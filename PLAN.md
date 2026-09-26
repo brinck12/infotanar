@@ -9,7 +9,7 @@ Kezdetleges, de működő prototípus a magyar közép- és emelt szintű **digi
 | Réteg | Technológia |
 |---|---|
 | Frontend | React 18 + TypeScript, Vite, Tailwind CSS, Axios, Monaco Editor (`@monaco-editor/react`) |
-| Backend | PHP 8.3 + Laravel 11 (API-only) |
+| Backend | PHP 8.3 + Laravel 12 (API-only) |
 | Adatbázis | MySQL 8 (már telepítve a szerveren) |
 | Kódfuttatás | Judge0 CE (már telepítve a szerveren, saját hosztolás) |
 | E2E teszt | Playwright |
@@ -27,7 +27,7 @@ infotanar/
 │   │   └── types/       # Megosztott TS típusok (Task, Submission, JudgeResult)
 │   ├── e2e/             # Playwright tesztek
 │   └── vite.config.ts
-├── backend/             # Laravel 11 API
+├── backend/             # Laravel 12 API
 │   ├── app/
 │   ├── database/migrations/
 │   ├── database/seeders/
@@ -184,3 +184,14 @@ A workflow-ban a secrets hiányára adj értelmes hibát, és a deploy legyen id
 - A kód legyen egyszerű és olvasható — ez prototípus, ne vezess be felesleges absztrakciót (ne legyen repository pattern, CQRS, stb.).
 - Minden felhasználónak látszó szöveg magyarul.
 - Lokális fejlesztéshez elég `php artisan serve` + `npm run dev`, Docker NEM kell.
+
+---
+
+## Terv-modositasok (a megvalositas soran)
+
+- **2026-09-26 — Laravel 11 → Laravel 12.** A terv eredetileg Laravel 11-et irt elo. A teljes
+  11-es agat erinti a `PKSA-mdq4-51ck-6kdq` biztonsagi serulekenyseg (`>=11.0.0,<12.0.0`), es a
+  11-es ag mar nem kap javitast (az utolso kiadas, a v11.56.1 is erintett), ezert a Composer
+  blokkolja a telepiteset. A projekt Laravel 12-vel keszul (v12.69.2, serulekenysegtol mentes),
+  ami a legkisebb elteres a tervtol — a 11 es 12 kozott gyakorlatilag nincs toro valtozas a
+  terv altal erintett teruleteken.
