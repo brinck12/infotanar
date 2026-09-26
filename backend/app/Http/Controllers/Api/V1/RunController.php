@@ -27,7 +27,7 @@ class RunController extends Controller
         if ($testCases->isEmpty()) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Ehhez a feladathoz nincs nyilvanos teszteset, hasznald a Beadas gombot.',
+                'message' => 'Ehhez a feladathoz nincs nyilvános teszteset, használd a Beadás gombot.',
                 'results' => [],
             ], 422);
         }

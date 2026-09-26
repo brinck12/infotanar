@@ -39,14 +39,14 @@ class Judge0Service
 
         if ($response->failed()) {
             throw new Judge0Exception(
-                'A kodfuttato szolgaltatas hibaval valaszolt (HTTP '.$response->status().').'
+                'A kódfuttató szolgáltatás hibával válaszolt (HTTP '.$response->status().').'
             );
         }
 
         $data = $response->json();
 
         if (! is_array($data) || ! isset($data['status']['id'])) {
-            throw new Judge0Exception('A kodfuttato szolgaltatas ertelmezhetetlen valaszt adott.');
+            throw new Judge0Exception('A kódfuttató szolgáltatás értelmezhetetlen választ adott.');
         }
 
         return [
@@ -72,7 +72,7 @@ class Judge0Service
         $config = config("judge0.languages.{$languageKey}");
 
         if (! $config) {
-            throw new Judge0Exception("Nem tamogatott programozasi nyelv: {$languageKey}.");
+            throw new Judge0Exception("Nem támogatott programozási nyelv: {$languageKey}.");
         }
 
         $languages = $this->languages();

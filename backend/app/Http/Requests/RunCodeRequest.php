@@ -27,12 +27,12 @@ class RunCodeRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'task_id.required' => 'A feladat azonositoja kotelezo.',
-            'task_id.exists' => 'A megadott feladat nem letezik.',
-            'language.required' => 'A programozasi nyelv megadasa kotelezo.',
-            'language.in' => 'Ez a programozasi nyelv nem tamogatott.',
-            'source_code.required' => 'A forraskod nem lehet ures.',
-            'source_code.max' => 'A forraskod tul hosszu (legfeljebb 65535 karakter).',
+            'task_id.required' => 'A feladat azonosítója kötelező.',
+            'task_id.exists' => 'A megadott feladat nem létezik.',
+            'language.required' => 'A programozási nyelv megadása kötelező.',
+            'language.in' => 'Ez a programozási nyelv nem támogatott.',
+            'source_code.required' => 'A forráskód nem lehet üres.',
+            'source_code.max' => 'A forráskód túl hosszú (legfeljebb 65535 karakter).',
         ];
     }
 
@@ -48,7 +48,7 @@ class RunCodeRequest extends FormRequest
                 $task = Task::find($this->integer('task_id'));
 
                 if ($task && ! in_array($this->string('language')->toString(), $task->allowed_languages ?? [], true)) {
-                    $validator->errors()->add('language', 'Ez a feladat nem oldhato meg ezen a nyelven.');
+                    $validator->errors()->add('language', 'Ez a feladat nem oldható meg ezen a nyelven.');
                 }
             },
         ];
