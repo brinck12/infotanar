@@ -156,11 +156,24 @@ másolj kódot a szerverre, és ne futtass ott migrációt.
    - `composer install --no-dev --optimize-autoloader` a backendre,
    - `rsync`-kel feltölti a `frontend/dist/`-et és a `backend/`-et
      (a `.env`, `storage/`, `node_modules/`, `tests/` kihagyásával),
-   - a szerveren lefuttatja: `migrate --force`, `config:cache`, `route:cache`,
+   - a szerveren lefuttatja: `migrate --force`, `db:seed-once`, `config:cache`, `route:cache`,
    - újratölti a php-fpm-et,
    - smoke checket futtat a `/api/v1/health` végpontra.
 
 A deploy kézzel is indítható: Actions → Deploy → Run workflow.
+
+### Mintaadatok — egyszeri seed
+
+A deploy a `php artisan db:seed-once` parancsot futtatja, nem a sima `db:seed`-et.
+Ez **csak akkor tölti be a mintafeladatokat, ha még egyetlen feladat sincs** az
+adatbázisban. Így az első deploy feltölti a tartalmat, a további deployok viszont
+nem írják felül a később szerkesztett feladatokat.
+
+Ha szándékosan újra akarod tölteni a mintaadatokat, a szerveren:
+
+```bash
+cd /var/www/infotanar/backend && php artisan db:seed --force
+```
 
 ### Szükséges GitHub Secrets
 

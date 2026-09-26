@@ -140,6 +140,11 @@ jobs:
           fi
 
           php artisan migrate --force
+
+          # Csak akkor seedel, ha meg egyetlen feladat sincs - igy az elso
+          # deploy feltolti a mintaadatokat, a tobbi deploy nem nyul hozzajuk.
+          php artisan db:seed-once
+
           php artisan config:cache
           php artisan route:cache
 
