@@ -195,3 +195,9 @@ A workflow-ban a secrets hiányára adj értelmes hibát, és a deploy legyen id
   blokkolja a telepiteset. A projekt Laravel 12-vel keszul (v12.69.2, serulekenysegtol mentes),
   ami a legkisebb elteres a tervtol — a 11 es 12 kozott gyakorlatilag nincs toro valtozas a
   terv altal erintett teruleteken.
+- **2026-09-26 — React 18 → React 19.** A Vite `react-ts` sablonja a jelenlegi
+  stabil React 19-et hozza. A terv altal erintett funkciok (Monaco, React Router,
+  Axios) valtozatlanul mukodnek, ezert nem forsziroztuk vissza a 18-at.
+- **2026-09-26 — Playwright webServer host.** A `vite preview` alapbol csak a
+  `localhost`-ra kot, amit Windowson a Playwright `127.0.0.1` cime nem ert el.
+  A `playwright.config.ts` ezert explicit `--host 127.0.0.1`-gyel indit.

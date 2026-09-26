@@ -1,0 +1,167 @@
+name: Deploy
+
+# Csak a main ágra, és csak akkor, ha a CI már sikeresen lefutott rá.
+on:
+  workflow_run:
+    workflows: ['CI']
+    types: [completed]
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Deploy a szerverre
+    runs-on: ubuntu-latest
+    # workflow_dispatch esetén nincs workflow_run kontextus, ezért az || ág.
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      github.event.workflow_run.conclusion == 'success'
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # workflow_run esetén azt a commitot deployoljuk, amire a CI lefutott.
+          ref: ${{ github.event.workflow_run.head_sha || github.ref }}
+
+      - name: Secretek ellenőrzése
+        env:
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+          DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+          DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+          DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
+        run: |
+          hianyzik=""
+          [ -z "$DEPLOY_HOST" ]    && hianyzik="$hianyzik DEPLOY_HOST"
+          [ -z "$DEPLOY_USER" ]    && hianyzik="$hianyzik DEPLOY_USER"
+          [ -z "$DEPLOY_SSH_KEY" ] && hianyzik="$hianyzik DEPLOY_SSH_KEY"
+          [ -z "$DEPLOY_PATH" ]    && hianyzik="$hianyzik DEPLOY_PATH"
+
+          if [ -n "$hianyzik" ]; then
+            echo "::error::Hiányzó GitHub Secret(ek):$hianyzik"
+            echo "Állítsd be őket: Settings -> Secrets and variables -> Actions"
+            exit 1
+          fi
+          echo "Minden szükséges secret megvan."
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Frontend build
+        working-directory: frontend
+        env:
+          # Éles környezetben az nginx ugyanarról a domainről proxyzza az API-t.
+          VITE_API_URL: /api/v1
+        run: |
+          npm ci
+          npm run build
+
+      - name: PHP 8.3 beállítása
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: mbstring, pdo_mysql, curl, zip, intl, fileinfo
+          coverage: none
+
+      - name: Backend függőségek (éles)
+        working-directory: backend
+        run: composer install --no-dev --optimize-autoloader --no-interaction --no-progress
+
+      - name: SSH kulcs beállítása
+        env:
+          DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+        run: |
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+          printf '%s\n' "$DEPLOY_SSH_KEY" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -H "$DEPLOY_HOST" >> ~/.ssh/known_hosts 2>/dev/null
+
+      - name: Célkönyvtárak létrehozása
+        env:
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+          DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+          DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
+        run: |
+          ssh -i ~/.ssh/deploy_key "$DEPLOY_USER@$DEPLOY_HOST" \
+            "mkdir -p '$DEPLOY_PATH/frontend' '$DEPLOY_PATH/backend'"
+
+      - name: Frontend feltöltése
+        env:
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+          DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+          DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
+        run: |
+          rsync -az --delete \
+            -e "ssh -i ~/.ssh/deploy_key" \
+            frontend/dist/ "$DEPLOY_USER@$DEPLOY_HOST:$DEPLOY_PATH/frontend/"
+
+      - name: Backend feltöltése
+        env:
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+          DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+          DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
+        run: |
+          # A .env és a storage a szerveren marad, azt nem írjuk felül.
+          rsync -az --delete \
+            --exclude='.env' \
+            --exclude='.env.*' \
+            --exclude='storage/' \
+            --exclude='node_modules/' \
+            --exclude='tests/' \
+            --exclude='.git/' \
+            -e "ssh -i ~/.ssh/deploy_key" \
+            backend/ "$DEPLOY_USER@$DEPLOY_HOST:$DEPLOY_PATH/backend/"
+
+      - name: Migráció és cache-ek frissítése
+        env:
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+          DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+          DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
+        run: |
+          ssh -i ~/.ssh/deploy_key "$DEPLOY_USER@$DEPLOY_HOST" bash -se <<EOSSH
+          set -euo pipefail
+          cd "$DEPLOY_PATH/backend"
+
+          # A storage a szerveren el, de az elso deploy utan letre kell hozni.
+          mkdir -p storage/app storage/framework/{cache,sessions,views} storage/logs
+          mkdir -p bootstrap/cache
+
+          if [ ! -f .env ]; then
+            echo "::error::Hianyzik a .env a szerveren: $DEPLOY_PATH/backend/.env"
+            exit 1
+          fi
+
+          php artisan migrate --force
+          php artisan config:cache
+          php artisan route:cache
+
+          # OPcache miatt a php-fpm-nek ujra kell olvasnia a fajlokat.
+          sudo -n systemctl reload php8.3-fpm
+          EOSSH
+
+      - name: Smoke check
+        env:
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+        run: |
+          for i in $(seq 1 10); do
+            if curl -fsS --max-time 10 "http://$DEPLOY_HOST/api/v1/health" | grep -q '"ok":true'; then
+              echo "A deploy sikeres, a /api/v1/health válaszol."
+              exit 0
+            fi
+            echo "Még nem válaszol, újrapróbálás ($i/10)…"
+            sleep 3
+          done
+          echo "::error::A /api/v1/health nem válaszolt a deploy után."
+          exit 1
+
+      - name: SSH kulcs törlése
+        if: always()
+        run: rm -f ~/.ssh/deploy_key
