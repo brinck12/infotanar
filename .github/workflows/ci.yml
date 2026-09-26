@@ -1,0 +1,90 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+# Ugyanarra az ágra érkező újabb push szakítsa félbe a korábbi futást.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  frontend:
+    name: Frontend (lint, typecheck, build, e2e)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Függőségek telepítése
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Típusellenőrzés
+        run: npx tsc --noEmit
+
+      - name: Build
+        run: npm run build
+
+      - name: Playwright böngésző telepítése
+        run: npx playwright install --with-deps chromium
+
+      # A tesztek mockolt API ellen futnak, nem kell hozzájuk backend és Judge0.
+      - name: E2E tesztek
+        run: npx playwright test
+
+      - name: Playwright riport feltöltése
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: frontend/playwright-report/
+          retention-days: 7
+
+  backend:
+    name: Backend (PHP tesztek)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: PHP 8.3 beállítása
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: mbstring, pdo_sqlite, sqlite3, curl, zip, intl, fileinfo
+          coverage: none
+
+      - name: Composer cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.composer/cache
+          key: composer-${{ runner.os }}-${{ hashFiles('backend/composer.lock') }}
+          restore-keys: composer-${{ runner.os }}-
+
+      - name: Függőségek telepítése
+        run: composer install --prefer-dist --no-interaction --no-progress
+
+      - name: Környezet előkészítése
+        run: |
+          cp .env.example .env
+          php artisan key:generate
+
+      # A phpunit.xml in-memory SQLite-ot használ, így nem kell adatbázis-szolgáltatás.
+      - name: Tesztek
+        run: php artisan test

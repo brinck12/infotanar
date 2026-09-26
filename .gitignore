@@ -1,0 +1,31 @@
+# Fuggosegek
+node_modules/
+vendor/
+
+# Build kimenetek
+dist/
+build/
+
+# Kornyezeti valtozok
+.env
+.env.*
+!.env.example
+
+# Naplok
+*.log
+npm-debug.log*
+
+# IDE / OS
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+
+# Playwright
+test-results/
+playwright-report/
+blob-report/
+playwright/.cache/
+
+# Vite
+frontend/dist/
