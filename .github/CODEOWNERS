@@ -1,0 +1,3 @@
+# Minden PR-hez automatikusan review-t kér a felsoroltaktól.
+# A PR szerzőjétől a GitHub magától nem kér review-t, még ha szerepel is itt.
+* @brinck12 @epeti04 @laszlogyula @Mataaxd
