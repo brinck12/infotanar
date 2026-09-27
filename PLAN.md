@@ -131,7 +131,7 @@ CI-ban a Playwright mockolt API ellen fusson (route interception), hogy ne kellj
 ### `ci.yml` — minden push + PR
 
 1. **frontend job**: `npm ci` → `npm run lint` → `tsc --noEmit` → `npm run build` → Playwright tesztek (mockolt API).
-2. **backend job**: PHP 8.3 setup → `composer install` → `php artisan test` (legalább a Judge0Service-re unit teszt HTTP-fake-kel és a végpontokra feature tesztek, MySQL service container vagy SQLite in-memory).
+2. **tests job**: Playwright E2E + API tesztek a `tests/` alól.
 
 ### `deploy.yml` — csak `main` branch push, a CI sikere után
 

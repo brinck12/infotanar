@@ -11,7 +11,7 @@ concurrency:
 
 jobs:
   frontend:
-    name: Frontend (lint, typecheck, build, e2e)
+    name: Frontend (lint, typecheck, build)
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -38,30 +38,20 @@ jobs:
       - name: Build
         run: npm run build
 
-      - name: Playwright böngésző telepítése
-        run: npx playwright install --with-deps chromium
-
-      # A tesztek mockolt API ellen futnak, nem kell hozzájuk backend és Judge0.
-      - name: E2E tesztek
-        run: npx playwright test
-
-      - name: Playwright riport feltöltése
-        if: failure()
-        uses: actions/upload-artifact@v4
-        with:
-          name: playwright-report
-          path: frontend/playwright-report/
-          retention-days: 7
-
-  backend:
-    name: Backend (PHP tesztek)
+  tests:
+    name: Tesztek (Playwright E2E + API)
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: backend
 
     steps:
       - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: |
+            frontend/package-lock.json
+            tests/package-lock.json
 
       - name: PHP 8.3 beállítása
         uses: shivammathur/setup-php@v2
@@ -77,14 +67,39 @@ jobs:
           key: composer-${{ runner.os }}-${{ hashFiles('backend/composer.lock') }}
           restore-keys: composer-${{ runner.os }}-
 
-      - name: Függőségek telepítése
+      - name: Backend függőségek telepítése
+        working-directory: backend
         run: composer install --prefer-dist --no-interaction --no-progress
 
-      - name: Környezet előkészítése
-        run: |
-          cp .env.example .env
-          php artisan key:generate
+      - name: Frontend függőségek telepítése
+        working-directory: frontend
+        run: npm ci
 
-      # A phpunit.xml in-memory SQLite-ot használ, így nem kell adatbázis-szolgáltatás.
-      - name: Tesztek
-        run: php artisan test
+      - name: Teszt függőségek telepítése
+        working-directory: tests
+        run: npm ci
+
+      - name: Playwright böngésző telepítése
+        working-directory: tests
+        run: npx playwright install --with-deps chromium
+
+      # Az E2E tesztek mockolt API ellen futnak (nem kell hozzájuk backend),
+      # az API tesztek pedig egy valódi helyi backendet és egy hamis
+      # Judge0-t indítanak (lásd tests/api/playwright.config.ts webServer).
+      - name: E2E tesztek
+        working-directory: tests
+        run: npm run test:e2e
+
+      - name: API tesztek
+        working-directory: tests
+        run: npm run test:api
+
+      - name: Playwright riport feltöltése
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: |
+            tests/playwright-report/
+            tests/api/playwright-report/
+          retention-days: 7

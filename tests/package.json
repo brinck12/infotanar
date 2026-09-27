@@ -1,0 +1,13 @@
+{
+  "name": "tests",
+  "private": true,
+  "version": "0.0.0",
+  "scripts": {
+    "test": "npm run test:e2e && npm run test:api",
+    "test:e2e": "playwright test",
+    "test:api": "playwright test --config=api/playwright.config.ts"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.63.0"
+  }
+}
