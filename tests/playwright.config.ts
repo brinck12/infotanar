@@ -21,7 +21,8 @@ export default defineConfig({
 
   // A buildelt appot szolgaljuk ki: ugyanaz fut, mint ami deployolodik.
   webServer: {
-    command: 'npm run build && npm run preview -- --host 127.0.0.1 --port 4173 --strictPort',
+    command:
+      'npm --prefix ../frontend run build && npm --prefix ../frontend run preview -- --host 127.0.0.1 --port 4173 --strictPort',
     url: 'http://127.0.0.1:4173',
     reuseExistingServer: !process.env.CI,
     timeout: 120_000,

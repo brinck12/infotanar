@@ -93,18 +93,16 @@ npm run dev                         # http://localhost:5173
 ## Tesztek
 
 ```bash
-# Backend: unit (Judge0Service HTTP-fake-kel, TaskEvaluator) + feature (végpontok)
-cd backend && php artisan test
-
-# Frontend: lint, típusellenőrzés, E2E
+# Frontend: lint, típusellenőrzés
 cd frontend
 npm run lint
 npx tsc --noEmit
-npx playwright test
-```
 
-A Playwright tesztek **mockolt API ellen** futnak (route interception), ezért nem
-kell hozzájuk se backend, se Judge0 — a CI pipeline is így futtatja őket.
+# Playwright: E2E (mockolt API) és API tesztek (valódi backend + hamis Judge0)
+cd tests
+npm run test:e2e
+npm run test:api
+```
 
 ---
 
