@@ -15,6 +15,7 @@ npm test           # minden projekt
 npm run test:e2e   # e2e-mocked: buildelt frontend, mockolt API (nem kell PHP)
 npm run test:api   # api + api-rate-limit: valódi Laravel backend + Judge0 mock
 npm run test:smoke # csak a @smoke tesztek
+npm run test:a11y  # csak az @a11y (axe-core, WCAG 2.1 AA) tesztek
 npm run test:ui    # Playwright UI mód
 npm run report     # az utolsó HTML riport
 ```
@@ -35,7 +36,7 @@ tests/
 │   ├── api/                  ApiClient + a backend szerződés típusai
 │   ├── pages/                oldalobjektumok (BasePage, TaskListPage, TaskSolvePage)
 │   │   └── components/       újrahasznosítható komponensek (MonacoEditor, ResultPanel)
-│   ├── fixtures/             test.extend: pages, apiClient, mockApi
+│   ├── fixtures/             test.extend: pages, apiClient, mockApi, a11y (axe)
 │   ├── mocks/                MockApi (route interception), Monaco CDN, Judge0 mock szerver
 │   └── data/                 adatbuilderek és a seedelt fixture adatok leírása
 └── specs/
@@ -84,7 +85,12 @@ validálja. Elsőbbségi sorrend: valódi környezeti változó >
   (`mockBackend: true`) automatikusan betölti az alap katalógust; egy teszt
   az `onRun`, `onSubmit`, `withCatalog` hívással felülírhatja.
 - **Címkék:** `@smoke` a kritikus út (gyors, stagingen is futtatható),
-  `@regression` minden más. Szűrés: `--grep @smoke`.
+  `@regression` minden más, `@a11y` az akadálymentességi ellenőrzés.
+  Szűrés: `--grep @smoke`.
+- **Akadálymentesség:** az `expectNoA11yViolations()` fixture az aktuális
+  oldalt axe-core-ral ellenőrzi (WCAG 2.1 A/AA), a teljes jelentést a
+  riporthoz csatolja. Szabályt kikapcsolni csak indoklással, a
+  `disableRules` opcióval lehet; a Monaco szerkesztő ki van zárva.
 - **Várakozás:** fix `waitForTimeout` tilos; web-first elvárásokat használunk
   (`await expect(locator).toBeVisible()`).
 

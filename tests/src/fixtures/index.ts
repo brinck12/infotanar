@@ -5,6 +5,7 @@ import { MockApi } from '../mocks/MockApi'
 import { serveMonacoLocally } from '../mocks/monaco'
 import { TaskListPage } from '../pages/TaskListPage'
 import { TaskSolvePage } from '../pages/TaskSolvePage'
+import { a11yFixtures, type A11yFixtures } from './a11y'
 
 export interface FrameworkOptions {
   /**
@@ -29,7 +30,7 @@ export interface FrameworkFixtures {
  * A fixture-ok lustak: az API tesztek nem inditanak bongeszot, mert nem
  * kernek oldalt.
  */
-export const test = base.extend<FrameworkFixtures & FrameworkOptions>({
+export const test = base.extend<FrameworkFixtures & A11yFixtures & FrameworkOptions>({
   mockBackend: [false, { option: true }],
 
   context: async ({ context }, use) => {
@@ -56,6 +57,9 @@ export const test = base.extend<FrameworkFixtures & FrameworkOptions>({
   apiClient: async ({ request }, use) => {
     await use(new ApiClient(request))
   },
+
+  ...a11yFixtures,
 })
 
 export { expect } from '@playwright/test'
+export type { A11yScanOptions } from './a11y'

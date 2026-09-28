@@ -33,7 +33,7 @@ export function TaskCard({ task }: { task: TaskListItem }) {
 
         <p className="mt-1 text-sm text-slate-400">{task.topic.name}</p>
 
-        <div className="mt-3 flex flex-wrap items-center gap-3 text-xs text-slate-500">
+        <div className="mt-3 flex flex-wrap items-center gap-3 text-xs text-slate-400">
           <span aria-label={`Nehézség: ${task.difficulty} az 5-ből`}>
             Nehézség: <span className="text-slate-300">{'★'.repeat(task.difficulty)}</span>
             {'☆'.repeat(Math.max(0, 5 - task.difficulty))}
