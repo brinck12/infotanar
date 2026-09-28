@@ -29,3 +29,6 @@ playwright/.cache/
 
 # Vite
 frontend/dist/
+
+# Tesztkeretrendszer: szemelyes kornyezet-felulirasok
+tests/config/environments/*.local.env

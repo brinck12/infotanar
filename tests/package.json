@@ -1,13 +1,34 @@
 {
-  "name": "tests",
+  "name": "infotanar-tests",
   "private": true,
   "version": "0.0.0",
   "scripts": {
-    "test": "npm run test:e2e && npm run test:api",
-    "test:e2e": "playwright test",
-    "test:api": "playwright test --config=api/playwright.config.ts"
+    "test": "playwright test",
+    "test:e2e": "playwright test --project=e2e-mocked",
+    "test:api": "playwright test --project=api --project=api-rate-limit",
+    "test:smoke": "playwright test --grep @smoke",
+    "test:regression": "playwright test --grep @regression",
+    "test:ui": "playwright test --ui",
+    "report": "playwright show-report",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "typecheck": "tsc -p .",
+    "check": "npm run typecheck && npm run lint"
   },
   "devDependencies": {
-    "@playwright/test": "^1.63.0"
+    "@eslint/js": "^10.0.1",
+    "@playwright/test": "^1.63.0",
+    "@types/node": "^22.20.4",
+    "dotenv": "^18.0.4",
+    "eslint": "^10.11.0",
+    "eslint-plugin-playwright": "^2.12.0",
+    "tsx": "^4.23.15",
+    "typescript": "^6.0.3",
+    "typescript-eslint": "^8.71.0",
+    "zod": "^4.6.5"
+  },
+  "description": "Playwright + TypeScript tesztkeretrendszer (E2E mockolt API-val es API tesztek valodi backend ellen).",
+  "engines": {
+    "node": ">=20"
   }
 }
