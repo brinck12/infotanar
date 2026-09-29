@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Requests\Execution;
 
 use App\Models\Exercise;
+use App\Models\User;
 use Closure;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Config;
@@ -48,7 +49,15 @@ final class RunCodeRequest extends FormRequest
     /** A v1 API mezoje `task_id`. Nem publikalt feladat 404, mintha nem is letezne. */
     public function exercise(): Exercise
     {
-        return $this->exercise ??= Exercise::query()->published()->findOrFail($this->integer('task_id'));
+        return $this->exercise ??= Exercise::query()->published()->with('lesson')->findOrFail($this->integer('task_id'));
+    }
+
+    /** A vegpont nyilvanos; ervenyes Bearer token eseten a felhasznalo, kulonben null. */
+    public function optionalUser(): ?User
+    {
+        $user = $this->user('sanctum');
+
+        return $user instanceof User ? $user : null;
     }
 
     public function language(): string

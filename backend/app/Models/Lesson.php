@@ -13,7 +13,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 /** Tananyag-egyseg egy modulon belul; egy vagy tobb gyakorlo feladattal (exercise). */
 final class Lesson extends Model
 {
-    protected $fillable = ['module_id', 'slug', 'title', 'content', 'position', 'is_free', 'is_published'];
+    protected $fillable = ['module_id', 'slug', 'title', 'content', 'video_path', 'position', 'is_free', 'is_published'];
 
     /** @return array<string, string> */
     protected function casts(): array
