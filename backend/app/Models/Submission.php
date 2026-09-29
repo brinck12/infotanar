@@ -7,9 +7,12 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * @property int $exercise_id
+ */
 final class Submission extends Model
 {
-    protected $fillable = ['user_id', 'task_id', 'language', 'source_code', 'status', 'results'];
+    protected $fillable = ['user_id', 'exercise_id', 'language', 'source_code', 'status', 'results'];
 
     /** @return array<string, string> */
     protected function casts(): array
@@ -17,10 +20,10 @@ final class Submission extends Model
         return ['results' => 'array'];
     }
 
-    /** @return BelongsTo<Task, $this> */
-    public function task(): BelongsTo
+    /** @return BelongsTo<Exercise, $this> */
+    public function exercise(): BelongsTo
     {
-        return $this->belongsTo(Task::class);
+        return $this->belongsTo(Exercise::class);
     }
 
     /** @return BelongsTo<User, $this> */

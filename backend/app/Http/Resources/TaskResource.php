@@ -4,16 +4,16 @@ declare(strict_types=1);
 
 namespace App\Http\Resources;
 
-use App\Models\Task;
+use App\Models\Exercise;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 use stdClass;
 
 /**
- * Reszletes nezet. Rejtett tesztesetbol csak a darabszam megy ki, a
- * tartalmuk soha.
+ * v1 reszletes nezet ("task"). Rejtett tesztesetbol csak a darabszam megy
+ * ki, a tartalmuk soha.
  *
- * @mixin Task
+ * @mixin Exercise
  */
 final class TaskResource extends JsonResource
 {
@@ -29,7 +29,7 @@ final class TaskResource extends JsonResource
             'allowed_languages' => $this->allowed_languages,
             // Ures objektum (nem ures tomb), hogy a kliens mindig map-kent kezelhesse.
             'starter_code' => $this->starter_code ?: new stdClass,
-            'topic' => TopicResource::make($this->whenLoaded('topic')),
+            'topic' => TopicResource::make($this->whenLoaded('lesson', fn () => $this->lesson?->module)),
             'example_test_cases' => ExampleTestCaseResource::collection($this->whenLoaded('visibleTestCases')),
             'hidden_test_case_count' => $this->whenCounted('hiddenTestCases'),
         ];
