@@ -132,7 +132,7 @@ export function TaskSolve() {
                 {task.example_test_cases.map((tc, i) => (
                   <li key={tc.id} className="grid gap-2 sm:grid-cols-2">
                     <div>
-                      <p className="mb-1 text-xs uppercase tracking-wide text-slate-500">
+                      <p className="mb-1 text-xs uppercase tracking-wide text-slate-400">
                         {i + 1}. bemenet
                       </p>
                       <pre className="rounded border border-slate-800 bg-slate-950 p-2 font-mono text-xs text-slate-300 whitespace-pre-wrap">
@@ -140,7 +140,7 @@ export function TaskSolve() {
                       </pre>
                     </div>
                     <div>
-                      <p className="mb-1 text-xs uppercase tracking-wide text-slate-500">
+                      <p className="mb-1 text-xs uppercase tracking-wide text-slate-400">
                         Elvárt kimenet
                       </p>
                       <pre className="rounded border border-slate-800 bg-slate-950 p-2 font-mono text-xs text-slate-300 whitespace-pre-wrap">
@@ -151,7 +151,7 @@ export function TaskSolve() {
                 ))}
               </ul>
               {task.hidden_test_case_count > 0 && (
-                <p className="mt-3 text-xs text-slate-500">
+                <p className="mt-3 text-xs text-slate-400">
                   Beadáskor további {task.hidden_test_case_count} rejtett teszteset is lefut.
                 </p>
               )}
@@ -190,7 +190,7 @@ export function TaskSolve() {
                 type="button"
                 onClick={() => execute('submit')}
                 disabled={running}
-                className="rounded-lg bg-sky-600 px-4 py-1.5 text-sm font-medium text-white transition hover:bg-sky-500 disabled:cursor-not-allowed disabled:opacity-50"
+                className="rounded-lg bg-sky-700 px-4 py-1.5 text-sm font-medium text-white transition hover:bg-sky-600 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 Beadás
               </button>

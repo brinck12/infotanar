@@ -13,12 +13,12 @@ export function Home() {
 
       <Link
         to="/feladatok"
-        className="mt-8 inline-block rounded-lg bg-sky-600 px-5 py-2.5 font-medium text-white transition hover:bg-sky-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-400"
+        className="mt-8 inline-block rounded-lg bg-sky-700 px-5 py-2.5 font-medium text-white transition hover:bg-sky-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-400"
       >
         Feladatok böngészése
       </Link>
 
-      <p className="mt-10 text-sm text-slate-500">
+      <p className="mt-10 text-sm text-slate-400">
         A megoldásaid a szerveren, elszigetelt környezetben futnak le. Jelenleg Python 3 és C#
         nyelven oldhatók meg a feladatok.
       </p>
