@@ -4,11 +4,16 @@ declare(strict_types=1);
 
 namespace App\Http\Resources;
 
-use App\Models\Topic;
+use App\Models\Module;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-/** @mixin Topic */
+/**
+ * v1 szerzodes: a modul "topic"-kent megy ki (`name`, `task_count`), hogy a
+ * meglevo kliensek valtozatlanul mukodjenek.
+ *
+ * @mixin Module
+ */
 final class TopicResource extends JsonResource
 {
     /** @return array<string, mixed> */
@@ -16,9 +21,9 @@ final class TopicResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'name' => $this->name,
+            'name' => $this->title,
             'slug' => $this->slug,
-            'task_count' => $this->whenCounted('tasks'),
+            'task_count' => $this->whenCounted('exercises'),
         ];
     }
 }

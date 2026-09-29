@@ -11,13 +11,27 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
+ * Megoldando programozasi feladat tesztesetekkel. A v1 API-ban "task" neven szerepel.
+ *
+ * Az oszlopok explicit dokumentaltak: a tabla atnevezessel (tasks -> exercises)
+ * jott letre, amit a statikus elemzo a migraciokbol nem tud kovetni.
+ *
+ * @property int $id
+ * @property int $lesson_id
+ * @property int $position
+ * @property string $title
+ * @property string $description
+ * @property string $level
+ * @property int $difficulty
  * @property list<string>|null $allowed_languages
  * @property array<string, string>|null $starter_code
+ * @property bool $is_published
+ * @property-read Lesson $lesson A lesson_id NOT NULL + cascade: a lecke mindig letezik.
  */
-final class Task extends Model
+final class Exercise extends Model
 {
     protected $fillable = [
-        'topic_id', 'title', 'description', 'level',
+        'lesson_id', 'position', 'title', 'description', 'level',
         'difficulty', 'allowed_languages', 'starter_code', 'is_published',
     ];
 
@@ -29,13 +43,14 @@ final class Task extends Model
             'starter_code' => 'array',
             'is_published' => 'boolean',
             'difficulty' => 'integer',
+            'position' => 'integer',
         ];
     }
 
-    /** @return BelongsTo<Topic, $this> */
-    public function topic(): BelongsTo
+    /** @return BelongsTo<Lesson, $this> */
+    public function lesson(): BelongsTo
     {
-        return $this->belongsTo(Topic::class);
+        return $this->belongsTo(Lesson::class);
     }
 
     /** @return HasMany<TestCase, $this> */
@@ -66,10 +81,15 @@ final class Task extends Model
         return $this->hasMany(Submission::class);
     }
 
-    /** @param Builder<Task> $query */
+    /**
+     * Diak szamara lathato: maga a feladat es a leckeje is publikalt.
+     *
+     * @param  Builder<Exercise>  $query
+     */
     #[Scope]
     protected function published(Builder $query): void
     {
-        $query->where('is_published', true);
+        $query->where('is_published', true)
+            ->whereHas('lesson', static fn (Builder $lesson) => $lesson->where('is_published', true));
     }
 }

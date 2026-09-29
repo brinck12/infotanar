@@ -1,5 +1,5 @@
 import { AxiosError } from 'axios'
-import type { ValidationErrorResponse } from '../../types'
+import type { LockedErrorResponse, LockReason, ValidationErrorResponse } from '../../types'
 
 export function httpStatus(error: unknown): number | undefined {
   return error instanceof AxiosError ? error.response?.status : undefined
@@ -35,6 +35,16 @@ export function hibaUzenet(error: unknown): string {
   }
 
   return 'Váratlan hiba történt a szerveren.'
+}
+
+const LOCK_REASONS: ReadonlySet<string> = new Set<LockReason>(['login_required', 'email_unverified', 'subscription_required'])
+
+/** Zárolt (fizetős) tartalom miatti 401/403 válasz, ha az volt a hiba oka. */
+export function zarolasOka(error: unknown): LockedErrorResponse | null {
+  if (!(error instanceof AxiosError)) return null
+  const data = error.response?.data as Partial<LockedErrorResponse> | undefined
+  if (!data?.reason || !LOCK_REASONS.has(data.reason) || typeof data.message !== 'string') return null
+  return { reason: data.reason, message: data.message }
 }
 
 /** 422-es válasznál mezőnként az első hibaüzenet, hogy a mező alatt jelenhessen meg. */
