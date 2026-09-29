@@ -6,6 +6,7 @@ namespace App\Http\Requests\Execution;
 
 use App\Models\Exercise;
 use App\Models\User;
+use App\Services\Execution\Sql\SqlProgram;
 use Closure;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Config;
@@ -41,6 +42,12 @@ final class RunCodeRequest extends FormRequest
 
                 if (! in_array($this->language(), $this->exercise()->allowed_languages ?? [], true)) {
                     $validator->errors()->add('language', __('execution.language_not_allowed'));
+
+                    return;
+                }
+
+                if ($this->language() === 'sql' && SqlProgram::containsDotCommand($this->sourceCode())) {
+                    $validator->errors()->add('source_code', __('execution.sql_dot_command'));
                 }
             },
         ];

@@ -25,6 +25,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property int $difficulty
  * @property list<string>|null $allowed_languages
  * @property array<string, string>|null $starter_code
+ * @property bool $sql_order_sensitive SQL-feladatnal szamit-e a sorok sorrendje.
  * @property bool $is_published
  * @property-read Lesson $lesson A lesson_id NOT NULL + cascade: a lecke mindig letezik.
  */
@@ -32,7 +33,7 @@ final class Exercise extends Model
 {
     protected $fillable = [
         'lesson_id', 'position', 'title', 'description', 'level',
-        'difficulty', 'allowed_languages', 'starter_code', 'is_published',
+        'difficulty', 'allowed_languages', 'starter_code', 'sql_order_sensitive', 'is_published',
     ];
 
     /** @return array<string, string> */
@@ -42,6 +43,7 @@ final class Exercise extends Model
             'allowed_languages' => 'array',
             'starter_code' => 'array',
             'is_published' => 'boolean',
+            'sql_order_sensitive' => 'boolean',
             'difficulty' => 'integer',
             'position' => 'integer',
         ];

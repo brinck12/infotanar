@@ -39,7 +39,7 @@ final readonly class SubmitSolution
             'status' => 'running',
         ]);
 
-        $result = $this->evaluator->evaluate($language, $sourceCode, $exercise->testCases()->get());
+        $result = $this->evaluator->evaluate($exercise, $language, $sourceCode, $exercise->testCases()->get());
 
         $submission->update([
             'status' => $result->status,

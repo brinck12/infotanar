@@ -60,8 +60,9 @@ return [
             'fallback_id' => 51,
             'monaco' => 'csharp',
         ],
-        // Adatbazis-track. Amig az SQL-specifikus kiertekeles (#40) nincs kesz,
-        // a Judge0 SQLite futtatokornyezete fut, stdout-osszevetessel.
+        // Adatbazis-track: a Judge0 SQLite (sqlite3 CLI) sandboxaban fut, a
+        // teszteset bemenete az adatkeszlet-szkript, az eredmenyt CSV-kent
+        // vetjuk ossze (SqlProgram, SqlResultComparator).
         'sql' => [
             'label' => 'SQL',
             'match' => 'sql (sqlite',

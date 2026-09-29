@@ -13,6 +13,7 @@ return [
         'timed_out' => 'A kódfuttató szolgáltatás nem válaszolt időben. Próbáld újra később.',
     ],
     'error_status_label' => 'Hiba',
+    'sql_dot_command' => 'A megoldás csak SQL utasításokat tartalmazhat (ponttal kezdődő sqlite-parancsokat nem).',
     'verdicts' => [
         'accepted' => 'Elfogadva',
         'wrong_answer' => 'Hibás kimenet',
