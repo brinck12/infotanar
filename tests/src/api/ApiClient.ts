@@ -3,6 +3,7 @@ import type {
   DataEnvelope,
   HealthResponse,
   LanguageKey,
+  RegisterRequest,
   RunRequest,
   RunResponse,
   SubmissionResponse,
@@ -10,6 +11,7 @@ import type {
   TaskListItem,
   TaskListQuery,
   Topic,
+  User,
   ValidationErrorResponse,
 } from './types'
 
@@ -78,6 +80,10 @@ export class ApiClient {
 
   submit(payload: RunPayload): Promise<ApiResult<SubmissionResponse>> {
     return this.post('submissions', payload)
+  }
+
+  register(payload: Partial<RegisterRequest>): Promise<ApiResult<DataEnvelope<User>>> {
+    return this.post('auth/register', payload)
   }
 
   /** Publikalt feladat azonositoja cim alapjan; hibat dob, ha nincs ilyen. */
