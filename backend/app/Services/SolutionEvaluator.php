@@ -9,6 +9,7 @@ use App\Exceptions\Judge0Exception;
 use App\Models\Exercise;
 use App\Models\TestCase;
 use App\Services\Execution\EvaluationResult;
+use App\Services\Execution\HiddenResultRedactor;
 use App\Services\Execution\Sql\SqlProgram;
 use App\Services\Execution\Sql\SqlResultComparator;
 use Illuminate\Support\Collection;
@@ -30,6 +31,7 @@ final readonly class SolutionEvaluator
     public function __construct(
         private Judge0Service $judge0,
         private SqlResultComparator $sqlComparator,
+        private HiddenResultRedactor $redactor,
     ) {}
 
     /** @param Collection<int, TestCase> $testCases */
@@ -77,7 +79,11 @@ final readonly class SolutionEvaluator
 
         $overall = $this->overallVerdict($verdicts);
 
-        return new EvaluationResult($this->legacyStatus($overall, $verdicts), $overall, $results);
+        return new EvaluationResult(
+            $this->legacyStatus($overall, $verdicts),
+            $overall,
+            $this->redactor->redact($results),
+        );
     }
 
     /**
@@ -136,12 +142,8 @@ final readonly class SolutionEvaluator
             'judge_status' => $run['status'],
         ];
 
-        // Rejtett teszteseteknel csak az allapot megy vissza, kimenet nelkul -
-        // kulonben visszafejthetok lennenek a rejtett bemenetek.
-        if ($testCase->is_hidden) {
-            return $result;
-        }
-
+        // A rejtett tesztesetek adatait az evaluate() vegen a HiddenResultRedactor
+        // tavolitja el, egyetlen helyen, fehérlistaval.
         return $result + [
             'stdin' => (string) $testCase->stdin,
             'stdout' => $run['stdout'],
