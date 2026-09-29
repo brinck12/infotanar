@@ -1,29 +1,29 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services;
 
 use App\Exceptions\Judge0Exception;
-use App\Models\Task;
+use App\Models\TestCase;
+use App\Services\Execution\EvaluationResult;
 use Illuminate\Support\Collection;
 
 /**
- * Egy feladat megoldasanak lefuttatasa tesztesetenkent, es az eredmeny
- * osszevetese az elvart kimenettel.
+ * Egy megoldas lefuttatasa tesztesetenkent, es az eredmeny osszevetese az
+ * elvart kimenettel.
  *
  * Az osszevetest szandekosan itt vegezzuk, nem a Judge0 expected_output
  * mezojevel: igy tudjuk, pontosan mi jott ki, es informativ hibat adhatunk.
+ *
+ * @phpstan-import-type Judge0Run from Judge0Service
  */
-class TaskEvaluator
+final readonly class TaskEvaluator
 {
-    public function __construct(private readonly Judge0Service $judge0)
-    {
-    }
+    public function __construct(private Judge0Service $judge0) {}
 
-    /**
-     * @param  Collection<int, \App\Models\TestCase>  $testCases
-     * @return array{status:string,results:array<int, array<string, mixed>>}
-     */
-    public function evaluate(Task $task, string $language, string $sourceCode, Collection $testCases): array
+    /** @param Collection<int, TestCase> $testCases */
+    public function evaluate(string $language, string $sourceCode, Collection $testCases): EvaluationResult
     {
         $results = [];
         $allPassed = true;
@@ -42,22 +42,15 @@ class TaskEvaluator
             }
 
             $passed = $this->outputMatches($run['stdout'], $testCase->expected_stdout);
-
-            if (! $passed) {
-                $allPassed = false;
-            }
-
+            $allPassed = $allPassed && $passed;
             $results[] = $this->buildResult($testCase, $run, $passed);
         }
 
-        return [
-            'status' => $this->overallStatus($hadError, $allPassed, count($results)),
-            'results' => $results,
-        ];
+        return new EvaluationResult($this->overallStatus($hadError, $allPassed, count($results)), $results);
     }
 
     /**
-     * Kimenet-osszevetes. A sorvegi whitespace-t es a zaro ureslsorokat
+     * Kimenet-osszevetes. A sorvegi whitespace-t es a zaro ures sorokat
      * normalizaljuk, mert ezek erettsegi-feladatoknal nem relevans elteresek.
      */
     public function outputMatches(string $actual, string $expected): bool
@@ -67,11 +60,8 @@ class TaskEvaluator
 
     private function normalize(string $value): string
     {
-        $value = str_replace("\r\n", "\n", $value);
-        $lines = explode("\n", $value);
-        $lines = array_map(static fn (string $line): string => rtrim($line), $lines);
+        $lines = array_map(rtrim(...), explode("\n", str_replace("\r\n", "\n", $value)));
 
-        // Zaro ures sorok levagasa.
         while ($lines !== [] && end($lines) === '') {
             array_pop($lines);
         }
@@ -79,8 +69,11 @@ class TaskEvaluator
         return implode("\n", $lines);
     }
 
-    /** @return array<string, mixed> */
-    private function buildResult(\App\Models\TestCase $testCase, array $run, bool $passed): array
+    /**
+     * @param  Judge0Run  $run
+     * @return array<string, mixed>
+     */
+    private function buildResult(TestCase $testCase, array $run, bool $passed): array
     {
         $result = [
             'test_case_id' => $testCase->id,
@@ -107,7 +100,7 @@ class TaskEvaluator
     }
 
     /** @return array<string, mixed> */
-    private function errorResult(\App\Models\TestCase $testCase, string $message): array
+    private function errorResult(TestCase $testCase, string $message): array
     {
         return [
             'test_case_id' => $testCase->id,
@@ -115,18 +108,14 @@ class TaskEvaluator
             'passed' => false,
             'time' => null,
             'exit_code' => null,
-            'judge_status' => 'Hiba',
+            'judge_status' => __('execution.error_status_label'),
             'error' => $message,
         ];
     }
 
     private function overallStatus(bool $hadError, bool $allPassed, int $resultCount): string
     {
-        if ($hadError) {
-            return 'error';
-        }
-
-        if ($resultCount === 0) {
+        if ($hadError || $resultCount === 0) {
             return 'error';
         }
 

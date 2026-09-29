@@ -1,14 +1,24 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Notifications;
 
 use App\Models\User;
+use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
+use Illuminate\Support\Facades\Config;
 
-class ResetPasswordNotification extends Notification
+final class ResetPasswordNotification extends Notification implements ShouldQueue
 {
-    public function __construct(private readonly string $token) {}
+    use Queueable;
+
+    public function __construct(private readonly string $token)
+    {
+        $this->afterCommit();
+    }
 
     /** @return list<string> */
     public function via(User $notifiable): array
@@ -18,17 +28,17 @@ class ResetPasswordNotification extends Notification
 
     public function toMail(User $notifiable): MailMessage
     {
-        $url = config('app.frontend_url').'/jelszo-visszaallitas?'.http_build_query([
+        $url = Config::string('app.frontend_url').'/jelszo-visszaallitas?'.http_build_query([
             'token' => $this->token,
             'email' => $notifiable->getEmailForPasswordReset(),
         ]);
 
         return (new MailMessage)
-            ->subject('Jelszó visszaállítása')
-            ->greeting('Szia '.$notifiable->name.'!')
-            ->line('Jelszó-visszaállítást kértek a fiókodhoz.')
-            ->action('Új jelszó beállítása', $url)
-            ->line('A link '.config('auth.passwords.users.expire').' percig érvényes, és csak egyszer használható.')
-            ->line('Ha nem te kérted, hagyd figyelmen kívül ezt a levelet, a jelszavad nem változik.');
+            ->subject(__('auth.password_reset.mail.subject'))
+            ->greeting(__('auth.password_reset.mail.greeting', ['name' => $notifiable->name]))
+            ->line(__('auth.password_reset.mail.intro'))
+            ->action(__('auth.password_reset.mail.action'), $url)
+            ->line(__('auth.password_reset.mail.expiry', ['minutes' => Config::integer('auth.passwords.users.expire')]))
+            ->line(__('auth.password_reset.mail.outro'));
     }
 }

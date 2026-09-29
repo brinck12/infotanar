@@ -1,41 +1,72 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Providers;
 
 use App\Mail\OutboxTransport;
+use App\Models\User;
 use Illuminate\Cache\RateLimiting\Limit;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\Relation;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
 
-class AppServiceProvider extends ServiceProvider
+final class AppServiceProvider extends ServiceProvider
 {
-    public function register(): void
-    {
-        //
-    }
-
     public function boot(): void
     {
-        Mail::extend('outbox', fn (array $config) => new OutboxTransport($config['path']));
+        // Fejlesztes es teszt alatt hangos hiba: N+1 lekerdezes, elnyelt
+        // mass-assignment, nem letezo attributum eleres.
+        Model::shouldBeStrict(! $this->app->isProduction());
 
-        Password::defaults(fn () => Password::min(8)->letters()->numbers());
+        // Polimorf kapcsolatokban (pl. audit naplo) stabil alias, ne az osztalynev keruljon az adatbazisba.
+        Relation::enforceMorphMap([
+            'user' => User::class,
+        ]);
 
-        $tooMany = fn () => response()->json(['message' => 'Túl sok próbálkozás, próbáld újra később.'], 429);
+        Password::defaults(static fn () => Password::min(8)->letters()->numbers());
+
+        Mail::extend('outbox', static fn () => new OutboxTransport(Config::string('mail.mailers.outbox.path')));
+
+        $this->configureRateLimiting();
+    }
+
+    private function configureRateLimiting(): void
+    {
+        $tooMany = static fn (): JsonResponse => response()->json(['message' => __('auth.throttle')], 429);
+        $emailAndIp = static fn (Request $request): string => $request->string('email')->lower()->append('|', (string) $request->ip())->toString();
 
         // Fiokonkent (e-mail + IP), hogy egy tamado ne zarhassa ki a tobbi felhasznalot.
-        RateLimiter::for('login', fn (Request $request) => Limit::perMinute(5)
-            ->by(mb_strtolower((string) $request->input('email')).'|'.$request->ip())
+        RateLimiter::for('login', static fn (Request $request) => Limit::perMinute(5)
+            ->by($emailAndIp($request))
             ->response($tooMany));
 
-        RateLimiter::for('password-reset', fn (Request $request) => Limit::perMinute(5)
-            ->by(mb_strtolower((string) $request->input('email')).'|'.$request->ip())
+        RateLimiter::for('password-reset', static fn (Request $request) => Limit::perMinute(5)
+            ->by($emailAndIp($request))
             ->response($tooMany));
 
-        RateLimiter::for('verification-resend', fn (Request $request) => Limit::perMinute(3)
-            ->by((string) $request->user()?->id)
+        $userOrIp = static fn (Request $request): string => $request->user() instanceof User
+            ? 'user:'.$request->user()->id
+            : 'ip:'.$request->ip();
+
+        RateLimiter::for('verification-resend', static fn (Request $request) => Limit::perMinute(3)
+            ->by($userOrIp($request))
+            ->response($tooMany));
+
+        // A teljes adatexport draga lekerdezes: orankent nehany eleg barkinek.
+        RateLimiter::for('account-export', static fn (Request $request) => Limit::perHour(5)
+            ->by($userOrIp($request))
+            ->response($tooMany));
+
+        // Jelszot ellenorzo, visszafordithatatlan muveletek: a jelszo ne legyen talalgathato.
+        RateLimiter::for('sensitive', static fn (Request $request) => Limit::perMinute(5)
+            ->by($userOrIp($request))
             ->response($tooMany));
     }
 }

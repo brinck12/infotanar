@@ -1,0 +1,23 @@
+# Laravel queue worker (queued e-mails, later: webhooks, background jobs).
+#
+# Egyszeri telepites a szerveren (a DEPLOY_PATH-hoz es a php-fpm userhez igazitva):
+#   sudo cp deploy/systemd/infotanar-queue.service /etc/systemd/system/
+#   sudo systemctl daemon-reload && sudo systemctl enable --now infotanar-queue
+#
+# A deploy a `php artisan queue:restart` paranccsal jelez: a worker a futo job
+# vegen kilep, a systemd pedig az uj koddal ujrainditja.
+
+[Unit]
+Description=InfoTanar queue worker
+After=network.target mysql.service
+
+[Service]
+User=www-data
+Group=www-data
+WorkingDirectory=/var/www/infotanar/backend
+ExecStart=/usr/bin/php artisan queue:work --sleep=3 --tries=3 --backoff=10 --max-time=3600
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
