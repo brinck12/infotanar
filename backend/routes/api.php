@@ -16,6 +16,7 @@ use App\Http\Controllers\Api\V1\Catalog\TrackController;
 use App\Http\Controllers\Api\V1\Execution\RunController;
 use App\Http\Controllers\Api\V1\Execution\SubmissionController;
 use App\Http\Controllers\Api\V1\HealthController;
+use App\Http\Controllers\Api\V1\Progress\ProgressController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('v1')->name('api.')->group(function (): void {
@@ -64,6 +65,8 @@ Route::prefix('v1')->name('api.')->group(function (): void {
         Route::post('/run', RunController::class)->name('run');
         Route::post('/submissions', [SubmissionController::class, 'store'])->name('submissions.store');
     });
+
+    Route::get('/progress', ProgressController::class)->middleware('auth:sanctum')->name('progress');
 
     Route::prefix('account')->name('account.')->middleware('auth:sanctum')->group(function (): void {
         Route::get('/export', [AccountController::class, 'export'])->middleware('throttle:account-export')->name('export');
