@@ -26,6 +26,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property list<string>|null $allowed_languages
  * @property array<string, string>|null $starter_code
  * @property bool $is_published
+ * @property-read Lesson $lesson A lesson_id NOT NULL + cascade: a lecke mindig letezik.
  */
 final class Exercise extends Model
 {
