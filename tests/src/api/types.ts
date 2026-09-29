@@ -117,6 +117,10 @@ export interface User {
   email_verified_at: string | null
 }
 
+export interface MessageResponse {
+  message: string
+}
+
 export interface HealthResponse {
   ok: boolean
 }

@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\V1\AuthController;
+use App\Http\Controllers\Api\V1\EmailVerificationController;
 use App\Http\Controllers\Api\V1\HealthController;
 use App\Http\Controllers\Api\V1\RunController;
 use App\Http\Controllers\Api\V1\SubmissionController;
@@ -12,6 +13,10 @@ Route::prefix('v1')->group(function (): void {
     Route::get('/health', HealthController::class);
 
     Route::post('/auth/register', [AuthController::class, 'register']);
+    Route::get('/auth/verify-email/{id}/{hash}', [EmailVerificationController::class, 'verify'])
+        ->whereNumber('id')
+        ->middleware('signed:relative')
+        ->name('api.verification.verify');
 
     Route::get('/topics', [TopicController::class, 'index']);
     Route::get('/tasks', [TaskController::class, 'index']);
