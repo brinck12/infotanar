@@ -1,0 +1,8 @@
+{
+    "(and :count more error)": "(és még :count hiba)",
+    "(and :count more errors)": "(és még :count hiba)",
+    "Server Error": "Váratlan hiba történt a szerveren.",
+    "Service Unavailable": "A szolgáltatás átmenetileg nem elérhető.",
+    "Unauthenticated.": "Ehhez be kell jelentkezned.",
+    "This action is unauthorized.": "Ehhez nincs jogosultságod."
+}

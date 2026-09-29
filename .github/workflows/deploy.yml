@@ -147,6 +147,11 @@ jobs:
 
           php artisan config:cache
           php artisan route:cache
+          php artisan event:cache
+
+          # A queue worker (deploy/systemd/infotanar-queue.service) a futo job
+          # utan kilep, a systemd az uj koddal inditja ujra.
+          php artisan queue:restart
 
           # OPcache miatt a php-fpm-nek ujra kell olvasnia a fajlokat.
           sudo -n systemctl reload php8.3-fpm

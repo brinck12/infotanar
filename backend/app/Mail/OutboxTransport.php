@@ -1,14 +1,21 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Mail;
 
 use Illuminate\Support\Str;
 use Symfony\Component\Mailer\SentMessage;
 use Symfony\Component\Mailer\Transport\AbstractTransport;
 use Symfony\Component\Mime\Address;
+use Symfony\Component\Mime\Message;
 use Symfony\Component\Mime\MessageConverter;
 
-class OutboxTransport extends AbstractTransport
+/**
+ * Csak tesztkornyezethez (MAIL_MAILER=outbox): minden levelet JSON fajlkent
+ * ir ki, hogy a Playwright API tesztek kiolvashassak a benne levo linkeket.
+ */
+final class OutboxTransport extends AbstractTransport
 {
     public function __construct(private readonly string $path)
     {
@@ -17,20 +24,27 @@ class OutboxTransport extends AbstractTransport
 
     protected function doSend(SentMessage $message): void
     {
-        $email = MessageConverter::toEmail($message->getOriginalMessage());
+        $original = $message->getOriginalMessage();
+
+        if (! $original instanceof Message) {
+            return;
+        }
+
+        $email = MessageConverter::toEmail($original);
 
         if (! is_dir($this->path)) {
             mkdir($this->path, 0775, true);
         }
 
-        $file = sprintf('%s/%s-%s.json', $this->path, now()->format('Uu'), Str::random(6));
-
-        file_put_contents($file, json_encode([
-            'to' => array_map(fn (Address $a): string => $a->getAddress(), $email->getTo()),
-            'subject' => $email->getSubject(),
-            'text' => $email->getTextBody(),
-            'html' => $email->getHtmlBody(),
-        ], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
+        file_put_contents(
+            sprintf('%s/%s-%s.json', $this->path, now()->format('Uu'), Str::random(6)),
+            json_encode([
+                'to' => array_map(static fn (Address $address): string => $address->getAddress(), $email->getTo()),
+                'subject' => $email->getSubject(),
+                'text' => $email->getTextBody(),
+                'html' => $email->getHtmlBody(),
+            ], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR),
+        );
     }
 
     public function __toString(): string

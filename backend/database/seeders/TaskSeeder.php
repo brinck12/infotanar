@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Database\Seeders;
 
 use App\Models\Task;
@@ -37,12 +39,12 @@ class TaskSeeder extends Seeder
             $task->testCases()->delete();
 
             foreach ($testCases as $order => $testCase) {
-                $task->testCases()->create($testCase + ['order' => $order]);
+                $task->testCases()->create([...$testCase, 'order' => $order]);
             }
         }
     }
 
-    /** @return array<int, array<string, mixed>> */
+    /** @return list<array{title: string, test_cases: list<array<string, mixed>>}&array<string, mixed>> */
     private function tasks(int $tetelekId, int $sorozatId): array
     {
         return [
