@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Database\Seeders;
 
+use App\Actions\Catalog\ApplyFreemiumDefaults;
 use App\Models\Exercise;
 use App\Models\Lesson;
 use App\Models\Module;
@@ -58,6 +59,8 @@ final class CatalogSeeder extends Seeder
                 $exercise->testCases()->create([...$testCase, 'order' => $order]);
             }
         }
+
+        app(ApplyFreemiumDefaults::class)->handle($track);
     }
 
     /** @return list<array{module_id: int, title: string, test_cases: list<array<string, mixed>>}&array<string, mixed>> */

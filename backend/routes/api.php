@@ -11,6 +11,7 @@ use App\Http\Controllers\Api\V1\Auth\RegisterController;
 use App\Http\Controllers\Api\V1\Auth\SessionController;
 use App\Http\Controllers\Api\V1\Catalog\TaskController;
 use App\Http\Controllers\Api\V1\Catalog\TopicController;
+use App\Http\Controllers\Api\V1\Catalog\TrackController;
 use App\Http\Controllers\Api\V1\Execution\RunController;
 use App\Http\Controllers\Api\V1\Execution\SubmissionController;
 use App\Http\Controllers\Api\V1\HealthController;
@@ -41,6 +42,9 @@ Route::prefix('v1')->name('api.')->group(function (): void {
                 ->name('verification.resend');
         });
     });
+
+    Route::get('/tracks', [TrackController::class, 'index'])->name('tracks.index');
+    Route::get('/tracks/{slug}', [TrackController::class, 'show'])->name('tracks.show');
 
     Route::get('/topics', [TopicController::class, 'index'])->name('topics.index');
     Route::get('/tasks', [TaskController::class, 'index'])->name('tasks.index');

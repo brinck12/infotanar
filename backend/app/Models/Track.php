@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 
 /** Kepzesi ag (pl. Programozás, Adatbázis-kezelés) - a katalogus legfelso szintje. */
 final class Track extends Model
@@ -27,6 +28,12 @@ final class Track extends Model
     public function modules(): HasMany
     {
         return $this->hasMany(Module::class)->orderBy('position');
+    }
+
+    /** @return HasManyThrough<Lesson, Module, $this> */
+    public function lessons(): HasManyThrough
+    {
+        return $this->hasManyThrough(Lesson::class, Module::class);
     }
 
     /** @param Builder<Track> $query */

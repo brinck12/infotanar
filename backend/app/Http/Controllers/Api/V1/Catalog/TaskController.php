@@ -15,7 +15,7 @@ use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 /** v1 "tasks" = publikalt feladatok (exercises), a modul ("topic") adataival. */
 final class TaskController extends Controller
 {
-    private const WITH_TOPIC = ['lesson:id,module_id', 'lesson.module:id,title,slug'];
+    private const WITH_TOPIC = ['lesson:id,module_id,is_free', 'lesson.module:id,title,slug'];
 
     public function index(ListTasksRequest $request): AnonymousResourceCollection
     {

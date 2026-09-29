@@ -2,18 +2,14 @@
 
 declare(strict_types=1);
 
-namespace App\Http\Resources;
+namespace App\Http\Resources\Catalog;
 
 use App\Models\Exercise;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-/**
- * v1 lista-nezet ("task"): leiras es tesztesetek nelkul.
- *
- * @mixin Exercise
- */
-final class TaskSummaryResource extends JsonResource
+/** @mixin Exercise */
+final class ExerciseSummaryResource extends JsonResource
 {
     /** @return array<string, mixed> */
     public function toArray(Request $request): array
@@ -24,8 +20,6 @@ final class TaskSummaryResource extends JsonResource
             'level' => $this->level,
             'difficulty' => $this->difficulty,
             'allowed_languages' => $this->allowed_languages,
-            'is_free' => $this->whenLoaded('lesson', fn () => $this->lesson?->is_free),
-            'topic' => TopicResource::make($this->whenLoaded('lesson', fn () => $this->lesson?->module)),
         ];
     }
 }
