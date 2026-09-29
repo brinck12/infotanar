@@ -14,7 +14,7 @@ final class RunController extends Controller
     public function __invoke(RunCodeRequest $request, RunSolution $runSolution): EvaluationResource
     {
         return EvaluationResource::make(
-            $runSolution->handle($request->task(), $request->language(), $request->sourceCode())
+            $runSolution->handle($request->exercise(), $request->language(), $request->sourceCode())
         );
     }
 }

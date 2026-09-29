@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Requests\Execution;
 
-use App\Models\Task;
+use App\Models\Exercise;
 use Closure;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Config;
@@ -13,13 +13,13 @@ use Illuminate\Validation\Validator;
 
 final class RunCodeRequest extends FormRequest
 {
-    private ?Task $task = null;
+    private ?Exercise $exercise = null;
 
     /** @return array<string, mixed> */
     public function rules(): array
     {
         return [
-            'task_id' => ['required', 'integer', 'exists:tasks,id'],
+            'task_id' => ['required', 'integer', 'exists:exercises,id'],
             'language' => ['required', 'string', Rule::in(array_keys(Config::array('judge0.languages')))],
             'source_code' => ['required', 'string', 'max:65535'],
         ];
@@ -38,17 +38,17 @@ final class RunCodeRequest extends FormRequest
                     return;
                 }
 
-                if (! in_array($this->language(), $this->task()->allowed_languages ?? [], true)) {
+                if (! in_array($this->language(), $this->exercise()->allowed_languages ?? [], true)) {
                     $validator->errors()->add('language', __('execution.language_not_allowed'));
                 }
             },
         ];
     }
 
-    /** Nem publikalt feladat 404, mintha nem is letezne. */
-    public function task(): Task
+    /** A v1 API mezoje `task_id`. Nem publikalt feladat 404, mintha nem is letezne. */
+    public function exercise(): Exercise
     {
-        return $this->task ??= Task::query()->published()->findOrFail($this->integer('task_id'));
+        return $this->exercise ??= Exercise::query()->published()->findOrFail($this->integer('task_id'));
     }
 
     public function language(): string

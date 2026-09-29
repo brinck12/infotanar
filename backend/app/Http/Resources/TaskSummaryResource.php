@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace App\Http\Resources;
 
-use App\Models\Task;
+use App\Models\Exercise;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 /**
- * Lista-nezet: leiras es tesztesetek nelkul.
+ * v1 lista-nezet ("task"): leiras es tesztesetek nelkul.
  *
- * @mixin Task
+ * @mixin Exercise
  */
 final class TaskSummaryResource extends JsonResource
 {
@@ -24,7 +24,7 @@ final class TaskSummaryResource extends JsonResource
             'level' => $this->level,
             'difficulty' => $this->difficulty,
             'allowed_languages' => $this->allowed_languages,
-            'topic' => TopicResource::make($this->whenLoaded('topic')),
+            'topic' => TopicResource::make($this->whenLoaded('lesson', fn () => $this->lesson?->module)),
         ];
     }
 }

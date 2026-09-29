@@ -19,7 +19,7 @@ final class SubmissionController extends Controller
         /** @var User|null $user */
         $user = $request->user('sanctum');
 
-        $submission = $submitSolution->handle($request->task(), $request->language(), $request->sourceCode(), $user);
+        $submission = $submitSolution->handle($request->exercise(), $request->language(), $request->sourceCode(), $user);
 
         // 200 (nem 201): a prototipus ota ez a szerzodes, a kliensek erre epulnek.
         return SubmissionResource::make($submission)->response()->setStatusCode(JsonResponse::HTTP_OK);

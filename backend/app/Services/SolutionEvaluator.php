@@ -18,7 +18,7 @@ use Illuminate\Support\Collection;
  *
  * @phpstan-import-type Judge0Run from Judge0Service
  */
-final readonly class TaskEvaluator
+final readonly class SolutionEvaluator
 {
     public function __construct(private Judge0Service $judge0) {}
 
