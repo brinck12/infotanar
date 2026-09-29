@@ -66,7 +66,7 @@ final class UserController extends Controller
     private function withOverview(Builder $query): Builder
     {
         return $query
-            ->with('liveSubscription')
+            ->with(['liveSubscription', 'activeAccessGrant'])
             ->withCount(['lessonCompletions' => static fn (Builder $q) => $q->whereHas('lesson', static fn (Builder $l) => $l->where('is_published', true))]);
     }
 

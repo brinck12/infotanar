@@ -13,4 +13,7 @@ enum AuditAction: string
     case CatalogUpdated = 'catalog.updated';
     case CatalogDeleted = 'catalog.deleted';
     case CatalogReordered = 'catalog.reordered';
+
+    case AccessGranted = 'access.granted';
+    case AccessRevoked = 'access.revoked';
 }

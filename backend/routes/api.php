@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Http\Controllers\Api\V1\Account\AccountController;
+use App\Http\Controllers\Api\V1\Admin\AccessGrantController;
 use App\Http\Controllers\Api\V1\Admin\Catalog\ConstraintOptionsController;
 use App\Http\Controllers\Api\V1\Admin\Catalog\ExerciseController as AdminExerciseController;
 use App\Http\Controllers\Api\V1\Admin\Catalog\LessonController as AdminLessonController;
@@ -102,6 +103,11 @@ Route::prefix('v1')->name('api.')->group(function (): void {
         // Felhasznalok attekintese (#50), csak olvasas.
         Route::get('/users', [AdminUserController::class, 'index'])->name('users.index');
         Route::get('/users/{user}', [AdminUserController::class, 'show'])->whereNumber('user')->name('users.show');
+
+        // Kezi premium hozzaferes (#51): kiadas, tortenet, visszavonas.
+        Route::get('/users/{user}/access-grants', [AccessGrantController::class, 'index'])->name('access-grants.index');
+        Route::post('/users/{user}/access-grants', [AccessGrantController::class, 'store'])->name('access-grants.store');
+        Route::delete('/access-grants/{accessGrant}', [AccessGrantController::class, 'destroy'])->name('access-grants.destroy');
 
         // Tesztesetek (#46): letrehozas/lista a feladat alatt, a tobbi kozvetlenul.
         Route::put('/exercises/{exercise}/test-cases/order', [TestCaseController::class, 'reorder'])->name('test-cases.order');

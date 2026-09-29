@@ -36,6 +36,12 @@ final class AdminUserResource extends JsonResource
             'registered_at' => $this->created_at?->toIso8601String(),
             'has_premium_access' => $this->hasPremiumAccess(),
             'subscription' => $this->whenLoaded('liveSubscription', fn (): ?array => self::subscription($this->liveSubscription)),
+            // Kezi hozzaferes (#51) a szamlazastol fuggetlenul; kulon visszavonhato.
+            'access_grant' => $this->whenLoaded('activeAccessGrant', fn (): ?array => $this->activeAccessGrant === null ? null : [
+                'id' => $this->activeAccessGrant->id,
+                'reason' => $this->activeAccessGrant->reason,
+                'ends_at' => $this->activeAccessGrant->ends_at?->toIso8601String(),
+            ]),
             'progress' => [
                 'completed' => $completed,
                 'total' => $this->publishedLessonCount,
