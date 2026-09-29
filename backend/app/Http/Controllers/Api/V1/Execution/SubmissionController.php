@@ -15,7 +15,7 @@ final class SubmissionController extends Controller
     /** Ingyenes leckenel bejelentkezes nelkul is mukodik; ha van ervenyes token, a felhasznalohoz kotjuk. */
     public function store(RunCodeRequest $request, SubmitSolution $submitSolution): JsonResponse
     {
-        $submission = $submitSolution->handle(
+        $outcome = $submitSolution->handle(
             $request->exercise(),
             $request->language(),
             $request->sourceCode(),
@@ -23,6 +23,6 @@ final class SubmissionController extends Controller
         );
 
         // 200 (nem 201): a prototipus ota ez a szerzodes, a kliensek erre epulnek.
-        return SubmissionResource::make($submission)->response()->setStatusCode(JsonResponse::HTTP_OK);
+        return SubmissionResource::make($outcome)->response()->setStatusCode(JsonResponse::HTTP_OK);
     }
 }
