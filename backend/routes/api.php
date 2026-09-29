@@ -9,6 +9,7 @@ use App\Http\Controllers\Api\V1\Auth\EmailVerificationController;
 use App\Http\Controllers\Api\V1\Auth\PasswordResetController;
 use App\Http\Controllers\Api\V1\Auth\RegisterController;
 use App\Http\Controllers\Api\V1\Auth\SessionController;
+use App\Http\Controllers\Api\V1\Catalog\LanguageController;
 use App\Http\Controllers\Api\V1\Catalog\LessonVideoController;
 use App\Http\Controllers\Api\V1\Catalog\TaskController;
 use App\Http\Controllers\Api\V1\Catalog\TopicController;
@@ -45,6 +46,7 @@ Route::prefix('v1')->name('api.')->group(function (): void {
         });
     });
 
+    Route::get('/languages', [LanguageController::class, 'index'])->name('languages.index');
     Route::get('/tracks', [TrackController::class, 'index'])->name('tracks.index');
     Route::get('/tracks/{slug}', [TrackController::class, 'show'])->name('tracks.show');
 

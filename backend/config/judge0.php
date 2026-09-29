@@ -51,6 +51,14 @@ return [
             'fallback_id' => 51,
             'monaco' => 'csharp',
         ],
+        // Adatbazis-track. Amig az SQL-specifikus kiertekeles (#40) nincs kesz,
+        // a Judge0 SQLite futtatokornyezete fut, stdout-osszevetessel.
+        'sql' => [
+            'label' => 'SQL',
+            'match' => 'sql (sqlite',
+            'fallback_id' => 82,
+            'monaco' => 'sql',
+        ],
     ],
 
     // Meddig tartsuk cache-ben a /languages valaszt (masodperc).
