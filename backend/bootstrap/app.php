@@ -14,6 +14,7 @@ use Illuminate\Http\Exceptions\ThrottleRequestsException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Exceptions\InvalidSignatureException;
+use Illuminate\Routing\Middleware\SubstituteBindings;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
@@ -26,6 +27,10 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->alias(['admin' => EnsureUserIsAdmin::class]);
+
+        // A jogosultsag-ellenorzes a route model binding ELOTT fusson, kulonben egy
+        // nem-admin a 404/403 kulonbsegbol kideritheti, mely azonositok leteznek.
+        $middleware->prependToPriorityList(before: SubstituteBindings::class, prepend: EnsureUserIsAdmin::class);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         // Az API mindig JSON-t ad, akkor is, ha a kliens nem kuld Accept fejlecet.

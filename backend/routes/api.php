@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+use App\Http\Controllers\Api\V1\Account\AccountController;
+use App\Http\Controllers\Api\V1\Admin\UserAccountController;
 use App\Http\Controllers\Api\V1\Auth\CurrentUserController;
 use App\Http\Controllers\Api\V1\Auth\EmailVerificationController;
 use App\Http\Controllers\Api\V1\Auth\PasswordResetController;
@@ -50,7 +52,17 @@ Route::prefix('v1')->name('api.')->group(function (): void {
         Route::post('/submissions', [SubmissionController::class, 'store'])->name('submissions.store');
     });
 
+    Route::prefix('account')->name('account.')->middleware('auth:sanctum')->group(function (): void {
+        Route::get('/export', [AccountController::class, 'export'])->middleware('throttle:account-export')->name('export');
+        Route::delete('/', [AccountController::class, 'destroy'])->middleware('throttle:sensitive')->name('destroy');
+    });
+
     Route::prefix('admin')->name('admin.')->middleware(['auth:sanctum', 'admin'])->group(function (): void {
         Route::get('/ping', static fn () => response()->json(['ok' => true]))->name('ping');
+
+        Route::middleware('can:manageAccount,user')->group(function (): void {
+            Route::get('/users/{user}/export', [UserAccountController::class, 'export'])->name('users.export');
+            Route::delete('/users/{user}', [UserAccountController::class, 'destroy'])->name('users.destroy');
+        });
     });
 });
