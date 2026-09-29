@@ -13,4 +13,12 @@ return [
         'timed_out' => 'A kódfuttató szolgáltatás nem válaszolt időben. Próbáld újra később.',
     ],
     'error_status_label' => 'Hiba',
+    'verdicts' => [
+        'accepted' => 'Elfogadva',
+        'wrong_answer' => 'Hibás kimenet',
+        'time_limit_exceeded' => 'Időkorlát túllépve',
+        'compilation_error' => 'Fordítási / szintaktikai hiba',
+        'runtime_error' => 'Futásidejű hiba',
+        'system_error' => 'Rendszerhiba',
+    ],
 ];

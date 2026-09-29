@@ -43,6 +43,7 @@ final readonly class SubmitSolution
 
         $submission->update([
             'status' => $result->status,
+            'verdict' => $result->verdict,
             'results' => $result->results,
         ]);
 

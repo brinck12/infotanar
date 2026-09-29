@@ -22,6 +22,8 @@ final class SubmissionResource extends JsonResource
         return [
             'submission_id' => $submission->id,
             'status' => $submission->status,
+            'verdict' => $submission->verdict?->value,
+            'verdict_label' => $submission->verdict?->label(),
             'results' => $submission->results ?? [],
             'lesson_completed' => $this->resource->lessonCompleted,
         ];

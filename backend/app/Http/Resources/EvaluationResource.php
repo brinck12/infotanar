@@ -24,6 +24,8 @@ final class EvaluationResource extends JsonResource
     {
         return [
             'status' => $this->resource->status,
+            'verdict' => $this->resource->verdict->value,
+            'verdict_label' => $this->resource->verdict->label(),
             'results' => $this->resource->results,
         ];
     }
