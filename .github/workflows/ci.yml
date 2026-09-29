@@ -9,10 +9,17 @@ concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: true
 
+permissions:
+  contents: read
+
+env:
+  NODE_VERSION: '22'
+
 jobs:
   frontend:
     name: Frontend (lint, typecheck, build)
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     defaults:
       run:
         working-directory: frontend
@@ -22,7 +29,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: '22'
+          node-version: ${{ env.NODE_VERSION }}
           cache: npm
           cache-dependency-path: frontend/package-lock.json
 
@@ -38,20 +45,135 @@ jobs:
       - name: Build
         run: npm run build
 
-  tests:
-    name: Tesztek (Playwright E2E + API)
+  tests-check:
+    name: Tesztkód (typecheck, lint)
     runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: tests
 
     steps:
       - uses: actions/checkout@v4
 
       - uses: actions/setup-node@v4
         with:
-          node-version: '22'
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: tests/package-lock.json
+
+      - name: Teszt függőségek telepítése
+        run: npm ci
+
+      - name: Típusellenőrzés és lint
+        run: npm run check
+
+  # Egyetlen konfiguráció (tests/playwright.config.ts), három projekt:
+  #   e2e-mocked      - buildelt frontend, route interceptionnel mockolt API
+  #   api             - valódi helyi backend (sqlite fixture) + Judge0 mock
+  #   api-rate-limit  - az "api" után, mert kimeríti a közös kvótát
+  #
+  # Az E2E projekt állapotmentes, ezért több gépre szétosztjuk (shard). Az API
+  # projektek közös, állapottal bíró backenden futnak, ezért egy gépen,
+  # sorosan maradnak. Minden job blob riportot tölt fel, a "report" job ezekből
+  # egyetlen közös HTML + JUnit riportot fűz össze, ahogy egy teljes
+  # "npm test" futás adná. A config/web-servers.ts a --project alapján csak a
+  # szükséges szervereket indítja (E2E: frontend, API: backend + Judge0 mock).
+  e2e:
+    name: E2E tesztek (shard ${{ matrix.shardIndex }}/${{ matrix.shardTotal }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      # Egy elbukó shard ne állítsa le a többit: a teljes képet akarjuk látni.
+      fail-fast: false
+      matrix:
+        shardIndex: [1, 2]
+        shardTotal: [2]
+    defaults:
+      run:
+        working-directory: tests
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
           cache: npm
           cache-dependency-path: |
             frontend/package-lock.json
             tests/package-lock.json
+
+      - name: Frontend függőségek telepítése
+        working-directory: frontend
+        run: npm ci
+
+      - name: Teszt függőségek telepítése
+        run: npm ci
+
+      # A böngésző binárisok a telepített Playwright verzióhoz tartoznak,
+      # ezért a verzió a cache kulcs része: verzióváltáskor új cache épül.
+      - name: Playwright verzió lekérdezése
+        id: playwright
+        run: echo "version=$(node -p "require('@playwright/test/package.json').version")" >> "$GITHUB_OUTPUT"
+
+      - name: Playwright böngésző cache
+        id: playwright-cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ steps.playwright.outputs.version }}-chromium
+
+      - name: Playwright böngésző telepítése
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
+        run: npx playwright install --with-deps chromium
+
+      # Cache találatnál a bináris megvan, de a rendszerkönyvtárak (apt)
+      # nincsenek a cache-ben, azokat mindig telepíteni kell.
+      - name: Playwright rendszerfüggőségek telepítése
+        if: steps.playwright-cache.outputs.cache-hit == 'true'
+        run: npx playwright install-deps chromium
+
+      # Az újrafuttatás (retries) és a trace gyűjtés (trace: on-first-retry)
+      # a playwright.config.ts-ben csak CI-ban aktív.
+      - name: E2E tesztek futtatása
+        run: npm run test:e2e -- --shard=${{ matrix.shardIndex }}/${{ matrix.shardTotal }} --reporter=blob,github
+
+      - name: Blob riport feltöltése
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: blob-report-e2e-${{ matrix.shardIndex }}
+          path: tests/blob-report/
+          retention-days: 1
+          if-no-files-found: ignore
+
+      - name: Trace-ek és hibás teszt eredmények feltöltése
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results-e2e-${{ matrix.shardIndex }}
+          path: tests/test-results/
+          retention-days: 7
+          if-no-files-found: ignore
+
+  # Böngésző nem kell hozzájuk, csak nyers HTTP hívások az APIRequestContext-tel.
+  api:
+    name: API tesztek
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: tests
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: tests/package-lock.json
 
       - name: PHP 8.3 beállítása
         uses: shivammathur/setup-php@v2
@@ -71,38 +193,70 @@ jobs:
         working-directory: backend
         run: composer install --prefer-dist --no-interaction --no-progress
 
-      - name: Frontend függőségek telepítése
-        working-directory: frontend
+      - name: Teszt függőségek telepítése
         run: npm ci
+
+      - name: API tesztek futtatása
+        run: npm run test:api -- --reporter=blob,github
+
+      - name: Blob riport feltöltése
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: blob-report-api
+          path: tests/blob-report/
+          retention-days: 1
+          if-no-files-found: ignore
+
+      - name: Hibás teszt eredmények feltöltése
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results-api
+          path: tests/test-results/
+          retention-days: 7
+          if-no-files-found: ignore
+
+  # Az összes job blob riportjából egyetlen közös HTML + JUnit riport.
+  report:
+    name: Közös Playwright riport
+    needs: [e2e, api]
+    if: ${{ !cancelled() }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: tests
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: tests/package-lock.json
 
       - name: Teszt függőségek telepítése
-        working-directory: tests
         run: npm ci
 
-      - name: Tesztkód típusellenőrzése és lintelése
-        working-directory: tests
-        run: npm run check
+      - name: Blob riportok letöltése
+        uses: actions/download-artifact@v4
+        with:
+          path: tests/all-blob-reports
+          pattern: blob-report-*
+          merge-multiple: true
 
-      - name: Playwright böngésző telepítése
-        working-directory: tests
-        run: npx playwright install --with-deps chromium
+      - name: Riportok összefűzése
+        env:
+          PLAYWRIGHT_JUNIT_OUTPUT_FILE: test-results/junit.xml
+        run: npx playwright merge-reports --reporter=html,junit ./all-blob-reports
 
-      # Egyetlen konfiguráció (tests/playwright.config.ts), három projekt:
-      #   e2e-mocked      - buildelt frontend, route interceptionnel mockolt API
-      #   api             - valódi helyi backend (sqlite fixture) + Judge0 mock
-      #   api-rate-limit  - az "api" után, mert kimeríti a közös kvótát
-      # A szükséges szervereket a Playwright webServer indítja (config/web-servers.ts).
-      # Egy futtatás = egy közös HTML/JUnit riport minden projektről.
-      - name: Playwright tesztek (E2E + API)
-        working-directory: tests
-        run: npm test
-
-      - name: Playwright riport feltöltése
-        if: ${{ !cancelled() }}
+      - name: Riport feltöltése
         uses: actions/upload-artifact@v4
         with:
           name: playwright-report
           path: |
             tests/playwright-report/
-            tests/test-results/
-          retention-days: 7
+            tests/test-results/junit.xml
+          retention-days: 14
