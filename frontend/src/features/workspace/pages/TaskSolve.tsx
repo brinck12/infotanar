@@ -1,15 +1,16 @@
-import { useMutation, useQuery } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
 import ReactMarkdown from 'react-markdown'
 import { Link, useParams } from 'react-router-dom'
 import remarkGfm from 'remark-gfm'
-import { hibaUzenet } from '../../../shared/api/errors'
+import { hibaUzenet, zarolasOka } from '../../../shared/api/errors'
 import { LANGUAGE_LABEL, LEVEL_LABEL } from '../../../shared/domain/labels'
 import { PageLoader } from '../../../shared/ui/PageLoader'
-import type { LanguageKey, RunRequest, TaskDetail } from '../../../types'
-import { taskQuery } from '../../catalog/api'
+import type { LanguageKey, RunRequest, TaskDetail, UnlockedTaskDetail } from '../../../types'
+import { catalogKeys, taskQuery } from '../../catalog/api'
 import { runCode, submitCode } from '../api'
 import { CodeEditor } from '../components/CodeEditor'
+import { Paywall } from '../components/Paywall'
 import { ResultPanel } from '../components/ResultPanel'
 
 type Mode = 'run' | 'submit'
@@ -40,11 +41,37 @@ export function TaskSolve() {
 
   if (task.isPending) return <PageLoader label="Feladat betöltése…" />
 
+  if (task.data.locked) {
+    return (
+      <div className="mx-auto max-w-3xl px-4 py-8">
+        <TaskHeader task={task.data} />
+        <div className="mt-6">
+          <Paywall reason={task.data.locked_reason} message={task.data.locked_message} />
+        </div>
+      </div>
+    )
+  }
+
   // A key miatt másik feladatra lépve a szerkesztő állapota tisztán újraindul.
   return <Workspace key={task.data.id} task={task.data} />
 }
 
-function Workspace({ task }: { task: TaskDetail }) {
+function TaskHeader({ task }: { task: TaskDetail }) {
+  return (
+    <>
+      <Link to="/feladatok" className="text-sm text-sky-400 hover:underline">
+        ← Vissza a feladatokhoz
+      </Link>
+      <h1 className="mt-3 text-2xl font-semibold text-slate-100">{task.title}</h1>
+      <p className="mt-1 text-sm text-slate-400">
+        {task.topic.name} · {LEVEL_LABEL[task.level]}
+      </p>
+    </>
+  )
+}
+
+function Workspace({ task }: { task: UnlockedTaskDetail }) {
+  const queryClient = useQueryClient()
   const initialLanguage = task.allowed_languages[0] ?? 'python'
   const [language, setLanguage] = useState<LanguageKey>(initialLanguage)
   const [code, setCode] = useState(task.starter_code[initialLanguage] ?? '')
@@ -53,6 +80,11 @@ function Workspace({ task }: { task: TaskDetail }) {
   const execution = useMutation({
     mutationFn: ({ kind, payload }: { kind: Mode; payload: RunRequest }) =>
       kind === 'run' ? runCode(payload) : submitCode(payload),
+    // Menet közben lejárt/megszűnt a hozzáférés (pl. kijelentkezés másik fülön):
+    // a feladatot újratöltjük, és a szülő a zárolt nézetre vált.
+    onError: (error) => {
+      if (zarolasOka(error)) void queryClient.invalidateQueries({ queryKey: catalogKeys.task(task.id) })
+    },
   })
 
   function changeLanguage(next: LanguageKey) {
@@ -70,14 +102,7 @@ function Workspace({ task }: { task: TaskDetail }) {
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-8">
-      <Link to="/feladatok" className="text-sm text-sky-400 hover:underline">
-        ← Vissza a feladatokhoz
-      </Link>
-
-      <h1 className="mt-3 text-2xl font-semibold text-slate-100">{task.title}</h1>
-      <p className="mt-1 text-sm text-slate-400">
-        {task.topic.name} · {LEVEL_LABEL[task.level]}
-      </p>
+      <TaskHeader task={task} />
 
       <div className="mt-6 grid gap-6 lg:grid-cols-2">
         <section aria-label="Feladat leírása" className="space-y-4">
