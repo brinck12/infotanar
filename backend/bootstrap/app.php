@@ -1,6 +1,7 @@
 <?php
 
 use App\Exceptions\Judge0Exception;
+use Illuminate\Auth\AuthenticationException;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -30,6 +31,14 @@ return Application::configure(basePath: dirname(__DIR__))
                 'message' => $e->getMessage(),
                 'results' => [],
             ], 503);
+        });
+
+        $exceptions->render(function (AuthenticationException $e, Request $request) {
+            if (! $request->is('api/*')) {
+                return null;
+            }
+
+            return response()->json(['message' => 'Ehhez be kell jelentkezned.'], 401);
         });
 
         $exceptions->render(function (InvalidSignatureException $e, Request $request) {

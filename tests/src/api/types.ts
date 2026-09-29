@@ -117,6 +117,19 @@ export interface User {
   email_verified_at: string | null
 }
 
+export interface LoginRequest {
+  email: string
+  password: string
+  device_name?: string
+}
+
+export interface LoginResponse {
+  token: string
+  token_type: 'Bearer'
+  expires_at: string | null
+  user: User
+}
+
 export interface MessageResponse {
   message: string
 }
