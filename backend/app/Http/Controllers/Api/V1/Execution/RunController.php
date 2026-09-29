@@ -13,8 +13,11 @@ final class RunController extends Controller
 {
     public function __invoke(RunCodeRequest $request, RunSolution $runSolution): EvaluationResource
     {
-        return EvaluationResource::make(
-            $runSolution->handle($request->exercise(), $request->language(), $request->sourceCode())
-        );
+        return EvaluationResource::make($runSolution->handle(
+            $request->exercise(),
+            $request->language(),
+            $request->sourceCode(),
+            $request->optionalUser(),
+        ));
     }
 }
