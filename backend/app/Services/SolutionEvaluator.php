@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use App\Enums\Verdict;
 use App\Exceptions\Judge0Exception;
 use App\Models\TestCase;
 use App\Services\Execution\EvaluationResult;
@@ -27,8 +28,7 @@ final readonly class SolutionEvaluator
     public function evaluate(string $language, string $sourceCode, Collection $testCases): EvaluationResult
     {
         $results = [];
-        $allPassed = true;
-        $hadError = false;
+        $verdicts = [];
 
         // A teljes kiertekelesnek (minden tesztesetnek egyutt) felso korlatja van,
         // hogy a kliens a sajat timeoutja elott mindig valaszt kapjon.
@@ -44,7 +44,7 @@ final readonly class SolutionEvaluator
 
                 $run = $this->judge0->run($language, $sourceCode, $testCase->stdin, $remaining);
             } catch (Judge0Exception $e) {
-                $hadError = true;
+                $verdicts[] = Verdict::SystemError;
                 $results[] = $this->errorResult($testCase, $e->getMessage());
 
                 // Ha a futtato szolgaltatas elerhetetlen, a tobbi teszteset
@@ -52,12 +52,19 @@ final readonly class SolutionEvaluator
                 break;
             }
 
-            $passed = $this->outputMatches($run['stdout'], $testCase->expected_stdout);
-            $allPassed = $allPassed && $passed;
-            $results[] = $this->buildResult($testCase, $run, $passed);
+            $verdict = Verdict::fromJudge0($run['status_id'], $this->outputMatches($run['stdout'], $testCase->expected_stdout));
+            $verdicts[] = $verdict;
+            $results[] = $this->buildResult($testCase, $run, $verdict);
+
+            // Forditasi hiba minden tesztesetnel ugyanaz lenne: a tobbit nem futtatjuk.
+            if ($verdict === Verdict::CompilationError) {
+                break;
+            }
         }
 
-        return new EvaluationResult($this->overallStatus($hadError, $allPassed, count($results)), $results);
+        $overall = $this->overallVerdict($verdicts);
+
+        return new EvaluationResult($this->legacyStatus($overall, $verdicts), $overall, $results);
     }
 
     /**
@@ -84,18 +91,20 @@ final readonly class SolutionEvaluator
      * @param  Judge0Run  $run
      * @return array<string, mixed>
      */
-    private function buildResult(TestCase $testCase, array $run, bool $passed): array
+    private function buildResult(TestCase $testCase, array $run, Verdict $verdict): array
     {
         $result = [
             'test_case_id' => $testCase->id,
             'hidden' => $testCase->is_hidden,
-            'passed' => $passed,
+            'passed' => $verdict === Verdict::Accepted,
+            'verdict' => $verdict->value,
+            'verdict_label' => $verdict->label(),
             'time' => $run['time'],
             'exit_code' => $run['exit_code'],
             'judge_status' => $run['status'],
         ];
 
-        // Rejtett teszteseteknel csak PASS/FAIL megy vissza, kimenet nelkul -
+        // Rejtett teszteseteknel csak az allapot megy vissza, kimenet nelkul -
         // kulonben visszafejthetok lennenek a rejtett bemenetek.
         if ($testCase->is_hidden) {
             return $result;
@@ -117,6 +126,8 @@ final readonly class SolutionEvaluator
             'test_case_id' => $testCase->id,
             'hidden' => $testCase->is_hidden,
             'passed' => false,
+            'verdict' => Verdict::SystemError->value,
+            'verdict_label' => Verdict::SystemError->label(),
             'time' => null,
             'exit_code' => null,
             'judge_status' => __('execution.error_status_label'),
@@ -124,12 +135,40 @@ final readonly class SolutionEvaluator
         ];
     }
 
-    private function overallStatus(bool $hadError, bool $allPassed, int $resultCount): string
+    /**
+     * Rendszerhiba felulir mindent (nem a megoldas hibaja); kulonben az
+     * elso nem elfogadott teszteset allapota a dontő (sorrendben ez az, amit
+     * a diak eloszor javitani fog).
+     *
+     * @param  list<Verdict>  $verdicts
+     */
+    private function overallVerdict(array $verdicts): Verdict
     {
-        if ($hadError || $resultCount === 0) {
-            return 'error';
+        if ($verdicts === [] || in_array(Verdict::SystemError, $verdicts, true)) {
+            return Verdict::SystemError;
         }
 
-        return $allPassed ? 'passed' : 'failed';
+        foreach ($verdicts as $verdict) {
+            if ($verdict !== Verdict::Accepted) {
+                return $verdict;
+            }
+        }
+
+        return Verdict::Accepted;
+    }
+
+    /**
+     * A regi, harom erteku osszegzes (passed/failed/error), valtozatlan
+     * jelentessel: a kliensek es a tarolt beadasok erre epulnek.
+     *
+     * @param  list<Verdict>  $verdicts
+     */
+    private function legacyStatus(Verdict $overall, array $verdicts): string
+    {
+        return match (true) {
+            $overall === Verdict::SystemError, $verdicts === [] => 'error',
+            $overall === Verdict::Accepted => 'passed',
+            default => 'failed',
+        };
     }
 }

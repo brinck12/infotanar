@@ -4,20 +4,22 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Enums\Verdict;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
  * @property int $exercise_id
+ * @property Verdict|null $verdict A #39 elotti beadasoknal NULL.
  */
 final class Submission extends Model
 {
-    protected $fillable = ['user_id', 'exercise_id', 'language', 'source_code', 'status', 'results'];
+    protected $fillable = ['user_id', 'exercise_id', 'language', 'source_code', 'status', 'verdict', 'results'];
 
     /** @return array<string, string> */
     protected function casts(): array
     {
-        return ['results' => 'array'];
+        return ['results' => 'array', 'verdict' => Verdict::class];
     }
 
     /** @return BelongsTo<Exercise, $this> */
