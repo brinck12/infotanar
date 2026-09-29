@@ -1,6 +1,7 @@
 import { test as base } from '@playwright/test'
 import { env } from '../../config/env'
 import { ApiClient } from '../api/ApiClient'
+import { Outbox } from '../api/Outbox'
 import { MockApi } from '../mocks/MockApi'
 import { serveMonacoLocally } from '../mocks/monaco'
 import { TaskListPage } from '../pages/TaskListPage'
@@ -22,6 +23,8 @@ export interface FrameworkFixtures {
   taskSolvePage: TaskSolvePage
   /** Tipusos kliens a valodi backendhez (API tesztek). */
   apiClient: ApiClient
+  /** A helyi teszt-backend altal kikuldott levelek (MAIL_MAILER=outbox). */
+  outbox: Outbox
 }
 
 /**
@@ -56,6 +59,11 @@ export const test = base.extend<FrameworkFixtures & A11yFixtures & FrameworkOpti
 
   apiClient: async ({ request }, use) => {
     await use(new ApiClient(request))
+  },
+
+  // eslint-disable-next-line no-empty-pattern
+  outbox: async ({}, use) => {
+    await use(new Outbox())
   },
 
   ...a11yFixtures,

@@ -3,6 +3,7 @@ import type {
   DataEnvelope,
   HealthResponse,
   LanguageKey,
+  MessageResponse,
   RegisterRequest,
   RunRequest,
   RunResponse,
@@ -84,6 +85,12 @@ export class ApiClient {
 
   register(payload: Partial<RegisterRequest>): Promise<ApiResult<DataEnvelope<User>>> {
     return this.post('auth/register', payload)
+  }
+
+  /** A megerosito level frontend linkjenek query parameterei valtozatlanul mennek az API-nak. */
+  verifyEmail(params: URLSearchParams): Promise<ApiResult<MessageResponse>> {
+    const { id, hash, ...rest } = Object.fromEntries(params)
+    return this.get(`auth/verify-email/${String(id)}/${String(hash)}`, rest)
   }
 
   /** Publikalt feladat azonositoja cim alapjan; hibat dob, ha nincs ilyen. */
