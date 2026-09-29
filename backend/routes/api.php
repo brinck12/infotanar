@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Http\Controllers\Api\V1\Account\AccountController;
+use App\Http\Controllers\Api\V1\Admin\Catalog\ConstraintOptionsController;
 use App\Http\Controllers\Api\V1\Admin\Catalog\ExerciseController as AdminExerciseController;
 use App\Http\Controllers\Api\V1\Admin\Catalog\LessonController as AdminLessonController;
 use App\Http\Controllers\Api\V1\Admin\Catalog\ModuleController as AdminModuleController;
@@ -94,6 +95,8 @@ Route::prefix('v1')->name('api.')->group(function (): void {
         Route::apiResource('modules', AdminModuleController::class);
         Route::apiResource('lessons', AdminLessonController::class);
         Route::apiResource('exercises', AdminExerciseController::class);
+
+        Route::get('/constraint-options', ConstraintOptionsController::class)->name('constraint-options');
 
         // Tesztesetek (#46): letrehozas/lista a feladat alatt, a tobbi kozvetlenul.
         Route::put('/exercises/{exercise}/test-cases/order', [TestCaseController::class, 'reorder'])->name('test-cases.order');
