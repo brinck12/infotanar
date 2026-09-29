@@ -37,7 +37,7 @@ export function ResultPanel({ loading, error, result, mode }: Props) {
 
   if (!result) {
     return (
-      <div className="rounded-lg border border-dashed border-slate-800 p-4 text-sm text-slate-500">
+      <div className="rounded-lg border border-dashed border-slate-800 p-4 text-sm text-slate-400">
         Még nem futtattál kódot. Nyomd meg a <strong className="text-slate-300">Futtatás</strong> gombot.
       </div>
     )
@@ -94,7 +94,7 @@ function TestResultRow({ index, result }: { index: number; result: TestResult })
         {result.hidden && (
           <span className="rounded bg-slate-800 px-2 py-0.5 text-xs text-slate-400">rejtett</span>
         )}
-        {result.time !== null && <span className="text-xs text-slate-500">{result.time} s</span>}
+        {result.time !== null && <span className="text-xs text-slate-400">{result.time} s</span>}
         {result.judge_status !== 'Accepted' && (
           <span className="text-xs text-amber-400">{result.judge_status}</span>
         )}
@@ -129,7 +129,7 @@ function OutputBlock({
 }) {
   return (
     <div>
-      <p className="mb-1 text-xs uppercase tracking-wide text-slate-500">{label}</p>
+      <p className="mb-1 text-xs uppercase tracking-wide text-slate-400">{label}</p>
       <pre
         className={[
           'max-h-40 overflow-auto rounded border p-2 font-mono text-xs whitespace-pre-wrap',

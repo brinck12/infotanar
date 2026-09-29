@@ -79,27 +79,30 @@ jobs:
         working-directory: tests
         run: npm ci
 
+      - name: Tesztkód típusellenőrzése és lintelése
+        working-directory: tests
+        run: npm run check
+
       - name: Playwright böngésző telepítése
         working-directory: tests
         run: npx playwright install --with-deps chromium
 
-      # Az E2E tesztek mockolt API ellen futnak (nem kell hozzájuk backend),
-      # az API tesztek pedig egy valódi helyi backendet és egy hamis
-      # Judge0-t indítanak (lásd tests/api/playwright.config.ts webServer).
-      - name: E2E tesztek
+      # Egyetlen konfiguráció (tests/playwright.config.ts), három projekt:
+      #   e2e-mocked      - buildelt frontend, route interceptionnel mockolt API
+      #   api             - valódi helyi backend (sqlite fixture) + Judge0 mock
+      #   api-rate-limit  - az "api" után, mert kimeríti a közös kvótát
+      # A szükséges szervereket a Playwright webServer indítja (config/web-servers.ts).
+      # Egy futtatás = egy közös HTML/JUnit riport minden projektről.
+      - name: Playwright tesztek (E2E + API)
         working-directory: tests
-        run: npm run test:e2e
-
-      - name: API tesztek
-        working-directory: tests
-        run: npm run test:api
+        run: npm test
 
       - name: Playwright riport feltöltése
-        if: failure()
+        if: ${{ !cancelled() }}
         uses: actions/upload-artifact@v4
         with:
           name: playwright-report
           path: |
             tests/playwright-report/
-            tests/api/playwright-report/
+            tests/test-results/
           retention-days: 7

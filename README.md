@@ -100,9 +100,14 @@ npx tsc --noEmit
 
 # Playwright: E2E (mockolt API) és API tesztek (valódi backend + hamis Judge0)
 cd tests
-npm run test:e2e
-npm run test:api
+npm run check      # típusellenőrzés + ESLint
+npm test           # minden projekt
+npm run test:e2e   # csak E2E (nem kell PHP)
+npm run test:api   # csak API
+npm run test:smoke # csak @smoke
 ```
+
+A tesztkeretrendszer felépítése és konvenciói: [tests/README.md](tests/README.md).
 
 ---
 
