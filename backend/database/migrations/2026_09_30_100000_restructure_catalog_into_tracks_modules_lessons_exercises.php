@@ -38,15 +38,19 @@ return new class extends Migration
             $table->timestamps();
         });
 
-        $trackId = DB::table('tracks')->insertGetId([
-            'slug' => self::DEFAULT_TRACK_SLUG,
-            'title' => 'Programozás',
-            'description' => 'Programozási tételek és feladatok Python és C# nyelven.',
-            'position' => 0,
-            'is_published' => true,
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);
+        // Alapertelmezett track csak akkor kell, ha van athelyezendo temakor; egy
+        // friss telepitesen ures, soha nem hasznalt track maradna utana.
+        $trackId = DB::table('topics')->exists()
+            ? DB::table('tracks')->insertGetId([
+                'slug' => self::DEFAULT_TRACK_SLUG,
+                'title' => 'Programozás',
+                'description' => 'Programozási tételek és feladatok Python és C# nyelven.',
+                'position' => 0,
+                'is_published' => true,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ])
+            : null;
 
         $this->topicsToModules($trackId);
         $this->createLessons();
@@ -71,7 +75,7 @@ return new class extends Migration
         Schema::dropIfExists('tracks');
     }
 
-    private function topicsToModules(int $trackId): void
+    private function topicsToModules(?int $trackId): void
     {
         Schema::rename('topics', 'modules');
 
