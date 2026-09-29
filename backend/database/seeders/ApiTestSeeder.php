@@ -2,8 +2,10 @@
 
 namespace Database\Seeders;
 
+use App\Enums\Role;
 use App\Models\Task;
 use App\Models\Topic;
+use App\Models\User;
 use Illuminate\Database\Seeder;
 
 /**
@@ -79,5 +81,16 @@ class ApiTestSeeder extends Seeder
         $advanced->testCases()->create([
             'stdin' => "1\n", 'expected_stdout' => "1\n", 'is_hidden' => false, 'order' => 0,
         ]);
+
+        // Rogzitett, megerositett fiokok a jogosultsagi szcenariokhoz; jelszo: Titkos123.
+        foreach (['admin@infotanar.test' => Role::Admin, 'student@infotanar.test' => Role::Student] as $email => $role) {
+            (new User)->forceFill([
+                'name' => 'PW '.$role->value,
+                'email' => $email,
+                'password' => 'Titkos123',
+                'role' => $role,
+                'email_verified_at' => now(),
+            ])->save();
+        }
     }
 }
