@@ -100,6 +100,23 @@ export interface DataEnvelope<T> {
   data: T
 }
 
+export type UserRole = 'student' | 'admin'
+
+export interface RegisterRequest {
+  name: string
+  email: string
+  password: string
+  password_confirmation: string
+}
+
+export interface User {
+  id: number
+  name: string
+  email: string
+  role: UserRole
+  email_verified_at: string | null
+}
+
 export interface HealthResponse {
   ok: boolean
 }
