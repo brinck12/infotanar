@@ -31,6 +31,10 @@ Route::prefix('v1')->group(function (): void {
             ->middleware('throttle:verification-resend');
     });
 
+    Route::prefix('admin')->middleware(['auth:sanctum', 'admin'])->group(function (): void {
+        Route::get('/ping', fn () => response()->json(['ok' => true]));
+    });
+
     Route::get('/topics', [TopicController::class, 'index']);
     Route::get('/tasks', [TaskController::class, 'index']);
     Route::get('/tasks/{task}', [TaskController::class, 'show']);
