@@ -12,6 +12,7 @@ return [
     'array' => 'A(z) :attribute mezőnek tömbnek kell lennie.',
     'boolean' => 'A(z) :attribute mező értéke csak igaz vagy hamis lehet.',
     'confirmed' => 'A(z) :attribute megerősítése nem egyezik.',
+    'current_password' => 'A megadott jelszó helytelen.',
     'date' => 'A(z) :attribute nem érvényes dátum.',
     'email' => 'A(z) :attribute nem érvényes e-mail-cím.',
     'exists' => 'A kiválasztott :attribute nem létezik.',
