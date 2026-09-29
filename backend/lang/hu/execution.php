@@ -10,6 +10,7 @@ return [
         'http_error' => 'A kódfuttató szolgáltatás hibával válaszolt (HTTP :status).',
         'malformed_response' => 'A kódfuttató szolgáltatás értelmezhetetlen választ adott.',
         'unreachable' => 'A kódfuttató szolgáltatás jelenleg nem elérhető, próbáld újra később.',
+        'timed_out' => 'A kódfuttató szolgáltatás nem válaszolt időben. Próbáld újra később.',
     ],
     'error_status_label' => 'Hiba',
 ];

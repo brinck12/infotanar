@@ -27,6 +27,11 @@ final class Judge0Exception extends RuntimeException
         return new self(__('execution.judge0.unreachable'), $previous);
     }
 
+    public static function timedOut(?Throwable $previous = null): self
+    {
+        return new self(__('execution.judge0.timed_out'), $previous);
+    }
+
     public static function httpError(int $status): self
     {
         return new self(__('execution.judge0.http_error', ['status' => $status]));

@@ -8,6 +8,7 @@ use App\Exceptions\Judge0Exception;
 use App\Models\TestCase;
 use App\Services\Execution\EvaluationResult;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Config;
 
 /**
  * Egy megoldas lefuttatasa tesztesetenkent, es az eredmeny osszevetese az
@@ -29,9 +30,19 @@ final readonly class SolutionEvaluator
         $allPassed = true;
         $hadError = false;
 
+        // A teljes kiertekelesnek (minden tesztesetnek egyutt) felso korlatja van,
+        // hogy a kliens a sajat timeoutja elott mindig valaszt kapjon.
+        $deadline = microtime(true) + Config::integer('judge0.evaluation_deadline');
+
         foreach ($testCases as $testCase) {
+            $remaining = (int) floor($deadline - microtime(true));
+
             try {
-                $run = $this->judge0->run($language, $sourceCode, $testCase->stdin);
+                if ($remaining < 1) {
+                    throw Judge0Exception::timedOut();
+                }
+
+                $run = $this->judge0->run($language, $sourceCode, $testCase->stdin, $remaining);
             } catch (Judge0Exception $e) {
                 $hadError = true;
                 $results[] = $this->errorResult($testCase, $e->getMessage());

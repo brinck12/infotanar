@@ -27,11 +27,12 @@ final class Judge0Service
      * Egyetlen forraskod lefuttatasa egy adott bemenettel.
      *
      * @param  string  $languageKey  A config/judge0.php 'languages' kulcsa (pl. 'python').
+     * @param  int|null  $timeout  Erre a hivasra jutó ido (mp); a hivo a teljes hatarido maradekat adja at.
      * @return Judge0Run
      *
      * @throws Judge0Exception
      */
-    public function run(string $languageKey, string $sourceCode, ?string $stdin = null): array
+    public function run(string $languageKey, string $sourceCode, ?string $stdin = null, ?int $timeout = null): array
     {
         $payload = [
             'cpu_time_limit' => Config::float('judge0.limits.cpu_time_limit'),
@@ -42,13 +43,21 @@ final class Judge0Service
             'stdin' => base64_encode((string) $stdin),
         ];
 
+        $request = $this->request();
+        if ($timeout !== null) {
+            $request = $request->timeout(max(1, min($timeout, Config::integer('judge0.timeout'))));
+        }
+
         try {
-            $response = $this->request()->post('/submissions?base64_encoded=true&wait=true', $payload);
+            $response = $request->post('/submissions?base64_encoded=true&wait=true', $payload);
         } catch (ConnectionException $e) {
             // A nyers uzenet a belso Judge0 URL-t tartalmazza: csak a naploba kerul.
             Log::error('Judge0: submission request failed.', ['error' => $e->getMessage()]);
 
-            throw Judge0Exception::unreachable($e);
+            // cURL 28 = operation timed out: a szolgaltatas el, csak lassu.
+            throw str_contains($e->getMessage(), 'cURL error 28')
+                ? Judge0Exception::timedOut($e)
+                : Judge0Exception::unreachable($e);
         }
 
         if ($response->failed()) {
@@ -153,6 +162,7 @@ final class Judge0Service
     private function request(): PendingRequest
     {
         $request = Http::baseUrl(Config::string('judge0.url'))
+            ->connectTimeout(Config::integer('judge0.connect_timeout'))
             ->timeout(Config::integer('judge0.timeout'))
             ->acceptJson();
 
