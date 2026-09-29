@@ -12,7 +12,10 @@ return new class extends Migration
     {
         Schema::create('subscriptions', function (Blueprint $table): void {
             $table->id();
-            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
+            // RESTRICT (nem CASCADE): MySQL-ben egy stored generalt oszlop
+            // (live_user_id) alap-oszlopan levo idegen kulcs nem hasznalhat
+            // CASCADE/SET NULL akciot. A felhasznalot amugy is csak soft-delete-eljuk.
+            $table->foreignId('user_id')->constrained()->restrictOnDelete();
 
             // Fizetesi szolgaltato (#12 donti el); a manualisan adott hozzaferes 'manual'.
             $table->string('provider', 32);
