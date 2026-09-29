@@ -9,6 +9,7 @@ use App\Http\Controllers\Api\V1\Auth\EmailVerificationController;
 use App\Http\Controllers\Api\V1\Auth\PasswordResetController;
 use App\Http\Controllers\Api\V1\Auth\RegisterController;
 use App\Http\Controllers\Api\V1\Auth\SessionController;
+use App\Http\Controllers\Api\V1\Catalog\LessonVideoController;
 use App\Http\Controllers\Api\V1\Catalog\TaskController;
 use App\Http\Controllers\Api\V1\Catalog\TopicController;
 use App\Http\Controllers\Api\V1\Catalog\TrackController;
@@ -45,6 +46,14 @@ Route::prefix('v1')->name('api.')->group(function (): void {
 
     Route::get('/tracks', [TrackController::class, 'index'])->name('tracks.index');
     Route::get('/tracks/{slug}', [TrackController::class, 'show'])->name('tracks.show');
+
+    Route::get('/lessons/{lesson}/video', [LessonVideoController::class, 'show'])
+        ->whereNumber('lesson')
+        ->name('lessons.video');
+    Route::get('/lessons/{lesson}/video/stream', [LessonVideoController::class, 'stream'])
+        ->whereNumber('lesson')
+        ->middleware('signed:relative')
+        ->name('lessons.video.stream');
 
     Route::get('/topics', [TopicController::class, 'index'])->name('topics.index');
     Route::get('/tasks', [TaskController::class, 'index'])->name('tasks.index');

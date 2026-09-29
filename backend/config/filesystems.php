@@ -38,6 +38,18 @@ return [
             'report' => false,
         ],
 
+        // Lecke-videok: SOHA nem publikus. Kiszolgalas csak rovid eletu, alairt
+        // URL-en at (LessonVideoController), a hozzaferesi szabaly ellenorzese utan.
+        // Elesben S3-kompatibilis tarolora cserelheto (LESSON_VIDEO_DISK), ott a
+        // tarolo sajat temporaryUrl-jet hasznaljuk.
+        'lesson_videos' => [
+            'driver' => 'local',
+            'root' => storage_path('app/private/lesson-videos'),
+            'visibility' => 'private',
+            'throw' => false,
+            'report' => false,
+        ],
+
         'public' => [
             'driver' => 'local',
             'root' => storage_path('app/public'),
