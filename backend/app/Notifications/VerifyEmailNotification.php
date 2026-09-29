@@ -1,14 +1,26 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Notifications;
 
 use App\Models\User;
+use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
+use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\URL;
 
-class VerifyEmailNotification extends Notification
+final class VerifyEmailNotification extends Notification implements ShouldQueue
 {
+    use Queueable;
+
+    public function __construct()
+    {
+        $this->afterCommit();
+    }
+
     /** @return list<string> */
     public function via(User $notifiable): array
     {
@@ -17,13 +29,15 @@ class VerifyEmailNotification extends Notification
 
     public function toMail(User $notifiable): MailMessage
     {
+        $minutes = Config::integer('auth.verification.expire', 60);
+
         return (new MailMessage)
-            ->subject('Erősítsd meg az e-mail-címed')
-            ->greeting('Szia '.$notifiable->name.'!')
-            ->line('Kattints az alábbi gombra az e-mail-címed megerősítéséhez.')
-            ->action('E-mail-cím megerősítése', $this->frontendUrl($notifiable))
-            ->line('A link '.config('auth.verification.expire', 60).' percig érvényes.')
-            ->line('Ha nem te regisztráltál, hagyd figyelmen kívül ezt a levelet.');
+            ->subject(__('auth.verification.mail.subject'))
+            ->greeting(__('auth.verification.mail.greeting', ['name' => $notifiable->name]))
+            ->line(__('auth.verification.mail.intro'))
+            ->action(__('auth.verification.mail.action'), $this->frontendUrl($notifiable, $minutes))
+            ->line(__('auth.verification.mail.expiry', ['minutes' => $minutes]))
+            ->line(__('auth.verification.mail.outro'));
     }
 
     /**
@@ -31,20 +45,21 @@ class VerifyEmailNotification extends Notification
      * parametereket valtozatlanul tovabbadja az API-nak. Relativ alairas,
      * mert a backend host (APP_URL) proxy mogott eltérhet.
      */
-    private function frontendUrl(User $user): string
+    private function frontendUrl(User $user, int $minutes): string
     {
+        $routeParameters = [
+            'id' => $user->getKey(),
+            'hash' => sha1($user->getEmailForVerification()),
+        ];
+
         $signed = URL::temporarySignedRoute(
-            'api.verification.verify',
-            now()->addMinutes((int) config('auth.verification.expire', 60)),
-            ['id' => $user->getKey(), 'hash' => sha1($user->getEmailForVerification())],
+            'api.auth.verification.verify',
+            now()->addMinutes($minutes),
+            $routeParameters,
             absolute: false,
         );
 
-        $query = (string) parse_url($signed, PHP_URL_QUERY);
-
-        return config('app.frontend_url').'/email-megerosites?'.http_build_query([
-            'id' => $user->getKey(),
-            'hash' => sha1($user->getEmailForVerification()),
-        ]).'&'.$query;
+        return Config::string('app.frontend_url').'/email-megerosites?'
+            .http_build_query($routeParameters).'&'.parse_url($signed, PHP_URL_QUERY);
     }
 }

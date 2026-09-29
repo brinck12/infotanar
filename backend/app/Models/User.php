@@ -1,48 +1,57 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
 use App\Enums\Role;
+use App\Enums\SubscriptionStatus;
 use App\Notifications\ResetPasswordNotification;
 use App\Notifications\VerifyEmailNotification;
+use Carbon\CarbonImmutable;
 use Database\Factories\UserFactory;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Carbon;
 use Laravel\Sanctum\HasApiTokens;
 
-class User extends Authenticatable implements MustVerifyEmail
+/**
+ * A `role` szandekosan nincs a $fillable-ben: csak forceFill-lel (admin
+ * parancs, seeder) allithato, a kliens nem adhatja meg magának.
+ *
+ * @property Role $role
+ * @property CarbonImmutable|Carbon|null $email_verified_at
+ */
+final class User extends Authenticatable implements MustVerifyEmail
 {
     /** @use HasFactory<UserFactory> */
-    use HasApiTokens, HasFactory, Notifiable;
+    use HasApiTokens, HasFactory, Notifiable, SoftDeletes;
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var list<string>
-     */
+    /** @var list<string> */
     protected $fillable = [
         'name',
         'email',
         'password',
     ];
 
-    /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var list<string>
-     */
+    /** @var list<string> */
     protected $hidden = [
         'password',
         'remember_token',
     ];
 
-    /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
-     */
+    /** @var array<string, mixed> */
+    protected $attributes = [
+        'role' => 'student',
+    ];
+
+    /** @return array<string, string> */
     protected function casts(): array
     {
         return [
@@ -55,6 +64,31 @@ class User extends Authenticatable implements MustVerifyEmail
     public function isAdmin(): bool
     {
         return $this->role === Role::Admin;
+    }
+
+    /** @return HasMany<Submission, $this> */
+    public function submissions(): HasMany
+    {
+        return $this->hasMany(Submission::class);
+    }
+
+    /** @return HasMany<Subscription, $this> */
+    public function subscriptions(): HasMany
+    {
+        return $this->hasMany(Subscription::class);
+    }
+
+    /**
+     * Az egyetlen elo (active/past_due) elofizetes, ha van.
+     *
+     * @return HasOne<Subscription, $this>
+     */
+    public function liveSubscription(): HasOne
+    {
+        return $this->hasOne(Subscription::class)->ofMany(
+            ['id' => 'max'],
+            static fn (Builder $query) => $query->whereIn('status', SubscriptionStatus::live()),
+        );
     }
 
     public function sendEmailVerificationNotification(): void
