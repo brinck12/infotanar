@@ -5,6 +5,10 @@ declare(strict_types=1);
 namespace App\Providers;
 
 use App\Mail\OutboxTransport;
+use App\Models\Exercise;
+use App\Models\Lesson;
+use App\Models\Module;
+use App\Models\Track;
 use App\Models\User;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Database\Eloquent\Model;
@@ -28,6 +32,10 @@ final class AppServiceProvider extends ServiceProvider
         // Polimorf kapcsolatokban (pl. audit naplo) stabil alias, ne az osztalynev keruljon az adatbazisba.
         Relation::enforceMorphMap([
             'user' => User::class,
+            'track' => Track::class,
+            'module' => Module::class,
+            'lesson' => Lesson::class,
+            'exercise' => Exercise::class,
         ]);
 
         Password::defaults(static fn () => Password::min(8)->letters()->numbers());

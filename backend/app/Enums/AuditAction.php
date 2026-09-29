@@ -8,4 +8,9 @@ enum AuditAction: string
 {
     case AccountExported = 'account.exported';
     case AccountDeleted = 'account.deleted';
+
+    case CatalogCreated = 'catalog.created';
+    case CatalogUpdated = 'catalog.updated';
+    case CatalogDeleted = 'catalog.deleted';
+    case CatalogReordered = 'catalog.reordered';
 }

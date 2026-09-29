@@ -3,6 +3,11 @@
 declare(strict_types=1);
 
 use App\Http\Controllers\Api\V1\Account\AccountController;
+use App\Http\Controllers\Api\V1\Admin\Catalog\ExerciseController as AdminExerciseController;
+use App\Http\Controllers\Api\V1\Admin\Catalog\LessonController as AdminLessonController;
+use App\Http\Controllers\Api\V1\Admin\Catalog\ModuleController as AdminModuleController;
+use App\Http\Controllers\Api\V1\Admin\Catalog\ReorderController;
+use App\Http\Controllers\Api\V1\Admin\Catalog\TrackController as AdminTrackController;
 use App\Http\Controllers\Api\V1\Admin\UserAccountController;
 use App\Http\Controllers\Api\V1\Auth\CurrentUserController;
 use App\Http\Controllers\Api\V1\Auth\EmailVerificationController;
@@ -77,6 +82,17 @@ Route::prefix('v1')->name('api.')->group(function (): void {
 
     Route::prefix('admin')->name('admin.')->middleware(['auth:sanctum', 'admin'])->group(function (): void {
         Route::get('/ping', static fn () => response()->json(['ok' => true]))->name('ping');
+
+        // Katalogus-szerkesztes (#45). A sorrend-vegpontok a szulo osszes gyereket varjak.
+        Route::put('/tracks/order', [ReorderController::class, 'tracks'])->name('tracks.order');
+        Route::put('/tracks/{track}/modules/order', [ReorderController::class, 'modules'])->name('modules.order');
+        Route::put('/modules/{module}/lessons/order', [ReorderController::class, 'lessons'])->name('lessons.order');
+        Route::put('/lessons/{lesson}/exercises/order', [ReorderController::class, 'exercises'])->name('exercises.order');
+
+        Route::apiResource('tracks', AdminTrackController::class);
+        Route::apiResource('modules', AdminModuleController::class);
+        Route::apiResource('lessons', AdminLessonController::class);
+        Route::apiResource('exercises', AdminExerciseController::class);
 
         Route::middleware('can:manageAccount,user')->group(function (): void {
             Route::get('/users/{user}/export', [UserAccountController::class, 'export'])->name('users.export');
