@@ -7,6 +7,7 @@ namespace App\Actions\Account;
 use App\Actions\Audit\RecordAuditEvent;
 use App\Enums\AuditAction;
 use App\Models\Submission;
+use App\Models\Subscription;
 use App\Models\User;
 
 /**
@@ -47,6 +48,19 @@ final readonly class ExportAccountData
                     'source_code' => $submission->source_code,
                     'results' => $submission->results,
                     'submitted_at' => $submission->created_at?->toIso8601String(),
+                ])
+                ->all(),
+            // Csak allapot es datumok: a szolgaltatoi azonositok belso adatok, nem a felhasznaloe.
+            'subscriptions' => $user->subscriptions()
+                ->oldest()
+                ->get()
+                ->map(static fn (Subscription $subscription): array => [
+                    'status' => $subscription->status->value,
+                    'current_period_start' => $subscription->current_period_start?->toIso8601String(),
+                    'current_period_end' => $subscription->current_period_end?->toIso8601String(),
+                    'cancel_at_period_end' => $subscription->cancel_at_period_end,
+                    'canceled_at' => $subscription->canceled_at?->toIso8601String(),
+                    'created_at' => $subscription->created_at?->toIso8601String(),
                 ])
                 ->all(),
         ];
