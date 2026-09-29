@@ -7,8 +7,6 @@ parameters:
         - app
         - bootstrap/app.php
         - config
-        - database/seeders
-        - database/migrations
+        - database
         - routes
-    # database/factories: a fakerphp/faker hianyzik a require-dev-bol (#60), addig nem elemezheto.
     tmpDir: storage/framework/cache/phpstan
