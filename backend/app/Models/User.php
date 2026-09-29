@@ -91,6 +91,12 @@ final class User extends Authenticatable implements MustVerifyEmail
         );
     }
 
+    /** A premium tartalomhoz valo hozzaferes egyetlen igazsagforrasa (#23 gate). */
+    public function hasPremiumAccess(): bool
+    {
+        return $this->liveSubscription?->grantsAccess() ?? false;
+    }
+
     public function sendEmailVerificationNotification(): void
     {
         $this->notify(new VerifyEmailNotification);
