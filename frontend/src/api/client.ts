@@ -40,7 +40,11 @@ export function hibaUzenet(error: unknown): string {
     }
   }
 
+  // A futtatás limitje a Laravel alap (angol) üzenetét adja, a többi limiter magyarul válaszol.
   if (error.response?.status === 429) {
+    if (typeof data?.message === 'string' && data.message !== '' && data.message !== 'Too Many Attempts.') {
+      return data.message
+    }
     return 'Túl sok futtatás rövid idő alatt. Várj egy percet, és próbáld újra.'
   }
 
@@ -54,6 +58,43 @@ export function hibaUzenet(error: unknown): string {
 
   return 'Váratlan hiba történt a szerveren.'
 }
+
+/** 422-es válasznál mezőnként az első hibaüzenet, hogy a mező alatt jelenhessen meg. */
+export function mezoHibak(error: unknown): Record<string, string> {
+  if (!(error instanceof AxiosError) || error.response?.status !== 422) return {}
+  const errors = (error.response.data as Partial<ValidationErrorResponse> | undefined)?.errors ?? {}
+  return Object.fromEntries(
+    Object.entries(errors)
+      .filter(([, messages]) => messages.length > 0)
+      .map(([field, messages]) => [field, messages[0]]),
+  )
+}
+
+const TOKEN_KEY = 'infotanar.token'
+
+export const tokenStore = {
+  get(): string | null {
+    try {
+      return localStorage.getItem(TOKEN_KEY)
+    } catch {
+      return null
+    }
+  },
+  set(token: string | null): void {
+    try {
+      if (token) localStorage.setItem(TOKEN_KEY, token)
+      else localStorage.removeItem(TOKEN_KEY)
+    } catch {
+      // Privát módban a localStorage tilthatja az írást; ilyenkor csak a munkamenet végéig vagyunk bent.
+    }
+  },
+}
+
+client.interceptors.request.use((config) => {
+  const token = tokenStore.get()
+  if (token) config.headers.Authorization = `Bearer ${token}`
+  return config
+})
 
 interface Envelope<T> {
   data: T
