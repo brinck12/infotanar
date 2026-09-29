@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Services;
 
 use App\Exceptions\Judge0Exception;
+use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Config;
@@ -41,17 +42,26 @@ final class Judge0Service
             'stdin' => base64_encode((string) $stdin),
         ];
 
-        $response = $this->request()->post('/submissions?base64_encoded=true&wait=true', $payload);
+        try {
+            $response = $this->request()->post('/submissions?base64_encoded=true&wait=true', $payload);
+        } catch (ConnectionException $e) {
+            // A nyers uzenet a belso Judge0 URL-t tartalmazza: csak a naploba kerul.
+            Log::error('Judge0: submission request failed.', ['error' => $e->getMessage()]);
+
+            throw Judge0Exception::unreachable($e);
+        }
 
         if ($response->failed()) {
-            throw new Judge0Exception(__('execution.judge0.http_error', ['status' => $response->status()]));
+            Log::warning('Judge0: submission returned an error status.', ['status' => $response->status()]);
+
+            throw Judge0Exception::httpError($response->status());
         }
 
         $data = $response->json();
         $status = is_array($data) ? ($data['status'] ?? null) : null;
 
         if (! is_array($data) || ! is_array($status) || ! is_numeric($status['id'] ?? null)) {
-            throw new Judge0Exception(__('execution.judge0.malformed_response'));
+            throw Judge0Exception::malformedResponse();
         }
 
         return [
@@ -79,7 +89,7 @@ final class Judge0Service
         $config = config("judge0.languages.{$languageKey}");
 
         if ($config === null) {
-            throw new Judge0Exception(__('execution.unsupported_language', ['language' => $languageKey]));
+            throw Judge0Exception::unsupportedLanguage($languageKey);
         }
 
         foreach ($this->languages() as $id => $name) {
