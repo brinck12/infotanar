@@ -17,6 +17,15 @@ return [
     // legyen, mint a cpu_time_limit, kulonben sajat magunkat vagjuk el.
     'timeout' => (int) env('JUDGE0_TIMEOUT', 20),
 
+    // Kapcsolodasi timeout: egy nem elerheto Judge0 azonnal hibat adjon,
+    // ne a teljes 'timeout'-ot varjuk ki.
+    'connect_timeout' => (int) env('JUDGE0_CONNECT_TIMEOUT', 3),
+
+    // Egy futtatas/beadas osszes tesztesetere jutó felso korlat (mp). Kisebb
+    // kell legyen, mint a frontend 60 mp-es keres-timeoutja, hogy a kliens
+    // mindig ertelmes valaszt kapjon, ne vegtelen toltest.
+    'evaluation_deadline' => (int) env('JUDGE0_EVALUATION_DEADLINE', 45),
+
     /*
     |--------------------------------------------------------------------------
     | Futtatasi limitek
