@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace App\Http\Resources;
 
-use App\Models\Submission;
+use App\Services\Execution\SubmissionOutcome;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-/** @mixin Submission */
+/** @property SubmissionOutcome $resource */
 final class SubmissionResource extends JsonResource
 {
     /** @var string|null */
@@ -17,10 +17,13 @@ final class SubmissionResource extends JsonResource
     /** @return array<string, mixed> */
     public function toArray(Request $request): array
     {
+        $submission = $this->resource->submission;
+
         return [
-            'submission_id' => $this->id,
-            'status' => $this->status,
-            'results' => $this->results ?? [],
+            'submission_id' => $submission->id,
+            'status' => $submission->status,
+            'results' => $submission->results ?? [],
+            'lesson_completed' => $this->resource->lessonCompleted,
         ];
     }
 }
