@@ -7,8 +7,8 @@ namespace App\Http\Controllers\Api\V1\Auth;
 use App\Actions\Auth\VerifyEmailAddress;
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use Illuminate\Container\Attributes\CurrentUser;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 
 final class EmailVerificationController extends Controller
 {
@@ -19,11 +19,8 @@ final class EmailVerificationController extends Controller
         return response()->json(['message' => __('auth.verification.verified')]);
     }
 
-    public function resend(Request $request): JsonResponse
+    public function resend(#[CurrentUser] User $user): JsonResponse
     {
-        /** @var User $user */
-        $user = $request->user();
-
         if ($user->hasVerifiedEmail()) {
             return response()->json(['message' => __('auth.verification.already_verified')]);
         }

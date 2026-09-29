@@ -9,9 +9,8 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
 use App\Http\Resources\AccessTokenResource;
 use App\Models\User;
-use Illuminate\Http\Request;
+use Illuminate\Container\Attributes\CurrentUser;
 use Illuminate\Http\Response;
-use Laravel\Sanctum\PersonalAccessToken;
 
 final class SessionController extends Controller
 {
@@ -25,14 +24,9 @@ final class SessionController extends Controller
     }
 
     /** Csak az aktualis tokent vonja vissza; a tobbi eszkozon bejelentkezve marad. */
-    public function destroy(Request $request): Response
+    public function destroy(#[CurrentUser] User $user): Response
     {
-        /** @var User $user */
-        $user = $request->user();
-
-        /** @var PersonalAccessToken $token */
-        $token = $user->currentAccessToken();
-        $token->delete();
+        $user->currentAccessToken()->delete();
 
         return response()->noContent();
     }

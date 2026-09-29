@@ -8,6 +8,7 @@ use App\Mail\OutboxTransport;
 use App\Models\User;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Config;
@@ -23,6 +24,11 @@ final class AppServiceProvider extends ServiceProvider
         // Fejlesztes es teszt alatt hangos hiba: N+1 lekerdezes, elnyelt
         // mass-assignment, nem letezo attributum eleres.
         Model::shouldBeStrict(! $this->app->isProduction());
+
+        // Polimorf kapcsolatokban (pl. audit naplo) stabil alias, ne az osztalynev keruljon az adatbazisba.
+        Relation::enforceMorphMap([
+            'user' => User::class,
+        ]);
 
         Password::defaults(static fn () => Password::min(8)->letters()->numbers());
 
@@ -45,8 +51,22 @@ final class AppServiceProvider extends ServiceProvider
             ->by($emailAndIp($request))
             ->response($tooMany));
 
+        $userOrIp = static fn (Request $request): string => $request->user() instanceof User
+            ? 'user:'.$request->user()->id
+            : 'ip:'.$request->ip();
+
         RateLimiter::for('verification-resend', static fn (Request $request) => Limit::perMinute(3)
-            ->by($request->user() instanceof User ? (string) $request->user()->id : (string) $request->ip())
+            ->by($userOrIp($request))
+            ->response($tooMany));
+
+        // A teljes adatexport draga lekerdezes: orankent nehany eleg barkinek.
+        RateLimiter::for('account-export', static fn (Request $request) => Limit::perHour(5)
+            ->by($userOrIp($request))
+            ->response($tooMany));
+
+        // Jelszot ellenorzo, visszafordithatatlan muveletek: a jelszo ne legyen talalgathato.
+        RateLimiter::for('sensitive', static fn (Request $request) => Limit::perMinute(5)
+            ->by($userOrIp($request))
             ->response($tooMany));
     }
 }
