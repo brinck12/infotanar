@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Database\Seeders;
 
+use App\Actions\Catalog\ApplyFreemiumDefaults;
 use App\Enums\Role;
 use App\Models\Exercise;
 use App\Models\Lesson;
@@ -74,6 +75,9 @@ final class ApiTestSeeder extends Seeder
             'allowed_languages' => ['python'],
             'starter_code' => ['python' => "print()\n"],
         ])->testCases()->create(['stdin' => "1\n", 'expected_stdout' => "1\n", 'is_hidden' => false, 'order' => 0]);
+
+        // Freemium: az 1-2. lecke (id 1, 2) ingyenes, a 3-4. (id 3, 4) fizetos.
+        app(ApplyFreemiumDefaults::class)->handle($track);
 
         // Rogzitett, megerositett fiokok a jogosultsagi szcenariokhoz; jelszo: Titkos123.
         foreach (['admin@infotanar.test' => Role::Admin, 'student@infotanar.test' => Role::Student] as $email => $role) {

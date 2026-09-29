@@ -29,6 +29,7 @@ final class TaskResource extends JsonResource
             'allowed_languages' => $this->allowed_languages,
             // Ures objektum (nem ures tomb), hogy a kliens mindig map-kent kezelhesse.
             'starter_code' => $this->starter_code ?: new stdClass,
+            'is_free' => $this->whenLoaded('lesson', fn () => $this->lesson?->is_free),
             'topic' => TopicResource::make($this->whenLoaded('lesson', fn () => $this->lesson?->module)),
             'example_test_cases' => ExampleTestCaseResource::collection($this->whenLoaded('visibleTestCases')),
             'hidden_test_case_count' => $this->whenCounted('hiddenTestCases'),
