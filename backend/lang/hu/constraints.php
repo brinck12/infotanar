@@ -10,6 +10,10 @@ return [
         'loop' => 'ciklust kell használnod',
         'recursion' => 'rekurziót kell használnod (a függvény hívja önmagát)',
     ],
+    'violation' => [
+        'require' => 'Ennél a feladatnál :rule.',
+        'forbid' => 'Ennél a feladatnál :rule.',
+    ],
     'forbid' => [
         'builtin' => 'a beépített :name() függvény nem használható',
         'method' => 'a .:name() metódus nem használható',
