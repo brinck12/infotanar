@@ -22,7 +22,7 @@ use Illuminate\Http\Request;
  */
 final class TaskController extends Controller
 {
-    private const WITH_TOPIC = ['lesson:id,module_id,is_free', 'lesson.module:id,title,slug'];
+    private const WITH_TOPIC = ['lesson:id,module_id,title,is_free,video_path', 'lesson.module:id,title,slug'];
 
     public function __construct(private readonly ContentAccess $access) {}
 

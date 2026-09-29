@@ -41,6 +41,12 @@ final class TaskResource extends JsonResource
             'locked_reason' => $this->denial?->value,
             'locked_message' => $this->denial?->message(),
             'topic' => TopicResource::make($this->whenLoaded('lesson', fn () => $this->lesson->module)),
+            // A videot a lejatszo kulon keri le (GET /lessons/{id}/video), rovid eletu URL-lel.
+            'lesson' => $this->whenLoaded('lesson', fn (): array => [
+                'id' => $this->lesson->id,
+                'title' => $this->lesson->title,
+                'has_video' => $this->lesson->video_path !== null,
+            ]),
             'description' => $this->when($unlocked, fn () => $this->description),
             // Ures objektum (nem ures tomb), hogy a kliens mindig map-kent kezelhesse.
             'starter_code' => $this->when($unlocked, fn () => $this->starter_code ?: new stdClass),
