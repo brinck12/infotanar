@@ -1,17 +1,17 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class TestCase extends Model
+final class TestCase extends Model
 {
-    use HasFactory;
-
     protected $fillable = ['task_id', 'stdin', 'expected_stdout', 'is_hidden', 'order'];
 
+    /** @return array<string, string> */
     protected function casts(): array
     {
         return [
@@ -20,6 +20,7 @@ class TestCase extends Model
         ];
     }
 
+    /** @return BelongsTo<Task, $this> */
     public function task(): BelongsTo
     {
         return $this->belongsTo(Task::class);

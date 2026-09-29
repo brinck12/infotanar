@@ -40,10 +40,44 @@ jobs:
         run: npm run lint
 
       - name: Típusellenőrzés
-        run: npx tsc --noEmit
+        run: npm run typecheck
 
       - name: Build
         run: npm run build
+
+  backend:
+    name: Backend (Pint, Larastan)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: backend
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: PHP 8.3 beállítása
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: mbstring, pdo_sqlite, curl, zip, intl, fileinfo
+          coverage: none
+
+      - name: Composer cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.composer/cache
+          key: composer-${{ runner.os }}-${{ hashFiles('backend/composer.lock') }}
+          restore-keys: composer-${{ runner.os }}-
+
+      - name: Függőségek telepítése
+        run: composer install --prefer-dist --no-interaction --no-progress
+
+      - name: Kódstílus (Pint)
+        run: composer lint
+
+      - name: Statikus analízis (Larastan, max szint)
+        run: composer analyse
 
   tests-check:
     name: Tesztkód (typecheck, lint)

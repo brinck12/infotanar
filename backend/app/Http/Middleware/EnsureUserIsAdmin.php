@@ -1,17 +1,28 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Middleware;
 
+use App\Models\User;
 use Closure;
+use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
-class EnsureUserIsAdmin
+final class EnsureUserIsAdmin
 {
+    /**
+     * @param  Closure(Request): Response  $next
+     *
+     * @throws AuthorizationException
+     */
     public function handle(Request $request, Closure $next): Response
     {
-        if (! $request->user()?->isAdmin()) {
-            return response()->json(['message' => 'Ehhez nincs jogosultságod.'], 403);
+        $user = $request->user();
+
+        if (! $user instanceof User || ! $user->isAdmin()) {
+            throw new AuthorizationException;
         }
 
         return $next($request);

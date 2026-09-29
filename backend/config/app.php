@@ -81,7 +81,9 @@ return [
     |
     */
 
-    'locale' => env('APP_LOCALE', 'en'),
+    // Egynyelvu (magyar) termek: szandekosan nem env-bol jon, mert a regi
+    // .env fajlokban APP_LOCALE=en maradhatott, ami angol uzeneteket adna.
+    'locale' => 'hu',
 
     'fallback_locale' => env('APP_FALLBACK_LOCALE', 'en'),
 

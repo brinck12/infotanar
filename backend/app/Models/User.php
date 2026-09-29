@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
 use App\Enums\Role;
@@ -8,41 +10,41 @@ use App\Notifications\VerifyEmailNotification;
 use Database\Factories\UserFactory;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 
-class User extends Authenticatable implements MustVerifyEmail
+/**
+ * A `role` szandekosan nincs a $fillable-ben: csak forceFill-lel (admin
+ * parancs, seeder) allithato, a kliens nem adhatja meg magának.
+ *
+ * @property Role $role
+ */
+final class User extends Authenticatable implements MustVerifyEmail
 {
     /** @use HasFactory<UserFactory> */
     use HasApiTokens, HasFactory, Notifiable;
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var list<string>
-     */
+    /** @var list<string> */
     protected $fillable = [
         'name',
         'email',
         'password',
     ];
 
-    /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var list<string>
-     */
+    /** @var list<string> */
     protected $hidden = [
         'password',
         'remember_token',
     ];
 
-    /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
-     */
+    /** @var array<string, mixed> */
+    protected $attributes = [
+        'role' => 'student',
+    ];
+
+    /** @return array<string, string> */
     protected function casts(): array
     {
         return [
@@ -55,6 +57,12 @@ class User extends Authenticatable implements MustVerifyEmail
     public function isAdmin(): bool
     {
         return $this->role === Role::Admin;
+    }
+
+    /** @return HasMany<Submission, $this> */
+    public function submissions(): HasMany
+    {
+        return $this->hasMany(Submission::class);
     }
 
     public function sendEmailVerificationNotification(): void
