@@ -17,6 +17,8 @@ enum Verdict: string
     case RuntimeError = 'runtime_error';
     /** A futtato kornyezet hibaja (elerhetetlen, belso hiba) - nem a megoldase. */
     case SystemError = 'system_error';
+    /** A megoldas megserti a feladat kodszabalyait (#42): nem is futott le. */
+    case ConstraintViolation = 'constraint_violation';
 
     /**
      * Judge0 status id-k: 3 Accepted (lefutott), 4 Wrong Answer, 5 TLE,

@@ -52,6 +52,6 @@ final readonly class SubmitSolution
             && $result->status === 'passed'
             && $this->recordLessonProgress->handle($user, $exercise->lesson);
 
-        return new SubmissionOutcome($submission, $lessonCompleted);
+        return new SubmissionOutcome($submission, $lessonCompleted, $result->violations);
     }
 }
