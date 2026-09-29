@@ -72,6 +72,12 @@ final class User extends Authenticatable implements MustVerifyEmail
         return $this->hasMany(Submission::class);
     }
 
+    /** @return HasMany<LessonCompletion, $this> */
+    public function lessonCompletions(): HasMany
+    {
+        return $this->hasMany(LessonCompletion::class);
+    }
+
     /** @return HasMany<Subscription, $this> */
     public function subscriptions(): HasMany
     {

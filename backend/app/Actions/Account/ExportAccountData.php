@@ -6,6 +6,7 @@ namespace App\Actions\Account;
 
 use App\Actions\Audit\RecordAuditEvent;
 use App\Enums\AuditAction;
+use App\Models\LessonCompletion;
 use App\Models\Submission;
 use App\Models\Subscription;
 use App\Models\User;
@@ -36,6 +37,15 @@ final readonly class ExportAccountData
                 'email_verified_at' => $user->email_verified_at?->toIso8601String(),
                 'registered_at' => $user->created_at?->toIso8601String(),
             ],
+            'completed_lessons' => $user->lessonCompletions()
+                ->with('lesson:id,title')
+                ->oldest('completed_at')
+                ->get()
+                ->map(static fn (LessonCompletion $completion): array => [
+                    'lesson' => ['id' => $completion->lesson_id, 'title' => $completion->lesson?->title],
+                    'completed_at' => $completion->completed_at->toIso8601String(),
+                ])
+                ->all(),
             'submissions' => $user->submissions()
                 ->with('exercise:id,title')
                 ->oldest()
