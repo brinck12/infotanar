@@ -37,12 +37,12 @@ final readonly class ExportAccountData
                 'registered_at' => $user->created_at?->toIso8601String(),
             ],
             'submissions' => $user->submissions()
-                ->with('task:id,title')
+                ->with('exercise:id,title')
                 ->oldest()
                 ->get()
                 ->map(static fn (Submission $submission): array => [
                     'id' => $submission->id,
-                    'task' => ['id' => $submission->task_id, 'title' => $submission->task?->title],
+                    'exercise' => ['id' => $submission->exercise_id, 'title' => $submission->exercise?->title],
                     'language' => $submission->language,
                     'status' => $submission->status,
                     'source_code' => $submission->source_code,

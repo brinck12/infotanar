@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Console\Commands;
 
-use App\Models\Task;
+use App\Models\Exercise;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Schema;
 
@@ -24,13 +24,13 @@ class SeedOnce extends Command
 
     public function handle(): int
     {
-        if (! Schema::hasTable('tasks')) {
-            $this->error('A tasks tábla nem létezik. Futtasd előbb a migrációt.');
+        if (! Schema::hasTable('exercises')) {
+            $this->error('Az exercises tábla nem létezik. Futtasd előbb a migrációt.');
 
             return self::FAILURE;
         }
 
-        $existing = Task::count();
+        $existing = Exercise::count();
 
         if ($existing > 0) {
             $this->info("Kihagyva: már van {$existing} feladat az adatbázisban.");
@@ -42,7 +42,7 @@ class SeedOnce extends Command
 
         $this->call('db:seed', ['--force' => true]);
 
-        $this->info('Betöltve: '.Task::count().' feladat.');
+        $this->info('Betöltve: '.Exercise::count().' feladat.');
 
         return self::SUCCESS;
     }

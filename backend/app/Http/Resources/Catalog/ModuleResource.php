@@ -2,28 +2,24 @@
 
 declare(strict_types=1);
 
-namespace App\Http\Resources;
+namespace App\Http\Resources\Catalog;
 
 use App\Models\Module;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-/**
- * v1 szerzodes: a modul "topic"-kent megy ki (`name`, `task_count`), hogy a
- * meglevo kliensek valtozatlanul mukodjenek.
- *
- * @mixin Module
- */
-final class TopicResource extends JsonResource
+/** @mixin Module */
+final class ModuleResource extends JsonResource
 {
     /** @return array<string, mixed> */
     public function toArray(Request $request): array
     {
         return [
             'id' => $this->id,
-            'name' => $this->title,
             'slug' => $this->slug,
-            'task_count' => $this->whenCounted('exercises'),
+            'title' => $this->title,
+            'description' => $this->description,
+            'lessons' => LessonSummaryResource::collection($this->whenLoaded('lessons')),
         ];
     }
 }

@@ -4,36 +4,46 @@ declare(strict_types=1);
 
 namespace Database\Seeders;
 
+use App\Actions\Catalog\ApplyFreemiumDefaults;
 use App\Enums\Role;
-use App\Models\Task;
-use App\Models\Topic;
+use App\Models\Exercise;
+use App\Models\Lesson;
+use App\Models\Module;
+use App\Models\Track;
 use App\Models\User;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Str;
 
 /**
- * Rogzitett adatok a Playwright API teszteknek (tests/api).
+ * Rogzitett adatok a Playwright API teszteknek (tests/specs/api).
  *
  * Csak egy uresen migralt adatbazison fut (migrate:fresh utan), ezert az
  * azonositok determinisztikusak: a letrehozas sorrendje itt a szerzodes.
  * A teszt a nem publikus feladatot (2. sorrend -> id 2) az azonositoval
  * eri el, mert az nem jelenik meg a listaban.
  */
-class ApiTestSeeder extends Seeder
+final class ApiTestSeeder extends Seeder
 {
+    private Module $module;
+
+    private int $position = 0;
+
     public function run(): void
     {
-        $topic = Topic::create(['name' => 'PW teszt témakör', 'slug' => 'pw-teszt-temakor']);
+        $track = Track::create(['slug' => 'pw-teszt-track', 'title' => 'PW teszt track', 'position' => 0]);
+        $this->module = Module::create([
+            'track_id' => $track->id,
+            'slug' => 'pw-teszt-temakor',
+            'title' => 'PW teszt témakör',
+            'position' => 0,
+        ]);
 
         // id 1 — fo feladat: futtatas/beadas/rejtett-teszteset szcenariokhoz.
-        $main = Task::create([
-            'topic_id' => $topic->id,
-            'title' => 'PW teszt: Összegzés',
-            'description' => 'Playwright API teszt fixture — nem valodi feladat.',
+        $main = $this->exercise('PW teszt: Összegzés', [
             'level' => 'kozep',
             'difficulty' => 1,
             'allowed_languages' => ['python', 'csharp'],
             'starter_code' => ['python' => "print()\n"],
-            'is_published' => true,
         ]);
         $main->testCases()->createMany([
             ['stdin' => "1\n", 'expected_stdout' => "1\n", 'is_hidden' => false, 'order' => 0],
@@ -43,46 +53,31 @@ class ApiTestSeeder extends Seeder
         ]);
 
         // id 2 — nem publikalt: lista/reszlet 404 szcenariohoz.
-        Task::create([
-            'topic_id' => $topic->id,
-            'title' => 'PW teszt: Nem publikus feladat',
-            'description' => 'Playwright API teszt fixture — nem valodi feladat.',
+        $this->exercise('PW teszt: Nem publikus feladat', [
             'level' => 'kozep',
             'difficulty' => 1,
             'allowed_languages' => ['python'],
             'starter_code' => ['python' => "print()\n"],
-            'is_published' => false,
-        ]);
+        ], published: false);
 
         // id 3 — csak C#-on oldhato meg: nyelv-validacios szcenariohoz.
-        $csharpOnly = Task::create([
-            'topic_id' => $topic->id,
-            'title' => 'PW teszt: Csak C# feladat',
-            'description' => 'Playwright API teszt fixture — nem valodi feladat.',
+        $this->exercise('PW teszt: Csak C# feladat', [
             'level' => 'kozep',
             'difficulty' => 2,
             'allowed_languages' => ['csharp'],
             'starter_code' => ['csharp' => "// TODO\n"],
-            'is_published' => true,
-        ]);
-        $csharpOnly->testCases()->create([
-            'stdin' => "1\n", 'expected_stdout' => "1\n", 'is_hidden' => false, 'order' => 0,
-        ]);
+        ])->testCases()->create(['stdin' => "1\n", 'expected_stdout' => "1\n", 'is_hidden' => false, 'order' => 0]);
 
         // id 4 — emelt szint: szint-szures szcenariohoz.
-        $advanced = Task::create([
-            'topic_id' => $topic->id,
-            'title' => 'PW teszt: Emelt szintű feladat',
-            'description' => 'Playwright API teszt fixture — nem valodi feladat.',
+        $this->exercise('PW teszt: Emelt szintű feladat', [
             'level' => 'emelt',
             'difficulty' => 3,
             'allowed_languages' => ['python'],
             'starter_code' => ['python' => "print()\n"],
-            'is_published' => true,
-        ]);
-        $advanced->testCases()->create([
-            'stdin' => "1\n", 'expected_stdout' => "1\n", 'is_hidden' => false, 'order' => 0,
-        ]);
+        ])->testCases()->create(['stdin' => "1\n", 'expected_stdout' => "1\n", 'is_hidden' => false, 'order' => 0]);
+
+        // Freemium: az 1-2. lecke (id 1, 2) ingyenes, a 3-4. (id 3, 4) fizetos.
+        app(ApplyFreemiumDefaults::class)->handle($track);
 
         // Rogzitett, megerositett fiokok a jogosultsagi szcenariokhoz; jelszo: Titkos123.
         foreach (['admin@infotanar.test' => Role::Admin, 'student@infotanar.test' => Role::Student] as $email => $role) {
@@ -94,5 +89,25 @@ class ApiTestSeeder extends Seeder
                 'email_verified_at' => now(),
             ])->save();
         }
+    }
+
+    /** @param array<string, mixed> $attributes */
+    private function exercise(string $title, array $attributes, bool $published = true): Exercise
+    {
+        $lesson = Lesson::create([
+            'module_id' => $this->module->id,
+            'slug' => Str::slug($title),
+            'title' => $title,
+            'position' => $this->position++,
+            'is_published' => $published,
+        ]);
+
+        return Exercise::create([
+            ...$attributes,
+            'lesson_id' => $lesson->id,
+            'title' => $title,
+            'description' => 'Playwright API teszt fixture — nem valodi feladat.',
+            'is_published' => $published,
+        ]);
     }
 }

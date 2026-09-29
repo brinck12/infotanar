@@ -4,52 +4,71 @@ declare(strict_types=1);
 
 namespace Database\Seeders;
 
-use App\Models\Task;
-use App\Models\Topic;
+use App\Actions\Catalog\ApplyFreemiumDefaults;
+use App\Models\Exercise;
+use App\Models\Lesson;
+use App\Models\Module;
+use App\Models\Track;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Str;
 
 /**
  * Öt érettségi-jellegű programozási mintafeladat, a klasszikus
- * programozási tételekre építve.
+ * programozási tételekre építve. Idempotens: ujrafuttatva frissit, nem duplikal.
  */
-class TaskSeeder extends Seeder
+final class CatalogSeeder extends Seeder
 {
     public function run(): void
     {
-        $tetelek = Topic::updateOrCreate(
+        $track = Track::updateOrCreate(
+            ['slug' => 'programozas'],
+            ['title' => 'Programozás', 'description' => 'Programozási tételek és feladatok Python és C# nyelven.', 'position' => 0],
+        );
+
+        $tetelek = Module::updateOrCreate(
             ['slug' => 'programozasi-tetelek'],
-            ['name' => 'Programozási tételek']
+            ['track_id' => $track->id, 'title' => 'Programozási tételek', 'position' => 0],
         );
 
-        $sorozat = Topic::updateOrCreate(
+        $sorozat = Module::updateOrCreate(
             ['slug' => 'sorozatfeldolgozas'],
-            ['name' => 'Sorozatfeldolgozás']
+            ['track_id' => $track->id, 'title' => 'Sorozatfeldolgozás', 'position' => 1],
         );
 
-        foreach ($this->tasks($tetelek->id, $sorozat->id) as $definition) {
-            $testCases = $definition['test_cases'];
-            unset($definition['test_cases']);
+        $positions = [];
 
-            $task = Task::updateOrCreate(
-                ['title' => $definition['title']],
-                $definition
+        foreach ($this->exercises($tetelek->id, $sorozat->id) as $definition) {
+            ['module_id' => $moduleId, 'test_cases' => $testCases] = $definition;
+            unset($definition['module_id'], $definition['test_cases']);
+
+            // Egyelore minden feladat sajat leckeben van; a tananyag (content) kesobb kerul fel.
+            $lesson = Lesson::updateOrCreate(
+                ['module_id' => $moduleId, 'slug' => Str::slug($definition['title'])],
+                ['title' => $definition['title'], 'position' => $positions[$moduleId] = ($positions[$moduleId] ?? -1) + 1],
+            );
+
+            $exercise = Exercise::updateOrCreate(
+                ['lesson_id' => $lesson->id, 'title' => $definition['title']],
+                $definition,
             );
 
             // Ujraseedelesnel ne duplazodjanak a tesztesetek.
-            $task->testCases()->delete();
+            $exercise->testCases()->delete();
 
             foreach ($testCases as $order => $testCase) {
-                $task->testCases()->create([...$testCase, 'order' => $order]);
+                $exercise->testCases()->create([...$testCase, 'order' => $order]);
             }
         }
+
+        app(ApplyFreemiumDefaults::class)->handle($track);
     }
 
-    /** @return list<array{title: string, test_cases: list<array<string, mixed>>}&array<string, mixed>> */
-    private function tasks(int $tetelekId, int $sorozatId): array
+    /** @return list<array{module_id: int, title: string, test_cases: list<array<string, mixed>>}&array<string, mixed>> */
+    private function exercises(int $tetelekId, int $sorozatId): array
     {
         return [
             [
-                'topic_id' => $tetelekId,
+                'module_id' => $tetelekId,
                 'title' => 'Összegzés tétele',
                 'level' => 'kozep',
                 'difficulty' => 1,
@@ -85,7 +104,7 @@ MD,
                 ],
             ],
             [
-                'topic_id' => $tetelekId,
+                'module_id' => $tetelekId,
                 'title' => 'Megszámlálás tétele',
                 'level' => 'kozep',
                 'difficulty' => 2,
@@ -121,7 +140,7 @@ MD,
                 ],
             ],
             [
-                'topic_id' => $tetelekId,
+                'module_id' => $tetelekId,
                 'title' => 'Maximumkiválasztás tétele',
                 'level' => 'kozep',
                 'difficulty' => 2,
@@ -157,7 +176,7 @@ MD,
                 ],
             ],
             [
-                'topic_id' => $tetelekId,
+                'module_id' => $tetelekId,
                 'title' => 'Eldöntés tétele',
                 'level' => 'kozep',
                 'difficulty' => 3,
@@ -193,7 +212,7 @@ MD,
                 ],
             ],
             [
-                'topic_id' => $sorozatId,
+                'module_id' => $sorozatId,
                 'title' => 'Kiválogatás tétele',
                 'level' => 'emelt',
                 'difficulty' => 4,
