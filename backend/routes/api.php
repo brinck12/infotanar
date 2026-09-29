@@ -17,6 +17,14 @@ Route::prefix('v1')->group(function (): void {
         ->whereNumber('id')
         ->middleware('signed:relative')
         ->name('api.verification.verify');
+    Route::post('/auth/login', [AuthController::class, 'login'])->middleware('throttle:login');
+
+    Route::middleware('auth:sanctum')->group(function (): void {
+        Route::get('/auth/me', [AuthController::class, 'me']);
+        Route::post('/auth/logout', [AuthController::class, 'logout']);
+        Route::post('/auth/email/verification-notification', [EmailVerificationController::class, 'resend'])
+            ->middleware('throttle:verification-resend');
+    });
 
     Route::get('/topics', [TopicController::class, 'index']);
     Route::get('/tasks', [TaskController::class, 'index']);

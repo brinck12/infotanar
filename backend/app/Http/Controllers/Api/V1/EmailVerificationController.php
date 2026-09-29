@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Auth\Events\Verified;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 
 class EmailVerificationController extends Controller
 {
@@ -23,5 +24,18 @@ class EmailVerificationController extends Controller
         }
 
         return response()->json(['message' => 'Az e-mail-címed megerősítve.']);
+    }
+
+    public function resend(Request $request): JsonResponse
+    {
+        $user = $request->user();
+
+        if ($user->hasVerifiedEmail()) {
+            return response()->json(['message' => 'Az e-mail-címed már meg van erősítve.']);
+        }
+
+        $user->sendEmailVerificationNotification();
+
+        return response()->json(['message' => 'Új megerősítő levelet küldtünk.'], 202);
     }
 }
