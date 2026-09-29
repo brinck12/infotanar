@@ -23,6 +23,7 @@ use Illuminate\Support\Carbon;
  * @property SubscriptionStatus $status
  * @property CarbonImmutable|Carbon|null $current_period_start
  * @property CarbonImmutable|Carbon|null $current_period_end
+ * @property CarbonImmutable|Carbon|null $grace_ends_at
  * @property CarbonImmutable|Carbon|null $canceled_at
  */
 final class Subscription extends Model
@@ -39,6 +40,7 @@ final class Subscription extends Model
         'current_period_start',
         'current_period_end',
         'cancel_at_period_end',
+        'grace_ends_at',
         'canceled_at',
     ];
 
@@ -50,6 +52,7 @@ final class Subscription extends Model
             'current_period_start' => 'datetime',
             'current_period_end' => 'datetime',
             'cancel_at_period_end' => 'boolean',
+            'grace_ends_at' => 'datetime',
             'canceled_at' => 'datetime',
         ];
     }
@@ -70,6 +73,20 @@ final class Subscription extends Model
     public function isLive(): bool
     {
         return $this->status->isLive();
+    }
+
+    /**
+     * Ad-e most premium hozzaferest. A past_due allapotot is az ido alapjan
+     * donti el, nem a sweep lefutasatol fugg, igy a hozzaferes percre pontosan
+     * a turelmi ido vegen szunik meg.
+     */
+    public function grantsAccess(): bool
+    {
+        return match ($this->status) {
+            SubscriptionStatus::Active => true,
+            SubscriptionStatus::PastDue => $this->grace_ends_at?->isFuture() ?? false,
+            SubscriptionStatus::Canceled => false,
+        };
     }
 
     /** Helyi lezaras; a szolgaltatonal valo lemondas a szolgaltato-integracio dolga (#14+). */

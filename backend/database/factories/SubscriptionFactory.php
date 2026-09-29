@@ -43,6 +43,16 @@ final class SubscriptionFactory extends Factory
         return $this->state(fn (): array => [
             'status' => SubscriptionStatus::PastDue,
             'current_period_end' => now()->subDay(),
+            'grace_ends_at' => now()->addDays(6),
+        ]);
+    }
+
+    public function graceExpired(): static
+    {
+        return $this->state(fn (): array => [
+            'status' => SubscriptionStatus::PastDue,
+            'current_period_end' => now()->subDays(8),
+            'grace_ends_at' => now()->subDay(),
         ]);
     }
 
