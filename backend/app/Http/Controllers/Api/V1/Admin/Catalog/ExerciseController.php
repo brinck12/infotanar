@@ -6,6 +6,7 @@ namespace App\Http\Controllers\Api\V1\Admin\Catalog;
 
 use App\Actions\Admin\Catalog\ManageCatalogItem;
 use App\Exceptions\Catalog\CatalogItemInUse;
+use App\Exceptions\Catalog\PublishedExerciseNeedsVisibleTestCase;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\Catalog\ExerciseRequest;
 use App\Http\Resources\Admin\AdminExerciseResource;
@@ -40,15 +41,31 @@ final class ExerciseController extends Controller
         return AdminExerciseResource::make($exercise->loadCount(['testCases', 'submissions']));
     }
 
+    /**
+     * Uj feladatnak meg nincs tesztesete, ezert nem hozhato letre publikaltkent:
+     * letrehozas -> tesztesetek (#46) -> publikalas.
+     *
+     * @throws PublishedExerciseNeedsVisibleTestCase
+     */
     public function store(ExerciseRequest $request, #[CurrentUser] User $admin): JsonResponse
     {
+        if ($request->boolean('is_published')) {
+            throw new PublishedExerciseNeedsVisibleTestCase;
+        }
+
         $exercise = $this->manage->create(new Exercise($request->validated()), self::PARENT, $admin);
 
         return AdminExerciseResource::make($exercise)->response()->setStatusCode(JsonResponse::HTTP_CREATED);
     }
 
+    /** @throws PublishedExerciseNeedsVisibleTestCase */
     public function update(ExerciseRequest $request, Exercise $exercise, #[CurrentUser] User $admin): AdminExerciseResource
     {
+        $published = $request->has('is_published') ? $request->boolean('is_published') : $exercise->is_published;
+        if ($published && ! $exercise->visibleTestCases()->exists()) {
+            throw new PublishedExerciseNeedsVisibleTestCase;
+        }
+
         return AdminExerciseResource::make($this->manage->update($exercise, $request->validated(), self::PARENT, $admin));
     }
 

@@ -10,9 +10,9 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 
 /**
- * A katalogus-elemek (track, modul, lecke, feladat) `position` mezojenek
- * kezelese egy szulon belul. Invarians: a testverek pozicioi mindig
- * 0..n-1, hezag es ismetlodes nelkul.
+ * Rendezett testverek sorszam-oszlopanak kezelese egy szulon belul (katalogus:
+ * `position`, tesztesetek: `order`). Invarians: a sorszamok mindig 0..n-1,
+ * hezag es ismetlodes nelkul.
  */
 final class SiblingOrder
 {
@@ -27,10 +27,10 @@ final class SiblingOrder
      *
      * @param  Builder<covariant Model>  $siblings
      */
-    public function compact(Builder $siblings): void
+    public function compact(Builder $siblings, string $column = 'position'): void
     {
-        $ids = (clone $siblings)->orderBy('position')->orderBy('id')->pluck('id')->values()->all();
-        $this->write($siblings, $ids);
+        $ids = (clone $siblings)->orderBy($column)->orderBy('id')->pluck('id')->values()->all();
+        $this->write($siblings, $ids, $column);
     }
 
     /**
@@ -43,7 +43,7 @@ final class SiblingOrder
      *
      * @throws InvalidOrder
      */
-    public function reorder(Builder $siblings, array $orderedIds): void
+    public function reorder(Builder $siblings, array $orderedIds, string $column = 'position'): void
     {
         $current = (clone $siblings)->pluck('id')->map(static fn (mixed $id): int => is_numeric($id) ? (int) $id : 0)->sort()->values()->all();
         $requested = $orderedIds;
@@ -53,18 +53,18 @@ final class SiblingOrder
             throw new InvalidOrder;
         }
 
-        $this->write($siblings, $orderedIds);
+        $this->write($siblings, $orderedIds, $column);
     }
 
     /**
      * @param  Builder<covariant Model>  $siblings
      * @param  array<int, mixed>  $orderedIds
      */
-    private function write(Builder $siblings, array $orderedIds): void
+    private function write(Builder $siblings, array $orderedIds, string $column): void
     {
-        DB::transaction(static function () use ($siblings, $orderedIds): void {
-            foreach (array_values($orderedIds) as $position => $id) {
-                (clone $siblings)->whereKey($id)->update(['position' => $position]);
+        DB::transaction(static function () use ($siblings, $orderedIds, $column): void {
+            foreach (array_values($orderedIds) as $index => $id) {
+                (clone $siblings)->whereKey($id)->update([$column => $index]);
             }
         });
     }

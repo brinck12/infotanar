@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\V1\Admin\Catalog\ExerciseController as AdminExercis
 use App\Http\Controllers\Api\V1\Admin\Catalog\LessonController as AdminLessonController;
 use App\Http\Controllers\Api\V1\Admin\Catalog\ModuleController as AdminModuleController;
 use App\Http\Controllers\Api\V1\Admin\Catalog\ReorderController;
+use App\Http\Controllers\Api\V1\Admin\Catalog\TestCaseController;
 use App\Http\Controllers\Api\V1\Admin\Catalog\TrackController as AdminTrackController;
 use App\Http\Controllers\Api\V1\Admin\UserAccountController;
 use App\Http\Controllers\Api\V1\Auth\CurrentUserController;
@@ -93,6 +94,10 @@ Route::prefix('v1')->name('api.')->group(function (): void {
         Route::apiResource('modules', AdminModuleController::class);
         Route::apiResource('lessons', AdminLessonController::class);
         Route::apiResource('exercises', AdminExerciseController::class);
+
+        // Tesztesetek (#46): letrehozas/lista a feladat alatt, a tobbi kozvetlenul.
+        Route::put('/exercises/{exercise}/test-cases/order', [TestCaseController::class, 'reorder'])->name('test-cases.order');
+        Route::apiResource('exercises.test-cases', TestCaseController::class)->shallow()->parameters(['test-cases' => 'testCase']);
 
         Route::middleware('can:manageAccount,user')->group(function (): void {
             Route::get('/users/{user}/export', [UserAccountController::class, 'export'])->name('users.export');
