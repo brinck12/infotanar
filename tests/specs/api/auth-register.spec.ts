@@ -1,21 +1,10 @@
-import { randomUUID } from 'node:crypto'
-
 import type { RegisterRequest } from '../../src/api/types'
+import { registration } from '../../src/data'
 import { expect, test } from '../../src/fixtures'
-
-function validPayload(overrides: Partial<RegisterRequest> = {}): RegisterRequest {
-  return {
-    name: 'Teszt Elek',
-    email: `pw-${randomUUID()}@example.test`,
-    password: 'Titkos123',
-    password_confirmation: 'Titkos123',
-    ...overrides,
-  }
-}
 
 test.describe('Regisztráció (/auth/register)', () => {
   test('érvényes adatokkal 201, és a jelszó nem szivárog ki', { tag: '@smoke' }, async ({ apiClient }) => {
-    const payload = validPayload()
+    const payload = registration()
 
     const result = await apiClient.register(payload)
 
@@ -30,14 +19,14 @@ test.describe('Regisztráció (/auth/register)', () => {
   })
 
   test('a kliens nem adhat magának admin szerepkört', { tag: '@regression' }, async ({ apiClient }) => {
-    const result = await apiClient.register({ ...validPayload(), role: 'admin' } as RegisterRequest)
+    const result = await apiClient.register({ ...registration(), role: 'admin' } as RegisterRequest)
 
     expect(result.status).toBe(201)
     expect(result.body.data.role).toBe('student')
   })
 
   test('már regisztrált e-mail-cím 422, kis-nagybetűtől függetlenül', { tag: '@regression' }, async ({ apiClient }) => {
-    const payload = validPayload()
+    const payload = registration()
     expect((await apiClient.register(payload)).status).toBe(201)
 
     const duplicate = await apiClient.register({ ...payload, email: payload.email.toUpperCase() })
@@ -47,7 +36,7 @@ test.describe('Regisztráció (/auth/register)', () => {
   })
 
   test('eltérő jelszó-megerősítés 422', { tag: '@regression' }, async ({ apiClient }) => {
-    const result = await apiClient.register(validPayload({ password_confirmation: 'Masik1234' }))
+    const result = await apiClient.register(registration({ password_confirmation: 'Masik1234' }))
 
     expect(result.status).toBe(422)
     expect(result.errorBody.errors).toHaveProperty('password')
@@ -55,7 +44,7 @@ test.describe('Regisztráció (/auth/register)', () => {
 
   for (const weak of ['rovid1', 'csakbetuk', '12345678']) {
     test(`gyenge jelszó (${weak}) 422`, { tag: '@regression' }, async ({ apiClient }) => {
-      const result = await apiClient.register(validPayload({ password: weak, password_confirmation: weak }))
+      const result = await apiClient.register(registration({ password: weak, password_confirmation: weak }))
 
       expect(result.status).toBe(422)
       expect(result.errorBody.errors).toHaveProperty('password')
