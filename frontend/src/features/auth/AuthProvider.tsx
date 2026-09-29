@@ -30,8 +30,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     staleTime: Infinity,
   })
 
-  const value = useMemo<AuthState>(
-    () => ({
+  const value = useMemo<AuthState>(() => {
+    /**
+     * A néző személyétől függő adatok (zárolás, haladás) a belépéssel,
+     * kilépéssel és e-mail-megerősítéssel elavulnak. A reset kiüríti és az
+     * aktív nézetekben újratölti őket; a removeQueries-szel szemben nem
+     * kapcsolja le a futó observereket.
+     */
+    const resetViewerData = () =>
+      queryClient.resetQueries({ predicate: (query) => query.queryKey[0] !== authApi.authKeys.me[0] })
+
+    return {
       user: user ?? null,
       loading: isLoading,
 
@@ -39,6 +48,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const { token, user: loggedIn } = await authApi.login(email, password)
         tokenStore.set(token)
         queryClient.setQueryData(authApi.authKeys.me, loggedIn)
+        await resetViewerData()
         return loggedIn
       },
 
@@ -48,18 +58,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         } finally {
           tokenStore.set(null)
           queryClient.setQueryData(authApi.authKeys.me, null)
-          // A felhasználóhoz kötött adatok (haladás stb.) se maradjanak a cache-ben.
-          // Az auth queryk maradnak: a `me`-re aktív observer figyel, eltávolítva lekapcsolódna róla.
-          queryClient.removeQueries({ predicate: (query) => query.queryKey[0] !== authApi.authKeys.me[0] })
+          await resetViewerData()
         }
       },
 
       async refresh() {
         await queryClient.invalidateQueries({ queryKey: authApi.authKeys.me })
+        await resetViewerData()
       },
-    }),
-    [user, isLoading, queryClient],
-  )
+    }
+  }, [user, isLoading, queryClient])
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
 }
