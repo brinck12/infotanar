@@ -1,12 +1,13 @@
-import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { useQuery } from '@tanstack/react-query'
 import { Link, useSearchParams } from 'react-router-dom'
 import { hibaUzenet } from '../../../shared/api/errors'
 import { Alert, AuthCard } from '../../../shared/ui/Form'
 import * as authApi from '../api'
+import { useAuth } from '../context'
 
 export function VerifyEmail() {
   const [params] = useSearchParams()
-  const queryClient = useQueryClient()
+  const { refresh } = useAuth()
 
   // Query (nem mutation), mert így a StrictMode kettős effektje és az
   // újrarenderelés sem váltja be kétszer ugyanazt a linket.
@@ -14,7 +15,7 @@ export function VerifyEmail() {
     queryKey: ['auth', 'verify-email', params.toString()],
     queryFn: async () => {
       const message = await authApi.verifyEmail(params)
-      await queryClient.invalidateQueries({ queryKey: authApi.authKeys.me })
+      await refresh()
       return message
     },
     retry: false,
