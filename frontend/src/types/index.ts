@@ -85,6 +85,23 @@ export interface RunRequest {
   source_code: string
 }
 
+export type Role = 'student' | 'admin'
+
+export interface AuthUser {
+  id: number
+  name: string
+  email: string
+  role: Role
+  email_verified_at: string | null
+}
+
+export interface LoginResponse {
+  token: string
+  token_type: 'Bearer'
+  expires_at: string | null
+  user: AuthUser
+}
+
 /** Laravel validációs hibaválasz (HTTP 422). */
 export interface ValidationErrorResponse {
   message: string
