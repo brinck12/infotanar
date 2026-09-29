@@ -1,6 +1,8 @@
 <?php
 
 use App\Exceptions\Judge0Exception;
+use App\Http\Middleware\EnsureUserIsAdmin;
+use Illuminate\Auth\AuthenticationException;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -15,7 +17,7 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        //
+        $middleware->alias(['admin' => EnsureUserIsAdmin::class]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         // A kodfuttato hibaja ne 500-as stacktrace legyen, hanem ertheto
@@ -30,6 +32,14 @@ return Application::configure(basePath: dirname(__DIR__))
                 'message' => $e->getMessage(),
                 'results' => [],
             ], 503);
+        });
+
+        $exceptions->render(function (AuthenticationException $e, Request $request) {
+            if (! $request->is('api/*')) {
+                return null;
+            }
+
+            return response()->json(['message' => 'Ehhez be kell jelentkezned.'], 401);
         });
 
         $exceptions->render(function (InvalidSignatureException $e, Request $request) {
