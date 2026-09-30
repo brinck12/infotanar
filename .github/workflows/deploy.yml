@@ -139,6 +139,13 @@ jobs:
             exit 1
           fi
 
+          # Debug modban a hibaoldal kiirja a konfiguraciot (pl. JUDGE0_AUTH_TOKEN,
+          # APP_KEY): elesben ez titokszivargas, ezert a deploy megall.
+          if grep -Eiq '^[[:space:]]*APP_DEBUG[[:space:]]*=[[:space:]]*"?(true|1|on|yes)"?[[:space:]]*$' .env; then
+            echo "::error::APP_DEBUG be van kapcsolva a szerver .env-ben. Allitsd APP_DEBUG=false-ra."
+            exit 1
+          fi
+
           php artisan migrate --force
 
           # Csak akkor seedel, ha meg egyetlen feladat sincs - igy az elso
@@ -147,6 +154,11 @@ jobs:
 
           php artisan config:cache
           php artisan route:cache
+          php artisan event:cache
+
+          # A queue worker (deploy/systemd/infotanar-queue.service) a futo job
+          # utan kilep, a systemd az uj koddal inditja ujra.
+          php artisan queue:restart
 
           # OPcache miatt a php-fpm-nek ujra kell olvasnia a fajlokat.
           sudo -n systemctl reload php8.3-fpm

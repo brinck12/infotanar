@@ -1,0 +1,20 @@
+# Laravel scheduler (routes/console.php utemezett feladatai, pl. elofizetes grace period sweep).
+#
+# Egyszeri telepites a szerveren (a DEPLOY_PATH-hoz es a php-fpm userhez igazitva):
+#   sudo cp deploy/systemd/infotanar-scheduler.service /etc/systemd/system/
+#   sudo systemctl daemon-reload && sudo systemctl enable --now infotanar-scheduler
+
+[Unit]
+Description=InfoTanar scheduler
+After=network.target mysql.service
+
+[Service]
+User=www-data
+Group=www-data
+WorkingDirectory=/var/www/infotanar/backend
+ExecStart=/usr/bin/php artisan schedule:work
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

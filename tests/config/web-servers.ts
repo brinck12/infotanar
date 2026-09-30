@@ -60,7 +60,10 @@ const backend: WebServer = {
     CACHE_STORE: 'file',
     QUEUE_CONNECTION: 'sync',
     BROADCAST_CONNECTION: 'log',
-    MAIL_MAILER: 'array',
+    // A levelek JSON-kent a backend/storage/framework/outbox mappaba
+    // kerulnek; a tesztek innen olvassak ki a linkeket (src/api/Outbox.ts).
+    MAIL_MAILER: 'outbox',
+    FRONTEND_URL: env.BASE_URL,
     JUDGE0_URL,
   },
 }

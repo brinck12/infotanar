@@ -17,6 +17,15 @@ return [
     // legyen, mint a cpu_time_limit, kulonben sajat magunkat vagjuk el.
     'timeout' => (int) env('JUDGE0_TIMEOUT', 20),
 
+    // Kapcsolodasi timeout: egy nem elerheto Judge0 azonnal hibat adjon,
+    // ne a teljes 'timeout'-ot varjuk ki.
+    'connect_timeout' => (int) env('JUDGE0_CONNECT_TIMEOUT', 3),
+
+    // Egy futtatas/beadas osszes tesztesetere jutó felso korlat (mp). Kisebb
+    // kell legyen, mint a frontend 60 mp-es keres-timeoutja, hogy a kliens
+    // mindig ertelmes valaszt kapjon, ne vegtelen toltest.
+    'evaluation_deadline' => (int) env('JUDGE0_EVALUATION_DEADLINE', 45),
+
     /*
     |--------------------------------------------------------------------------
     | Futtatasi limitek
@@ -50,6 +59,15 @@ return [
             'match' => 'c# (mono',
             'fallback_id' => 51,
             'monaco' => 'csharp',
+        ],
+        // Adatbazis-track: a Judge0 SQLite (sqlite3 CLI) sandboxaban fut, a
+        // teszteset bemenete az adatkeszlet-szkript, az eredmenyt CSV-kent
+        // vetjuk ossze (SqlProgram, SqlResultComparator).
+        'sql' => [
+            'label' => 'SQL',
+            'match' => 'sql (sqlite',
+            'fallback_id' => 82,
+            'monaco' => 'sql',
         ],
     ],
 

@@ -1,8 +1,9 @@
 <?php
 
-use Illuminate\Foundation\Inspiring;
-use Illuminate\Support\Facades\Artisan;
+declare(strict_types=1);
 
-Artisan::command('inspire', function () {
-    $this->comment(Inspiring::quote());
-})->purpose('Display an inspiring quote');
+use App\Jobs\ExpireGracePeriods;
+use Illuminate\Support\Facades\Schedule;
+
+// Fut: deploy/systemd/infotanar-scheduler.service (schedule:work).
+Schedule::job(new ExpireGracePeriods)->hourly();

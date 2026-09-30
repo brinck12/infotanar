@@ -26,7 +26,14 @@ export interface TaskListItem {
   difficulty: number
   allowed_languages: LanguageKey[]
   topic: TaskTopic
+  /** Ingyenes lecke része-e (freemium). */
+  is_free?: boolean
+  /** A jelenlegi néző számára zárolt-e (fizetős, jogosultság nélkül). */
+  locked?: boolean
 }
+
+/** Miért zárolt egy fizetős feladat a néző számára (a backend `AccessDenial` enumja). */
+export type LockReason = 'login_required' | 'email_unverified' | 'subscription_required'
 
 export interface ExampleTestCase {
   id: number
@@ -35,18 +42,33 @@ export interface ExampleTestCase {
 }
 
 /** Részletes nézet: teljes leírással és a nem rejtett tesztesetekkel. */
-export interface TaskDetail {
+interface TaskDetailBase {
   id: number
   title: string
-  description: string
   level: Level
   difficulty: number
   allowed_languages: LanguageKey[]
-  starter_code: Partial<Record<LanguageKey, string>>
   topic: TaskTopic
-  example_test_cases: ExampleTestCase[]
+  is_free?: boolean
   hidden_test_case_count: number
 }
+
+/** Hozzáférhető feladat: teljes leírással és a nem rejtett tesztesetekkel. */
+export interface UnlockedTaskDetail extends TaskDetailBase {
+  locked?: false
+  description: string
+  starter_code: Partial<Record<LanguageKey, string>>
+  example_test_cases: ExampleTestCase[]
+}
+
+/** Zárolt (fizetős) feladat: a backend a tartalmat nem küldi el, csak az okot. */
+export interface LockedTaskDetail extends TaskDetailBase {
+  locked: true
+  locked_reason: LockReason
+  locked_message: string
+}
+
+export type TaskDetail = UnlockedTaskDetail | LockedTaskDetail
 
 export type RunStatus = 'passed' | 'failed' | 'error'
 
@@ -83,6 +105,29 @@ export interface RunRequest {
   task_id: number
   language: LanguageKey
   source_code: string
+}
+
+export type Role = 'student' | 'admin'
+
+export interface AuthUser {
+  id: number
+  name: string
+  email: string
+  role: Role
+  email_verified_at: string | null
+}
+
+export interface LoginResponse {
+  token: string
+  token_type: 'Bearer'
+  expires_at: string | null
+  user: AuthUser
+}
+
+/** A futtatás/beadás 401/403 válasza zárolt feladatnál. */
+export interface LockedErrorResponse {
+  message: string
+  reason: LockReason
 }
 
 /** Laravel validációs hibaválasz (HTTP 422). */

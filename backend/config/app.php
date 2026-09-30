@@ -54,6 +54,9 @@ return [
 
     'url' => env('APP_URL', 'http://localhost'),
 
+    // A levelekben kikuldott linkek a frontend oldalaira mutatnak.
+    'frontend_url' => rtrim((string) env('FRONTEND_URL', 'http://localhost:5173'), '/'),
+
     /*
     |--------------------------------------------------------------------------
     | Application Timezone
@@ -78,7 +81,9 @@ return [
     |
     */
 
-    'locale' => env('APP_LOCALE', 'en'),
+    // Egynyelvu (magyar) termek: szandekosan nem env-bol jon, mert a regi
+    // .env fajlokban APP_LOCALE=en maradhatott, ami angol uzeneteket adna.
+    'locale' => 'hu',
 
     'fallback_locale' => env('APP_FALLBACK_LOCALE', 'en'),
 

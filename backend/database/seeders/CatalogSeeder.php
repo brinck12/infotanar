@@ -1,0 +1,327 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Database\Seeders;
+
+use App\Actions\Catalog\ApplyFreemiumDefaults;
+use App\Models\Exercise;
+use App\Models\Lesson;
+use App\Models\Module;
+use App\Models\Track;
+use Illuminate\Database\Seeder;
+use Illuminate\Support\Str;
+
+/**
+ * Öt érettségi-jellegű programozási mintafeladat, a klasszikus
+ * programozási tételekre építve. Idempotens: ujrafuttatva frissit, nem duplikal.
+ */
+final class CatalogSeeder extends Seeder
+{
+    public function run(): void
+    {
+        $track = Track::updateOrCreate(
+            ['slug' => 'programozas'],
+            ['title' => 'Programozás', 'description' => 'Programozási tételek és feladatok Python és C# nyelven.', 'position' => 0],
+        );
+
+        $tetelek = Module::updateOrCreate(
+            ['slug' => 'programozasi-tetelek'],
+            ['track_id' => $track->id, 'title' => 'Programozási tételek', 'position' => 0],
+        );
+
+        $sorozat = Module::updateOrCreate(
+            ['slug' => 'sorozatfeldolgozas'],
+            ['track_id' => $track->id, 'title' => 'Sorozatfeldolgozás', 'position' => 1],
+        );
+
+        $this->seedExercises($this->exercises($tetelek->id, $sorozat->id));
+        app(ApplyFreemiumDefaults::class)->handle($track);
+
+        $sqlTrack = Track::updateOrCreate(
+            ['slug' => 'adatbazis-kezeles'],
+            ['title' => 'Adatbázis-kezelés (SQL)', 'description' => 'Lekérdezések SQL nyelven, érettségi-jellegű adatbázisokon.', 'position' => 1],
+        );
+
+        $lekerdezesek = Module::updateOrCreate(
+            ['slug' => 'egyszeru-lekerdezesek'],
+            ['track_id' => $sqlTrack->id, 'title' => 'Egyszerű lekérdezések', 'position' => 0],
+        );
+
+        $this->seedExercises($this->sqlExercises($lekerdezesek->id));
+        app(ApplyFreemiumDefaults::class)->handle($sqlTrack);
+    }
+
+    /** @param list<array{module_id: int, title: string, test_cases: list<array<string, mixed>>}&array<string, mixed>> $definitions */
+    private function seedExercises(array $definitions): void
+    {
+        $positions = [];
+
+        foreach ($definitions as $definition) {
+            ['module_id' => $moduleId, 'test_cases' => $testCases] = $definition;
+            unset($definition['module_id'], $definition['test_cases']);
+
+            // Egyelore minden feladat sajat leckeben van; a tananyag (content) kesobb kerul fel.
+            $lesson = Lesson::updateOrCreate(
+                ['module_id' => $moduleId, 'slug' => Str::slug($definition['title'])],
+                ['title' => $definition['title'], 'position' => $positions[$moduleId] = ($positions[$moduleId] ?? -1) + 1],
+            );
+
+            $exercise = Exercise::updateOrCreate(
+                ['lesson_id' => $lesson->id, 'title' => $definition['title']],
+                $definition,
+            );
+
+            // Ujraseedelesnel ne duplazodjanak a tesztesetek.
+            $exercise->testCases()->delete();
+
+            foreach ($testCases as $order => $testCase) {
+                $exercise->testCases()->create([...$testCase, 'order' => $order]);
+            }
+        }
+    }
+
+    /**
+     * SQL-feladatnal a teszteset `stdin`-je az adatkeszletet felepito szkript,
+     * az `expected_stdout` a vart eredmeny CSV-ben, fejlecsorral (sqlite3
+     * `.headers on` + `.mode csv`). Kulon adatkeszlet a rejtett tesztesethez,
+     * hogy a beegetett eredmeny ne mukodjon.
+     *
+     * @return list<array{module_id: int, title: string, test_cases: list<array<string, mixed>>}&array<string, mixed>>
+     */
+    private function sqlExercises(int $moduleId): array
+    {
+        $schema = "CREATE TABLE diak (nev TEXT, osztaly TEXT, pont INTEGER);\n";
+
+        return [
+            [
+                'module_id' => $moduleId,
+                'title' => 'Egy osztály diákjai',
+                'level' => 'kozep',
+                'difficulty' => 1,
+                'is_published' => true,
+                'allowed_languages' => ['sql'],
+                'sql_order_sensitive' => false,
+                'description' => <<<'MD'
+## Feladat
+
+A `diak` tábla a diákok nevét, osztályát és versenypontszámát tárolja:
+
+| oszlop | típus |
+|---|---|
+| `nev` | szöveg |
+| `osztaly` | szöveg |
+| `pont` | egész |
+
+Írj lekérdezést, amely a **10.A** osztály diákjainak **nevét** és **pontszámát** listázza!
+A sorok sorrendje nem számít.
+MD,
+                'starter_code' => ['sql' => "SELECT\n  \nFROM diak\nWHERE ;\n"],
+                'test_cases' => [
+                    [
+                        'stdin' => $schema."INSERT INTO diak VALUES ('Anna', '10.A', 42), ('Bence', '10.B', 37), ('Csilla', '10.A', 51);\n",
+                        'expected_stdout' => "nev,pont\nAnna,42\nCsilla,51\n",
+                        'is_hidden' => false,
+                    ],
+                    [
+                        'stdin' => $schema."INSERT INTO diak VALUES ('Dóra', '10.A', 12), ('Endre', '11.A', 60), ('Feri', '10.A', 33), ('Gábor', '10.B', 45);\n",
+                        'expected_stdout' => "nev,pont\nDóra,12\nFeri,33\n",
+                        'is_hidden' => true,
+                    ],
+                ],
+            ],
+        ];
+    }
+
+    /** @return list<array{module_id: int, title: string, test_cases: list<array<string, mixed>>}&array<string, mixed>> */
+    private function exercises(int $tetelekId, int $sorozatId): array
+    {
+        return [
+            [
+                'module_id' => $tetelekId,
+                'title' => 'Összegzés tétele',
+                'level' => 'kozep',
+                'difficulty' => 1,
+                'is_published' => true,
+                'allowed_languages' => ['python', 'csharp'],
+                'constraints' => ['require' => ['loop'], 'forbid' => ['builtin:sum']],
+                'description' => <<<'MD'
+## Feladat
+
+Olvass be egy `N` egész számot, majd `N` darab egész számot, és írd ki az **összegüket**!
+
+### Bemenet
+
+- Az első sorban egy `N` egész szám (`1 ≤ N ≤ 100`).
+- A következő `N` sorban egy-egy egész szám.
+
+### Kimenet
+
+Egyetlen sorban a számok összege.
+
+### Példa
+
+Bemenet: `3`, majd `5`, `10`, `15` — Kimenet: `30`
+MD,
+                'starter_code' => [
+                    'python' => "n = int(input())\nosszeg = 0\nfor _ in range(n):\n    szam = int(input())\n    # TODO: add hozzá az összeghez\nprint(osszeg)\n",
+                    'csharp' => "using System;\n\nclass Program\n{\n    static void Main()\n    {\n        int n = int.Parse(Console.ReadLine());\n        int osszeg = 0;\n        for (int i = 0; i < n; i++)\n        {\n            int szam = int.Parse(Console.ReadLine());\n            // TODO: add hozzá az összeghez\n        }\n        Console.WriteLine(osszeg);\n    }\n}\n",
+                ],
+                'test_cases' => [
+                    ['stdin' => "3\n5\n10\n15\n", 'expected_stdout' => "30\n", 'is_hidden' => false],
+                    ['stdin' => "1\n42\n", 'expected_stdout' => "42\n", 'is_hidden' => false],
+                    ['stdin' => "5\n1\n2\n3\n4\n5\n", 'expected_stdout' => "15\n", 'is_hidden' => true],
+                    ['stdin' => "4\n-3\n-7\n10\n0\n", 'expected_stdout' => "0\n", 'is_hidden' => true],
+                ],
+            ],
+            [
+                'module_id' => $tetelekId,
+                'title' => 'Megszámlálás tétele',
+                'level' => 'kozep',
+                'difficulty' => 2,
+                'is_published' => true,
+                'allowed_languages' => ['python', 'csharp'],
+                'constraints' => ['require' => ['loop'], 'forbid' => ['method:count', 'builtin:sum']],
+                'description' => <<<'MD'
+## Feladat
+
+Olvass be egy `N` egész számot, majd `N` darab egész számot. Írd ki, **hány darab páros szám** van közöttük!
+
+### Bemenet
+
+- Az első sorban egy `N` egész szám (`1 ≤ N ≤ 100`).
+- A következő `N` sorban egy-egy egész szám.
+
+### Kimenet
+
+Egyetlen sorban a páros számok darabszáma.
+
+### Példa
+
+Bemenet: `4`, majd `1`, `2`, `3`, `4` — Kimenet: `2`
+MD,
+                'starter_code' => [
+                    'python' => "n = int(input())\ndb = 0\nfor _ in range(n):\n    szam = int(input())\n    # TODO: számold meg a párosakat\nprint(db)\n",
+                    'csharp' => "using System;\n\nclass Program\n{\n    static void Main()\n    {\n        int n = int.Parse(Console.ReadLine());\n        int db = 0;\n        for (int i = 0; i < n; i++)\n        {\n            int szam = int.Parse(Console.ReadLine());\n            // TODO: számold meg a párosakat\n        }\n        Console.WriteLine(db);\n    }\n}\n",
+                ],
+                'test_cases' => [
+                    ['stdin' => "4\n1\n2\n3\n4\n", 'expected_stdout' => "2\n", 'is_hidden' => false],
+                    ['stdin' => "3\n1\n3\n5\n", 'expected_stdout' => "0\n", 'is_hidden' => false],
+                    ['stdin' => "5\n2\n4\n6\n8\n10\n", 'expected_stdout' => "5\n", 'is_hidden' => true],
+                    ['stdin' => "4\n-2\n-1\n0\n7\n", 'expected_stdout' => "2\n", 'is_hidden' => true],
+                ],
+            ],
+            [
+                'module_id' => $tetelekId,
+                'title' => 'Maximumkiválasztás tétele',
+                'level' => 'kozep',
+                'difficulty' => 2,
+                'is_published' => true,
+                'allowed_languages' => ['python', 'csharp'],
+                'constraints' => ['require' => ['loop'], 'forbid' => ['builtin:max', 'builtin:sorted', 'method:sort']],
+                'description' => <<<'MD'
+## Feladat
+
+Olvass be egy `N` egész számot, majd `N` darab egész számot. Írd ki a **legnagyobbat** közülük!
+
+### Bemenet
+
+- Az első sorban egy `N` egész szám (`1 ≤ N ≤ 100`).
+- A következő `N` sorban egy-egy egész szám.
+
+### Kimenet
+
+Egyetlen sorban a legnagyobb szám.
+
+### Példa
+
+Bemenet: `4`, majd `3`, `9`, `2`, `7` — Kimenet: `9`
+MD,
+                'starter_code' => [
+                    'python' => "n = int(input())\nmax_ertek = None\nfor _ in range(n):\n    szam = int(input())\n    # TODO: tartsd nyilván a legnagyobbat\nprint(max_ertek)\n",
+                    'csharp' => "using System;\n\nclass Program\n{\n    static void Main()\n    {\n        int n = int.Parse(Console.ReadLine());\n        int maxErtek = int.MinValue;\n        for (int i = 0; i < n; i++)\n        {\n            int szam = int.Parse(Console.ReadLine());\n            // TODO: tartsd nyilván a legnagyobbat\n        }\n        Console.WriteLine(maxErtek);\n    }\n}\n",
+                ],
+                'test_cases' => [
+                    ['stdin' => "4\n3\n9\n2\n7\n", 'expected_stdout' => "9\n", 'is_hidden' => false],
+                    ['stdin' => "1\n-5\n", 'expected_stdout' => "-5\n", 'is_hidden' => false],
+                    ['stdin' => "5\n-10\n-3\n-99\n-1\n-50\n", 'expected_stdout' => "-1\n", 'is_hidden' => true],
+                    ['stdin' => "3\n7\n7\n7\n", 'expected_stdout' => "7\n", 'is_hidden' => true],
+                ],
+            ],
+            [
+                'module_id' => $tetelekId,
+                'title' => 'Eldöntés tétele',
+                'level' => 'kozep',
+                'difficulty' => 3,
+                'is_published' => true,
+                'allowed_languages' => ['python', 'csharp'],
+                'constraints' => ['require' => ['loop'], 'forbid' => ['builtin:any', 'builtin:all']],
+                'description' => <<<'MD'
+## Feladat
+
+Olvass be egy `N` egész számot, majd `N` darab egész számot. Döntsd el, **van-e közöttük negatív szám**!
+
+### Bemenet
+
+- Az első sorban egy `N` egész szám (`1 ≤ N ≤ 100`).
+- A következő `N` sorban egy-egy egész szám.
+
+### Kimenet
+
+Egyetlen sorban `IGEN`, ha van negatív szám, egyébként `NEM`.
+
+### Példa
+
+Bemenet: `3`, majd `4`, `-2`, `8` — Kimenet: `IGEN`
+MD,
+                'starter_code' => [
+                    'python' => "n = int(input())\nvan = False\nfor _ in range(n):\n    szam = int(input())\n    # TODO: jelöld, ha találtál negatívat\nprint('IGEN' if van else 'NEM')\n",
+                    'csharp' => "using System;\n\nclass Program\n{\n    static void Main()\n    {\n        int n = int.Parse(Console.ReadLine());\n        bool van = false;\n        for (int i = 0; i < n; i++)\n        {\n            int szam = int.Parse(Console.ReadLine());\n            // TODO: jelöld, ha találtál negatívat\n        }\n        Console.WriteLine(van ? \"IGEN\" : \"NEM\");\n    }\n}\n",
+                ],
+                'test_cases' => [
+                    ['stdin' => "3\n4\n-2\n8\n", 'expected_stdout' => "IGEN\n", 'is_hidden' => false],
+                    ['stdin' => "3\n1\n2\n3\n", 'expected_stdout' => "NEM\n", 'is_hidden' => false],
+                    ['stdin' => "1\n-1\n", 'expected_stdout' => "IGEN\n", 'is_hidden' => true],
+                    ['stdin' => "4\n0\n0\n0\n0\n", 'expected_stdout' => "NEM\n", 'is_hidden' => true],
+                ],
+            ],
+            [
+                'module_id' => $sorozatId,
+                'title' => 'Kiválogatás tétele',
+                'level' => 'emelt',
+                'difficulty' => 4,
+                'is_published' => true,
+                'allowed_languages' => ['python', 'csharp'],
+                'constraints' => ['require' => ['loop'], 'forbid' => ['builtin:filter']],
+                'description' => <<<'MD'
+## Feladat
+
+Olvass be egy `N` egész számot, majd `N` darab egész számot. Írd ki **külön sorokba a 10-nél nagyobb számokat**, a beolvasás sorrendjében! Ha nincs ilyen szám, ne írj ki semmit.
+
+### Bemenet
+
+- Az első sorban egy `N` egész szám (`1 ≤ N ≤ 100`).
+- A következő `N` sorban egy-egy egész szám.
+
+### Kimenet
+
+Soronként egy-egy 10-nél nagyobb szám.
+
+### Példa
+
+Bemenet: `4`, majd `5`, `12`, `3`, `20` — Kimenet: `12` és `20` külön sorokban
+MD,
+                'starter_code' => [
+                    'python' => "n = int(input())\nfor _ in range(n):\n    szam = int(input())\n    # TODO: írd ki, ha nagyobb 10-nél\n",
+                    'csharp' => "using System;\n\nclass Program\n{\n    static void Main()\n    {\n        int n = int.Parse(Console.ReadLine());\n        for (int i = 0; i < n; i++)\n        {\n            int szam = int.Parse(Console.ReadLine());\n            // TODO: írd ki, ha nagyobb 10-nél\n        }\n    }\n}\n",
+                ],
+                'test_cases' => [
+                    ['stdin' => "4\n5\n12\n3\n20\n", 'expected_stdout' => "12\n20\n", 'is_hidden' => false],
+                    ['stdin' => "3\n1\n2\n3\n", 'expected_stdout' => '', 'is_hidden' => false],
+                    ['stdin' => "5\n11\n10\n9\n100\n-5\n", 'expected_stdout' => "11\n100\n", 'is_hidden' => true],
+                    ['stdin' => "2\n10\n11\n", 'expected_stdout' => "11\n", 'is_hidden' => true],
+                ],
+            ],
+        ];
+    }
+}

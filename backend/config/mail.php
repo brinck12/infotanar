@@ -79,6 +79,13 @@ return [
             'transport' => 'array',
         ],
 
+        // Csak tesztkornyezetbe: minden levelet JSON fajlkent ir ki, hogy a
+        // Playwright API tesztek kiolvashassak a linkeket.
+        'outbox' => [
+            'transport' => 'outbox',
+            'path' => storage_path('framework/outbox'),
+        ],
+
         'failover' => [
             'transport' => 'failover',
             'mailers' => [

@@ -1,10 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Console\Commands;
 
 use Database\Seeders\ApiTestSeeder;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\File;
 
 /**
  * Friss adatbazis + fixture adatok a Playwright API teszteknek (tests/api).
@@ -36,6 +39,8 @@ class PrepareApiTestFixtures extends Command
         // "array" driver nem elne tul egy kerelmet). Ezt is nullazzuk,
         // kulonben egy korabbi futtatas maradek szamlaloja szivarogna at.
         Cache::flush();
+
+        File::deleteDirectory(storage_path('framework/outbox'));
 
         return self::SUCCESS;
     }

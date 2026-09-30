@@ -1,22 +1,121 @@
 <?php
 
+declare(strict_types=1);
+
+use App\Http\Controllers\Api\V1\Account\AccountController;
+use App\Http\Controllers\Api\V1\Admin\AccessGrantController;
+use App\Http\Controllers\Api\V1\Admin\Catalog\ConstraintOptionsController;
+use App\Http\Controllers\Api\V1\Admin\Catalog\ExerciseController as AdminExerciseController;
+use App\Http\Controllers\Api\V1\Admin\Catalog\LessonController as AdminLessonController;
+use App\Http\Controllers\Api\V1\Admin\Catalog\ModuleController as AdminModuleController;
+use App\Http\Controllers\Api\V1\Admin\Catalog\ReorderController;
+use App\Http\Controllers\Api\V1\Admin\Catalog\TestCaseController;
+use App\Http\Controllers\Api\V1\Admin\Catalog\TrackController as AdminTrackController;
+use App\Http\Controllers\Api\V1\Admin\UserAccountController;
+use App\Http\Controllers\Api\V1\Admin\UserController as AdminUserController;
+use App\Http\Controllers\Api\V1\Auth\CurrentUserController;
+use App\Http\Controllers\Api\V1\Auth\EmailVerificationController;
+use App\Http\Controllers\Api\V1\Auth\PasswordResetController;
+use App\Http\Controllers\Api\V1\Auth\RegisterController;
+use App\Http\Controllers\Api\V1\Auth\SessionController;
+use App\Http\Controllers\Api\V1\Catalog\LanguageController;
+use App\Http\Controllers\Api\V1\Catalog\LessonVideoController;
+use App\Http\Controllers\Api\V1\Catalog\TaskController;
+use App\Http\Controllers\Api\V1\Catalog\TopicController;
+use App\Http\Controllers\Api\V1\Catalog\TrackController;
+use App\Http\Controllers\Api\V1\Execution\RunController;
+use App\Http\Controllers\Api\V1\Execution\SubmissionController;
 use App\Http\Controllers\Api\V1\HealthController;
-use App\Http\Controllers\Api\V1\RunController;
-use App\Http\Controllers\Api\V1\SubmissionController;
-use App\Http\Controllers\Api\V1\TaskController;
-use App\Http\Controllers\Api\V1\TopicController;
+use App\Http\Controllers\Api\V1\Progress\ProgressController;
 use Illuminate\Support\Facades\Route;
 
-Route::prefix('v1')->group(function (): void {
-    Route::get('/health', HealthController::class);
+Route::prefix('v1')->name('api.')->group(function (): void {
+    Route::get('/health', HealthController::class)->name('health');
 
-    Route::get('/topics', [TopicController::class, 'index']);
-    Route::get('/tasks', [TaskController::class, 'index']);
-    Route::get('/tasks/{task}', [TaskController::class, 'show']);
+    Route::prefix('auth')->name('auth.')->group(function (): void {
+        Route::post('/register', RegisterController::class)->name('register');
+        Route::post('/login', [SessionController::class, 'store'])->middleware('throttle:login')->name('login');
+
+        Route::get('/verify-email/{id}/{hash}', [EmailVerificationController::class, 'verify'])
+            ->whereNumber('id')
+            ->middleware('signed:relative')
+            ->name('verification.verify');
+
+        Route::middleware('throttle:password-reset')->group(function (): void {
+            Route::post('/forgot-password', [PasswordResetController::class, 'forgot'])->name('password.forgot');
+            Route::post('/reset-password', [PasswordResetController::class, 'reset'])->name('password.reset');
+        });
+
+        Route::middleware('auth:sanctum')->group(function (): void {
+            Route::get('/me', CurrentUserController::class)->name('me');
+            Route::post('/logout', [SessionController::class, 'destroy'])->name('logout');
+            Route::post('/email/verification-notification', [EmailVerificationController::class, 'resend'])
+                ->middleware('throttle:verification-resend')
+                ->name('verification.resend');
+        });
+    });
+
+    Route::get('/languages', [LanguageController::class, 'index'])->name('languages.index');
+    Route::get('/tracks', [TrackController::class, 'index'])->name('tracks.index');
+    Route::get('/tracks/{slug}', [TrackController::class, 'show'])->name('tracks.show');
+
+    Route::get('/lessons/{lesson}/video', [LessonVideoController::class, 'show'])
+        ->whereNumber('lesson')
+        ->name('lessons.video');
+    Route::get('/lessons/{lesson}/video/stream', [LessonVideoController::class, 'stream'])
+        ->whereNumber('lesson')
+        ->middleware('signed:relative')
+        ->name('lessons.video.stream');
+
+    Route::get('/topics', [TopicController::class, 'index'])->name('topics.index');
+    Route::get('/tasks', [TaskController::class, 'index'])->name('tasks.index');
+    Route::get('/tasks/{task}', [TaskController::class, 'show'])->whereNumber('task')->name('tasks.show');
 
     // A kodfuttatas draga muvelet: IP-nkent 10 keres / perc.
     Route::middleware('throttle:10,1')->group(function (): void {
-        Route::post('/run', RunController::class);
-        Route::post('/submissions', [SubmissionController::class, 'store']);
+        Route::post('/run', RunController::class)->name('run');
+        Route::post('/submissions', [SubmissionController::class, 'store'])->name('submissions.store');
+    });
+
+    Route::get('/progress', ProgressController::class)->middleware('auth:sanctum')->name('progress');
+
+    Route::prefix('account')->name('account.')->middleware('auth:sanctum')->group(function (): void {
+        Route::get('/export', [AccountController::class, 'export'])->middleware('throttle:account-export')->name('export');
+        Route::delete('/', [AccountController::class, 'destroy'])->middleware('throttle:sensitive')->name('destroy');
+    });
+
+    Route::prefix('admin')->name('admin.')->middleware(['auth:sanctum', 'admin'])->group(function (): void {
+        Route::get('/ping', static fn () => response()->json(['ok' => true]))->name('ping');
+
+        // Katalogus-szerkesztes (#45). A sorrend-vegpontok a szulo osszes gyereket varjak.
+        Route::put('/tracks/order', [ReorderController::class, 'tracks'])->name('tracks.order');
+        Route::put('/tracks/{track}/modules/order', [ReorderController::class, 'modules'])->name('modules.order');
+        Route::put('/modules/{module}/lessons/order', [ReorderController::class, 'lessons'])->name('lessons.order');
+        Route::put('/lessons/{lesson}/exercises/order', [ReorderController::class, 'exercises'])->name('exercises.order');
+
+        Route::apiResource('tracks', AdminTrackController::class);
+        Route::apiResource('modules', AdminModuleController::class);
+        Route::apiResource('lessons', AdminLessonController::class);
+        Route::apiResource('exercises', AdminExerciseController::class);
+
+        Route::get('/constraint-options', ConstraintOptionsController::class)->name('constraint-options');
+
+        // Felhasznalok attekintese (#50), csak olvasas.
+        Route::get('/users', [AdminUserController::class, 'index'])->name('users.index');
+        Route::get('/users/{user}', [AdminUserController::class, 'show'])->whereNumber('user')->name('users.show');
+
+        // Kezi premium hozzaferes (#51): kiadas, tortenet, visszavonas.
+        Route::get('/users/{user}/access-grants', [AccessGrantController::class, 'index'])->name('access-grants.index');
+        Route::post('/users/{user}/access-grants', [AccessGrantController::class, 'store'])->name('access-grants.store');
+        Route::delete('/access-grants/{accessGrant}', [AccessGrantController::class, 'destroy'])->name('access-grants.destroy');
+
+        // Tesztesetek (#46): letrehozas/lista a feladat alatt, a tobbi kozvetlenul.
+        Route::put('/exercises/{exercise}/test-cases/order', [TestCaseController::class, 'reorder'])->name('test-cases.order');
+        Route::apiResource('exercises.test-cases', TestCaseController::class)->shallow()->parameters(['test-cases' => 'testCase']);
+
+        Route::middleware('can:manageAccount,user')->group(function (): void {
+            Route::get('/users/{user}/export', [UserAccountController::class, 'export'])->name('users.export');
+            Route::delete('/users/{user}', [UserAccountController::class, 'destroy'])->name('users.destroy');
+        });
     });
 });
