@@ -18,6 +18,9 @@ use App\Http\Controllers\Api\V1\Auth\EmailVerificationController;
 use App\Http\Controllers\Api\V1\Auth\PasswordResetController;
 use App\Http\Controllers\Api\V1\Auth\RegisterController;
 use App\Http\Controllers\Api\V1\Auth\SessionController;
+use App\Http\Controllers\Api\V1\Billing\BarionCallbackController;
+use App\Http\Controllers\Api\V1\Billing\CheckoutController;
+use App\Http\Controllers\Api\V1\Billing\PaymentController;
 use App\Http\Controllers\Api\V1\Catalog\LanguageController;
 use App\Http\Controllers\Api\V1\Catalog\LessonVideoController;
 use App\Http\Controllers\Api\V1\Catalog\TaskController;
@@ -83,6 +86,16 @@ Route::prefix('v1')->name('api.')->group(function (): void {
         Route::get('/export', [AccountController::class, 'export'])->middleware('throttle:account-export')->name('export');
         Route::delete('/', [AccountController::class, 'destroy'])->middleware('throttle:sensitive')->name('destroy');
     });
+
+    // Elofizetes (#14): Barion fizetooldal inditasa es a fizetes allapota.
+    Route::prefix('billing')->name('billing.')->middleware('auth:sanctum')->group(function (): void {
+        Route::post('/checkout', CheckoutController::class)->middleware('throttle:checkout')->name('checkout');
+        Route::get('/payments/{payment}', [PaymentController::class, 'show'])->whereUuid('payment')->name('payments.show');
+    });
+
+    // A Barion szerverrol szerverre hiv; nincs alairas, ezert a hivas csak
+    // jelzes, az allapotot mindig a Barion API-bol kerdezzuk le (ADR 0001).
+    Route::post('/webhooks/barion', BarionCallbackController::class)->middleware('throttle:60,1')->name('webhooks.barion');
 
     Route::prefix('admin')->name('admin.')->middleware(['auth:sanctum', 'admin'])->group(function (): void {
         Route::get('/ping', static fn () => response()->json(['ok' => true]))->name('ping');
