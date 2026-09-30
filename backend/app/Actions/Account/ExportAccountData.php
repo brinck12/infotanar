@@ -6,6 +6,7 @@ namespace App\Actions\Account;
 
 use App\Actions\Audit\RecordAuditEvent;
 use App\Enums\AuditAction;
+use App\Models\AccessGrant;
 use App\Models\LessonCompletion;
 use App\Models\Submission;
 use App\Models\Subscription;
@@ -71,6 +72,17 @@ final readonly class ExportAccountData
                     'cancel_at_period_end' => $subscription->cancel_at_period_end,
                     'canceled_at' => $subscription->canceled_at?->toIso8601String(),
                     'created_at' => $subscription->created_at?->toIso8601String(),
+                ])
+                ->all(),
+            // Kezi (osztondij/tamogatasi) hozzaferesek; az admin kilete belso adat, nem kerul bele.
+            'access_grants' => $user->accessGrants()
+                ->oldest()
+                ->get()
+                ->map(static fn (AccessGrant $grant): array => [
+                    'reason' => $grant->reason,
+                    'granted_at' => $grant->created_at?->toIso8601String(),
+                    'ends_at' => $grant->ends_at?->toIso8601String(),
+                    'revoked_at' => $grant->revoked_at?->toIso8601String(),
                 ])
                 ->all(),
         ];
