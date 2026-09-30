@@ -40,6 +40,7 @@ export default function App() {
                     <Route path="/elfelejtett-jelszo" element={<GuestOnly><Pages.ForgotPassword /></GuestOnly>} />
                     <Route path="/jelszo-visszaallitas" element={<Pages.ResetPassword />} />
                     <Route path="/elofizetes" element={<RequireAuth><Pages.Subscribe /></RequireAuth>} />
+                    <Route path="/haladas" element={<RequireAuth><Pages.ProgressDashboard /></RequireAuth>} />
                     <Route path="*" element={<NotFound />} />
                   </Routes>
                 </Suspense>

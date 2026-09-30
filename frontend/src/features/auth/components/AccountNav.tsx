@@ -30,6 +30,9 @@ export function AccountNav() {
 
   return (
     <div className="ml-auto flex items-center gap-4">
+      <Link to="/haladas" className={linkClass}>
+        Haladásom
+      </Link>
       <Link to="/elofizetes" className={linkClass}>
         Előfizetés
       </Link>

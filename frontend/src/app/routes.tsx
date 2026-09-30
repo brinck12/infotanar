@@ -18,3 +18,4 @@ export const VerifyEmail = page(() => import('../features/auth/pages/VerifyEmail
 export const ForgotPassword = page(() => import('../features/auth/pages/ForgotPassword'), 'ForgotPassword')
 export const ResetPassword = page(() => import('../features/auth/pages/ResetPassword'), 'ResetPassword')
 export const Subscribe = page(() => import('../features/billing/pages/Subscribe'), 'Subscribe')
+export const ProgressDashboard = page(() => import('../features/progress/pages/ProgressDashboard'), 'ProgressDashboard')
