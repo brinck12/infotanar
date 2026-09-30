@@ -103,6 +103,12 @@ final class User extends Authenticatable implements MustVerifyEmail
         return $this->hasOne(BillingProfile::class);
     }
 
+    /** @return HasMany<Invoice, $this> */
+    public function invoices(): HasMany
+    {
+        return $this->hasMany(Invoice::class);
+    }
+
     /** @return HasMany<Payment, $this> */
     public function payments(): HasMany
     {

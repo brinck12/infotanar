@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions\Billing;
 
+use App\Actions\Billing\Invoicing\OpenInvoice;
 use App\Enums\PaymentPurpose;
 use App\Enums\PaymentStatus;
 use App\Enums\SubscriptionStatus;
@@ -33,6 +34,7 @@ final readonly class SyncPaymentState
         private BarionClient $barion,
         private ReactivateSubscription $reactivate,
         private MarkSubscriptionPastDue $markPastDue,
+        private OpenInvoice $openInvoice,
     ) {}
 
     /** @throws BarionException */
@@ -128,6 +130,9 @@ final readonly class SyncPaymentState
         }
 
         $payment->subscription()->associate($subscription);
+
+        // Minden sikeres terhelesrol pontosan egy szamla (#20); kiallitas a commit utan.
+        $this->openInvoice->handle($payment);
     }
 
     private function applyFailure(Payment $payment): void

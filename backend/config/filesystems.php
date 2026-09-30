@@ -42,6 +42,15 @@ return [
         // URL-en at (LessonVideoController), a hozzaferesi szabaly ellenorzese utan.
         // Elesben S3-kompatibilis tarolora cserelheto (LESSON_VIDEO_DISK), ott a
         // tarolo sajat temporaryUrl-jet hasznaljuk.
+        // Kiallitott szamlak PDF-jei (#20): privat, csak a tulajdonos toltheti le.
+        'invoices' => [
+            'driver' => 'local',
+            'root' => storage_path('app/private/invoices'),
+            'visibility' => 'private',
+            'throw' => false,
+            'report' => false,
+        ],
+
         'lesson_videos' => [
             'driver' => 'local',
             'root' => storage_path('app/private/lesson-videos'),
