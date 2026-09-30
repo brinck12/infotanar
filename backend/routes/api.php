@@ -21,6 +21,7 @@ use App\Http\Controllers\Api\V1\Auth\SessionController;
 use App\Http\Controllers\Api\V1\Billing\BarionCallbackController;
 use App\Http\Controllers\Api\V1\Billing\CheckoutController;
 use App\Http\Controllers\Api\V1\Billing\PaymentController;
+use App\Http\Controllers\Api\V1\Billing\SubscriptionController;
 use App\Http\Controllers\Api\V1\Catalog\LanguageController;
 use App\Http\Controllers\Api\V1\Catalog\LessonVideoController;
 use App\Http\Controllers\Api\V1\Catalog\TaskController;
@@ -87,10 +88,19 @@ Route::prefix('v1')->name('api.')->group(function (): void {
         Route::delete('/', [AccountController::class, 'destroy'])->middleware('throttle:sensitive')->name('destroy');
     });
 
-    // Elofizetes (#14): Barion fizetooldal inditasa es a fizetes allapota.
+    // Elofizetes (#14): Barion fizetooldal inditasa es a fizetes allapota;
+    // onkiszolgalo kezeles (#17): lemondas/visszavonas, kartyacsere, tortenet.
     Route::prefix('billing')->name('billing.')->middleware('auth:sanctum')->group(function (): void {
         Route::post('/checkout', CheckoutController::class)->middleware('throttle:checkout')->name('checkout');
+        Route::get('/payments', [PaymentController::class, 'index'])->name('payments.index');
         Route::get('/payments/{payment}', [PaymentController::class, 'show'])->whereUuid('payment')->name('payments.show');
+
+        Route::prefix('subscription')->name('subscription.')->group(function (): void {
+            Route::get('/', [SubscriptionController::class, 'show'])->name('show');
+            Route::post('/cancel', [SubscriptionController::class, 'cancel'])->middleware('throttle:sensitive')->name('cancel');
+            Route::post('/resume', [SubscriptionController::class, 'resume'])->middleware('throttle:sensitive')->name('resume');
+            Route::post('/card', [SubscriptionController::class, 'changeCard'])->middleware('throttle:checkout')->name('card');
+        });
     });
 
     // A Barion szerverrol szerverre hiv; nincs alairas, ezert a hivas csak

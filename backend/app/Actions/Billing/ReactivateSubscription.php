@@ -16,6 +16,7 @@ final class ReactivateSubscription
         $subscription->forceFill([
             'status' => SubscriptionStatus::Active,
             'grace_ends_at' => null,
+            'canceled_at' => null,
             'current_period_start' => $periodStart,
             'current_period_end' => $periodEnd,
         ])->save();

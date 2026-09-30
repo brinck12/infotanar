@@ -96,17 +96,22 @@ final readonly class SyncPaymentState
     {
         $payment->paid_at = now();
 
-        if ($payment->purpose === PaymentPurpose::Initial && $snapshot->recurrenceResult !== 'Successful') {
-            // A penz megjott, de a kartya nem regisztralodott: a megujitas nem fog menni.
-            Log::warning('Barion: card token was not registered with the first payment.', [
+        $cardRegistered = $payment->purpose->registersCard() && $snapshot->recurrenceResult === 'Successful';
+
+        if ($payment->purpose->registersCard() && ! $cardRegistered) {
+            // A penz megjott, de a kartya nem regisztralodott: erre a tokenre nem lehet megujitani.
+            Log::warning('Barion: card token was not registered with the payment.', [
                 'payment_id' => $payment->id,
                 'recurrence_result' => $snapshot->recurrenceResult,
             ]);
         }
 
-        $subscription = $payment->purpose === PaymentPurpose::Renewal
-            ? $payment->subscription
-            : $this->liveSubscriptionOf($payment);
+        // Ha a hozzatartozo elofizetes kozben lezarult, a befizetes nem veszhet el:
+        // az elo elofizetest hosszabbitja, ha nincs ilyen, a lezartat eleszti ujra.
+        $linked = $payment->purpose->continuesSubscription() ? $payment->subscription : null;
+        $subscription = $linked?->isLive() === true
+            ? $linked
+            : ($this->liveSubscriptionOf($payment) ?? $linked);
 
         if ($subscription === null) {
             $subscription = $this->startSubscription($payment);
@@ -115,6 +120,11 @@ final readonly class SyncPaymentState
             // idoszak a meglevo vegehez adodik, nem vesz el.
             $start = $this->laterOf($subscription->current_period_end, now());
             $this->reactivate->handle($subscription, $start, $this->periodEnd($start));
+
+            if ($payment->purpose === PaymentPurpose::CardChange && $cardRegistered) {
+                // Kartyacsere (#17): a tovabbi megujitasok mar az uj tokent terhelik.
+                $subscription->forceFill(['provider_subscription_id' => $payment->recurrence_id])->save();
+            }
         }
 
         $payment->subscription()->associate($subscription);
@@ -122,7 +132,8 @@ final readonly class SyncPaymentState
 
     private function applyFailure(Payment $payment): void
     {
-        // Az elso fizetes kudarca utan nincs mit visszavonni: elofizetes meg nem jott letre.
+        // Csak a megujitas kudarca erinti az elofizetest: az elso fizetesnel meg nincs
+        // mit visszavonni, sikertelen kartyacsere utan pedig a regi kartya marad.
         if ($payment->purpose === PaymentPurpose::Renewal && $payment->subscription !== null) {
             $this->markPastDue->handle($payment->subscription);
         }

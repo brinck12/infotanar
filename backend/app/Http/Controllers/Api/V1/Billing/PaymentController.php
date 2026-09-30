@@ -9,9 +9,18 @@ use App\Http\Resources\PaymentResource;
 use App\Models\Payment;
 use App\Models\User;
 use Illuminate\Container\Attributes\CurrentUser;
+use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
 final class PaymentController extends Controller
 {
+    /** Sajat fizetesi tortenet (#17), legujabb elol. */
+    public function index(#[CurrentUser] User $user): AnonymousResourceCollection
+    {
+        return PaymentResource::collection(
+            $user->payments()->latest('id')->paginate(20),
+        );
+    }
+
     /**
      * A Barionrol visszatero oldal ezt kerdezi le, amig a fizetes vegleges
      * allapotba nem kerul. Mas felhasznalo fizeteset 404-gyel utasitja el,
