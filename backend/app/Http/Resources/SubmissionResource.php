@@ -24,6 +24,8 @@ final class SubmissionResource extends JsonResource
             'status' => $submission->status,
             'verdict' => $submission->verdict?->value,
             'verdict_label' => $submission->verdict?->label(),
+            'violations' => $this->when($this->resource->violations !== [], $this->resource->violations),
+            'message' => $this->when($this->resource->violations !== [], implode(' ', $this->resource->violations)),
             'results' => $submission->results ?? [],
             'lesson_completed' => $this->resource->lessonCompleted,
         ];

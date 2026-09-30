@@ -26,6 +26,8 @@ final class EvaluationResource extends JsonResource
             'status' => $this->resource->status,
             'verdict' => $this->resource->verdict->value,
             'verdict_label' => $this->resource->verdict->label(),
+            'violations' => $this->when($this->resource->violations !== [], $this->resource->violations),
+            'message' => $this->when($this->resource->violations !== [], implode(' ', $this->resource->violations)),
             'results' => $this->resource->results,
         ];
     }
