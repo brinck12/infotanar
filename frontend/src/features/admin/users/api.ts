@@ -74,3 +74,30 @@ export const userQuery = (id: number) =>
     queryKey: adminUserKeys.detail(id),
     queryFn: async ({ signal }) => (await http.get<Envelope<AdminUserDetail>>(`/admin/users/${id}`, { signal })).data.data,
   })
+
+/** Kézi prémium hozzáférés (#51) története; ki adta ki és ki vonta vissza. */
+export interface AccessGrant {
+  id: number
+  reason: string
+  active: boolean
+  ends_at: string | null
+  granted_at: string | null
+  granted_by: { id: number; name: string } | null
+  revoked_at: string | null
+  revoked_by: { id: number; name: string } | null
+}
+
+export const accessGrantsQuery = (userId: number) =>
+  queryOptions({
+    queryKey: [...adminUserKeys.detail(userId), 'access-grants'] as const,
+    queryFn: async ({ signal }) =>
+      (await http.get<Envelope<AccessGrant[]>>(`/admin/users/${userId}/access-grants`, { signal })).data.data,
+  })
+
+export async function grantAccess(userId: number, payload: { reason: string; ends_at: string | null }): Promise<AccessGrant> {
+  return (await http.post<Envelope<AccessGrant>>(`/admin/users/${userId}/access-grants`, payload)).data.data
+}
+
+export async function revokeAccess(grantId: number): Promise<void> {
+  await http.delete(`/admin/access-grants/${grantId}`)
+}

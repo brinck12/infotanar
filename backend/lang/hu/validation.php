@@ -118,5 +118,7 @@ return [
         'city' => 'település',
         'address_line' => 'cím',
         'tax_number' => 'adószám',
+        'reason' => 'indoklás',
+        'ends_at' => 'lejárat',
     ],
 ];
