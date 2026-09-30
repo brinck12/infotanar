@@ -97,10 +97,35 @@ final class User extends Authenticatable implements MustVerifyEmail
         );
     }
 
-    /** A premium tartalomhoz valo hozzaferes egyetlen igazsagforrasa (#23 gate). */
+    /** @return HasMany<AccessGrant, $this> */
+    public function accessGrants(): HasMany
+    {
+        return $this->hasMany(AccessGrant::class);
+    }
+
+    /**
+     * Az ervenyes kezi hozzaferes (#51), ha van.
+     *
+     * @return HasOne<AccessGrant, $this>
+     */
+    public function activeAccessGrant(): HasOne
+    {
+        return $this->hasOne(AccessGrant::class)->ofMany(
+            ['id' => 'max'],
+            static fn (Builder $query) => $query->whereNull('revoked_at')
+                ->where(static fn (Builder $q) => $q->whereNull('ends_at')->orWhere('ends_at', '>', now())),
+        );
+    }
+
+    /**
+     * A premium tartalomhoz valo hozzaferes egyetlen igazsagforrasa (#23 gate):
+     * rendben levo elofizetes VAGY ervenyes kezi hozzaferes (osztondij,
+     * tamogatas - a szamlazastol fuggetlenul).
+     */
     public function hasPremiumAccess(): bool
     {
-        return $this->liveSubscription?->grantsAccess() ?? false;
+        return ($this->liveSubscription?->grantsAccess() ?? false)
+            || ($this->activeAccessGrant?->isActive() ?? false);
     }
 
     public function sendEmailVerificationNotification(): void

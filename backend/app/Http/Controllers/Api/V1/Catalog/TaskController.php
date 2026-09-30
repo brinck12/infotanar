@@ -64,6 +64,6 @@ final class TaskController extends Controller
     {
         $user = $request->user('sanctum');
 
-        return $user instanceof User ? $user->loadMissing('liveSubscription') : null;
+        return $user instanceof User ? $user->loadMissing(['liveSubscription', 'activeAccessGrant']) : null;
     }
 }
