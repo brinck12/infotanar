@@ -19,8 +19,10 @@ use App\Http\Controllers\Api\V1\Auth\PasswordResetController;
 use App\Http\Controllers\Api\V1\Auth\RegisterController;
 use App\Http\Controllers\Api\V1\Auth\SessionController;
 use App\Http\Controllers\Api\V1\Billing\BarionCallbackController;
+use App\Http\Controllers\Api\V1\Billing\BillingProfileController;
 use App\Http\Controllers\Api\V1\Billing\CheckoutController;
 use App\Http\Controllers\Api\V1\Billing\PaymentController;
+use App\Http\Controllers\Api\V1\Billing\PlanController;
 use App\Http\Controllers\Api\V1\Billing\SubscriptionController;
 use App\Http\Controllers\Api\V1\Catalog\LanguageController;
 use App\Http\Controllers\Api\V1\Catalog\LessonVideoController;
@@ -88,9 +90,13 @@ Route::prefix('v1')->name('api.')->group(function (): void {
         Route::delete('/', [AccountController::class, 'destroy'])->middleware('throttle:sensitive')->name('destroy');
     });
 
+    Route::get('/billing/plan', PlanController::class)->name('billing.plan');
+
     // Elofizetes (#14): Barion fizetooldal inditasa es a fizetes allapota;
     // onkiszolgalo kezeles (#17): lemondas/visszavonas, kartyacsere, tortenet.
     Route::prefix('billing')->name('billing.')->middleware('auth:sanctum')->group(function (): void {
+        Route::get('/profile', [BillingProfileController::class, 'show'])->name('profile.show');
+        Route::put('/profile', [BillingProfileController::class, 'update'])->middleware('throttle:10,1')->name('profile.update');
         Route::post('/checkout', CheckoutController::class)->middleware('throttle:checkout')->name('checkout');
         Route::get('/payments', [PaymentController::class, 'index'])->name('payments.index');
         Route::get('/payments/{payment}', [PaymentController::class, 'show'])->whereUuid('payment')->name('payments.show');

@@ -76,6 +76,13 @@ return [
             'required' => 'A forráskód nem lehet üres.',
             'max' => 'A forráskód túl hosszú (legfeljebb :max karakter).',
         ],
+        'postal_code' => [
+            'regex' => 'Az irányítószám négy számjegy legyen (pl. 1051).',
+        ],
+        'tax_number' => [
+            'required_if' => 'Cég vagy vállalkozó esetén az adószám megadása kötelező.',
+            'prohibited_if' => 'Magánszemélyként nem adható meg adószám.',
+        ],
     ],
 
     'attributes' => [
@@ -106,5 +113,10 @@ return [
         'constraints' => 'kódszabályok',
         'sql_order_sensitive' => 'sorrendérzékenység',
         'ids' => 'sorrend',
+        'customer_type' => 'vevő típusa',
+        'postal_code' => 'irányítószám',
+        'city' => 'település',
+        'address_line' => 'cím',
+        'tax_number' => 'adószám',
     ],
 ];

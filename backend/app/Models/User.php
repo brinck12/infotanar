@@ -97,6 +97,12 @@ final class User extends Authenticatable implements MustVerifyEmail
         );
     }
 
+    /** @return HasOne<BillingProfile, $this> */
+    public function billingProfile(): HasOne
+    {
+        return $this->hasOne(BillingProfile::class);
+    }
+
     /** @return HasMany<Payment, $this> */
     public function payments(): HasMany
     {

@@ -23,6 +23,12 @@ final class CheckoutNotAllowed extends DomainException
         return new self(__('billing.email_not_verified'), 403);
     }
 
+    /** A szamla (#20) ezekbol keszul, ezert fizetni csak utanuk lehet. */
+    public static function billingProfileMissing(): self
+    {
+        return new self(__('billing.billing_profile_missing'), 409);
+    }
+
     public function status(): int
     {
         return $this->httpStatus;

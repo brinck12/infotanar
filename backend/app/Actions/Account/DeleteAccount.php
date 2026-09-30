@@ -36,6 +36,8 @@ final readonly class DeleteAccount
             }
 
             $user->submissions()->update(['user_id' => null]);
+            // A kiallitott szamlak sajat masolatot tartanak (szamviteli megorzes), a profil torolheto.
+            $user->billingProfile()->delete();
 
             $user->forceFill([
                 'name' => 'Törölt felhasználó',
