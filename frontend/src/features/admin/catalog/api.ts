@@ -57,6 +57,18 @@ export interface AdminExercise {
   submission_count?: number
 }
 
+export interface AdminTestCase {
+  id: number
+  exercise_id: number
+  order: number
+  stdin: string
+  expected_stdout: string
+  is_hidden: boolean
+  updated_at: string | null
+}
+
+export type TestCasePayload = Pick<AdminTestCase, 'stdin' | 'expected_stdout' | 'is_hidden'>
+
 export interface LanguageOption {
   key: LanguageKey
   label: string
@@ -78,6 +90,7 @@ export const adminCatalogKeys = {
   module: (id: number) => [...adminCatalogKeys.all, 'module', id] as const,
   lesson: (id: number) => [...adminCatalogKeys.all, 'lesson', id] as const,
   exercise: (id: number) => [...adminCatalogKeys.all, 'exercise', id] as const,
+  testCases: (exerciseId: number) => [...adminCatalogKeys.all, 'exercise', exerciseId, 'test-cases'] as const,
   languages: ['catalog', 'languages'] as const,
 }
 
@@ -100,6 +113,24 @@ export const exerciseQuery = (id: number) =>
     queryKey: adminCatalogKeys.exercise(id),
     queryFn: ({ signal }) => get<AdminExercise>(`/admin/exercises/${id}`, signal),
   })
+
+export const testCasesQuery = (exerciseId: number) =>
+  queryOptions({
+    queryKey: adminCatalogKeys.testCases(exerciseId),
+    queryFn: ({ signal }) => get<AdminTestCase[]>(`/admin/exercises/${exerciseId}/test-cases`, signal),
+  })
+
+export async function createTestCase(exerciseId: number, payload: TestCasePayload): Promise<AdminTestCase> {
+  return (await http.post<Envelope<AdminTestCase>>(`/admin/exercises/${exerciseId}/test-cases`, payload)).data.data
+}
+
+export async function updateTestCase(id: number, payload: Partial<TestCasePayload>): Promise<AdminTestCase> {
+  return (await http.put<Envelope<AdminTestCase>>(`/admin/test-cases/${id}`, payload)).data.data
+}
+
+export async function deleteTestCase(id: number): Promise<void> {
+  await http.delete(`/admin/test-cases/${id}`)
+}
 
 export const languagesQuery = () =>
   queryOptions({
