@@ -87,6 +87,19 @@ export type TaskDetail = UnlockedTaskDetail | LockedTaskDetail
 export type RunStatus = 'passed' | 'failed' | 'error'
 
 /**
+ * A kiértékelés eredménye (backend `Verdict` enum): a PRD hat állapota és a
+ * nem a megoldásnak felróható rendszerhiba.
+ */
+export type Verdict =
+  | 'accepted'
+  | 'wrong_answer'
+  | 'time_limit_exceeded'
+  | 'compilation_error'
+  | 'runtime_error'
+  | 'constraint_violation'
+  | 'system_error'
+
+/**
  * Egy teszteset eredménye. Rejtett teszteseteknél (`hidden: true`) a
  * kimeneti mezők szándékosan hiányoznak — a backend nem küldi vissza őket.
  */
@@ -94,6 +107,9 @@ export interface TestResult {
   test_case_id: number
   hidden: boolean
   passed: boolean
+  /** Régebbi (vagy mockolt) válaszokban hiányozhat: ekkor a `passed`-ből következtetünk. */
+  verdict?: Verdict
+  verdict_label?: string
   time: number | null
   exit_code: number | null
   judge_status: string
@@ -107,6 +123,10 @@ export interface TestResult {
 
 export interface RunResponse {
   status: RunStatus
+  verdict?: Verdict
+  verdict_label?: string
+  /** Kódszabály-sértések (constraint_violation), magyarul. */
+  violations?: string[]
   results: TestResult[]
   message?: string
 }
