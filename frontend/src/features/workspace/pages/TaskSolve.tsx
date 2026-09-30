@@ -15,6 +15,7 @@ import { catalogKeys, taskQuery } from '../../catalog/api'
 import { progressKeys } from '../../progress/api'
 import { runCode, submitCode } from '../api'
 import { CodeEditor, type EditorReplacement } from '../components/CodeEditor'
+import { LessonVideo } from '../components/LessonVideo'
 import { Paywall } from '../components/Paywall'
 import { ResetCodeButton } from '../components/ResetCodeButton'
 import { ResultPanel } from '../components/ResultPanel'
@@ -145,6 +146,8 @@ function Workspace({ task }: { task: UnlockedTaskDetail }) {
 
   const description = (
     <section aria-label="Feladat leírása" className="space-y-4">
+      {task.lesson && <LessonVideo lesson={task.lesson} />}
+
       <div className="prose-invert max-w-none rounded-lg border border-slate-800 bg-slate-900 p-5 text-slate-200 [&_code]:rounded [&_code]:bg-slate-950 [&_code]:px-1 [&_h2]:mt-0 [&_h2]:mb-3 [&_h2]:text-lg [&_h2]:font-semibold [&_h3]:mt-4 [&_h3]:mb-2 [&_h3]:font-medium [&_li]:ml-4 [&_li]:list-disc [&_p]:my-2">
         <ReactMarkdown remarkPlugins={[remarkGfm]}>{task.description}</ReactMarkdown>
       </div>

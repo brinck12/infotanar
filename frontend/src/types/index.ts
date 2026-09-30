@@ -51,6 +51,20 @@ interface TaskDetailBase {
   topic: TaskTopic
   is_free?: boolean
   hidden_test_case_count: number
+  /** A feladathoz tartozó lecke (a videóhoz); régebbi válaszokban hiányozhat. */
+  lesson?: TaskLesson
+}
+
+export interface TaskLesson {
+  id: number
+  title: string
+  has_video: boolean
+}
+
+/** Rövid életű, aláírt lejátszási URL (`GET /lessons/{id}/video`). */
+export interface LessonVideo {
+  url: string
+  expires_at: string
 }
 
 /** Hozzáférhető feladat: teljes leírással és a nem rejtett tesztesetekkel. */
