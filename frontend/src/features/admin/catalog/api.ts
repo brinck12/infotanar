@@ -50,7 +50,7 @@ export interface AdminExercise {
   difficulty: number
   allowed_languages: LanguageKey[]
   starter_code: Partial<Record<LanguageKey, string>>
-  constraints: unknown
+  constraints: ConstraintSet
   sql_order_sensitive: boolean
   is_published: boolean
   test_case_count?: number
@@ -69,6 +69,19 @@ export interface AdminTestCase {
 
 export type TestCasePayload = Pick<AdminTestCase, 'stdin' | 'expected_stdout' | 'is_hidden'>
 
+/** Statikus kódszabályok (#42): kötelező szerkezetek és tiltott hívások (`builtin:<név>` / `method:<név>`). */
+export interface ConstraintSet {
+  require: string[]
+  forbid: string[]
+}
+
+export interface ConstraintOptions {
+  require: Array<{ value: string; label: string }>
+  forbid: Array<{ value: string; kind: 'builtin' | 'method'; label: string }>
+  /** Ezekre a nyelvekre fut elemzés (SQL-re nincs). */
+  enforced_languages: LanguageKey[]
+}
+
 export interface LanguageOption {
   key: LanguageKey
   label: string
@@ -80,7 +93,16 @@ export type ModulePayload = Pick<AdminModule, 'track_id' | 'slug' | 'title' | 'd
 export type LessonPayload = Pick<AdminLesson, 'module_id' | 'slug' | 'title' | 'content' | 'video_path' | 'is_free' | 'is_published'>
 export type ExercisePayload = Pick<
   AdminExercise,
-  'lesson_id' | 'title' | 'description' | 'level' | 'difficulty' | 'allowed_languages' | 'starter_code' | 'sql_order_sensitive' | 'is_published'
+  | 'lesson_id'
+  | 'title'
+  | 'description'
+  | 'level'
+  | 'difficulty'
+  | 'allowed_languages'
+  | 'starter_code'
+  | 'constraints'
+  | 'sql_order_sensitive'
+  | 'is_published'
 >
 
 export const adminCatalogKeys = {
@@ -131,6 +153,13 @@ export async function updateTestCase(id: number, payload: Partial<TestCasePayloa
 export async function deleteTestCase(id: number): Promise<void> {
   await http.delete(`/admin/test-cases/${id}`)
 }
+
+export const constraintOptionsQuery = () =>
+  queryOptions({
+    queryKey: [...adminCatalogKeys.all, 'constraint-options'] as const,
+    queryFn: ({ signal }) => get<ConstraintOptions>('/admin/constraint-options', signal),
+    staleTime: 60 * 60_000,
+  })
 
 export const languagesQuery = () =>
   queryOptions({
