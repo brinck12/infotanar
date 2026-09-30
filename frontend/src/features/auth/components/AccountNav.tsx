@@ -30,6 +30,11 @@ export function AccountNav() {
 
   return (
     <div className="ml-auto flex items-center gap-4">
+      {user.role === 'admin' && (
+        <Link to="/admin/tananyag" className={linkClass}>
+          Admin
+        </Link>
+      )}
       <Link to="/haladas" className={linkClass}>
         Haladásom
       </Link>

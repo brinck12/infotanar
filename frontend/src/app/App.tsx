@@ -1,7 +1,7 @@
 import { Suspense } from 'react'
-import { BrowserRouter, Link, Route, Routes } from 'react-router-dom'
+import { BrowserRouter, Link, Navigate, Outlet, Route, Routes } from 'react-router-dom'
 import { AccountNav, VerifyEmailBanner } from '../features/auth/components/AccountNav'
-import { GuestOnly, RequireAuth } from '../features/auth/guards'
+import { GuestOnly, RequireAuth, RequireRole } from '../features/auth/guards'
 import { PageLoader } from '../shared/ui/PageLoader'
 import { ErrorBoundary } from './ErrorBoundary'
 import { Providers } from './Providers'
@@ -41,6 +41,15 @@ export default function App() {
                     <Route path="/jelszo-visszaallitas" element={<Pages.ResetPassword />} />
                     <Route path="/elofizetes" element={<RequireAuth><Pages.Subscribe /></RequireAuth>} />
                     <Route path="/haladas" element={<RequireAuth><Pages.ProgressDashboard /></RequireAuth>} />
+                    <Route path="/admin" element={<RequireRole allow="admin"><Outlet /></RequireRole>}>
+                      <Route index element={<Navigate to="/admin/tananyag" replace />} />
+                      <Route path="tananyag" element={<Pages.AdminCatalog />} />
+                      <Route path="tananyag/agak/:trackId" element={<Pages.AdminTrack />} />
+                      <Route path="tananyag/modulok/:moduleId" element={<Pages.AdminModule />} />
+                      <Route path="tananyag/leckek/:lessonId" element={<Pages.AdminLesson />} />
+                      <Route path="tananyag/leckek/:lessonId/uj-feladat" element={<Pages.AdminNewExercise />} />
+                      <Route path="tananyag/feladatok/:exerciseId" element={<Pages.AdminExercise />} />
+                    </Route>
                     <Route path="*" element={<NotFound />} />
                   </Routes>
                 </Suspense>
