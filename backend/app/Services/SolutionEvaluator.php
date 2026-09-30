@@ -6,8 +6,13 @@ namespace App\Services;
 
 use App\Enums\Verdict;
 use App\Exceptions\Judge0Exception;
+use App\Models\Exercise;
 use App\Models\TestCase;
+use App\Services\Constraints\ConstraintChecker;
 use App\Services\Execution\EvaluationResult;
+use App\Services\Execution\HiddenResultRedactor;
+use App\Services\Execution\Sql\SqlProgram;
+use App\Services\Execution\Sql\SqlResultComparator;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Config;
 
@@ -22,11 +27,25 @@ use Illuminate\Support\Facades\Config;
  */
 final readonly class SolutionEvaluator
 {
-    public function __construct(private Judge0Service $judge0) {}
+    private const SQL = 'sql';
+
+    public function __construct(
+        private Judge0Service $judge0,
+        private SqlResultComparator $sqlComparator,
+        private HiddenResultRedactor $redactor,
+        private ConstraintChecker $constraints,
+    ) {}
 
     /** @param Collection<int, TestCase> $testCases */
-    public function evaluate(string $language, string $sourceCode, Collection $testCases): EvaluationResult
+    public function evaluate(Exercise $exercise, string $language, string $sourceCode, Collection $testCases): EvaluationResult
     {
+        // A kodszabalyokat a sandbox elott ellenorizzuk: a szabalyserto megoldas
+        // el sem jut a Judge0-ig (idot es futtatasi kapacitast sporol).
+        $violations = $this->constraints->violations($exercise->constraints, $language, $sourceCode);
+        if ($violations !== []) {
+            return EvaluationResult::constraintViolation($violations);
+        }
+
         $results = [];
         $verdicts = [];
 
@@ -42,7 +61,10 @@ final readonly class SolutionEvaluator
                     throw Judge0Exception::timedOut();
                 }
 
-                $run = $this->judge0->run($language, $sourceCode, $testCase->stdin, $remaining);
+                // SQL-nel a teszteset bemenete az adatkeszlet-szkript, ami a programba kerul.
+                $run = $language === self::SQL
+                    ? $this->judge0->run($language, SqlProgram::build((string) $testCase->stdin, $sourceCode), null, $remaining)
+                    : $this->judge0->run($language, $sourceCode, $testCase->stdin, $remaining);
             } catch (Judge0Exception $e) {
                 $verdicts[] = Verdict::SystemError;
                 $results[] = $this->errorResult($testCase, $e->getMessage());
@@ -52,7 +74,9 @@ final readonly class SolutionEvaluator
                 break;
             }
 
-            $verdict = Verdict::fromJudge0($run['status_id'], $this->outputMatches($run['stdout'], $testCase->expected_stdout));
+            $verdict = $language === self::SQL
+                ? $this->sqlVerdict($run, $testCase, $exercise->sql_order_sensitive)
+                : Verdict::fromJudge0($run['status_id'], $this->outputMatches($run['stdout'], $testCase->expected_stdout));
             $verdicts[] = $verdict;
             $results[] = $this->buildResult($testCase, $run, $verdict);
 
@@ -64,7 +88,30 @@ final readonly class SolutionEvaluator
 
         $overall = $this->overallVerdict($verdicts);
 
-        return new EvaluationResult($this->legacyStatus($overall, $verdicts), $overall, $results);
+        return new EvaluationResult(
+            $this->legacyStatus($overall, $verdicts),
+            $overall,
+            $this->redactor->redact($results),
+        );
+    }
+
+    /**
+     * A sqlite3 `.bail on` mellett hibanal "Error: ..." uzenettel es nem nulla
+     * kilepesi koddal all le (Judge0: Runtime Error). SQL-nel ez szintaktikai /
+     * szemantikai hiba a lekerdezesben, ezert fordítasi hibakent jelezzuk.
+     *
+     * @param  Judge0Run  $run
+     */
+    private function sqlVerdict(array $run, TestCase $testCase, bool $orderSensitive): Verdict
+    {
+        if (str_contains($run['stderr'], 'Error:')) {
+            return Verdict::CompilationError;
+        }
+
+        return Verdict::fromJudge0(
+            $run['status_id'],
+            $this->sqlComparator->matches($run['stdout'], $testCase->expected_stdout, $orderSensitive),
+        );
     }
 
     /**
@@ -104,12 +151,8 @@ final readonly class SolutionEvaluator
             'judge_status' => $run['status'],
         ];
 
-        // Rejtett teszteseteknel csak az allapot megy vissza, kimenet nelkul -
-        // kulonben visszafejthetok lennenek a rejtett bemenetek.
-        if ($testCase->is_hidden) {
-            return $result;
-        }
-
+        // A rejtett tesztesetek adatait az evaluate() vegen a HiddenResultRedactor
+        // tavolitja el, egyetlen helyen, fehérlistaval.
         return $result + [
             'stdin' => (string) $testCase->stdin,
             'stdout' => $run['stdout'],

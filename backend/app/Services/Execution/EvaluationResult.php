@@ -16,10 +16,25 @@ use App\Enums\Verdict;
  */
 final readonly class EvaluationResult
 {
-    /** @param list<TestResult> $results */
+    /**
+     * @param  list<TestResult>  $results
+     * @param  list<string>  $violations  megsertett kodszabalyok, magyarul (csak ConstraintViolation eseten)
+     */
     public function __construct(
         public string $status,
         public Verdict $verdict,
         public array $results,
+        public array $violations = [],
     ) {}
+
+    /**
+     * A megoldas meg sem futott: a kodszabalyok (#42) ellenorzese mar a
+     * Judge0 elott megakasztotta.
+     *
+     * @param  non-empty-list<string>  $violations
+     */
+    public static function constraintViolation(array $violations): self
+    {
+        return new self('failed', Verdict::ConstraintViolation, [], $violations);
+    }
 }

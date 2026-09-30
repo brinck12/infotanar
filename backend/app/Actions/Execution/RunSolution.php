@@ -37,6 +37,6 @@ final readonly class RunSolution
             throw new NoVisibleTestCases;
         }
 
-        return $this->evaluator->evaluate($language, $sourceCode, $testCases);
+        return $this->evaluator->evaluate($exercise, $language, $sourceCode, $testCases);
     }
 }

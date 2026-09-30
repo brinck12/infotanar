@@ -35,9 +35,29 @@ final class CatalogSeeder extends Seeder
             ['track_id' => $track->id, 'title' => 'Sorozatfeldolgozás', 'position' => 1],
         );
 
+        $this->seedExercises($this->exercises($tetelek->id, $sorozat->id));
+        app(ApplyFreemiumDefaults::class)->handle($track);
+
+        $sqlTrack = Track::updateOrCreate(
+            ['slug' => 'adatbazis-kezeles'],
+            ['title' => 'Adatbázis-kezelés (SQL)', 'description' => 'Lekérdezések SQL nyelven, érettségi-jellegű adatbázisokon.', 'position' => 1],
+        );
+
+        $lekerdezesek = Module::updateOrCreate(
+            ['slug' => 'egyszeru-lekerdezesek'],
+            ['track_id' => $sqlTrack->id, 'title' => 'Egyszerű lekérdezések', 'position' => 0],
+        );
+
+        $this->seedExercises($this->sqlExercises($lekerdezesek->id));
+        app(ApplyFreemiumDefaults::class)->handle($sqlTrack);
+    }
+
+    /** @param list<array{module_id: int, title: string, test_cases: list<array<string, mixed>>}&array<string, mixed>> $definitions */
+    private function seedExercises(array $definitions): void
+    {
         $positions = [];
 
-        foreach ($this->exercises($tetelek->id, $sorozat->id) as $definition) {
+        foreach ($definitions as $definition) {
             ['module_id' => $moduleId, 'test_cases' => $testCases] = $definition;
             unset($definition['module_id'], $definition['test_cases']);
 
@@ -59,8 +79,58 @@ final class CatalogSeeder extends Seeder
                 $exercise->testCases()->create([...$testCase, 'order' => $order]);
             }
         }
+    }
 
-        app(ApplyFreemiumDefaults::class)->handle($track);
+    /**
+     * SQL-feladatnal a teszteset `stdin`-je az adatkeszletet felepito szkript,
+     * az `expected_stdout` a vart eredmeny CSV-ben, fejlecsorral (sqlite3
+     * `.headers on` + `.mode csv`). Kulon adatkeszlet a rejtett tesztesethez,
+     * hogy a beegetett eredmeny ne mukodjon.
+     *
+     * @return list<array{module_id: int, title: string, test_cases: list<array<string, mixed>>}&array<string, mixed>>
+     */
+    private function sqlExercises(int $moduleId): array
+    {
+        $schema = "CREATE TABLE diak (nev TEXT, osztaly TEXT, pont INTEGER);\n";
+
+        return [
+            [
+                'module_id' => $moduleId,
+                'title' => 'Egy osztály diákjai',
+                'level' => 'kozep',
+                'difficulty' => 1,
+                'is_published' => true,
+                'allowed_languages' => ['sql'],
+                'sql_order_sensitive' => false,
+                'description' => <<<'MD'
+## Feladat
+
+A `diak` tábla a diákok nevét, osztályát és versenypontszámát tárolja:
+
+| oszlop | típus |
+|---|---|
+| `nev` | szöveg |
+| `osztaly` | szöveg |
+| `pont` | egész |
+
+Írj lekérdezést, amely a **10.A** osztály diákjainak **nevét** és **pontszámát** listázza!
+A sorok sorrendje nem számít.
+MD,
+                'starter_code' => ['sql' => "SELECT\n  \nFROM diak\nWHERE ;\n"],
+                'test_cases' => [
+                    [
+                        'stdin' => $schema."INSERT INTO diak VALUES ('Anna', '10.A', 42), ('Bence', '10.B', 37), ('Csilla', '10.A', 51);\n",
+                        'expected_stdout' => "nev,pont\nAnna,42\nCsilla,51\n",
+                        'is_hidden' => false,
+                    ],
+                    [
+                        'stdin' => $schema."INSERT INTO diak VALUES ('Dóra', '10.A', 12), ('Endre', '11.A', 60), ('Feri', '10.A', 33), ('Gábor', '10.B', 45);\n",
+                        'expected_stdout' => "nev,pont\nDóra,12\nFeri,33\n",
+                        'is_hidden' => true,
+                    ],
+                ],
+            ],
+        ];
     }
 
     /** @return list<array{module_id: int, title: string, test_cases: list<array<string, mixed>>}&array<string, mixed>> */
@@ -74,6 +144,7 @@ final class CatalogSeeder extends Seeder
                 'difficulty' => 1,
                 'is_published' => true,
                 'allowed_languages' => ['python', 'csharp'],
+                'constraints' => ['require' => ['loop'], 'forbid' => ['builtin:sum']],
                 'description' => <<<'MD'
 ## Feladat
 
@@ -110,6 +181,7 @@ MD,
                 'difficulty' => 2,
                 'is_published' => true,
                 'allowed_languages' => ['python', 'csharp'],
+                'constraints' => ['require' => ['loop'], 'forbid' => ['method:count', 'builtin:sum']],
                 'description' => <<<'MD'
 ## Feladat
 
@@ -146,6 +218,7 @@ MD,
                 'difficulty' => 2,
                 'is_published' => true,
                 'allowed_languages' => ['python', 'csharp'],
+                'constraints' => ['require' => ['loop'], 'forbid' => ['builtin:max', 'builtin:sorted', 'method:sort']],
                 'description' => <<<'MD'
 ## Feladat
 
@@ -182,6 +255,7 @@ MD,
                 'difficulty' => 3,
                 'is_published' => true,
                 'allowed_languages' => ['python', 'csharp'],
+                'constraints' => ['require' => ['loop'], 'forbid' => ['builtin:any', 'builtin:all']],
                 'description' => <<<'MD'
 ## Feladat
 
@@ -218,6 +292,7 @@ MD,
                 'difficulty' => 4,
                 'is_published' => true,
                 'allowed_languages' => ['python', 'csharp'],
+                'constraints' => ['require' => ['loop'], 'forbid' => ['builtin:filter']],
                 'description' => <<<'MD'
 ## Feladat
 
