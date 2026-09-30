@@ -8,9 +8,11 @@ use App\Models\Submission;
 
 final readonly class SubmissionOutcome
 {
+    /** @param list<string> $violations megsertett kodszabalyok (Constraint Violation eseten) */
     public function __construct(
         public Submission $submission,
         /** A beadas ezzel teljesitette-e eloszor a leckét. */
         public bool $lessonCompleted,
+        public array $violations = [],
     ) {}
 }
