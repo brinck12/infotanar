@@ -21,5 +21,6 @@ return [
         'compilation_error' => 'Fordítási / szintaktikai hiba',
         'runtime_error' => 'Futásidejű hiba',
         'system_error' => 'Rendszerhiba',
+        'constraint_violation' => 'Szabálysértés',
     ],
 ];
