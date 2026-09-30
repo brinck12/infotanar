@@ -3,6 +3,7 @@ import type { LanguageKey, LessonProgressStatus, Level } from '../../types'
 export const LANGUAGE_LABEL: Readonly<Record<LanguageKey, string>> = {
   python: 'Python 3',
   csharp: 'C#',
+  sql: 'SQL (SQLite)',
 }
 
 export const LEVEL_LABEL: Readonly<Record<Level, string>> = {

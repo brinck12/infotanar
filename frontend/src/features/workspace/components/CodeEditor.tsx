@@ -5,6 +5,7 @@ import type { LanguageKey } from '../../../types'
 const MONACO_LANGUAGE: Record<LanguageKey, string> = {
   python: 'python',
   csharp: 'csharp',
+  sql: 'sql',
 }
 
 interface Props {
