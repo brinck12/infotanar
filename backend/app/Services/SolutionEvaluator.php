@@ -8,7 +8,9 @@ use App\Enums\Verdict;
 use App\Exceptions\Judge0Exception;
 use App\Models\Exercise;
 use App\Models\TestCase;
+use App\Services\Constraints\ConstraintChecker;
 use App\Services\Execution\EvaluationResult;
+use App\Services\Execution\HiddenResultRedactor;
 use App\Services\Execution\Sql\SqlProgram;
 use App\Services\Execution\Sql\SqlResultComparator;
 use Illuminate\Support\Collection;
@@ -30,11 +32,20 @@ final readonly class SolutionEvaluator
     public function __construct(
         private Judge0Service $judge0,
         private SqlResultComparator $sqlComparator,
+        private HiddenResultRedactor $redactor,
+        private ConstraintChecker $constraints,
     ) {}
 
     /** @param Collection<int, TestCase> $testCases */
     public function evaluate(Exercise $exercise, string $language, string $sourceCode, Collection $testCases): EvaluationResult
     {
+        // A kodszabalyokat a sandbox elott ellenorizzuk: a szabalyserto megoldas
+        // el sem jut a Judge0-ig (idot es futtatasi kapacitast sporol).
+        $violations = $this->constraints->violations($exercise->constraints, $language, $sourceCode);
+        if ($violations !== []) {
+            return EvaluationResult::constraintViolation($violations);
+        }
+
         $results = [];
         $verdicts = [];
 
@@ -77,7 +88,11 @@ final readonly class SolutionEvaluator
 
         $overall = $this->overallVerdict($verdicts);
 
-        return new EvaluationResult($this->legacyStatus($overall, $verdicts), $overall, $results);
+        return new EvaluationResult(
+            $this->legacyStatus($overall, $verdicts),
+            $overall,
+            $this->redactor->redact($results),
+        );
     }
 
     /**
@@ -136,12 +151,8 @@ final readonly class SolutionEvaluator
             'judge_status' => $run['status'],
         ];
 
-        // Rejtett teszteseteknel csak az allapot megy vissza, kimenet nelkul -
-        // kulonben visszafejthetok lennenek a rejtett bemenetek.
-        if ($testCase->is_hidden) {
-            return $result;
-        }
-
+        // A rejtett tesztesetek adatait az evaluate() vegen a HiddenResultRedactor
+        // tavolitja el, egyetlen helyen, fehérlistaval.
         return $result + [
             'stdin' => (string) $testCase->stdin,
             'stdout' => $run['stdout'],

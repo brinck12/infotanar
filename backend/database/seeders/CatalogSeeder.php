@@ -144,6 +144,7 @@ MD,
                 'difficulty' => 1,
                 'is_published' => true,
                 'allowed_languages' => ['python', 'csharp'],
+                'constraints' => ['require' => ['loop'], 'forbid' => ['builtin:sum']],
                 'description' => <<<'MD'
 ## Feladat
 
@@ -180,6 +181,7 @@ MD,
                 'difficulty' => 2,
                 'is_published' => true,
                 'allowed_languages' => ['python', 'csharp'],
+                'constraints' => ['require' => ['loop'], 'forbid' => ['method:count', 'builtin:sum']],
                 'description' => <<<'MD'
 ## Feladat
 
@@ -216,6 +218,7 @@ MD,
                 'difficulty' => 2,
                 'is_published' => true,
                 'allowed_languages' => ['python', 'csharp'],
+                'constraints' => ['require' => ['loop'], 'forbid' => ['builtin:max', 'builtin:sorted', 'method:sort']],
                 'description' => <<<'MD'
 ## Feladat
 
@@ -252,6 +255,7 @@ MD,
                 'difficulty' => 3,
                 'is_published' => true,
                 'allowed_languages' => ['python', 'csharp'],
+                'constraints' => ['require' => ['loop'], 'forbid' => ['builtin:any', 'builtin:all']],
                 'description' => <<<'MD'
 ## Feladat
 
@@ -288,6 +292,7 @@ MD,
                 'difficulty' => 4,
                 'is_published' => true,
                 'allowed_languages' => ['python', 'csharp'],
+                'constraints' => ['require' => ['loop'], 'forbid' => ['builtin:filter']],
                 'description' => <<<'MD'
 ## Feladat
 
