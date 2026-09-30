@@ -8,6 +8,7 @@ use App\Mail\OutboxTransport;
 use App\Models\Exercise;
 use App\Models\Lesson;
 use App\Models\Module;
+use App\Models\TestCase;
 use App\Models\Track;
 use App\Models\User;
 use Illuminate\Cache\RateLimiting\Limit;
@@ -36,6 +37,7 @@ final class AppServiceProvider extends ServiceProvider
             'module' => Module::class,
             'lesson' => Lesson::class,
             'exercise' => Exercise::class,
+            'test_case' => TestCase::class,
         ]);
 
         Password::defaults(static fn () => Password::min(8)->letters()->numbers());

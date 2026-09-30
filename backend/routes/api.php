@@ -3,12 +3,16 @@
 declare(strict_types=1);
 
 use App\Http\Controllers\Api\V1\Account\AccountController;
+use App\Http\Controllers\Api\V1\Admin\AccessGrantController;
+use App\Http\Controllers\Api\V1\Admin\Catalog\ConstraintOptionsController;
 use App\Http\Controllers\Api\V1\Admin\Catalog\ExerciseController as AdminExerciseController;
 use App\Http\Controllers\Api\V1\Admin\Catalog\LessonController as AdminLessonController;
 use App\Http\Controllers\Api\V1\Admin\Catalog\ModuleController as AdminModuleController;
 use App\Http\Controllers\Api\V1\Admin\Catalog\ReorderController;
+use App\Http\Controllers\Api\V1\Admin\Catalog\TestCaseController;
 use App\Http\Controllers\Api\V1\Admin\Catalog\TrackController as AdminTrackController;
 use App\Http\Controllers\Api\V1\Admin\UserAccountController;
+use App\Http\Controllers\Api\V1\Admin\UserController as AdminUserController;
 use App\Http\Controllers\Api\V1\Auth\CurrentUserController;
 use App\Http\Controllers\Api\V1\Auth\EmailVerificationController;
 use App\Http\Controllers\Api\V1\Auth\PasswordResetController;
@@ -93,6 +97,21 @@ Route::prefix('v1')->name('api.')->group(function (): void {
         Route::apiResource('modules', AdminModuleController::class);
         Route::apiResource('lessons', AdminLessonController::class);
         Route::apiResource('exercises', AdminExerciseController::class);
+
+        Route::get('/constraint-options', ConstraintOptionsController::class)->name('constraint-options');
+
+        // Felhasznalok attekintese (#50), csak olvasas.
+        Route::get('/users', [AdminUserController::class, 'index'])->name('users.index');
+        Route::get('/users/{user}', [AdminUserController::class, 'show'])->whereNumber('user')->name('users.show');
+
+        // Kezi premium hozzaferes (#51): kiadas, tortenet, visszavonas.
+        Route::get('/users/{user}/access-grants', [AccessGrantController::class, 'index'])->name('access-grants.index');
+        Route::post('/users/{user}/access-grants', [AccessGrantController::class, 'store'])->name('access-grants.store');
+        Route::delete('/access-grants/{accessGrant}', [AccessGrantController::class, 'destroy'])->name('access-grants.destroy');
+
+        // Tesztesetek (#46): letrehozas/lista a feladat alatt, a tobbi kozvetlenul.
+        Route::put('/exercises/{exercise}/test-cases/order', [TestCaseController::class, 'reorder'])->name('test-cases.order');
+        Route::apiResource('exercises.test-cases', TestCaseController::class)->shallow()->parameters(['test-cases' => 'testCase']);
 
         Route::middleware('can:manageAccount,user')->group(function (): void {
             Route::get('/users/{user}/export', [UserAccountController::class, 'export'])->name('users.export');
