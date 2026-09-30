@@ -12,7 +12,7 @@ import {
   type AdminTestCase,
   type TestCasePayload,
 } from '../api'
-import { StatusPill } from './AdminShell'
+import { StatusPill } from '../../components/AdminShell'
 import { MutationError } from './QueryState'
 
 const TEST_CASE_FIELDS = ['stdin', 'expected_stdout', 'is_hidden'] as const

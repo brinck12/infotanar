@@ -49,6 +49,8 @@ export default function App() {
                       <Route path="tananyag/leckek/:lessonId" element={<Pages.AdminLesson />} />
                       <Route path="tananyag/leckek/:lessonId/uj-feladat" element={<Pages.AdminNewExercise />} />
                       <Route path="tananyag/feladatok/:exerciseId" element={<Pages.AdminExercise />} />
+                      <Route path="felhasznalok" element={<Pages.AdminUsers />} />
+                      <Route path="felhasznalok/:userId" element={<Pages.AdminUserDetail />} />
                     </Route>
                     <Route path="*" element={<NotFound />} />
                   </Routes>

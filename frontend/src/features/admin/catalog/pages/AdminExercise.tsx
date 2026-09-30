@@ -18,7 +18,7 @@ import {
   type ExercisePayload,
   type LanguageOption,
 } from '../api'
-import { AdminShell, Section } from '../components/AdminShell'
+import { AdminShell, Section } from '../../components/AdminShell'
 import { ConstraintEditor } from '../components/ConstraintEditor'
 import { MutationError, QueryState } from '../components/QueryState'
 import { TestCaseManager } from '../components/TestCaseManager'
