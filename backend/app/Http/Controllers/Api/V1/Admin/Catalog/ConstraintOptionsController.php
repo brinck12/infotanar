@@ -6,6 +6,7 @@ namespace App\Http\Controllers\Api\V1\Admin\Catalog;
 
 use App\Enums\RequiredConstruct;
 use App\Http\Controllers\Controller;
+use App\Services\Constraints\ConstraintChecker;
 use App\Services\Constraints\Prohibition;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Config;
@@ -35,8 +36,8 @@ final class ConstraintOptionsController extends Controller
                 RequiredConstruct::cases(),
             ),
             'forbid' => $forbid,
-            // Az elemzes jelenleg csak ezekre a nyelvekre fut (C#: #86).
-            'enforced_languages' => ['python'],
+            // Ezekre a nyelvekre fut elemzes (SQL-re nincs).
+            'enforced_languages' => ConstraintChecker::ENFORCED_LANGUAGES,
             'format' => ['forbid' => 'builtin:<név> | method:<név>'],
         ]]);
     }
