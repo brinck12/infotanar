@@ -175,3 +175,57 @@ export interface HostedCheckout {
   checkout_url: string
   payment_id: string
 }
+
+/** Egy lecke állapota a felhasználó számára (`GET /progress`). */
+export type LessonProgressStatus = 'not_started' | 'in_progress' | 'completed'
+
+export interface ProgressSummary {
+  completed: number
+  total: number
+  percent: number
+}
+
+export interface TrackProgress extends ProgressSummary {
+  id: number
+  slug: string
+  title: string
+  lessons: Array<{ id: number; status: LessonProgressStatus }>
+}
+
+export interface ProgressReport {
+  overall: ProgressSummary
+  tracks: TrackProgress[]
+}
+
+/** Képzési ág szerkezete (`GET /tracks/{slug}`): modulok, leckék, feladatok. */
+export interface ExerciseSummary {
+  id: number
+  title: string
+  level: Level
+  difficulty: number
+  allowed_languages: LanguageKey[]
+}
+
+export interface LessonSummary {
+  id: number
+  slug: string
+  title: string
+  is_free: boolean
+  exercises: ExerciseSummary[]
+}
+
+export interface ModuleSummary {
+  id: number
+  slug: string
+  title: string
+  description: string | null
+  lessons: LessonSummary[]
+}
+
+export interface TrackDetail {
+  id: number
+  slug: string
+  title: string
+  description: string | null
+  modules: ModuleSummary[]
+}

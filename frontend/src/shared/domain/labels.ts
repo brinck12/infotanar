@@ -1,4 +1,4 @@
-import type { LanguageKey, Level } from '../../types'
+import type { LanguageKey, LessonProgressStatus, Level } from '../../types'
 
 export const LANGUAGE_LABEL: Readonly<Record<LanguageKey, string>> = {
   python: 'Python 3',
@@ -8,4 +8,10 @@ export const LANGUAGE_LABEL: Readonly<Record<LanguageKey, string>> = {
 export const LEVEL_LABEL: Readonly<Record<Level, string>> = {
   kozep: 'Középszint',
   emelt: 'Emelt szint',
+}
+
+export const LESSON_STATUS_LABEL: Readonly<Record<LessonProgressStatus, string>> = {
+  not_started: 'Nem kezdted el',
+  in_progress: 'Folyamatban',
+  completed: 'Teljesítve',
 }

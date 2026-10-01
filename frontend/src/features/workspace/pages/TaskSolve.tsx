@@ -8,6 +8,7 @@ import { LANGUAGE_LABEL, LEVEL_LABEL } from '../../../shared/domain/labels'
 import { PageLoader } from '../../../shared/ui/PageLoader'
 import type { LanguageKey, RunRequest, TaskDetail, UnlockedTaskDetail } from '../../../types'
 import { catalogKeys, taskQuery } from '../../catalog/api'
+import { progressKeys } from '../../progress/api'
 import { runCode, submitCode } from '../api'
 import { CodeEditor } from '../components/CodeEditor'
 import { Paywall } from '../components/Paywall'
@@ -84,6 +85,10 @@ function Workspace({ task }: { task: UnlockedTaskDetail }) {
     // a feladatot újratöltjük, és a szülő a zárolt nézetre vált.
     onError: (error) => {
       if (zarolasOka(error)) void queryClient.invalidateQueries({ queryKey: catalogKeys.task(task.id) })
+    },
+    // Egy beadás (akár sikertelen) a lecke állapotát is változtathatja (#28).
+    onSuccess: (_, { kind }) => {
+      if (kind === 'submit') void queryClient.invalidateQueries({ queryKey: progressKeys.all })
     },
   })
 
