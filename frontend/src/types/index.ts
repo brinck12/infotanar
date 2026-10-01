@@ -53,6 +53,24 @@ interface TaskDetailBase {
   hidden_test_case_count: number
   /** A feladathoz tartozó lecke (a videóhoz); régebbi válaszokban hiányozhat. */
   lesson?: TaskLesson
+  /** Előző / következő a tanulási sorrendben (#145); régebbi válaszokban hiányozhat. */
+  navigation?: TaskNavigation
+}
+
+export interface TaskLink {
+  id: number
+  title: string
+  lesson_id: number
+  /** A néző számára zárolt-e; a feladat oldalán a paywall fogadja. */
+  locked: boolean
+}
+
+export interface TaskNavigation {
+  previous: TaskLink | null
+  /** A következő feladat, akár másik leckében. */
+  next: TaskLink | null
+  /** A feladat leckéjét követő lecke, akkor is, ha nincs feladata. */
+  next_lesson: { slug: string; title: string; locked: boolean } | null
 }
 
 export interface TaskLesson {
@@ -138,6 +156,8 @@ export interface RunResponse {
 
 export interface SubmissionResponse extends RunResponse {
   submission_id: number
+  /** Igaz, ha a lecke ezzel a beadással teljesült először. */
+  lesson_completed?: boolean
 }
 
 export interface RunRequest {
