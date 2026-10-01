@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Jobs;
 
 use App\Enums\SubscriptionStatus;
+use App\Jobs\Concerns\AlertsOperatorOnFailure;
 use App\Models\Subscription;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -18,7 +19,7 @@ use Illuminate\Support\Facades\Log;
  */
 final class ExpireGracePeriods implements ShouldBeUnique, ShouldQueue
 {
-    use Queueable;
+    use AlertsOperatorOnFailure, Queueable;
 
     public function handle(): void
     {
