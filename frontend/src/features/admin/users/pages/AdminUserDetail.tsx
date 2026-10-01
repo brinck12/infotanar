@@ -6,11 +6,12 @@ import { QueryState } from '../../catalog/components/QueryState'
 import { AdminShell, Section } from '../../components/AdminShell'
 import { userQuery, type AdminUserDetail as Detail } from '../api'
 import { AccessBadge } from '../components/AccessBadge'
+import { AccessGrants } from '../components/AccessGrants'
 import { formatDate } from '../format'
 
 const SUBSCRIPTION_STATUS = { active: 'Aktív', past_due: 'Sikertelen megújítás (türelmi idő)' } as const
 
-/** Egy felhasználó áttekintése (#50): hozzáférés és haladás; csak olvasás, fizetési adat nélkül. */
+/** Egy felhasználó áttekintése (#50) és kézi hozzáférése (#51); fizetési adat nélkül. */
 export function AdminUserDetail() {
   const id = Number(useParams().userId)
   const user = useQuery(userQuery(id))
@@ -57,6 +58,10 @@ function UserOverview({ user }: { user: Detail }) {
             {user.access_grant.ends_at ? `, ${formatDate(user.access_grant.ends_at)}-ig` : ', lejárat nélkül'}.
           </p>
         )}
+      </Section>
+
+      <Section title="Kézi prémium hozzáférés">
+        <AccessGrants userId={user.id} />
       </Section>
 
       <Section title="Haladás">
