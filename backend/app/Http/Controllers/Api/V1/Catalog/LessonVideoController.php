@@ -28,6 +28,7 @@ final class LessonVideoController extends Controller
         return response()->json([
             'data' => [
                 'url' => $video->url,
+                'captions_url' => $video->captionsUrl,
                 'expires_at' => $video->expiresAt->toIso8601String(),
             ],
         ])->header('Cache-Control', 'no-store');
@@ -53,6 +54,27 @@ final class LessonVideoController extends Controller
 
         // A BinaryFileResponse alapbol "public": egy kozos cache (proxy, CDN)
         // tovabbadhatna a premium videot. Csak a kero bongeszoje tarolhatja.
+        $response->setPrivate();
+        $response->setMaxAge(600);
+        $response->headers->set('X-Content-Type-Options', 'nosniff');
+
+        return $response;
+    }
+
+    /** A felirat (#111), a videoval azonos alairt, lejaro URL-en at. */
+    public function captions(int $lesson): Response
+    {
+        $model = $this->publishedLesson($lesson);
+        $disk = Storage::disk(Config::string('catalog.video.disk'));
+
+        if ($model->captions_path === null || ! $disk->exists($model->captions_path)) {
+            throw new LessonVideoMissing;
+        }
+
+        $response = $this->isLocal($disk)
+            ? response()->file($disk->path($model->captions_path), ['Content-Type' => 'text/vtt; charset=utf-8'])
+            : $disk->response($model->captions_path, null, ['Content-Type' => 'text/vtt; charset=utf-8']);
+
         $response->setPrivate();
         $response->setMaxAge(600);
         $response->headers->set('X-Content-Type-Options', 'nosniff');

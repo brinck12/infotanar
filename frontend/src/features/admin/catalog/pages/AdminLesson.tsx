@@ -28,6 +28,7 @@ function LessonEditor({ lesson }: { lesson: AdminLesson }) {
     slug: lesson.slug,
     content: lesson.content,
     video_path: lesson.video_path,
+    captions_path: lesson.captions_path,
     is_free: lesson.is_free,
     is_published: lesson.is_published,
   })
@@ -38,7 +39,7 @@ function LessonEditor({ lesson }: { lesson: AdminLesson }) {
 
   function submit(e: FormEvent) {
     e.preventDefault()
-    save.mutate({ ...form, video_path: form.video_path?.trim() || null })
+    save.mutate({ ...form, video_path: form.video_path?.trim() || null, captions_path: form.captions_path?.trim() || null })
   }
 
   return (
@@ -53,7 +54,7 @@ function LessonEditor({ lesson }: { lesson: AdminLesson }) {
       title={lesson.title}
     >
       <Section title="Lecke adatai" aside={<SavedNote mutation={save} />}>
-        <MutationError error={save.error} fields={['title', 'slug', 'content', 'video_path', 'is_free', 'is_published']} />
+        <MutationError error={save.error} fields={['title', 'slug', 'content', 'video_path', 'captions_path', 'is_free', 'is_published']} />
         <form onSubmit={submit} noValidate className="grid gap-4">
           <div className="grid gap-4 sm:grid-cols-2">
             <Field label="Cím" value={form.title} onChange={(e) => set('title', e.target.value)} error={errors.title} />
@@ -74,6 +75,14 @@ function LessonEditor({ lesson }: { lesson: AdminLesson }) {
             value={form.video_path ?? ''}
             onChange={(e) => set('video_path', e.target.value)}
             error={errors.video_path}
+          />
+          <Field
+            label="Felirat elérési útja (WebVTT)"
+            placeholder="pl. python/ciklusok.hu.vtt"
+            hint="Ugyanabban a tárolóban; .vtt fájl. Siket és nagyothalló diákoknak, illetve hang nélküli nézéshez."
+            value={form.captions_path ?? ''}
+            onChange={(e) => set('captions_path', e.target.value)}
+            error={errors.captions_path}
           />
           <div className="flex flex-wrap gap-6">
             <CheckboxField

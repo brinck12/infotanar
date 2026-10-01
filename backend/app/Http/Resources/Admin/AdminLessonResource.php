@@ -21,6 +21,7 @@ final class AdminLessonResource extends JsonResource
             'title' => $this->title,
             'content' => $this->content,
             'video_path' => $this->video_path,
+            'captions_path' => $this->captions_path,
             'position' => $this->position,
             'is_free' => $this->is_free,
             'is_published' => $this->is_published,

@@ -33,6 +33,8 @@ export interface AdminLesson {
   title: string
   content: string | null
   video_path: string | null
+  /** WebVTT felirat (#111) a videóhoz. */
+  captions_path: string | null
   position: number
   is_free: boolean
   is_published: boolean
@@ -90,7 +92,7 @@ export interface LanguageOption {
 
 export type TrackPayload = Pick<AdminTrack, 'slug' | 'title' | 'description' | 'is_published'>
 export type ModulePayload = Pick<AdminModule, 'track_id' | 'slug' | 'title' | 'description'>
-export type LessonPayload = Pick<AdminLesson, 'module_id' | 'slug' | 'title' | 'content' | 'video_path' | 'is_free' | 'is_published'>
+export type LessonPayload = Pick<AdminLesson, 'module_id' | 'slug' | 'title' | 'content' | 'video_path' | 'captions_path' | 'is_free' | 'is_published'>
 export type ExercisePayload = Pick<
   AdminExercise,
   | 'lesson_id'

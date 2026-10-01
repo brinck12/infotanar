@@ -28,6 +28,8 @@ final class LessonRequest extends FormRequest
             'content' => ['sometimes', 'nullable', 'string', 'max:100000'],
             // Relativ utvonal a privat video-taroloban; utvonal-bejaras tiltva.
             'video_path' => ['sometimes', 'nullable', 'string', 'max:500', 'not_regex:/(^\/|\.\.|\\\\)/'],
+            // WebVTT felirat (#111) ugyanott, ugyanazzal az utvonal-szaballyal.
+            'captions_path' => ['sometimes', 'nullable', 'string', 'max:500', 'not_regex:/(^\/|\.\.|\\\\)/', 'ends_with:.vtt'],
             'is_free' => ['sometimes', 'boolean'],
             'is_published' => ['sometimes', 'boolean'],
         ];

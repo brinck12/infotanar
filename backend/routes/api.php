@@ -73,6 +73,10 @@ Route::prefix('v1')->name('api.')->group(function (): void {
         ->whereNumber('lesson')
         ->middleware('signed:relative')
         ->name('lessons.video.stream');
+    Route::get('/lessons/{lesson}/video/captions', [LessonVideoController::class, 'captions'])
+        ->whereNumber('lesson')
+        ->middleware('signed:relative')
+        ->name('lessons.video.captions');
 
     Route::get('/topics', [TopicController::class, 'index'])->name('topics.index');
     Route::get('/tasks', [TaskController::class, 'index'])->name('tasks.index');
