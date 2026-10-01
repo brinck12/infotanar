@@ -186,9 +186,11 @@ cd /var/www/infotanar/backend && php artisan db:seed --force
 | `DEPLOY_USER` | SSH felhasználó (deploy-only user javasolt) |
 | `DEPLOY_SSH_KEY` | a deploy user privát kulcsa (teljes tartalom) |
 | `DEPLOY_PATH` | `/var/www/infotanar` |
+| `DEPLOY_URL` | `https://<domain>`: a deploy utáni smoke check ezen a címen, tanúsítvány-ellenőrzéssel fut |
 
-Ha bármelyik hiányzik, a workflow érthető hibaüzenettel áll le, nem kriptikus
-SSH-hibával.
+Ha az első négy bármelyike hiányzik, a workflow érthető hibaüzenettel áll le,
+nem kriptikus SSH-hibával. `DEPLOY_URL` nélkül a smoke check figyelmeztetéssel,
+titkosítatlan HTTP-n fut.
 
 ---
 
@@ -247,31 +249,38 @@ A deploy usernek jelszó nélkül kell tudnia újratölteni a php-fpm-et
 
 ### 5. nginx
 
-```nginx
-server {
-    listen 80;
-    server_name <domain>;
+Az oldal csak HTTPS-en szolgálható ki: a jelszavak, a bejelentkezési tokenek
+és a Barion visszairányítás nem mehetnek titkosítatlanul. A
+referencia-konfiguráció a repóban van:
 
-    # Frontend: statikus fájlok, SPA fallback
-    root /var/www/infotanar/frontend;
-    index index.html;
+- [`deploy/nginx/infotanar.conf`](deploy/nginx/infotanar.conf): a 80-as port
+  átirányít HTTPS-re; a 443-as kiszolgálja a frontendet (SPA fallback, a
+  hash-elt `/assets/` fájlok tartós cache-elése) és a Laravel API-t.
+- [`deploy/nginx/snippets/infotanar-security-headers.conf`](deploy/nginx/snippets/infotanar-security-headers.conf):
+  HSTS, `X-Frame-Options`, `Referrer-Policy`, `Permissions-Policy` és egy
+  egyelőre csak jelentő (Report-Only) Content-Security-Policy.
 
-    location / {
-        try_files $uri $uri/ /index.html;
-    }
+Telepítés (a `<domain>` átírása után):
 
-    # Backend: Laravel
-    location /api {
-        try_files $uri $uri/ /index.php?$query_string;
-    }
+```bash
+sudo apt install certbot
+sudo mkdir -p /var/www/certbot
 
-    location ~ ^/index\.php$ {
-        root /var/www/infotanar/backend/public;
-        fastcgi_pass unix:/run/php/php8.3-fpm.sock;
-        include fastcgi_params;
-        fastcgi_param SCRIPT_FILENAME /var/www/infotanar/backend/public/index.php;
-    }
+sudo cp deploy/nginx/snippets/infotanar-security-headers.conf /etc/nginx/snippets/
+sudo cp deploy/nginx/infotanar.conf /etc/nginx/sites-available/infotanar
+sudo ln -s /etc/nginx/sites-available/infotanar /etc/nginx/sites-enabled/
 
-    location ~ /\. { deny all; }
-}
+# Első körben csak a 80-as server blokk legyen aktív (a 443-as a még hiányzó
+# tanúsítványfájlok miatt nem töltődne be), majd:
+sudo nginx -t && sudo systemctl reload nginx
+sudo certbot certonly --webroot -w /var/www/certbot -d <domain>
+
+# A tanúsítvány megléte után a 443-as blokk is bekapcsolható:
+sudo nginx -t && sudo systemctl reload nginx
 ```
+
+A megújítást a certbot saját időzítője végzi; megújítás után az nginx-et újra
+kell tölteni (`--deploy-hook "systemctl reload nginx"`).
+
+Ezután a szerver `.env`-jében az `APP_URL` és a `FRONTEND_URL` legyen
+`https://<domain>`, a repóban pedig állítsd be a `DEPLOY_URL` secretet.
