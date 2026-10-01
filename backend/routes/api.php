@@ -27,6 +27,7 @@ use App\Http\Controllers\Api\V1\Billing\PaymentController;
 use App\Http\Controllers\Api\V1\Billing\PlanController;
 use App\Http\Controllers\Api\V1\Billing\SubscriptionController;
 use App\Http\Controllers\Api\V1\Catalog\LanguageController;
+use App\Http\Controllers\Api\V1\Catalog\LessonController;
 use App\Http\Controllers\Api\V1\Catalog\LessonVideoController;
 use App\Http\Controllers\Api\V1\Catalog\TaskController;
 use App\Http\Controllers\Api\V1\Catalog\TopicController;
@@ -75,6 +76,7 @@ Route::prefix('v1')->name('api.')->middleware(RejectInvalidToken::class)->group(
     Route::get('/languages', [LanguageController::class, 'index'])->name('languages.index');
     Route::get('/tracks', [TrackController::class, 'index'])->name('tracks.index');
     Route::get('/tracks/{slug}', [TrackController::class, 'show'])->name('tracks.show');
+    Route::get('/tracks/{trackSlug}/lessons/{lessonSlug}', [LessonController::class, 'show'])->name('tracks.lessons.show');
 
     Route::get('/lessons/{lesson}/video', [LessonVideoController::class, 'show'])
         ->whereNumber('lesson')

@@ -22,7 +22,12 @@ use Illuminate\Http\Request;
  */
 final class TaskController extends Controller
 {
-    private const WITH_TOPIC = ['lesson:id,module_id,title,is_free,video_path', 'lesson.module:id,title,slug'];
+    /** A modul ("topic") es a lecke oldalara visszavezeto ut (kepzesi ag + lecke slug, #143). */
+    private const WITH_TOPIC = [
+        'lesson:id,module_id,slug,title,is_free,video_path',
+        'lesson.module:id,track_id,title,slug',
+        'lesson.module.track:id,slug',
+    ];
 
     public function __construct(private readonly ContentAccess $access) {}
 
