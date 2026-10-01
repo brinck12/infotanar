@@ -41,9 +41,9 @@ export function AccountNav() {
       <Link to="/elofizetes" className={linkClass}>
         Előfizetés
       </Link>
-      <span className="text-sm text-slate-300" data-testid="account-name">
+      <Link to="/fiok" className="text-sm text-slate-300 transition hover:text-slate-100" data-testid="account-name">
         {user.name}
-      </span>
+      </Link>
       <button
         type="button"
         className={linkClass}
