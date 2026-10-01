@@ -32,3 +32,7 @@ frontend/dist/
 
 # Tesztkeretrendszer: szemelyes kornyezet-felulirasok
 tests/config/environments/*.local.env
+
+# A Laravel a keretrendszer level-sablonjainak feluliarasat a resources/views/vendor
+# ala varja; ez nem Composer-fuggoseg, verziokezelni kell (#137).
+!backend/resources/views/vendor/
