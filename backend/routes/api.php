@@ -11,6 +11,7 @@ use App\Http\Controllers\Api\V1\Admin\Catalog\ModuleController as AdminModuleCon
 use App\Http\Controllers\Api\V1\Admin\Catalog\ReorderController;
 use App\Http\Controllers\Api\V1\Admin\Catalog\TestCaseController;
 use App\Http\Controllers\Api\V1\Admin\Catalog\TrackController as AdminTrackController;
+use App\Http\Controllers\Api\V1\Admin\InvoiceController as AdminInvoiceController;
 use App\Http\Controllers\Api\V1\Admin\UserAccountController;
 use App\Http\Controllers\Api\V1\Admin\UserController as AdminUserController;
 use App\Http\Controllers\Api\V1\Auth\CurrentUserController;
@@ -145,6 +146,11 @@ Route::prefix('v1')->name('api.')->group(function (): void {
         // Tesztesetek (#46): letrehozas/lista a feladat alatt, a tobbi kozvetlenul.
         Route::put('/exercises/{exercise}/test-cases/order', [TestCaseController::class, 'reorder'])->name('test-cases.order');
         Route::apiResource('exercises.test-cases', TestCaseController::class)->shallow()->parameters(['test-cases' => 'testCase']);
+
+        // Elakadt szamlak (#103).
+        Route::get('/invoices', [AdminInvoiceController::class, 'index'])->name('invoices.index');
+        Route::put('/invoices/{invoice}/buyer', [AdminInvoiceController::class, 'updateBuyer'])->name('invoices.buyer');
+        Route::post('/invoices/{invoice}/retry', [AdminInvoiceController::class, 'retry'])->name('invoices.retry');
 
         Route::middleware('can:manageAccount,user')->group(function (): void {
             Route::get('/users/{user}/export', [UserAccountController::class, 'export'])->name('users.export');

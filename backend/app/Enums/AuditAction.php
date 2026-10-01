@@ -19,4 +19,7 @@ enum AuditAction: string
 
     case SubscriptionCancelScheduled = 'subscription.cancel_scheduled';
     case SubscriptionResumed = 'subscription.resumed';
+
+    case InvoiceBuyerCorrected = 'invoice.buyer_corrected';
+    case InvoiceRetried = 'invoice.retried';
 }

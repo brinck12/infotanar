@@ -12,6 +12,7 @@ return [
     'not_canceling' => 'Az előfizetésed nincs lemondva, nincs mit visszavonni.',
     'invoice_not_ready' => 'Ehhez a fizetéshez még nem készült el a számla. Általában néhány percen belül megérkezik e-mailben is.',
     'invoice_unavailable' => 'A számla most nem tölthető le. Próbáld újra később; e-mailben is megkaptad.',
+    'invoice_already_issued' => 'Ez a számla már elkészült; kiállított számlát nem lehet módosítani vagy újra kiállítani.',
     'billing_profile_missing' => 'Fizetés előtt add meg a számlázási adataidat.',
 
     'validation' => [

@@ -9,6 +9,7 @@ export interface Crumb {
 const ADMIN_SECTIONS = [
   { to: '/admin/tananyag', label: 'Tananyag' },
   { to: '/admin/felhasznalok', label: 'Felhasználók' },
+  { to: '/admin/szamlak', label: 'Számlák' },
 ] as const
 
 /** Admin oldalkeret: morzsamenü, cím és a tartalom. */
