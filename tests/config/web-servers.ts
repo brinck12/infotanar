@@ -27,8 +27,13 @@ const judge0Mock: WebServer = {
   env: { JUDGE0_MOCK_PORT: String(env.JUDGE0_MOCK_PORT) },
 }
 
+/** Alapbol eldobhato sqlite fajl; API_DATABASE_URL megadasakor az eles motorral egyezo MySQL. */
+const backendDatabase: Record<string, string> = env.API_DATABASE_URL
+  ? { DB_CONNECTION: 'mysql', DB_URL: env.API_DATABASE_URL }
+  : { DB_CONNECTION: 'sqlite', DB_DATABASE: 'database/testing.sqlite' }
+
 /**
- * Valodi Laravel backend sqlite fixture adatbazissal
+ * Valodi Laravel backend fixture adatbazissal
  * (backend/database/seeders/ApiTestSeeder.php).
  *
  * "php artisan serve" egy kulon gyerekfolyamatkent inditja a valodi PHP
@@ -51,8 +56,7 @@ const backend: WebServer = {
     // Csak a helyi, eldobhato teszt-backendhez; nem titok.
     APP_KEY: 'base64:IuoO2O2E2ePTfNKZ3XNlVF5ZfvMJM5zld0sDIFlKhQ8=',
     APP_DEBUG: 'true',
-    DB_CONNECTION: 'sqlite',
-    DB_DATABASE: 'database/testing.sqlite',
+    ...backendDatabase,
     SESSION_DRIVER: 'array',
     // Nem "array": a beepitett PHP szerver kerelmenkent uj folyamatban
     // fut, egy in-memory cache nem elne tul egy kerelmet, es a rate-limit
