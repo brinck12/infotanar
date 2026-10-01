@@ -16,6 +16,7 @@
     "import/no-cycle": "error",
     "react/react-in-jsx-scope": "off",
     "jsx-a11y/prefer-tag-over-role": "off",
+    "jsx-a11y/no-noninteractive-tabindex": ["error", { "roles": ["region"], "tags": [] }],
     "import/no-named-as-default-member": "off",
     "import/no-unassigned-import": ["error", { "allow": ["**/*.css"] }]
   }
