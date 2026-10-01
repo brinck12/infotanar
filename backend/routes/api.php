@@ -37,9 +37,12 @@ use App\Http\Controllers\Api\V1\Execution\SubmissionController;
 use App\Http\Controllers\Api\V1\HealthController;
 use App\Http\Controllers\Api\V1\Progress\ProgressController;
 use App\Http\Controllers\Api\V1\ReadinessController;
+use App\Http\Middleware\RejectInvalidToken;
 use Illuminate\Support\Facades\Route;
 
-Route::prefix('v1')->name('api.')->group(function (): void {
+// Minden vegpontra: a kuldott, de mar ervenytelen token 401, akkor is, ha a
+// vegpont vendegkent is hivhato (kulonben a lejart munkamenet csendben vendegge valna, #136).
+Route::prefix('v1')->name('api.')->middleware(RejectInvalidToken::class)->group(function (): void {
     Route::get('/health', HealthController::class)->name('health');
     Route::get('/health/ready', ReadinessController::class)->middleware('throttle:30,1')->name('health.ready');
 
