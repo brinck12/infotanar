@@ -3,7 +3,7 @@ import { useState } from 'react'
 import ReactMarkdown from 'react-markdown'
 import { Link, useParams } from 'react-router-dom'
 import remarkGfm from 'remark-gfm'
-import { hibaUzenet, zarolasOka } from '../../../shared/api/errors'
+import { hibaUzenet, mezoHibak, zarolasOka } from '../../../shared/api/errors'
 import { LANGUAGE_LABEL, LEVEL_LABEL } from '../../../shared/domain/labels'
 import { useMediaQuery } from '../../../shared/hooks/useMediaQuery'
 import { usePersistentState } from '../../../shared/hooks/usePersistentState'
@@ -15,12 +15,14 @@ import { catalogKeys, taskQuery } from '../../catalog/api'
 import { progressKeys } from '../../progress/api'
 import { runCode, submitCode } from '../api'
 import { CodeEditor, type EditorReplacement } from '../components/CodeEditor'
+import { CustomInputBox } from '../components/CustomInputBox'
 import { LessonVideo } from '../components/LessonVideo'
 import { Paywall } from '../components/Paywall'
 import { ResetCodeButton } from '../components/ResetCodeButton'
 import { ResultPanel } from '../components/ResultPanel'
 import { WorkspaceTabs, type WorkspaceView } from '../components/WorkspaceTabs'
 import { useCodeDraft } from '../useCodeDraft'
+import { useCustomInput } from '../useCustomInput'
 
 type Mode = 'run' | 'submit'
 
@@ -102,6 +104,9 @@ function Workspace({ task }: { task: UnlockedTaskDetail }) {
   // A szerkesztő a saját tartalmának gazdája; a tartalomcserét (nyelvváltás,
   // visszaállítás) sorszámozott kéréssel adjuk át neki.
   const [replacement, setReplacement] = useState<EditorReplacement>({ value: code, seq: 0, undoable: false })
+  const customInput = useCustomInput(userKey, task.id)
+  // SQL-nél a "bemenet" a teszteset adatkészlete, saját bemenet ott nincs (a backend is elutasítja).
+  const customRun = customInput.open && language !== 'sql'
   const [mode, setMode] = useState<Mode>('run')
   const wide = useMediaQuery(WIDE_LAYOUT)
   // Keskeny nézetben (#30) melyik fül látszik; a leírással kezdünk.
@@ -139,7 +144,9 @@ function Workspace({ task }: { task: UnlockedTaskDetail }) {
 
   function execute(kind: Mode) {
     setMode(kind)
-    execution.mutate({ kind, payload: { task_id: task.id, language, source_code: code } })
+    // Csak a Futtatás használja a saját bemenetet; a Beadás mindig a teszteseteken fut.
+    const stdin = kind === 'run' && customRun ? { stdin: customInput.text } : {}
+    execution.mutate({ kind, payload: { task_id: task.id, language, source_code: code, ...stdin } })
   }
 
   const running = execution.isPending
@@ -196,6 +203,16 @@ function Workspace({ task }: { task: UnlockedTaskDetail }) {
         <div className="ml-auto flex gap-2">
           <button
             type="button"
+            aria-pressed={customRun}
+            disabled={language === 'sql'}
+            title={language === 'sql' ? 'SQL-feladatnál nem adható meg saját bemenet.' : undefined}
+            onClick={() => customInput.setOpen(!customInput.open)}
+            className="rounded-lg border border-slate-700 px-4 py-1.5 text-sm font-medium text-slate-200 transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50 aria-pressed:border-sky-500 aria-pressed:bg-sky-950 aria-pressed:text-sky-200"
+          >
+            Saját bemenet
+          </button>
+          <button
+            type="button"
             onClick={() => execute('run')}
             disabled={running}
             className="rounded-lg border border-slate-700 bg-slate-800 px-4 py-1.5 text-sm font-medium text-slate-100 transition hover:bg-slate-700 disabled:cursor-not-allowed disabled:opacity-50"
@@ -222,6 +239,15 @@ function Workspace({ task }: { task: UnlockedTaskDetail }) {
       <div className="h-[420px]">
         <CodeEditor language={language} initialValue={code} onChange={setCode} replace={replacement} readOnly={running} />
       </div>
+
+      {customRun && (
+        <CustomInputBox
+          value={customInput.text}
+          error={mezoHibak(execution.error).stdin}
+          disabled={running}
+          onChange={customInput.setText}
+        />
+      )}
 
       <ResultPanel
         loading={running}

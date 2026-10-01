@@ -28,6 +28,11 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->alias(['admin' => EnsureUserIsAdmin::class]);
 
+        // A `stdin` szokozeit es sortoreseit nem szabad levagni: a program pontosan azt a
+        // bemenetet kapja, amit a diak (vagy a teszteset) megadott. A `source_code`
+        // es a tobbi szoveg tovabbra is trimmelt.
+        $middleware->trimStrings(except: ['stdin']);
+
         // A jogosultsag-ellenorzes a route model binding ELOTT fusson, kulonben egy
         // nem-admin a 404/403 kulonbsegbol kideritheti, mely azonositok leteznek.
         $middleware->prependToPriorityList(before: SubstituteBindings::class, prepend: EnsureUserIsAdmin::class);

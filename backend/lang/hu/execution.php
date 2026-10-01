@@ -13,6 +13,7 @@ return [
         'timed_out' => 'A kódfuttató szolgáltatás nem válaszolt időben. Próbáld újra később.',
     ],
     'error_status_label' => 'Hiba',
+    'custom_input_not_for_sql' => 'SQL-feladatnál nem adható meg saját bemenet: az adatokat a feladat tesztesetei adják.',
     'sql_dot_command' => 'A megoldás csak SQL utasításokat tartalmazhat (ponttal kezdődő sqlite-parancsokat nem).',
     'verdicts' => [
         'accepted' => 'Elfogadva',
@@ -22,5 +23,6 @@ return [
         'runtime_error' => 'Futásidejű hiba',
         'system_error' => 'Rendszerhiba',
         'constraint_violation' => 'Szabálysértés',
+        'completed' => 'Lefutott',
     ],
 ];

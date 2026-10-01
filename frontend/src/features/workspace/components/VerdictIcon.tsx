@@ -54,6 +54,13 @@ export function VerdictIcon({ verdict, className = 'h-5 w-5' }: { verdict: Verdi
           <path d="m7.5 7.5 5 5" />
         </svg>
       )
+    case 'completed':
+      return (
+        <svg {...common}>
+          <circle cx="10" cy="10" r="8" />
+          <path d="m8.2 6.8 5 3.2-5 3.2V6.8Z" />
+        </svg>
+      )
     case 'system_error':
       return (
         <svg {...common}>
