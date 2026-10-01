@@ -16,6 +16,7 @@ import { progressKeys } from '../../progress/api'
 import { runCode, submitCode } from '../api'
 import { CodeEditor } from '../components/CodeEditor'
 import { Paywall } from '../components/Paywall'
+import { ResetCodeButton } from '../components/ResetCodeButton'
 import { ResultPanel } from '../components/ResultPanel'
 import { WorkspaceTabs, type WorkspaceView } from '../components/WorkspaceTabs'
 
@@ -111,6 +112,14 @@ function Workspace({ task }: { task: UnlockedTaskDetail }) {
     },
   })
 
+  const starterCode = task.starter_code[language] ?? ''
+
+  /** #32: a jelenlegi nyelv pontos kiinduló kódja; a korábbi eredmény is eltűnik. */
+  function resetCode() {
+    setCode(starterCode)
+    execution.reset()
+  }
+
   function changeLanguage(next: LanguageKey) {
     setLanguage(next)
     setCode(task.starter_code[next] ?? '')
@@ -168,6 +177,8 @@ function Workspace({ task }: { task: UnlockedTaskDetail }) {
             ))}
           </select>
         </label>
+
+        <ResetCodeButton dirty={code !== starterCode} disabled={running} onReset={resetCode} />
 
         <div className="ml-auto flex gap-2">
           <button
