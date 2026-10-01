@@ -9,6 +9,7 @@ import { CheckboxField, Field, SelectField, SubmitButton, TextAreaField } from '
 import type { LanguageKey, Level } from '../../../../types'
 import { CodeEditor } from '../../../workspace/components/CodeEditor'
 import {
+  DEFAULT_COMPARISON,
   exerciseQuery,
   languagesQuery,
   lessonQuery,
@@ -19,6 +20,7 @@ import {
   type LanguageOption,
 } from '../api'
 import { AdminShell, Section } from '../../components/AdminShell'
+import { ComparisonEditor } from '../components/ComparisonEditor'
 import { ConstraintEditor } from '../components/ConstraintEditor'
 import { MutationError, QueryState } from '../components/QueryState'
 import { TestCaseManager } from '../components/TestCaseManager'
@@ -50,7 +52,7 @@ function LessonContext({ lessonId, children }: { lessonId: number; children: (le
 }
 
 /** Az űrlapon megjelenített mezőhibák; minden más a szakasz tetején. */
-const EXERCISE_FIELDS = ['title', 'description', 'level', 'difficulty', 'allowed_languages', 'allowed_languages.0', 'is_published', 'sql_order_sensitive', 'constraints', 'starter_code.python', 'starter_code.csharp', 'starter_code.sql'] as const
+const EXERCISE_FIELDS = ['title', 'description', 'level', 'difficulty', 'allowed_languages', 'allowed_languages.0', 'is_published', 'sql_order_sensitive', 'constraints', 'comparison', 'comparison.mode', 'comparison.abs_tol', 'comparison.rel_tol', 'comparison.case_insensitive', 'comparison.ignore_blank_lines', 'starter_code.python', 'starter_code.csharp', 'starter_code.sql'] as const
 
 const LEVEL_OPTIONS = (Object.keys(LEVEL_LABEL) as Level[]).map((level) => ({ value: level, label: LEVEL_LABEL[level] }))
 const DIFFICULTY_OPTIONS = [1, 2, 3, 4, 5].map((n) => ({ value: String(n), label: `${n} ${'★'.repeat(n)}` }))
@@ -68,6 +70,7 @@ function ExerciseEditor({ lesson, exercise }: { lesson: AdminLesson; exercise: A
     allowed_languages: exercise?.allowed_languages ?? ['python'],
     starter_code: exercise?.starter_code ?? {},
     constraints: exercise?.constraints ?? { require: [], forbid: [] },
+    comparison: exercise?.comparison ?? DEFAULT_COMPARISON,
     sql_order_sensitive: exercise?.sql_order_sensitive ?? false,
     is_published: exercise?.is_published ?? false,
   }))
@@ -227,6 +230,13 @@ function ExerciseEditor({ lesson, exercise }: { lesson: AdminLesson; exercise: A
             error={errors.constraints}
           />
         </Section>
+
+        {/* SQL-feladatnál a saját (CSV) összevetés dönt, ott ez a beállítás nem számít. */}
+        {form.allowed_languages.some((language) => language !== 'sql') && (
+          <Section title="Kimenet összevetése">
+            <ComparisonEditor value={form.comparison} onChange={(comparison) => set('comparison', comparison)} errors={errors} />
+          </Section>
+        )}
 
         <div className="flex items-center gap-3">
           <SubmitButton busy={save.isPending} fullWidth={false}>

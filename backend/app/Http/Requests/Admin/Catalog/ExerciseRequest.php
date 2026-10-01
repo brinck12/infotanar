@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Requests\Admin\Catalog;
 
+use App\Http\Requests\Concerns\ValidatesComparisonSettings;
 use App\Models\Exercise;
 use App\Rules\ValidConstraintSet;
 use Closure;
@@ -15,6 +16,8 @@ use Illuminate\Validation\Validator;
 /** POST: minden kotelezo mezo kell; PATCH: csak a megadott mezok valtoznak (lesson_id = athelyezes). */
 final class ExerciseRequest extends FormRequest
 {
+    use ValidatesComparisonSettings;
+
     /** @return array<string, mixed> */
     public function rules(): array
     {
@@ -32,6 +35,7 @@ final class ExerciseRequest extends FormRequest
             'starter_code' => ['sometimes', 'nullable', 'array'],
             'starter_code.*' => ['nullable', 'string', 'max:20000'],
             'constraints' => ['sometimes', 'nullable', 'array', new ValidConstraintSet],
+            ...$this->comparisonRules(),
             'sql_order_sensitive' => ['sometimes', 'boolean'],
             'is_published' => ['sometimes', 'boolean'],
         ];

@@ -75,6 +75,8 @@ export interface UnlockedTaskDetail extends TaskDetailBase {
   description: string
   starter_code: Partial<Record<LanguageKey, string>>
   example_test_cases: ExampleTestCase[]
+  /** Hogyan vetjük össze a kimenetet, magyarul (#155); pontos összevetésnél üres. Régebbi válaszokban hiányozhat. */
+  comparison_rules?: string[]
 }
 
 /** Zárolt (fizetős) feladat: a backend a tartalmat nem küldi el, csak az okot. */
@@ -120,6 +122,8 @@ export interface TestResult {
   expected?: string
   stderr?: string
   compile_output?: string
+  /** Mi tért el, ha a feladat tűréses összevetést használ (#155); csak látható tesztesetnél jön. */
+  difference?: string
   error?: string
 }
 

@@ -13,6 +13,19 @@ return [
         'timed_out' => 'A kódfuttató szolgáltatás nem válaszolt időben. Próbáld újra később.',
     ],
     'error_status_label' => 'Hiba',
+    // Kimenet-osszevetes (#155): a feladat leirasa alatt latszo szabalyok, es az elteres leirasa.
+    'comparison' => [
+        'tokens' => 'A szóközök és a sortörések számától eltekintünk: csak a kimenet elemeinek sorrendje számít.',
+        'numeric' => 'A számokat :tolerance fogadjuk el (tizedesponttal és tizedesvesszővel is).',
+        'numeric_exact' => 'A számokat az értékük szerint hasonlítjuk össze, tehát a 3,50 és a 3.5 ugyanaz.',
+        'abs_tol' => ':tolerance pontossággal',
+        'rel_tol' => 'legfeljebb :percent%-os relatív eltéréssel',
+        'or' => ' vagy ',
+        'ignore_blank_lines' => 'Az üres sorok számától eltekintünk.',
+        'case_insensitive' => 'A kis- és nagybetűk közötti különbséget nem vesszük figyelembe.',
+        'token_count' => 'A kimenet :actual elemből áll, de :expected elem az elvárt.',
+        'token_differs' => ':position. elem: ezt kaptuk: „:actual”, ezt vártuk: „:expected”.',
+    ],
     'sql_dot_command' => 'A megoldás csak SQL utasításokat tartalmazhat (ponttal kezdődő sqlite-parancsokat nem).',
     'verdicts' => [
         'accepted' => 'Elfogadva',

@@ -9,6 +9,8 @@ use App\Exceptions\Judge0Exception;
 use App\Models\Exercise;
 use App\Models\TestCase;
 use App\Services\Constraints\ConstraintChecker;
+use App\Services\Execution\Comparison\Comparison;
+use App\Services\Execution\Comparison\OutputComparators;
 use App\Services\Execution\EvaluationResult;
 use App\Services\Execution\HiddenResultRedactor;
 use App\Services\Execution\Sql\SqlProgram;
@@ -34,6 +36,7 @@ final readonly class SolutionEvaluator
         private SqlResultComparator $sqlComparator,
         private HiddenResultRedactor $redactor,
         private ConstraintChecker $constraints,
+        private OutputComparators $comparators,
     ) {}
 
     /** @param Collection<int, TestCase> $testCases */
@@ -74,11 +77,17 @@ final readonly class SolutionEvaluator
                 break;
             }
 
-            $verdict = $language === self::SQL
-                ? $this->sqlVerdict($run, $testCase, $exercise->sql_order_sensitive)
-                : Verdict::fromJudge0($run['status_id'], $this->outputMatches($run['stdout'], $testCase->expected_stdout));
+            // SQL-nel a sajat osszevetes dont (SqlResultComparator); a tobbi nyelvnel a feladat beallitasa.
+            if ($language === self::SQL) {
+                $verdict = $this->sqlVerdict($run, $testCase, $exercise->sql_order_sensitive);
+                $difference = null;
+            } else {
+                $comparison = $this->compare($exercise, $run['stdout'], $testCase->expected_stdout);
+                $verdict = Verdict::fromJudge0($run['status_id'], $comparison->matches);
+                $difference = $comparison->difference;
+            }
             $verdicts[] = $verdict;
-            $results[] = $this->buildResult($testCase, $run, $verdict);
+            $results[] = $this->buildResult($testCase, $run, $verdict, $difference);
 
             // Forditasi hiba minden tesztesetnel ugyanaz lenne: a tobbit nem futtatjuk.
             if ($verdict === Verdict::CompilationError) {
@@ -114,31 +123,20 @@ final readonly class SolutionEvaluator
         );
     }
 
-    /**
-     * Kimenet-osszevetes. A sorvegi whitespace-t es a zaro ures sorokat
-     * normalizaljuk, mert ezek erettsegi-feladatoknal nem relevans elteresek.
-     */
-    public function outputMatches(string $actual, string $expected): bool
+    /** Kimenet-osszevetes a feladat beallitasai szerint (#155); alapesetben soronkenti, pontos. */
+    private function compare(Exercise $exercise, string $actual, string $expected): Comparison
     {
-        return $this->normalize($actual) === $this->normalize($expected);
-    }
+        $settings = $exercise->comparison;
 
-    private function normalize(string $value): string
-    {
-        $lines = array_map(rtrim(...), explode("\n", str_replace("\r\n", "\n", $value)));
-
-        while ($lines !== [] && end($lines) === '') {
-            array_pop($lines);
-        }
-
-        return implode("\n", $lines);
+        return $this->comparators->for($settings)->compare($actual, $expected, $settings);
     }
 
     /**
      * @param  Judge0Run  $run
+     * @param  string|null  $difference  Mi tert el (tolerans osszevetesnel); rejtett tesztesetnel a redactor eldobja.
      * @return array<string, mixed>
      */
-    private function buildResult(TestCase $testCase, array $run, Verdict $verdict): array
+    private function buildResult(TestCase $testCase, array $run, Verdict $verdict, ?string $difference = null): array
     {
         $result = [
             'test_case_id' => $testCase->id,
@@ -159,7 +157,7 @@ final readonly class SolutionEvaluator
             'expected' => $testCase->expected_stdout,
             'stderr' => $run['stderr'],
             'compile_output' => $run['compile_output'],
-        ];
+        ] + ($difference === null || $verdict === Verdict::Accepted ? [] : ['difference' => $difference]);
     }
 
     /** @return array<string, mixed> */

@@ -134,6 +134,11 @@ A `/run` és a `/submissions` **IP-nként 10 kérés / perc** rate limit alatt �
   és az elvárt kimenet összevetése is szerveroldalon történik.
 - Az összevetést a `TaskEvaluator` végzi, nem a Judge0 `expected_output` mezője.
   A sorvégi whitespace-t és a záró üres sorokat normalizáljuk.
+  Feladatonként állítható (`exercises.comparison`): `exact` (alapértelmezett, a fenti viselkedés),
+  `tokens` (szóközök mentén elemekre bontva) és `numeric` (a számok tűréssel, tizedesponttal vagy
+  -vesszővel); opció: kis/nagybetű, üres sorok. Egy módhoz egy `OutputComparator` osztály tartozik
+  (`app/Services/Execution/Comparison`). A diák a feladat alatt látja a szabályt (`comparison_rules`),
+  és tűréses összevetésnél a látható hibás tesztesetnél azt is, melyik elem tért el (`difference`).
 - **Rejtett teszteseteknél a válasz csak PASS/FAIL**, kimenet nélkül — különben a
   rejtett bemenetek visszafejthetők lennének.
 - A nyelvek Judge0 ID-ját futásidőben a `/languages` végpontról oldjuk fel

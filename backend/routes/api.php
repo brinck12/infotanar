@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Http\Controllers\Api\V1\Account\AccountController;
 use App\Http\Controllers\Api\V1\Admin\AccessGrantController;
+use App\Http\Controllers\Api\V1\Admin\Catalog\ComparisonCheckController;
 use App\Http\Controllers\Api\V1\Admin\Catalog\ConstraintOptionsController;
 use App\Http\Controllers\Api\V1\Admin\Catalog\ExerciseController as AdminExerciseController;
 use App\Http\Controllers\Api\V1\Admin\Catalog\LessonController as AdminLessonController;
@@ -137,6 +138,8 @@ Route::prefix('v1')->name('api.')->group(function (): void {
         Route::apiResource('exercises', AdminExerciseController::class);
 
         Route::get('/constraint-options', ConstraintOptionsController::class)->name('constraint-options');
+        // "Kiprobalom" a kimenet-osszevetes beallitasaihoz (#155): allapotmentes.
+        Route::post('/comparison/check', ComparisonCheckController::class)->middleware('throttle:60,1')->name('comparison.check');
 
         // Felhasznalok attekintese (#50), csak olvasas.
         Route::get('/users', [AdminUserController::class, 'index'])->name('users.index');

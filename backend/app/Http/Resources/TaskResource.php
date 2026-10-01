@@ -50,6 +50,8 @@ final class TaskResource extends JsonResource
             'description' => $this->when($unlocked, fn () => $this->description),
             // A diaknak elore lathato szabalyok, magyarul (pl. "for ciklust kell használnod").
             'constraints' => $this->when($unlocked, fn (): array => $this->constraints->describe()),
+            // Hogyan vetjuk ossze a kimenetet (#155), magyarul; a pontos (alapertelmezett) osszevetesnel ures.
+            'comparison_rules' => $this->when($unlocked, fn (): array => $this->comparison->describe()),
             // Ures objektum (nem ures tomb), hogy a kliens mindig map-kent kezelhesse.
             'starter_code' => $this->when($unlocked, fn () => $this->starter_code ?: new stdClass),
             'example_test_cases' => $this->when(
