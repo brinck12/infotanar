@@ -196,6 +196,55 @@ jobs:
           php artisan migrate --force
           php artisan db:seed --force
 
+      # A mentés annyit ér, amennyire vissza lehet állítani belőle (#129): a
+      # valódi mentőszkript fut egy helyi mappába mint "távoli" tárolóba, majd a
+      # dumpot üres adatbázisba töltjük vissza, és összevetjük a sorok számát.
+      - name: Mentés és visszaállítási próba
+        run: |
+          sudo apt-get install -y --no-install-recommends rclone >/dev/null
+
+          storage="$RUNNER_TEMP/private"
+          remote="$RUNNER_TEMP/offsite"
+          mkdir -p "$storage/invoices/2026" "$remote"
+          echo "pdf" > "$storage/invoices/2026/TESZT-1.pdf"
+
+          cat > "$RUNNER_TEMP/backup.env" <<EOF
+          DB_NAME=infotanar_test
+          DB_USER=root
+          DB_PASSWORD=root
+          PRIVATE_STORAGE_DIR=$storage
+          BACKUP_REMOTE=$remote
+          EOF
+
+          bash deploy/backup/infotanar-backup.sh "$RUNNER_TEMP/backup.env"
+
+          test -f "$remote/invoices/2026/TESZT-1.pdf"
+          test -s "$storage/backup-last-success"
+
+          mysql() { command mysql -h 127.0.0.1 -uroot -proot -N "$@"; }
+          mysql -e "CREATE DATABASE restore_drill"
+          gunzip -c "$remote"/db/daily/infotanar_test-*.sql.gz | mysql restore_drill
+
+          for table in migrations exercises test_cases; do
+            original=$(mysql -e "SELECT COUNT(*) FROM infotanar_test.$table")
+            restored=$(mysql -e "SELECT COUNT(*) FROM restore_drill.$table")
+            echo "$table: eredeti=$original visszaállított=$restored"
+            [ "$original" -gt 0 ] && [ "$original" = "$restored" ]
+          done
+
+      # Új migráció szimulálása: az utolsó visszagörgetése után van mit futtatni,
+      # tehát a deploy előtti mentésnek el kell készülnie.
+      - name: Migráció előtti mentés
+        working-directory: backend
+        run: |
+          php artisan db:snapshot-before-migrate | tee /dev/stderr | grep -q "nincs futtatandó migráció"
+
+          php artisan migrate:rollback --step=1 --force
+          php artisan db:snapshot-before-migrate
+          ls storage/app/private/db-snapshots/*.sql.gz
+          gunzip -t storage/app/private/db-snapshots/*.sql.gz
+          php artisan migrate --force
+
       - name: Teszt függőségek telepítése
         working-directory: tests
         run: npm ci

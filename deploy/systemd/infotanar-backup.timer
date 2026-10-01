@@ -1,0 +1,13 @@
+# Az infotanar-backup.service ejszakai inditasa (#129).
+
+[Unit]
+Description=InfoTanar nightly backup
+
+[Timer]
+OnCalendar=*-*-* 02:30:00
+# Ha a szerver a megadott idoben allt, a kovetkezo indulaskor potolja.
+Persistent=true
+RandomizedDelaySec=15min
+
+[Install]
+WantedBy=timers.target

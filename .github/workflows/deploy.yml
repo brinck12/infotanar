@@ -147,6 +147,10 @@ jobs:
           php artisan config:clear
           php artisan app:check-config $STRICT_CONFIG_FLAG
 
+          # Ha van futtatando migracio, elotte helyi mentes keszul (az utolso harom
+          # marad meg); ha a mentes nem sikerul, a migracio el sem indul (#129).
+          php artisan db:snapshot-before-migrate
+
           php artisan migrate --force
 
           # Csak akkor seedel, ha meg egyetlen feladat sincs - igy az elso
