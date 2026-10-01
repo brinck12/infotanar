@@ -9,6 +9,8 @@ function page<K extends string>(
 }
 
 export const Home = page(() => import('../features/home/Home'), 'Home')
+export const Curriculum = page(() => import('../features/catalog/pages/Curriculum'), 'Curriculum')
+export const TrackPage = page(() => import('../features/catalog/pages/TrackPage'), 'TrackPage')
 export const TaskList = page(() => import('../features/catalog/pages/TaskList'), 'TaskList')
 export const TaskSolve = page(() => import('../features/workspace/pages/TaskSolve'), 'TaskSolve')
 export const Register = page(() => import('../features/auth/pages/Register'), 'Register')

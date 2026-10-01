@@ -21,10 +21,10 @@ export function Home() {
       </p>
 
       <Link
-        to="/feladatok"
+        to="/tananyag"
         className="mt-8 inline-block rounded-lg bg-sky-700 px-5 py-2.5 font-medium text-white transition hover:bg-sky-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-400"
       >
-        Feladatok böngészése
+        Tananyag megtekintése
       </Link>
 
       <p className="mt-10 text-sm text-slate-400">

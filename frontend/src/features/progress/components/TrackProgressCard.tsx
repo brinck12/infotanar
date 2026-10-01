@@ -3,7 +3,7 @@ import { useId, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { hibaUzenet } from '../../../shared/api/errors'
 import type { LessonProgressStatus, LessonSummary, TrackProgress } from '../../../types'
-import { trackQuery } from '../api'
+import { trackQuery } from '../../catalog/api'
 import { LessonStatusBadge } from './LessonStatusBadge'
 import { ProgressBar } from './ProgressBar'
 
