@@ -59,6 +59,9 @@ export interface TaskLesson {
   id: number
   title: string
   has_video: boolean
+  /** A lecke oldalához vezető út (#143); régebbi válaszokban hiányozhat. */
+  slug?: string
+  track_slug?: string | null
 }
 
 /** Rövid életű, aláírt lejátszási URL (`GET /lessons/{id}/video`). */
@@ -266,6 +269,45 @@ export interface ModuleSummary {
   description: string | null
   lessons: LessonSummary[]
 }
+
+export interface LessonLink {
+  slug: string
+  title: string
+}
+
+export interface LessonExercise extends ExerciseSummary {
+  /** A néző megoldotta-e; vendégnél mindig hamis. */
+  solved: boolean
+}
+
+/** Egy lecke oldala (`GET /tracks/{track}/lessons/{lesson}`). */
+interface LessonDetailBase {
+  id: number
+  slug: string
+  title: string
+  track: LessonLink
+  module: { id: number; title: string | null }
+  is_free: boolean
+  has_video: boolean
+  exercises: LessonExercise[]
+  previous: LessonLink | null
+  next: LessonLink | null
+}
+
+export interface UnlockedLessonDetail extends LessonDetailBase {
+  locked: false
+  /** A tananyag Markdownban; üres, ha a leckéhez még nem készült. */
+  content: string
+}
+
+/** Zárolt lecke: a backend a tananyagot nem küldi el, csak az okot. */
+export interface LockedLessonDetail extends LessonDetailBase {
+  locked: true
+  locked_reason: LockReason
+  locked_message: string
+}
+
+export type LessonDetail = UnlockedLessonDetail | LockedLessonDetail
 
 /** Egy képzési ág a listában (`GET /tracks`). */
 export interface TrackSummary {
