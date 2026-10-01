@@ -6,6 +6,7 @@ namespace App\Actions\Billing;
 
 use App\Enums\PaymentPurpose;
 use App\Enums\PaymentStatus;
+use App\Exceptions\Billing\CheckoutNotAllowed;
 use App\Models\Payment;
 use App\Models\Subscription;
 use App\Models\User;
@@ -28,9 +29,16 @@ final readonly class StartHostedPayment
         private PaymentRequestFactory $requests,
     ) {}
 
-    /** @throws BarionException */
+    /**
+     * @throws CheckoutNotAllowed
+     * @throws BarionException
+     */
     public function handle(User $user, PaymentPurpose $purpose, ?Subscription $subscription = null): StartedPayment
     {
+        if (! $user->billingProfile()->exists()) {
+            throw CheckoutNotAllowed::billingProfileMissing();
+        }
+
         // Hianyzo beallitasnal ne maradjon utana ervenytelen fizetes-sor.
         $this->barion->payee();
 

@@ -75,6 +75,9 @@ final readonly class ExportAccountData
                     'created_at' => $subscription->created_at?->toIso8601String(),
                 ])
                 ->all(),
+            'billing_profile' => $user->billingProfile?->only([
+                'customer_type', 'name', 'country', 'postal_code', 'city', 'address_line', 'tax_number',
+            ]),
             // Fizetesek (#14): osszeg, allapot, datumok; a Barion-azonositok belso adatok.
             'payments' => $user->payments()
                 ->oldest('id')

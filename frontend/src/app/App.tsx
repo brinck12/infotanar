@@ -1,7 +1,7 @@
 import { Suspense } from 'react'
 import { BrowserRouter, Link, Route, Routes } from 'react-router-dom'
 import { AccountNav, VerifyEmailBanner } from '../features/auth/components/AccountNav'
-import { GuestOnly } from '../features/auth/guards'
+import { GuestOnly, RequireAuth } from '../features/auth/guards'
 import { PageLoader } from '../shared/ui/PageLoader'
 import { ErrorBoundary } from './ErrorBoundary'
 import { Providers } from './Providers'
@@ -39,6 +39,7 @@ export default function App() {
                     <Route path="/email-megerosites" element={<Pages.VerifyEmail />} />
                     <Route path="/elfelejtett-jelszo" element={<GuestOnly><Pages.ForgotPassword /></GuestOnly>} />
                     <Route path="/jelszo-visszaallitas" element={<Pages.ResetPassword />} />
+                    <Route path="/elofizetes" element={<RequireAuth><Pages.Subscribe /></RequireAuth>} />
                     <Route path="*" element={<NotFound />} />
                   </Routes>
                 </Suspense>

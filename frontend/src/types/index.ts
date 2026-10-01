@@ -135,3 +135,43 @@ export interface ValidationErrorResponse {
   message: string
   errors: Record<string, string[]>
 }
+
+/** Az egyetlen előfizetési csomag (`GET /billing/plan`). */
+export interface Plan {
+  name: string
+  price_huf: number
+  period_months: number
+}
+
+export type CustomerType = 'person' | 'company'
+
+/** Számlázási adatok (#19); a számla ezekből készül. */
+export interface BillingProfile {
+  customer_type: CustomerType
+  name: string
+  country: 'HU'
+  postal_code: string
+  city: string
+  address_line: string
+  tax_number: string | null
+  updated_at: string | null
+}
+
+export type BillingProfilePayload = Omit<BillingProfile, 'country' | 'updated_at'>
+
+export type SubscriptionStatus = 'active' | 'past_due' | 'canceled'
+
+export interface Subscription {
+  status: SubscriptionStatus
+  grants_access: boolean
+  current_period_start: string | null
+  current_period_end: string | null
+  grace_ends_at: string | null
+  cancel_at_period_end: boolean
+}
+
+/** Barion fizetőoldal indítása: ide kell átirányítani a böngészőt. */
+export interface HostedCheckout {
+  checkout_url: string
+  payment_id: string
+}

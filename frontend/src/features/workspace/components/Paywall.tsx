@@ -62,11 +62,18 @@ function PaywallAction({ reason }: { reason: LockReason }) {
         </div>
       )
     case 'subscription_required':
-      // Az online előfizetés a fizetési szolgáltató kiválasztása után érkezik (#12, #14).
       return (
-        <Link to="/feladatok" className="text-sm text-sky-400 hover:underline">
-          Vissza az ingyenes feladatokhoz
-        </Link>
+        <div className="flex flex-wrap items-center gap-4">
+          <Link
+            to="/elofizetes"
+            className="inline-block rounded-lg bg-sky-700 px-5 py-2.5 font-medium text-white transition hover:bg-sky-600"
+          >
+            Előfizetek
+          </Link>
+          <Link to="/feladatok" className="text-sm text-sky-400 hover:underline">
+            Vissza az ingyenes feladatokhoz
+          </Link>
+        </div>
       )
   }
 }

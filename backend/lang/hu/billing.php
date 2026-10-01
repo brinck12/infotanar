@@ -10,4 +10,9 @@ return [
     'not_subscribed' => 'Nincs élő előfizetésed. Előfizetni az Előfizetés oldalon tudsz.',
     'already_canceling' => 'Az előfizetésed lemondása már be van állítva az időszak végére.',
     'not_canceling' => 'Az előfizetésed nincs lemondva, nincs mit visszavonni.',
+    'billing_profile_missing' => 'Fizetés előtt add meg a számlázási adataidat.',
+
+    'validation' => [
+        'tax_number' => 'Érvénytelen adószám. Formátum: 12345678-1-12.',
+    ],
 ];
