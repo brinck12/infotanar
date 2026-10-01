@@ -12,6 +12,7 @@ import {
   exerciseQuery,
   languagesQuery,
   lessonQuery,
+  testCasesQuery,
   type AdminExercise,
   type AdminLesson,
   type ExercisePayload,
@@ -19,6 +20,7 @@ import {
 } from '../api'
 import { AdminShell, Section } from '../components/AdminShell'
 import { MutationError, QueryState } from '../components/QueryState'
+import { TestCaseManager } from '../components/TestCaseManager'
 import { SavedNote } from '../components/SavedNote'
 import { useSaveEntity } from '../useCatalogMutations'
 
@@ -72,6 +74,10 @@ function ExerciseEditor({ lesson, exercise }: { lesson: AdminLesson; exercise: A
   })
   const errors = mezoHibak(save.error)
   const set = <K extends keyof ExercisePayload>(key: K, value: ExercisePayload[K]) => setForm((f) => ({ ...f, [key]: value }))
+  // #48: publikálni csak nyilvános tesztesettel lehet (a /run azokon fut); a backend is ellenőrzi.
+  const testCases = useQuery({ ...testCasesQuery(exercise?.id ?? 0), enabled: exercise !== null })
+  const visibleTestCases = testCases.data?.filter((tc) => !tc.is_hidden).length ?? 0
+  const [publishError, setPublishError] = useState<string | null>(null)
 
   function toggleLanguage(language: LanguageKey, on: boolean) {
     setForm((f) => ({
@@ -82,6 +88,15 @@ function ExerciseEditor({ lesson, exercise }: { lesson: AdminLesson; exercise: A
 
   function submit(e: FormEvent) {
     e.preventDefault()
+    if (form.is_published && visibleTestCases === 0) {
+      setPublishError(
+        exercise
+          ? 'Publikálás előtt adj hozzá legalább egy nyilvános tesztesetet (lent, a Tesztesetek résznél).'
+          : 'Új feladat csak vázlatként menthető: a tesztesetek a létrehozás után adhatók hozzá, utána publikálható.',
+      )
+      return
+    }
+    setPublishError(null)
     // Csak az engedélyezett nyelvek kiinduló kódja megy el.
     const starter = Object.fromEntries(form.allowed_languages.map((l) => [l, form.starter_code[l] ?? '']))
     save.mutate({ ...form, starter_code: starter, sql_order_sensitive: form.allowed_languages.includes('sql') && form.sql_order_sensitive })
@@ -148,7 +163,7 @@ function ExerciseEditor({ lesson, exercise }: { lesson: AdminLesson; exercise: A
               hint="Csak publikált feladat jelenik meg a diákoknak (a leckének és a képzési ágnak is publikáltnak kell lennie)."
               checked={form.is_published}
               onChange={(e) => set('is_published', e.target.checked)}
-              error={errors.is_published}
+              error={publishError ?? errors.is_published}
             />
           </div>
         </Section>
@@ -209,6 +224,13 @@ function ExerciseEditor({ lesson, exercise }: { lesson: AdminLesson; exercise: A
           <SavedNote mutation={save} />
         </div>
       </form>
+
+      {/* Külön űrlapok: nem lehetnek a feladat űrlapján belül. */}
+      {exercise && (
+        <Section title="Tesztesetek">
+          <TestCaseManager exerciseId={exercise.id} />
+        </Section>
+      )}
     </AdminShell>
   )
 }
