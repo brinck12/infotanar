@@ -28,3 +28,4 @@ export const AdminNewExercise = page(() => import('../features/admin/catalog/pag
 export const AdminUsers = page(() => import('../features/admin/users/pages/AdminUsers'), 'AdminUsers')
 export const AdminUserDetail = page(() => import('../features/admin/users/pages/AdminUserDetail'), 'AdminUserDetail')
 export const PaymentReturn = page(() => import('../features/billing/pages/PaymentReturn'), 'PaymentReturn')
+export const AdminInvoices = page(() => import('../features/admin/invoices/pages/AdminInvoices'), 'AdminInvoices')

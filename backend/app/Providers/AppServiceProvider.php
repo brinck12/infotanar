@@ -6,6 +6,7 @@ namespace App\Providers;
 
 use App\Mail\OutboxTransport;
 use App\Models\Exercise;
+use App\Models\Invoice;
 use App\Models\Lesson;
 use App\Models\Module;
 use App\Models\Subscription;
@@ -40,6 +41,7 @@ final class AppServiceProvider extends ServiceProvider
             'exercise' => Exercise::class,
             'test_case' => TestCase::class,
             'subscription' => Subscription::class,
+            'invoice' => Invoice::class,
         ]);
 
         Password::defaults(static fn () => Password::min(8)->letters()->numbers());
