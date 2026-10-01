@@ -19,6 +19,9 @@ export interface TaskTopic {
 }
 
 /** Lista-nézet: leírás nélkül. */
+/** A néző állapota egy feladatnál; amihez még nem adott be megoldást, annál nincs (null). */
+export type ExerciseStatus = 'solved' | 'attempted'
+
 export interface TaskListItem {
   id: number
   title: string
@@ -26,6 +29,8 @@ export interface TaskListItem {
   difficulty: number
   allowed_languages: LanguageKey[]
   topic: TaskTopic
+  /** Csak bejelentkezve érkezik. */
+  my_status?: ExerciseStatus | null
   /** Ingyenes lecke része-e (freemium). */
   is_free?: boolean
   /** A jelenlegi néző számára zárolt-e (fizetős, jogosultság nélkül). */
@@ -55,6 +60,8 @@ interface TaskDetailBase {
   lesson?: TaskLesson
   /** Előző / következő a tanulási sorrendben (#145); régebbi válaszokban hiányozhat. */
   navigation?: TaskNavigation
+  /** Csak bejelentkezve érkezik. */
+  my_status?: ExerciseStatus | null
 }
 
 export interface TaskLink {
@@ -265,6 +272,8 @@ export interface ExerciseSummary {
   level: Level
   difficulty: number
   allowed_languages: LanguageKey[]
+  /** A néző állapota; vendégnél hiányzik vagy null. */
+  my_status?: ExerciseStatus | null
 }
 
 export interface LessonSummary {
@@ -295,11 +304,6 @@ export interface LessonLink {
   title: string
 }
 
-export interface LessonExercise extends ExerciseSummary {
-  /** A néző megoldotta-e; vendégnél mindig hamis. */
-  solved: boolean
-}
-
 /** Egy lecke oldala (`GET /tracks/{track}/lessons/{lesson}`). */
 interface LessonDetailBase {
   id: number
@@ -311,7 +315,7 @@ interface LessonDetailBase {
   has_video: boolean
   /** A néző haladása; vendégnél null. */
   status: LessonProgressStatus | null
-  exercises: LessonExercise[]
+  exercises: ExerciseSummary[]
   previous: LessonLink | null
   next: LessonLink | null
 }

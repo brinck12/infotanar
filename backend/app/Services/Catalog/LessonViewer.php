@@ -9,6 +9,7 @@ use App\Enums\LessonProgressStatus;
 use App\Models\Lesson;
 use App\Models\User;
 use App\Services\Access\ContentAccess;
+use App\Services\Progress\ExerciseStatuses;
 use App\Services\Progress\LessonStatuses;
 
 /**
@@ -22,6 +23,7 @@ final readonly class LessonViewer
         private ContentAccess $access,
         private ?User $user,
         private ?LessonStatuses $statuses,
+        public ExerciseStatuses $exerciseStatuses,
     ) {}
 
     public static function for(?User $user, ContentAccess $access): self
@@ -29,7 +31,7 @@ final readonly class LessonViewer
         // A hozzaferes eldontesehez kello kapcsolatok egyszer toltodnek be, nem leckenkent.
         $user?->loadMissing(['liveSubscription', 'activeAccessGrant']);
 
-        return new self($access, $user, $user === null ? null : LessonStatuses::forUser($user));
+        return new self($access, $user, $user === null ? null : LessonStatuses::forUser($user), ExerciseStatuses::for($user));
     }
 
     public function denial(Lesson $lesson): ?AccessDenial

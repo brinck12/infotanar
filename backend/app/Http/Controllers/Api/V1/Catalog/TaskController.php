@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Api\V1\Catalog;
 
 use App\Actions\Catalog\BuildTaskNavigation;
+use App\Actions\Catalog\ListTasks;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Catalog\ListTasksRequest;
 use App\Http\Resources\TaskResource;
@@ -12,7 +13,7 @@ use App\Http\Resources\TaskSummaryResource;
 use App\Models\Exercise;
 use App\Models\User;
 use App\Services\Access\ContentAccess;
-use Illuminate\Database\Eloquent\Builder;
+use App\Services\Progress\ExerciseStatuses;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -23,33 +24,18 @@ use Illuminate\Http\Request;
  */
 final class TaskController extends Controller
 {
-    /** A modul ("topic") es a lecke oldalara visszavezeto ut (kepzesi ag + lecke slug, #143). */
-    private const WITH_TOPIC = [
-        'lesson:id,module_id,slug,title,is_free,video_path',
-        'lesson.module:id,track_id,title,slug',
-        'lesson.module.track:id,slug',
-    ];
-
     public function __construct(private readonly ContentAccess $access) {}
 
-    public function index(ListTasksRequest $request): JsonResponse
+    public function index(ListTasksRequest $request, ListTasks $listTasks): JsonResponse
     {
-        $user = $this->viewer($request);
-
-        $exercises = Exercise::query()
-            ->published()
-            ->with(self::WITH_TOPIC)
-            ->when($request->topicSlug(), static fn (Builder $query, string $slug) => $query
-                ->whereHas('lesson.module', static fn (Builder $module) => $module->where('slug', $slug)))
-            ->when($request->level(), static fn (Builder $query, string $level) => $query->where('level', $level))
-            ->orderBy('difficulty')
-            ->orderBy('title')
-            ->get();
+        $viewer = $this->viewer($request);
+        $statuses = ExerciseStatuses::for($viewer);
 
         return response()->json([
-            'data' => $exercises->map(fn (Exercise $exercise): TaskSummaryResource => new TaskSummaryResource(
+            'data' => $listTasks->handle($request->filters(), $viewer)->map(fn (Exercise $exercise): TaskSummaryResource => new TaskSummaryResource(
                 $exercise,
-                $this->access->denialFor($user, $exercise->lesson),
+                $this->access->denialFor($viewer, $exercise->lesson),
+                $statuses,
             )),
         ]);
     }
@@ -58,7 +44,7 @@ final class TaskController extends Controller
     {
         $exercise = Exercise::query()
             ->published()
-            ->with([...self::WITH_TOPIC, 'visibleTestCases'])
+            ->with([...ListTasks::WITH_TOPIC, 'visibleTestCases'])
             ->withCount('hiddenTestCases')
             ->findOrFail($task);
 
@@ -68,6 +54,7 @@ final class TaskController extends Controller
             $exercise,
             $this->access->denialFor($viewer, $exercise->lesson),
             $buildNavigation->handle($viewer, $exercise),
+            ExerciseStatuses::for($viewer),
         );
     }
 

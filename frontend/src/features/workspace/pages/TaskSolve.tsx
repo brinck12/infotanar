@@ -144,13 +144,14 @@ function Workspace({ task }: { task: UnlockedTaskDetail }) {
     onError: (error) => {
       if (zarolasOka(error)) void queryClient.invalidateQueries({ queryKey: catalogKeys.task(task.id) })
     },
-    // Egy beadás (akár sikertelen) a lecke állapotát is változtathatja (#28):
-    // a haladás oldal és a tananyag-nézet (#142) is ebből frissül.
+    // Egy beadás (akár sikertelen) a feladat és a lecke állapotát is változtathatja:
+    // a haladás oldal, a tananyag-nézet és a feladatlisták is ebből frissülnek.
     onSuccess: (_, { kind }) => {
       if (kind !== 'submit') return
 
       void queryClient.invalidateQueries({ queryKey: progressKeys.all })
       void queryClient.invalidateQueries({ queryKey: catalogKeys.tracks() })
+      void queryClient.invalidateQueries({ queryKey: catalogKeys.taskLists() })
     },
   })
 

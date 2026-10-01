@@ -47,7 +47,8 @@ final class LessonResource extends JsonResource
                 'level' => $exercise->level,
                 'difficulty' => $exercise->difficulty,
                 'allowed_languages' => $exercise->allowed_languages,
-                'solved' => isset($page->solvedExerciseIds[$exercise->id]),
+                // "solved", "attempted", vagy null (vendegnel es beadas nelkul).
+                'my_status' => $page->exerciseStatuses->of($exercise->id)?->value,
             ]),
             'previous' => self::link($page->previous),
             'next' => self::link($page->next),
