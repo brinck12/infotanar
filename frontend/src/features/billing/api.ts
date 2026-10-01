@@ -24,8 +24,14 @@ export async function subscription(signal?: AbortSignal): Promise<Subscription |
   return (await http.get<Envelope<Subscription | null>>('/billing/subscription', { signal })).data.data
 }
 
-export async function checkout(): Promise<HostedCheckout> {
-  return (await http.post<Envelope<HostedCheckout>>('/billing/checkout')).data.data
+export interface CheckoutPayload {
+  /** A vásárló kéri, hogy a szolgáltatás a fizetés után azonnal induljon (#133). */
+  accept_immediate_performance: boolean
+  terms_version: string
+}
+
+export async function checkout(payload: CheckoutPayload): Promise<HostedCheckout> {
+  return (await http.post<Envelope<HostedCheckout>>('/billing/checkout', payload)).data.data
 }
 
 export const paymentKeys = {

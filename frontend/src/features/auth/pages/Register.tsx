@@ -2,19 +2,23 @@ import { useMutation } from '@tanstack/react-query'
 import { useState, type ChangeEvent, type FormEvent } from 'react'
 import { Link, Navigate, useNavigate } from 'react-router-dom'
 import { hibaUzenet, mezoHibak } from '../../../shared/api/errors'
-import { Alert, AuthCard, Field, SubmitButton } from '../../../shared/ui/Form'
+import { Alert, AuthCard, CheckboxField, Field, SubmitButton } from '../../../shared/ui/Form'
+import { LEGAL_VERSIONS } from '../../legal/documents'
+import { LegalLink } from '../../legal/LegalLink'
 import * as authApi from '../api'
 import { useAuth } from '../context'
 
-type Form = authApi.RegisterPayload
+/** A begépelhető mezők; az elfogadás és a dokumentumverziók küldéskor kerülnek mellé. */
+type Form = Pick<authApi.RegisterPayload, 'name' | 'email' | 'password' | 'password_confirmation'>
 
 export function Register() {
   const { user, login } = useAuth()
   const navigate = useNavigate()
   const [form, setForm] = useState<Form>({ name: '', email: '', password: '', password_confirmation: '' })
+  const [acceptTerms, setAcceptTerms] = useState(false)
 
   const mutation = useMutation({
-    mutationFn: async (payload: Form) => {
+    mutationFn: async (payload: authApi.RegisterPayload) => {
       await authApi.register(payload)
       await login(payload.email, payload.password)
     },
@@ -31,7 +35,12 @@ export function Register() {
 
   function onSubmit(e: FormEvent) {
     e.preventDefault()
-    mutation.mutate(form)
+    mutation.mutate({
+      ...form,
+      accept_terms: acceptTerms,
+      terms_version: LEGAL_VERSIONS.terms,
+      privacy_version: LEGAL_VERSIONS.privacy,
+    })
   }
 
   return (
@@ -67,11 +76,23 @@ export function Register() {
           onChange={set('password_confirmation')}
           error={errors.password_confirmation}
         />
+        <CheckboxField
+          label={
+            <span>
+              Elfogadom az <LegalLink to="terms">Általános Szerződési Feltételeket</LegalLink>, és megismertem az{' '}
+              <LegalLink to="privacy">Adatkezelési tájékoztatót</LegalLink>.
+            </span>
+          }
+          required
+          checked={acceptTerms}
+          onChange={(e) => setAcceptTerms(e.target.checked)}
+          error={errors.accept_terms}
+        />
         <SubmitButton busy={mutation.isPending}>{mutation.isPending ? 'Regisztráció…' : 'Regisztrálok'}</SubmitButton>
       </form>
       <p className="text-sm text-slate-400">
         Van már fiókod?{' '}
-        <Link to="/bejelentkezes" className="text-sky-400 hover:underline">
+        <Link to="/bejelentkezes" className="text-sky-400 underline underline-offset-2 hover:text-sky-300">
           Jelentkezz be
         </Link>
       </p>
