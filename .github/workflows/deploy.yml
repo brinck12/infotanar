@@ -165,12 +165,22 @@ jobs:
           sudo -n systemctl reload php8.3-fpm
           EOSSH
 
+      # A DEPLOY_URL a nyilvanos, HTTPS-es cim (pl. https://infotanar.hu). A curl
+      # ellenorzi a tanusitvanyt, igy egy lejart vagy hibas tanusitvany is megbuktatja
+      # a deployt. Amig a secret nincs beallitva, a regi HTTP-s ellenorzes fut.
       - name: Smoke check
         env:
           DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+          DEPLOY_URL: ${{ secrets.DEPLOY_URL }}
         run: |
+          if [ -z "$DEPLOY_URL" ]; then
+            echo "::warning::Nincs DEPLOY_URL secret: a smoke check titkosítatlan HTTP-n fut. Állítsd be a HTTPS-es címet."
+            DEPLOY_URL="http://$DEPLOY_HOST"
+          fi
+          HEALTH_URL="${DEPLOY_URL%/}/api/v1/health"
+
           for i in $(seq 1 10); do
-            if curl -fsS --max-time 10 "http://$DEPLOY_HOST/api/v1/health" | grep -q '"ok":true'; then
+            if curl -fsS --max-time 10 "$HEALTH_URL" | grep -q '"ok":true'; then
               echo "A deploy sikeres, a /api/v1/health válaszol."
               exit 0
             fi
