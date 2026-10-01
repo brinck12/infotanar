@@ -37,7 +37,7 @@ tests/
 │   ├── pages/                oldalobjektumok (BasePage, TaskListPage, TaskSolvePage)
 │   │   └── components/       újrahasznosítható komponensek (MonacoEditor, ResultPanel)
 │   ├── fixtures/             test.extend: pages, apiClient, mockApi, a11y (axe)
-│   ├── mocks/                MockApi (route interception), Monaco CDN, Judge0 mock szerver
+│   ├── mocks/                MockApi (route interception), Judge0 mock szerver
 │   └── data/                 adatbuilderek és a seedelt fixture adatok leírása
 └── specs/
     ├── e2e/                  böngészős tesztek
@@ -68,7 +68,6 @@ validálja. Elsőbbségi sorrend: valódi környezeti változó >
 | `API_BASE_URL` | a backend `/api/v1/` gyökere (záró perjellel) |
 | `START_WEB_SERVERS` | indítsa-e a Playwright a helyi szervereket |
 | `JUDGE0_MOCK_PORT` | a Judge0 mock portja |
-| `MONACO_SOURCE` | `local`: a Monaco a frontend `node_modules`-ából, CDN nélkül; `cdn`: jsDelivr |
 
 Érvénytelen érték esetén a futás azonnal, érthető hibával leáll.
 

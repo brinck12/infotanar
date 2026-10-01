@@ -48,13 +48,6 @@ const EnvSchema = z.object({
    */
   START_WEB_SERVERS: booleanFromString,
   JUDGE0_MOCK_PORT: z.coerce.number().int().positive().default(2358),
-
-  /**
-   * Honnan toltodjon a Monaco szerkeszto: "local" = a frontend
-   * node_modules-abol route interceptionnel (hermetikus, CDN nelkul),
-   * "cdn" = ahogy az eles app is, a jsDelivr-rol.
-   */
-  MONACO_SOURCE: z.enum(['local', 'cdn']).default('local'),
 })
 
 export type Env = z.infer<typeof EnvSchema>
