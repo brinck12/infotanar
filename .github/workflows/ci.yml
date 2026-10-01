@@ -79,6 +79,11 @@ jobs:
       - name: Statikus analízis (Larastan, max szint)
         run: composer analyse
 
+      # A docs/api-endpoints.md az útvonalakból generált fájl; itt bukik el, ha
+      # egy útvonal változott, de a dokumentum nem lett újragenerálva (#140).
+      - name: Végpontlista naprakész
+        run: php artisan docs:endpoints --check
+
       # Egy már lefutott migráció szerkesztése az éles adatbázison nem fut le
       # újra: a séma csak új migrációval változhat. A PR merge-commitját
       # hasonlítjuk a célághoz, így a célág újabb migrációi nem zavarnak be.
