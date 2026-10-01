@@ -86,7 +86,8 @@ export interface LockedTaskDetail extends TaskDetailBase {
 
 export type TaskDetail = UnlockedTaskDetail | LockedTaskDetail
 
-export type RunStatus = 'passed' | 'failed' | 'error'
+/** `completed`: sajat bemenettel futott le a program (#153), nincs sikeres/hibas minosites. */
+export type RunStatus = 'passed' | 'failed' | 'error' | 'completed'
 
 /**
  * A kiértékelés eredménye (backend `Verdict` enum): a PRD hat állapota és a
@@ -100,12 +101,16 @@ export type Verdict =
   | 'runtime_error'
   | 'constraint_violation'
   | 'system_error'
+  /** A program lefutott a diák saját bemenetével (#153); nincs elvárt kimenet, ezért nem "elfogadva". */
+  | 'completed'
 
 /**
  * Egy teszteset eredménye. Rejtett teszteseteknél (`hidden: true`) a
  * kimeneti mezők szándékosan hiányoznak — a backend nem küldi vissza őket.
  */
 export interface TestResult {
+  /** Teszteset eredménye; a `kind` hiányzik a régebbi válaszokból. */
+  kind?: 'test'
   test_case_id: number
   hidden: boolean
   passed: boolean
@@ -123,13 +128,32 @@ export interface TestResult {
   error?: string
 }
 
+/**
+ * Futtatás a diák saját bemenetével (#153): csak azt mutatja, amit a program
+ * kiírt, összevetés és minősítés nélkül.
+ */
+export interface CustomRunResult {
+  kind: 'custom'
+  verdict: Verdict
+  verdict_label: string
+  time: number | null
+  exit_code: number | null
+  judge_status: string
+  stdout: string
+  stderr: string
+  compile_output: string
+  error?: string
+}
+
+export type RunResultItem = TestResult | CustomRunResult
+
 export interface RunResponse {
   status: RunStatus
   verdict?: Verdict
   verdict_label?: string
   /** Kódszabály-sértések (constraint_violation), magyarul. */
   violations?: string[]
-  results: TestResult[]
+  results: RunResultItem[]
   message?: string
 }
 
@@ -141,6 +165,8 @@ export interface RunRequest {
   task_id: number
   language: LanguageKey
   source_code: string
+  /** Csak a "Futtatás"-nál: ha megvan (akár üres), a program ezzel a bemenettel fut egyszer, tesztesetek nélkül. */
+  stdin?: string
 }
 
 export type Role = 'student' | 'admin'

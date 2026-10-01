@@ -12,6 +12,8 @@ const PREFIX = 'infotanar.draft.v1.'
 const MAX_AGE_MS = 60 * 24 * 60 * 60 * 1000
 /** A backend is 64 KB körül korlátozza a forráskódot; nagyobbat nem érdemes menteni. */
 const MAX_CODE_LENGTH = 64_000
+/** A backend a saját bemenetet 65 536 karakterig fogadja. */
+export const MAX_CUSTOM_INPUT_LENGTH = 65_536
 
 interface StoredDraft {
   code: string
@@ -25,6 +27,7 @@ export interface DraftScope {
 
 const codeKey = (scope: DraftScope, language: LanguageKey) => `${PREFIX}${scope.userKey}.${scope.taskId}.${language}`
 const languageKey = (scope: DraftScope) => `${PREFIX}${scope.userKey}.${scope.taskId}.lang`
+const inputKey = (scope: DraftScope) => `${PREFIX}${scope.userKey}.${scope.taskId}.stdin`
 
 function isStoredDraft(value: unknown): value is StoredDraft {
   return (
@@ -72,6 +75,23 @@ export function saveDraft(scope: DraftScope, language: LanguageKey, code: string
     return
   }
   write(codeKey(scope, language), { code, savedAt: Date.now() } satisfies StoredDraft)
+}
+
+/**
+ * A "Saját bemenet" szövege (#153), feladatonként (nem nyelvenként). Ugyanazt a
+ * tárolási alakot használja, mint a kód, így a lejárat és a takarítás közös.
+ */
+export function loadCustomInput(scope: DraftScope): string {
+  const value = readJson(inputKey(scope))
+  return isStoredDraft(value) && Date.now() - value.savedAt < MAX_AGE_MS ? value.code : ''
+}
+
+export function saveCustomInput(scope: DraftScope, text: string): void {
+  if (text === '') {
+    remove(inputKey(scope))
+    return
+  }
+  write(inputKey(scope), { code: text, savedAt: Date.now() } satisfies StoredDraft)
 }
 
 export function loadLastLanguage(scope: DraftScope, allowed: readonly LanguageKey[]): LanguageKey | null {

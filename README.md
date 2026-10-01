@@ -121,7 +121,7 @@ Minden végpont a `/api/v1` prefix alatt.
 | `GET` | `/topics` | Témakörök, publikált feladatszámmal |
 | `GET` | `/tasks?topic=&level=` | Publikált feladatok listája (leírás nélkül) |
 | `GET` | `/tasks/{id}` | Feladat teljes leírással, starter_code-dal és a **nem rejtett** tesztesetekkel |
-| `POST` | `/run` | Futtatás csak a nem rejtett teszteseteken, nem mentődik |
+| `POST` | `/run` | Futtatás csak a nem rejtett teszteseteken, nem mentődik. Opcionális `stdin` (max. 64 KB): ha megadod, egyetlen futtatás a saját bemenettel, összevetés nélkül (`results[0].kind = "custom"`, verdict `completed`); SQL-nél 422 |
 | `POST` | `/submissions` | Futtatás **minden** teszteseten, submission mentésével |
 
 A `/run` és a `/submissions` **IP-nként 10 kérés / perc** rate limit alatt áll
@@ -141,6 +141,10 @@ A `/run` és a `/submissions` **IP-nként 10 kérés / perc** rate limit alatt �
   nem elérhető, a `fallback_id` lép életbe.
 - Limitek minden kérésben: `cpu_time_limit: 2`, `memory_limit: 128000`,
   `max_processes_and_or_threads: 60`.
+- A „Saját bemenet” (`stdin` a `/run` kérésben) nem használ tesztesetet, a rejtetteket sem:
+  a program a megadott bemenettel fut egyszer, és a válasz csak a kimenetét adja, helyes/hibás
+  minősítés nélkül. A kódszabályok itt is érvényesek, a hozzáférési szabály és a rate limit
+  ugyanaz, mint a normál futtatásnál. A `stdin` szóközeit és sortöréseit nem vágjuk le.
 - Ha a Judge0 elérhetetlen, a válasz `status: "error"` érthető magyar üzenettel,
   nem 500-as stacktrace.
 

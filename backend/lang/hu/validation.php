@@ -65,6 +65,10 @@ return [
         'token' => [
             'required' => 'Hiányzik a visszaállító kód.',
         ],
+        'stdin' => [
+            'string' => 'A bemenet szöveg legyen.',
+            'max' => 'A bemenet túl hosszú (legfeljebb :max karakter).',
+        ],
         'task_id' => [
             'required' => 'A feladat azonosítója kötelező.',
             'exists' => 'A megadott feladat nem létezik.',
@@ -96,6 +100,7 @@ return [
         'task_id' => 'feladat',
         'language' => 'programozási nyelv',
         'source_code' => 'forráskód',
+        'stdin' => 'bemenet',
         'topic' => 'témakör',
         'level' => 'szint',
         'slug' => 'URL-azonosító',

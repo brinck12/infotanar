@@ -1,5 +1,5 @@
-import type { RunResponse, TestResult } from '../../../types'
-import { runVerdict, testVerdict, VERDICT_META, type VerdictTone } from '../verdicts'
+import type { CustomRunResult, RunResponse, TestResult } from '../../../types'
+import { isCustomRunResult, isTestResult, runVerdict, testVerdict, VERDICT_META, type VerdictTone } from '../verdicts'
 import { VerdictIcon } from './VerdictIcon'
 
 const TONE_CARD: Readonly<Record<VerdictTone, string>> = {
@@ -59,8 +59,11 @@ export function ResultPanel({ loading, error, result, mode }: Props) {
     )
   }
 
-  const passedCount = result.results.filter((r) => r.passed).length
-  const total = result.results.length
+  const testResults = result.results.filter(isTestResult)
+  // Saját bemenettel futtatásnál egyetlen "custom" elem jön, minősítés nélkül (#153).
+  const customResult = result.results.find(isCustomRunResult)
+  const passedCount = testResults.filter((r) => r.passed).length
+  const total = testResults.length
   const verdict = runVerdict(result)
   const meta = VERDICT_META[verdict]
 
@@ -93,12 +96,36 @@ export function ResultPanel({ loading, error, result, mode }: Props) {
         )}
       </div>
 
-      <ul className="space-y-2">
-        {result.results.map((testResult, index) => (
-          <TestResultRow key={testResult.test_case_id} index={index} result={testResult} />
-        ))}
-      </ul>
+      {customResult ? (
+        <CustomRunOutput result={customResult} />
+      ) : (
+        <ul className="space-y-2">
+          {testResults.map((testResult, index) => (
+            <TestResultRow key={testResult.test_case_id} index={index} result={testResult} />
+          ))}
+        </ul>
+      )}
     </div>
+  )
+}
+
+/** A program kimenete a megadott bemenetre: nincs elvárt kimenet, nincs összevetés. */
+function CustomRunOutput({ result }: { result: CustomRunResult }) {
+  return (
+    <section aria-label="Kimenet" data-testid="custom-output" className="rounded-lg border border-slate-800 bg-slate-900 p-3 text-sm">
+      <div className="flex flex-wrap items-center gap-2">
+        <h3 className="font-semibold text-slate-200">Kimenet</h3>
+        <RunMetrics time={result.time} exitCode={result.exit_code} />
+      </div>
+
+      {result.error && <p className="mt-2 text-red-300">{result.error}</p>}
+
+      <div className="mt-3 grid gap-3">
+        <OutputBlock label="Standard kimenet" value={result.stdout} />
+        {result.stderr ? <OutputBlock label="Hibakimenet" value={result.stderr} highlight /> : null}
+        {result.compile_output ? <OutputBlock label="Fordítási üzenet" value={result.compile_output} highlight /> : null}
+      </div>
+    </section>
   )
 }
 

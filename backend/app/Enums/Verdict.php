@@ -19,6 +19,11 @@ enum Verdict: string
     case SystemError = 'system_error';
     /** A megoldas megserti a feladat kodszabalyait (#42): nem is futott le. */
     case ConstraintViolation = 'constraint_violation';
+    /**
+     * A program lefutott egy sajat bemenettel (#153). Nincs elvart kimenet, ezert
+     * nem helyes es nem hibas: ez az allapot sosem mond ki "elfogadva"-t.
+     */
+    case Completed = 'completed';
 
     /**
      * Judge0 status id-k: 3 Accepted (lefutott), 4 Wrong Answer, 5 TLE,
@@ -37,6 +42,12 @@ enum Verdict: string
             $statusId >= 7 && $statusId <= 12 => self::RuntimeError,
             default => self::SystemError,
         };
+    }
+
+    /** Futtatas sajat bemenettel: nincs osszevetes, csak az szamit, hogy a program lefutott-e. */
+    public static function forCustomRun(int $statusId): self
+    {
+        return $statusId === 3 ? self::Completed : self::fromJudge0($statusId, outputMatches: false);
     }
 
     public function label(): string

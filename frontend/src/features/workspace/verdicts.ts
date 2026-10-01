@@ -1,4 +1,4 @@
-import type { RunResponse, TestResult, Verdict } from '../../types'
+import type { CustomRunResult, RunResponse, RunResultItem, TestResult, Verdict } from '../../types'
 
 export type VerdictTone = 'success' | 'danger' | 'warning' | 'compile' | 'runtime' | 'rule' | 'neutral'
 
@@ -42,6 +42,11 @@ export const VERDICT_META: Readonly<Record<Verdict, VerdictMeta>> = {
     hint: 'A megoldás nem tartja be a feladat kódszabályait, ezért nem futott le.',
     tone: 'rule',
   },
+  completed: {
+    label: 'Lefutott',
+    hint: 'A program lefutott a megadott bemenettel. Ez nem tesztelés: lent látod, mit írt ki.',
+    tone: 'neutral',
+  },
   system_error: {
     label: 'Rendszerhiba',
     hint: 'Ez nem a te hibád: a kiértékelés most nem sikerült. Próbáld újra kicsit később.',
@@ -54,6 +59,10 @@ export function runVerdict(result: RunResponse): Verdict {
   if (result.verdict) return result.verdict
   return result.status === 'passed' ? 'accepted' : result.status === 'failed' ? 'wrong_answer' : 'system_error'
 }
+
+export const isCustomRunResult = (item: RunResultItem): item is CustomRunResult => item.kind === 'custom'
+
+export const isTestResult = (item: RunResultItem): item is TestResult => item.kind !== 'custom'
 
 export function testVerdict(result: TestResult): Verdict {
   return result.verdict ?? (result.passed ? 'accepted' : result.error ? 'system_error' : 'wrong_answer')
