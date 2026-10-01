@@ -19,3 +19,7 @@ Schedule::job(new RetryPendingInvoices)->everyFifteenMinutes();
 
 // Megujitasok terhelese es az idoszak vegen lemondott elofizetesek lezarasa (#98).
 Schedule::job(new ProcessDueSubscriptions)->hourly();
+
+// Karbantartas (#127): a lejart tokenek es a regi hibas jobok kulonben orokre megmaradnak.
+Schedule::command('sanctum:prune-expired --hours=24')->daily();
+Schedule::command('queue:prune-failed --hours=720')->daily();
