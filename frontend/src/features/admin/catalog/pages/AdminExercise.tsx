@@ -19,6 +19,7 @@ import {
   type LanguageOption,
 } from '../api'
 import { AdminShell, Section } from '../components/AdminShell'
+import { ConstraintEditor } from '../components/ConstraintEditor'
 import { MutationError, QueryState } from '../components/QueryState'
 import { TestCaseManager } from '../components/TestCaseManager'
 import { SavedNote } from '../components/SavedNote'
@@ -49,7 +50,7 @@ function LessonContext({ lessonId, children }: { lessonId: number; children: (le
 }
 
 /** Az űrlapon megjelenített mezőhibák; minden más a szakasz tetején. */
-const EXERCISE_FIELDS = ['title', 'description', 'level', 'difficulty', 'allowed_languages', 'allowed_languages.0', 'is_published', 'sql_order_sensitive', 'starter_code.python', 'starter_code.csharp', 'starter_code.sql'] as const
+const EXERCISE_FIELDS = ['title', 'description', 'level', 'difficulty', 'allowed_languages', 'allowed_languages.0', 'is_published', 'sql_order_sensitive', 'constraints', 'starter_code.python', 'starter_code.csharp', 'starter_code.sql'] as const
 
 const LEVEL_OPTIONS = (Object.keys(LEVEL_LABEL) as Level[]).map((level) => ({ value: level, label: LEVEL_LABEL[level] }))
 const DIFFICULTY_OPTIONS = [1, 2, 3, 4, 5].map((n) => ({ value: String(n), label: `${n} ${'★'.repeat(n)}` }))
@@ -66,6 +67,7 @@ function ExerciseEditor({ lesson, exercise }: { lesson: AdminLesson; exercise: A
     difficulty: exercise?.difficulty ?? 1,
     allowed_languages: exercise?.allowed_languages ?? ['python'],
     starter_code: exercise?.starter_code ?? {},
+    constraints: exercise?.constraints ?? { require: [], forbid: [] },
     sql_order_sensitive: exercise?.sql_order_sensitive ?? false,
     is_published: exercise?.is_published ?? false,
   }))
@@ -215,6 +217,15 @@ function ExerciseEditor({ lesson, exercise }: { lesson: AdminLesson; exercise: A
               />
             </div>
           )}
+        </Section>
+
+        <Section title="Kódszabályok">
+          <ConstraintEditor
+            value={form.constraints}
+            onChange={(constraints) => set('constraints', constraints)}
+            allowedLanguages={form.allowed_languages}
+            error={errors.constraints}
+          />
         </Section>
 
         <div className="flex items-center gap-3">
