@@ -1,5 +1,5 @@
 import type { ComponentProps } from 'react'
-import ReactMarkdown from 'react-markdown'
+import ReactMarkdown, { type Components } from 'react-markdown'
 import { Link } from 'react-router-dom'
 import remarkGfm from 'remark-gfm'
 
@@ -8,11 +8,17 @@ import remarkGfm from 'remark-gfm'
  * A tipográfia az index.css `.longform` szabályaiban van. A nyers HTML nem
  * jelenik meg: a szerkesztett tartalom nem tud szkriptet vagy saját jelölést
  * bevinni az oldalba.
+ *
+ * A `code` saját megjelenítőt ad a kódrészleteknek (a tananyag kódkiemelése),
+ * hogy a kiemelő csak ott töltődjön le, ahol kell.
  */
-export function Markdown({ children }: { children: string }) {
+export function Markdown({ children, code }: { children: string; code?: Components['code'] }) {
   return (
     <div className="longform">
-      <ReactMarkdown remarkPlugins={[remarkGfm]} components={{ a: MarkdownLink, table: ScrollableTable }}>
+      <ReactMarkdown
+        remarkPlugins={[remarkGfm]}
+        components={{ a: MarkdownLink, table: ScrollableTable, pre: ScrollableCode, ...(code && { code }) }}
+      >
         {children}
       </ReactMarkdown>
     </div>
@@ -35,6 +41,15 @@ function MarkdownLink({ href, children }: ComponentProps<'a'>) {
  * így az oszlopok olvashatók maradnak, és nem tolják szét az oldalt. A
  * görgethető terület fókuszálható, hogy billentyűzettel is görgetni lehessen.
  */
+/** A hosszú kódsor nem törik (a behúzás olvasható marad), hanem a blokk görgethető, ugyanúgy, mint a táblázat. */
+function ScrollableCode({ children }: ComponentProps<'pre'>) {
+  return (
+    <div className="longform-code" role="region" aria-label="Kódrészlet (vízszintesen görgethető)" tabIndex={0}>
+      <pre>{children}</pre>
+    </div>
+  )
+}
+
 function ScrollableTable({ children }: ComponentProps<'table'>) {
   return (
     <div className="longform-table" role="region" aria-label="Táblázat (vízszintesen görgethető)" tabIndex={0}>

@@ -36,6 +36,7 @@ export default function App() {
                     <Route path="/" element={<Pages.Home />} />
                     <Route path="/tananyag" element={<Pages.Curriculum />} />
                     <Route path="/tananyag/:trackSlug" element={<Pages.TrackPage />} />
+                    <Route path="/tananyag/:trackSlug/:lessonSlug" element={<Pages.LessonPage />} />
                     <Route path="/feladatok" element={<Pages.TaskList />} />
                     <Route path="/feladatok/:id" element={<Pages.TaskSolve />} />
                     <Route path="/regisztracio" element={<Pages.Register />} />

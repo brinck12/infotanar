@@ -44,6 +44,8 @@ final class TaskResource extends JsonResource
             // A videot a lejatszo kulon keri le (GET /lessons/{id}/video), rovid eletu URL-lel.
             'lesson' => $this->whenLoaded('lesson', fn (): array => [
                 'id' => $this->lesson->id,
+                'slug' => $this->lesson->slug,
+                'track_slug' => $this->lesson->module?->track?->slug,
                 'title' => $this->lesson->title,
                 'has_video' => $this->lesson->video_path !== null,
             ]),
