@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Jobs;
 
 use App\Actions\Billing\MarkSubscriptionPastDue;
+use App\Actions\Billing\NotifySubscriber;
+use App\Enums\SubscriptionNoticeType;
 use App\Enums\SubscriptionStatus;
 use App\Jobs\Concerns\AlertsOperatorOnFailure;
 use App\Models\Subscription;
@@ -24,7 +26,7 @@ final class ProcessDueSubscriptions implements ShouldBeUnique, ShouldQueue
 {
     use AlertsOperatorOnFailure, Queueable;
 
-    public function handle(MarkSubscriptionPastDue $markPastDue): void
+    public function handle(MarkSubscriptionPastDue $markPastDue, NotifySubscriber $notify): void
     {
         $ended = 0;
         $queued = 0;
@@ -32,10 +34,11 @@ final class ProcessDueSubscriptions implements ShouldBeUnique, ShouldQueue
         Subscription::query()
             ->where('status', SubscriptionStatus::Active)
             ->where('current_period_end', '<=', now())
-            ->chunkById(200, static function ($subscriptions) use (&$ended, &$queued, $markPastDue): void {
+            ->chunkById(200, static function ($subscriptions) use (&$ended, &$queued, $markPastDue, $notify): void {
                 foreach ($subscriptions as $subscription) {
                     if ($subscription->cancel_at_period_end) {
                         $subscription->cancel();
+                        $notify->handle($subscription, SubscriptionNoticeType::Ended);
                         $ended++;
                     } elseif ($subscription->provider_subscription_id === null) {
                         // Nincs terhelheto kartya-token: a turelmi ido alatt kartyacserevel (#17) rendezheto.

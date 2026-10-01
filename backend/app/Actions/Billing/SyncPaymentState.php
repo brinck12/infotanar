@@ -7,6 +7,7 @@ namespace App\Actions\Billing;
 use App\Actions\Billing\Invoicing\OpenInvoice;
 use App\Enums\PaymentPurpose;
 use App\Enums\PaymentStatus;
+use App\Enums\SubscriptionNoticeType;
 use App\Enums\SubscriptionStatus;
 use App\Models\Payment;
 use App\Models\Subscription;
@@ -35,6 +36,7 @@ final readonly class SyncPaymentState
         private ReactivateSubscription $reactivate,
         private MarkSubscriptionPastDue $markPastDue,
         private OpenInvoice $openInvoice,
+        private NotifySubscriber $notify,
     ) {}
 
     /** @throws BarionException */
@@ -117,7 +119,10 @@ final readonly class SyncPaymentState
 
         if ($subscription === null) {
             $subscription = $this->startSubscription($payment);
+            $notice = SubscriptionNoticeType::Started;
         } else {
+            $notice = SubscriptionNoticeType::Renewed;
+
             // Megujitas, vagy ket parhuzamos elso fizetesbol a masodik: a fizetett
             // idoszak a meglevo vegehez adodik, nem vesz el.
             $start = $this->laterOf($subscription->current_period_end, now());
@@ -133,6 +138,8 @@ final readonly class SyncPaymentState
 
         // Minden sikeres terhelesrol pontosan egy szamla (#20); kiallitas a commit utan.
         $this->openInvoice->handle($payment);
+
+        $this->notify->handle($subscription, $notice);
     }
 
     private function applyFailure(Payment $payment): void
