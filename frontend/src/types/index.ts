@@ -3,7 +3,7 @@
 export type Level = 'kozep' | 'emelt'
 
 /** A `tasks.allowed_languages` mezőben és a futtatáskor használt nyelvkulcs. */
-export type LanguageKey = 'python' | 'csharp'
+export type LanguageKey = 'python' | 'csharp' | 'sql'
 
 export interface Topic {
   id: number

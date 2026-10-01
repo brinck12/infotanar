@@ -19,7 +19,7 @@ export function Home() {
       </Link>
 
       <p className="mt-10 text-sm text-slate-400">
-        A megoldásaid a szerveren, elszigetelt környezetben futnak le. Jelenleg Python 3 és C#
+        A megoldásaid a szerveren, elszigetelt környezetben futnak le. Jelenleg Python 3, C# és SQL
         nyelven oldhatók meg a feladatok.
       </p>
     </div>
