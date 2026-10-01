@@ -249,6 +249,13 @@ export interface LessonSummary {
   slug: string
   title: string
   is_free: boolean
+  /** A néző számára zárolt-e; az ok a `locked_reason`. */
+  locked: boolean
+  locked_reason: LockReason | null
+  has_video: boolean
+  exercise_count: number
+  /** A néző haladása; vendégnél null. */
+  status: LessonProgressStatus | null
   exercises: ExerciseSummary[]
 }
 
@@ -258,6 +265,19 @@ export interface ModuleSummary {
   title: string
   description: string | null
   lessons: LessonSummary[]
+}
+
+/** Egy képzési ág a listában (`GET /tracks`). */
+export interface TrackSummary {
+  id: number
+  slug: string
+  title: string
+  description: string | null
+  module_count: number
+  lesson_count: number
+  free_lesson_count: number
+  /** A néző haladása; vendégnél null. */
+  progress: ProgressSummary | null
 }
 
 export interface TrackDetail {
