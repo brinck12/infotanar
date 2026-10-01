@@ -130,7 +130,8 @@ function TestResultRow({ index, result }: { index: number; result: TestResult })
             {result.verdict_label ?? meta.label}
           </span>
         )}
-        {result.time !== null && <span className="text-xs text-slate-400">{result.time} s</span>}
+        {/* Rejtett tesztesetnél a backend nem küld futási részleteket (csak az eredményt). */}
+        {!result.hidden && <RunMetrics time={result.time} exitCode={result.exit_code} />}
       </div>
 
       {result.error && <p className="mt-2 text-red-300">{result.error}</p>}
@@ -148,6 +149,34 @@ function TestResultRow({ index, result }: { index: number; result: TestResult })
         </div>
       )}
     </li>
+  )
+}
+
+const seconds = new Intl.NumberFormat('hu-HU', { minimumFractionDigits: 3, maximumFractionDigits: 3 })
+
+/** Futási idő és kilépési kód (#36); a nem nulla kilépési kód kiemelve. */
+function RunMetrics({ time, exitCode }: { time: number | null; exitCode: number | null }) {
+  if (time === null && exitCode === null) return null
+
+  return (
+    <span className="ml-auto flex items-center gap-3 font-mono text-xs text-slate-400" data-testid="run-metrics">
+      {time !== null && (
+        <span title="Futási idő" data-testid="run-time">
+          <span className="sr-only">Futási idő: </span>
+          <span aria-hidden="true">⏱ </span>
+          {seconds.format(time)} s
+        </span>
+      )}
+      {exitCode !== null && (
+        <span
+          title="Kilépési kód"
+          data-testid="exit-code"
+          className={exitCode === 0 ? '' : 'rounded bg-orange-950 px-1.5 text-orange-300'}
+        >
+          <span className="sr-only">Kilépési kód: </span>exit {exitCode}
+        </span>
+      )}
+    </span>
   )
 }
 
