@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Services\Access;
 
 use App\Enums\AccessDenial;
+use App\Exceptions\Access\PremiumContentLocked;
 use App\Models\Lesson;
 use App\Models\User;
 
@@ -35,6 +36,21 @@ final class ContentAccess
         }
 
         return $user->hasPremiumAccess() ? null : AccessDenial::SubscriptionRequired;
+    }
+
+    /**
+     * A hozzaferes-szabaly kivetelkent: azok a muveletek (futtatas, tippek, megoldas),
+     * amelyek nem tudnak "zarolt" nezetet mutatni, ezt hasznaljak.
+     *
+     * @throws PremiumContentLocked
+     */
+    public function ensureAllows(?User $user, Lesson $lesson): void
+    {
+        $denial = $this->denialFor($user, $lesson);
+
+        if ($denial !== null) {
+            throw new PremiumContentLocked($denial);
+        }
     }
 
     public function allows(?User $user, Lesson $lesson): bool

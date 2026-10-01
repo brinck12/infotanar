@@ -6,6 +6,8 @@ namespace App\Providers;
 
 use App\Mail\OutboxTransport;
 use App\Models\Exercise;
+use App\Models\ExerciseHint;
+use App\Models\ExerciseSolution;
 use App\Models\Invoice;
 use App\Models\Lesson;
 use App\Models\Module;
@@ -39,6 +41,8 @@ final class AppServiceProvider extends ServiceProvider
             'module' => Module::class,
             'lesson' => Lesson::class,
             'exercise' => Exercise::class,
+            'exercise_hint' => ExerciseHint::class,
+            'exercise_solution' => ExerciseSolution::class,
             'test_case' => TestCase::class,
             'subscription' => Subscription::class,
             'invoice' => Invoice::class,

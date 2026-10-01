@@ -71,6 +71,27 @@ export interface AdminTestCase {
 
 export type TestCasePayload = Pick<AdminTestCase, 'stdin' | 'expected_stdout' | 'is_hidden'>
 
+/** Tipp a feladathoz (#154), Markdown; a diák `position` szerinti sorrendben, egyenként kapja. */
+export interface AdminExerciseHint {
+  id: number
+  exercise_id: number
+  position: number
+  body: string
+  updated_at: string | null
+}
+
+/** Mintamegoldás egy nyelvhez (#154), magyarázattal. */
+export interface AdminExerciseSolution {
+  id: number
+  exercise_id: number
+  language: LanguageKey
+  source_code: string
+  explanation: string | null
+  updated_at: string | null
+}
+
+export type ExerciseSolutionPayload = Pick<AdminExerciseSolution, 'source_code' | 'explanation'>
+
 /** Statikus kódszabályok (#42): kötelező szerkezetek és tiltott hívások (`builtin:<név>` / `method:<név>`). */
 export interface ConstraintSet {
   require: string[]
@@ -115,6 +136,8 @@ export const adminCatalogKeys = {
   lesson: (id: number) => [...adminCatalogKeys.all, 'lesson', id] as const,
   exercise: (id: number) => [...adminCatalogKeys.all, 'exercise', id] as const,
   testCases: (exerciseId: number) => [...adminCatalogKeys.all, 'exercise', exerciseId, 'test-cases'] as const,
+  hints: (exerciseId: number) => [...adminCatalogKeys.all, 'exercise', exerciseId, 'hints'] as const,
+  solutions: (exerciseId: number) => [...adminCatalogKeys.all, 'exercise', exerciseId, 'solutions'] as const,
   languages: ['catalog', 'languages'] as const,
 }
 
@@ -143,6 +166,43 @@ export const testCasesQuery = (exerciseId: number) =>
     queryKey: adminCatalogKeys.testCases(exerciseId),
     queryFn: ({ signal }) => get<AdminTestCase[]>(`/admin/exercises/${exerciseId}/test-cases`, signal),
   })
+
+export const exerciseHintsQuery = (exerciseId: number) =>
+  queryOptions({
+    queryKey: adminCatalogKeys.hints(exerciseId),
+    queryFn: ({ signal }) => get<AdminExerciseHint[]>(`/admin/exercises/${exerciseId}/hints`, signal),
+  })
+
+export async function createExerciseHint(exerciseId: number, body: string): Promise<AdminExerciseHint> {
+  return (await http.post<Envelope<AdminExerciseHint>>(`/admin/exercises/${exerciseId}/hints`, { body })).data.data
+}
+
+export async function updateExerciseHint(id: number, body: string): Promise<AdminExerciseHint> {
+  return (await http.put<Envelope<AdminExerciseHint>>(`/admin/exercise-hints/${id}`, { body })).data.data
+}
+
+export async function deleteExerciseHint(id: number): Promise<void> {
+  await http.delete(`/admin/exercise-hints/${id}`)
+}
+
+export const exerciseSolutionsQuery = (exerciseId: number) =>
+  queryOptions({
+    queryKey: adminCatalogKeys.solutions(exerciseId),
+    queryFn: ({ signal }) => get<AdminExerciseSolution[]>(`/admin/exercises/${exerciseId}/solutions`, signal),
+  })
+
+/** Nyelvenként egy megoldás van: a mentés létrehozza vagy lecseréli. */
+export async function saveExerciseSolution(
+  exerciseId: number,
+  language: LanguageKey,
+  payload: ExerciseSolutionPayload,
+): Promise<AdminExerciseSolution> {
+  return (await http.put<Envelope<AdminExerciseSolution>>(`/admin/exercises/${exerciseId}/solutions/${language}`, payload)).data.data
+}
+
+export async function deleteExerciseSolution(id: number): Promise<void> {
+  await http.delete(`/admin/exercise-solutions/${id}`)
+}
 
 export async function createTestCase(exerciseId: number, payload: TestCasePayload): Promise<AdminTestCase> {
   return (await http.post<Envelope<AdminTestCase>>(`/admin/exercises/${exerciseId}/test-cases`, payload)).data.data

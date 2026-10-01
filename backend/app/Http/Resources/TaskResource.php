@@ -57,6 +57,10 @@ final class TaskResource extends JsonResource
                 fn () => ExampleTestCaseResource::collection($this->whenLoaded('visibleTestCases')),
             ),
             'hidden_test_case_count' => $this->whenCounted('hiddenTestCases'),
+            // Csak a darabszam es a letezes: a tipp es a megoldas szoveget a /hints es a /solution
+            // adja, a feloldasi szabalyok szerint. `solution_available`: a szerzo irt mintamegoldast.
+            'hint_count' => $this->whenCounted('hints'),
+            'solution_available' => $this->whenCounted('solutions', fn (int $count): bool => $count > 0),
         ];
     }
 }

@@ -11,6 +11,7 @@ use App\Models\Submission;
 use App\Models\User;
 use App\Services\Access\ContentAccess;
 use App\Services\Execution\SubmissionOutcome;
+use App\Services\Learning\SolutionAccess;
 use App\Services\SolutionEvaluator;
 
 /** "Beadas": minden teszteseten fut (a rejtetteken is), az eredmeny mentodik. */
@@ -20,6 +21,7 @@ final readonly class SubmitSolution
         private SolutionEvaluator $evaluator,
         private ContentAccess $access,
         private RecordLessonProgress $recordLessonProgress,
+        private SolutionAccess $solutions,
     ) {}
 
     /** @throws PremiumContentLocked */
@@ -37,6 +39,8 @@ final readonly class SubmitSolution
             'language' => $language,
             'source_code' => $sourceCode,
             'status' => 'running',
+            // A mintamegoldas megnyitasa utan keszult beadas (#154): a lecke igy is teljesul, de jelolt.
+            'assisted' => $user !== null && $this->solutions->hasRevealed($user, $exercise),
         ]);
 
         $result = $this->evaluator->evaluate($exercise, $language, $sourceCode, $exercise->testCases()->get());

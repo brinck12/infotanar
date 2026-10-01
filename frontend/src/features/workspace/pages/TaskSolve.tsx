@@ -15,6 +15,8 @@ import { catalogKeys, taskQuery } from '../../catalog/api'
 import { progressKeys } from '../../progress/api'
 import { runCode, submitCode } from '../api'
 import { CodeEditor, type EditorReplacement } from '../components/CodeEditor'
+import { helpKeys } from '../help/api'
+import { HelpPanel } from '../help/HelpPanel'
 import { LessonVideo } from '../components/LessonVideo'
 import { Paywall } from '../components/Paywall'
 import { ResetCodeButton } from '../components/ResetCodeButton'
@@ -117,9 +119,12 @@ function Workspace({ task }: { task: UnlockedTaskDetail }) {
     onError: (error) => {
       if (zarolasOka(error)) void queryClient.invalidateQueries({ queryKey: catalogKeys.task(task.id) })
     },
-    // Egy beadás (akár sikertelen) a lecke állapotát is változtathatja (#28).
+    // Egy beadás (akár sikertelen) a lecke állapotát is változtathatja (#28), és a
+    // mintamegoldás feloldását is (elfogadott beadás, vagy több sikertelen beadás, #154).
     onSuccess: (_, { kind }) => {
-      if (kind === 'submit') void queryClient.invalidateQueries({ queryKey: progressKeys.all })
+      if (kind !== 'submit') return
+      void queryClient.invalidateQueries({ queryKey: progressKeys.all })
+      void queryClient.invalidateQueries({ queryKey: helpKeys.solution(task.id) })
     },
   })
 
@@ -127,6 +132,16 @@ function Workspace({ task }: { task: UnlockedTaskDetail }) {
   function resetCode() {
     resetToStarter()
     setReplacement((r) => ({ value: starterCode, seq: r.seq + 1, undoable: true }))
+    execution.reset()
+  }
+
+  /**
+   * #154: a mintamegoldás bemásolása. Visszavonható szerkesztés (Ctrl+Z), és a
+   * piszkozatba is bekerül; a korábbi eredmény eltűnik, mert már nem erre a kódra vonatkozik.
+   */
+  function copySolution(solutionCode: string) {
+    setCode(solutionCode)
+    setReplacement((r) => ({ value: solutionCode, seq: r.seq + 1, undoable: true }))
     execution.reset()
   }
 
@@ -170,6 +185,8 @@ function Workspace({ task }: { task: UnlockedTaskDetail }) {
           )}
         </div>
       )}
+
+      <HelpPanel task={task} signedIn={user !== null} language={language} onCopySolution={copySolution} />
     </section>
   )
 

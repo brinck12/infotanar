@@ -81,6 +81,26 @@ final class Exercise extends Model
         return $this->hasMany(TestCase::class)->where('is_hidden', true);
     }
 
+    /**
+     * A szerzo tippjei, a diak ebben a sorrendben kapja oket (#154).
+     *
+     * @return HasMany<ExerciseHint, $this>
+     */
+    public function hints(): HasMany
+    {
+        return $this->hasMany(ExerciseHint::class)->orderBy('position');
+    }
+
+    /**
+     * Mintamegoldasok, nyelvenkent egy (#154).
+     *
+     * @return HasMany<ExerciseSolution, $this>
+     */
+    public function solutions(): HasMany
+    {
+        return $this->hasMany(ExerciseSolution::class)->orderBy('language');
+    }
+
     /** @return HasMany<Submission, $this> */
     public function submissions(): HasMany
     {
