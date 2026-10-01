@@ -1,4 +1,26 @@
 import type { RunResponse, TestResult } from '../../../types'
+import { runVerdict, testVerdict, VERDICT_META, type VerdictTone } from '../verdicts'
+import { VerdictIcon } from './VerdictIcon'
+
+const TONE_CARD: Readonly<Record<VerdictTone, string>> = {
+  success: 'border-emerald-800 bg-emerald-950/50 text-emerald-200',
+  danger: 'border-red-900 bg-red-950/50 text-red-200',
+  warning: 'border-amber-800 bg-amber-950/50 text-amber-200',
+  compile: 'border-fuchsia-900 bg-fuchsia-950/40 text-fuchsia-200',
+  runtime: 'border-orange-900 bg-orange-950/50 text-orange-200',
+  rule: 'border-indigo-800 bg-indigo-950/50 text-indigo-200',
+  neutral: 'border-slate-700 bg-slate-900 text-slate-200',
+}
+
+const TONE_CHIP: Readonly<Record<VerdictTone, string>> = {
+  success: 'border-emerald-800 text-emerald-300',
+  danger: 'border-red-800 text-red-300',
+  warning: 'border-amber-800 text-amber-300',
+  compile: 'border-fuchsia-800 text-fuchsia-300',
+  runtime: 'border-orange-800 text-orange-300',
+  rule: 'border-indigo-700 text-indigo-300',
+  neutral: 'border-slate-700 text-slate-300',
+}
 
 interface Props {
   loading: boolean
@@ -6,12 +28,6 @@ interface Props {
   result: RunResponse | null
   /** Beadásnál a rejtett teszteseteket is jelezzük. */
   mode: 'run' | 'submit'
-}
-
-const STATUS_LABEL: Record<string, string> = {
-  passed: 'Minden teszt sikeres',
-  failed: 'Van hibás teszteset',
-  error: 'Hiba a futtatás során',
 }
 
 export function ResultPanel({ loading, error, result, mode }: Props) {
@@ -45,26 +61,36 @@ export function ResultPanel({ loading, error, result, mode }: Props) {
 
   const passedCount = result.results.filter((r) => r.passed).length
   const total = result.results.length
+  const verdict = runVerdict(result)
+  const meta = VERDICT_META[verdict]
 
   return (
     <div className="space-y-3">
       <div
         data-testid="result-summary"
         data-status={result.status}
-        className={[
-          'rounded-lg border p-4',
-          result.status === 'passed'
-            ? 'border-emerald-800 bg-emerald-950/50 text-emerald-200'
-            : result.status === 'failed'
-              ? 'border-red-900 bg-red-950/50 text-red-200'
-              : 'border-amber-900 bg-amber-950/50 text-amber-200',
-        ].join(' ')}
+        data-verdict={verdict}
+        role="status"
+        className={`rounded-lg border p-4 ${TONE_CARD[meta.tone]}`}
       >
-        <p className="font-medium">{STATUS_LABEL[result.status] ?? result.status}</p>
-        <p className="mt-1 text-sm opacity-80">
-          {passedCount} / {total} teszteset sikeres
-          {mode === 'submit' ? ' (a rejtett teszteseteket is beleértve)' : ''}
+        <p className="flex items-center gap-2 font-semibold">
+          <VerdictIcon verdict={verdict} />
+          {result.verdict_label ?? meta.label}
         </p>
+        <p className="mt-1 text-sm opacity-90">{meta.hint}</p>
+        {result.violations && result.violations.length > 0 && (
+          <ul className="mt-2 list-disc space-y-1 pl-5 text-sm" data-testid="result-violations">
+            {result.violations.map((violation) => (
+              <li key={violation}>{violation}</li>
+            ))}
+          </ul>
+        )}
+        {total > 0 && (
+          <p className="mt-2 text-sm opacity-80">
+            {passedCount} / {total} teszteset sikeres
+            {mode === 'submit' ? ' (a rejtett teszteseteket is beleértve)' : ''}
+          </p>
+        )}
       </div>
 
       <ul className="space-y-2">
@@ -77,10 +103,14 @@ export function ResultPanel({ loading, error, result, mode }: Props) {
 }
 
 function TestResultRow({ index, result }: { index: number; result: TestResult }) {
+  const verdict = testVerdict(result)
+  const meta = VERDICT_META[verdict]
+
   return (
     <li
       data-testid="test-result"
       data-passed={result.passed}
+      data-verdict={verdict}
       className={[
         'rounded-lg border p-3 text-sm',
         result.passed ? 'border-emerald-900 bg-emerald-950/30' : 'border-red-900 bg-red-950/30',
@@ -94,10 +124,13 @@ function TestResultRow({ index, result }: { index: number; result: TestResult })
         {result.hidden && (
           <span className="rounded bg-slate-800 px-2 py-0.5 text-xs text-slate-400">rejtett</span>
         )}
-        {result.time !== null && <span className="text-xs text-slate-400">{result.time} s</span>}
-        {result.judge_status !== 'Accepted' && (
-          <span className="text-xs text-amber-400">{result.judge_status}</span>
+        {!result.passed && (
+          <span className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs ${TONE_CHIP[meta.tone]}`}>
+            <VerdictIcon verdict={verdict} className="h-3.5 w-3.5" />
+            {result.verdict_label ?? meta.label}
+          </span>
         )}
+        {result.time !== null && <span className="text-xs text-slate-400">{result.time} s</span>}
       </div>
 
       {result.error && <p className="mt-2 text-red-300">{result.error}</p>}
