@@ -1,8 +1,17 @@
-import { Link } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
+import { Alert } from '../../shared/ui/Form'
 
 export function Home() {
+  // Egyszeri értesítés egy ide irányító műveletből (pl. fióktörlés után).
+  const notice = (useLocation().state as { notice?: string } | null)?.notice
+
   return (
     <div className="mx-auto max-w-3xl px-4 py-16">
+      {notice && (
+        <div className="mb-8">
+          <Alert kind="success">{notice}</Alert>
+        </div>
+      )}
       <h1 className="text-3xl font-semibold text-slate-100">InfoTanár</h1>
 
       <p className="mt-4 text-slate-300">
