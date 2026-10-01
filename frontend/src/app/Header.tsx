@@ -12,11 +12,17 @@ interface NavItem {
   label: string
 }
 
+/** A tananyag az elsődleges belépő; a Feladatok a teljes, szűrhető gyakorlólista. */
+const PUBLIC_ITEMS: NavItem[] = [
+  { to: '/tananyag', label: 'Tananyag' },
+  { to: '/feladatok', label: 'Feladatok' },
+]
+
 function itemsFor(user: AuthUser | null): NavItem[] {
-  if (!user) return [{ to: '/feladatok', label: 'Feladatok' }]
+  if (!user) return PUBLIC_ITEMS
 
   return [
-    { to: '/feladatok', label: 'Feladatok' },
+    ...PUBLIC_ITEMS,
     { to: '/haladas', label: 'Haladásom' },
     { to: '/elofizetes', label: 'Előfizetés' },
     ...(user.role === 'admin' ? [{ to: '/admin', label: 'Admin' }] : []),
