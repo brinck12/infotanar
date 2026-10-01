@@ -1,5 +1,5 @@
-import type { RunResponse, TestResult } from '../../../types'
-import { runVerdict, testVerdict, VERDICT_META, type VerdictTone } from '../verdicts'
+import type { ExecutionLimits, RunResponse, TestResult } from '../../../types'
+import { runVerdict, testVerdict, VERDICT_META, verdictHint, type VerdictTone } from '../verdicts'
 import { VerdictIcon } from './VerdictIcon'
 
 const TONE_CARD: Readonly<Record<VerdictTone, string>> = {
@@ -28,9 +28,11 @@ interface Props {
   result: RunResponse | null
   /** Beadásnál a rejtett teszteseteket is jelezzük. */
   mode: 'run' | 'submit'
+  /** A futtatásra érvényes korlátok: időtúllépésnél a tanács megnevezi a korlátot. */
+  limits?: ExecutionLimits
 }
 
-export function ResultPanel({ loading, error, result, mode }: Props) {
+export function ResultPanel({ loading, error, result, mode, limits }: Props) {
   if (loading) {
     return (
       <div className="flex items-center gap-3 rounded-lg border border-slate-800 bg-slate-900 p-4 text-sm text-slate-300">
@@ -77,7 +79,7 @@ export function ResultPanel({ loading, error, result, mode }: Props) {
           <VerdictIcon verdict={verdict} />
           {result.verdict_label ?? meta.label}
         </p>
-        <p className="mt-1 text-sm opacity-90">{meta.hint}</p>
+        <p className="mt-1 text-sm opacity-90">{verdictHint(verdict, limits)}</p>
         {result.violations && result.violations.length > 0 && (
           <ul className="mt-2 list-disc space-y-1 pl-5 text-sm" data-testid="result-violations">
             {result.violations.map((violation) => (

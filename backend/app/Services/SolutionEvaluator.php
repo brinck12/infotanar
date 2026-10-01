@@ -10,6 +10,7 @@ use App\Models\Exercise;
 use App\Models\TestCase;
 use App\Services\Constraints\ConstraintChecker;
 use App\Services\Execution\EvaluationResult;
+use App\Services\Execution\ExecutionLimitResolver;
 use App\Services\Execution\HiddenResultRedactor;
 use App\Services\Execution\Sql\SqlProgram;
 use App\Services\Execution\Sql\SqlResultComparator;
@@ -34,6 +35,7 @@ final readonly class SolutionEvaluator
         private SqlResultComparator $sqlComparator,
         private HiddenResultRedactor $redactor,
         private ConstraintChecker $constraints,
+        private ExecutionLimitResolver $limits,
     ) {}
 
     /** @param Collection<int, TestCase> $testCases */
@@ -49,9 +51,17 @@ final readonly class SolutionEvaluator
         $results = [];
         $verdicts = [];
 
-        // A teljes kiertekelesnek (minden tesztesetnek egyutt) felso korlatja van,
-        // hogy a kliens a sajat timeoutja elott mindig valaszt kapjon.
-        $deadline = microtime(true) + Config::integer('judge0.evaluation_deadline');
+        $limits = $this->limits->forExercise($exercise, $language);
+
+        // Egy tesztesetre ennyi ido (mp) jut: a futas faliora-korlatja, plusz a sorban allas es a forditas.
+        $perTestCase = (int) ceil($limits->wallTimeSeconds()) + Config::integer('judge0.test_overhead');
+
+        // A teljes kiertekeles idokerete a tesztesetek szamaval no, de felso korlatja
+        // van, hogy a kliens a sajat timeoutja elott mindig valaszt kapjon.
+        $deadline = microtime(true) + min(
+            $perTestCase * max(1, $testCases->count()),
+            Config::integer('judge0.evaluation_deadline'),
+        );
 
         foreach ($testCases as $testCase) {
             $remaining = (int) floor($deadline - microtime(true));
@@ -61,10 +71,12 @@ final readonly class SolutionEvaluator
                     throw Judge0Exception::timedOut();
                 }
 
+                $timeout = min($remaining, $perTestCase);
+
                 // SQL-nel a teszteset bemenete az adatkeszlet-szkript, ami a programba kerul.
                 $run = $language === self::SQL
-                    ? $this->judge0->run($language, SqlProgram::build((string) $testCase->stdin, $sourceCode), null, $remaining)
-                    : $this->judge0->run($language, $sourceCode, $testCase->stdin, $remaining);
+                    ? $this->judge0->run($language, SqlProgram::build((string) $testCase->stdin, $sourceCode), null, $limits, $timeout)
+                    : $this->judge0->run($language, $sourceCode, $testCase->stdin, $limits, $timeout);
             } catch (Judge0Exception $e) {
                 $verdicts[] = Verdict::SystemError;
                 $results[] = $this->errorResult($testCase, $e->getMessage());

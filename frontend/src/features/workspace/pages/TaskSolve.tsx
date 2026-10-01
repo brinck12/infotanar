@@ -5,6 +5,7 @@ import { Link, useParams } from 'react-router-dom'
 import remarkGfm from 'remark-gfm'
 import { hibaUzenet, zarolasOka } from '../../../shared/api/errors'
 import { LANGUAGE_LABEL, LEVEL_LABEL } from '../../../shared/domain/labels'
+import { formatMemoryLimit, formatTimeLimit } from '../../../shared/domain/limits'
 import { useMediaQuery } from '../../../shared/hooks/useMediaQuery'
 import { usePersistentState } from '../../../shared/hooks/usePersistentState'
 import { PageLoader } from '../../../shared/ui/PageLoader'
@@ -143,6 +144,8 @@ function Workspace({ task }: { task: UnlockedTaskDetail }) {
   }
 
   const running = execution.isPending
+  // A korlát nyelvenként eltérhet (pl. a C# több időt kaphat), ezért a kiválasztott nyelvét mutatjuk.
+  const limits = task.limits?.[language]
 
   const description = (
     <section aria-label="Feladat leírása" className="space-y-4">
@@ -151,6 +154,15 @@ function Workspace({ task }: { task: UnlockedTaskDetail }) {
       <div className="prose-invert max-w-none rounded-lg border border-slate-800 bg-slate-900 p-5 text-slate-200 [&_code]:rounded [&_code]:bg-slate-950 [&_code]:px-1 [&_h2]:mt-0 [&_h2]:mb-3 [&_h2]:text-lg [&_h2]:font-semibold [&_h3]:mt-4 [&_h3]:mb-2 [&_h3]:font-medium [&_li]:ml-4 [&_li]:list-disc [&_p]:my-2">
         <ReactMarkdown remarkPlugins={[remarkGfm]}>{task.description}</ReactMarkdown>
       </div>
+
+      {limits && (
+        <p data-testid="execution-limits" className="px-1 text-sm text-slate-400">
+          Időkorlát: <span className="text-slate-200">{formatTimeLimit(limits.time_limit_ms)}</span>
+          <span aria-hidden="true"> · </span>
+          <span className="sr-only">, </span>
+          Memória: <span className="text-slate-200">{formatMemoryLimit(limits.memory_limit_kb)}</span>
+        </p>
+      )}
 
       {task.example_test_cases.length > 0 && (
         <div className="rounded-lg border border-slate-800 bg-slate-900 p-5">
@@ -228,6 +240,7 @@ function Workspace({ task }: { task: UnlockedTaskDetail }) {
         error={execution.isError ? hibaUzenet(execution.error) : null}
         result={execution.data ?? null}
         mode={mode}
+        limits={limits}
       />
     </section>
   )

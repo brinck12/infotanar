@@ -27,6 +27,9 @@ final class AdminExerciseResource extends JsonResource
             'starter_code' => $this->starter_code ?: new stdClass,
             'constraints' => $this->constraints->toArray(),
             'sql_order_sensitive' => $this->sql_order_sensitive,
+            // A feladat sajat korlatai; null = a globalis alapertek ervenyes.
+            'time_limit_ms' => $this->time_limit_ms,
+            'memory_limit_kb' => $this->memory_limit_kb,
             'is_published' => $this->is_published,
             'test_case_count' => $this->whenCounted('testCases'),
             'submission_count' => $this->whenCounted('submissions'),
