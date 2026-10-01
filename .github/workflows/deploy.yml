@@ -172,26 +172,41 @@ jobs:
       # A DEPLOY_URL a nyilvanos, HTTPS-es cim (pl. https://infotanar.hu). A curl
       # ellenorzi a tanusitvanyt, igy egy lejart vagy hibas tanusitvany is megbuktatja
       # a deployt. Amig a secret nincs beallitva, a regi HTTP-s ellenorzes fut.
+      #
+      # HEALTH_TOKEN secrettel (ugyanaz, mint a szerver .env-jeben) a readiness
+      # vegpontot kerdezzuk (#130): az az adatbazist, a sort, az utemezot es a
+      # queue workert is ellenorzi, es hibanal megmondja, melyik all. A tokent
+      # csak HTTPS-en kuldjuk el.
       - name: Smoke check
         env:
           DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
           DEPLOY_URL: ${{ secrets.DEPLOY_URL }}
+          HEALTH_TOKEN: ${{ secrets.HEALTH_TOKEN }}
         run: |
           if [ -z "$DEPLOY_URL" ]; then
             echo "::warning::Nincs DEPLOY_URL secret: a smoke check titkosítatlan HTTP-n fut. Állítsd be a HTTPS-es címet."
             DEPLOY_URL="http://$DEPLOY_HOST"
           fi
-          HEALTH_URL="${DEPLOY_URL%/}/api/v1/health"
+
+          if [ -n "$HEALTH_TOKEN" ] && [[ "$DEPLOY_URL" == https://* ]]; then
+            HEALTH_URL="${DEPLOY_URL%/}/api/v1/health/ready"
+          else
+            echo "::warning::Nincs HEALTH_TOKEN secret (vagy a cím nem HTTPS): csak azt ellenőrizzük, hogy a PHP válaszol-e."
+            HEALTH_URL="${DEPLOY_URL%/}/api/v1/health"
+            HEALTH_TOKEN=""
+          fi
 
           for i in $(seq 1 10); do
-            if curl -fsS --max-time 10 "$HEALTH_URL" | grep -q '"ok":true'; then
-              echo "A deploy sikeres, a /api/v1/health válaszol."
+            body=$(curl -sS --max-time 15 -H "X-Health-Token: $HEALTH_TOKEN" "$HEALTH_URL" || true)
+            if echo "$body" | grep -q '"ok":true'; then
+              echo "A deploy sikeres: $HEALTH_URL"
               exit 0
             fi
-            echo "Még nem válaszol, újrapróbálás ($i/10)…"
+            echo "Még nem egészséges, újrapróbálás ($i/10)…"
             sleep 3
           done
-          echo "::error::A /api/v1/health nem válaszolt a deploy után."
+          echo "::error::Az állapot-ellenőrzés a deploy után sem lett zöld: $HEALTH_URL"
+          echo "$body"
           exit 1
 
       - name: SSH kulcs törlése

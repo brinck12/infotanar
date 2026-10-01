@@ -34,10 +34,12 @@ use App\Http\Controllers\Api\V1\Execution\RunController;
 use App\Http\Controllers\Api\V1\Execution\SubmissionController;
 use App\Http\Controllers\Api\V1\HealthController;
 use App\Http\Controllers\Api\V1\Progress\ProgressController;
+use App\Http\Controllers\Api\V1\ReadinessController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('v1')->name('api.')->group(function (): void {
     Route::get('/health', HealthController::class)->name('health');
+    Route::get('/health/ready', ReadinessController::class)->middleware('throttle:30,1')->name('health.ready');
 
     Route::prefix('auth')->name('auth.')->group(function (): void {
         Route::post('/register', RegisterController::class)->name('register');
