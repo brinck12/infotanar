@@ -124,8 +124,28 @@ Minden végpont a `/api/v1` prefix alatt.
 | `POST` | `/run` | Futtatás csak a nem rejtett teszteseteken, nem mentődik |
 | `POST` | `/submissions` | Futtatás **minden** teszteseten, submission mentésével |
 
-A `/run` és a `/submissions` **IP-nként 10 kérés / perc** rate limit alatt áll
-(`throttle:10,1`), mert a kódfuttatás drága művelet.
+A `/run` és a `/submissions` közös rate limit alatt áll (`throttle:execution`),
+mert a kódfuttatás drága művelet. A keret bejelentkezve **fiókonként** számít, így
+egy közös IP mögött ülő osztály tagjai nem egymás elől fogyasztják el:
+
+| Ki | Kulcs | Alapérték | Beállítás (`backend/.env`) |
+|---|---|---|---|
+| Vendég | IP-cím | 10 / perc | `JUDGE0_RATE_GUEST_PER_MINUTE` |
+| Bejelentkezett | fiók | 20 / perc | `JUDGE0_RATE_USER_PER_MINUTE` |
+| Előfizető, admin | fiók | 40 / perc | `JUDGE0_RATE_PREMIUM_PER_MINUTE` |
+| Bejelentkezett (napi) | fiók | 1000 / nap | `JUDGE0_RATE_USER_PER_DAY` |
+| Mindenki együtt | – | 300 / perc | `JUDGE0_RATE_GLOBAL_PER_MINUTE` |
+
+A saját keret túllépése `429`, a közös kereté `503` (nem a kérő hibája, a futtató
+telt meg). Mindkét válasz törzse megmondja, mennyit kell várni:
+
+```json
+{ "message": "Túl sok futtatás rövid idő alatt. Próbáld újra 42 másodperc múlva.",
+  "reason": "rate_limited", "retry_after": 42, "guest": false }
+```
+
+A `reason` értéke `rate_limited`, `daily_limit` vagy `busy`; a `guest` csak a
+`rate_limited` válaszban szerepel. A `Retry-After` fejléc is megy.
 
 ### A kódfuttatás szabályai
 

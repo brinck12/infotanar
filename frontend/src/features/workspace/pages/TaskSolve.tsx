@@ -3,8 +3,9 @@ import { useState } from 'react'
 import ReactMarkdown from 'react-markdown'
 import { Link, useParams } from 'react-router-dom'
 import remarkGfm from 'remark-gfm'
-import { hibaUzenet, zarolasOka } from '../../../shared/api/errors'
+import { hibaUzenet, varakozas, zarolasOka, type ExecutionWait } from '../../../shared/api/errors'
 import { LANGUAGE_LABEL, LEVEL_LABEL } from '../../../shared/domain/labels'
+import { useCountdown } from '../../../shared/hooks/useCountdown'
 import { useMediaQuery } from '../../../shared/hooks/useMediaQuery'
 import { usePersistentState } from '../../../shared/hooks/usePersistentState'
 import { PageLoader } from '../../../shared/ui/PageLoader'
@@ -17,6 +18,7 @@ import { runCode, submitCode } from '../api'
 import { CodeEditor, type EditorReplacement } from '../components/CodeEditor'
 import { LessonVideo } from '../components/LessonVideo'
 import { Paywall } from '../components/Paywall'
+import { RateLimitNotice } from '../components/RateLimitNotice'
 import { ResetCodeButton } from '../components/ResetCodeButton'
 import { ResultPanel } from '../components/ResultPanel'
 import { WorkspaceTabs, type WorkspaceView } from '../components/WorkspaceTabs'
@@ -109,6 +111,9 @@ function Workspace({ task }: { task: UnlockedTaskDetail }) {
   // Felhasználónként (ugyanazon a gépen) megőrzött panelarány (#29).
   const [split, setSplit] = usePersistentState(`infotanar.workspace.split.${user?.id ?? 'guest'}`, DEFAULT_SPLIT, isSplitRatio)
 
+  const [wait, setWait] = useState<ExecutionWait | null>(null)
+  const countdown = useCountdown()
+
   const execution = useMutation({
     mutationFn: ({ kind, payload }: { kind: Mode; payload: RunRequest }) =>
       kind === 'run' ? runCode(payload) : submitCode(payload),
@@ -116,6 +121,11 @@ function Workspace({ task }: { task: UnlockedTaskDetail }) {
     // a feladatot újratöltjük, és a szülő a zárolt nézetre vált.
     onError: (error) => {
       if (zarolasOka(error)) void queryClient.invalidateQueries({ queryKey: catalogKeys.task(task.id) })
+
+      // Futtatási korlát (#148): amíg a szerver szerint várni kell, a gombok sem élnek.
+      const limited = varakozas(error)
+      setWait(limited)
+      if (limited) countdown.start(limited.seconds)
     },
     // Egy beadás (akár sikertelen) a lecke állapotát is változtathatja (#28).
     onSuccess: (_, { kind }) => {
@@ -139,10 +149,12 @@ function Workspace({ task }: { task: UnlockedTaskDetail }) {
 
   function execute(kind: Mode) {
     setMode(kind)
+    setWait(null)
     execution.mutate({ kind, payload: { task_id: task.id, language, source_code: code } })
   }
 
   const running = execution.isPending
+  const mustWait = countdown.seconds > 0
 
   const description = (
     <section aria-label="Feladat leírása" className="space-y-4">
@@ -197,7 +209,7 @@ function Workspace({ task }: { task: UnlockedTaskDetail }) {
           <button
             type="button"
             onClick={() => execute('run')}
-            disabled={running}
+            disabled={running || mustWait}
             className="rounded-lg border border-slate-700 bg-slate-800 px-4 py-1.5 text-sm font-medium text-slate-100 transition hover:bg-slate-700 disabled:cursor-not-allowed disabled:opacity-50"
           >
             Futtatás
@@ -205,7 +217,7 @@ function Workspace({ task }: { task: UnlockedTaskDetail }) {
           <button
             type="button"
             onClick={() => execute('submit')}
-            disabled={running}
+            disabled={running || mustWait}
             className="rounded-lg bg-sky-700 px-4 py-1.5 text-sm font-medium text-white transition hover:bg-sky-600 disabled:cursor-not-allowed disabled:opacity-50"
           >
             Beadás
@@ -223,12 +235,16 @@ function Workspace({ task }: { task: UnlockedTaskDetail }) {
         <CodeEditor language={language} initialValue={code} onChange={setCode} replace={replacement} readOnly={running} />
       </div>
 
-      <ResultPanel
-        loading={running}
-        error={execution.isError ? hibaUzenet(execution.error) : null}
-        result={execution.data ?? null}
-        mode={mode}
-      />
+      {wait && !running ? (
+        <RateLimitNotice wait={wait} seconds={countdown.seconds} />
+      ) : (
+        <ResultPanel
+          loading={running}
+          error={execution.isError ? hibaUzenet(execution.error) : null}
+          result={execution.data ?? null}
+          mode={mode}
+        />
+      )}
     </section>
   )
 
