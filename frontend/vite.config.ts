@@ -26,8 +26,26 @@ function warnAboutLegalPlaceholders(): Plugin {
   }
 }
 
+/**
+ * A Barion kártyaelfogadó logója kötelező eleme az éles boltnak (#139), de a
+ * hivatalos fájlt kézzel kell elhelyezni (lásd app/Footer.tsx). Hiányára a build figyelmeztet.
+ */
+function warnAboutMissingBarionLogo(): Plugin {
+  const assets = fileURLToPath(new URL('./src/assets', import.meta.url))
+
+  return {
+    name: 'warn-about-missing-barion-logo',
+    apply: 'build',
+    buildStart() {
+      if (!readdirSync(assets).some((file) => /^barion-card-acceptance\.(svg|png)$/.test(file))) {
+        this.warn('Hiányzik a Barion kártyaelfogadó logó: src/assets/barion-card-acceptance.svg (vagy .png)')
+      }
+    },
+  }
+}
+
 export default defineConfig({
-  plugins: [react(), tailwindcss(), warnAboutLegalPlaceholders()],
+  plugins: [react(), tailwindcss(), warnAboutLegalPlaceholders(), warnAboutMissingBarionLogo()],
   server: {
     port: 5173,
   },

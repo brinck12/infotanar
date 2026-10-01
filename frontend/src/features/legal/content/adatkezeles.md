@@ -34,7 +34,11 @@ A bankkártya adatait nem kezeljük: azokat a fizetési szolgáltató kezeli.
 
 Az oldal a bejelentkezés fenntartásához és a szerkesztőben írt kód megőrzéséhez a böngésző helyi tárolóját használja.
 
-[KITÖLTENDŐ: a működéshez nem feltétlenül szükséges sütik (például a Barion Pixel) és a hozzájárulás kezelése.]
+### Barion Pixel
+
+A fizetési partnerünk, a Barion Payment Zrt. az oldalon a Barion Pixel nevű eszközt használja. Az oldal alján megjelenő sávban dönthetsz róla, és a döntésedet a láblécben a „Sütibeállítások” gombbal bármikor megváltoztathatod.
+
+[KITÖLTENDŐ: a Barion Pixel által kezelt adatok, a célok (csalásmegelőzés; hozzájárulás esetén marketing), a jogalap, a megőrzési idő és a Barion adatkezelési tájékoztatójának linkje. Eldöntendő az is, hogy a csalásmegelőzési célú alap Pixel a hozzájárulás előtt betölt-e (`VITE_BARION_PIXEL_REQUIRES_CONSENT`).]
 
 ## 5. Az érintettek jogai
 
