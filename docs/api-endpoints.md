@@ -118,6 +118,7 @@ Minden végpont a `/api/v1` előtag alatt érhető el. A hozzáférés oszlop je
 
 | Metódus | Útvonal | Hozzáférés | Limit |
 |---|---|---|---|
+| `POST` | `/lessons/{lesson}/complete` | bejelentkezve | `30,1` |
 | `GET` | `/lessons/{lesson}/video` | nyilvános | – |
 | `GET` | `/lessons/{lesson}/video/captions` | aláírt link | – |
 | `GET` | `/lessons/{lesson}/video/stream` | aláírt link | – |

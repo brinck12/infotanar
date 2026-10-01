@@ -36,6 +36,7 @@ use App\Http\Controllers\Api\V1\ClientErrorController;
 use App\Http\Controllers\Api\V1\Execution\RunController;
 use App\Http\Controllers\Api\V1\Execution\SubmissionController;
 use App\Http\Controllers\Api\V1\HealthController;
+use App\Http\Controllers\Api\V1\Progress\LessonCompletionController;
 use App\Http\Controllers\Api\V1\Progress\ProgressController;
 use App\Http\Controllers\Api\V1\ReadinessController;
 use App\Http\Middleware\RejectInvalidToken;
@@ -101,6 +102,11 @@ Route::prefix('v1')->name('api.')->middleware(RejectInvalidToken::class)->group(
     });
 
     Route::get('/progress', ProgressController::class)->middleware('auth:sanctum')->name('progress');
+    // Feladat nelkuli lecke kesznek jelolese (#144); a feladatos lecke beadassal teljesul.
+    Route::post('/lessons/{lesson}/complete', [LessonCompletionController::class, 'store'])
+        ->whereNumber('lesson')
+        ->middleware(['auth:sanctum', 'throttle:30,1'])
+        ->name('lessons.complete');
 
     Route::prefix('account')->name('account.')->middleware('auth:sanctum')->group(function (): void {
         Route::get('/export', [AccountController::class, 'export'])->middleware('throttle:account-export')->name('export');
