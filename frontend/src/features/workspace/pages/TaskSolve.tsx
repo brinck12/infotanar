@@ -9,12 +9,22 @@ import { useMediaQuery } from '../../../shared/hooks/useMediaQuery'
 import { usePersistentState } from '../../../shared/hooks/usePersistentState'
 import { PageLoader } from '../../../shared/ui/PageLoader'
 import { SplitPane } from '../../../shared/ui/SplitPane'
-import type { LanguageKey, RunRequest, RunResponse, SubmissionResponse, TaskDetail, UnlockedTaskDetail } from '../../../types'
+import type {
+  LanguageKey,
+  RunRequest,
+  RunResponse,
+  SubmissionDetail,
+  SubmissionResponse,
+  TaskDetail,
+  UnlockedTaskDetail,
+} from '../../../types'
 import { useAuth } from '../../auth/context'
 import { catalogKeys, taskQuery } from '../../catalog/api'
 import { lessonPath } from '../../lesson/api'
 import { LessonTheory } from '../../lesson/components/LessonTheory'
 import { progressKeys } from '../../progress/api'
+import { submissionKeys } from '../../submissions/api'
+import { SubmissionHistory } from '../../submissions/components/SubmissionHistory'
 import { runCode, submitCode } from '../api'
 import { CodeEditor, type EditorReplacement } from '../components/CodeEditor'
 import { LessonVideo } from '../components/LessonVideo'
@@ -152,6 +162,7 @@ function Workspace({ task }: { task: UnlockedTaskDetail }) {
       void queryClient.invalidateQueries({ queryKey: progressKeys.all })
       void queryClient.invalidateQueries({ queryKey: catalogKeys.tracks() })
       void queryClient.invalidateQueries({ queryKey: catalogKeys.taskLists() })
+      void queryClient.invalidateQueries({ queryKey: submissionKeys.all })
     },
   })
 
@@ -166,6 +177,18 @@ function Workspace({ task }: { task: UnlockedTaskDetail }) {
   function changeLanguage(next: LanguageKey) {
     const nextCode = switchLanguage(next)
     setReplacement((r) => ({ value: nextCode, seq: r.seq + 1, undoable: false }))
+    execution.reset()
+  }
+
+  /**
+   * #147: egy korábbi beadás kódja a szerkesztőbe, visszavonhatóan. Másik nyelvű beadásnál
+   * előbb arra a nyelvre váltunk (a mostani kód piszkozatként megmarad), és a visszavonás
+   * annak a nyelvnek a kódjához tér vissza.
+   */
+  function restoreSubmission(submission: SubmissionDetail) {
+    const resetTo = submission.language === language ? undefined : switchLanguage(submission.language)
+    setCode(submission.source_code)
+    setReplacement((r) => ({ value: submission.source_code, seq: r.seq + 1, undoable: true, resetTo }))
     execution.reset()
   }
 
@@ -267,6 +290,9 @@ function Workspace({ task }: { task: UnlockedTaskDetail }) {
         result={execution.data ?? null}
         mode={mode}
       />
+
+      {/* Vendég beadása nem kötődik fiókhoz, ezért neki nincs története. */}
+      {user && <SubmissionHistory taskId={task.id} allowedLanguages={task.allowed_languages} onRestore={restoreSubmission} />}
     </section>
   )
 

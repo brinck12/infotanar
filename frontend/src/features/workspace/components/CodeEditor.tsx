@@ -18,6 +18,11 @@ export interface EditorReplacement {
   seq: number
   /** Visszavonható szerkesztésként (pl. visszaállítás), vagy új dokumentumként (pl. nyelvváltás). */
   undoable: boolean
+  /**
+   * Nyelvváltással járó visszavonható csere (korábbi beadás betöltése): a dokumentum
+   * előbb erre áll be előzmény nélkül, így a visszavonás az új nyelv kódjához tér vissza.
+   */
+  resetTo?: string
 }
 
 interface Props {
@@ -56,6 +61,7 @@ export function CodeEditor({ language, initialValue, onChange, replace, readOnly
     appliedSeq.current = replace.seq
 
     if (replace.undoable) {
+      if (replace.resetTo !== undefined) model.setValue(replace.resetTo)
       editor.pushUndoStop()
       editor.executeEdits('replace', [{ range: model.getFullModelRange(), text: replace.value, forceMoveMarkers: true }])
       editor.pushUndoStop()
