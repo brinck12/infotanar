@@ -17,5 +17,6 @@ return [
 
     'validation' => [
         'tax_number' => 'Érvénytelen adószám. Formátum: 12345678-1-12.',
+        'accept_immediate_performance' => 'A fizetés indításához jelöld be, hogy kéred a szolgáltatás azonnali megkezdését.',
     ],
 ];

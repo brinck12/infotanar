@@ -6,6 +6,10 @@ return [
     'failed' => 'Hibás e-mail-cím vagy jelszó.',
     'throttle' => 'Túl sok próbálkozás, próbáld újra később.',
 
+    'register' => [
+        'accept_terms' => 'A regisztrációhoz el kell fogadnod az Általános Szerződési Feltételeket és az Adatkezelési tájékoztatót.',
+    ],
+
     'verification' => [
         'verified' => 'Az e-mail-címed megerősítve.',
         'already_verified' => 'Az e-mail-címed már meg van erősítve.',

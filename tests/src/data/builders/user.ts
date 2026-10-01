@@ -10,6 +10,9 @@ export function registration(overrides: Partial<RegisterRequest> = {}): Register
     email: `pw-${randomUUID()}@example.test`,
     password: DEFAULT_PASSWORD,
     password_confirmation: DEFAULT_PASSWORD,
+    accept_terms: true,
+    terms_version: '0.1',
+    privacy_version: '0.1',
     ...overrides,
   }
 }
