@@ -100,6 +100,10 @@ Route::prefix('v1')->name('api.')->group(function (): void {
         Route::post('/checkout', CheckoutController::class)->middleware('throttle:checkout')->name('checkout');
         Route::get('/payments', [PaymentController::class, 'index'])->name('payments.index');
         Route::get('/payments/{payment}', [PaymentController::class, 'show'])->whereUuid('payment')->name('payments.show');
+        Route::get('/payments/{payment}/invoice', [PaymentController::class, 'invoice'])
+            ->whereUuid('payment')
+            ->middleware('throttle:30,1')
+            ->name('payments.invoice');
 
         Route::prefix('subscription')->name('subscription.')->group(function (): void {
             Route::get('/', [SubscriptionController::class, 'show'])->name('show');

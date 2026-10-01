@@ -43,4 +43,21 @@ return [
         'payee' => env('BARION_PAYEE'),
         'timeout' => (int) env('BARION_TIMEOUT', 15),
     ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Szamlazz.hu Szamla Agent (ADR 0002)
+    |--------------------------------------------------------------------------
+    | Minden sikeres terhelesrol pontosan egy szamla (#20). Az agent-kulcs titok.
+    | Az AFA-kulcs szam (pl. 27) vagy adomentessegi kod (pl. AAM): a konyvelovel
+    | egyeztetendo. A csomag ara brutto, a szamla ebbol bontja a nettot.
+    */
+    'szamlazz' => [
+        'base_url' => env('SZAMLAZZ_BASE_URL', 'https://www.szamlazz.hu/szamla/'),
+        'agent_key' => env('SZAMLAZZ_AGENT_KEY'),
+        'vat_rate' => (string) env('SZAMLAZZ_VAT_RATE', '27'),
+        'invoice_prefix' => env('SZAMLAZZ_INVOICE_PREFIX'),
+        'timeout' => (int) env('SZAMLAZZ_TIMEOUT', 30),
+        'disk' => env('SZAMLAZZ_INVOICE_DISK', 'invoices'),
+    ],
 ];

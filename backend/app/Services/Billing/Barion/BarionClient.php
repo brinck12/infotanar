@@ -133,7 +133,6 @@ final class BarionClient
             ->timeout(Config::integer('billing.barion.timeout'));
     }
 
-    /** @throws BarionException */
     /**
      * A bolt Barion-fiokja, amelyre a tranzakciok erkeznek.
      *

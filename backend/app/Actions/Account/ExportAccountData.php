@@ -7,6 +7,7 @@ namespace App\Actions\Account;
 use App\Actions\Audit\RecordAuditEvent;
 use App\Enums\AuditAction;
 use App\Models\AccessGrant;
+use App\Models\Invoice;
 use App\Models\LessonCompletion;
 use App\Models\Payment;
 use App\Models\Submission;
@@ -89,6 +90,22 @@ final readonly class ExportAccountData
                     'currency' => $payment->currency,
                     'paid_at' => $payment->paid_at?->toIso8601String(),
                     'created_at' => $payment->created_at?->toIso8601String(),
+                ])
+                ->all(),
+            // Kiallitott szamlak (#20): a szamlan szereplo adatok a felhasznaloeik.
+            'invoices' => $user->invoices()
+                ->oldest('id')
+                ->get()
+                ->map(static fn (Invoice $invoice): array => [
+                    'number' => $invoice->invoice_number,
+                    'status' => $invoice->status->value,
+                    'buyer' => $invoice->buyer,
+                    'net_amount' => $invoice->net_amount,
+                    'vat_rate' => $invoice->vat_rate,
+                    'vat_amount' => $invoice->vat_amount,
+                    'gross_amount' => $invoice->gross_amount,
+                    'currency' => $invoice->currency,
+                    'issued_at' => $invoice->issued_at?->toIso8601String(),
                 ])
                 ->all(),
             // Kezi (osztondij/tamogatasi) hozzaferesek; az admin kilete belso adat, nem kerul bele.
