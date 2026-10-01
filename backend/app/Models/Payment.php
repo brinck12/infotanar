@@ -16,6 +16,7 @@ use Illuminate\Support\Carbon;
  * @property PaymentPurpose $purpose
  * @property PaymentStatus $status
  * @property CarbonImmutable|Carbon|null $paid_at
+ * @property CarbonImmutable|Carbon|null $renews_period_ending_at
  */
 final class Payment extends Model
 {
@@ -23,7 +24,7 @@ final class Payment extends Model
 
     protected $fillable = [
         'user_id', 'subscription_id', 'provider', 'request_id', 'provider_payment_id',
-        'recurrence_id', 'purpose', 'amount', 'currency', 'status', 'provider_status', 'paid_at',
+        'recurrence_id', 'purpose', 'renews_period_ending_at', 'amount', 'currency', 'status', 'provider_status', 'paid_at',
     ];
 
     /** @return array<string, string> */
@@ -34,6 +35,7 @@ final class Payment extends Model
             'status' => PaymentStatus::class,
             'amount' => 'integer',
             'paid_at' => 'datetime',
+            'renews_period_ending_at' => 'datetime',
         ];
     }
 

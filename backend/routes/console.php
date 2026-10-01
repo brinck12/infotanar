@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Jobs\ExpireGracePeriods;
+use App\Jobs\ProcessDueSubscriptions;
 use App\Jobs\RetryPendingInvoices;
 use App\Jobs\SyncPendingPayments;
 use Illuminate\Support\Facades\Schedule;
@@ -15,3 +16,6 @@ Schedule::job(new SyncPendingPayments)->everyFiveMinutes();
 
 // Elakadt szamlak potlasa (#20).
 Schedule::job(new RetryPendingInvoices)->everyFifteenMinutes();
+
+// Megujitasok terhelese es az idoszak vegen lemondott elofizetesek lezarasa (#98).
+Schedule::job(new ProcessDueSubscriptions)->hourly();
