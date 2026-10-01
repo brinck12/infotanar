@@ -82,8 +82,12 @@ jobs:
       # Egy már lefutott migráció szerkesztése az éles adatbázison nem fut le
       # újra: a séma csak új migrációval változhat. A PR merge-commitját
       # hasonlítjuk a célághoz, így a célág újabb migrációi nem zavarnak be.
+      # Kivétel a `migration-edit` címkés PR: csak a down() javítására való,
+      # az up() ilyenkor sem változhat (ezt a reviewer ellenőrzi).
       - name: Kiadott migráció nem módosítható
-        if: github.event_name == 'pull_request'
+        if: >-
+          github.event_name == 'pull_request' &&
+          !contains(github.event.pull_request.labels.*.name, 'migration-edit')
         working-directory: .
         env:
           BASE_REF: ${{ github.base_ref }}
