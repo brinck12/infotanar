@@ -59,8 +59,12 @@ export async function changeCard(): Promise<HostedCheckout> {
   return (await http.post<Envelope<HostedCheckout>>('/billing/subscription/card')).data.data
 }
 
-/** A számla PDF letöltése. */
+/**
+ * A számla PDF letöltése. Az API Bearer tokent vár, ezért sima link helyett
+ * blobként kérjük le, és a böngésző letöltéseként mentjük.
+ */
 export async function downloadInvoice(paymentId: string, invoiceNumber: string): Promise<void> {
   const response = await http.get<Blob>(`/billing/payments/${encodeURIComponent(paymentId)}/invoice`, { responseType: 'blob' })
+
   saveBlob(response.data, `szamla-${invoiceNumber}.pdf`)
 }

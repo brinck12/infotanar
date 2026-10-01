@@ -1,6 +1,6 @@
 /**
- * Egy már letöltött tartalom mentése a böngésző letöltéseként. Az API Bearer
- * tokent vár, ezért a letöltést sima link helyett blobként kérjük le.
+ * Egy hitelesített kéréssel lekért fájl mentése a böngésző letöltéseként.
+ * (Sima link nem jó: az nem küldené el a Bearer tokent.)
  */
 export function saveBlob(blob: Blob, filename: string): void {
   const url = URL.createObjectURL(blob)
