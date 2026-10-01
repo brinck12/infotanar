@@ -53,6 +53,7 @@ export interface AdminExercise {
   allowed_languages: LanguageKey[]
   starter_code: Partial<Record<LanguageKey, string>>
   constraints: ConstraintSet
+  comparison: ComparisonSettings
   sql_order_sensitive: boolean
   is_published: boolean
   test_case_count?: number
@@ -75,6 +76,34 @@ export type TestCasePayload = Pick<AdminTestCase, 'stdin' | 'expected_stdout' | 
 export interface ConstraintSet {
   require: string[]
   forbid: string[]
+}
+
+/**
+ * Hogyan vetjük össze a program kimenetét az elvárttal (#155): `exact` soronként (alapértelmezett),
+ * `tokens` szóközök mentén elemekre bontva, `numeric` mint a tokens, de a számokat tűréssel.
+ */
+export type ComparisonMode = 'exact' | 'tokens' | 'numeric'
+
+export interface ComparisonSettings {
+  mode: ComparisonMode
+  /** Csak `numeric` módban számít. */
+  abs_tol: number
+  rel_tol: number
+  case_insensitive: boolean
+  ignore_blank_lines: boolean
+}
+
+export const DEFAULT_COMPARISON: ComparisonSettings = {
+  mode: 'exact',
+  abs_tol: 0,
+  rel_tol: 0,
+  case_insensitive: false,
+  ignore_blank_lines: false,
+}
+
+export interface ComparisonCheck {
+  matches: boolean
+  difference: string | null
 }
 
 export interface ConstraintOptions {
@@ -103,6 +132,7 @@ export type ExercisePayload = Pick<
   | 'allowed_languages'
   | 'starter_code'
   | 'constraints'
+  | 'comparison'
   | 'sql_order_sensitive'
   | 'is_published'
 >
@@ -162,6 +192,11 @@ export const constraintOptionsQuery = () =>
     queryFn: ({ signal }) => get<ConstraintOptions>('/admin/constraint-options', signal),
     staleTime: 60 * 60_000,
   })
+
+/** "Kipróbálom": két szöveg összevetése a megadott (akár még el nem mentett) beállításokkal; nem ment semmit. */
+export async function checkComparison(payload: { comparison: ComparisonSettings; expected: string; actual: string }): Promise<ComparisonCheck> {
+  return (await http.post<Envelope<ComparisonCheck>>('/admin/comparison/check', payload)).data.data
+}
 
 export const languagesQuery = () =>
   queryOptions({

@@ -135,6 +135,11 @@ function TestResultRow({ index, result }: { index: number; result: TestResult })
       </div>
 
       {result.error && <p className="mt-2 text-red-300">{result.error}</p>}
+      {result.difference && !result.hidden && (
+        <p className="mt-2 text-amber-200" data-testid="result-difference">
+          {result.difference}
+        </p>
+      )}
 
       {/* Rejtett teszteseteknél a backend nem küld kimenetet. */}
       {!result.hidden && (

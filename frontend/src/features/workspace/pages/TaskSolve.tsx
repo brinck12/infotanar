@@ -150,6 +150,18 @@ function Workspace({ task }: { task: UnlockedTaskDetail }) {
 
       <div className="prose-invert max-w-none rounded-lg border border-slate-800 bg-slate-900 p-5 text-slate-200 [&_code]:rounded [&_code]:bg-slate-950 [&_code]:px-1 [&_h2]:mt-0 [&_h2]:mb-3 [&_h2]:text-lg [&_h2]:font-semibold [&_h3]:mt-4 [&_h3]:mb-2 [&_h3]:font-medium [&_li]:ml-4 [&_li]:list-disc [&_p]:my-2">
         <ReactMarkdown remarkPlugins={[remarkGfm]}>{task.description}</ReactMarkdown>
+
+        {/* #155: ha nem a pontos összevetés él, a diák tudja, mire nem kell ügyelnie. */}
+        {task.comparison_rules && task.comparison_rules.length > 0 && (
+          <div className="mt-4 border-t border-slate-800 pt-3 text-sm text-slate-300" data-testid="comparison-rules">
+            <p className="font-medium text-slate-200">Hogyan értékeljük a kimenetet?</p>
+            <ul className="mt-1 space-y-1">
+              {task.comparison_rules.map((rule) => (
+                <li key={rule}>{rule}</li>
+              ))}
+            </ul>
+          </div>
+        )}
       </div>
 
       {task.example_test_cases.length > 0 && (

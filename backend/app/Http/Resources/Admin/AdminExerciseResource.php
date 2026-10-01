@@ -26,6 +26,7 @@ final class AdminExerciseResource extends JsonResource
             'allowed_languages' => $this->allowed_languages,
             'starter_code' => $this->starter_code ?: new stdClass,
             'constraints' => $this->constraints->toArray(),
+            'comparison' => $this->comparison->toArray(),
             'sql_order_sensitive' => $this->sql_order_sensitive,
             'is_published' => $this->is_published,
             'test_case_count' => $this->whenCounted('testCases'),
