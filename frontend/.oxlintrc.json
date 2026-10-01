@@ -17,6 +17,6 @@
     "react/react-in-jsx-scope": "off",
     "jsx-a11y/prefer-tag-over-role": "off",
     "import/no-named-as-default-member": "off",
-    "import/no-unassigned-import": ["error", { "allow": ["**/*.css"] }]
+    "import/no-unassigned-import": ["error", { "allow": ["**/*.css", "monaco-editor/**"] }]
   }
 }

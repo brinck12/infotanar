@@ -1,16 +1,6 @@
-import { Editor, type OnMount } from '@monaco-editor/react'
-import { useEffect, useRef } from 'react'
+import { Component, lazy, Suspense, type ReactNode } from 'react'
 import type { LanguageKey } from '../../../types'
-
-/** A nyelvkulcs és a Monaco saját nyelvazonosítójának megfeleltetése. */
-const MONACO_LANGUAGE: Record<LanguageKey, string> = {
-  python: 'python',
-  csharp: 'csharp',
-  sql: 'sql',
-}
-
-type MonacoEditor = Parameters<OnMount>[0]
-type Monaco = Parameters<OnMount>[1]
+import { EditorSkeleton } from './EditorSkeleton'
 
 /** Kívülről kért tartalomcsere; minden új `seq` pontosan egyszer hat. */
 export interface EditorReplacement {
@@ -20,7 +10,7 @@ export interface EditorReplacement {
   undoable: boolean
 }
 
-interface Props {
+export interface CodeEditorProps {
   language: LanguageKey
   /** A szerkesztő kezdőtartalma (csak mountkor számít). */
   initialValue: string
@@ -29,67 +19,58 @@ interface Props {
   readOnly?: boolean
 }
 
+/** A Monaco több megabájt: külön chunkban, csak a szerkesztőt mutató oldalakon töltődik le. */
+const MonacoCodeEditor = lazy(async () => ({ default: (await import('./MonacoCodeEditor')).MonacoCodeEditor }))
+
 /**
- * A szerkesztő a saját tartalmának gazdája (nem vezérelt `value`): a vezérelt
- * mód a @monaco-editor/react-ben minden renderkor visszaírja a propot, és ha
- * a gépelés gyorsabb a renderelésnél, elavult szöveget írna a modellbe.
- * A szülő az onChange-en követi a tartalmat, és csak a tényleges cseréket
- * (nyelvváltás, visszaállítás) kéri a `replace`-szel.
- *
- * Mindig LF sorvég: sortörés nélküli tartalom után a Monaco Windowson CRLF-re
- * válthat, és akkor a változatlan kiinduló kód is módosítottnak látszana.
+ * Kódszerkesztő (#150). Ez a könnyű burok azonnal megjelenik; a Monaco a
+ * háttérben töltődik: addig váz látszik, sikertelen letöltésnél pedig
+ * hibaüzenet újratöltés gombbal, nem üres doboz.
  */
-export function CodeEditor({ language, initialValue, onChange, replace, readOnly = false }: Props) {
-  const editorRef = useRef<MonacoEditor | null>(null)
-  const appliedSeq = useRef(replace?.seq ?? 0)
-
-  const onMount: OnMount = (editor, monaco) => {
-    editorRef.current = editor
-    editor.onDidChangeModelContent(() => ensureLf(editor, monaco))
-    ensureLf(editor, monaco)
-  }
-
-  useEffect(() => {
-    const editor = editorRef.current
-    const model = editor?.getModel()
-    if (!replace || replace.seq === appliedSeq.current || !editor || !model) return
-    appliedSeq.current = replace.seq
-
-    if (replace.undoable) {
-      editor.pushUndoStop()
-      editor.executeEdits('replace', [{ range: model.getFullModelRange(), text: replace.value, forceMoveMarkers: true }])
-      editor.pushUndoStop()
-    } else {
-      // Másik nyelv másik dokumentum: a visszavonási előzmény nem keveredhet.
-      model.setValue(replace.value)
-    }
-  }, [replace])
-
+export function CodeEditor(props: CodeEditorProps) {
   return (
     <div className="h-full overflow-hidden rounded-lg border border-slate-800">
-      <Editor
-        height="100%"
-        theme="vs-dark"
-        language={MONACO_LANGUAGE[language]}
-        defaultValue={initialValue}
-        onMount={onMount}
-        onChange={(next) => onChange((next ?? '').replace(/\r\n/g, '\n'))}
-        loading={<div className="p-4 text-sm text-slate-400">Szerkesztő betöltése…</div>}
-        options={{
-          readOnly,
-          fontSize: 14,
-          minimap: { enabled: false },
-          scrollBeyondLastLine: false,
-          tabSize: 4,
-          automaticLayout: true,
-          renderWhitespace: 'selection',
-        }}
-      />
+      <EditorLoadBoundary>
+        <Suspense fallback={<EditorSkeleton />}>
+          <MonacoCodeEditor {...props} />
+        </Suspense>
+      </EditorLoadBoundary>
     </div>
   )
 }
 
-function ensureLf(editor: MonacoEditor, monaco: Monaco): void {
-  const model = editor.getModel()
-  if (model && model.getEOL() !== '\n') model.setEOL(monaco.editor.EndOfLineSequence.LF)
+/**
+ * Elkapja a szerkesztő betöltési hibáját (pl. megszakadt letöltés).
+ *
+ * Az újrapróbálás az oldal újratöltése: a Chrome a sikertelenül letöltött
+ * modult az oldal élettartamára megjegyzi, egy újabb `import()` ugyanazt a
+ * hibát adná vissza hálózati kérés nélkül.
+ */
+class EditorLoadBoundary extends Component<{ children: ReactNode }, { failed: boolean }> {
+  override state = { failed: false }
+
+  static getDerivedStateFromError(): { failed: boolean } {
+    return { failed: true }
+  }
+
+  override componentDidCatch(error: Error): void {
+    console.error('A kódszerkesztő betöltése nem sikerült', error)
+  }
+
+  override render() {
+    if (!this.state.failed) return this.props.children
+
+    return (
+      <div role="alert" data-testid="editor-load-error" className="flex h-full flex-col items-center justify-center gap-4 bg-slate-900 p-6 text-center">
+        <p className="text-sm text-slate-200">A kódszerkesztőt nem sikerült betölteni. Ellenőrizd az internetkapcsolatot, majd próbáld újra.</p>
+        <button
+          type="button"
+          onClick={() => window.location.reload()}
+          className="min-h-11 rounded-lg border border-slate-700 bg-slate-800 px-5 text-sm font-medium text-slate-100 transition hover:bg-slate-700"
+        >
+          Újrapróbálás
+        </button>
+      </div>
+    )
+  }
 }
