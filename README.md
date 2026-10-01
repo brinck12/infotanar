@@ -121,6 +121,10 @@ Minden végpont a `/api/v1` prefix alatt.
 | `GET` | `/topics` | Témakörök, publikált feladatszámmal |
 | `GET` | `/tasks?topic=&level=` | Publikált feladatok listája (leírás nélkül) |
 | `GET` | `/tasks/{id}` | Feladat teljes leírással, starter_code-dal és a **nem rejtett** tesztesetekkel |
+| `GET` | `/tasks/{id}/hints` | **Bejelentkezés kell.** A feladat tippjeinek száma és a már megnyitottak szövege |
+| `POST` | `/tasks/{id}/hints/reveal` | A következő tipp megnyitása (a szerver választja, rögzíti); nincs több tipp: 422 |
+| `GET` | `/tasks/{id}/solution` | A mintamegoldás állapota: `locked` / `revealable` / `unlocked`; a megoldás csak `unlocked`-nál van a válaszban |
+| `POST` | `/tasks/{id}/solution/reveal` | „Megnézem a megoldást”: `revealable` állapotban rögzíti a megnyitást és kiadja a megoldást; `locked`: 403 |
 | `POST` | `/run` | Futtatás csak a nem rejtett teszteseteken, nem mentődik |
 | `POST` | `/submissions` | Futtatás **minden** teszteseten, submission mentésével |
 
@@ -141,6 +145,12 @@ A `/run` és a `/submissions` **IP-nként 10 kérés / perc** rate limit alatt �
   nem elérhető, a `fallback_id` lép életbe.
 - Limitek minden kérésben: `cpu_time_limit: 2`, `memory_limit: 128000`,
   `max_processes_and_or_threads: 60`.
+- **Tippek és mintamegoldás** (csak bejelentkezve, a feladat hozzáférési szabályával): a szerver
+  dönt, a kliens csak megjeleníti. A tippek egyenként nyílnak, a megnyitás rögzül. A megoldás
+  elfogadott beadás után látszik; előtte `SOLUTION_UNLOCK_AFTER_FAILED_SUBMISSIONS` (alapból 5)
+  sikertelen beadás után kifejezett megerősítéssel nyitható meg. Ez rögzül, és az utána készült
+  beadások `assisted` jelölést kapnak (a lecke így is teljesül). A `GET /tasks/{id}` csak a
+  `hint_count`-ot és a `solution_available`-t adja, szöveget soha.
 - Ha a Judge0 elérhetetlen, a válasz `status: "error"` érthető magyar üzenettel,
   nem 500-as stacktrace.
 

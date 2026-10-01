@@ -53,6 +53,10 @@ interface TaskDetailBase {
   hidden_test_case_count: number
   /** A feladathoz tartozó lecke (a videóhoz); régebbi válaszokban hiányozhat. */
   lesson?: TaskLesson
+  /** Hány tipp van a feladathoz (#154); a szövegük a `/tasks/{id}/hints`-ből jön. Régebbi válaszokban hiányozhat. */
+  hint_count?: number
+  /** A szerző írt mintamegoldást (#154); hogy látszik-e a diáknak, a `/tasks/{id}/solution` dönti el. */
+  solution_available?: boolean
 }
 
 export interface TaskLesson {
@@ -85,6 +89,32 @@ export interface LockedTaskDetail extends TaskDetailBase {
 }
 
 export type TaskDetail = UnlockedTaskDetail | LockedTaskDetail
+
+/** A diák megnyitott tippjei (`GET /tasks/{id}/hints`); a nem megnyitottak szövege nem jön le. */
+export interface HintBook {
+  count: number
+  revealed: Array<{ position: number; body: string }>
+}
+
+/**
+ * A mintamegoldás állapota a diáknak (#154): zárolt, megerősítéssel megnyitható
+ * (elég sikertelen beadás után), vagy látható (elfogadott beadás / korábbi megnyitás).
+ */
+export type SolutionStatus = 'locked' | 'revealable' | 'unlocked'
+
+export interface SolutionSnippet {
+  language: LanguageKey
+  source_code: string
+  explanation: string | null
+}
+
+export interface SolutionView {
+  status: SolutionStatus
+  failed_submissions: number
+  required_failed_submissions: number
+  /** Csak `unlocked` állapotban van a válaszban. */
+  solutions?: SolutionSnippet[]
+}
 
 export type RunStatus = 'passed' | 'failed' | 'error'
 

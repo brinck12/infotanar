@@ -53,7 +53,7 @@ final class TaskController extends Controller
         $exercise = Exercise::query()
             ->published()
             ->with([...self::WITH_TOPIC, 'visibleTestCases'])
-            ->withCount('hiddenTestCases')
+            ->withCount(['hiddenTestCases', 'hints', 'solutions'])
             ->findOrFail($task);
 
         return new TaskResource($exercise, $this->access->denialFor($this->viewer($request), $exercise->lesson));

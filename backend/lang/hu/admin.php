@@ -3,5 +3,6 @@
 declare(strict_types=1);
 
 return [
+    'solution_language_not_allowed' => 'Mintamegoldás csak engedélyezett nyelvre adható meg („:language” nincs az engedélyezettek között).',
     'starter_code_language' => 'Kiinduló kód csak engedélyezett nyelvre adható meg („:language” nincs az engedélyezettek között).',
 ];

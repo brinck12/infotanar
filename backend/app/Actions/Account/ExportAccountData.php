@@ -7,9 +7,11 @@ namespace App\Actions\Account;
 use App\Actions\Audit\RecordAuditEvent;
 use App\Enums\AuditAction;
 use App\Models\AccessGrant;
+use App\Models\HintReveal;
 use App\Models\Invoice;
 use App\Models\LessonCompletion;
 use App\Models\Payment;
+use App\Models\SolutionReveal;
 use App\Models\Submission;
 use App\Models\Subscription;
 use App\Models\User;
@@ -60,7 +62,29 @@ final readonly class ExportAccountData
                     'status' => $submission->status,
                     'source_code' => $submission->source_code,
                     'results' => $submission->results,
+                    'assisted' => $submission->assisted,
                     'submitted_at' => $submission->created_at?->toIso8601String(),
+                ])
+                ->all(),
+            // Megnyitott tippek es mintamegoldasok (#154): melyik feladatnal, mikor.
+            'revealed_hints' => $user->hintReveals()
+                ->with('exercise:id,title')
+                ->oldest('revealed_at')
+                ->get()
+                ->map(static fn (HintReveal $reveal): array => [
+                    'exercise' => ['id' => $reveal->exercise_id, 'title' => $reveal->exercise?->title],
+                    'hint_number' => $reveal->position,
+                    'revealed_at' => $reveal->revealed_at->toIso8601String(),
+                ])
+                ->all(),
+            'revealed_solutions' => $user->solutionReveals()
+                ->with('exercise:id,title')
+                ->oldest('revealed_at')
+                ->get()
+                ->map(static fn (SolutionReveal $reveal): array => [
+                    'exercise' => ['id' => $reveal->exercise_id, 'title' => $reveal->exercise?->title],
+                    'failed_submissions' => $reveal->failed_submissions,
+                    'revealed_at' => $reveal->revealed_at->toIso8601String(),
                 ])
                 ->all(),
             // Csak allapot es datumok: a szolgaltatoi azonositok belso adatok, nem a felhasznaloe.

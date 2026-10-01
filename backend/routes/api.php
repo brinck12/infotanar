@@ -6,6 +6,8 @@ use App\Http\Controllers\Api\V1\Account\AccountController;
 use App\Http\Controllers\Api\V1\Admin\AccessGrantController;
 use App\Http\Controllers\Api\V1\Admin\Catalog\ConstraintOptionsController;
 use App\Http\Controllers\Api\V1\Admin\Catalog\ExerciseController as AdminExerciseController;
+use App\Http\Controllers\Api\V1\Admin\Catalog\ExerciseHintController;
+use App\Http\Controllers\Api\V1\Admin\Catalog\ExerciseSolutionController;
 use App\Http\Controllers\Api\V1\Admin\Catalog\LessonController as AdminLessonController;
 use App\Http\Controllers\Api\V1\Admin\Catalog\ModuleController as AdminModuleController;
 use App\Http\Controllers\Api\V1\Admin\Catalog\ReorderController;
@@ -33,6 +35,8 @@ use App\Http\Controllers\Api\V1\Catalog\TrackController;
 use App\Http\Controllers\Api\V1\Execution\RunController;
 use App\Http\Controllers\Api\V1\Execution\SubmissionController;
 use App\Http\Controllers\Api\V1\HealthController;
+use App\Http\Controllers\Api\V1\Learning\HintController;
+use App\Http\Controllers\Api\V1\Learning\SolutionController;
 use App\Http\Controllers\Api\V1\Progress\ProgressController;
 use Illuminate\Support\Facades\Route;
 
@@ -81,6 +85,14 @@ Route::prefix('v1')->name('api.')->group(function (): void {
     Route::get('/topics', [TopicController::class, 'index'])->name('topics.index');
     Route::get('/tasks', [TaskController::class, 'index'])->name('tasks.index');
     Route::get('/tasks/{task}', [TaskController::class, 'show'])->whereNumber('task')->name('tasks.show');
+
+    // Tippek es mintamegoldas (#154): bejelentkezes kell, a megnyitasok a felhasznalohoz kotottek.
+    Route::prefix('tasks/{task}')->where(['task' => '[0-9]+'])->name('tasks.')->middleware('auth:sanctum')->group(function (): void {
+        Route::get('/hints', [HintController::class, 'index'])->name('hints.index');
+        Route::post('/hints/reveal', [HintController::class, 'reveal'])->middleware('throttle:30,1')->name('hints.reveal');
+        Route::get('/solution', [SolutionController::class, 'show'])->name('solution.show');
+        Route::post('/solution/reveal', [SolutionController::class, 'reveal'])->middleware('throttle:30,1')->name('solution.reveal');
+    });
 
     // A kodfuttatas draga muvelet: IP-nkent 10 keres / perc.
     Route::middleware('throttle:10,1')->group(function (): void {
@@ -150,6 +162,18 @@ Route::prefix('v1')->name('api.')->group(function (): void {
         // Tesztesetek (#46): letrehozas/lista a feladat alatt, a tobbi kozvetlenul.
         Route::put('/exercises/{exercise}/test-cases/order', [TestCaseController::class, 'reorder'])->name('test-cases.order');
         Route::apiResource('exercises.test-cases', TestCaseController::class)->shallow()->parameters(['test-cases' => 'testCase']);
+
+        // Tippek es mintamegoldasok (#154).
+        Route::put('/exercises/{exercise}/hints/order', [ExerciseHintController::class, 'reorder'])->name('exercise-hints.order');
+        Route::get('/exercises/{exercise}/hints', [ExerciseHintController::class, 'index'])->name('exercise-hints.index');
+        Route::post('/exercises/{exercise}/hints', [ExerciseHintController::class, 'store'])->name('exercise-hints.store');
+        Route::put('/exercise-hints/{hint}', [ExerciseHintController::class, 'update'])->name('exercise-hints.update');
+        Route::delete('/exercise-hints/{hint}', [ExerciseHintController::class, 'destroy'])->name('exercise-hints.destroy');
+        Route::get('/exercises/{exercise}/solutions', [ExerciseSolutionController::class, 'index'])->name('exercise-solutions.index');
+        Route::put('/exercises/{exercise}/solutions/{language}', [ExerciseSolutionController::class, 'update'])
+            ->where('language', '[a-z]+')
+            ->name('exercise-solutions.update');
+        Route::delete('/exercise-solutions/{solution}', [ExerciseSolutionController::class, 'destroy'])->name('exercise-solutions.destroy');
 
         // Elakadt szamlak (#103).
         Route::get('/invoices', [AdminInvoiceController::class, 'index'])->name('invoices.index');

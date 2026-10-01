@@ -96,6 +96,8 @@ return [
         'task_id' => 'feladat',
         'language' => 'programozási nyelv',
         'source_code' => 'forráskód',
+        'body' => 'tipp szövege',
+        'explanation' => 'magyarázat',
         'topic' => 'témakör',
         'level' => 'szint',
         'slug' => 'URL-azonosító',
