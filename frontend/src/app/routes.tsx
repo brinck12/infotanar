@@ -29,6 +29,7 @@ export const AdminUsers = page(() => import('../features/admin/users/pages/Admin
 export const AdminUserDetail = page(() => import('../features/admin/users/pages/AdminUserDetail'), 'AdminUserDetail')
 export const PaymentReturn = page(() => import('../features/billing/pages/PaymentReturn'), 'PaymentReturn')
 export const Account = page(() => import('../features/account/pages/Account'), 'Account')
+export const EmailChangeConfirm = page(() => import('../features/account/pages/EmailChangeConfirm'), 'EmailChangeConfirm')
 export const Terms = page(() => import('../features/legal/pages/LegalPage'), 'Terms')
 export const Privacy = page(() => import('../features/legal/pages/LegalPage'), 'Privacy')
 export const Imprint = page(() => import('../features/legal/pages/LegalPage'), 'Imprint')
