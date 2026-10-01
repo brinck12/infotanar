@@ -15,12 +15,12 @@ export function RequireAuth({ children }: { children: ReactNode }) {
   return children
 }
 
-export function RequireRole({ role, children }: { role: Role; children: ReactNode }) {
+export function RequireRole({ allow, children }: { allow: Role; children: ReactNode }) {
   const { user, loading } = useAuth()
 
   if (loading) return <PageLoader />
   if (!user) return <Navigate to="/bejelentkezes" replace />
-  if (user.role !== role) return <Navigate to="/" replace />
+  if (user.role !== allow) return <Navigate to="/" replace />
 
   return children
 }
