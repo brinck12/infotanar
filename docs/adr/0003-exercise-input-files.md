@@ -1,7 +1,7 @@
 # ADR 0003 — Feladathoz mellékelt adatfájlok (bemeneti fájlok)
 
-- **Állapot:** elfogadva (2026-10-01); a kimeneti fájlok külön issue-ban maradnak
-- **Kapcsolódó issue-k:** #152, #151 (limitek), #159 (referenciamegoldás)
+- **Állapot:** elfogadva (2026-10-01); a kimeneti fájlok külön issue-ban (#220) maradnak
+- **Kapcsolódó issue-k:** #152, #220 (kimeneti fájlok), #151 (limitek), #159 (referenciamegoldás)
 
 ## Kontextus
 
@@ -43,7 +43,7 @@ A munkaterület a fájl első 10 sorát mutatja, de csak érvényes UTF-8 szöve
 
 A Judge0 csak stdout-ot és stderr-t ad vissza, ezért a megoldás által írt fájlt stdout-on át kellene visszahozni: nyelvenként egy, a beadott kódhoz fűzött záró rész véletlen jelölősor után kiírná a fájlt, a kiértékelő pedig a jelölőnél kettévágná a kimenetet. Az issue szerint ezt valódi Judge0-n kell kipróbálni (a korán `exit()`-et hívó program kihagyná a záró részt), és ha nem megbízható, külön issue-ba kell tenni.
 
-Ehhez a munkához nem volt elérhető valódi Judge0 példány, ezért a megközelítést nem tudtuk kipróbálni, és nem szállítjuk le kipróbálatlanul. A kimeneti fájlok követő issue-ban folytatódnak.
+Ehhez a munkához nem volt elérhető valódi Judge0 példány, ezért a megközelítést nem tudtuk kipróbálni, és nem szállítjuk le kipróbálatlanul. A kimeneti fájlok a #220 issue-ban folytatódnak.
 
 ## Következmények
 
