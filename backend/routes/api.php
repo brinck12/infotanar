@@ -35,6 +35,7 @@ use App\Http\Controllers\Api\V1\Catalog\TrackController;
 use App\Http\Controllers\Api\V1\ClientErrorController;
 use App\Http\Controllers\Api\V1\Execution\RunController;
 use App\Http\Controllers\Api\V1\Execution\SubmissionController;
+use App\Http\Controllers\Api\V1\Execution\SubmissionHistoryController;
 use App\Http\Controllers\Api\V1\HealthController;
 use App\Http\Controllers\Api\V1\Progress\LessonCompletionController;
 use App\Http\Controllers\Api\V1\Progress\ProgressController;
@@ -102,6 +103,13 @@ Route::prefix('v1')->name('api.')->middleware(RejectInvalidToken::class)->group(
     });
 
     Route::get('/progress', ProgressController::class)->middleware('auth:sanctum')->name('progress');
+
+    // A diak sajat beadasai (#147): lista feladatonkent es osszesen, valamint egy beadas a forraskoddal.
+    Route::middleware('auth:sanctum')->group(function (): void {
+        Route::get('/submissions', [SubmissionHistoryController::class, 'index'])->name('submissions.index');
+        Route::get('/submissions/{submission}', [SubmissionHistoryController::class, 'show'])->whereNumber('submission')->name('submissions.show');
+        Route::get('/tasks/{task}/submissions', [SubmissionHistoryController::class, 'forTask'])->whereNumber('task')->name('tasks.submissions');
+    });
     // Feladat nelkuli lecke kesznek jelolese (#144); a feladatos lecke beadassal teljesul.
     Route::post('/lessons/{lesson}/complete', [LessonCompletionController::class, 'store'])
         ->whereNumber('lesson')

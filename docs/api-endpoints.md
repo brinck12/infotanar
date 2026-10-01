@@ -139,7 +139,9 @@ Minden végpont a `/api/v1` előtag alatt érhető el. A hozzáférés oszlop je
 
 | Metódus | Útvonal | Hozzáférés | Limit |
 |---|---|---|---|
+| `GET` | `/submissions` | bejelentkezve | – |
 | `POST` | `/submissions` | nyilvános | `10,1` |
+| `GET` | `/submissions/{submission}` | bejelentkezve | – |
 
 ## tasks
 
@@ -147,6 +149,7 @@ Minden végpont a `/api/v1` előtag alatt érhető el. A hozzáférés oszlop je
 |---|---|---|---|
 | `GET` | `/tasks` | nyilvános | – |
 | `GET` | `/tasks/{task}` | nyilvános | – |
+| `GET` | `/tasks/{task}/submissions` | bejelentkezve | – |
 
 ## topics
 
