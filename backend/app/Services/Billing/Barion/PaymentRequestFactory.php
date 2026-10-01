@@ -57,4 +57,44 @@ final readonly class PaymentRequestFactory
             ]],
         ];
     }
+
+    /**
+     * Megujitas a tarolt kartyaval (ADR 0001): ugyanaz a RecurrenceId, uj token
+     * regisztracio nelkul; a vasarlo nincs jelen, ezert nincs RedirectUrl.
+     *
+     * @return array<string, mixed>
+     *
+     * @throws BarionException
+     */
+    public function recurringCharge(Payment $payment, User $user): array
+    {
+        $plan = Config::string('billing.plan.name');
+
+        return [
+            'PaymentType' => 'Immediate',
+            'GuestCheckOut' => true,
+            'FundingSources' => ['All'],
+            'PaymentRequestId' => $payment->request_id,
+            'PayerHint' => $user->email,
+            'Locale' => 'hu-HU',
+            'Currency' => $payment->currency,
+            'InitiateRecurrence' => false,
+            'RecurrenceId' => $payment->recurrence_id,
+            'RecurrenceType' => 'RecurringPayment',
+            'CallbackUrl' => route('api.webhooks.barion'),
+            'Transactions' => [[
+                'POSTransactionId' => $payment->request_id,
+                'Payee' => $this->barion->payee(),
+                'Total' => $payment->amount,
+                'Items' => [[
+                    'Name' => $plan,
+                    'Description' => $plan,
+                    'Quantity' => 1,
+                    'Unit' => 'hónap',
+                    'UnitPrice' => $payment->amount,
+                    'ItemTotal' => $payment->amount,
+                ]],
+            ]],
+        ];
+    }
 }
