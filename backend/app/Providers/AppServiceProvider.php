@@ -74,6 +74,11 @@ final class AppServiceProvider extends ServiceProvider
             ->by($userOrIp($request))
             ->response($tooMany));
 
+        // Minden inditas egy Barion-hivas es egy fizetes-sor: ne lehessen vele elarasztani.
+        RateLimiter::for('checkout', static fn (Request $request) => Limit::perMinute(5)
+            ->by($userOrIp($request))
+            ->response($tooMany));
+
         // Jelszot ellenorzo, visszafordithatatlan muveletek: a jelszo ne legyen talalgathato.
         RateLimiter::for('sensitive', static fn (Request $request) => Limit::perMinute(5)
             ->by($userOrIp($request))
