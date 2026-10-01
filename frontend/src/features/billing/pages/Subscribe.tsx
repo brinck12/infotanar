@@ -1,19 +1,20 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import type { ReactNode } from 'react'
-import { Link } from 'react-router-dom'
 import { hibaUzenet, mezoHibak } from '../../../shared/api/errors'
 import { Alert } from '../../../shared/ui/Form'
 import { PageLoader } from '../../../shared/ui/PageLoader'
-import type { BillingProfile, BillingProfilePayload, Plan, Subscription } from '../../../types'
+import type { BillingProfile, BillingProfilePayload, Plan } from '../../../types'
 import { useAuth } from '../../auth/context'
 import * as billingApi from '../api'
 import { billingKeys } from '../api'
 import { BillingProfileForm } from '../components/BillingProfileForm'
+import { SubscriptionManager } from '../components/SubscriptionManager'
 import { formatHuf } from '../format'
 
 /**
  * Előfizetés (#19): számlázási adatok, majd tovább a Barion fizetőoldalára.
  * A számla ezekből az adatokból készül, ezért fizetni csak utánuk lehet.
+ * Előfizetőknek ugyanitt az önkiszolgáló kezelés jelenik meg (#101).
  */
 export function Subscribe() {
   const { user } = useAuth()
@@ -36,13 +37,17 @@ export function Subscribe() {
 
   return (
     <Page>
-      <PlanSummary plan={plan.data} />
       {subscription.data ? (
-        <AlreadySubscribed subscription={subscription.data} />
-      ) : !user?.email_verified_at ? (
-        <Alert kind="info">Előfizetés előtt erősítsd meg az e-mail-címed a regisztrációkor kapott levélben.</Alert>
+        <SubscriptionManager subscription={subscription.data} profile={profile.data} />
       ) : (
-        <CheckoutForm initial={profile.data} />
+        <>
+          <PlanSummary plan={plan.data} />
+          {user?.email_verified_at ? (
+            <CheckoutForm initial={profile.data} />
+          ) : (
+            <Alert kind="info">Előfizetés előtt erősítsd meg az e-mail-címed a regisztrációkor kapott levélben.</Alert>
+          )}
+        </>
       )}
     </Page>
   )
@@ -107,19 +112,6 @@ function PlanSummary({ plan }: { plan: Plan }) {
       </p>
       <p className="mt-2 text-sm text-slate-400">Minden feladat és videó elérhető, havonta megújul, bármikor lemondható.</p>
     </div>
-  )
-}
-
-function AlreadySubscribed({ subscription }: { subscription: Subscription }) {
-  const end = subscription.current_period_end ? new Date(subscription.current_period_end).toLocaleDateString('hu-HU') : null
-
-  return (
-    <Alert kind="success">
-      Már előfizető vagy{end ? `, a jelenlegi időszak vége: ${end}` : ''}.{' '}
-      <Link to="/feladatok" className="underline">
-        Tovább a feladatokhoz
-      </Link>
-    </Alert>
   )
 }
 

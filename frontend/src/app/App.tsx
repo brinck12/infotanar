@@ -2,6 +2,7 @@ import { Suspense } from 'react'
 import { BrowserRouter, Link, Navigate, Outlet, Route, Routes } from 'react-router-dom'
 import { AccountNav, VerifyEmailBanner } from '../features/auth/components/AccountNav'
 import { GuestOnly, RequireAuth, RequireRole } from '../features/auth/guards'
+import { PastDueBanner } from '../features/billing/components/PastDueBanner'
 import { PageLoader } from '../shared/ui/PageLoader'
 import { ErrorBoundary } from './ErrorBoundary'
 import { Providers } from './Providers'
@@ -25,6 +26,7 @@ export default function App() {
               </nav>
             </header>
             <VerifyEmailBanner />
+            <PastDueBanner />
 
             <main className="flex-1">
               <ErrorBoundary>
@@ -40,6 +42,7 @@ export default function App() {
                     <Route path="/elfelejtett-jelszo" element={<GuestOnly><Pages.ForgotPassword /></GuestOnly>} />
                     <Route path="/jelszo-visszaallitas" element={<Pages.ResetPassword />} />
                     <Route path="/elofizetes" element={<RequireAuth><Pages.Subscribe /></RequireAuth>} />
+                    <Route path="/elofizetes/visszateres" element={<RequireAuth><Pages.PaymentReturn /></RequireAuth>} />
                     <Route path="/haladas" element={<RequireAuth><Pages.ProgressDashboard /></RequireAuth>} />
                     <Route path="/admin" element={<RequireRole allow="admin"><Outlet /></RequireRole>}>
                       <Route index element={<Navigate to="/admin/tananyag" replace />} />
