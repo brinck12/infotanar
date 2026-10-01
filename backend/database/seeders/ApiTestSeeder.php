@@ -11,8 +11,10 @@ use App\Models\Lesson;
 use App\Models\Module;
 use App\Models\Track;
 use App\Models\User;
+use App\Support\DisposableDatabase;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Str;
+use RuntimeException;
 
 /**
  * Rogzitett adatok a Playwright API teszteknek (tests/specs/api).
@@ -30,6 +32,13 @@ final class ApiTestSeeder extends Seeder
 
     public function run(): void
     {
+        // Kozvetlenul (db:seed --class=...) hivva se kerulhessen teszt-adat eles adatbazisba.
+        $refusal = DisposableDatabase::refusal();
+
+        if ($refusal !== null) {
+            throw new RuntimeException($refusal);
+        }
+
         $track = Track::create(['slug' => 'pw-teszt-track', 'title' => 'PW teszt track', 'position' => 0]);
         $this->module = Module::create([
             'track_id' => $track->id,
