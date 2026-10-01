@@ -6,6 +6,7 @@ namespace App\Http\Resources;
 
 use App\Enums\AccessDenial;
 use App\Models\Exercise;
+use App\Services\Catalog\TaskNavigation;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 use stdClass;
@@ -20,8 +21,11 @@ use stdClass;
  */
 final class TaskResource extends JsonResource
 {
-    public function __construct(Exercise $exercise, private readonly ?AccessDenial $denial = null)
-    {
+    public function __construct(
+        Exercise $exercise,
+        private readonly ?AccessDenial $denial = null,
+        private readonly ?TaskNavigation $navigation = null,
+    ) {
         parent::__construct($exercise);
     }
 
@@ -59,6 +63,8 @@ final class TaskResource extends JsonResource
                 fn () => ExampleTestCaseResource::collection($this->whenLoaded('visibleTestCases')),
             ),
             'hidden_test_case_count' => $this->whenCounted('hiddenTestCases'),
+            // Zarolt feladatnal is megy: a diak onnan is tovabb tud lepni.
+            'navigation' => $this->when($this->navigation !== null, fn (): ?array => $this->navigation?->toArray()),
         ];
     }
 }

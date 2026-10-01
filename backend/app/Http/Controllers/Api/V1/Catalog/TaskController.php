@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Api\V1\Catalog;
 
+use App\Actions\Catalog\BuildTaskNavigation;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Catalog\ListTasksRequest;
 use App\Http\Resources\TaskResource;
@@ -53,7 +54,7 @@ final class TaskController extends Controller
         ]);
     }
 
-    public function show(Request $request, int $task): TaskResource
+    public function show(Request $request, int $task, BuildTaskNavigation $buildNavigation): TaskResource
     {
         $exercise = Exercise::query()
             ->published()
@@ -61,7 +62,13 @@ final class TaskController extends Controller
             ->withCount('hiddenTestCases')
             ->findOrFail($task);
 
-        return new TaskResource($exercise, $this->access->denialFor($this->viewer($request), $exercise->lesson));
+        $viewer = $this->viewer($request);
+
+        return new TaskResource(
+            $exercise,
+            $this->access->denialFor($viewer, $exercise->lesson),
+            $buildNavigation->handle($viewer, $exercise),
+        );
     }
 
     /** Az elofizetest egyszer toltjuk be, hogy a lista ne kerdezze le feladatonkent (N+1). */
