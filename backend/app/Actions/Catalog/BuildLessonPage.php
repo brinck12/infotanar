@@ -5,12 +5,12 @@ declare(strict_types=1);
 namespace App\Actions\Catalog;
 
 use App\Models\Lesson;
-use App\Models\Submission;
 use App\Models\Track;
 use App\Models\User;
 use App\Services\Access\ContentAccess;
 use App\Services\Catalog\CurriculumOrder;
 use App\Services\Catalog\LessonPage;
+use App\Services\Progress\ExerciseStatuses;
 use App\Services\Progress\LessonStatuses;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Database\Eloquent\Relations\Relation;
@@ -49,25 +49,8 @@ final readonly class BuildLessonPage
             previous: $neighbours['previous'],
             next: $neighbours['next'],
             denial: $this->access->denialFor($viewer, $lesson),
-            solvedExerciseIds: $this->solvedExerciseIds($viewer, $lesson),
+            exerciseStatuses: ExerciseStatuses::for($viewer),
             status: $viewer === null ? null : LessonStatuses::forUser($viewer)->of($lesson->id),
         );
-    }
-
-    /** @return array<int, true> */
-    private function solvedExerciseIds(?User $viewer, Lesson $lesson): array
-    {
-        if ($viewer === null || $lesson->exercises->isEmpty()) {
-            return [];
-        }
-
-        return Submission::query()
-            ->where('user_id', $viewer->id)
-            ->where('status', 'passed')
-            ->whereIn('exercise_id', $lesson->exercises->modelKeys())
-            ->distinct()
-            ->get(['exercise_id'])
-            ->mapWithKeys(static fn (Submission $submission): array => [$submission->exercise_id => true])
-            ->all();
     }
 }

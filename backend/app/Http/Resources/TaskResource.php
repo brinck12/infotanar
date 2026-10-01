@@ -7,6 +7,7 @@ namespace App\Http\Resources;
 use App\Enums\AccessDenial;
 use App\Models\Exercise;
 use App\Services\Catalog\TaskNavigation;
+use App\Services\Progress\ExerciseStatuses;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 use stdClass;
@@ -25,6 +26,7 @@ final class TaskResource extends JsonResource
         Exercise $exercise,
         private readonly ?AccessDenial $denial = null,
         private readonly ?TaskNavigation $navigation = null,
+        private readonly ?ExerciseStatuses $statuses = null,
     ) {
         parent::__construct($exercise);
     }
@@ -44,6 +46,8 @@ final class TaskResource extends JsonResource
             'locked' => ! $unlocked,
             'locked_reason' => $this->denial?->value,
             'locked_message' => $this->denial?->message(),
+            // Csak bejelentkezett nezonel: "solved", "attempted", vagy null, ha meg nem adott be.
+            'my_status' => $this->when($this->statuses?->hasViewer() === true, fn (): ?string => $this->statuses?->of($this->id)?->value),
             'topic' => TopicResource::make($this->whenLoaded('lesson', fn () => $this->lesson->module)),
             // A videot a lejatszo kulon keri le (GET /lessons/{id}/video), rovid eletu URL-lel.
             'lesson' => $this->whenLoaded('lesson', fn (): array => [
