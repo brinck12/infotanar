@@ -6,6 +6,7 @@ namespace App\Http\Requests\Admin\Catalog;
 
 use App\Models\Exercise;
 use App\Rules\ValidConstraintSet;
+use App\Services\Execution\ExecutionLimits;
 use Closure;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Config;
@@ -33,6 +34,9 @@ final class ExerciseRequest extends FormRequest
             'starter_code.*' => ['nullable', 'string', 'max:20000'],
             'constraints' => ['sometimes', 'nullable', 'array', new ValidConstraintSet],
             'sql_order_sensitive' => ['sometimes', 'boolean'],
+            // Ures (null) = a globalis alapertek ervenyes.
+            'time_limit_ms' => ['sometimes', 'nullable', 'integer', 'between:'.ExecutionLimits::MIN_TIME_LIMIT_MS.','.ExecutionLimits::MAX_TIME_LIMIT_MS],
+            'memory_limit_kb' => ['sometimes', 'nullable', 'integer', 'between:'.ExecutionLimits::MIN_MEMORY_LIMIT_KB.','.ExecutionLimits::MAX_MEMORY_LIMIT_KB],
             'is_published' => ['sometimes', 'boolean'],
         ];
     }

@@ -1,6 +1,6 @@
 import { queryOptions, type QueryClient } from '@tanstack/react-query'
 import { http, type Envelope } from '../../../shared/api/client'
-import type { LanguageKey, Level } from '../../../types'
+import type { ExecutionLimits, LanguageKey, Level } from '../../../types'
 
 /** Az admin katalógus-API (#45) típusai: a publikálatlan elemeket is tartalmazzák. */
 export interface AdminTrack {
@@ -54,6 +54,10 @@ export interface AdminExercise {
   starter_code: Partial<Record<LanguageKey, string>>
   constraints: ConstraintSet
   sql_order_sensitive: boolean
+  /** Saját időkorlát (ms); `null` = az alapértelmezés érvényes. */
+  time_limit_ms: number | null
+  /** Saját memóriakorlát (KB); `null` = az alapértelmezés érvényes. */
+  memory_limit_kb: number | null
   is_published: boolean
   test_case_count?: number
   submission_count?: number
@@ -88,6 +92,10 @@ export interface LanguageOption {
   key: LanguageKey
   label: string
   monaco: string
+  /** A saját korlát nélküli feladatokra érvényes értékek ezen a nyelven (az idő már a szorzóval). */
+  default_limits: ExecutionLimits
+  /** Ennyivel szorzódik az időkorlát ezen a nyelven (a feladat saját korlátja is). */
+  time_factor: number
 }
 
 export type TrackPayload = Pick<AdminTrack, 'slug' | 'title' | 'description' | 'is_published'>
@@ -104,6 +112,8 @@ export type ExercisePayload = Pick<
   | 'starter_code'
   | 'constraints'
   | 'sql_order_sensitive'
+  | 'time_limit_ms'
+  | 'memory_limit_kb'
   | 'is_published'
 >
 

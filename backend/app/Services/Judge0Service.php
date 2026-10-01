@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Services;
 
 use App\Exceptions\Judge0Exception;
+use App\Services\Execution\ExecutionLimits;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Support\Facades\Cache;
@@ -27,16 +28,18 @@ final class Judge0Service
      * Egyetlen forraskod lefuttatasa egy adott bemenettel.
      *
      * @param  string  $languageKey  A config/judge0.php 'languages' kulcsa (pl. 'python').
-     * @param  int|null  $timeout  Erre a hivasra jutó ido (mp); a hivo a teljes hatarido maradekat adja at.
+     * @param  ExecutionLimits  $limits  A futasra ervenyes ido- es memoriakorlat.
+     * @param  int|null  $timeout  Erre a hivasra jutó ido (mp); nagyobb kell legyen a faliora-korlatnal.
      * @return Judge0Run
      *
      * @throws Judge0Exception
      */
-    public function run(string $languageKey, string $sourceCode, ?string $stdin = null, ?int $timeout = null): array
+    public function run(string $languageKey, string $sourceCode, ?string $stdin, ExecutionLimits $limits, ?int $timeout = null): array
     {
         $payload = [
-            'cpu_time_limit' => Config::float('judge0.limits.cpu_time_limit'),
-            'memory_limit' => Config::integer('judge0.limits.memory_limit'),
+            'cpu_time_limit' => $limits->cpuTimeSeconds(),
+            'wall_time_limit' => $limits->wallTimeSeconds(),
+            'memory_limit' => $limits->memoryLimitKb,
             'max_processes_and_or_threads' => Config::integer('judge0.limits.max_processes_and_or_threads'),
             'language_id' => $this->resolveLanguageId($languageKey),
             'source_code' => base64_encode($sourceCode),
@@ -45,7 +48,7 @@ final class Judge0Service
 
         $request = $this->request();
         if ($timeout !== null) {
-            $request = $request->timeout(max(1, min($timeout, Config::integer('judge0.timeout'))));
+            $request = $request->timeout(max(1, $timeout));
         }
 
         try {

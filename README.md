@@ -139,8 +139,13 @@ A `/run` és a `/submissions` **IP-nként 10 kérés / perc** rate limit alatt �
 - A nyelvek Judge0 ID-ját futásidőben a `/languages` végpontról oldjuk fel
   (`config/judge0.php` `match` mezője alapján), nem hardcode-oljuk. Ha a `/languages`
   nem elérhető, a `fallback_id` lép életbe.
-- Limitek minden kérésben: `cpu_time_limit: 2`, `memory_limit: 128000`,
-  `max_processes_and_or_threads: 60`.
+- Limitek minden kérésben: alapból `cpu_time_limit: 2` (mp), `memory_limit: 128000` (KB),
+  `max_processes_and_or_threads: 60`. Az idő- és memóriakorlát feladatonként
+  felüldefiniálható az admin felületen (100–10 000 ms, 16 000–512 000 KB); az idő
+  nyelvenként szorozható (`JUDGE0_TIME_FACTOR_CSHARP`). A feloldás sorrendje:
+  feladat saját értéke → globális alapérték, majd × nyelvi szorzó, legfeljebb a
+  Judge0 példány maximuma (`JUDGE0_MAX_*`). A diák a feladat oldalán látja az
+  érvényes korlátot (`GET /tasks/{id}` → `limits`).
 - Ha a Judge0 elérhetetlen, a válasz `status: "error"` érthető magyar üzenettel,
   nem 500-as stacktrace.
 

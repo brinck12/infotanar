@@ -31,7 +31,7 @@ export function Field({ label, error, hint, ...input }: FieldProps) {
         {...input}
       />
       {hint && !error && (
-        <p id={`${id}-hint`} className="mt-1 text-slate-500">
+        <p id={`${id}-hint`} className="mt-1 text-slate-400">
           {hint}
         </p>
       )}
@@ -70,7 +70,7 @@ export function TextAreaField({ label, error, hint, mono = false, className = ''
         {...textarea}
       />
       {hint && !error && (
-        <p id={`${id}-hint`} className="mt-1 text-slate-500">
+        <p id={`${id}-hint`} className="mt-1 text-slate-400">
           {hint}
         </p>
       )}
@@ -107,7 +107,7 @@ export function CheckboxField({ label, hint, error, ...input }: CheckboxFieldPro
         {label}
       </label>
       {hint && (
-        <p id={`${id}-hint`} className="mt-1 ml-6 text-slate-500">
+        <p id={`${id}-hint`} className="mt-1 ml-6 text-slate-400">
           {hint}
         </p>
       )}

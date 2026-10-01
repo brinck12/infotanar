@@ -10,6 +10,11 @@ declare(strict_types=1);
 
 return [
     'array' => 'A(z) :attribute mezőnek tömbnek kell lennie.',
+    'between' => [
+        'array' => 'A(z) :attribute :min és :max közötti számú elemet tartalmazzon.',
+        'numeric' => 'A(z) :attribute :min és :max közötti érték legyen.',
+        'string' => 'A(z) :attribute :min és :max karakter közötti hosszúságú legyen.',
+    ],
     'boolean' => 'A(z) :attribute mező értéke csak igaz vagy hamis lehet.',
     'confirmed' => 'A(z) :attribute megerősítése nem egyezik.',
     'current_password' => 'A megadott jelszó helytelen.',
@@ -80,6 +85,12 @@ return [
         'postal_code' => [
             'regex' => 'Az irányítószám négy számjegy legyen (pl. 1051).',
         ],
+        'time_limit_ms' => [
+            'between' => 'Az időkorlát :min és :max ms közötti érték legyen.',
+        ],
+        'memory_limit_kb' => [
+            'between' => 'A memóriakorlát :min és :max KB közötti érték legyen.',
+        ],
         'tax_number' => [
             'required_if' => 'Cég vagy vállalkozó esetén az adószám megadása kötelező.',
             'prohibited_if' => 'Magánszemélyként nem adható meg adószám.',
@@ -114,6 +125,8 @@ return [
         'starter_code' => 'kiinduló kód',
         'constraints' => 'kódszabályok',
         'sql_order_sensitive' => 'sorrendérzékenység',
+        'time_limit_ms' => 'időkorlát',
+        'memory_limit_kb' => 'memóriakorlát',
         'ids' => 'sorrend',
         'customer_type' => 'vevő típusa',
         'postal_code' => 'irányítószám',
