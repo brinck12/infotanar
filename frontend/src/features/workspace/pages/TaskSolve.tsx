@@ -17,10 +17,11 @@ import { runCode, submitCode } from '../api'
 import { CodeEditor } from '../components/CodeEditor'
 import { Paywall } from '../components/Paywall'
 import { ResultPanel } from '../components/ResultPanel'
+import { WorkspaceTabs, type WorkspaceView } from '../components/WorkspaceTabs'
 
 type Mode = 'run' | 'submit'
 
-/** Ettől a szélességtől (Tailwind `lg`) egymás mellett, húzható elválasztóval. */
+/** Ettől a szélességtől (Tailwind `lg`) egymás mellett, húzható elválasztóval; alatta fülek. */
 const WIDE_LAYOUT = '(min-width: 1024px)'
 const DEFAULT_SPLIT = 0.5
 
@@ -90,6 +91,8 @@ function Workspace({ task }: { task: UnlockedTaskDetail }) {
   const [code, setCode] = useState(task.starter_code[initialLanguage] ?? '')
   const [mode, setMode] = useState<Mode>('run')
   const wide = useMediaQuery(WIDE_LAYOUT)
+  // Keskeny nézetben (#30) melyik fül látszik; a leírással kezdünk.
+  const [view, setView] = useState<WorkspaceView>('task')
   const { user } = useAuth()
   // Felhasználónként (ugyanazon a gépen) megőrzött panelarány (#29).
   const [split, setSplit] = usePersistentState(`infotanar.workspace.split.${user?.id ?? 'guest'}`, DEFAULT_SPLIT, isSplitRatio)
@@ -215,10 +218,13 @@ function Workspace({ task }: { task: UnlockedTaskDetail }) {
             right={solution}
           />
         ) : (
-          <div className="grid gap-6">
-            {description}
-            {solution}
-          </div>
+          <WorkspaceTabs
+            view={view}
+            onViewChange={setView}
+            task={description}
+            code={solution}
+            codeBadge={running ? 'fut…' : execution.isSuccess || execution.isError ? 'eredmény' : null}
+          />
         )}
       </div>
     </div>
