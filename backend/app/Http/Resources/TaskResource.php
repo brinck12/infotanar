@@ -56,6 +56,11 @@ final class TaskResource extends JsonResource
                 $unlocked,
                 fn () => ExampleTestCaseResource::collection($this->whenLoaded('visibleTestCases')),
             ),
+            // Csak a kozos (letoltheto) fajlok; a tesztesethez kotottak sosem kerulnek ki.
+            'files' => $this->when(
+                $unlocked,
+                fn () => TaskFileResource::collection($this->whenLoaded('sharedFiles')),
+            ),
             'hidden_test_case_count' => $this->whenCounted('hiddenTestCases'),
         ];
     }

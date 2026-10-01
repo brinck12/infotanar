@@ -121,6 +121,7 @@ Minden végpont a `/api/v1` prefix alatt.
 | `GET` | `/topics` | Témakörök, publikált feladatszámmal |
 | `GET` | `/tasks?topic=&level=` | Publikált feladatok listája (leírás nélkül) |
 | `GET` | `/tasks/{id}` | Feladat teljes leírással, starter_code-dal és a **nem rejtett** tesztesetekkel |
+| `GET` | `/tasks/{id}/files/{name}` | A feladathoz mellékelt **közös** adatfájl letöltése (ugyanaz a hozzáférési szabály, mint a feladaté) |
 | `POST` | `/run` | Futtatás csak a nem rejtett teszteseteken, nem mentődik |
 | `POST` | `/submissions` | Futtatás **minden** teszteseten, submission mentésével |
 
@@ -141,6 +142,10 @@ A `/run` és a `/submissions` **IP-nként 10 kérés / perc** rate limit alatt �
   nem elérhető, a `fallback_id` lép életbe.
 - Limitek minden kérésben: `cpu_time_limit: 2`, `memory_limit: 128000`,
   `max_processes_and_or_threads: 60`.
+- A feladathoz mellékelt adatfájlokat (érettségi-stílusú feladatok) tesztesetenként zip-ben
+  küldjük a Judge0 `additional_files` mezőjében; a teszteset saját fájlja felülírja az
+  azonos nevű közös fájlt. A tesztesethez kötött fájlt a diák soha nem kapja meg
+  ([ADR 0003](docs/adr/0003-exercise-input-files.md)).
 - Ha a Judge0 elérhetetlen, a válasz `status: "error"` érthető magyar üzenettel,
   nem 500-as stacktrace.
 

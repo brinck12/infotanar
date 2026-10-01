@@ -40,6 +40,27 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Mellekelt adatfajlok (#152)
+    |--------------------------------------------------------------------------
+    | Az erettsegi-feladatok adatfajlt adnak a programnak. A fajlok zip-ben, a
+    | Judge0 'additional_files' mezojeben mennek a futtatokornyezetbe.
+    |
+    | A 'max_per_scope' a kozos fajlokra, es tesztesetenkent a felulirasokra
+    | kulon ertendo. A 'reserved_names' azok a nevek, amelyeket a Judge0 a
+    | sajat fajljaihoz hasznal (forraskod, fordito/futtato szkript): ilyen nevu
+    | adatfajl felulirhatna a megoldast.
+    */
+    'files' => [
+        'max_per_scope' => (int) env('JUDGE0_FILES_MAX_PER_SCOPE', 5),
+        'max_size_kb' => (int) env('JUDGE0_FILES_MAX_SIZE_KB', 256),
+        'name_pattern' => '/^(?!\.{1,2}$)[A-Za-z0-9._-]{1,64}$/',
+        'reserved_names' => ['script.py', 'script.sql', 'Main.cs', 'compile', 'run'],
+        // A zip a fajlok hash-e szerint cache-elodik; ennyi ideig (mp) tartjuk meg.
+        'archive_cache_ttl' => (int) env('JUDGE0_FILES_ARCHIVE_CACHE_TTL', 86400),
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | Tamogatott nyelvek
     |--------------------------------------------------------------------------
     | A kulcs az, amit a frontend es az adatbazis hasznal (tasks.allowed_languages).

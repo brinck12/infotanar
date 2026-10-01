@@ -81,6 +81,26 @@ final class Exercise extends Model
         return $this->hasMany(TestCase::class)->where('is_hidden', true);
     }
 
+    /**
+     * Az osszes mellekelt fajl, a tesztesethez kotott felulirasokkal egyutt (admin nezet).
+     *
+     * @return HasMany<ExerciseFile, $this>
+     */
+    public function files(): HasMany
+    {
+        return $this->hasMany(ExerciseFile::class)->orderBy('name');
+    }
+
+    /**
+     * A minden tesztesetnel jelen levo, a diak altal letoltheto fajlok.
+     *
+     * @return HasMany<ExerciseFile, $this>
+     */
+    public function sharedFiles(): HasMany
+    {
+        return $this->files()->whereNull('test_case_id');
+    }
+
     /** @return HasMany<Submission, $this> */
     public function submissions(): HasMany
     {

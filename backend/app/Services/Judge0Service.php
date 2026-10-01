@@ -28,11 +28,12 @@ final class Judge0Service
      *
      * @param  string  $languageKey  A config/judge0.php 'languages' kulcsa (pl. 'python').
      * @param  int|null  $timeout  Erre a hivasra jutó ido (mp); a hivo a teljes hatarido maradekat adja at.
+     * @param  string|null  $additionalFiles  Base64-elt zip: a futtatokornyezet munkakonyvtaraba kicsomagolt adatfajlok.
      * @return Judge0Run
      *
      * @throws Judge0Exception
      */
-    public function run(string $languageKey, string $sourceCode, ?string $stdin = null, ?int $timeout = null): array
+    public function run(string $languageKey, string $sourceCode, ?string $stdin = null, ?int $timeout = null, ?string $additionalFiles = null): array
     {
         $payload = [
             'cpu_time_limit' => Config::float('judge0.limits.cpu_time_limit'),
@@ -42,6 +43,10 @@ final class Judge0Service
             'source_code' => base64_encode($sourceCode),
             'stdin' => base64_encode((string) $stdin),
         ];
+
+        if ($additionalFiles !== null) {
+            $payload['additional_files'] = $additionalFiles;
+        }
 
         $request = $this->request();
         if ($timeout !== null) {

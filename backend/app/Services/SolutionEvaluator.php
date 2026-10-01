@@ -10,10 +10,11 @@ use App\Models\Exercise;
 use App\Models\TestCase;
 use App\Services\Constraints\ConstraintChecker;
 use App\Services\Execution\EvaluationResult;
+use App\Services\Execution\Files\ExecutionFileArchive;
 use App\Services\Execution\HiddenResultRedactor;
 use App\Services\Execution\Sql\SqlProgram;
 use App\Services\Execution\Sql\SqlResultComparator;
-use Illuminate\Support\Collection;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Config;
 
 /**
@@ -34,6 +35,7 @@ final readonly class SolutionEvaluator
         private SqlResultComparator $sqlComparator,
         private HiddenResultRedactor $redactor,
         private ConstraintChecker $constraints,
+        private ExecutionFileArchive $files,
     ) {}
 
     /** @param Collection<int, TestCase> $testCases */
@@ -45,6 +47,10 @@ final readonly class SolutionEvaluator
         if ($violations !== []) {
             return EvaluationResult::constraintViolation($violations);
         }
+
+        // Az adatfajlok egy-egy lekerdezessel jonnek, nem tesztesetenkent (N+1).
+        $exercise->loadMissing('sharedFiles');
+        $testCases->loadMissing('files');
 
         $results = [];
         $verdicts = [];
@@ -64,7 +70,7 @@ final readonly class SolutionEvaluator
                 // SQL-nel a teszteset bemenete az adatkeszlet-szkript, ami a programba kerul.
                 $run = $language === self::SQL
                     ? $this->judge0->run($language, SqlProgram::build((string) $testCase->stdin, $sourceCode), null, $remaining)
-                    : $this->judge0->run($language, $sourceCode, $testCase->stdin, $remaining);
+                    : $this->judge0->run($language, $sourceCode, $testCase->stdin, $remaining, $this->files->for($exercise, $testCase));
             } catch (Judge0Exception $e) {
                 $verdicts[] = Verdict::SystemError;
                 $results[] = $this->errorResult($testCase, $e->getMessage());

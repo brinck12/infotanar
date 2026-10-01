@@ -52,7 +52,8 @@ final class TaskController extends Controller
     {
         $exercise = Exercise::query()
             ->published()
-            ->with([...self::WITH_TOPIC, 'visibleTestCases'])
+            // A fajlok tartalma nem kell a leiráshoz: csak nev es meret toltodik be.
+            ->with([...self::WITH_TOPIC, 'visibleTestCases', 'sharedFiles:id,exercise_id,test_case_id,name,size'])
             ->withCount('hiddenTestCases')
             ->findOrFail($task);
 

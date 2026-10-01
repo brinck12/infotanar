@@ -48,6 +48,17 @@ return [
         'name' => [
             'required' => 'A név megadása kötelező.',
             'max' => 'A név legfeljebb :max karakter lehet.',
+            // Mellekelt adatfajl neve (#152).
+            'regex' => 'A fájlnév csak angol betűt, számjegyet, pontot, kötőjelet és aláhúzást tartalmazhat, és legfeljebb 64 karakter lehet.',
+            'not_in' => 'Ez a fájlnév foglalt (a futtatókörnyezet használja), válassz másikat.',
+        ],
+        'file' => [
+            'required' => 'Válassz ki egy fájlt.',
+            'file' => 'A feltöltés nem sikerült, próbáld újra.',
+            'max' => 'A fájl legfeljebb :max kilobájt lehet.',
+        ],
+        'test_case_id' => [
+            'exists' => 'A megadott teszteset nem tartozik ehhez a feladathoz.',
         ],
         'email' => [
             'required' => 'Az e-mail-cím megadása kötelező.',
@@ -115,6 +126,8 @@ return [
         'constraints' => 'kódszabályok',
         'sql_order_sensitive' => 'sorrendérzékenység',
         'ids' => 'sorrend',
+        'file' => 'fájl',
+        'test_case_id' => 'teszteset',
         'customer_type' => 'vevő típusa',
         'postal_code' => 'irányítószám',
         'city' => 'település',
