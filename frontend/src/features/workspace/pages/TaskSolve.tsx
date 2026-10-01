@@ -14,11 +14,12 @@ import { useAuth } from '../../auth/context'
 import { catalogKeys, taskQuery } from '../../catalog/api'
 import { progressKeys } from '../../progress/api'
 import { runCode, submitCode } from '../api'
-import { CodeEditor } from '../components/CodeEditor'
+import { CodeEditor, type EditorReplacement } from '../components/CodeEditor'
 import { Paywall } from '../components/Paywall'
 import { ResetCodeButton } from '../components/ResetCodeButton'
 import { ResultPanel } from '../components/ResultPanel'
 import { WorkspaceTabs, type WorkspaceView } from '../components/WorkspaceTabs'
+import { useCodeDraft } from '../useCodeDraft'
 
 type Mode = 'run' | 'submit'
 
@@ -32,6 +33,7 @@ function isSplitRatio(value: unknown): value is number {
 
 export function TaskSolve() {
   const { id } = useParams<{ id: string }>()
+  const { user, loading: authLoading } = useAuth()
   const taskId = Number(id)
   const validId = Number.isInteger(taskId) && taskId > 0
 
@@ -54,7 +56,8 @@ export function TaskSolve() {
     )
   }
 
-  if (task.isPending) return <PageLoader label="Feladat betöltése…" />
+  // A piszkozat felhasználóhoz kötött: a munkaterület csak az auth-állapot ismeretében indul.
+  if (task.isPending || authLoading) return <PageLoader label="Feladat betöltése…" />
 
   if (task.data.locked) {
     return (
@@ -67,8 +70,9 @@ export function TaskSolve() {
     )
   }
 
-  // A key miatt másik feladatra lépve a szerkesztő állapota tisztán újraindul.
-  return <Workspace key={task.data.id} task={task.data} />
+  // A key miatt másik feladatra lépve vagy felhasználóváltáskor (kijelentkezés)
+  // a szerkesztő tisztán újraindul, és a piszkozat nem kerül át másik fiókhoz.
+  return <Workspace key={`${task.data.id}:${user?.id ?? 'guest'}`} task={task.data} />
 }
 
 function TaskHeader({ task }: { task: TaskDetail }) {
@@ -87,14 +91,20 @@ function TaskHeader({ task }: { task: TaskDetail }) {
 
 function Workspace({ task }: { task: UnlockedTaskDetail }) {
   const queryClient = useQueryClient()
-  const initialLanguage = task.allowed_languages[0] ?? 'python'
-  const [language, setLanguage] = useState<LanguageKey>(initialLanguage)
-  const [code, setCode] = useState(task.starter_code[initialLanguage] ?? '')
+  const { user } = useAuth()
+  // Piszkozat felhasználónként, feladatonként és nyelvenként (#33).
+  const userKey = user ? `u${user.id}` : 'guest'
+  const { language, code, starterCode, restored, setCode, changeLanguage: switchLanguage, resetToStarter } = useCodeDraft(
+    task,
+    userKey,
+  )
+  // A szerkesztő a saját tartalmának gazdája; a tartalomcserét (nyelvváltás,
+  // visszaállítás) sorszámozott kéréssel adjuk át neki.
+  const [replacement, setReplacement] = useState<EditorReplacement>({ value: code, seq: 0, undoable: false })
   const [mode, setMode] = useState<Mode>('run')
   const wide = useMediaQuery(WIDE_LAYOUT)
   // Keskeny nézetben (#30) melyik fül látszik; a leírással kezdünk.
   const [view, setView] = useState<WorkspaceView>('task')
-  const { user } = useAuth()
   // Felhasználónként (ugyanazon a gépen) megőrzött panelarány (#29).
   const [split, setSplit] = usePersistentState(`infotanar.workspace.split.${user?.id ?? 'guest'}`, DEFAULT_SPLIT, isSplitRatio)
 
@@ -112,17 +122,17 @@ function Workspace({ task }: { task: UnlockedTaskDetail }) {
     },
   })
 
-  const starterCode = task.starter_code[language] ?? ''
-
   /** #32: a jelenlegi nyelv pontos kiinduló kódja; a korábbi eredmény is eltűnik. */
   function resetCode() {
-    setCode(starterCode)
+    resetToStarter()
+    setReplacement((r) => ({ value: starterCode, seq: r.seq + 1, undoable: true }))
     execution.reset()
   }
 
+  /** A jelenlegi kód piszkozatként megmarad; az új nyelv saját piszkozata töltődik be. */
   function changeLanguage(next: LanguageKey) {
-    setLanguage(next)
-    setCode(task.starter_code[next] ?? '')
+    const nextCode = switchLanguage(next)
+    setReplacement((r) => ({ value: nextCode, seq: r.seq + 1, undoable: false }))
     execution.reset()
   }
 
@@ -200,8 +210,14 @@ function Workspace({ task }: { task: UnlockedTaskDetail }) {
         </div>
       </div>
 
+      {restored && code !== starterCode && (
+        <p className="text-xs text-slate-400" data-testid="draft-restored">
+          A legutóbb szerkesztett kódodat töltöttük vissza ebből a böngészőből.
+        </p>
+      )}
+
       <div className="h-[420px]">
-        <CodeEditor language={language} value={code} onChange={setCode} readOnly={running} />
+        <CodeEditor language={language} initialValue={code} onChange={setCode} replace={replacement} readOnly={running} />
       </div>
 
       <ResultPanel
