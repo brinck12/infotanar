@@ -1,4 +1,5 @@
 import { http, type Envelope } from '../../shared/api/client'
+import { saveBlob } from '../../shared/api/download'
 import type { BillingProfile, BillingProfilePayload, HostedCheckout, PaymentSummary, Plan, Subscription } from '../../types'
 
 export const billingKeys = {
@@ -58,20 +59,8 @@ export async function changeCard(): Promise<HostedCheckout> {
   return (await http.post<Envelope<HostedCheckout>>('/billing/subscription/card')).data.data
 }
 
-/**
- * A számla PDF letöltése. Az API Bearer tokent vár, ezért sima link helyett
- * blobként kérjük le, és a böngésző letöltéseként mentjük.
- */
+/** A számla PDF letöltése. */
 export async function downloadInvoice(paymentId: string, invoiceNumber: string): Promise<void> {
   const response = await http.get<Blob>(`/billing/payments/${encodeURIComponent(paymentId)}/invoice`, { responseType: 'blob' })
-  const url = URL.createObjectURL(response.data)
-  try {
-    const link = document.createElement('a')
-    link.href = url
-    link.download = `szamla-${invoiceNumber}.pdf`
-    link.click()
-  } finally {
-    // A kattintás szinkron indítja a letöltést; utána az URL felszabadítható.
-    setTimeout(() => URL.revokeObjectURL(url), 0)
-  }
+  saveBlob(response.data, `szamla-${invoiceNumber}.pdf`)
 }

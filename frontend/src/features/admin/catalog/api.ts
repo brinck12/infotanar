@@ -71,6 +71,28 @@ export interface AdminTestCase {
 
 export type TestCasePayload = Pick<AdminTestCase, 'stdin' | 'expected_stdout' | 'is_hidden'>
 
+/**
+ * Feladathoz mellékelt adatfájl (#152). `test_case_id` nélkül közös fájl (a diák
+ * letöltheti); kitöltve csak annál a tesztesetnél van jelen, és a diák nem látja.
+ */
+export interface AdminExerciseFile {
+  id: number
+  exercise_id: number
+  test_case_id: number | null
+  name: string
+  size: number
+  sha256: string
+  updated_at: string | null
+}
+
+export interface ExerciseFileUpload {
+  file: File
+  /** Elhagyva a fájl eredeti neve lesz. */
+  name?: string
+  /** Elhagyva közös fájl. */
+  testCaseId: number | null
+}
+
 /** Statikus kódszabályok (#42): kötelező szerkezetek és tiltott hívások (`builtin:<név>` / `method:<név>`). */
 export interface ConstraintSet {
   require: string[]
@@ -115,6 +137,7 @@ export const adminCatalogKeys = {
   lesson: (id: number) => [...adminCatalogKeys.all, 'lesson', id] as const,
   exercise: (id: number) => [...adminCatalogKeys.all, 'exercise', id] as const,
   testCases: (exerciseId: number) => [...adminCatalogKeys.all, 'exercise', exerciseId, 'test-cases'] as const,
+  files: (exerciseId: number) => [...adminCatalogKeys.all, 'exercise', exerciseId, 'files'] as const,
   languages: ['catalog', 'languages'] as const,
 }
 
@@ -143,6 +166,26 @@ export const testCasesQuery = (exerciseId: number) =>
     queryKey: adminCatalogKeys.testCases(exerciseId),
     queryFn: ({ signal }) => get<AdminTestCase[]>(`/admin/exercises/${exerciseId}/test-cases`, signal),
   })
+
+export const exerciseFilesQuery = (exerciseId: number) =>
+  queryOptions({
+    queryKey: adminCatalogKeys.files(exerciseId),
+    queryFn: ({ signal }) => get<AdminExerciseFile[]>(`/admin/exercises/${exerciseId}/files`, signal),
+  })
+
+/** Feltöltés; azonos nevű (és hatókörű) fájl esetén a régit lecseréli. */
+export async function uploadExerciseFile(exerciseId: number, { file, name, testCaseId }: ExerciseFileUpload): Promise<AdminExerciseFile> {
+  const body = new FormData()
+  body.append('file', file)
+  if (name) body.append('name', name)
+  if (testCaseId !== null) body.append('test_case_id', String(testCaseId))
+
+  return (await http.post<Envelope<AdminExerciseFile>>(`/admin/exercises/${exerciseId}/files`, body)).data.data
+}
+
+export async function deleteExerciseFile(id: number): Promise<void> {
+  await http.delete(`/admin/exercise-files/${id}`)
+}
 
 export async function createTestCase(exerciseId: number, payload: TestCasePayload): Promise<AdminTestCase> {
   return (await http.post<Envelope<AdminTestCase>>(`/admin/exercises/${exerciseId}/test-cases`, payload)).data.data

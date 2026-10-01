@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\V1\Account\AccountController;
 use App\Http\Controllers\Api\V1\Admin\AccessGrantController;
 use App\Http\Controllers\Api\V1\Admin\Catalog\ConstraintOptionsController;
 use App\Http\Controllers\Api\V1\Admin\Catalog\ExerciseController as AdminExerciseController;
+use App\Http\Controllers\Api\V1\Admin\Catalog\ExerciseFileController;
 use App\Http\Controllers\Api\V1\Admin\Catalog\LessonController as AdminLessonController;
 use App\Http\Controllers\Api\V1\Admin\Catalog\ModuleController as AdminModuleController;
 use App\Http\Controllers\Api\V1\Admin\Catalog\ReorderController;
@@ -28,6 +29,7 @@ use App\Http\Controllers\Api\V1\Billing\SubscriptionController;
 use App\Http\Controllers\Api\V1\Catalog\LanguageController;
 use App\Http\Controllers\Api\V1\Catalog\LessonVideoController;
 use App\Http\Controllers\Api\V1\Catalog\TaskController;
+use App\Http\Controllers\Api\V1\Catalog\TaskFileController;
 use App\Http\Controllers\Api\V1\Catalog\TopicController;
 use App\Http\Controllers\Api\V1\Catalog\TrackController;
 use App\Http\Controllers\Api\V1\Execution\RunController;
@@ -81,6 +83,11 @@ Route::prefix('v1')->name('api.')->group(function (): void {
     Route::get('/topics', [TopicController::class, 'index'])->name('topics.index');
     Route::get('/tasks', [TaskController::class, 'index'])->name('tasks.index');
     Route::get('/tasks/{task}', [TaskController::class, 'show'])->whereNumber('task')->name('tasks.show');
+    Route::get('/tasks/{task}/files/{name}', [TaskFileController::class, 'show'])
+        ->whereNumber('task')
+        ->where('name', '[A-Za-z0-9._-]+')
+        ->middleware('throttle:60,1')
+        ->name('tasks.files.show');
 
     // A kodfuttatas draga muvelet: IP-nkent 10 keres / perc.
     Route::middleware('throttle:10,1')->group(function (): void {
@@ -150,6 +157,11 @@ Route::prefix('v1')->name('api.')->group(function (): void {
         // Tesztesetek (#46): letrehozas/lista a feladat alatt, a tobbi kozvetlenul.
         Route::put('/exercises/{exercise}/test-cases/order', [TestCaseController::class, 'reorder'])->name('test-cases.order');
         Route::apiResource('exercises.test-cases', TestCaseController::class)->shallow()->parameters(['test-cases' => 'testCase']);
+
+        // Mellekelt adatfajlok (#152): kozosek es tesztesetenkent felulirtak.
+        Route::get('/exercises/{exercise}/files', [ExerciseFileController::class, 'index'])->name('exercise-files.index');
+        Route::post('/exercises/{exercise}/files', [ExerciseFileController::class, 'store'])->name('exercise-files.store');
+        Route::delete('/exercise-files/{exerciseFile}', [ExerciseFileController::class, 'destroy'])->name('exercise-files.destroy');
 
         // Elakadt szamlak (#103).
         Route::get('/invoices', [AdminInvoiceController::class, 'index'])->name('invoices.index');

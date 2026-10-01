@@ -20,6 +20,7 @@ import {
 } from '../api'
 import { AdminShell, Section } from '../../components/AdminShell'
 import { ConstraintEditor } from '../components/ConstraintEditor'
+import { ExerciseFileManager } from '../components/ExerciseFileManager'
 import { MutationError, QueryState } from '../components/QueryState'
 import { TestCaseManager } from '../components/TestCaseManager'
 import { SavedNote } from '../components/SavedNote'
@@ -238,9 +239,14 @@ function ExerciseEditor({ lesson, exercise }: { lesson: AdminLesson; exercise: A
 
       {/* Külön űrlapok: nem lehetnek a feladat űrlapján belül. */}
       {exercise && (
-        <Section title="Tesztesetek">
-          <TestCaseManager exerciseId={exercise.id} />
-        </Section>
+        <>
+          <Section title="Tesztesetek">
+            <TestCaseManager exerciseId={exercise.id} />
+          </Section>
+          <Section title="Mellékelt fájlok">
+            <ExerciseFileManager exerciseId={exercise.id} />
+          </Section>
+        </>
       )}
     </AdminShell>
   )

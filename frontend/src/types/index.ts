@@ -69,12 +69,21 @@ export interface LessonVideo {
   expires_at: string
 }
 
+/** A feladathoz mellékelt, letölthető adatfájl (`GET /tasks/{id}/files/{name}`). */
+export interface TaskFile {
+  name: string
+  /** Bájtban. */
+  size: number
+}
+
 /** Hozzáférhető feladat: teljes leírással és a nem rejtett tesztesetekkel. */
 export interface UnlockedTaskDetail extends TaskDetailBase {
   locked?: false
   description: string
   starter_code: Partial<Record<LanguageKey, string>>
   example_test_cases: ExampleTestCase[]
+  /** Régebbi (vagy mockolt) válaszokban hiányozhat: ekkor nincs mellékelt fájl. */
+  files?: TaskFile[]
 }
 
 /** Zárolt (fizetős) feladat: a backend a tartalmat nem küldi el, csak az okot. */
