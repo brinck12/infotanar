@@ -23,6 +23,14 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Emlekezteto a megujitas elott
+    |--------------------------------------------------------------------------
+    | Ennyi nappal a terheles elott megy level arrol, mikor es mennyit vonunk le (#137).
+    */
+    'renewal_reminder_days' => (int) env('BILLING_RENEWAL_REMINDER_DAYS', 3),
+
+    /*
+    |--------------------------------------------------------------------------
     | Havi elofizetes
     |--------------------------------------------------------------------------
     | Brutto ar forintban (az AFA-t a szamla bontja, #20).
