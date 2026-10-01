@@ -10,6 +10,7 @@ use App\Models\Track;
 use App\Models\User;
 use App\Services\Access\ContentAccess;
 use App\Services\Catalog\LessonPage;
+use App\Services\Progress\LessonStatuses;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Database\Eloquent\Relations\Relation;
@@ -49,6 +50,7 @@ final readonly class BuildLessonPage
             next: $fromRequested->get(1),
             denial: $this->access->denialFor($viewer, $lesson),
             solvedExerciseIds: $this->solvedExerciseIds($viewer, $lesson),
+            status: $viewer === null ? null : LessonStatuses::forUser($viewer)->of($lesson->id),
         );
     }
 

@@ -88,6 +88,15 @@ POST /submissions  minden teszteseten fut, mentődik, és a haladást is frissí
    hozzáadott mező se szivárogjon.
 6. Beadásnál, ha a lecke minden publikált feladata megoldott, a lecke teljesítettnek jelölődik.
 
+### Lecke teljesítése
+
+Egy lecke kétféleképpen lesz teljesített (`lesson_completions`, felhasználónként és leckénként egy sor):
+
+- **Feladatos lecke:** amikor a diák a lecke minden publikált feladatát megoldotta (beadáskor, `RecordLessonProgress`).
+- **Feladat nélküli lecke** (csak elmélet vagy videó): a diák maga jelöli késznek (`POST /lessons/{id}/complete`, `CompleteTheoryLesson`). Feladatos leckénél ez a végpont 409-et ad.
+
+A teljesítés végleges: ha egy már teljesített, feladat nélküli leckéhez később feladat kerül, a teljesítés megmarad, a diáknak nem kell újra megszereznie. Ugyanez igaz arra, ha egy teljesített feladatos lecke új feladatot kap.
+
 A Judge0 hibája nem 500-as hiba: a válasz `status: "error"` magyar üzenettel.
 
 **Ismert korlát:** a kiértékelés a kérésen belül fut, így egy beadás akár 45

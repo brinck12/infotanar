@@ -19,6 +19,11 @@ export const lessonQuery = (trackSlug: string, lessonSlug: string) =>
       ).data.data,
   })
 
+/** Feladat nélküli lecke késznek jelölése; ismételt hívás nem változtat semmin. */
+export async function completeLesson(lessonId: number): Promise<void> {
+  await http.post(`/lessons/${lessonId}/complete`)
+}
+
 export function lessonPath(trackSlug: string, lessonSlug: string): string {
   return `/tananyag/${trackSlug}/${lessonSlug}`
 }
