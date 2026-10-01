@@ -1,15 +1,33 @@
 import type { ReactNode } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, NavLink } from 'react-router-dom'
 
 export interface Crumb {
   label: string
   to?: string
 }
 
+const ADMIN_SECTIONS = [
+  { to: '/admin/tananyag', label: 'Tananyag' },
+  { to: '/admin/felhasznalok', label: 'Felhasználók' },
+] as const
+
 /** Admin oldalkeret: morzsamenü, cím és a tartalom. */
 export function AdminShell({ crumbs, title, actions, children }: { crumbs: Crumb[]; title: string; actions?: ReactNode; children: ReactNode }) {
   return (
     <div className="mx-auto max-w-5xl px-4 py-8">
+      <nav aria-label="Admin menü" className="mb-4 flex gap-1 border-b border-slate-800 text-sm">
+        {ADMIN_SECTIONS.map((section) => (
+          <NavLink
+            key={section.to}
+            to={section.to}
+            className={({ isActive }) =>
+              `-mb-px border-b-2 px-3 py-2 transition ${isActive ? 'border-sky-400 text-slate-100' : 'border-transparent text-slate-400 hover:text-slate-200'}`
+            }
+          >
+            {section.label}
+          </NavLink>
+        ))}
+      </nav>
       <nav aria-label="Morzsamenü" className="text-sm text-slate-400">
         <ol className="flex flex-wrap items-center gap-1">
           {crumbs.map((crumb, i) => (
