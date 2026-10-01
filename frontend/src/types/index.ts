@@ -64,6 +64,8 @@ export interface TaskLesson {
 /** Rövid életű, aláírt lejátszási URL (`GET /lessons/{id}/video`). */
 export interface LessonVideo {
   url: string
+  /** WebVTT felirat (#111), ha a leckéhez tartozik. */
+  captions_url: string | null
   expires_at: string
 }
 

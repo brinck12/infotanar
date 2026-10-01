@@ -87,8 +87,6 @@ function Player({ lessonId, title }: { lessonId: number; title: string }) {
       ) : (
         <div className="aspect-video bg-black">
           {source.data && (
-            // A leckékhez még nincs felirat (WebVTT); a bevezetése: #111. Addig tudatos kivétel.
-            // oxlint-disable-next-line jsx-a11y/media-has-caption
             <video
               ref={videoRef}
               key={source.data.url}
@@ -97,6 +95,8 @@ function Player({ lessonId, title }: { lessonId: number; title: string }) {
               controlsList="nodownload"
               preload="metadata"
               playsInline
+              // A felirat-sáv (#111) csak CORS-szal tölthető, ha az API más originen van (fejlesztés, CDN).
+              crossOrigin="anonymous"
               onLoadedMetadata={onLoadedMetadata}
               onCanPlay={applyResume}
               onTimeUpdate={(e) => {
@@ -110,6 +110,8 @@ function Player({ lessonId, title }: { lessonId: number; title: string }) {
               aria-label={`Videós magyarázat: ${title}`}
               className="h-full w-full"
             >
+              {/* A felirat (#111) a videóval azonos, lejáró URL-en jön; ha a leckének nincs, a sáv üres marad. */}
+              <track kind="captions" srcLang="hu" label="Magyar" src={source.data.captions_url ?? undefined} default={source.data.captions_url !== null} />
               A böngésződ nem támogatja a videólejátszást.
             </video>
           )}

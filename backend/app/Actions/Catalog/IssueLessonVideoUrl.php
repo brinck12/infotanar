@@ -50,6 +50,14 @@ final readonly class IssueLessonVideoUrl
             ? $disk->temporaryUrl($lesson->video_path, $expiresAt)
             : url(URL::temporarySignedRoute('api.lessons.video.stream', $expiresAt, ['lesson' => $lesson->id], absolute: false));
 
-        return new LessonVideoUrl($url, $expiresAt);
+        // A felirat ugyanazzal a lejarattal es hozzaferessel (#111); hianyzo fajl nem hiba.
+        $captionsUrl = null;
+        if ($lesson->captions_path !== null && $disk->exists($lesson->captions_path)) {
+            $captionsUrl = $disk->providesTemporaryUrls()
+                ? $disk->temporaryUrl($lesson->captions_path, $expiresAt)
+                : url(URL::temporarySignedRoute('api.lessons.video.captions', $expiresAt, ['lesson' => $lesson->id], absolute: false));
+        }
+
+        return new LessonVideoUrl($url, $expiresAt, $captionsUrl);
     }
 }
