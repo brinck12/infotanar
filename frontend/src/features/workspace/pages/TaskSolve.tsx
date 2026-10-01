@@ -15,18 +15,23 @@ import { catalogKeys, taskQuery } from '../../catalog/api'
 import { progressKeys } from '../../progress/api'
 import { runCode, submitCode } from '../api'
 import { CodeEditor, type EditorReplacement } from '../components/CodeEditor'
+import { EditorPreferencesMenu } from '../components/EditorPreferencesMenu'
 import { LessonVideo } from '../components/LessonVideo'
 import { Paywall } from '../components/Paywall'
 import { ResetCodeButton } from '../components/ResetCodeButton'
 import { ResultPanel } from '../components/ResultPanel'
 import { WorkspaceTabs, type WorkspaceView } from '../components/WorkspaceTabs'
 import { useCodeDraft } from '../useCodeDraft'
+import { useEditorPreferences } from '../editorPreferences'
+import { RUN_SHORTCUT, SUBMIT_SHORTCUT, useWorkspaceShortcuts } from '../shortcuts'
 
 type Mode = 'run' | 'submit'
 
 /** Ettől a szélességtől (Tailwind `lg`) egymás mellett, húzható elválasztóval; alatta fülek. */
 const WIDE_LAYOUT = '(min-width: 1024px)'
 const DEFAULT_SPLIT = 0.5
+/** A szerkesztő az oszlop magasságának ekkora részét kapja, a többi az eredményé. */
+const DEFAULT_EDITOR_SPLIT = 0.65
 
 function isSplitRatio(value: unknown): value is number {
   return typeof value === 'number' && value > 0.05 && value < 0.95
@@ -108,6 +113,13 @@ function Workspace({ task }: { task: UnlockedTaskDetail }) {
   const [view, setView] = useState<WorkspaceView>('task')
   // Felhasználónként (ugyanazon a gépen) megőrzött panelarány (#29).
   const [split, setSplit] = usePersistentState(`infotanar.workspace.split.${user?.id ?? 'guest'}`, DEFAULT_SPLIT, isSplitRatio)
+  // A szerkesztő és az eredmény közötti vízszintes elválasztó aránya, és a szerkesztő beállításai (#156).
+  const [editorSplit, setEditorSplit] = usePersistentState(
+    `infotanar.workspace.editorSplit.${user?.id ?? 'guest'}`,
+    DEFAULT_EDITOR_SPLIT,
+    isSplitRatio,
+  )
+  const [preferences, setPreferences] = useEditorPreferences(userKey)
 
   const execution = useMutation({
     mutationFn: ({ kind, payload }: { kind: Mode; payload: RunRequest }) =>
@@ -137,12 +149,16 @@ function Workspace({ task }: { task: UnlockedTaskDetail }) {
     execution.reset()
   }
 
+  const running = execution.isPending
+
+  /** A gomb és a gyorsbillentyű is ezt hívja; futás közben nem indul új (#156). */
   function execute(kind: Mode) {
+    if (running) return
     setMode(kind)
     execution.mutate({ kind, payload: { task_id: task.id, language, source_code: code } })
   }
 
-  const running = execution.isPending
+  useWorkspaceShortcuts({ run: () => execute('run'), submit: () => execute('submit') })
 
   const description = (
     <section aria-label="Feladat leírása" className="space-y-4">
@@ -174,8 +190,10 @@ function Workspace({ task }: { task: UnlockedTaskDetail }) {
   )
 
   const solution = (
-    <section aria-label="Megoldás" className="space-y-4">
-      <div className="flex flex-wrap items-center gap-3">
+    // A szakasz a képernyő magasságához igazodik (4K-n is kitölti), a szerkesztő és az eredmény
+    // közötti elválasztóval osztható meg; az eredmény a saját panelében görget.
+    <section aria-label="Megoldás" className="flex h-[calc(100dvh-13rem)] min-h-[42rem] flex-col gap-4">
+      <div className="flex shrink-0 flex-wrap items-center gap-3">
         <label className="text-sm">
           <span className="mr-2 text-slate-400">Nyelv:</span>
           <select
@@ -193,11 +211,14 @@ function Workspace({ task }: { task: UnlockedTaskDetail }) {
 
         <ResetCodeButton dirty={code !== starterCode} disabled={running} onReset={resetCode} />
 
-        <div className="ml-auto flex gap-2">
+        <div className="ml-auto flex items-center gap-2">
+          <EditorPreferencesMenu preferences={preferences} onChange={setPreferences} />
           <button
             type="button"
             onClick={() => execute('run')}
             disabled={running}
+            title={`Futtatás (${RUN_SHORTCUT.label})`}
+            aria-keyshortcuts={RUN_SHORTCUT.aria}
             className="rounded-lg border border-slate-700 bg-slate-800 px-4 py-1.5 text-sm font-medium text-slate-100 transition hover:bg-slate-700 disabled:cursor-not-allowed disabled:opacity-50"
           >
             Futtatás
@@ -206,6 +227,8 @@ function Workspace({ task }: { task: UnlockedTaskDetail }) {
             type="button"
             onClick={() => execute('submit')}
             disabled={running}
+            title={`Beadás (${SUBMIT_SHORTCUT.label})`}
+            aria-keyshortcuts={SUBMIT_SHORTCUT.aria}
             className="rounded-lg bg-sky-700 px-4 py-1.5 text-sm font-medium text-white transition hover:bg-sky-600 disabled:cursor-not-allowed disabled:opacity-50"
           >
             Beadás
@@ -214,21 +237,46 @@ function Workspace({ task }: { task: UnlockedTaskDetail }) {
       </div>
 
       {restored && code !== starterCode && (
-        <p className="text-xs text-slate-400" data-testid="draft-restored">
+        <p className="shrink-0 text-xs text-slate-400" data-testid="draft-restored">
           A legutóbb szerkesztett kódodat töltöttük vissza ebből a böngészőből.
         </p>
       )}
 
-      <div className="h-[420px]">
-        <CodeEditor language={language} initialValue={code} onChange={setCode} replace={replacement} readOnly={running} />
+      <div className="min-h-0 flex-1">
+        <SplitPane
+          orientation="vertical"
+          label="A szerkesztő és az eredmény közötti elválasztó"
+          handleTestId="editor-split-handle"
+          ratio={editorSplit}
+          onRatioChange={setEditorSplit}
+          defaultRatio={DEFAULT_EDITOR_SPLIT}
+          first={
+            <CodeEditor
+              language={language}
+              initialValue={code}
+              onChange={setCode}
+              replace={replacement}
+              readOnly={running}
+              preferences={preferences}
+              onRun={() => execute('run')}
+              onSubmit={() => execute('submit')}
+            />
+          }
+          second={
+            // Görgethető panel: billentyűzettel is elérhetőnek kell lennie (WCAG 2.1.1, axe: scrollable-region-focusable).
+            // A lint-szabály (nem interaktív elemen tabIndex) ezzel ütközik, ezért itt, indokkal, kikapcsoljuk.
+            // oxlint-disable-next-line jsx-a11y/no-noninteractive-tabindex
+            <div role="region" aria-label="Eredmény" tabIndex={0} className="h-full overflow-auto focus-visible:ring-2 focus-visible:ring-sky-400 focus-visible:outline-none">
+              <ResultPanel
+                loading={running}
+                error={execution.isError ? hibaUzenet(execution.error) : null}
+                result={execution.data ?? null}
+                mode={mode}
+              />
+            </div>
+          }
+        />
       </div>
-
-      <ResultPanel
-        loading={running}
-        error={execution.isError ? hibaUzenet(execution.error) : null}
-        result={execution.data ?? null}
-        mode={mode}
-      />
     </section>
   )
 
@@ -244,8 +292,8 @@ function Workspace({ task }: { task: UnlockedTaskDetail }) {
             ratio={split}
             onRatioChange={setSplit}
             defaultRatio={DEFAULT_SPLIT}
-            left={description}
-            right={solution}
+            first={description}
+            second={solution}
           />
         ) : (
           <WorkspaceTabs
