@@ -22,9 +22,12 @@ final class Payment extends Model
 {
     public const PROVIDER_BARION = 'barion';
 
+    /** A Barion el sem inditotta a tokenes terhelest: a kartya-token nem hasznalhato, uj kartya kell (#138). */
+    public const STATUS_START_REJECTED = 'StartRejected';
+
     protected $fillable = [
         'user_id', 'subscription_id', 'provider', 'request_id', 'provider_payment_id',
-        'recurrence_id', 'purpose', 'renews_period_ending_at', 'amount', 'currency', 'status', 'provider_status', 'paid_at',
+        'recurrence_id', 'purpose', 'renews_period_ending_at', 'attempt', 'amount', 'currency', 'status', 'provider_status', 'paid_at',
     ];
 
     /** @return array<string, string> */
@@ -34,6 +37,7 @@ final class Payment extends Model
             'purpose' => PaymentPurpose::class,
             'status' => PaymentStatus::class,
             'amount' => 'integer',
+            'attempt' => 'integer',
             'paid_at' => 'datetime',
             'renews_period_ending_at' => 'datetime',
         ];

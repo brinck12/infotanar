@@ -50,8 +50,34 @@ final class ProcessDueSubscriptions implements ShouldBeUnique, ShouldQueue
                 }
             });
 
+        $queued += $this->queueRetries();
+
         if ($ended > 0 || $queued > 0) {
             Log::info('Billing: due subscriptions processed.', ['ended' => $ended, 'renewals_queued' => $queued]);
         }
+    }
+
+    /**
+     * A turelmi idejukben levo elofizetesek (#138). Hogy esedekes-e mar uj
+     * terhelesi kiserlet, azt a ChargeRenewal donti el; itt csak sorba tesszuk.
+     */
+    private function queueRetries(): int
+    {
+        $queued = 0;
+
+        Subscription::query()
+            ->where('status', SubscriptionStatus::PastDue)
+            ->where('grace_ends_at', '>', now())
+            ->where('cancel_at_period_end', false)
+            ->whereNotNull('provider_subscription_id')
+            ->select('id')
+            ->chunkById(200, static function ($subscriptions) use (&$queued): void {
+                foreach ($subscriptions as $subscription) {
+                    ChargeSubscriptionRenewal::dispatch($subscription->id);
+                    $queued++;
+                }
+            });
+
+        return $queued;
     }
 }

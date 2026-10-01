@@ -14,6 +14,18 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Ujraprobalkozas sikertelen megujitas utan (#138)
+    |--------------------------------------------------------------------------
+    | Az elso kudarc utan ennyi nappal probaljuk ujra megterhelni a kartyat.
+    | Minden erteknek a turelmi idon belul kell lennie, kulonben az elofizetes
+    | elobb zarul le, mint hogy a kiserlet sorra kerulne.
+    */
+    'dunning' => [
+        'retry_days' => [3, 6],
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | A szamlazas idozonaja
     |--------------------------------------------------------------------------
     | Az alkalmazas UTC-ben tarol; a szamlan szereplo naptari napok (kelt,
