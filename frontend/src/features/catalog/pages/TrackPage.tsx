@@ -8,14 +8,11 @@ import { lessonPath } from '../../lesson/api'
 import { trackQuery } from '../api'
 import { LessonRow } from '../components/LessonRow'
 
-/**
- * A lecke, ahol a tanulás folytatható: az első, amelyik elérhető és még nincs kész.
- * Feladat nélküli lecke nem teljesíthető, ezért azon nem akadunk meg.
- */
+/** A lecke, ahol a tanulás folytatható: az első, amelyik elérhető és még nincs kész. */
 function nextLesson(track: TrackDetail): LessonSummary | undefined {
   return track.modules
     .flatMap((module) => module.lessons)
-    .find((lesson) => !lesson.locked && lesson.status !== 'completed' && lesson.exercises.length > 0)
+    .find((lesson) => !lesson.locked && lesson.status !== 'completed')
 }
 
 /** Egy képzési ág (#142): modulonként a leckék, a néző haladásával és a zárolt leckék jelölésével. */

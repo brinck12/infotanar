@@ -6,9 +6,11 @@ import { AccessBadge } from '../../../shared/ui/AccessBadge'
 import { Alert } from '../../../shared/ui/Form'
 import { PageLoader } from '../../../shared/ui/PageLoader'
 import type { LessonDetail, LessonExercise, LessonLink } from '../../../types'
+import { LessonStatusBadge } from '../../progress/components/LessonStatusBadge'
 import { LessonVideo } from '../../workspace/components/LessonVideo'
 import { Paywall } from '../../workspace/components/Paywall'
 import { lessonPath, lessonQuery } from '../api'
+import { CompleteLesson } from '../components/CompleteLesson'
 import { LessonContent } from '../components/LessonContent'
 
 /** Egy lecke oldala (#143): videó, tananyag, feladatok, lépkedés a szomszédos leckékre. */
@@ -38,8 +40,9 @@ export function LessonPage() {
       <Breadcrumb lesson={lesson.data} />
 
       <h1 className="mt-3 text-2xl font-semibold text-balance text-slate-100">{lesson.data.title}</h1>
-      <p className="mt-2">
+      <p className="mt-2 flex flex-wrap items-center gap-2">
         <AccessBadge free={lesson.data.is_free} locked={lesson.data.locked} />
+        {lesson.data.status && <LessonStatusBadge status={lesson.data.status} />}
       </p>
 
       <div className="mt-8 space-y-10">
@@ -50,6 +53,7 @@ export function LessonPage() {
             {lesson.data.has_video && <LessonVideo lesson={lesson.data} />}
             {lesson.data.content.trim() !== '' && <LessonContent>{lesson.data.content}</LessonContent>}
             <Exercises exercises={lesson.data.exercises} />
+            <CompleteLesson lesson={lesson.data} />
           </>
         )}
 

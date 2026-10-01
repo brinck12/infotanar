@@ -289,6 +289,8 @@ interface LessonDetailBase {
   module: { id: number; title: string | null }
   is_free: boolean
   has_video: boolean
+  /** A néző haladása; vendégnél null. */
+  status: LessonProgressStatus | null
   exercises: LessonExercise[]
   previous: LessonLink | null
   next: LessonLink | null

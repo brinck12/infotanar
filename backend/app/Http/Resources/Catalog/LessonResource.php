@@ -38,6 +38,8 @@ final class LessonResource extends JsonResource
             'locked_message' => $page->denial?->message(),
             // A videot a lejatszo kulon keri le (GET /lessons/{id}/video), rovid eletu URL-lel.
             'has_video' => $lesson->video_path !== null,
+            // Vendegnel null: neki nincs haladasa.
+            'status' => $page->status?->value,
             'content' => $this->when($unlocked, fn (): string => $lesson->content ?? ''),
             'exercises' => $lesson->exercises->map(static fn (Exercise $exercise): array => [
                 'id' => $exercise->id,
