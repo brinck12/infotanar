@@ -263,3 +263,18 @@ export interface TrackDetail {
   description: string | null
   modules: ModuleSummary[]
 }
+
+export type PaymentStatus = 'pending' | 'succeeded' | 'failed' | 'canceled' | 'expired'
+
+/** Egy fizetés (`GET /billing/payments`), a hozzá kiállított számlával. */
+export interface PaymentSummary {
+  id: string
+  purpose: 'initial' | 'renewal' | 'card_change'
+  status: PaymentStatus
+  is_final: boolean
+  amount: number
+  currency: string
+  paid_at: string | null
+  created_at: string | null
+  invoice?: { status: 'pending' | 'issued' | 'failed'; number: string | null; download_url: string | null } | null
+}
