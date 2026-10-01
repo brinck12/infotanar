@@ -99,7 +99,7 @@ jobs:
   # Az éles adatbázis MySQL 8, a többi job sqlite-on fut. Itt derül ki, ha egy
   # migráció vagy lekérdezés csak sqlite-on működik (#126).
   backend-mysql:
-    name: Backend (MySQL 8: migrációk, API tesztek)
+    name: Backend MySQL 8-on (migrációk, API tesztek)
     runs-on: ubuntu-latest
     timeout-minutes: 20
 
