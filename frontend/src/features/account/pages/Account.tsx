@@ -1,10 +1,12 @@
 import { useAuth } from '../../auth/context'
+import { ChangeEmail } from '../components/ChangeEmail'
+import { ChangePassword } from '../components/ChangePassword'
 import { DataExport } from '../components/DataExport'
 import { DeleteAccount } from '../components/DeleteAccount'
 import { ProfileSummary } from '../components/ProfileSummary'
 import { SubscriptionSummary } from '../components/SubscriptionSummary'
 
-/** Fiókom (#134): saját adatok, előfizetés, adatletöltés és fióktörlés egy helyen. */
+/** Fiókom (#134, #135): saját adatok és módosításuk, előfizetés, adatletöltés és fióktörlés egy helyen. */
 export function Account() {
   const { user } = useAuth()
 
@@ -17,6 +19,8 @@ export function Account() {
       <h1 className="text-2xl font-semibold text-slate-100">Fiókom</h1>
 
       <ProfileSummary user={user} />
+      <ChangeEmail pendingEmail={user.pending_email} />
+      <ChangePassword />
       <SubscriptionSummary />
       <DataExport />
       <DeleteAccount />
