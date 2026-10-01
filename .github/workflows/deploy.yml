@@ -58,6 +58,8 @@ jobs:
         env:
           # Éles környezetben az nginx ugyanarról a domainről proxyzza az API-t.
           VITE_API_URL: /api/v1
+          # A frontend hibajelentései ezzel azonosítják a kiadást (#131).
+          VITE_RELEASE: ${{ github.event.workflow_run.head_sha || github.sha }}
         run: |
           npm ci
           npm run build

@@ -1,4 +1,5 @@
 import { Component, type ErrorInfo, type ReactNode } from 'react'
+import { reportError } from '../shared/api/reportError'
 
 interface State {
   error: Error | null
@@ -17,6 +18,7 @@ export class ErrorBoundary extends Component<{ children: ReactNode }, State> {
 
   override componentDidCatch(error: Error, info: ErrorInfo): void {
     console.error('Nem kezelt renderelési hiba', error, info.componentStack)
+    reportError(error, info.componentStack)
   }
 
   override render() {

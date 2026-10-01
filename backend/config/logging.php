@@ -73,6 +73,15 @@ return [
             'replace_placeholders' => true,
         ],
 
+        // A bongeszobol jelentett hibak (#131): kulon fajl, hogy a szerver
+        // naplojat ne arassza el, es kulon lehessen olvasni.
+        'client' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/client.log'),
+            'level' => 'error',
+            'days' => env('LOG_DAILY_DAYS', 14),
+        ],
+
         'slack' => [
             'driver' => 'slack',
             'url' => env('LOG_SLACK_WEBHOOK_URL'),

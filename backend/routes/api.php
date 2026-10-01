@@ -30,6 +30,7 @@ use App\Http\Controllers\Api\V1\Catalog\LessonVideoController;
 use App\Http\Controllers\Api\V1\Catalog\TaskController;
 use App\Http\Controllers\Api\V1\Catalog\TopicController;
 use App\Http\Controllers\Api\V1\Catalog\TrackController;
+use App\Http\Controllers\Api\V1\ClientErrorController;
 use App\Http\Controllers\Api\V1\Execution\RunController;
 use App\Http\Controllers\Api\V1\Execution\SubmissionController;
 use App\Http\Controllers\Api\V1\HealthController;
@@ -40,6 +41,9 @@ use Illuminate\Support\Facades\Route;
 Route::prefix('v1')->name('api.')->group(function (): void {
     Route::get('/health', HealthController::class)->name('health');
     Route::get('/health/ready', ReadinessController::class)->middleware('throttle:30,1')->name('health.ready');
+
+    // A frontend nem kezelt hibainak bejelentese (#131); szuk limit, mert barki hivhatja.
+    Route::post('/client-errors', ClientErrorController::class)->middleware('throttle:10,1')->name('client-errors');
 
     Route::prefix('auth')->name('auth.')->group(function (): void {
         Route::post('/register', RegisterController::class)->name('register');

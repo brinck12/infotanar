@@ -63,6 +63,7 @@ final class ProductionConfigAudit
             $from === '' || str_ends_with($from, '@example.com')
                 ? new ConfigProblem('MAIL_FROM_ADDRESS', 'Valódi feladó cím kell, a saját domainről.')
                 : null,
+            $this->required('alerts.email', 'ALERT_EMAIL', 'Nélküle az elbukott jobokról és az elakadt számlákról senki nem értesül.'),
         ];
     }
 
