@@ -8,6 +8,7 @@ use App\Actions\Audit\RecordAuditEvent;
 use App\Enums\AuditAction;
 use App\Models\AccessGrant;
 use App\Models\LessonCompletion;
+use App\Models\Payment;
 use App\Models\Submission;
 use App\Models\Subscription;
 use App\Models\User;
@@ -72,6 +73,19 @@ final readonly class ExportAccountData
                     'cancel_at_period_end' => $subscription->cancel_at_period_end,
                     'canceled_at' => $subscription->canceled_at?->toIso8601String(),
                     'created_at' => $subscription->created_at?->toIso8601String(),
+                ])
+                ->all(),
+            // Fizetesek (#14): osszeg, allapot, datumok; a Barion-azonositok belso adatok.
+            'payments' => $user->payments()
+                ->oldest('id')
+                ->get()
+                ->map(static fn (Payment $payment): array => [
+                    'purpose' => $payment->purpose->value,
+                    'status' => $payment->status->value,
+                    'amount' => $payment->amount,
+                    'currency' => $payment->currency,
+                    'paid_at' => $payment->paid_at?->toIso8601String(),
+                    'created_at' => $payment->created_at?->toIso8601String(),
                 ])
                 ->all(),
             // Kezi (osztondij/tamogatasi) hozzaferesek; az admin kilete belso adat, nem kerul bele.

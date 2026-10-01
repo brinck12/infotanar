@@ -8,6 +8,7 @@ use App\Mail\OutboxTransport;
 use App\Models\Exercise;
 use App\Models\Lesson;
 use App\Models\Module;
+use App\Models\Subscription;
 use App\Models\TestCase;
 use App\Models\Track;
 use App\Models\User;
@@ -38,6 +39,7 @@ final class AppServiceProvider extends ServiceProvider
             'lesson' => Lesson::class,
             'exercise' => Exercise::class,
             'test_case' => TestCase::class,
+            'subscription' => Subscription::class,
         ]);
 
         Password::defaults(static fn () => Password::min(8)->letters()->numbers());

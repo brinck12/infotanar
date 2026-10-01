@@ -16,4 +16,7 @@ enum AuditAction: string
 
     case AccessGranted = 'access.granted';
     case AccessRevoked = 'access.revoked';
+
+    case SubscriptionCancelScheduled = 'subscription.cancel_scheduled';
+    case SubscriptionResumed = 'subscription.resumed';
 }
