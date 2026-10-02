@@ -5,6 +5,7 @@ import { mezoHibak } from '../../../../shared/api/errors'
 import { LEVEL_LABEL } from '../../../../shared/domain/labels'
 import { CheckboxField, Field, SubmitButton, TextAreaField } from '../../../../shared/ui/Form'
 import { lessonQuery, moduleQuery, trackQuery, type AdminExercise, type AdminLesson, type LessonPayload } from '../api'
+import { HistoryLink } from '../../audit/components/HistoryLink'
 import { AdminShell, Section, StatusPill } from '../../components/AdminShell'
 import { ChildList } from '../components/ChildList'
 import { MutationError, QueryState } from '../components/QueryState'
@@ -52,6 +53,7 @@ function LessonEditor({ lesson }: { lesson: AdminLesson }) {
         { label: lesson.title },
       ]}
       title={lesson.title}
+      actions={<HistoryLink subjectType="lesson" subjectId={lesson.id} />}
     >
       <Section title="Lecke adatai" aside={<SavedNote mutation={save} />}>
         <MutationError error={save.error} fields={['title', 'slug', 'content', 'video_path', 'captions_path', 'is_free', 'is_published']} />

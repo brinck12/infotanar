@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Http\Controllers\Api\V1\Account\AccountController;
 use App\Http\Controllers\Api\V1\Admin\AccessGrantController;
+use App\Http\Controllers\Api\V1\Admin\AuditLogController;
 use App\Http\Controllers\Api\V1\Admin\Catalog\ConstraintOptionsController;
 use App\Http\Controllers\Api\V1\Admin\Catalog\ExerciseController as AdminExerciseController;
 use App\Http\Controllers\Api\V1\Admin\Catalog\LessonController as AdminLessonController;
@@ -124,6 +125,9 @@ Route::prefix('v1')->name('api.')->group(function (): void {
 
     Route::prefix('admin')->name('admin.')->middleware(['auth:sanctum', 'admin'])->group(function (): void {
         Route::get('/ping', static fn () => response()->json(['ok' => true]))->name('ping');
+
+        // Naplo-nezet (#161): csak olvasas.
+        Route::get('/audit-logs', [AuditLogController::class, 'index'])->name('audit-logs.index');
 
         // Katalogus-szerkesztes (#45). A sorrend-vegpontok a szulo osszes gyereket varjak.
         Route::put('/tracks/order', [ReorderController::class, 'tracks'])->name('tracks.order');

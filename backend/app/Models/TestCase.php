@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
  * @property int $exercise_id
+ * @property-read Exercise $exercise A exercise_id NOT NULL + cascade: a feladat mindig letezik.
  */
 final class TestCase extends Model
 {

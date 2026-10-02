@@ -22,4 +22,10 @@ enum AuditAction: string
 
     case InvoiceBuyerCorrected = 'invoice.buyer_corrected';
     case InvoiceRetried = 'invoice.retried';
+
+    /** Magyar felirat a naplo-nezethez (lang/hu/admin.php, `audit.actions`). */
+    public function label(): string
+    {
+        return __("admin.audit.actions.{$this->value}");
+    }
 }

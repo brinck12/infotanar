@@ -18,6 +18,7 @@ import {
   type ExercisePayload,
   type LanguageOption,
 } from '../api'
+import { HistoryLink } from '../../audit/components/HistoryLink'
 import { AdminShell, Section } from '../../components/AdminShell'
 import { ConstraintEditor } from '../components/ConstraintEditor'
 import { MutationError, QueryState } from '../components/QueryState'
@@ -115,6 +116,7 @@ function ExerciseEditor({ lesson, exercise }: { lesson: AdminLesson; exercise: A
         { label: title },
       ]}
       title={title}
+      actions={exercise ? <HistoryLink subjectType="exercise" subjectId={exercise.id} /> : undefined}
     >
       <form onSubmit={submit} noValidate className="space-y-8">
         <Section title="Feladat" aside={<SavedNote mutation={save} />}>
