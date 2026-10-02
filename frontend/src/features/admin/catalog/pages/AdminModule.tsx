@@ -4,6 +4,7 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { mezoHibak } from '../../../../shared/api/errors'
 import { Field, SubmitButton, TextAreaField } from '../../../../shared/ui/Form'
 import { moduleQuery, trackQuery, type AdminLesson, type AdminModule, type ModulePayload } from '../api'
+import { HistoryLink } from '../../audit/components/HistoryLink'
 import { AdminShell, Section, StatusPill } from '../../components/AdminShell'
 import { ChildList } from '../components/ChildList'
 import { MutationError, QueryState } from '../components/QueryState'
@@ -48,6 +49,7 @@ function ModuleEditor({ module }: { module: AdminModule }) {
         { label: module.title },
       ]}
       title={module.title}
+      actions={<HistoryLink subjectType="module" subjectId={module.id} />}
     >
       <Section title="Modul adatai" aside={<SavedNote mutation={save} />}>
         <MutationError error={save.error} fields={['title', 'slug', 'description']} />

@@ -5,6 +5,7 @@ import { ProgressBar } from '../../../progress/components/ProgressBar'
 import { QueryState } from '../../catalog/components/QueryState'
 import { AdminShell, Section } from '../../components/AdminShell'
 import { userQuery, type AdminUserDetail as Detail } from '../api'
+import { HistoryLink } from '../../audit/components/HistoryLink'
 import { AccessBadge } from '../components/AccessBadge'
 import { AccessGrants } from '../components/AccessGrants'
 import { formatDate } from '../format'
@@ -26,7 +27,12 @@ function UserOverview({ user }: { user: Detail }) {
     <AdminShell
       crumbs={[{ label: 'Admin' }, { label: 'Felhasználók', to: '/admin/felhasznalok' }, { label: user.name }]}
       title={user.name}
-      actions={<AccessBadge user={user} />}
+      actions={
+        <>
+          <AccessBadge user={user} />
+          <HistoryLink subjectType="user" subjectId={user.id} />
+        </>
+      }
     >
       <Section title="Fiók">
         <dl className="grid gap-x-6 gap-y-3 text-sm sm:grid-cols-2">

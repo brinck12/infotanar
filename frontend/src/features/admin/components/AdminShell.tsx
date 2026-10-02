@@ -10,6 +10,7 @@ const ADMIN_SECTIONS = [
   { to: '/admin/tananyag', label: 'Tananyag' },
   { to: '/admin/felhasznalok', label: 'Felhasználók' },
   { to: '/admin/szamlak', label: 'Számlák' },
+  { to: '/admin/naplo', label: 'Napló' },
 ] as const
 
 /** Admin oldalkeret: morzsamenü, cím és a tartalom. */

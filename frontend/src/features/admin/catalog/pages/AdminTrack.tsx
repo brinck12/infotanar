@@ -4,6 +4,7 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { mezoHibak } from '../../../../shared/api/errors'
 import { CheckboxField, Field, SubmitButton, TextAreaField } from '../../../../shared/ui/Form'
 import { trackQuery, type AdminModule, type AdminTrack, type TrackPayload } from '../api'
+import { HistoryLink } from '../../audit/components/HistoryLink'
 import { AdminShell, Section, StatusPill } from '../../components/AdminShell'
 import { ChildList } from '../components/ChildList'
 import { MutationError, QueryState } from '../components/QueryState'
@@ -39,7 +40,7 @@ function TrackEditor({ track }: { track: AdminTrack }) {
   }
 
   return (
-    <AdminShell crumbs={[{ label: 'Admin' }, { label: 'Tananyag', to: '/admin/tananyag' }, { label: track.title }]} title={track.title}>
+    <AdminShell crumbs={[{ label: 'Admin' }, { label: 'Tananyag', to: '/admin/tananyag' }, { label: track.title }]} title={track.title} actions={<HistoryLink subjectType="track" subjectId={track.id} />}>
       <Section title="Képzési ág adatai" aside={<SavedNote mutation={save} />}>
         <MutationError error={save.error} fields={['title', 'slug', 'description', 'is_published']} />
         <form onSubmit={submit} noValidate className="grid gap-4">
