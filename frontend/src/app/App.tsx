@@ -1,5 +1,5 @@
 import { Suspense } from 'react'
-import { BrowserRouter, Link, Navigate, Outlet, Route, Routes } from 'react-router-dom'
+import { BrowserRouter, Link, Outlet, Route, Routes } from 'react-router-dom'
 import { AccountNav, VerifyEmailBanner } from '../features/auth/components/AccountNav'
 import { GuestOnly, RequireAuth, RequireRole } from '../features/auth/guards'
 import { PastDueBanner } from '../features/billing/components/PastDueBanner'
@@ -45,7 +45,7 @@ export default function App() {
                     <Route path="/elofizetes/visszateres" element={<RequireAuth><Pages.PaymentReturn /></RequireAuth>} />
                     <Route path="/haladas" element={<RequireAuth><Pages.ProgressDashboard /></RequireAuth>} />
                     <Route path="/admin" element={<RequireRole allow="admin"><Outlet /></RequireRole>}>
-                      <Route index element={<Navigate to="/admin/tananyag" replace />} />
+                      <Route index element={<Pages.AdminDashboard />} />
                       <Route path="tananyag" element={<Pages.AdminCatalog />} />
                       <Route path="tananyag/agak/:trackId" element={<Pages.AdminTrack />} />
                       <Route path="tananyag/modulok/:moduleId" element={<Pages.AdminModule />} />
