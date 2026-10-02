@@ -19,6 +19,7 @@ export const ForgotPassword = page(() => import('../features/auth/pages/ForgotPa
 export const ResetPassword = page(() => import('../features/auth/pages/ResetPassword'), 'ResetPassword')
 export const Subscribe = page(() => import('../features/billing/pages/Subscribe'), 'Subscribe')
 export const ProgressDashboard = page(() => import('../features/progress/pages/ProgressDashboard'), 'ProgressDashboard')
+export const AdminDashboard = page(() => import('../features/admin/dashboard/pages/AdminDashboard'), 'AdminDashboard')
 export const AdminCatalog = page(() => import('../features/admin/catalog/pages/AdminCatalog'), 'AdminCatalog')
 export const AdminTrack = page(() => import('../features/admin/catalog/pages/AdminTrack'), 'AdminTrack')
 export const AdminModule = page(() => import('../features/admin/catalog/pages/AdminModule'), 'AdminModule')

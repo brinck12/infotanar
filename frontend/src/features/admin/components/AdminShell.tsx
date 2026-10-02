@@ -7,6 +7,7 @@ export interface Crumb {
 }
 
 const ADMIN_SECTIONS = [
+  { to: '/admin', label: 'Áttekintés', end: true },
   { to: '/admin/tananyag', label: 'Tananyag' },
   { to: '/admin/felhasznalok', label: 'Felhasználók' },
   { to: '/admin/szamlak', label: 'Számlák' },
@@ -21,6 +22,7 @@ export function AdminShell({ crumbs, title, actions, children }: { crumbs: Crumb
           <NavLink
             key={section.to}
             to={section.to}
+            end={'end' in section}
             className={({ isActive }) =>
               `-mb-px border-b-2 px-3 py-2 transition ${isActive ? 'border-sky-400 text-slate-100' : 'border-transparent text-slate-400 hover:text-slate-200'}`
             }

@@ -11,6 +11,7 @@ use App\Http\Controllers\Api\V1\Admin\Catalog\ModuleController as AdminModuleCon
 use App\Http\Controllers\Api\V1\Admin\Catalog\ReorderController;
 use App\Http\Controllers\Api\V1\Admin\Catalog\TestCaseController;
 use App\Http\Controllers\Api\V1\Admin\Catalog\TrackController as AdminTrackController;
+use App\Http\Controllers\Api\V1\Admin\DashboardController;
 use App\Http\Controllers\Api\V1\Admin\InvoiceController as AdminInvoiceController;
 use App\Http\Controllers\Api\V1\Admin\UserAccountController;
 use App\Http\Controllers\Api\V1\Admin\UserController as AdminUserController;
@@ -124,6 +125,9 @@ Route::prefix('v1')->name('api.')->group(function (): void {
 
     Route::prefix('admin')->name('admin.')->middleware(['auth:sanctum', 'admin'])->group(function (): void {
         Route::get('/ping', static fn () => response()->json(['ok' => true]))->name('ping');
+
+        // Attekintes (#160): elofizetesek, bevetel, felhasznalok, tanulas, figyelmet kero dolgok.
+        Route::get('/metrics', DashboardController::class)->name('metrics');
 
         // Katalogus-szerkesztes (#45). A sorrend-vegpontok a szulo osszes gyereket varjak.
         Route::put('/tracks/order', [ReorderController::class, 'tracks'])->name('tracks.order');
