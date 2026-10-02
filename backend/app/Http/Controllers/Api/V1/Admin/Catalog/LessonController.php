@@ -12,6 +12,7 @@ use App\Http\Resources\Admin\AdminLessonResource;
 use App\Models\Lesson;
 use App\Models\LessonCompletion;
 use App\Models\User;
+use App\Services\Catalog\Media\LessonMediaInspector;
 use Illuminate\Container\Attributes\CurrentUser;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Http\JsonResponse;
@@ -37,9 +38,11 @@ final class LessonController extends Controller
         return AdminLessonResource::collection($lessons);
     }
 
-    public function show(Lesson $lesson): AdminLessonResource
+    public function show(Lesson $lesson, LessonMediaInspector $inspector): AdminLessonResource
     {
-        return AdminLessonResource::make($lesson->load(['exercises' => static fn (Relation $q) => $q->withCount(['testCases', 'submissions'])]));
+        $lesson->load(['exercises' => static fn (Relation $q) => $q->withCount(['testCases', 'submissions'])]);
+
+        return AdminLessonResource::detailed($lesson, $inspector);
     }
 
     public function store(LessonRequest $request, #[CurrentUser] User $admin): JsonResponse

@@ -7,6 +7,7 @@ import { CheckboxField, Field, SubmitButton, TextAreaField } from '../../../../s
 import { lessonQuery, moduleQuery, trackQuery, type AdminExercise, type AdminLesson, type LessonPayload } from '../api'
 import { AdminShell, Section, StatusPill } from '../../components/AdminShell'
 import { ChildList } from '../components/ChildList'
+import { LessonMediaManager } from '../components/LessonMediaManager'
 import { MutationError, QueryState } from '../components/QueryState'
 import { SavedNote } from '../components/SavedNote'
 import { useChildMutations, useSaveEntity } from '../useCatalogMutations'
@@ -18,7 +19,13 @@ export function AdminLesson() {
   return <QueryState query={lesson}>{(data) => <LessonEditor key={data.id} lesson={data} />}</QueryState>
 }
 
-type LessonForm = Omit<LessonPayload, 'module_id'>
+type LessonForm = Omit<LessonPayload, 'module_id' | 'video_path' | 'captions_path'>
+
+/**
+ * A kézzel megadott fájlútvonalak (haladó mező). Csak a ténylegesen szerkesztett érték kerül a
+ * mentésbe: a feltöltés közben a lecke útvonala megváltozhat, és egy elavult másolat felülírná.
+ */
+type PathOverrides = Partial<Pick<LessonPayload, 'video_path' | 'captions_path'>>
 
 function LessonEditor({ lesson }: { lesson: AdminLesson }) {
   const module = useQuery(moduleQuery(lesson.module_id))
@@ -27,19 +34,22 @@ function LessonEditor({ lesson }: { lesson: AdminLesson }) {
     title: lesson.title,
     slug: lesson.slug,
     content: lesson.content,
-    video_path: lesson.video_path,
-    captions_path: lesson.captions_path,
     is_free: lesson.is_free,
     is_published: lesson.is_published,
   })
-  const save = useSaveEntity<AdminLesson>('lessons', lesson.id)
+  const [pathOverrides, setPathOverrides] = useState<PathOverrides>({})
+  const save = useSaveEntity<AdminLesson>('lessons', lesson.id, () => setPathOverrides({}))
   const errors = mezoHibak(save.error)
   const exercises = useChildMutations<AdminExercise>('exercises', `/admin/lessons/${lesson.id}/exercises/order`, () => undefined)
   const set = <K extends keyof LessonForm>(key: K, value: LessonForm[K]) => setForm((f) => ({ ...f, [key]: value }))
 
   function submit(e: FormEvent) {
     e.preventDefault()
-    save.mutate({ ...form, video_path: form.video_path?.trim() || null, captions_path: form.captions_path?.trim() || null })
+    save.mutate({
+      ...form,
+      ...(pathOverrides.video_path !== undefined && { video_path: pathOverrides.video_path?.trim() || null }),
+      ...(pathOverrides.captions_path !== undefined && { captions_path: pathOverrides.captions_path?.trim() || null }),
+    })
   }
 
   return (
@@ -68,22 +78,28 @@ function LessonEditor({ lesson }: { lesson: AdminLesson }) {
             onChange={(e) => set('content', e.target.value || null)}
             error={errors.content}
           />
-          <Field
-            label="Videó elérési útja"
-            placeholder="pl. python/ciklusok.mp4"
-            hint="Relatív útvonal a privát videótárolóban. Üresen hagyva a leckének nincs videója."
-            value={form.video_path ?? ''}
-            onChange={(e) => set('video_path', e.target.value)}
-            error={errors.video_path}
-          />
-          <Field
-            label="Felirat elérési útja (WebVTT)"
-            placeholder="pl. python/ciklusok.hu.vtt"
-            hint="Ugyanabban a tárolóban; .vtt fájl. Siket és nagyothalló diákoknak, illetve hang nélküli nézéshez."
-            value={form.captions_path ?? ''}
-            onChange={(e) => set('captions_path', e.target.value)}
-            error={errors.captions_path}
-          />
+          <details className="rounded-lg border border-slate-800 p-3">
+            <summary className="cursor-pointer text-sm text-slate-300">Haladó: fájlútvonalak kézzel</summary>
+            <div className="mt-3 grid gap-4">
+              <p className="text-xs text-slate-400">
+                A videót és a feliratot a „Videó és felirat” szakaszban töltheted fel. Ide csak akkor írj, ha a fájlt máshogy, a szerveren helyezted el.
+              </p>
+              <Field
+                label="Videó elérési útja"
+                placeholder="pl. python/ciklusok.mp4"
+                value={pathOverrides.video_path ?? lesson.video_path ?? ''}
+                onChange={(e) => setPathOverrides((o) => ({ ...o, video_path: e.target.value }))}
+                error={errors.video_path}
+              />
+              <Field
+                label="Felirat elérési útja (WebVTT)"
+                placeholder="pl. python/ciklusok.hu.vtt"
+                value={pathOverrides.captions_path ?? lesson.captions_path ?? ''}
+                onChange={(e) => setPathOverrides((o) => ({ ...o, captions_path: e.target.value }))}
+                error={errors.captions_path}
+              />
+            </div>
+          </details>
           <div className="flex flex-wrap gap-6">
             <CheckboxField
               label="Ingyenes lecke"
@@ -106,6 +122,10 @@ function LessonEditor({ lesson }: { lesson: AdminLesson }) {
             </SubmitButton>
           </div>
         </form>
+      </Section>
+
+      <Section title="Videó és felirat">
+        <LessonMediaManager lesson={lesson} />
       </Section>
 
       <Section

@@ -7,6 +7,8 @@ use App\Http\Controllers\Api\V1\Admin\AccessGrantController;
 use App\Http\Controllers\Api\V1\Admin\Catalog\ConstraintOptionsController;
 use App\Http\Controllers\Api\V1\Admin\Catalog\ExerciseController as AdminExerciseController;
 use App\Http\Controllers\Api\V1\Admin\Catalog\LessonController as AdminLessonController;
+use App\Http\Controllers\Api\V1\Admin\Catalog\LessonMediaController;
+use App\Http\Controllers\Api\V1\Admin\Catalog\LessonVideoUploadController;
 use App\Http\Controllers\Api\V1\Admin\Catalog\ModuleController as AdminModuleController;
 use App\Http\Controllers\Api\V1\Admin\Catalog\ReorderController;
 use App\Http\Controllers\Api\V1\Admin\Catalog\TestCaseController;
@@ -78,6 +80,16 @@ Route::prefix('v1')->name('api.')->group(function (): void {
         ->middleware('signed:relative')
         ->name('lessons.video.captions');
 
+    // Admin elonezet (#158): alairt URL-en at, publikalatlan leckehez is; csak admin kerhet ilyen URL-t.
+    Route::get('/lessons/{lesson}/video/preview-stream', [LessonMediaController::class, 'previewStream'])
+        ->whereNumber('lesson')
+        ->middleware('signed:relative')
+        ->name('lessons.video.preview');
+    Route::get('/lessons/{lesson}/video/preview-captions', [LessonMediaController::class, 'previewCaptions'])
+        ->whereNumber('lesson')
+        ->middleware('signed:relative')
+        ->name('lessons.captions.preview');
+
     Route::get('/topics', [TopicController::class, 'index'])->name('topics.index');
     Route::get('/tasks', [TaskController::class, 'index'])->name('tasks.index');
     Route::get('/tasks/{task}', [TaskController::class, 'show'])->whereNumber('task')->name('tasks.show');
@@ -134,6 +146,21 @@ Route::prefix('v1')->name('api.')->group(function (): void {
         Route::apiResource('tracks', AdminTrackController::class);
         Route::apiResource('modules', AdminModuleController::class);
         Route::apiResource('lessons', AdminLessonController::class);
+
+        // Lecke-video es felirat feltoltese (#158): a video darabokban, hogy megszakadas utan folytathato legyen.
+        Route::post('/lessons/{lesson}/video/uploads', [LessonVideoUploadController::class, 'store'])->whereNumber('lesson')->name('lesson-uploads.store');
+        Route::get('/lesson-uploads/{upload}', [LessonVideoUploadController::class, 'show'])->whereUuid('upload')->name('lesson-uploads.show');
+        Route::put('/lesson-uploads/{upload}/parts/{part}', [LessonVideoUploadController::class, 'part'])
+            ->whereUuid('upload')
+            ->whereNumber('part')
+            ->middleware('throttle:600,1')
+            ->name('lesson-uploads.part');
+        Route::post('/lesson-uploads/{upload}/complete', [LessonVideoUploadController::class, 'complete'])->whereUuid('upload')->name('lesson-uploads.complete');
+        Route::delete('/lesson-uploads/{upload}', [LessonVideoUploadController::class, 'destroy'])->whereUuid('upload')->name('lesson-uploads.destroy');
+        Route::delete('/lessons/{lesson}/video', [LessonMediaController::class, 'destroyVideo'])->whereNumber('lesson')->name('lessons.video.destroy');
+        Route::get('/lessons/{lesson}/video/preview', [LessonMediaController::class, 'preview'])->whereNumber('lesson')->name('lessons.video.preview-url');
+        Route::post('/lessons/{lesson}/captions', [LessonMediaController::class, 'storeCaptions'])->whereNumber('lesson')->name('lessons.captions.store');
+        Route::delete('/lessons/{lesson}/captions', [LessonMediaController::class, 'destroyCaptions'])->whereNumber('lesson')->name('lessons.captions.destroy');
         Route::apiResource('exercises', AdminExerciseController::class);
 
         Route::get('/constraint-options', ConstraintOptionsController::class)->name('constraint-options');

@@ -13,6 +13,8 @@ use App\Models\Subscription;
 use App\Models\TestCase;
 use App\Models\Track;
 use App\Models\User;
+use App\Services\Catalog\Media\LocalChunkedVideoUploader;
+use App\Services\Catalog\Media\VideoUploader;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\Relation;
@@ -26,6 +28,12 @@ use Illuminate\Validation\Rules\Password;
 
 final class AppServiceProvider extends ServiceProvider
 {
+    public function register(): void
+    {
+        // Videofeltoltes (#158): jelenleg a darabok a szerveren allnak ossze; S3-hoz masik megvalositas kotheto ide.
+        $this->app->bind(VideoUploader::class, LocalChunkedVideoUploader::class);
+    }
+
     public function boot(): void
     {
         // Fejlesztes es teszt alatt hangos hiba: N+1 lekerdezes, elnyelt

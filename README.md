@@ -275,6 +275,25 @@ server {
         fastcgi_param SCRIPT_FILENAME /var/www/infotanar/backend/public/index.php;
     }
 
+    # Leckevideo-feltöltés (#158): a darabok (alapból 8 MB) nagyobbak az nginx 1 MB-os alapértelmezett
+    # limitjénél. A nagyobb limit csak erre a végpontra érvényes; ezért közvetlenül a php-fpm-nek adjuk
+    # át (belső átirányítás után az `index.php` blokk limitje lépne életbe).
+    location ~ ^/api/v1/admin/lesson-uploads/[^/]+/parts/[0-9]+$ {
+        client_max_body_size 16m;
+        root /var/www/infotanar/backend/public;
+        fastcgi_pass unix:/run/php/php8.3-fpm.sock;
+        include fastcgi_params;
+        fastcgi_param SCRIPT_FILENAME /var/www/infotanar/backend/public/index.php;
+    }
+
     location ~ /\. { deny all; }
 }
 ```
+
+A leckevideók és feliratok az admin felületről tölthetők fel (nem kell a szerverre fájlt másolni). A
+videó darabokban megy, megszakadás után onnan folytatható. Beállítások a `.env`-ben (mind elhagyható):
+`LESSON_VIDEO_MAX_SIZE_MB` (1024), `LESSON_VIDEO_PART_SIZE_MB` (8, legyen kisebb az nginx
+`client_max_body_size`-ánál), `LESSON_VIDEO_UPLOAD_TTL_HOURS` (24), `LESSON_CAPTIONS_MAX_SIZE_KB` (1024).
+A fájlok a `catalog.video.disk` tárolóba kerülnek. Az ütemező óránként törli a felbehagyott feltöltések
+darabjait (`lessons:prune-uploads`), naponta jelenti az árva fájlokat és a hiányzó hivatkozásokat
+(`lessons:media-report`, csak jelent, nem töröl).
