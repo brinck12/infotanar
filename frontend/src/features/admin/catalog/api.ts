@@ -26,6 +26,15 @@ export interface AdminModule {
   lessons?: AdminLesson[]
 }
 
+/** Egy lecke fájljának tényleges állapota a tárolón (csak a részletes nézetben, `GET /admin/lessons/{id}`). */
+export interface LessonMediaFile {
+  path: string | null
+  /** false: az útvonal "lelóg", a diák hibát kapna. */
+  exists: boolean
+  size: number | null
+  uploaded_at: string | null
+}
+
 export interface AdminLesson {
   id: number
   module_id: number
@@ -35,6 +44,9 @@ export interface AdminLesson {
   video_path: string | null
   /** WebVTT felirat (#111) a videóhoz. */
   captions_path: string | null
+  /** A fájlok állapota a tárolón (#158); a listában nincs. */
+  video?: LessonMediaFile
+  captions?: LessonMediaFile
   position: number
   is_free: boolean
   is_published: boolean

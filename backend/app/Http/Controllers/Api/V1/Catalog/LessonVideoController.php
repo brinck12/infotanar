@@ -5,20 +5,18 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Api\V1\Catalog;
 
 use App\Actions\Catalog\IssueLessonVideoUrl;
-use App\Exceptions\Catalog\LessonVideoMissing;
 use App\Http\Controllers\Controller;
 use App\Models\Lesson;
 use App\Models\User;
-use Illuminate\Filesystem\FilesystemAdapter;
+use App\Services\Catalog\Media\MediaResponse;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Config;
-use Illuminate\Support\Facades\Storage;
-use League\Flysystem\Local\LocalFilesystemAdapter;
 use Symfony\Component\HttpFoundation\Response;
 
 final class LessonVideoController extends Controller
 {
+    public function __construct(private readonly MediaResponse $media) {}
+
     /** Rovid eletu lejatszasi URL a hozzaferes ellenorzese utan. */
     public function show(Request $request, int $lesson, IssueLessonVideoUrl $issue): JsonResponse
     {
@@ -34,61 +32,20 @@ final class LessonVideoController extends Controller
         ])->header('Cache-Control', 'no-store');
     }
 
-    /**
-     * Csak ervenyes, lejarat elotti alairassal erheto el (signed:relative).
-     * Helyi tarolonal BinaryFileResponse: tamogatja a Range kereseket, igy a
-     * lejatszoban lehet tekerni.
-     */
+    /** Csak ervenyes, lejarat elotti alairassal erheto el (signed:relative). */
     public function stream(int $lesson): Response
     {
-        $model = $this->publishedLesson($lesson);
-        $disk = Storage::disk(Config::string('catalog.video.disk'));
-
-        if ($model->video_path === null || ! $disk->exists($model->video_path)) {
-            throw new LessonVideoMissing;
-        }
-
-        $response = $this->isLocal($disk)
-            ? response()->file($disk->path($model->video_path))
-            : $disk->response($model->video_path);
-
-        // A BinaryFileResponse alapbol "public": egy kozos cache (proxy, CDN)
-        // tovabbadhatna a premium videot. Csak a kero bongeszoje tarolhatja.
-        $response->setPrivate();
-        $response->setMaxAge(600);
-        $response->headers->set('X-Content-Type-Options', 'nosniff');
-
-        return $response;
+        return $this->media->video($this->publishedLesson($lesson)->video_path);
     }
 
     /** A felirat (#111), a videoval azonos alairt, lejaro URL-en at. */
     public function captions(int $lesson): Response
     {
-        $model = $this->publishedLesson($lesson);
-        $disk = Storage::disk(Config::string('catalog.video.disk'));
-
-        if ($model->captions_path === null || ! $disk->exists($model->captions_path)) {
-            throw new LessonVideoMissing;
-        }
-
-        $response = $this->isLocal($disk)
-            ? response()->file($disk->path($model->captions_path), ['Content-Type' => 'text/vtt; charset=utf-8'])
-            : $disk->response($model->captions_path, null, ['Content-Type' => 'text/vtt; charset=utf-8']);
-
-        $response->setPrivate();
-        $response->setMaxAge(600);
-        $response->headers->set('X-Content-Type-Options', 'nosniff');
-
-        return $response;
+        return $this->media->captions($this->publishedLesson($lesson)->captions_path);
     }
 
     private function publishedLesson(int $id): Lesson
     {
         return Lesson::query()->published()->findOrFail($id);
-    }
-
-    private function isLocal(FilesystemAdapter $disk): bool
-    {
-        return $disk->getAdapter() instanceof LocalFilesystemAdapter;
     }
 }

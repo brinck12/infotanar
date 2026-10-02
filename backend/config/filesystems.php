@@ -51,6 +51,16 @@ return [
             'report' => false,
         ],
 
+        // A folyamatban levo videofeltoltesek darabjai (#158); a kesz fajl a lesson_videos
+        // (vagy az oda beallitott S3) taroloba kerul. Mindig helyi: az osszefuzes itt tortenik.
+        'upload_staging' => [
+            'driver' => 'local',
+            'root' => storage_path('app/private/uploads'),
+            'visibility' => 'private',
+            'throw' => false,
+            'report' => false,
+        ],
+
         'lesson_videos' => [
             'driver' => 'local',
             'root' => storage_path('app/private/lesson-videos'),

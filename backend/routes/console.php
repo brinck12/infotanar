@@ -19,3 +19,7 @@ Schedule::job(new RetryPendingInvoices)->everyFifteenMinutes();
 
 // Megujitasok terhelese es az idoszak vegen lemondott elofizetesek lezarasa (#98).
 Schedule::job(new ProcessDueSubscriptions)->hourly();
+
+// Felbehagyott videofeltoltesek takaritasa es az arva/lelogo medialeletek jelentese (#158).
+Schedule::command('lessons:prune-uploads')->hourly();
+Schedule::command('lessons:media-report')->dailyAt('04:30');
