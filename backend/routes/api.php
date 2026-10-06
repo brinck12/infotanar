@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Http\Controllers\Api\V1\Account\AccountController;
+use App\Http\Controllers\Api\V1\Account\ProfileController;
 use App\Http\Controllers\Api\V1\Admin\AccessGrantController;
 use App\Http\Controllers\Api\V1\Admin\Catalog\ConstraintOptionsController;
 use App\Http\Controllers\Api\V1\Admin\Catalog\ExerciseController as AdminExerciseController;
@@ -99,7 +100,18 @@ Route::prefix('v1')->name('api.')->group(function (): void {
     Route::prefix('account')->name('account.')->middleware('auth:sanctum')->group(function (): void {
         Route::get('/export', [AccountController::class, 'export'])->middleware('throttle:account-export')->name('export');
         Route::delete('/', [AccountController::class, 'destroy'])->middleware('throttle:sensitive')->name('destroy');
+
+        // Sajat adatok modositasa (#135). A jelszot kero muveletek a talalgatas ellen szuk limitet kapnak.
+        Route::patch('/profile', [ProfileController::class, 'update'])->middleware('throttle:10,1')->name('profile.update');
+        Route::put('/password', [ProfileController::class, 'changePassword'])->middleware('throttle:sensitive')->name('password.update');
+        Route::post('/email', [ProfileController::class, 'requestEmailChange'])->middleware('throttle:sensitive')->name('email.request');
     });
+
+    // Az uj e-mail-cimre kuldott link: bejelentkezes nelkul is megnyithato, az alairas vedi.
+    Route::get('/account/email/confirm/{id}/{hash}', [ProfileController::class, 'confirmEmailChange'])
+        ->whereNumber('id')
+        ->middleware('signed:relative')
+        ->name('account.email.confirm');
 
     Route::get('/billing/plan', PlanController::class)->name('billing.plan');
 

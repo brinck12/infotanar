@@ -149,6 +149,8 @@ export interface AuthUser {
   id: number
   name: string
   email: string
+  /** Megerősítésre váró új cím (#135); null, ha nincs folyamatban csere. */
+  pending_email: string | null
   role: Role
   email_verified_at: string | null
 }
