@@ -16,7 +16,8 @@ const ADMIN_SECTIONS = [
 export function AdminShell({ crumbs, title, actions, children }: { crumbs: Crumb[]; title: string; actions?: ReactNode; children: ReactNode }) {
   return (
     <div className="mx-auto max-w-5xl px-4 py-8">
-      <nav aria-label="Admin menü" className="mb-4 flex gap-1 border-b border-slate-800 text-sm">
+      {/* Keskeny kijelzőn a fülek a saját sorukban görgethetők, nem tolják szét az oldalt. */}
+      <nav aria-label="Admin menü" className="mb-4 flex gap-1 overflow-x-auto border-b border-slate-800 text-sm whitespace-nowrap">
         {ADMIN_SECTIONS.map((section) => (
           <NavLink
             key={section.to}

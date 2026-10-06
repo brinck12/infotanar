@@ -1,6 +1,6 @@
 import { Suspense } from 'react'
 import { BrowserRouter, Link, Navigate, Outlet, Route, Routes } from 'react-router-dom'
-import { AccountNav, VerifyEmailBanner } from '../features/auth/components/AccountNav'
+import { VerifyEmailBanner } from '../features/auth/components/VerifyEmailBanner'
 import { GuestOnly, RequireAuth, RequireRole } from '../features/auth/guards'
 import { PastDueBanner } from '../features/billing/components/PastDueBanner'
 import { LEGAL_DOCUMENTS } from '../features/legal/documents'
@@ -8,6 +8,7 @@ import { CookieBanner } from '../shared/consent/CookieBanner'
 import { PageLoader } from '../shared/ui/PageLoader'
 import { ErrorBoundary } from './ErrorBoundary'
 import { Footer } from './Footer'
+import { Header } from './Header'
 import { Providers } from './Providers'
 import * as Pages from './routes'
 
@@ -24,17 +25,7 @@ export default function App() {
             >
               Ugrás a tartalomra
             </a>
-            <header className="border-b border-slate-800 bg-slate-900">
-              <nav aria-label="Fő navigáció" className="mx-auto flex max-w-7xl items-center gap-6 px-4 py-3">
-                <Link to="/" className="font-semibold text-slate-100">
-                  InfoTanár
-                </Link>
-                <Link to="/feladatok" className="text-sm text-slate-400 transition hover:text-slate-100">
-                  Feladatok
-                </Link>
-                <AccountNav />
-              </nav>
-            </header>
+            <Header />
             <VerifyEmailBanner />
             <PastDueBanner />
 
