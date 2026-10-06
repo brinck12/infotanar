@@ -53,6 +53,7 @@ export default function App() {
                     <Route path="/elofizetes" element={<RequireAuth><Pages.Subscribe /></RequireAuth>} />
                     <Route path="/elofizetes/visszateres" element={<RequireAuth><Pages.PaymentReturn /></RequireAuth>} />
                     <Route path="/haladas" element={<RequireAuth><Pages.ProgressDashboard /></RequireAuth>} />
+                    <Route path="/fiok" element={<RequireAuth><Pages.Account /></RequireAuth>} />
                     <Route path={LEGAL_DOCUMENTS.terms.path} element={<Pages.Terms />} />
                     <Route path={LEGAL_DOCUMENTS.privacy.path} element={<Pages.Privacy />} />
                     <Route path={LEGAL_DOCUMENTS.imprint.path} element={<Pages.Imprint />} />
