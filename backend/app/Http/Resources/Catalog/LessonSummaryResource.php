@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Resources\Catalog;
 
+use App\Models\Exercise;
 use App\Models\Lesson;
 use App\Services\Catalog\LessonViewer;
 use Illuminate\Http\Request;
@@ -38,7 +39,7 @@ final class LessonSummaryResource extends JsonResource
             'exercise_count' => $this->exercises->count(),
             // Vendegnel null: neki nincs haladasa.
             'status' => $this->viewer->status($this->lesson)?->value,
-            'exercises' => ExerciseSummaryResource::collection($this->exercises),
+            'exercises' => $this->exercises->map(fn (Exercise $exercise): ExerciseSummaryResource => new ExerciseSummaryResource($exercise, $this->viewer->exerciseStatuses)),
         ];
     }
 }

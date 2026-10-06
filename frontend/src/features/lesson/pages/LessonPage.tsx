@@ -5,7 +5,8 @@ import { LEVEL_LABEL } from '../../../shared/domain/labels'
 import { AccessBadge } from '../../../shared/ui/AccessBadge'
 import { Alert } from '../../../shared/ui/Form'
 import { PageLoader } from '../../../shared/ui/PageLoader'
-import type { LessonDetail, LessonExercise, LessonLink } from '../../../types'
+import type { ExerciseSummary, LessonDetail, LessonLink } from '../../../types'
+import { ExerciseStatusBadge } from '../../progress/components/ExerciseStatusBadge'
 import { LessonStatusBadge } from '../../progress/components/LessonStatusBadge'
 import { LessonVideo } from '../../workspace/components/LessonVideo'
 import { Paywall } from '../../workspace/components/Paywall'
@@ -91,7 +92,7 @@ function Breadcrumb({ lesson }: { lesson: LessonDetail }) {
   )
 }
 
-function Exercises({ exercises }: { exercises: LessonExercise[] }) {
+function Exercises({ exercises }: { exercises: ExerciseSummary[] }) {
   if (exercises.length === 0) return null
 
   return (
@@ -110,24 +111,12 @@ function Exercises({ exercises }: { exercises: LessonExercise[] }) {
                 <span className="font-medium text-slate-100 group-hover:text-sky-300">{exercise.title}</span>
                 <span className="mt-0.5 block text-xs text-slate-400">{LEVEL_LABEL[exercise.level]}</span>
               </span>
-              {exercise.solved && <SolvedBadge />}
+              {exercise.my_status && <ExerciseStatusBadge status={exercise.my_status} />}
             </Link>
           </li>
         ))}
       </ul>
     </section>
-  )
-}
-
-/** Szöveg + ikon, nem csak szín. */
-function SolvedBadge() {
-  return (
-    <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-800 bg-emerald-950 px-2.5 py-0.5 text-xs text-emerald-300">
-      <svg viewBox="0 0 16 16" aria-hidden="true" className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth={2}>
-        <path d="m3.5 8.5 3 3 6-6.5" strokeLinecap="round" strokeLinejoin="round" />
-      </svg>
-      Megoldva
-    </span>
   )
 }
 

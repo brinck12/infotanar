@@ -5,12 +5,16 @@ import type { Level, TaskDetail, TaskListItem, Topic, TrackDetail, TrackSummary 
 export interface TaskFilter {
   topic?: string
   level?: Level
+  /** Csak a még meg nem oldott feladatok; vendégnél a backend figyelmen kívül hagyja. */
+  status?: 'unsolved'
 }
 
 export const catalogKeys = {
   all: ['catalog'] as const,
   topics: () => [...catalogKeys.all, 'topics'] as const,
-  tasks: (filter: TaskFilter) => [...catalogKeys.all, 'tasks', filter] as const,
+  /** Minden szűrt feladatlista: a néző állapotát is tartalmazzák, ezért beadás után frissülnek. */
+  taskLists: () => [...catalogKeys.all, 'tasks'] as const,
+  tasks: (filter: TaskFilter) => [...catalogKeys.taskLists(), filter] as const,
   task: (id: number) => [...catalogKeys.all, 'task', id] as const,
   /** A képzési ágak listája és egy-egy ág; a néző haladását is tartalmazzák. */
   tracks: () => [...catalogKeys.all, 'tracks'] as const,
