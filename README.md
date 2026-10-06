@@ -215,24 +215,21 @@ FLUSH PRIVILEGES;
 ### 3. `.env` a szerveren
 
 A `/var/www/infotanar/backend/.env` fájlt **kézzel** kell létrehozni; a deploy
-szándékosan nem írja felül. Minimum:
+szándékosan nem írja felül. A szükséges kulcsok teljes listája a
+[`backend/.env.example`](backend/.env.example) végén, az „Éles környezet”
+részben van (alkalmazás, adatbázis, sor, levelezés, Barion, Számlázz.hu, Judge0).
 
-```ini
-APP_NAME=InfoTanar
-APP_ENV=production
-APP_KEY=base64:...        # php artisan key:generate --show
-APP_DEBUG=false
-APP_URL=https://<domain>
+A deploy a migráció előtt lefuttatja az ellenőrzést:
 
-DB_CONNECTION=mysql
-DB_HOST=127.0.0.1
-DB_DATABASE=infotanar
-DB_USERNAME=infotanar
-DB_PASSWORD=<jelszó>
-
-JUDGE0_URL=http://localhost:2358
-JUDGE0_AUTH_TOKEN=<token>
+```bash
+php artisan app:check-config            # blokkoló hibánál megáll (APP_DEBUG=true, hiányzó APP_KEY)
+php artisan app:check-config --strict   # élesítéshez: a figyelmeztetések is hibák
 ```
+
+A figyelmeztetések (hiányzó Barion- vagy Számlázz.hu-kulcs, nem kézbesítő
+levelező, nem HTTPS cím) addig nem állítják meg a deployt, amíg a repó
+`DEPLOY_STRICT_CONFIG` Actions-változója nem `true`. Élesítéskor ezt be kell
+kapcsolni (Settings → Secrets and variables → Actions → Variables).
 
 ### 4. Jogosultságok
 

@@ -125,6 +125,7 @@ jobs:
           DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
           DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
           DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
+          STRICT_CONFIG_FLAG: ${{ vars.DEPLOY_STRICT_CONFIG == 'true' && '--strict' || '' }}
         run: |
           ssh -i ~/.ssh/deploy_key "$DEPLOY_USER@$DEPLOY_HOST" bash -se <<EOSSH
           set -euo pipefail
@@ -139,12 +140,12 @@ jobs:
             exit 1
           fi
 
-          # Debug modban a hibaoldal kiirja a konfiguraciot (pl. JUDGE0_AUTH_TOKEN,
-          # APP_KEY): elesben ez titokszivargas, ezert a deploy megall.
-          if grep -Eiq '^[[:space:]]*APP_DEBUG[[:space:]]*=[[:space:]]*"?(true|1|on|yes)"?[[:space:]]*$' .env; then
-            echo "::error::APP_DEBUG be van kapcsolva a szerver .env-ben. Allitsd APP_DEBUG=false-ra."
-            exit 1
-          fi
+          # A szerver .env-jenek ellenorzese, mielott barmi megvaltozna. Blokkolo
+          # hiba (pl. APP_DEBUG=true: a hibaoldal kiirna a titkokat) mindig megallitja
+          # a deployt; a tobbi hiany figyelmeztetes, amig a DEPLOY_STRICT_CONFIG
+          # repo-valtozo nem "true" (elesiteskor kapcsolando be).
+          php artisan config:clear
+          php artisan app:check-config $STRICT_CONFIG_FLAG
 
           php artisan migrate --force
 
