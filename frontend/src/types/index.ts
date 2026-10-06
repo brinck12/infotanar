@@ -46,6 +46,12 @@ export interface ExampleTestCase {
   expected_stdout: string
 }
 
+/** Egy futtatásra érvényes idő- és memóriakorlát (#151). */
+export interface ExecutionLimits {
+  time_limit_ms: number
+  memory_limit_kb: number
+}
+
 /** Részletes nézet: teljes leírással és a nem rejtett tesztesetekkel. */
 interface TaskDetailBase {
   id: number
@@ -103,6 +109,8 @@ export interface UnlockedTaskDetail extends TaskDetailBase {
   description: string
   starter_code: Partial<Record<LanguageKey, string>>
   example_test_cases: ExampleTestCase[]
+  /** Nyelvenként az érvényes korlát; régebbi (vagy mockolt) válaszokban hiányozhat. */
+  limits?: Partial<Record<LanguageKey, ExecutionLimits>>
 }
 
 /** Zárolt (fizetős) feladat: a backend a tartalmat nem küldi el, csak az okot. */

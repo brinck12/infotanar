@@ -29,6 +29,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property array<string, string>|null $starter_code
  * @property bool $sql_order_sensitive SQL-feladatnal szamit-e a sorok sorrendje.
  * @property ConstraintSet $constraints Statikus kodszabalyok (#42); ures, ha nincs.
+ * @property int|null $time_limit_ms Sajat processzorido-korlat (#151); null = globalis alapertek.
+ * @property int|null $memory_limit_kb Sajat memoriakorlat (#151); null = globalis alapertek.
  * @property bool $is_published
  * @property-read Lesson $lesson A lesson_id NOT NULL + cascade: a lecke mindig letezik.
  */
@@ -36,7 +38,8 @@ final class Exercise extends Model
 {
     protected $fillable = [
         'lesson_id', 'position', 'title', 'description', 'level',
-        'difficulty', 'allowed_languages', 'starter_code', 'constraints', 'sql_order_sensitive', 'is_published',
+        'difficulty', 'allowed_languages', 'starter_code', 'constraints', 'sql_order_sensitive',
+        'time_limit_ms', 'memory_limit_kb', 'is_published',
     ];
 
     /** @return array<string, string> */
@@ -50,6 +53,8 @@ final class Exercise extends Model
             'constraints' => AsConstraintSet::class,
             'difficulty' => 'integer',
             'position' => 'integer',
+            'time_limit_ms' => 'integer',
+            'memory_limit_kb' => 'integer',
         ];
     }
 
