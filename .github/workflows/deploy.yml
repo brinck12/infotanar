@@ -58,6 +58,11 @@ jobs:
         env:
           # Éles környezetben az nginx ugyanarról a domainről proxyzza az API-t.
           VITE_API_URL: /api/v1
+          # A frontend hibajelentései ezzel azonosítják a kiadást (#131).
+          VITE_RELEASE: ${{ github.event.workflow_run.head_sha || github.sha }}
+          # Barion Pixel (#139): azonosító nélkül a Pixel ki van kapcsolva.
+          VITE_BARION_PIXEL_ID: ${{ vars.BARION_PIXEL_ID }}
+          VITE_BARION_PIXEL_REQUIRES_CONSENT: ${{ vars.BARION_PIXEL_REQUIRES_CONSENT }}
         run: |
           npm ci
           npm run build
@@ -125,6 +130,7 @@ jobs:
           DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
           DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
           DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
+          STRICT_CONFIG_FLAG: ${{ vars.DEPLOY_STRICT_CONFIG == 'true' && '--strict' || '' }}
         run: |
           ssh -i ~/.ssh/deploy_key "$DEPLOY_USER@$DEPLOY_HOST" bash -se <<EOSSH
           set -euo pipefail
@@ -139,12 +145,16 @@ jobs:
             exit 1
           fi
 
-          # Debug modban a hibaoldal kiirja a konfiguraciot (pl. JUDGE0_AUTH_TOKEN,
-          # APP_KEY): elesben ez titokszivargas, ezert a deploy megall.
-          if grep -Eiq '^[[:space:]]*APP_DEBUG[[:space:]]*=[[:space:]]*"?(true|1|on|yes)"?[[:space:]]*$' .env; then
-            echo "::error::APP_DEBUG be van kapcsolva a szerver .env-ben. Allitsd APP_DEBUG=false-ra."
-            exit 1
-          fi
+          # A szerver .env-jenek ellenorzese, mielott barmi megvaltozna. Blokkolo
+          # hiba (pl. APP_DEBUG=true: a hibaoldal kiirna a titkokat) mindig megallitja
+          # a deployt; a tobbi hiany figyelmeztetes, amig a DEPLOY_STRICT_CONFIG
+          # repo-valtozo nem "true" (elesiteskor kapcsolando be).
+          php artisan config:clear
+          php artisan app:check-config $STRICT_CONFIG_FLAG
+
+          # Ha van futtatando migracio, elotte helyi mentes keszul (az utolso harom
+          # marad meg); ha a mentes nem sikerul, a migracio el sem indul (#129).
+          php artisan db:snapshot-before-migrate
 
           php artisan migrate --force
 
@@ -164,19 +174,44 @@ jobs:
           sudo -n systemctl reload php8.3-fpm
           EOSSH
 
+      # A DEPLOY_URL a nyilvanos, HTTPS-es cim (pl. https://infotanar.hu). A curl
+      # ellenorzi a tanusitvanyt, igy egy lejart vagy hibas tanusitvany is megbuktatja
+      # a deployt. Amig a secret nincs beallitva, a regi HTTP-s ellenorzes fut.
+      #
+      # HEALTH_TOKEN secrettel (ugyanaz, mint a szerver .env-jeben) a readiness
+      # vegpontot kerdezzuk (#130): az az adatbazist, a sort, az utemezot es a
+      # queue workert is ellenorzi, es hibanal megmondja, melyik all. A tokent
+      # csak HTTPS-en kuldjuk el.
       - name: Smoke check
         env:
           DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+          DEPLOY_URL: ${{ secrets.DEPLOY_URL }}
+          HEALTH_TOKEN: ${{ secrets.HEALTH_TOKEN }}
         run: |
+          if [ -z "$DEPLOY_URL" ]; then
+            echo "::warning::Nincs DEPLOY_URL secret: a smoke check titkosítatlan HTTP-n fut. Állítsd be a HTTPS-es címet."
+            DEPLOY_URL="http://$DEPLOY_HOST"
+          fi
+
+          if [ -n "$HEALTH_TOKEN" ] && [[ "$DEPLOY_URL" == https://* ]]; then
+            HEALTH_URL="${DEPLOY_URL%/}/api/v1/health/ready"
+          else
+            echo "::warning::Nincs HEALTH_TOKEN secret (vagy a cím nem HTTPS): csak azt ellenőrizzük, hogy a PHP válaszol-e."
+            HEALTH_URL="${DEPLOY_URL%/}/api/v1/health"
+            HEALTH_TOKEN=""
+          fi
+
           for i in $(seq 1 10); do
-            if curl -fsS --max-time 10 "http://$DEPLOY_HOST/api/v1/health" | grep -q '"ok":true'; then
-              echo "A deploy sikeres, a /api/v1/health válaszol."
+            body=$(curl -sS --max-time 15 -H "X-Health-Token: $HEALTH_TOKEN" "$HEALTH_URL" || true)
+            if echo "$body" | grep -q '"ok":true'; then
+              echo "A deploy sikeres: $HEALTH_URL"
               exit 0
             fi
-            echo "Még nem válaszol, újrapróbálás ($i/10)…"
+            echo "Még nem egészséges, újrapróbálás ($i/10)…"
             sleep 3
           done
-          echo "::error::A /api/v1/health nem válaszolt a deploy után."
+          echo "::error::Az állapot-ellenőrzés a deploy után sem lett zöld: $HEALTH_URL"
+          echo "$body"
           exit 1
 
       - name: SSH kulcs törlése

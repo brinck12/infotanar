@@ -8,6 +8,8 @@ interface Props {
   errors: Record<string, string>
   busy: boolean
   submitLabel: ReactNode
+  /** A küldés gomb fölé kerülő tartalom (pl. a fizetés előtti nyilatkozat). */
+  beforeSubmit?: ReactNode
   onSubmit: (payload: BillingProfilePayload) => void
 }
 
@@ -28,7 +30,7 @@ function fromProfile(profile: BillingProfile | null): BillingProfilePayload {
 }
 
 /** A számlához szükséges adatok (#19). A formátumot a backend ellenőrzi véglegesen. */
-export function BillingProfileForm({ initial, errors, busy, submitLabel, onSubmit }: Props) {
+export function BillingProfileForm({ initial, errors, busy, submitLabel, beforeSubmit, onSubmit }: Props) {
   const [form, setForm] = useState<BillingProfilePayload>(() => fromProfile(initial))
   const isCompany = form.customer_type === 'company'
 
@@ -116,6 +118,8 @@ export function BillingProfileForm({ initial, errors, busy, submitLabel, onSubmi
       />
 
       <p className="text-xs text-slate-500">Számlázás jelenleg csak magyarországi címre lehetséges.</p>
+
+      {beforeSubmit}
 
       <SubmitButton busy={busy}>{submitLabel}</SubmitButton>
     </form>

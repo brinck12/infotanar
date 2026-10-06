@@ -1,7 +1,8 @@
 import { Link } from 'react-router-dom'
 import { LANGUAGE_LABEL, LEVEL_LABEL } from '../../../shared/domain/labels'
-import { LockIcon } from '../../../shared/ui/LockIcon'
+import { AccessBadge } from '../../../shared/ui/AccessBadge'
 import type { TaskListItem } from '../../../types'
+import { ExerciseStatusBadge } from '../../progress/components/ExerciseStatusBadge'
 
 export function TaskCard({ task }: { task: TaskListItem }) {
   return (
@@ -22,6 +23,11 @@ export function TaskCard({ task }: { task: TaskListItem }) {
             {LEVEL_LABEL[task.level]}
           </span>
           {task.is_free !== undefined && <AccessBadge free={task.is_free} locked={task.locked ?? false} />}
+          {task.my_status && (
+            <span className="ml-auto">
+              <ExerciseStatusBadge status={task.my_status} />
+            </span>
+          )}
         </div>
 
         <p className="mt-1 text-sm text-slate-400">{task.topic.name}</p>
@@ -35,23 +41,5 @@ export function TaskCard({ task }: { task: TaskListItem }) {
         </div>
       </Link>
     </li>
-  )
-}
-
-/** Szöveg + ikon, nem csak szín: színtévesztők és képernyőolvasók számára is egyértelmű. */
-function AccessBadge({ free, locked }: { free: boolean; locked: boolean }) {
-  if (free) {
-    return <span className="rounded bg-emerald-950 px-2 py-0.5 text-xs text-emerald-300">Ingyenes</span>
-  }
-
-  return (
-    <span
-      data-testid="task-card-premium"
-      data-locked={locked}
-      className="inline-flex items-center gap-1 rounded bg-amber-950 px-2 py-0.5 text-xs text-amber-300"
-    >
-      {locked && <LockIcon className="h-3 w-3" />}
-      {locked ? 'Előfizetés szükséges' : 'Prémium'}
-    </span>
   )
 }

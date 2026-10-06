@@ -47,6 +47,27 @@ export function zarolasOka(error: unknown): LockedErrorResponse | null {
   return { reason: data.reason, message: data.message }
 }
 
+/** Kódfuttatásnál várni kell: a néző elérte a percenkénti keretét, vagy a futtató túlterhelt. */
+export interface ExecutionWait {
+  reason: 'rate_limited' | 'busy'
+  seconds: number
+  /** Vendég: bejelentkezve magasabb a keret. */
+  guest: boolean
+}
+
+/**
+ * A futtatás 429 / 503 válasza, ha rövid várakozás után újra lehet próbálni.
+ * A napi keret elérése nem ilyen: annak a szerver üzenete jelenik meg.
+ */
+export function varakozas(error: unknown): ExecutionWait | null {
+  if (!(error instanceof AxiosError)) return null
+  const data = error.response?.data as { reason?: unknown; retry_after?: unknown; guest?: unknown } | undefined
+
+  if ((data?.reason !== 'rate_limited' && data?.reason !== 'busy') || typeof data.retry_after !== 'number') return null
+
+  return { reason: data.reason, seconds: data.retry_after, guest: data.guest === true }
+}
+
 /** 422-es válasznál mezőnként az első hibaüzenet, hogy a mező alatt jelenhessen meg. */
 export function mezoHibak(error: unknown): Record<string, string> {
   if (!(error instanceof AxiosError) || error.response?.status !== 422) return {}

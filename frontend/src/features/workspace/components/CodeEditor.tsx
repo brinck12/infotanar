@@ -8,6 +8,11 @@ export interface EditorReplacement {
   seq: number
   /** Visszavonható szerkesztésként (pl. visszaállítás), vagy új dokumentumként (pl. nyelvváltás). */
   undoable: boolean
+  /**
+   * Nyelvváltással járó visszavonható csere (korábbi beadás betöltése): a dokumentum
+   * előbb erre áll be előzmény nélkül, így a visszavonás az új nyelv kódjához tér vissza.
+   */
+  resetTo?: string
 }
 
 export interface CodeEditorProps {

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Providers;
 
+use App\Jobs\Concerns\AlertsOperatorOnFailure;
 use App\Mail\OutboxTransport;
 use App\Models\Exercise;
 use App\Models\Invoice;
@@ -13,13 +14,16 @@ use App\Models\Subscription;
 use App\Models\TestCase;
 use App\Models\Track;
 use App\Models\User;
+use App\Support\RateLimiting\ExecutionRateLimit;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Queue\Events\JobFailed;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
@@ -49,6 +53,28 @@ final class AppServiceProvider extends ServiceProvider
         Mail::extend('outbox', static fn () => new OutboxTransport(Config::string('mail.mailers.outbox.path')));
 
         $this->configureRateLimiting();
+        $this->alertOnFailedJobs();
+    }
+
+    /**
+     * Minden vegleg elbukott jobrol riasztas megy (#131), pl. egy ki nem
+     * kuldheto megerosito levelrol is. A sajat azonositoikkal riaszto jobok
+     * (AlertsOperatorOnFailure) maguk jelentenek, azokat itt kihagyjuk.
+     */
+    private function alertOnFailedJobs(): void
+    {
+        Queue::failing(static function (JobFailed $event): void {
+            $job = $event->job->resolveName();
+
+            if (class_exists($job) && in_array(AlertsOperatorOnFailure::class, class_uses_recursive($job), true)) {
+                return;
+            }
+
+            app(OperatorAlert::class)->raise(
+                __('alerts.job_failed', ['job' => class_basename($job)]),
+                ['error' => $event->exception->getMessage()],
+            );
+        });
     }
 
     private function configureRateLimiting(): void
@@ -82,6 +108,9 @@ final class AppServiceProvider extends ServiceProvider
         RateLimiter::for('checkout', static fn (Request $request) => Limit::perMinute(5)
             ->by($userOrIp($request))
             ->response($tooMany));
+
+        // Kodfuttatas: bejelentkezve fiokonkent, vendegnel IP-nkent, es egy kozos keret a Judge0 vedelmere.
+        RateLimiter::for('execution', static fn (Request $request): array => app(ExecutionRateLimit::class)->limits($request));
 
         // Jelszot ellenorzo, visszafordithatatlan muveletek: a jelszo ne legyen talalgathato.
         RateLimiter::for('sensitive', static fn (Request $request) => Limit::perMinute(5)

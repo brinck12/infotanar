@@ -10,6 +10,10 @@ export interface RegisterPayload {
   email: string
   password: string
   password_confirmation: string
+  /** Az ÁSZF és az adatkezelési tájékoztató elfogadása, a megjelenített verziókkal (#133). */
+  accept_terms: boolean
+  terms_version: string
+  privacy_version: string
 }
 
 export interface ResetPasswordPayload {

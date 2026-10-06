@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Jobs;
 
 use App\Actions\Billing\SyncPaymentState;
+use App\Jobs\Concerns\AlertsOperatorOnFailure;
 use App\Models\Payment;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -17,7 +18,7 @@ use Illuminate\Foundation\Queue\Queueable;
  */
 final class SyncBarionPayment implements ShouldBeUnique, ShouldQueue
 {
-    use Queueable;
+    use AlertsOperatorOnFailure, Queueable;
 
     public int $tries = 5;
 
@@ -31,6 +32,12 @@ final class SyncBarionPayment implements ShouldBeUnique, ShouldQueue
     public function uniqueId(): string
     {
         return (string) $this->paymentId;
+    }
+
+    /** @return array<string, int|string> */
+    protected function alertContext(): array
+    {
+        return ['payment_id' => $this->paymentId];
     }
 
     public function handle(SyncPaymentState $sync): void

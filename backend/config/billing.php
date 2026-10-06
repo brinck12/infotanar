@@ -14,12 +14,32 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Ujraprobalkozas sikertelen megujitas utan (#138)
+    |--------------------------------------------------------------------------
+    | Az elso kudarc utan ennyi nappal probaljuk ujra megterhelni a kartyat.
+    | Minden erteknek a turelmi idon belul kell lennie, kulonben az elofizetes
+    | elobb zarul le, mint hogy a kiserlet sorra kerulne.
+    */
+    'dunning' => [
+        'retry_days' => [3, 6],
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | A szamlazas idozonaja
     |--------------------------------------------------------------------------
     | Az alkalmazas UTC-ben tarol; a szamlan szereplo naptari napok (kelt,
     | teljesites) ebben az idozonaban ertendok (#125).
     */
     'timezone' => env('BILLING_TIMEZONE', 'Europe/Budapest'),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Emlekezteto a megujitas elott
+    |--------------------------------------------------------------------------
+    | Ennyi nappal a terheles elott megy level arrol, mikor es mennyit vonunk le (#137).
+    */
+    'renewal_reminder_days' => (int) env('BILLING_RENEWAL_REMINDER_DAYS', 3),
 
     /*
     |--------------------------------------------------------------------------

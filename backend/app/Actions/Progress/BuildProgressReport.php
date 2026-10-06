@@ -5,10 +5,9 @@ declare(strict_types=1);
 namespace App\Actions\Progress;
 
 use App\Enums\LessonProgressStatus;
-use App\Models\LessonCompletion;
-use App\Models\Submission;
 use App\Models\Track;
 use App\Models\User;
+use App\Services\Progress\LessonStatuses;
 use App\Services\Progress\ProgressReport;
 use App\Services\Progress\ProgressSummary;
 use App\Services\Progress\TrackProgress;
@@ -32,14 +31,7 @@ final class BuildProgressReport
             ->orderBy('position')
             ->get();
 
-        $completed = $this->lessonIdSet(LessonCompletion::query()->where('user_id', $user->id)->pluck('lesson_id')->all());
-
-        $attempted = $this->lessonIdSet(Submission::query()
-            ->join('exercises', 'exercises.id', '=', 'submissions.exercise_id')
-            ->where('submissions.user_id', $user->id)
-            ->distinct()
-            ->pluck('exercises.lesson_id')
-            ->all());
+        $lessonStatuses = LessonStatuses::forUser($user);
 
         $trackReports = [];
         $completedTotal = 0;
@@ -49,11 +41,7 @@ final class BuildProgressReport
             $statuses = [];
             foreach ($track->modules as $module) {
                 foreach ($module->lessons as $lesson) {
-                    $statuses[$lesson->id] = match (true) {
-                        isset($completed[$lesson->id]) => LessonProgressStatus::Completed,
-                        isset($attempted[$lesson->id]) => LessonProgressStatus::InProgress,
-                        default => LessonProgressStatus::NotStarted,
-                    };
+                    $statuses[$lesson->id] = $lessonStatuses->of($lesson->id);
                 }
             }
 
@@ -65,21 +53,5 @@ final class BuildProgressReport
         }
 
         return new ProgressReport(new ProgressSummary($completedTotal, $lessonTotal), $trackReports);
-    }
-
-    /**
-     * @param  array<array-key, mixed>  $ids
-     * @return array<int, true>
-     */
-    private function lessonIdSet(array $ids): array
-    {
-        $set = [];
-        foreach ($ids as $id) {
-            if (is_numeric($id)) {
-                $set[(int) $id] = true;
-            }
-        }
-
-        return $set;
     }
 }

@@ -8,6 +8,7 @@ import { LESSON_STATUS_LABEL } from '../../../shared/domain/labels'
 import { LessonStatusBadge } from '../components/LessonStatusBadge'
 import { ProgressBar } from '../components/ProgressBar'
 import { TrackProgressCard } from '../components/TrackProgressCard'
+import { RecentSubmissions } from '../../submissions/components/RecentSubmissions'
 
 /** Haladásom (#28): összesített és képzési áganként bontott haladás, leckeállapotokkal. */
 export function ProgressDashboard() {
@@ -38,8 +39,8 @@ export function ProgressDashboard() {
             {progress.data.overall.completed === 0 && (
               <p className="mt-3 text-sm text-slate-400">
                 Még nem teljesítettél leckét.{' '}
-                <Link to="/feladatok" className="text-sky-400 hover:underline">
-                  Kezdd egy feladattal!
+                <Link to="/tananyag" className="text-sky-400 underline underline-offset-2 hover:text-sky-300">
+                  Kezdd az első leckével!
                 </Link>
               </p>
             )}
@@ -52,6 +53,8 @@ export function ProgressDashboard() {
               <TrackProgressCard key={track.id} track={track} defaultOpen={index === 0} />
             ))}
           </ul>
+
+          <RecentSubmissions />
         </>
       )}
     </div>

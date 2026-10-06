@@ -42,6 +42,8 @@ final readonly class DeleteAccount
             $user->forceFill([
                 'name' => 'Törölt felhasználó',
                 'email' => sprintf('deleted-%d-%s@deleted.invalid', $user->id, Str::lower(Str::random(8))),
+                // Egy felbehagyott cimcsere (#135) is szemelyes adat.
+                'pending_email' => null,
                 'password' => Str::random(64),
                 'email_verified_at' => null,
                 'remember_token' => null,

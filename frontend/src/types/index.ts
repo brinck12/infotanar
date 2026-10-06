@@ -19,6 +19,9 @@ export interface TaskTopic {
 }
 
 /** Lista-nézet: leírás nélkül. */
+/** A néző állapota egy feladatnál; amihez még nem adott be megoldást, annál nincs (null). */
+export type ExerciseStatus = 'solved' | 'attempted'
+
 export interface TaskListItem {
   id: number
   title: string
@@ -26,6 +29,8 @@ export interface TaskListItem {
   difficulty: number
   allowed_languages: LanguageKey[]
   topic: TaskTopic
+  /** Csak bejelentkezve érkezik. */
+  my_status?: ExerciseStatus | null
   /** Ingyenes lecke része-e (freemium). */
   is_free?: boolean
   /** A jelenlegi néző számára zárolt-e (fizetős, jogosultság nélkül). */
@@ -53,12 +58,35 @@ interface TaskDetailBase {
   hidden_test_case_count: number
   /** A feladathoz tartozó lecke (a videóhoz); régebbi válaszokban hiányozhat. */
   lesson?: TaskLesson
+  /** Előző / következő a tanulási sorrendben (#145); régebbi válaszokban hiányozhat. */
+  navigation?: TaskNavigation
+  /** Csak bejelentkezve érkezik. */
+  my_status?: ExerciseStatus | null
+}
+
+export interface TaskLink {
+  id: number
+  title: string
+  lesson_id: number
+  /** A néző számára zárolt-e; a feladat oldalán a paywall fogadja. */
+  locked: boolean
+}
+
+export interface TaskNavigation {
+  previous: TaskLink | null
+  /** A következő feladat, akár másik leckében. */
+  next: TaskLink | null
+  /** A feladat leckéjét követő lecke, akkor is, ha nincs feladata. */
+  next_lesson: { slug: string; title: string; locked: boolean } | null
 }
 
 export interface TaskLesson {
   id: number
   title: string
   has_video: boolean
+  /** A lecke oldalához vezető út (#143); régebbi válaszokban hiányozhat. */
+  slug?: string
+  track_slug?: string | null
 }
 
 /** Rövid életű, aláírt lejátszási URL (`GET /lessons/{id}/video`). */
@@ -135,6 +163,28 @@ export interface RunResponse {
 
 export interface SubmissionResponse extends RunResponse {
   submission_id: number
+  /** Igaz, ha a lecke ezzel a beadással teljesült először. */
+  lesson_completed?: boolean
+}
+
+/** Egy korábbi beadás a listában: a forráskód és a tesztesetenkénti eredmények nélkül. */
+export interface SubmissionSummary {
+  id: number
+  /** A vegyes listában (`GET /submissions`) érkezik. */
+  exercise?: { id: number; title: string }
+  language: LanguageKey
+  /** `pending` / `running`: a kiértékelés megszakadt, nincs eredmény. */
+  status: RunStatus | 'pending' | 'running'
+  verdict: Verdict | null
+  verdict_label: string | null
+  passed_count: number
+  total_count: number
+  created_at: string
+}
+
+export interface SubmissionDetail extends SubmissionSummary {
+  source_code: string
+  results: TestResult[]
 }
 
 export interface RunRequest {
@@ -149,6 +199,8 @@ export interface AuthUser {
   id: number
   name: string
   email: string
+  /** Megerősítésre váró új cím (#135); null, ha nincs folyamatban csere. */
+  pending_email: string | null
   role: Role
   email_verified_at: string | null
 }
@@ -240,6 +292,8 @@ export interface ExerciseSummary {
   level: Level
   difficulty: number
   allowed_languages: LanguageKey[]
+  /** A néző állapota; vendégnél hiányzik vagy null. */
+  my_status?: ExerciseStatus | null
 }
 
 export interface LessonSummary {
@@ -247,6 +301,13 @@ export interface LessonSummary {
   slug: string
   title: string
   is_free: boolean
+  /** A néző számára zárolt-e; az ok a `locked_reason`. */
+  locked: boolean
+  locked_reason: LockReason | null
+  has_video: boolean
+  exercise_count: number
+  /** A néző haladása; vendégnél null. */
+  status: LessonProgressStatus | null
   exercises: ExerciseSummary[]
 }
 
@@ -256,6 +317,55 @@ export interface ModuleSummary {
   title: string
   description: string | null
   lessons: LessonSummary[]
+}
+
+export interface LessonLink {
+  slug: string
+  title: string
+}
+
+/** Egy lecke oldala (`GET /tracks/{track}/lessons/{lesson}`). */
+interface LessonDetailBase {
+  id: number
+  slug: string
+  title: string
+  track: LessonLink
+  module: { id: number; title: string | null }
+  is_free: boolean
+  has_video: boolean
+  /** A néző haladása; vendégnél null. */
+  status: LessonProgressStatus | null
+  exercises: ExerciseSummary[]
+  previous: LessonLink | null
+  next: LessonLink | null
+}
+
+export interface UnlockedLessonDetail extends LessonDetailBase {
+  locked: false
+  /** A tananyag Markdownban; üres, ha a leckéhez még nem készült. */
+  content: string
+}
+
+/** Zárolt lecke: a backend a tananyagot nem küldi el, csak az okot. */
+export interface LockedLessonDetail extends LessonDetailBase {
+  locked: true
+  locked_reason: LockReason
+  locked_message: string
+}
+
+export type LessonDetail = UnlockedLessonDetail | LockedLessonDetail
+
+/** Egy képzési ág a listában (`GET /tracks`). */
+export interface TrackSummary {
+  id: number
+  slug: string
+  title: string
+  description: string | null
+  module_count: number
+  lesson_count: number
+  free_lesson_count: number
+  /** A néző haladása; vendégnél null. */
+  progress: ProgressSummary | null
 }
 
 export interface TrackDetail {
