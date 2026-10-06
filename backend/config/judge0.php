@@ -40,6 +40,20 @@ return [
     | egy feladat feluldefinialhatja (exercises.time_limit_ms, memory_limit_kb),
     | lasd ExecutionLimitResolver.
     */
+    /*
+    | Futtatasok szama (Futtatas + Beadas egyutt), lasd ExecutionRateLimit.
+    | Bejelentkezve fiokonkent, vendegnel IP-nkent szamolunk. A 'global_per_minute'
+    | az osszes felhasznalo egyuttes kerete: annyi legyen, amennyit a Judge0
+    | peldany kiszolgal; folotte 503 megy ki (nem 429), mert nem a kero hibaja.
+    */
+    'rate' => [
+        'guest_per_minute' => (int) env('JUDGE0_RATE_GUEST_PER_MINUTE', 10),
+        'user_per_minute' => (int) env('JUDGE0_RATE_USER_PER_MINUTE', 20),
+        'premium_per_minute' => (int) env('JUDGE0_RATE_PREMIUM_PER_MINUTE', 40),
+        'user_per_day' => (int) env('JUDGE0_RATE_USER_PER_DAY', 1000),
+        'global_per_minute' => (int) env('JUDGE0_RATE_GLOBAL_PER_MINUTE', 300),
+    ],
+
     'limits' => [
         'cpu_time_limit' => (float) env('JUDGE0_CPU_TIME_LIMIT', 2),
         'memory_limit' => (int) env('JUDGE0_MEMORY_LIMIT', 128000),

@@ -50,6 +50,25 @@ Ez a Stripe-féle aláírás-ellenőrzést váltja ki: hamisított callback nem 
 - A 3D Secure megfelelés érdekében az első fizetés vásárló-jelenléttel zajlik; a későbbi, általunk indított terhelés `RecurringPayment` típusú.
 - Konfiguráció: `BARION_POS_KEY`, `BARION_PAYEE` (a bolt Barion e-mail címe), `BARION_ENVIRONMENT` (`test` / `prod`).
 
+## A bolt jóváhagyásához szükséges elemek (#139)
+
+A Barion az éles boltot kézzel hagyja jóvá. A dokumentációja automatizált lekéréssel nem volt olvasható (HTTP 403), ezért az alábbi lista a keresőben megjelenő Barion-oldalak kivonatán alapul; **élesítés előtt a Barion aktuális ellenőrzőlistájával össze kell vetni.**
+
+| Elvárás | Hol teljesül | Állapot |
+|---|---|---|
+| Hivatalos kártyaelfogadó logó az oldalon, módosítás nélkül | lábléc (`frontend/src/app/Footer.tsx`); a fájl helye `frontend/src/assets/barion-card-acceptance.svg` | **a fájlt a tulajdonosnak kell letöltenie** a Barion logó-oldaláról; hiányára a build figyelmeztet |
+| Alap Barion Pixel minden oldalon | `frontend/src/shared/consent/barionPixel.ts`, a `VITE_BARION_PIXEL_ID` beállításával | kész; azonosító nélkül kikapcsolva |
+| Hozzájárulás a marketing célú használathoz (`grantConsent` / `rejectConsent`) | süti-sáv (`CookieBanner.tsx`), a döntés a láblécből módosítható | kész |
+| A Barion fizetés szerepel az ÁSZF-ben | `frontend/src/features/legal/content/aszf.md` 4. szakasz | vázlat, jogi szöveg kell |
+| ÁSZF, adatkezelési tájékoztató, impresszum elérhető | #132 | vázlat, jogi szöveg kell |
+
+**A Pixel betöltése és a hozzájárulás.** A Barion az alap Pixelt csalásmegelőzési célúnak tekinti, amely a hozzájárulástól függetlenül fut; a marketing célú feldolgozáshoz kell a `grantConsent`. Hogy az alap Pixel betölthet-e a látogató döntése előtt, az adatvédelmi kérdés, és a tulajdonos döntése:
+
+- `VITE_BARION_PIXEL_REQUIRES_CONSENT=true` (alapértelmezés): a Pixel csak elfogadás után töltődik be. Ez az óvatosabb olvasat; ha a Barion a jóváhagyáskor a Pixelt hozzájárulás nélkül is látni akarja, ezen kell változtatni.
+- `false`: az alap Pixel azonnal betölt, a hozzájárulás-esemény a döntést követi.
+
+**Nem készült el:** a teljes (marketing) Pixel eseményei (`contentView`, `initiateCheckout`, `purchase`). Az eseményleírást nem tudtam elolvasni, és hibás mezőkkel küldött eseménynek nincs értelme; ha kell, külön issue.
+
 ## Hivatkozások
 
 - [Payment/Start v2](https://docs.barion.com/Payment-Start-v2)

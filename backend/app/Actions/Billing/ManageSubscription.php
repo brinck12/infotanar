@@ -7,6 +7,7 @@ namespace App\Actions\Billing;
 use App\Actions\Audit\RecordAuditEvent;
 use App\Enums\AuditAction;
 use App\Enums\PaymentPurpose;
+use App\Enums\SubscriptionNoticeType;
 use App\Exceptions\Billing\SubscriptionNotManageable;
 use App\Models\Subscription;
 use App\Models\User;
@@ -25,6 +26,7 @@ final readonly class ManageSubscription
     public function __construct(
         private StartHostedPayment $startHostedPayment,
         private RecordAuditEvent $audit,
+        private NotifySubscriber $notify,
     ) {}
 
     /**
@@ -44,6 +46,7 @@ final readonly class ManageSubscription
 
             $subscription->forceFill(['cancel_at_period_end' => true])->save();
             $this->audit->handle(AuditAction::SubscriptionCancelScheduled, $user, $subscription);
+            $this->notify->handle($subscription, SubscriptionNoticeType::CancelScheduled);
 
             return $subscription;
         });
@@ -61,6 +64,7 @@ final readonly class ManageSubscription
 
             $subscription->forceFill(['cancel_at_period_end' => false])->save();
             $this->audit->handle(AuditAction::SubscriptionResumed, $user, $subscription);
+            $this->notify->handle($subscription, SubscriptionNoticeType::CancelUndone);
 
             return $subscription;
         });

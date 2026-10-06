@@ -6,6 +6,7 @@ namespace App\Http\Controllers\Api\V1\Billing;
 
 use App\Actions\Billing\StartCheckout;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Billing\CheckoutRequest;
 use App\Models\User;
 use Illuminate\Container\Attributes\CurrentUser;
 use Illuminate\Http\JsonResponse;
@@ -13,9 +14,12 @@ use Illuminate\Http\JsonResponse;
 final class CheckoutController extends Controller
 {
     /** A kliens a `checkout_url`-re iranyitja a vasarlot (Barion fizetooldal). */
-    public function __invoke(#[CurrentUser] User $user, StartCheckout $startCheckout): JsonResponse
+    public function __invoke(CheckoutRequest $request, #[CurrentUser] User $user, StartCheckout $startCheckout): JsonResponse
     {
-        $started = $startCheckout->handle($user->loadMissing('liveSubscription'));
+        $started = $startCheckout->handle(
+            $user->loadMissing('liveSubscription'),
+            $request->string('terms_version')->toString(),
+        );
 
         return response()->json(['data' => [
             'checkout_url' => $started->gatewayUrl,

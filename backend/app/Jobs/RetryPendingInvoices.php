@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Jobs;
 
 use App\Enums\InvoiceStatus;
+use App\Jobs\Concerns\AlertsOperatorOnFailure;
 use App\Models\Invoice;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -17,7 +18,7 @@ use Illuminate\Foundation\Queue\Queueable;
  */
 final class RetryPendingInvoices implements ShouldBeUnique, ShouldQueue
 {
-    use Queueable;
+    use AlertsOperatorOnFailure, Queueable;
 
     public function handle(): void
     {

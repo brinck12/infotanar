@@ -7,7 +7,7 @@ import { useAuth } from '../context'
 
 /** Sikeres belépés után a GuestOnly guard visz tovább (a `from` helyre vagy a feladatokhoz). */
 export function Login() {
-  const { login } = useAuth()
+  const { login, sessionExpired } = useAuth()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
 
@@ -23,6 +23,7 @@ export function Login() {
 
   return (
     <AuthCard title="Bejelentkezés">
+      {sessionExpired && !generalError && <Alert kind="info">A munkameneted lejárt, jelentkezz be újra.</Alert>}
       {generalError && <Alert kind="error">{generalError}</Alert>}
       <form onSubmit={onSubmit} className="space-y-4" noValidate>
         <Field

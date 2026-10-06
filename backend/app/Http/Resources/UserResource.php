@@ -18,6 +18,8 @@ final class UserResource extends JsonResource
             'id' => $this->id,
             'name' => $this->name,
             'email' => $this->email,
+            // Megerositesre varo uj cim (#135); null, ha nincs folyamatban csere.
+            'pending_email' => $this->pending_email,
             'role' => $this->role,
             'email_verified_at' => $this->email_verified_at,
         ];

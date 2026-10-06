@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Http\Controllers\Api\V1\Account\AccountController;
+use App\Http\Controllers\Api\V1\Account\ProfileController;
 use App\Http\Controllers\Api\V1\Admin\AccessGrantController;
 use App\Http\Controllers\Api\V1\Admin\Catalog\ConstraintOptionsController;
 use App\Http\Controllers\Api\V1\Admin\Catalog\ExerciseController as AdminExerciseController;
@@ -26,18 +27,30 @@ use App\Http\Controllers\Api\V1\Billing\PaymentController;
 use App\Http\Controllers\Api\V1\Billing\PlanController;
 use App\Http\Controllers\Api\V1\Billing\SubscriptionController;
 use App\Http\Controllers\Api\V1\Catalog\LanguageController;
+use App\Http\Controllers\Api\V1\Catalog\LessonController;
 use App\Http\Controllers\Api\V1\Catalog\LessonVideoController;
 use App\Http\Controllers\Api\V1\Catalog\TaskController;
 use App\Http\Controllers\Api\V1\Catalog\TopicController;
 use App\Http\Controllers\Api\V1\Catalog\TrackController;
+use App\Http\Controllers\Api\V1\ClientErrorController;
 use App\Http\Controllers\Api\V1\Execution\RunController;
 use App\Http\Controllers\Api\V1\Execution\SubmissionController;
+use App\Http\Controllers\Api\V1\Execution\SubmissionHistoryController;
 use App\Http\Controllers\Api\V1\HealthController;
+use App\Http\Controllers\Api\V1\Progress\LessonCompletionController;
 use App\Http\Controllers\Api\V1\Progress\ProgressController;
+use App\Http\Controllers\Api\V1\ReadinessController;
+use App\Http\Middleware\RejectInvalidToken;
 use Illuminate\Support\Facades\Route;
 
-Route::prefix('v1')->name('api.')->group(function (): void {
+// Minden vegpontra: a kuldott, de mar ervenytelen token 401, akkor is, ha a
+// vegpont vendegkent is hivhato (kulonben a lejart munkamenet csendben vendegge valna, #136).
+Route::prefix('v1')->name('api.')->middleware(RejectInvalidToken::class)->group(function (): void {
     Route::get('/health', HealthController::class)->name('health');
+    Route::get('/health/ready', ReadinessController::class)->middleware('throttle:30,1')->name('health.ready');
+
+    // A frontend nem kezelt hibainak bejelentese (#131); szuk limit, mert barki hivhatja.
+    Route::post('/client-errors', ClientErrorController::class)->middleware('throttle:10,1')->name('client-errors');
 
     Route::prefix('auth')->name('auth.')->group(function (): void {
         Route::post('/register', RegisterController::class)->name('register');
@@ -65,6 +78,7 @@ Route::prefix('v1')->name('api.')->group(function (): void {
     Route::get('/languages', [LanguageController::class, 'index'])->name('languages.index');
     Route::get('/tracks', [TrackController::class, 'index'])->name('tracks.index');
     Route::get('/tracks/{slug}', [TrackController::class, 'show'])->name('tracks.show');
+    Route::get('/tracks/{trackSlug}/lessons/{lessonSlug}', [LessonController::class, 'show'])->name('tracks.lessons.show');
 
     Route::get('/lessons/{lesson}/video', [LessonVideoController::class, 'show'])
         ->whereNumber('lesson')
@@ -82,18 +96,41 @@ Route::prefix('v1')->name('api.')->group(function (): void {
     Route::get('/tasks', [TaskController::class, 'index'])->name('tasks.index');
     Route::get('/tasks/{task}', [TaskController::class, 'show'])->whereNumber('task')->name('tasks.show');
 
-    // A kodfuttatas draga muvelet: IP-nkent 10 keres / perc.
-    Route::middleware('throttle:10,1')->group(function (): void {
+    // A kodfuttatas draga muvelet: fiokonkent (vendegnel IP-nkent) korlatozzuk, lasd ExecutionRateLimit.
+    Route::middleware('throttle:execution')->group(function (): void {
         Route::post('/run', RunController::class)->name('run');
         Route::post('/submissions', [SubmissionController::class, 'store'])->name('submissions.store');
     });
 
     Route::get('/progress', ProgressController::class)->middleware('auth:sanctum')->name('progress');
 
+    // A diak sajat beadasai (#147): lista feladatonkent es osszesen, valamint egy beadas a forraskoddal.
+    Route::middleware('auth:sanctum')->group(function (): void {
+        Route::get('/submissions', [SubmissionHistoryController::class, 'index'])->name('submissions.index');
+        Route::get('/submissions/{submission}', [SubmissionHistoryController::class, 'show'])->whereNumber('submission')->name('submissions.show');
+        Route::get('/tasks/{task}/submissions', [SubmissionHistoryController::class, 'forTask'])->whereNumber('task')->name('tasks.submissions');
+    });
+    // Feladat nelkuli lecke kesznek jelolese (#144); a feladatos lecke beadassal teljesul.
+    Route::post('/lessons/{lesson}/complete', [LessonCompletionController::class, 'store'])
+        ->whereNumber('lesson')
+        ->middleware(['auth:sanctum', 'throttle:30,1'])
+        ->name('lessons.complete');
+
     Route::prefix('account')->name('account.')->middleware('auth:sanctum')->group(function (): void {
         Route::get('/export', [AccountController::class, 'export'])->middleware('throttle:account-export')->name('export');
         Route::delete('/', [AccountController::class, 'destroy'])->middleware('throttle:sensitive')->name('destroy');
+
+        // Sajat adatok modositasa (#135). A jelszot kero muveletek a talalgatas ellen szuk limitet kapnak.
+        Route::patch('/profile', [ProfileController::class, 'update'])->middleware('throttle:10,1')->name('profile.update');
+        Route::put('/password', [ProfileController::class, 'changePassword'])->middleware('throttle:sensitive')->name('password.update');
+        Route::post('/email', [ProfileController::class, 'requestEmailChange'])->middleware('throttle:sensitive')->name('email.request');
     });
+
+    // Az uj e-mail-cimre kuldott link: bejelentkezes nelkul is megnyithato, az alairas vedi.
+    Route::get('/account/email/confirm/{id}/{hash}', [ProfileController::class, 'confirmEmailChange'])
+        ->whereNumber('id')
+        ->middleware('signed:relative')
+        ->name('account.email.confirm');
 
     Route::get('/billing/plan', PlanController::class)->name('billing.plan');
 

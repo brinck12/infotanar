@@ -6,7 +6,6 @@ namespace App\Services\Billing\Szamlazz;
 
 use App\Enums\CustomerType;
 use App\Models\Invoice;
-use Carbon\CarbonInterface;
 use DOMDocument;
 use DOMElement;
 
@@ -29,11 +28,10 @@ final class InvoiceXml
     private const TAXPAYER_NONE = '-1';
 
     /** @param array{prefix: string|null, item_name: string, unit: string} $options */
-    public static function issue(Invoice $invoice, string $agentKey, string $orderNumber, CarbonInterface $paidAt, array $options): string
+    public static function issue(Invoice $invoice, string $agentKey, string $orderNumber, InvoiceDates $dates, array $options): string
     {
         [$doc, $root] = self::document('xmlszamla', self::NS_INVOICE);
         $buyer = $invoice->buyer;
-        $date = $paidAt->toDateString();
 
         self::children($doc, self::child($doc, $root, 'beallitasok'), [
             'szamlaagentkulcs' => $agentKey,
@@ -43,9 +41,10 @@ final class InvoiceXml
         ]);
 
         self::children($doc, self::child($doc, $root, 'fejlec'), array_filter([
-            'keltDatum' => $date,
-            'teljesitesDatum' => $date,
-            'fizetesiHataridoDatum' => $date,
+            'keltDatum' => $dates->issued,
+            'teljesitesDatum' => $dates->fulfilled,
+            // Kartyaval mar kifizetve (fizetve=true): a hatarido a kelt napja, nem korabbi.
+            'fizetesiHataridoDatum' => $dates->issued,
             'fizmod' => 'Bankkártya',
             'penznem' => $invoice->currency,
             'szamlaNyelve' => 'hu',

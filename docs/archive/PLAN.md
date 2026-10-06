@@ -1,3 +1,8 @@
+> **Archivált dokumentum.** Ez az eredeti, 2026. szeptemberi prototípus-terv. A projekt azóta
+> túlnőtt rajta (hitelesítés, előfizetés, számlázás, admin felület, rétegzett architektúra), ezért
+> több állítása már nem igaz. A jelenlegi állapotot a [README](../../README.md) és a
+> [docs/architecture.md](../architecture.md) írja le.
+
 # InfoTanar.hu — Prototípus terv (Claude Code számára)
 
 ## Cél

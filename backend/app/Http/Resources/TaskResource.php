@@ -41,10 +41,14 @@ final class TaskResource extends JsonResource
             'locked' => ! $unlocked,
             'locked_reason' => $this->denial?->value,
             'locked_message' => $this->denial?->message(),
+            // Csak bejelentkezett nezonel: "solved", "attempted", vagy null, ha meg nem adott be.
+            'my_status' => $this->when($this->statuses?->hasViewer() === true, fn (): ?string => $this->statuses?->of($this->id)?->value),
             'topic' => TopicResource::make($this->whenLoaded('lesson', fn () => $this->lesson->module)),
             // A videot a lejatszo kulon keri le (GET /lessons/{id}/video), rovid eletu URL-lel.
             'lesson' => $this->whenLoaded('lesson', fn (): array => [
                 'id' => $this->lesson->id,
+                'slug' => $this->lesson->slug,
+                'track_slug' => $this->lesson->module?->track?->slug,
                 'title' => $this->lesson->title,
                 'has_video' => $this->lesson->video_path !== null,
             ]),
@@ -60,6 +64,8 @@ final class TaskResource extends JsonResource
                 fn () => ExampleTestCaseResource::collection($this->whenLoaded('visibleTestCases')),
             ),
             'hidden_test_case_count' => $this->whenCounted('hiddenTestCases'),
+            // Zarolt feladatnal is megy: a diak onnan is tovabb tud lepni.
+            'navigation' => $this->when($this->navigation !== null, fn (): ?array => $this->navigation?->toArray()),
         ];
     }
 }

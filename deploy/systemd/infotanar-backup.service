@@ -1,0 +1,23 @@
+# Ejszakai mentes (#129). Az idozites: infotanar-backup.timer.
+#
+# Egyszeri telepites a szerveren:
+#   sudo install -m 755 deploy/backup/infotanar-backup.sh /usr/local/bin/
+#   sudo install -d -m 700 /etc/infotanar
+#   sudo install -m 600 deploy/backup/backup.env.example /etc/infotanar/backup.env   # majd kitoltendo
+#   sudo cp deploy/systemd/infotanar-backup.service deploy/systemd/infotanar-backup.timer /etc/systemd/system/
+#   sudo systemctl daemon-reload && sudo systemctl enable --now infotanar-backup.timer
+#
+# Kezi futtatas es naplo:
+#   sudo systemctl start infotanar-backup && journalctl -u infotanar-backup -n 50
+
+[Unit]
+Description=InfoTanar backup (database, invoices, videos)
+After=network-online.target mysql.service
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+# Rootkent fut: az rclone konfiguracio es az adatbazis-jelszo csak root szamara olvashato.
+ExecStart=/usr/local/bin/infotanar-backup.sh /etc/infotanar/backup.env
+Nice=10
+IOSchedulingClass=idle
