@@ -37,7 +37,7 @@ tests/
 │   ├── pages/                oldalobjektumok (BasePage, TaskListPage, TaskSolvePage)
 │   │   └── components/       újrahasznosítható komponensek (MonacoEditor, ResultPanel)
 │   ├── fixtures/             test.extend: pages, apiClient, mockApi, a11y (axe)
-│   ├── mocks/                MockApi (route interception), Monaco CDN, Judge0 mock szerver
+│   ├── mocks/                MockApi (route interception), Judge0 mock szerver
 │   └── data/                 adatbuilderek és a seedelt fixture adatok leírása
 └── specs/
     ├── e2e/                  böngészős tesztek
