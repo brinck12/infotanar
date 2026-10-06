@@ -25,6 +25,9 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('payments', function (Blueprint $table): void {
+            // MySQL-en a subscription_id idegen kulcsa az osszetett egyedi indexre
+            // tamaszkodik; sajat index nelkul az eldobasa 1553-as hibaval megall (#126).
+            $table->index('subscription_id');
             $table->dropUnique(['subscription_id', 'renews_period_ending_at']);
             $table->dropColumn('renews_period_ending_at');
         });

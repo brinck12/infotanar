@@ -8,6 +8,7 @@ use App\Support\DisposableDatabase;
 use Database\Seeders\ApiTestSeeder;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
 
 /**
@@ -25,7 +26,7 @@ class PrepareApiTestFixtures extends Command
 {
     protected $signature = 'test:prepare-api-fixtures';
 
-    protected $description = 'Friss sqlite adatbázis és ApiTestSeeder fixture a Playwright API teszteknek';
+    protected $description = 'Friss adatbázis és ApiTestSeeder fixture a Playwright API teszteknek';
 
     /** Eles kornyezetben a parancs a listaban sem jelenik meg. */
     public function isHidden(): bool
@@ -45,7 +46,8 @@ class PrepareApiTestFixtures extends Command
 
         $path = database_path('testing.sqlite');
 
-        if (! file_exists($path)) {
+        // MySQL-en (#126) az adatbazist a kornyezet adja; sqlite-nal a fajlnak leteznie kell.
+        if (DB::connection()->getDriverName() === 'sqlite' && ! file_exists($path)) {
             touch($path);
         }
 

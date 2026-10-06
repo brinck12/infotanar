@@ -69,8 +69,27 @@ validálja. Elsőbbségi sorrend: valódi környezeti változó >
 | `START_WEB_SERVERS` | indítsa-e a Playwright a helyi szervereket |
 | `JUDGE0_MOCK_PORT` | a Judge0 mock portja |
 | `MONACO_SOURCE` | `local`: a Monaco a frontend `node_modules`-ából, CDN nélkül; `cdn`: jsDelivr |
+| `API_DATABASE_URL` | opcionális; megadva az API tesztek backendje MySQL-en fut sqlite helyett |
 
 Érvénytelen érték esetén a futás azonnal, érthető hibával leáll.
+
+### API tesztek MySQL-en
+
+Az éles adatbázis MySQL 8, a helyi futtatás alapból sqlite. A CI
+`backend-mysql` jobja mindkét motoron lefuttatja az API teszteket; helyben
+csak akkor kell, ha motorfüggő hibát keresel. Ehhez (és csak ehhez) Docker kell:
+
+```bash
+docker run --rm -d --name infotanar-mysql-test -p 3306:3306 \
+  -e MYSQL_ROOT_PASSWORD=root -e MYSQL_DATABASE=infotanar_test mysql:8
+
+API_DATABASE_URL=mysql://root:root@127.0.0.1:3306/infotanar_test npm run test:api
+
+docker stop infotanar-mysql-test
+```
+
+A fixture-betöltés minden táblát eldob, ezért a backend csak `_test` végű
+MySQL adatbázist fogad el, és csak `APP_ENV=testing` mellett.
 
 ## Konvenciók
 
