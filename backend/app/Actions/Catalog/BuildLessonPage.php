@@ -9,9 +9,9 @@ use App\Models\Submission;
 use App\Models\Track;
 use App\Models\User;
 use App\Services\Access\ContentAccess;
+use App\Services\Catalog\CurriculumOrder;
 use App\Services\Catalog\LessonPage;
 use App\Services\Progress\LessonStatuses;
-use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Database\Eloquent\Relations\Relation;
 
@@ -22,19 +22,19 @@ use Illuminate\Database\Eloquent\Relations\Relation;
  */
 final readonly class BuildLessonPage
 {
-    public function __construct(private ContentAccess $access) {}
+    public function __construct(
+        private ContentAccess $access,
+        private CurriculumOrder $order,
+    ) {}
 
     /** @throws ModelNotFoundException ha a kepzesi ag vagy a lecke nem letezik, vagy nincs publikalva */
     public function handle(?User $viewer, string $trackSlug, string $lessonSlug): LessonPage
     {
         $track = Track::query()->published()->where('slug', $trackSlug)->firstOrFail();
 
-        $sequence = $this->lessonSequence($track);
-        $earlier = $sequence->takeUntil(static fn (Lesson $lesson): bool => $lesson->slug === $lessonSlug);
-        // A keresett lecke es az utana kovetkezok.
-        $fromRequested = $sequence->slice($earlier->count())->values();
-
-        $requested = $fromRequested->first() ?? throw (new ModelNotFoundException)->setModel(Lesson::class);
+        $sequence = $this->order->lessons($track->id);
+        $requested = $sequence->firstWhere('slug', $lessonSlug) ?? throw (new ModelNotFoundException)->setModel(Lesson::class);
+        $neighbours = $this->order->neighbours($sequence, $requested->id);
 
         $lesson = Lesson::query()
             ->with([
@@ -46,30 +46,12 @@ final readonly class BuildLessonPage
         return new LessonPage(
             track: $track,
             lesson: $lesson,
-            previous: $earlier->last(),
-            next: $fromRequested->get(1),
+            previous: $neighbours['previous'],
+            next: $neighbours['next'],
             denial: $this->access->denialFor($viewer, $lesson),
             solvedExerciseIds: $this->solvedExerciseIds($viewer, $lesson),
             status: $viewer === null ? null : LessonStatuses::forUser($viewer)->of($lesson->id),
         );
-    }
-
-    /**
-     * Az ag publikalt leckei tanulasi sorrendben, a tartalmuk nelkul.
-     *
-     * @return Collection<int, Lesson>
-     */
-    private function lessonSequence(Track $track): Collection
-    {
-        return Lesson::query()
-            ->join('modules', 'modules.id', '=', 'lessons.module_id')
-            ->where('modules.track_id', $track->id)
-            ->where('lessons.is_published', true)
-            ->orderBy('modules.position')
-            ->orderBy('modules.id')
-            ->orderBy('lessons.position')
-            ->orderBy('lessons.id')
-            ->get(['lessons.id', 'lessons.slug', 'lessons.title']);
     }
 
     /** @return array<int, true> */

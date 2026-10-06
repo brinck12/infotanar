@@ -9,7 +9,7 @@ import { useMediaQuery } from '../../../shared/hooks/useMediaQuery'
 import { usePersistentState } from '../../../shared/hooks/usePersistentState'
 import { PageLoader } from '../../../shared/ui/PageLoader'
 import { SplitPane } from '../../../shared/ui/SplitPane'
-import type { LanguageKey, RunRequest, TaskDetail, UnlockedTaskDetail } from '../../../types'
+import type { LanguageKey, RunRequest, RunResponse, SubmissionResponse, TaskDetail, UnlockedTaskDetail } from '../../../types'
 import { useAuth } from '../../auth/context'
 import { catalogKeys, taskQuery } from '../../catalog/api'
 import { lessonPath } from '../../lesson/api'
@@ -18,9 +18,11 @@ import { progressKeys } from '../../progress/api'
 import { runCode, submitCode } from '../api'
 import { CodeEditor, type EditorReplacement } from '../components/CodeEditor'
 import { LessonVideo } from '../components/LessonVideo'
+import { NextStep } from '../components/NextStep'
 import { Paywall } from '../components/Paywall'
 import { ResetCodeButton } from '../components/ResetCodeButton'
 import { ResultPanel } from '../components/ResultPanel'
+import { TaskStepper } from '../components/TaskStepper'
 import { WorkspaceTabs, type WorkspaceView } from '../components/WorkspaceTabs'
 import { useCodeDraft } from '../useCodeDraft'
 
@@ -29,6 +31,11 @@ type Mode = 'run' | 'submit'
 /** Ettől a szélességtől (Tailwind `lg`) egymás mellett, húzható elválasztóval; alatta fülek. */
 const WIDE_LAYOUT = '(min-width: 1024px)'
 const DEFAULT_SPLIT = 0.5
+
+/** Csak a beadás válaszában van `submission_id`. */
+function isSubmission(response: RunResponse): response is SubmissionResponse {
+  return 'submission_id' in response
+}
 
 function isSplitRatio(value: unknown): value is number {
   return typeof value === 'number' && value > 0.05 && value < 0.95
@@ -89,21 +96,24 @@ function TaskHeader({ task }: { task: TaskDetail }) {
   const lesson = lessonOf(task)
 
   return (
-    <>
-      {lesson ? (
-        <Link to={lessonPath(lesson.trackSlug, lesson.lessonSlug)} className="text-sm text-sky-400 hover:underline">
-          ← Vissza a leckéhez: {lesson.title}
-        </Link>
-      ) : (
-        <Link to="/feladatok" className="text-sm text-sky-400 hover:underline">
-          ← Vissza a feladatokhoz
-        </Link>
-      )}
-      <h1 className="mt-3 text-2xl font-semibold text-slate-100">{task.title}</h1>
-      <p className="mt-1 text-sm text-slate-400">
-        {task.topic.name} · {LEVEL_LABEL[task.level]}
-      </p>
-    </>
+    <div className="flex flex-wrap items-end justify-between gap-x-6 gap-y-4">
+      <div>
+        {lesson ? (
+          <Link to={lessonPath(lesson.trackSlug, lesson.lessonSlug)} className="text-sm text-sky-400 hover:underline">
+            ← Vissza a leckéhez: {lesson.title}
+          </Link>
+        ) : (
+          <Link to="/feladatok" className="text-sm text-sky-400 hover:underline">
+            ← Vissza a feladatokhoz
+          </Link>
+        )}
+        <h1 className="mt-3 text-2xl font-semibold text-slate-100">{task.title}</h1>
+        <p className="mt-1 text-sm text-slate-400">
+          {task.topic.name} · {LEVEL_LABEL[task.level]}
+        </p>
+      </div>
+      {task.navigation && <TaskStepper navigation={task.navigation} />}
+    </div>
   )
 }
 
@@ -165,6 +175,8 @@ function Workspace({ task }: { task: UnlockedTaskDetail }) {
 
   const running = execution.isPending
   const lesson = lessonOf(task)
+  // A sima futtatás nem számít megoldásnak, csak az elfogadott beadás.
+  const accepted = execution.data && isSubmission(execution.data) && execution.data.status === 'passed' ? execution.data : null
 
   const description = (
     <section aria-label="Feladat leírása" className="space-y-4">
@@ -245,6 +257,8 @@ function Workspace({ task }: { task: UnlockedTaskDetail }) {
       <div className="h-[420px]">
         <CodeEditor language={language} initialValue={code} onChange={setCode} replace={replacement} readOnly={running} />
       </div>
+
+      {accepted && <NextStep task={task} lessonCompleted={accepted.lesson_completed === true} />}
 
       <ResultPanel
         loading={running}
