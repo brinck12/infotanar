@@ -24,7 +24,7 @@ export function LessonVideo({ lesson }: { lesson: TaskLesson }) {
     return (
       <p
         data-testid="lesson-video-placeholder"
-        className="rounded-lg border border-dashed border-slate-800 px-4 py-3 text-sm text-slate-500"
+        className="rounded-lg border border-dashed border-slate-800 px-4 py-3 text-sm text-slate-400"
       >
         Ehhez a leckéhez még nem készült videós magyarázat.
       </p>

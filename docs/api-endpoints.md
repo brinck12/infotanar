@@ -159,6 +159,7 @@ Minden végpont a `/api/v1` előtag alatt érhető el. A hozzáférés oszlop je
 |---|---|---|---|
 | `GET` | `/tracks` | nyilvános | – |
 | `GET` | `/tracks/{slug}` | nyilvános | – |
+| `GET` | `/tracks/{trackSlug}/lessons/{lessonSlug}` | nyilvános | – |
 
 ## webhooks
 

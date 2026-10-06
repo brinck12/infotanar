@@ -63,6 +63,44 @@ body {
     @apply rounded bg-slate-900 px-1 py-0.5 font-mono text-sm text-slate-200;
   }
 
+  .longform-code {
+    @apply my-5 overflow-x-auto rounded-lg border border-slate-800 bg-slate-950 focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-400;
+  }
+
+  .longform pre {
+    @apply w-max min-w-full p-4 text-sm leading-normal;
+  }
+
+  .longform pre code {
+    @apply bg-transparent p-0;
+  }
+
+  /* Kódkiemelés (highlight.js osztályok); minden szín legalább 4,5:1 kontrasztú a blokk hátterén. */
+  .longform .hljs-keyword,
+  .longform .hljs-literal,
+  .longform .hljs-operator {
+    @apply text-sky-300;
+  }
+
+  .longform .hljs-string,
+  .longform .hljs-regexp {
+    @apply text-emerald-300;
+  }
+
+  .longform .hljs-number {
+    @apply text-amber-300;
+  }
+
+  .longform .hljs-title,
+  .longform .hljs-built_in,
+  .longform .hljs-type {
+    @apply text-violet-300;
+  }
+
+  .longform .hljs-comment {
+    @apply text-slate-400 italic;
+  }
+
   .longform-table {
     @apply my-6 overflow-x-auto rounded-lg border border-slate-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-400;
   }
