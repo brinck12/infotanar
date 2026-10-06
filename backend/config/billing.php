@@ -14,6 +14,15 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | A szamlazas idozonaja
+    |--------------------------------------------------------------------------
+    | Az alkalmazas UTC-ben tarol; a szamlan szereplo naptari napok (kelt,
+    | teljesites) ebben az idozonaban ertendok (#125).
+    */
+    'timezone' => env('BILLING_TIMEZONE', 'Europe/Budapest'),
+
+    /*
+    |--------------------------------------------------------------------------
     | Havi elofizetes
     |--------------------------------------------------------------------------
     | Brutto ar forintban (az AFA-t a szamla bontja, #20).

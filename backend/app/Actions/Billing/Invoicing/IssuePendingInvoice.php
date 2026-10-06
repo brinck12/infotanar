@@ -6,9 +6,11 @@ namespace App\Actions\Billing\Invoicing;
 
 use App\Enums\InvoiceStatus;
 use App\Models\Invoice;
+use App\Services\Billing\Szamlazz\InvoiceDates;
 use App\Services\Billing\Szamlazz\InvoiceXml;
 use App\Services\Billing\Szamlazz\SzamlazzClient;
 use App\Services\Billing\Szamlazz\SzamlazzException;
+use Carbon\CarbonInterface;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
@@ -41,15 +43,20 @@ final readonly class IssuePendingInvoice
             $existing = $this->szamlazz->findNumberByOrder(InvoiceXml::queryByOrderNumber($agentKey, $payment->request_id));
 
             if ($existing !== null) {
-                return $this->markIssued($invoice, $existing, null);
+                // Egy korabbi, bizonytalan kimenetelu kiserlet allitotta ki; a pontos idopontjat nem ismerjuk.
+                return $this->markIssued($invoice, $existing, null, now());
             }
         }
 
         $invoice->increment('attempts');
         $prefix = Config::get('billing.szamlazz.invoice_prefix');
 
+        // Egy oraallas: a szamlan szereplo kelt es a sajat issued_at ugyanarra a pillanatra esik.
+        $issuedAt = now();
+        $dates = InvoiceDates::in(Config::string('billing.timezone'), $issuedAt, $payment->paid_at ?? $issuedAt);
+
         try {
-            $issued = $this->szamlazz->issue(InvoiceXml::issue($invoice, $agentKey, $payment->request_id, $payment->paid_at ?? now(), [
+            $issued = $this->szamlazz->issue(InvoiceXml::issue($invoice, $agentKey, $payment->request_id, $dates, [
                 'prefix' => is_string($prefix) && $prefix !== '' ? $prefix : null,
                 'item_name' => Config::string('billing.plan.name'),
                 'unit' => 'hónap',
@@ -69,10 +76,10 @@ final readonly class IssuePendingInvoice
             throw $e;
         }
 
-        return $this->markIssued($invoice, $issued->number, $issued->pdf);
+        return $this->markIssued($invoice, $issued->number, $issued->pdf, $issuedAt);
     }
 
-    private function markIssued(Invoice $invoice, string $number, ?string $pdf): Invoice
+    private function markIssued(Invoice $invoice, string $number, ?string $pdf, CarbonInterface $issuedAt): Invoice
     {
         $path = null;
 
@@ -86,7 +93,7 @@ final readonly class IssuePendingInvoice
             'invoice_number' => $number,
             'pdf_path' => $path,
             'last_error' => null,
-            'issued_at' => now(),
+            'issued_at' => $issuedAt,
         ])->save();
 
         return $invoice;
