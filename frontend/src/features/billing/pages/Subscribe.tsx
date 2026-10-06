@@ -1,10 +1,12 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import type { ReactNode } from 'react'
+import { useState, type ReactNode } from 'react'
 import { hibaUzenet, mezoHibak } from '../../../shared/api/errors'
-import { Alert } from '../../../shared/ui/Form'
+import { Alert, CheckboxField } from '../../../shared/ui/Form'
 import { PageLoader } from '../../../shared/ui/PageLoader'
 import type { BillingProfile, BillingProfilePayload, Plan } from '../../../types'
 import { useAuth } from '../../auth/context'
+import { LEGAL_VERSIONS } from '../../legal/documents'
+import { LegalLink } from '../../legal/LegalLink'
 import * as billingApi from '../api'
 import { billingKeys } from '../api'
 import { BillingProfileForm } from '../components/BillingProfileForm'
@@ -67,18 +69,25 @@ function CheckoutForm({ initial }: { initial: BillingProfile | null }) {
     onSuccess: ({ checkout_url }) => window.location.assign(checkout_url),
   })
 
+  // A vásárló kifejezett kérése az azonnali teljesítésre (#133); enélkül a szerver sem indít fizetést.
+  const [immediatePerformance, setImmediatePerformance] = useState(false)
+
   const busy = save.isPending || checkout.isPending || checkout.isSuccess
   const fieldErrors = mezoHibak(save.error)
+  const consentError = mezoHibak(checkout.error).accept_immediate_performance
   const generalError =
     save.isError && Object.keys(fieldErrors).length === 0
       ? hibaUzenet(save.error)
-      : checkout.isError
+      : checkout.isError && !consentError
         ? hibaUzenet(checkout.error)
         : null
 
   function submit(payload: BillingProfilePayload) {
     checkout.reset()
-    save.mutate(payload, { onSuccess: () => checkout.mutate() })
+    save.mutate(payload, {
+      onSuccess: () =>
+        checkout.mutate({ accept_immediate_performance: immediatePerformance, terms_version: LEGAL_VERSIONS.terms }),
+    })
   }
 
   return (
@@ -92,6 +101,20 @@ function CheckoutForm({ initial }: { initial: BillingProfile | null }) {
         errors={fieldErrors}
         busy={busy}
         submitLabel={busy ? 'Átirányítás a fizetéshez…' : 'Tovább a fizetéshez'}
+        beforeSubmit={
+          <CheckboxField
+            label={
+              <span>
+                Kérem, hogy az előfizetés a fizetés után azonnal elinduljon, és tudomásul veszem az{' '}
+                <LegalLink to="terms">ÁSZF</LegalLink> elállási jogra vonatkozó szabályait.
+              </span>
+            }
+            required
+            checked={immediatePerformance}
+            onChange={(e) => setImmediatePerformance(e.target.checked)}
+            error={consentError}
+          />
+        }
         onSubmit={submit}
       />
       <p className="text-xs text-slate-500">

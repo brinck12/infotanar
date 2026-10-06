@@ -7,6 +7,7 @@ namespace App\Actions\Account;
 use App\Actions\Audit\RecordAuditEvent;
 use App\Enums\AuditAction;
 use App\Models\AccessGrant;
+use App\Models\Consent;
 use App\Models\Invoice;
 use App\Models\LessonCompletion;
 use App\Models\Payment;
@@ -117,6 +118,15 @@ final readonly class ExportAccountData
                     'granted_at' => $grant->created_at?->toIso8601String(),
                     'ends_at' => $grant->ends_at?->toIso8601String(),
                     'revoked_at' => $grant->revoked_at?->toIso8601String(),
+                ])
+                ->all(),
+            'consents' => $user->consents()
+                ->oldest('id')
+                ->get()
+                ->map(static fn (Consent $consent): array => [
+                    'type' => $consent->type->value,
+                    'document_version' => $consent->document_version,
+                    'accepted_at' => $consent->created_at->toIso8601String(),
                 ])
                 ->all(),
         ];

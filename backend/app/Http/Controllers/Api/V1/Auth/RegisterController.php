@@ -18,6 +18,8 @@ final class RegisterController extends Controller
             name: $request->string('name')->toString(),
             email: $request->string('email')->toString(),
             password: $request->string('password')->toString(),
+            termsVersion: $request->string('terms_version')->toString(),
+            privacyVersion: $request->string('privacy_version')->toString(),
         );
 
         return UserResource::make($user)->response()->setStatusCode(JsonResponse::HTTP_CREATED);
