@@ -167,6 +167,26 @@ export interface SubmissionResponse extends RunResponse {
   lesson_completed?: boolean
 }
 
+/** Egy korábbi beadás a listában: a forráskód és a tesztesetenkénti eredmények nélkül. */
+export interface SubmissionSummary {
+  id: number
+  /** A vegyes listában (`GET /submissions`) érkezik. */
+  exercise?: { id: number; title: string }
+  language: LanguageKey
+  /** `pending` / `running`: a kiértékelés megszakadt, nincs eredmény. */
+  status: RunStatus | 'pending' | 'running'
+  verdict: Verdict | null
+  verdict_label: string | null
+  passed_count: number
+  total_count: number
+  created_at: string
+}
+
+export interface SubmissionDetail extends SubmissionSummary {
+  source_code: string
+  results: TestResult[]
+}
+
 export interface RunRequest {
   task_id: number
   language: LanguageKey
