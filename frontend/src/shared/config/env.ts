@@ -15,6 +15,14 @@ function readApiUrl(): string {
   return value.replace(/\/+$/, '')
 }
 
+/** A build git commitja (a deploy állítja be); a hibajelentésekből így látszik, melyik kiadás hibázott. */
+function readRelease(): string | null {
+  const raw: unknown = import.meta.env.VITE_RELEASE
+
+  return typeof raw === 'string' && raw.trim() !== '' ? raw.trim() : null
+}
+
 export const env = Object.freeze({
   apiUrl: readApiUrl(),
+  release: readRelease(),
 })

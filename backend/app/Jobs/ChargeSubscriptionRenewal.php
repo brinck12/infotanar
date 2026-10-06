@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Jobs;
 
 use App\Actions\Billing\ChargeRenewal;
+use App\Jobs\Concerns\AlertsOperatorOnFailure;
 use App\Models\Subscription;
 use App\Services\Billing\Barion\BarionException;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
@@ -19,7 +20,7 @@ use Illuminate\Support\Facades\Log;
  */
 final class ChargeSubscriptionRenewal implements ShouldBeUnique, ShouldQueue
 {
-    use Queueable;
+    use AlertsOperatorOnFailure, Queueable;
 
     public int $tries = 4;
 
@@ -33,6 +34,12 @@ final class ChargeSubscriptionRenewal implements ShouldBeUnique, ShouldQueue
     public function uniqueId(): string
     {
         return (string) $this->subscriptionId;
+    }
+
+    /** @return array<string, int|string> */
+    protected function alertContext(): array
+    {
+        return ['subscription_id' => $this->subscriptionId];
     }
 
     public function handle(ChargeRenewal $charge): void

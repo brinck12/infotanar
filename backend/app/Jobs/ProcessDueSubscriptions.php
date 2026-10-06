@@ -6,6 +6,7 @@ namespace App\Jobs;
 
 use App\Actions\Billing\MarkSubscriptionPastDue;
 use App\Enums\SubscriptionStatus;
+use App\Jobs\Concerns\AlertsOperatorOnFailure;
 use App\Models\Subscription;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -21,7 +22,7 @@ use Illuminate\Support\Facades\Log;
  */
 final class ProcessDueSubscriptions implements ShouldBeUnique, ShouldQueue
 {
-    use Queueable;
+    use AlertsOperatorOnFailure, Queueable;
 
     public function handle(MarkSubscriptionPastDue $markPastDue): void
     {

@@ -10,9 +10,9 @@ use App\Services\Billing\Szamlazz\InvoiceDates;
 use App\Services\Billing\Szamlazz\InvoiceXml;
 use App\Services\Billing\Szamlazz\SzamlazzClient;
 use App\Services\Billing\Szamlazz\SzamlazzException;
+use App\Support\Alerts\OperatorAlert;
 use Carbon\CarbonInterface;
 use Illuminate\Support\Facades\Config;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
@@ -27,7 +27,10 @@ use Illuminate\Support\Str;
  */
 final readonly class IssuePendingInvoice
 {
-    public function __construct(private SzamlazzClient $szamlazz) {}
+    public function __construct(
+        private SzamlazzClient $szamlazz,
+        private OperatorAlert $alert,
+    ) {}
 
     /** @throws SzamlazzException ujraprobalhato hibanal; a job ujrafuttatja */
     public function handle(Invoice $invoice): Invoice
@@ -68,7 +71,7 @@ final readonly class IssuePendingInvoice
             ])->save();
 
             if (! $e->retryable) {
-                Log::critical('Invoice rejected by Szamlazz.hu; manual action needed.', ['invoice_id' => $invoice->id]);
+                $this->alert->raise(__('alerts.invoice_rejected'), ['invoice_id' => $invoice->id]);
 
                 return $invoice;
             }
