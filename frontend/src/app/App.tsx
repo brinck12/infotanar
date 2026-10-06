@@ -3,8 +3,10 @@ import { BrowserRouter, Link, Navigate, Outlet, Route, Routes } from 'react-rout
 import { AccountNav, VerifyEmailBanner } from '../features/auth/components/AccountNav'
 import { GuestOnly, RequireAuth, RequireRole } from '../features/auth/guards'
 import { PastDueBanner } from '../features/billing/components/PastDueBanner'
+import { LEGAL_DOCUMENTS } from '../features/legal/documents'
 import { PageLoader } from '../shared/ui/PageLoader'
 import { ErrorBoundary } from './ErrorBoundary'
+import { Footer } from './Footer'
 import { Providers } from './Providers'
 import * as Pages from './routes'
 
@@ -14,8 +16,15 @@ export default function App() {
       <BrowserRouter>
         <Providers>
           <div className="flex min-h-full flex-col">
+            {/* Billentyűzettel az első Tab ide lép: a menü átugorható. Csak fókuszban látszik. */}
+            <a
+              href="#tartalom"
+              className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-50 focus:rounded-lg focus:bg-sky-700 focus:px-4 focus:py-2 focus:text-white"
+            >
+              Ugrás a tartalomra
+            </a>
             <header className="border-b border-slate-800 bg-slate-900">
-              <nav className="mx-auto flex max-w-7xl items-center gap-6 px-4 py-3">
+              <nav aria-label="Fő navigáció" className="mx-auto flex max-w-7xl items-center gap-6 px-4 py-3">
                 <Link to="/" className="font-semibold text-slate-100">
                   InfoTanár
                 </Link>
@@ -28,7 +37,7 @@ export default function App() {
             <VerifyEmailBanner />
             <PastDueBanner />
 
-            <main className="flex-1">
+            <main id="tartalom" tabIndex={-1} className="flex-1 focus:outline-none">
               <ErrorBoundary>
                 <Suspense fallback={<PageLoader />}>
                   <Routes>
@@ -44,6 +53,9 @@ export default function App() {
                     <Route path="/elofizetes" element={<RequireAuth><Pages.Subscribe /></RequireAuth>} />
                     <Route path="/elofizetes/visszateres" element={<RequireAuth><Pages.PaymentReturn /></RequireAuth>} />
                     <Route path="/haladas" element={<RequireAuth><Pages.ProgressDashboard /></RequireAuth>} />
+                    <Route path={LEGAL_DOCUMENTS.terms.path} element={<Pages.Terms />} />
+                    <Route path={LEGAL_DOCUMENTS.privacy.path} element={<Pages.Privacy />} />
+                    <Route path={LEGAL_DOCUMENTS.imprint.path} element={<Pages.Imprint />} />
                     <Route path="/admin" element={<RequireRole allow="admin"><Outlet /></RequireRole>}>
                       <Route index element={<Navigate to="/admin/tananyag" replace />} />
                       <Route path="tananyag" element={<Pages.AdminCatalog />} />
@@ -61,6 +73,7 @@ export default function App() {
                 </Suspense>
               </ErrorBoundary>
             </main>
+            <Footer />
           </div>
         </Providers>
       </BrowserRouter>
