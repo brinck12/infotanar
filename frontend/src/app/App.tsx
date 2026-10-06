@@ -4,6 +4,7 @@ import { AccountNav, VerifyEmailBanner } from '../features/auth/components/Accou
 import { GuestOnly, RequireAuth, RequireRole } from '../features/auth/guards'
 import { PastDueBanner } from '../features/billing/components/PastDueBanner'
 import { LEGAL_DOCUMENTS } from '../features/legal/documents'
+import { CookieBanner } from '../shared/consent/CookieBanner'
 import { PageLoader } from '../shared/ui/PageLoader'
 import { ErrorBoundary } from './ErrorBoundary'
 import { Footer } from './Footer'
@@ -76,6 +77,7 @@ export default function App() {
               </ErrorBoundary>
             </main>
             <Footer />
+            <CookieBanner />
           </div>
         </Providers>
       </BrowserRouter>

@@ -60,6 +60,9 @@ jobs:
           VITE_API_URL: /api/v1
           # A frontend hibajelentései ezzel azonosítják a kiadást (#131).
           VITE_RELEASE: ${{ github.event.workflow_run.head_sha || github.sha }}
+          # Barion Pixel (#139): azonosító nélkül a Pixel ki van kapcsolva.
+          VITE_BARION_PIXEL_ID: ${{ vars.BARION_PIXEL_ID }}
+          VITE_BARION_PIXEL_REQUIRES_CONSENT: ${{ vars.BARION_PIXEL_REQUIRES_CONSENT }}
         run: |
           npm ci
           npm run build
