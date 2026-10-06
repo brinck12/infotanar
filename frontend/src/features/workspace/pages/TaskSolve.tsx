@@ -10,17 +10,31 @@ import { useMediaQuery } from '../../../shared/hooks/useMediaQuery'
 import { usePersistentState } from '../../../shared/hooks/usePersistentState'
 import { PageLoader } from '../../../shared/ui/PageLoader'
 import { SplitPane } from '../../../shared/ui/SplitPane'
-import type { LanguageKey, RunRequest, TaskDetail, UnlockedTaskDetail } from '../../../types'
+import type {
+  LanguageKey,
+  RunRequest,
+  RunResponse,
+  SubmissionDetail,
+  SubmissionResponse,
+  TaskDetail,
+  UnlockedTaskDetail,
+} from '../../../types'
 import { useAuth } from '../../auth/context'
 import { catalogKeys, taskQuery } from '../../catalog/api'
+import { lessonPath } from '../../lesson/api'
+import { LessonTheory } from '../../lesson/components/LessonTheory'
 import { progressKeys } from '../../progress/api'
+import { submissionKeys } from '../../submissions/api'
+import { SubmissionHistory } from '../../submissions/components/SubmissionHistory'
 import { runCode, submitCode } from '../api'
 import { CodeEditor, type EditorReplacement } from '../components/CodeEditor'
 import { LessonVideo } from '../components/LessonVideo'
+import { NextStep } from '../components/NextStep'
 import { Paywall } from '../components/Paywall'
 import { RateLimitNotice } from '../components/RateLimitNotice'
 import { ResetCodeButton } from '../components/ResetCodeButton'
 import { ResultPanel } from '../components/ResultPanel'
+import { TaskStepper } from '../components/TaskStepper'
 import { WorkspaceTabs, type WorkspaceView } from '../components/WorkspaceTabs'
 import { useCodeDraft } from '../useCodeDraft'
 
@@ -29,6 +43,11 @@ type Mode = 'run' | 'submit'
 /** Ettől a szélességtől (Tailwind `lg`) egymás mellett, húzható elválasztóval; alatta fülek. */
 const WIDE_LAYOUT = '(min-width: 1024px)'
 const DEFAULT_SPLIT = 0.5
+
+/** Csak a beadás válaszában van `submission_id`. */
+function isSubmission(response: RunResponse): response is SubmissionResponse {
+  return 'submission_id' in response
+}
 
 function isSplitRatio(value: unknown): value is number {
   return typeof value === 'number' && value > 0.05 && value < 0.95
@@ -78,17 +97,35 @@ export function TaskSolve() {
   return <Workspace key={`${task.data.id}:${user?.id ?? 'guest'}`} task={task.data} />
 }
 
+/** A feladat leckéjének oldala; régebbi válaszban (slug nélkül) nincs. */
+function lessonOf(task: TaskDetail): { trackSlug: string; lessonSlug: string; title: string } | null {
+  const lesson = task.lesson
+
+  return lesson?.slug && lesson.track_slug ? { trackSlug: lesson.track_slug, lessonSlug: lesson.slug, title: lesson.title } : null
+}
+
 function TaskHeader({ task }: { task: TaskDetail }) {
+  const lesson = lessonOf(task)
+
   return (
-    <>
-      <Link to="/feladatok" className="text-sm text-sky-400 hover:underline">
-        ← Vissza a feladatokhoz
-      </Link>
-      <h1 className="mt-3 text-2xl font-semibold text-slate-100">{task.title}</h1>
-      <p className="mt-1 text-sm text-slate-400">
-        {task.topic.name} · {LEVEL_LABEL[task.level]}
-      </p>
-    </>
+    <div className="flex flex-wrap items-end justify-between gap-x-6 gap-y-4">
+      <div>
+        {lesson ? (
+          <Link to={lessonPath(lesson.trackSlug, lesson.lessonSlug)} className="text-sm text-sky-400 hover:underline">
+            ← Vissza a leckéhez: {lesson.title}
+          </Link>
+        ) : (
+          <Link to="/feladatok" className="text-sm text-sky-400 hover:underline">
+            ← Vissza a feladatokhoz
+          </Link>
+        )}
+        <h1 className="mt-3 text-2xl font-semibold text-slate-100">{task.title}</h1>
+        <p className="mt-1 text-sm text-slate-400">
+          {task.topic.name} · {LEVEL_LABEL[task.level]}
+        </p>
+      </div>
+      {task.navigation && <TaskStepper navigation={task.navigation} />}
+    </div>
   )
 }
 
@@ -127,9 +164,15 @@ function Workspace({ task }: { task: UnlockedTaskDetail }) {
       setWait(limited)
       if (limited) countdown.start(limited.seconds)
     },
-    // Egy beadás (akár sikertelen) a lecke állapotát is változtathatja (#28).
+    // Egy beadás (akár sikertelen) a feladat és a lecke állapotát is változtathatja:
+    // a haladás oldal, a tananyag-nézet és a feladatlisták is ebből frissülnek.
     onSuccess: (_, { kind }) => {
-      if (kind === 'submit') void queryClient.invalidateQueries({ queryKey: progressKeys.all })
+      if (kind !== 'submit') return
+
+      void queryClient.invalidateQueries({ queryKey: progressKeys.all })
+      void queryClient.invalidateQueries({ queryKey: catalogKeys.tracks() })
+      void queryClient.invalidateQueries({ queryKey: catalogKeys.taskLists() })
+      void queryClient.invalidateQueries({ queryKey: submissionKeys.all })
     },
   })
 
@@ -147,6 +190,18 @@ function Workspace({ task }: { task: UnlockedTaskDetail }) {
     execution.reset()
   }
 
+  /**
+   * #147: egy korábbi beadás kódja a szerkesztőbe, visszavonhatóan. Másik nyelvű beadásnál
+   * előbb arra a nyelvre váltunk (a mostani kód piszkozatként megmarad), és a visszavonás
+   * annak a nyelvnek a kódjához tér vissza.
+   */
+  function restoreSubmission(submission: SubmissionDetail) {
+    const resetTo = submission.language === language ? undefined : switchLanguage(submission.language)
+    setCode(submission.source_code)
+    setReplacement((r) => ({ value: submission.source_code, seq: r.seq + 1, undoable: true, resetTo }))
+    execution.reset()
+  }
+
   function execute(kind: Mode) {
     setMode(kind)
     setWait(null)
@@ -159,6 +214,7 @@ function Workspace({ task }: { task: UnlockedTaskDetail }) {
   const description = (
     <section aria-label="Feladat leírása" className="space-y-4">
       {task.lesson && <LessonVideo lesson={task.lesson} />}
+      {lesson && <LessonTheory trackSlug={lesson.trackSlug} lessonSlug={lesson.lessonSlug} />}
 
       <div className="prose-invert max-w-none rounded-lg border border-slate-800 bg-slate-900 p-5 text-slate-200 [&_code]:rounded [&_code]:bg-slate-950 [&_code]:px-1 [&_h2]:mt-0 [&_h2]:mb-3 [&_h2]:text-lg [&_h2]:font-semibold [&_h3]:mt-4 [&_h3]:mb-2 [&_h3]:font-medium [&_li]:ml-4 [&_li]:list-disc [&_p]:my-2">
         <ReactMarkdown remarkPlugins={[remarkGfm]}>{task.description}</ReactMarkdown>

@@ -31,7 +31,7 @@ export function Field({ label, error, hint, ...input }: FieldProps) {
         {...input}
       />
       {hint && !error && (
-        <p id={`${id}-hint`} className="mt-1 text-slate-500">
+        <p id={`${id}-hint`} className="mt-1 text-slate-400">
           {hint}
         </p>
       )}
@@ -70,7 +70,7 @@ export function TextAreaField({ label, error, hint, mono = false, className = ''
         {...textarea}
       />
       {hint && !error && (
-        <p id={`${id}-hint`} className="mt-1 text-slate-500">
+        <p id={`${id}-hint`} className="mt-1 text-slate-400">
           {hint}
         </p>
       )}
@@ -84,7 +84,8 @@ export function TextAreaField({ label, error, hint, mono = false, className = ''
 }
 
 interface CheckboxFieldProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 'type'> {
-  label: string
+  /** Szöveg vagy linket tartalmazó tartalom (pl. elfogadó nyilatkozat). */
+  label: ReactNode
   hint?: string
   error?: string
 }
@@ -95,11 +96,12 @@ export function CheckboxField({ label, hint, error, ...input }: CheckboxFieldPro
 
   return (
     <div className="text-sm">
-      <label htmlFor={id} className="flex items-center gap-2 text-slate-200">
+      {/* Felülre igazítva: több soros címkénél a jelölőnégyzet az első sor mellett marad. */}
+      <label htmlFor={id} className="flex items-start gap-2 text-slate-200">
         <input
           id={id}
           type="checkbox"
-          className="h-4 w-4 accent-sky-600"
+          className="mt-0.5 h-4 w-4 shrink-0 accent-sky-600"
           aria-invalid={error ? true : undefined}
           aria-describedby={describedBy}
           {...input}
@@ -107,7 +109,7 @@ export function CheckboxField({ label, hint, error, ...input }: CheckboxFieldPro
         {label}
       </label>
       {hint && (
-        <p id={`${id}-hint`} className="mt-1 ml-6 text-slate-500">
+        <p id={`${id}-hint`} className="mt-1 ml-6 text-slate-400">
           {hint}
         </p>
       )}

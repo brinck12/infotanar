@@ -79,6 +79,196 @@ jobs:
       - name: Statikus analízis (Larastan, max szint)
         run: composer analyse
 
+      # A docs/api-endpoints.md az útvonalakból generált fájl; itt bukik el, ha
+      # egy útvonal változott, de a dokumentum nem lett újragenerálva (#140).
+      - name: Végpontlista naprakész
+        run: php artisan docs:endpoints --check
+
+      # Egy már lefutott migráció szerkesztése az éles adatbázison nem fut le
+      # újra: a séma csak új migrációval változhat. A PR merge-commitját
+      # hasonlítjuk a célághoz, így a célág újabb migrációi nem zavarnak be.
+      # Kivétel a `migration-edit` címkés PR: csak a down() javítására való,
+      # az up() ilyenkor sem változhat (ezt a reviewer ellenőrzi).
+      - name: Kiadott migráció nem módosítható
+        if: >-
+          github.event_name == 'pull_request' &&
+          !contains(github.event.pull_request.labels.*.name, 'migration-edit')
+        working-directory: .
+        env:
+          BASE_REF: ${{ github.base_ref }}
+        run: |
+          git fetch --no-tags --depth=1 origin "$BASE_REF"
+          changed=$(git diff --name-only --diff-filter=MDR FETCH_HEAD HEAD -- backend/database/migrations)
+          if [ -n "$changed" ]; then
+            echo "::error::Már kiadott migráció módosult vagy törlődött. Adj hozzá új migrációt helyette:"
+            echo "$changed"
+            exit 1
+          fi
+
+  # A deploy/nginx alatti referencia-konfigurációt kézzel másoljuk a szerverre;
+  # itt derül ki, ha szintaktikailag hibás (#128). Eldobható, önaláírt
+  # tanúsítvánnyal töltjük be, a <domain> helyére teszt-nevet írva.
+  nginx-config:
+    name: nginx konfiguráció (szintaxis)
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: nginx -t
+        run: |
+          work="$RUNNER_TEMP/nginx"
+          cert="$work/letsencrypt/live/example.test"
+          mkdir -p "$cert"
+          openssl req -x509 -newkey rsa:2048 -nodes -days 1 -subj "/CN=example.test" \
+            -keyout "$cert/privkey.pem" -out "$cert/fullchain.pem" 2>/dev/null
+          sed 's/<domain>/example.test/g' deploy/nginx/infotanar.conf > "$work/infotanar.conf"
+
+          docker run --rm \
+            -v "$work/infotanar.conf:/etc/nginx/conf.d/default.conf:ro" \
+            -v "$PWD/deploy/nginx/snippets:/etc/nginx/snippets:ro" \
+            -v "$work/letsencrypt:/etc/letsencrypt:ro" \
+            nginx:stable nginx -t
+
+  # Az éles adatbázis MySQL 8, a többi job sqlite-on fut. Itt derül ki, ha egy
+  # migráció vagy lekérdezés csak sqlite-on működik (#126).
+  backend-mysql:
+    name: Backend MySQL 8-on (migrációk, API tesztek)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    services:
+      mysql:
+        image: mysql:8
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: infotanar_test
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -proot --silent"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=20
+
+    env:
+      APP_ENV: testing
+      # Csak az eldobható CI-adatbázishoz; nem titok.
+      APP_KEY: base64:IuoO2O2E2ePTfNKZ3XNlVF5ZfvMJM5zld0sDIFlKhQ8=
+      DB_CONNECTION: mysql
+      DB_URL: mysql://root:root@127.0.0.1:3306/infotanar_test
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: tests/package-lock.json
+
+      - name: PHP 8.3 beállítása
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: mbstring, pdo_mysql, curl, zip, intl, fileinfo
+          coverage: none
+
+      - name: Composer cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.composer/cache
+          key: composer-${{ runner.os }}-${{ hashFiles('backend/composer.lock') }}
+          restore-keys: composer-${{ runner.os }}-
+
+      - name: Backend függőségek telepítése
+        working-directory: backend
+        run: composer install --prefer-dist --no-interaction --no-progress
+
+      - name: Migráció üres adatbázisra
+        working-directory: backend
+        run: php artisan migrate --force
+
+      # Friss migrálás után minden migráció egy batch-ben van, így ez minden down()-t lefuttat.
+      - name: Minden migráció visszagörgethető
+        working-directory: backend
+        run: php artisan migrate:rollback --force
+
+      - name: Újramigrálás és seed
+        working-directory: backend
+        run: |
+          php artisan migrate --force
+          php artisan db:seed --force
+
+      # A mentés annyit ér, amennyire vissza lehet állítani belőle (#129): a
+      # valódi mentőszkript fut egy helyi mappába mint "távoli" tárolóba, majd a
+      # dumpot üres adatbázisba töltjük vissza, és összevetjük a sorok számát.
+      - name: Mentés és visszaállítási próba
+        run: |
+          sudo apt-get install -y --no-install-recommends rclone >/dev/null
+
+          storage="$RUNNER_TEMP/private"
+          remote="$RUNNER_TEMP/offsite"
+          mkdir -p "$storage/invoices/2026" "$remote"
+          echo "pdf" > "$storage/invoices/2026/TESZT-1.pdf"
+
+          cat > "$RUNNER_TEMP/backup.env" <<EOF
+          DB_NAME=infotanar_test
+          DB_USER=root
+          DB_PASSWORD=root
+          PRIVATE_STORAGE_DIR=$storage
+          BACKUP_REMOTE=$remote
+          EOF
+
+          bash deploy/backup/infotanar-backup.sh "$RUNNER_TEMP/backup.env"
+
+          test -f "$remote/invoices/2026/TESZT-1.pdf"
+          test -s "$storage/backup-last-success"
+
+          mysql() { command mysql -h 127.0.0.1 -uroot -proot -N "$@"; }
+          mysql -e "CREATE DATABASE restore_drill"
+          gunzip -c "$remote"/db/daily/infotanar_test-*.sql.gz | mysql restore_drill
+
+          for table in migrations exercises test_cases; do
+            original=$(mysql -e "SELECT COUNT(*) FROM infotanar_test.$table")
+            restored=$(mysql -e "SELECT COUNT(*) FROM restore_drill.$table")
+            echo "$table: eredeti=$original visszaállított=$restored"
+            [ "$original" -gt 0 ] && [ "$original" = "$restored" ]
+          done
+
+      # Új migráció szimulálása: az utolsó visszagörgetése után van mit futtatni,
+      # tehát a deploy előtti mentésnek el kell készülnie.
+      - name: Migráció előtti mentés
+        working-directory: backend
+        run: |
+          php artisan db:snapshot-before-migrate | tee /dev/stderr | grep -q "nincs futtatandó migráció"
+
+          php artisan migrate:rollback --step=1 --force
+          php artisan db:snapshot-before-migrate
+          ls storage/app/private/db-snapshots/*.sql.gz
+          gunzip -t storage/app/private/db-snapshots/*.sql.gz
+          php artisan migrate --force
+
+      - name: Teszt függőségek telepítése
+        working-directory: tests
+        run: npm ci
+
+      - name: API tesztek MySQL-en
+        working-directory: tests
+        env:
+          API_DATABASE_URL: mysql://root:root@127.0.0.1:3306/infotanar_test
+        run: npm run test:api -- --reporter=list,github
+
+      - name: Hibás teszt eredmények feltöltése
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results-api-mysql
+          path: tests/test-results/
+          retention-days: 7
+          if-no-files-found: ignore
+
   tests-check:
     name: Tesztkód (typecheck, lint)
     runs-on: ubuntu-latest

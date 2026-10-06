@@ -1,0 +1,84 @@
+import { useMutation } from '@tanstack/react-query'
+import { useState, type FormEvent } from 'react'
+import { hibaUzenet, mezoHibak } from '../../../shared/api/errors'
+import { Field, SubmitButton } from '../../../shared/ui/Form'
+import type { AuthUser } from '../../../types'
+import * as authApi from '../../auth/api'
+import { useAuth } from '../../auth/context'
+import * as accountApi from '../api'
+import { AccountSection } from './AccountSection'
+
+/** Név (szerkeszthető), e-mail-cím és a megerősítés állapota. */
+export function ProfileSummary({ user }: { user: AuthUser }) {
+  return (
+    <AccountSection title="Adataim">
+      <NameForm currentName={user.name} />
+
+      <dl className="grid grid-cols-[auto_1fr] gap-x-6 gap-y-2 border-t border-slate-800 pt-4">
+        <dt className="text-slate-400">E-mail-cím</dt>
+        <dd className="break-all text-slate-100">{user.email}</dd>
+        <dt className="text-slate-400">Állapot</dt>
+        <dd>{user.email_verified_at ? 'Megerősített e-mail-cím' : 'Az e-mail-cím még nincs megerősítve'}</dd>
+      </dl>
+
+      {!user.email_verified_at && <ResendVerification />}
+    </AccountSection>
+  )
+}
+
+function NameForm({ currentName }: { currentName: string }) {
+  const { refresh } = useAuth()
+  const [name, setName] = useState(currentName)
+  const save = useMutation({ mutationFn: accountApi.updateName, onSuccess: refresh })
+
+  const nameError = mezoHibak(save.error).name
+  const unchanged = name.trim() === currentName
+
+  function submit(event: FormEvent) {
+    event.preventDefault()
+    save.mutate(name.trim())
+  }
+
+  return (
+    <form onSubmit={submit} noValidate className="space-y-3">
+      <Field
+        label="Név"
+        autoComplete="name"
+        required
+        value={name}
+        onChange={(e) => setName(e.target.value)}
+        error={nameError ?? (save.isError ? hibaUzenet(save.error) : undefined)}
+      />
+      <div className="flex flex-wrap items-center gap-3">
+        <SubmitButton busy={save.isPending} fullWidth={false}>
+          {save.isPending ? 'Mentés…' : 'Név mentése'}
+        </SubmitButton>
+        <span role="status" className="text-emerald-300">
+          {save.isSuccess && unchanged && 'Mentve.'}
+        </span>
+      </div>
+    </form>
+  )
+}
+
+function ResendVerification() {
+  const resend = useMutation({ mutationFn: authApi.resendVerification })
+
+  return (
+    <div role="status">
+      {resend.isSuccess ? (
+        <p className="text-emerald-300">{resend.data}</p>
+      ) : (
+        <button
+          type="button"
+          onClick={() => resend.mutate()}
+          disabled={resend.isPending}
+          className="rounded-sm text-sky-400 underline underline-offset-2 hover:text-sky-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-400 disabled:opacity-60"
+        >
+          {resend.isPending ? 'Küldés…' : 'Megerősítő levél újraküldése'}
+        </button>
+      )}
+      {resend.isError && <p className="mt-1 text-red-300">{hibaUzenet(resend.error)}</p>}
+    </div>
+  )
+}

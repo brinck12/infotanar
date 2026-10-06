@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
  * @property int $exercise_id
+ * @property list<array<string, mixed>>|null $results Tesztesetenkenti eredmenyek, a rejtettek adatai nelkul.
  * @property Verdict|null $verdict A #39 elotti beadasoknal NULL.
  */
 final class Submission extends Model

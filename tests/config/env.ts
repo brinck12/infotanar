@@ -50,6 +50,13 @@ const EnvSchema = z.object({
   JUDGE0_MOCK_PORT: z.coerce.number().int().positive().default(2358),
 
   /**
+   * A helyben inditott teszt-backend adatbazisa. Megadas nelkul eldobhato
+   * sqlite fajl; megadva MySQL, pl. mysql://root:root@127.0.0.1:3306/infotanar_test
+   * (az adatbazis nevenek `_test`-re kell vegzodnie, kulonben a backend elutasitja).
+   */
+  API_DATABASE_URL: z.url({ protocol: /^mysql$/ }).optional(),
+
+  /**
    * Honnan toltodjon a Monaco szerkeszto: "local" = a frontend
    * node_modules-abol route interceptionnel (hermetikus, CDN nelkul),
    * "cdn" = ahogy az eles app is, a jsDelivr-rol.

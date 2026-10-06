@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Jobs;
 
 use App\Actions\Billing\Invoicing\IssuePendingInvoice;
+use App\Jobs\Concerns\AlertsOperatorOnFailure;
 use App\Models\Invoice;
 use App\Services\Billing\Szamlazz\SzamlazzException;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
@@ -20,7 +21,7 @@ use Illuminate\Support\Facades\Log;
  */
 final class IssueInvoice implements ShouldBeUnique, ShouldQueue
 {
-    use Queueable;
+    use AlertsOperatorOnFailure, Queueable;
 
     public int $tries = 6;
 
@@ -40,6 +41,12 @@ final class IssueInvoice implements ShouldBeUnique, ShouldQueue
     public function middleware(): array
     {
         return [(new WithoutOverlapping('invoice:'.$this->invoiceId))->releaseAfter(60)->expireAfter(300)];
+    }
+
+    /** @return array<string, int|string> */
+    protected function alertContext(): array
+    {
+        return ['invoice_id' => $this->invoiceId];
     }
 
     public function handle(IssuePendingInvoice $issue): void

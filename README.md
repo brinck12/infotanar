@@ -1,110 +1,94 @@
-# InfoTanár.hu
+# InfoTanár
 
-Felkészítő webalkalmazás a magyar közép- és emelt szintű **digitális kultúra érettségire**.
-A felhasználó kiválaszt egy programozási feladatot, megírja a megoldást a beépített
-kódszerkesztőben, lefuttatja, és automatikus kiértékelést kap.
+Online felkészítő a magyar közép- és emelt szintű **digitális kultúra érettségire**.
+A diák leckéket és videós magyarázatokat kap, a programozási feladatokat a
+böngészőben oldja meg, a megoldását pedig a szerver elszigetelt környezetben
+lefuttatja és automatikusan kiértékeli. Az első leckék ingyenesek, a többi havi
+előfizetéssel érhető el.
 
-> Prototípus. A részletes tervet lásd: [PLAN.md](PLAN.md)
+| Dokumentum | Miről szól |
+|---|---|
+| [docs/architecture.md](docs/architecture.md) | felépítés, kódfuttatás, hozzáférési szabályok, számlázási folyamat |
+| [docs/api-endpoints.md](docs/api-endpoints.md) | minden API végpont (generált) |
+| [docs/runbooks/go-live.md](docs/runbooks/go-live.md) | élesítési ellenőrzőlista |
+| [docs/runbooks/incidents.md](docs/runbooks/incidents.md) | teendők üzemzavar esetén |
+| [docs/runbooks/backup-restore.md](docs/runbooks/backup-restore.md) | mentés és visszaállítás |
+| [docs/adr/](docs/adr) | döntések: fizetés (Barion), számlázás (Számlázz.hu), hibakövetés |
+| [tests/README.md](tests/README.md) | a tesztkeretrendszer |
 
 ## Stack
 
 | Réteg | Technológia |
 |---|---|
-| Frontend | React + TypeScript, Vite, Tailwind CSS, Axios, Monaco Editor |
-| Backend | PHP 8.3 + Laravel 12 (API-only) |
-| Adatbázis | MySQL 8 (éles), SQLite (fejlesztés és teszt) |
+| Frontend | React 19 + TypeScript, Vite, Tailwind CSS 4, TanStack Query, Monaco Editor |
+| Backend | PHP 8.3 + Laravel 12 (csak API), Sanctum tokenes hitelesítés |
+| Adatbázis | MySQL 8 (éles), SQLite (fejlesztés és helyi teszt) |
+| Háttérfeladatok | Laravel queue (adatbázis-sor) és scheduler |
 | Kódfuttatás | Judge0 CE (saját hosztolás) |
-| E2E teszt | Playwright |
+| Fizetés, számlázás | Barion (ismétlődő kártyás fizetés), Számlázz.hu (Számla Agent) |
+| Tesztek | Playwright (E2E mockolt API-val, API tesztek valódi backenddel) |
 | CI/CD | GitHub Actions → SSH deploy |
 
-## Mappastruktúra
+## Mappák
 
 ```
 infotanar/
-├── frontend/            # React + Vite app
-│   ├── src/api/         # Axios kliens, végpont-wrapperek
-│   ├── src/components/  # CodeEditor, TaskCard, ResultPanel
-│   ├── src/pages/       # Home, TaskList, TaskSolve
-│   ├── src/types/       # Megosztott TS típusok
-│   └── e2e/             # Playwright tesztek (mockolt API)
-├── backend/             # Laravel 12 API
-│   ├── app/Services/    # Judge0Service, TaskEvaluator
-│   ├── app/Http/        # Controllerek (Api/V1), RunCodeRequest
-│   ├── config/judge0.php
-│   └── database/        # migrációk, seederek
-└── .github/workflows/   # ci.yml, deploy.yml
+├── backend/             Laravel API
+│   ├── app/Actions/         egy használati eset = egy osztály
+│   ├── app/Http/            vékony controllerek, FormRequestek, Resource-ok
+│   ├── app/Services/        integrációk: Judge0, Barion, Számlázz.hu, kódszabály-elemzők
+│   ├── app/Jobs/            sorban futó és ütemezett feladatok
+│   ├── lang/hu/             minden felhasználónak szóló szöveg
+│   └── routes/              api.php (végpontok), console.php (ütemezés)
+├── frontend/            React alkalmazás
+│   ├── src/app/             keret: útvonalak, fejléc, lábléc, szolgáltatók
+│   ├── src/features/        funkciónként egy mappa (auth, workspace, billing, admin, …)
+│   └── src/shared/          közös API-kliens, UI-elemek, beállítások
+├── tests/               Playwright tesztek (E2E és API)
+├── deploy/              nginx konfiguráció, systemd unitok, mentőszkript
+├── docs/                architektúra, runbookok, ADR-ek
+└── .github/workflows/   ci.yml, deploy.yml
 ```
 
----
-
-## Lokális fejlesztés
+## Helyi fejlesztés
 
 ### Előfeltételek
 
 - **PHP 8.3** a `mbstring`, `pdo_sqlite`, `sqlite3`, `curl`, `zip`, `fileinfo`, `intl` kiterjesztésekkel
 - **Composer 2**
 - **Node.js 22** + npm
-- SSH-hozzáférés a szerverhez (a Judge0 tunnelhez)
+- **Python 3** a `python3` (vagy a `CONSTRAINTS_PYTHON_BINARY`-ban megadott) néven: a
+  kódszabály-elemző használja. Nélküle a feladatok megkötései (pl. „ne használd a
+  `sum`-ot”) csendben nem érvényesülnek.
+- SSH-hozzáférés a szerverhez, ha valódi kódfuttatás kell (Judge0-tunnel)
 
 Docker nem kell.
 
-### 1. Judge0 SSH-tunnel
-
-A Judge0 a szerveren **csak localhoston** érhető el, kifelé nincs kinyitva. Lokális
-fejlesztésnél tunnelt kell nyitni, és azt nyitva hagyni egy külön terminálban:
-
-```bash
-ssh -N -L 2358:localhost:2358 <user>@<szerver>
-```
-
-Ellenőrzés:
-
-```bash
-curl -H "X-Auth-Token: <token>" http://localhost:2358/about
-```
-
-### 2. Backend
+### Backend
 
 ```bash
 cd backend
 composer install
 cp .env.example .env
 php artisan key:generate
-
-# A .env-ben állítsd be a Judge0 tokent:
-#   JUDGE0_URL=http://localhost:2358
-#   JUDGE0_AUTH_TOKEN=<token>
-
-php artisan migrate --seed          # SQLite + 5 mintafeladat betöltése
+php artisan migrate --seed          # SQLite adatbázis és a mintatananyag
 php artisan serve                   # http://127.0.0.1:8000
 ```
 
-### 3. Frontend
+Külön terminálban a háttérfeladatok. E-mail, számlakiállítás és a Barion
+visszajelzés feldolgozása sorból megy, nélküle ezek nem történnek meg:
 
 ```bash
-cd frontend
-npm install
-cp .env.example .env                # VITE_API_URL=http://127.0.0.1:8000/api/v1
-npm run dev                         # http://localhost:5173
+php artisan queue:work              # sorban álló feladatok
+php artisan schedule:work           # ütemezett feladatok (megújítás, pótlások)
 ```
 
----
+A levelek alapból a naplóba kerülnek (`MAIL_MAILER=log`, `storage/logs`).
 
-## Tesztek
+Az első admin:
 
 ```bash
-# Frontend: lint, típusellenőrzés
-cd frontend
-npm run lint
-npx tsc --noEmit
-
-# Playwright: E2E (mockolt API) és API tesztek (valódi backend + hamis Judge0)
-cd tests
-npm run check      # típusellenőrzés + ESLint
-npm test           # minden projekt
-npm run test:e2e   # csak E2E (nem kell PHP)
-npm run test:api   # csak API
-npm run test:smoke # csak @smoke
+php artisan user:role <e-mail> admin
 ```
 
 A tesztkeretrendszer felépítése és konvenciói: [tests/README.md](tests/README.md).
@@ -185,116 +169,129 @@ másolj kódot a szerverre, és ne futtass ott migrációt.
 
 A deploy kézzel is indítható: Actions → Deploy → Run workflow.
 
-### Mintaadatok — egyszeri seed
-
-A deploy a `php artisan db:seed-once` parancsot futtatja, nem a sima `db:seed`-et.
-Ez **csak akkor tölti be a mintafeladatokat, ha még egyetlen feladat sincs** az
-adatbázisban. Így az első deploy feltölti a tartalmat, a további deployok viszont
-nem írják felül a később szerkesztett feladatokat.
-
-Ha szándékosan újra akarod tölteni a mintaadatokat, a szerveren:
+A Judge0 a szerveren **csak localhoston** érhető el. Helyi fejlesztéshez tunnelt
+kell nyitni egy külön terminálban, majd a `.env`-ben megadni a tokent:
 
 ```bash
-cd /var/www/infotanar/backend && php artisan db:seed --force
+ssh -N -L 2358:localhost:2358 <user>@<szerver>
 ```
-
-### Szükséges GitHub Secrets
-
-| Secret | Példa |
-|---|---|
-| `DEPLOY_HOST` | a szerver IP-je vagy domainje |
-| `DEPLOY_USER` | SSH felhasználó (deploy-only user javasolt) |
-| `DEPLOY_SSH_KEY` | a deploy user privát kulcsa (teljes tartalom) |
-| `DEPLOY_PATH` | `/var/www/infotanar` |
-
-Ha bármelyik hiányzik, a workflow érthető hibaüzenettel áll le, nem kriptikus
-SSH-hibával.
-
----
-
-## Szerveroldali előfeltételek
-
-Ezeket **egyszer, kézzel** kell beállítani a szerveren — a pipeline nem automatizálja.
-
-### 1. Csomagok
-
-- nginx
-- PHP 8.3 + php-fpm + `php8.3-mysql`, `php8.3-mbstring`, `php8.3-curl`, `php8.3-zip`, `php8.3-xml`
-- MySQL 8
-- Judge0 (`http://localhost:2358`, csak localhoston)
-
-### 2. Adatbázis
-
-```sql
-CREATE DATABASE infotanar CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-CREATE USER 'infotanar'@'localhost' IDENTIFIED BY '<jelszó>';
-GRANT ALL PRIVILEGES ON infotanar.* TO 'infotanar'@'localhost';
-FLUSH PRIVILEGES;
-```
-
-### 3. `.env` a szerveren
-
-A `/var/www/infotanar/backend/.env` fájlt **kézzel** kell létrehozni; a deploy
-szándékosan nem írja felül. Minimum:
 
 ```ini
-APP_NAME=InfoTanar
-APP_ENV=production
-APP_KEY=base64:...        # php artisan key:generate --show
-APP_DEBUG=false
-APP_URL=https://<domain>
-
-DB_CONNECTION=mysql
-DB_HOST=127.0.0.1
-DB_DATABASE=infotanar
-DB_USERNAME=infotanar
-DB_PASSWORD=<jelszó>
-
 JUDGE0_URL=http://localhost:2358
 JUDGE0_AUTH_TOKEN=<token>
 ```
 
-### 4. Jogosultságok
+Tunnel nélkül az oldal működik, csak a „Futtatás” és a „Beadás” ad érthető
+hibaüzenetet.
+
+### Frontend
 
 ```bash
-chown -R <deploy_user>:www-data /var/www/infotanar
-chmod -R 775 /var/www/infotanar/backend/storage /var/www/infotanar/backend/bootstrap/cache
+cd frontend
+npm install
+cp .env.example .env                # VITE_API_URL=http://127.0.0.1:8000/api/v1
+npm run dev                         # http://localhost:5173
 ```
 
-A deploy usernek jelszó nélkül kell tudnia újratölteni a php-fpm-et
-(`/etc/sudoers.d/deploy`):
+A böngészőből csak a `CORS_ALLOWED_ORIGINS`-ban felsorolt címek hívhatják az
+API-t (alapból `http://localhost:5173` és `http://127.0.0.1:5173`).
 
+### Fizetés helyben
+
+A fizetéshez Barion **teszt** POSKey kell (`BARION_ENVIRONMENT=test`,
+`BARION_POS_KEY`, `BARION_PAYEE`), a számlához Számlázz.hu teszt Agent-kulcs
+(`SZAMLAZZ_AGENT_KEY`). Nélkülük az előfizetés indítása érthető hibát ad, a
+többi funkció működik.
+
+## Ellenőrzések és tesztek
+
+```bash
+# Backend: kódstílus és statikus analízis
+cd backend
+composer lint                       # Pint
+composer analyse                    # Larastan
+php artisan docs:endpoints          # a végpontlista frissítése útvonal-változás után
+
+# Frontend
+cd frontend
+npm run lint
+npm run typecheck
+npm run build
+
+# Tesztek
+cd tests
+npm run check                       # típusellenőrzés + ESLint
+npm test                            # minden
+npm run test:e2e                    # böngészős tesztek mockolt API-val (nem kell PHP)
+npm run test:api                    # API tesztek valódi backenddel és ál-Judge0-val
 ```
-<deploy_user> ALL=(root) NOPASSWD: /usr/bin/systemctl reload php8.3-fpm
-```
 
-### 5. nginx
+A CI ugyanezeket futtatja, továbbá MySQL 8-on is lefuttatja a migrációkat
+(oda-vissza) és az API teszteket, kipróbálja a mentést és a visszaállítást, és
+betölti az nginx referencia-konfigurációt.
 
-```nginx
-server {
-    listen 80;
-    server_name <domain>;
+## Deploy
 
-    # Frontend: statikus fájlok, SPA fallback
-    root /var/www/infotanar/frontend;
-    index index.html;
+A deploy **kizárólag a GitHub Actions pipeline-on keresztül** történik. Kézzel ne
+másolj kódot a szerverre, és ne futtass ott migrációt.
 
-    location / {
-        try_files $uri $uri/ /index.html;
-    }
+1. Push a `main` ágra → lefut a **CI**.
+2. Ha sikeres, elindul a **Deploy**:
+   - buildeli a frontendet, telepíti a backend éles függőségeit;
+   - `rsync`-kel feltölti őket (a `.env` és a `storage/` érintetlen marad);
+   - a szerveren: konfiguráció-ellenőrzés (`app:check-config`), mentés a migráció
+     előtt (`db:snapshot-before-migrate`), `migrate --force`, cache-ek, a queue
+     worker újraindítása, php-fpm újratöltés;
+   - állapot-ellenőrzés a nyilvános címen.
 
-    # Backend: Laravel
-    location /api {
-        try_files $uri $uri/ /index.php?$query_string;
-    }
+Kézzel is indítható: Actions → Deploy → Run workflow.
 
-    location ~ ^/index\.php$ {
-        root /var/www/infotanar/backend/public;
-        fastcgi_pass unix:/run/php/php8.3-fpm.sock;
-        include fastcgi_params;
-        fastcgi_param SCRIPT_FILENAME /var/www/infotanar/backend/public/index.php;
-    }
+### GitHub beállítások
 
-    location ~ /\. { deny all; }
-}
-```
+| Név | Típus | Mire való |
+|---|---|---|
+| `DEPLOY_HOST`, `DEPLOY_USER`, `DEPLOY_SSH_KEY`, `DEPLOY_PATH` | secret | SSH-elérés; nélkülük a deploy érthető hibával leáll |
+| `DEPLOY_URL` | secret | `https://<domain>`: az állapot-ellenőrzés címe. Nélküle figyelmeztetéssel, HTTP-n fut |
+| `HEALTH_TOKEN` | secret | a részletes állapot-ellenőrzéshez (ugyanaz, mint a szerver `.env`-jében). Nélküle csak azt nézzük, válaszol-e a PHP |
+| `DEPLOY_STRICT_CONFIG` | változó | `true` esetén a hiányos éles konfiguráció megállítja a deployt. **Élesítéskor bekapcsolandó** |
+| `BARION_PIXEL_ID`, `BARION_PIXEL_REQUIRES_CONSENT` | változó | Barion Pixel (ADR 0001) |
+
+### Mintaadatok
+
+A deploy a `php artisan db:seed-once` parancsot futtatja: csak akkor tölti be a
+mintatananyagot, ha még egyetlen feladat sincs. A később szerkesztett tartalmat
+nem írja felül.
+
+## A szerver beállítása
+
+Egyszeri, kézi lépések; sorrendben a [go-live runbook](docs/runbooks/go-live.md)
+vezet végig rajtuk. Röviden:
+
+- **Csomagok:** nginx, PHP 8.3 + php-fpm (`mysql`, `mbstring`, `curl`, `zip`, `xml`,
+  `intl`), MySQL 8, Python 3, Judge0 (csak localhoston), certbot, rclone.
+- **Adatbázis:**
+  ```sql
+  CREATE DATABASE infotanar CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+  CREATE USER 'infotanar'@'localhost' IDENTIFIED BY '<jelszó>';
+  GRANT ALL PRIVILEGES ON infotanar.* TO 'infotanar'@'localhost';
+  ```
+- **`.env`:** kézzel készül a `/var/www/infotanar/backend/.env` helyen; a szükséges
+  kulcsok a [`backend/.env.example`](backend/.env.example) „Éles környezet”
+  részében vannak. Ellenőrzés: `php artisan app:check-config --strict`.
+- **Jogosultságok:**
+  ```bash
+  chown -R <deploy_user>:www-data /var/www/infotanar
+  chmod -R 775 /var/www/infotanar/backend/storage /var/www/infotanar/backend/bootstrap/cache
+  ```
+  A deploy usernek jelszó nélkül kell tudnia újratölteni a php-fpm-et
+  (`/etc/sudoers.d/deploy`):
+  ```
+  <deploy_user> ALL=(root) NOPASSWD: /usr/bin/systemctl reload php8.3-fpm
+  ```
+- **nginx és HTTPS:** [`deploy/nginx/infotanar.conf`](deploy/nginx/infotanar.conf)
+  és a hozzá tartozó [fejléc-részlet](deploy/nginx/snippets/infotanar-security-headers.conf);
+  a telepítés lépései a fájl elején.
+- **Háttérfolyamatok:** `deploy/systemd/infotanar-queue.service` és
+  `infotanar-scheduler.service`. Nélkülük nincs e-mail, számla és megújítás.
+- **Mentés:** `deploy/systemd/infotanar-backup.timer`, lásd a
+  [mentési runbookot](docs/runbooks/backup-restore.md).

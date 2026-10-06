@@ -4,8 +4,11 @@ declare(strict_types=1);
 
 namespace App\Actions\Billing;
 
+use App\Actions\Consent\RecordConsent;
+use App\Enums\ConsentType;
 use App\Enums\PaymentPurpose;
 use App\Exceptions\Billing\CheckoutNotAllowed;
+use App\Models\Payment;
 use App\Models\User;
 use App\Services\Billing\Barion\BarionException;
 use App\Services\Billing\Barion\StartedPayment;
@@ -18,13 +21,18 @@ use App\Services\Billing\Barion\StartedPayment;
  */
 final readonly class StartCheckout
 {
-    public function __construct(private StartHostedPayment $startHostedPayment) {}
+    public function __construct(
+        private StartHostedPayment $startHostedPayment,
+        private RecordConsent $recordConsent,
+    ) {}
 
     /**
+     * @param  string  $termsVersion  az ASZF verzioja, amely mellett a vasarlo az azonnali teljesitest kerte (#133)
+     *
      * @throws CheckoutNotAllowed
      * @throws BarionException
      */
-    public function handle(User $user): StartedPayment
+    public function handle(User $user, string $termsVersion): StartedPayment
     {
         if (! $user->hasVerifiedEmail()) {
             throw CheckoutNotAllowed::emailNotVerified();
@@ -34,6 +42,16 @@ final readonly class StartCheckout
             throw CheckoutNotAllowed::alreadySubscribed();
         }
 
-        return $this->startHostedPayment->handle($user, PaymentPurpose::Initial);
+        $started = $this->startHostedPayment->handle($user, PaymentPurpose::Initial);
+
+        // A nyilatkozat ahhoz a fizeteshez tartozik, amelyik most indult el.
+        $payment = Payment::query()
+            ->where('provider', Payment::PROVIDER_BARION)
+            ->where('provider_payment_id', $started->paymentId)
+            ->first();
+
+        $this->recordConsent->handle($user, ConsentType::ImmediatePerformance, $termsVersion, $payment);
+
+        return $started;
     }
 }

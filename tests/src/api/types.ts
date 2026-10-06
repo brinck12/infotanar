@@ -107,6 +107,10 @@ export interface RegisterRequest {
   email: string
   password: string
   password_confirmation: string
+  /** Az ASZF es az adatkezelesi tajekoztato elfogadasa a latott verziokkal (#133). */
+  accept_terms: boolean
+  terms_version: string
+  privacy_version: string
 }
 
 export interface User {

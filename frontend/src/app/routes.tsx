@@ -9,6 +9,9 @@ function page<K extends string>(
 }
 
 export const Home = page(() => import('../features/home/Home'), 'Home')
+export const Curriculum = page(() => import('../features/catalog/pages/Curriculum'), 'Curriculum')
+export const TrackPage = page(() => import('../features/catalog/pages/TrackPage'), 'TrackPage')
+export const LessonPage = page(() => import('../features/lesson/pages/LessonPage'), 'LessonPage')
 export const TaskList = page(() => import('../features/catalog/pages/TaskList'), 'TaskList')
 export const TaskSolve = page(() => import('../features/workspace/pages/TaskSolve'), 'TaskSolve')
 export const Register = page(() => import('../features/auth/pages/Register'), 'Register')
@@ -28,4 +31,9 @@ export const AdminNewExercise = page(() => import('../features/admin/catalog/pag
 export const AdminUsers = page(() => import('../features/admin/users/pages/AdminUsers'), 'AdminUsers')
 export const AdminUserDetail = page(() => import('../features/admin/users/pages/AdminUserDetail'), 'AdminUserDetail')
 export const PaymentReturn = page(() => import('../features/billing/pages/PaymentReturn'), 'PaymentReturn')
+export const Account = page(() => import('../features/account/pages/Account'), 'Account')
+export const EmailChangeConfirm = page(() => import('../features/account/pages/EmailChangeConfirm'), 'EmailChangeConfirm')
+export const Terms = page(() => import('../features/legal/pages/LegalPage'), 'Terms')
+export const Privacy = page(() => import('../features/legal/pages/LegalPage'), 'Privacy')
+export const Imprint = page(() => import('../features/legal/pages/LegalPage'), 'Imprint')
 export const AdminInvoices = page(() => import('../features/admin/invoices/pages/AdminInvoices'), 'AdminInvoices')

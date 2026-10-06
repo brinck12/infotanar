@@ -1,4 +1,5 @@
 import { http, type Envelope } from '../../shared/api/client'
+import { saveBlob } from '../../shared/api/download'
 import type { BillingProfile, BillingProfilePayload, HostedCheckout, PaymentSummary, Plan, Subscription } from '../../types'
 
 export const billingKeys = {
@@ -24,8 +25,14 @@ export async function subscription(signal?: AbortSignal): Promise<Subscription |
   return (await http.get<Envelope<Subscription | null>>('/billing/subscription', { signal })).data.data
 }
 
-export async function checkout(): Promise<HostedCheckout> {
-  return (await http.post<Envelope<HostedCheckout>>('/billing/checkout')).data.data
+export interface CheckoutPayload {
+  /** A vásárló kéri, hogy a szolgáltatás a fizetés után azonnal induljon (#133). */
+  accept_immediate_performance: boolean
+  terms_version: string
+}
+
+export async function checkout(payload: CheckoutPayload): Promise<HostedCheckout> {
+  return (await http.post<Envelope<HostedCheckout>>('/billing/checkout', payload)).data.data
 }
 
 export const paymentKeys = {
@@ -64,14 +71,6 @@ export async function changeCard(): Promise<HostedCheckout> {
  */
 export async function downloadInvoice(paymentId: string, invoiceNumber: string): Promise<void> {
   const response = await http.get<Blob>(`/billing/payments/${encodeURIComponent(paymentId)}/invoice`, { responseType: 'blob' })
-  const url = URL.createObjectURL(response.data)
-  try {
-    const link = document.createElement('a')
-    link.href = url
-    link.download = `szamla-${invoiceNumber}.pdf`
-    link.click()
-  } finally {
-    // A kattintás szinkron indítja a letöltést; utána az URL felszabadítható.
-    setTimeout(() => URL.revokeObjectURL(url), 0)
-  }
+
+  saveBlob(response.data, `szamla-${invoiceNumber}.pdf`)
 }

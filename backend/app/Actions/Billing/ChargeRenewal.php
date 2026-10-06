@@ -13,6 +13,7 @@ use App\Services\Billing\Barion\BarionClient;
 use App\Services\Billing\Barion\BarionException;
 use App\Services\Billing\Barion\PaymentRequestFactory;
 use Illuminate\Database\UniqueConstraintViolationException;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -21,10 +22,12 @@ use Illuminate\Support\Str;
 /**
  * Egy esedekes elofizetes megujitasa a tarolt kartyaval (#98, ADR 0001).
  *
- * Pontosan egy terheles idoszakonkent: a fizetes-sor a lejaro idoszak
- * vegehez kotott (egyedi index), es elobb jon letre, mint a Barion-hivas.
- * Ujrafuttataskor (job retry, parhuzamos sweep) ugyanazt a sort talaljuk
- * meg: ha mar elindult vagy lezarult, nem terhelunk ujra.
+ * Egy idoszakra tobb terhelesi kiserlet is lehet (#138): ha az elso
+ * elutasitasra fut (pl. nincs fedezet), a turelmi ido alatt a beallitott
+ * napokon ujra megprobaljuk. Egy kiserlethez viszont pontosan egy fizetes-sor
+ * tartozik (egyedi index), es az elobb jon letre, mint a Barion-hivas.
+ * Ujrafuttataskor (job retry, parhuzamos sweep) ugyanazt a sort talaljuk meg:
+ * ha mar elindult vagy lezarult, ugyanazt a kiserletet nem terheljuk ujra.
  *
  * A Barion valasza utan az eredmenyt ugyanaz a SyncPaymentState dolgozza
  * fel, mint a callbacket: siker eseten az idoszak hosszabbodik, elutasitasnal
@@ -49,8 +52,8 @@ final readonly class ChargeRenewal
         }
 
         if ($payment->status->isFinal()) {
-            // Egy korabbi kiserlet mar lezarult erre az idoszakra: sikernel nincs teendo,
-            // kudarcnal (pl. elhagyott inditas) a turelmi ido indul, ujraterheles nincs.
+            // A legutobbi kiserlet mar lezarult, es uj meg nem esedekes: sikernel nincs
+            // teendo, kudarcnal (pl. elhagyott inditas) a turelmi ido indul.
             if ($payment->status !== PaymentStatus::Succeeded) {
                 $this->markPastDue->handle($subscription);
             }
@@ -63,8 +66,9 @@ final readonly class ChargeRenewal
                 $started = $this->barion->startPayment($this->requests->recurringCharge($payment, $subscription->user()->withTrashed()->firstOrFail()));
             } catch (BarionException $e) {
                 if ($e->status() === 502) {
-                    // A Barion elutasitotta (pl. lejart/letiltott kartya): ez kudarc, nem atmeneti hiba.
-                    $payment->update(['status' => PaymentStatus::Failed, 'provider_status' => 'StartRejected']);
+                    // A Barion el sem inditotta a terhelest (pl. lejart/letiltott kartya-token):
+                    // ez nem atmeneti hiba, ujraprobalni sem erdemes, uj kartya kell.
+                    $payment->update(['status' => PaymentStatus::Failed, 'provider_status' => Payment::STATUS_START_REJECTED]);
                     $this->markPastDue->handle($subscription);
                     Log::warning('Renewal charge rejected by Barion.', ['subscription_id' => $subscription->id]);
 
@@ -81,54 +85,99 @@ final readonly class ChargeRenewal
         return $this->sync->handle($payment);
     }
 
-    /** A lejaro idoszakra szolo megujitasi fizetes, szukseg eseten letrehozva. */
+    /**
+     * A lejart idoszakra szolo, most feldolgozando fizetes: az elso kiserlet, egy
+     * folyamatban levo, vagy (ha esedekes) egy uj ujraprobalkozas. Null, ha az
+     * elofizetes nem terhelheto.
+     */
     private function openPayment(Subscription $subscription): ?Payment
     {
         return DB::transaction(function () use ($subscription): ?Payment {
             $locked = Subscription::query()->lockForUpdate()->find($subscription->id);
 
-            if ($locked === null || ! self::isDue($locked)) {
+            if ($locked === null || ! self::isChargeable($locked)) {
                 return null;
             }
 
-            $periodEnd = $locked->current_period_end;
-
-            $existing = Payment::query()
+            $attempts = Payment::query()
                 ->where('subscription_id', $locked->id)
-                ->where('renews_period_ending_at', $periodEnd)
-                ->first();
+                ->where('renews_period_ending_at', $locked->current_period_end)
+                ->orderBy('attempt')
+                ->get();
 
-            if ($existing !== null) {
-                return $existing;
+            $latest = $attempts->last();
+
+            if ($latest === null) {
+                return $this->createAttempt($locked, 1);
             }
 
-            try {
-                return Payment::create([
-                    'user_id' => $locked->user_id,
-                    'subscription_id' => $locked->id,
-                    'provider' => Payment::PROVIDER_BARION,
-                    'request_id' => (string) Str::uuid(),
-                    'recurrence_id' => (string) $locked->provider_subscription_id,
-                    'purpose' => PaymentPurpose::Renewal,
-                    'renews_period_ending_at' => $periodEnd,
-                    'amount' => Config::integer('billing.plan.price_huf'),
-                    'currency' => 'HUF',
-                    'status' => PaymentStatus::Pending,
-                ]);
-            } catch (UniqueConstraintViolationException) {
-                // Egy parhuzamos futas megelozott minket: az o sorat hasznaljuk.
-                return Payment::query()
-                    ->where('subscription_id', $locked->id)
-                    ->where('renews_period_ending_at', $periodEnd)
-                    ->firstOrFail();
-            }
+            return $this->retryIsDue($attempts) ? $this->createAttempt($locked, $latest->attempt + 1) : $latest;
         });
     }
 
-    /** Aktiv, lejart idoszaku, nem lemondott, es van tarolt kartya-tokenje. */
-    public static function isDue(Subscription $subscription): bool
+    /**
+     * Ujraprobalkozas akkor esedekes, ha a legutobbi kiserlet elutasitasra futott
+     * (de a kartya-token meg hasznalhato), es az elso kudarc ota eltelt a
+     * kovetkezo kiserlethez beallitott napok szama.
+     *
+     * @param  Collection<int, Payment>  $attempts  a kiserletek sorrendben, legalabb egy
+     */
+    private function retryIsDue(Collection $attempts): bool
     {
-        return $subscription->status === SubscriptionStatus::Active
+        $first = $attempts->firstOrFail();
+        $latest = $attempts->last() ?? $first;
+
+        if ($latest->status === PaymentStatus::Pending || $latest->status === PaymentStatus::Succeeded) {
+            return false;
+        }
+
+        if ($latest->provider_status === Payment::STATUS_START_REJECTED) {
+            return false;
+        }
+
+        $retryAfterDays = Config::array('billing.dunning.retry_days')[$attempts->count() - 1] ?? null;
+
+        return is_int($retryAfterDays)
+            && $first->created_at !== null
+            && $first->created_at->copy()->addDays($retryAfterDays)->isPast();
+    }
+
+    private function createAttempt(Subscription $subscription, int $attempt): Payment
+    {
+        $period = [
+            'subscription_id' => $subscription->id,
+            'renews_period_ending_at' => $subscription->current_period_end,
+            'attempt' => $attempt,
+        ];
+
+        try {
+            return Payment::create([
+                ...$period,
+                'user_id' => $subscription->user_id,
+                'provider' => Payment::PROVIDER_BARION,
+                'request_id' => (string) Str::uuid(),
+                'recurrence_id' => (string) $subscription->provider_subscription_id,
+                'purpose' => PaymentPurpose::Renewal,
+                'amount' => Config::integer('billing.plan.price_huf'),
+                'currency' => 'HUF',
+                'status' => PaymentStatus::Pending,
+            ]);
+        } catch (UniqueConstraintViolationException) {
+            // Egy parhuzamos futas megelozott minket: az o sorat hasznaljuk.
+            return Payment::query()->where($period)->firstOrFail();
+        }
+    }
+
+    /**
+     * Lejart idoszaku, nem lemondott, tarolt kartya-tokennel rendelkezo elofizetes,
+     * amely aktiv (elso kiserlet) vagy a turelmi idejen belul van (ujraprobalkozas).
+     */
+    public static function isChargeable(Subscription $subscription): bool
+    {
+        $inGracePeriod = $subscription->status === SubscriptionStatus::PastDue
+            && $subscription->grace_ends_at?->isFuture() === true;
+
+        return ($subscription->status === SubscriptionStatus::Active || $inGracePeriod)
             && ! $subscription->cancel_at_period_end
             && $subscription->provider === Payment::PROVIDER_BARION
             && $subscription->provider_subscription_id !== null
