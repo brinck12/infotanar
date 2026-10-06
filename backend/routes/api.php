@@ -96,8 +96,8 @@ Route::prefix('v1')->name('api.')->middleware(RejectInvalidToken::class)->group(
     Route::get('/tasks', [TaskController::class, 'index'])->name('tasks.index');
     Route::get('/tasks/{task}', [TaskController::class, 'show'])->whereNumber('task')->name('tasks.show');
 
-    // A kodfuttatas draga muvelet: IP-nkent 10 keres / perc.
-    Route::middleware('throttle:10,1')->group(function (): void {
+    // A kodfuttatas draga muvelet: fiokonkent (vendegnel IP-nkent) korlatozzuk, lasd ExecutionRateLimit.
+    Route::middleware('throttle:execution')->group(function (): void {
         Route::post('/run', RunController::class)->name('run');
         Route::post('/submissions', [SubmissionController::class, 'store'])->name('submissions.store');
     });

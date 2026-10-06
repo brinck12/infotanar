@@ -14,7 +14,7 @@ use App\Models\Subscription;
 use App\Models\TestCase;
 use App\Models\Track;
 use App\Models\User;
-use App\Support\Alerts\OperatorAlert;
+use App\Support\RateLimiting\ExecutionRateLimit;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\Relation;
@@ -108,6 +108,9 @@ final class AppServiceProvider extends ServiceProvider
         RateLimiter::for('checkout', static fn (Request $request) => Limit::perMinute(5)
             ->by($userOrIp($request))
             ->response($tooMany));
+
+        // Kodfuttatas: bejelentkezve fiokonkent, vendegnel IP-nkent, es egy kozos keret a Judge0 vedelmere.
+        RateLimiter::for('execution', static fn (Request $request): array => app(ExecutionRateLimit::class)->limits($request));
 
         // Jelszot ellenorzo, visszafordithatatlan muveletek: a jelszo ne legyen talalgathato.
         RateLimiter::for('sensitive', static fn (Request $request) => Limit::perMinute(5)

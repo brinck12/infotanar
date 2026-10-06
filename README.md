@@ -91,7 +91,83 @@ Az első admin:
 php artisan user:role <e-mail> admin
 ```
 
-### Judge0
+A tesztkeretrendszer felépítése és konvenciói: [tests/README.md](tests/README.md).
+
+---
+
+## API
+
+Minden végpont a `/api/v1` prefix alatt.
+
+| Metódus | Útvonal | Leírás |
+|---|---|---|
+| `GET` | `/health` | `{ "ok": true }` — deploy smoke checkhez |
+| `GET` | `/topics` | Témakörök, publikált feladatszámmal |
+| `GET` | `/tasks?topic=&level=` | Publikált feladatok listája (leírás nélkül) |
+| `GET` | `/tasks/{id}` | Feladat teljes leírással, starter_code-dal és a **nem rejtett** tesztesetekkel |
+| `POST` | `/run` | Futtatás csak a nem rejtett teszteseteken, nem mentődik |
+| `POST` | `/submissions` | Futtatás **minden** teszteseten, submission mentésével |
+
+A `/run` és a `/submissions` közös rate limit alatt áll (`throttle:execution`),
+mert a kódfuttatás drága művelet. A keret bejelentkezve **fiókonként** számít, így
+egy közös IP mögött ülő osztály tagjai nem egymás elől fogyasztják el:
+
+| Ki | Kulcs | Alapérték | Beállítás (`backend/.env`) |
+|---|---|---|---|
+| Vendég | IP-cím | 10 / perc | `JUDGE0_RATE_GUEST_PER_MINUTE` |
+| Bejelentkezett | fiók | 20 / perc | `JUDGE0_RATE_USER_PER_MINUTE` |
+| Előfizető, admin | fiók | 40 / perc | `JUDGE0_RATE_PREMIUM_PER_MINUTE` |
+| Bejelentkezett (napi) | fiók | 1000 / nap | `JUDGE0_RATE_USER_PER_DAY` |
+| Mindenki együtt | – | 300 / perc | `JUDGE0_RATE_GLOBAL_PER_MINUTE` |
+
+A saját keret túllépése `429`, a közös kereté `503` (nem a kérő hibája, a futtató
+telt meg). Mindkét válasz törzse megmondja, mennyit kell várni:
+
+```json
+{ "message": "Túl sok futtatás rövid idő alatt. Próbáld újra 42 másodperc múlva.",
+  "reason": "rate_limited", "retry_after": 42, "guest": false }
+```
+
+A `reason` értéke `rate_limited`, `daily_limit` vagy `busy`; a `guest` csak a
+`rate_limited` válaszban szerepel. A `Retry-After` fejléc is megy.
+
+### A kódfuttatás szabályai
+
+- A frontend **soha nem hívja közvetlenül a Judge0-t**. Minden futtatás a Laravel
+  backenden megy át (`Judge0Service`): így a Judge0 URL és token nem kerül a kliensbe,
+  és az elvárt kimenet összevetése is szerveroldalon történik.
+- Az összevetést a `TaskEvaluator` végzi, nem a Judge0 `expected_output` mezője.
+  A sorvégi whitespace-t és a záró üres sorokat normalizáljuk.
+- **Rejtett teszteseteknél a válasz csak PASS/FAIL**, kimenet nélkül — különben a
+  rejtett bemenetek visszafejthetők lennének.
+- A nyelvek Judge0 ID-ját futásidőben a `/languages` végpontról oldjuk fel
+  (`config/judge0.php` `match` mezője alapján), nem hardcode-oljuk. Ha a `/languages`
+  nem elérhető, a `fallback_id` lép életbe.
+- Limitek minden kérésben: `cpu_time_limit: 2`, `memory_limit: 128000`,
+  `max_processes_and_or_threads: 60`.
+- Ha a Judge0 elérhetetlen, a válasz `status: "error"` érthető magyar üzenettel,
+  nem 500-as stacktrace.
+
+---
+
+## Deploy
+
+A deploy **kizárólag a GitHub Actions pipeline-on keresztül** történik. Kézzel ne
+másolj kódot a szerverre, és ne futtass ott migrációt.
+
+### Folyamat
+
+1. Push a `main` ágra → lefut a **CI** (`ci.yml`).
+2. Ha a CI sikeres, elindul a **Deploy** (`deploy.yml`), ami:
+   - buildeli a frontendet (`VITE_API_URL=/api/v1`),
+   - `composer install --no-dev --optimize-autoloader` a backendre,
+   - `rsync`-kel feltölti a `frontend/dist/`-et és a `backend/`-et
+     (a `.env`, `storage/`, `node_modules/`, `tests/` kihagyásával),
+   - a szerveren lefuttatja: `migrate --force`, `db:seed-once`, `config:cache`, `route:cache`,
+   - újratölti a php-fpm-et,
+   - smoke checket futtat a `/api/v1/health` végpontra.
+
+A deploy kézzel is indítható: Actions → Deploy → Run workflow.
 
 A Judge0 a szerveren **csak localhoston** érhető el. Helyi fejlesztéshez tunnelt
 kell nyitni egy külön terminálban, majd a `.env`-ben megadni a tokent:
