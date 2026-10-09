@@ -2,8 +2,10 @@ import { useMutation } from '@tanstack/react-query'
 import { useState, type ChangeEvent, type FormEvent } from 'react'
 import { Link, Navigate, useNavigate } from 'react-router-dom'
 import { hibaUzenet, mezoHibak } from '../../../shared/api/errors'
-import { Alert, AuthCard, Field, SubmitButton } from '../../../shared/ui/Form'
+import { Banner } from '../../../shared/ui/Banner'
+import { CheckboxField, Field, SubmitButton } from '../../../shared/ui/Form'
 import * as authApi from '../api'
+import { AuthCard } from '../components/AuthCard'
 import { useAuth } from '../context'
 
 type Form = authApi.RegisterPayload
@@ -12,6 +14,8 @@ export function Register() {
   const { user, login } = useAuth()
   const navigate = useNavigate()
   const [form, setForm] = useState<Form>({ name: '', email: '', password: '', password_confirmation: '' })
+  const [accepted, setAccepted] = useState(false)
+  const [termsError, setTermsError] = useState(false)
 
   const mutation = useMutation({
     mutationFn: async (payload: Form) => {
@@ -31,13 +35,22 @@ export function Register() {
 
   function onSubmit(e: FormEvent) {
     e.preventDefault()
-    mutation.mutate(form)
+    setTermsError(!accepted)
+    if (accepted) mutation.mutate(form)
   }
 
   return (
-    <AuthCard title="Regisztráció">
-      {generalError && <Alert kind="error">{generalError}</Alert>}
-      <form onSubmit={onSubmit} className="space-y-4" noValidate>
+    <AuthCard
+      title="Regisztráció"
+      lead="Ingyenes fiókkal elmented a haladásod, és megnyílik az első két lecke minden sávban."
+      footer={
+        <>
+          Van már fiókod? <Link to="/bejelentkezes">Belépés</Link>
+        </>
+      }
+    >
+      {generalError && <Banner kind="error">{generalError}</Banner>}
+      <form onSubmit={onSubmit} className="flex flex-col gap-5" noValidate>
         <Field label="Név" autoComplete="name" required value={form.name} onChange={set('name')} error={errors.name} />
         <Field
           label="E-mail-cím"
@@ -56,10 +69,10 @@ export function Register() {
           value={form.password}
           onChange={set('password')}
           error={errors.password}
-          hint="Legalább 8 karakter, betűvel és számmal."
+          hint="Legalább 8 karakter, benne betű és szám is legyen."
         />
         <Field
-          label="Jelszó még egyszer"
+          label="Jelszó újra"
           type="password"
           autoComplete="new-password"
           required
@@ -67,14 +80,25 @@ export function Register() {
           onChange={set('password_confirmation')}
           error={errors.password_confirmation}
         />
-        <SubmitButton busy={mutation.isPending}>{mutation.isPending ? 'Regisztráció…' : 'Regisztrálok'}</SubmitButton>
+        <CheckboxField
+          checked={accepted}
+          onChange={(e) => {
+            setAccepted(e.target.checked)
+            if (e.target.checked) setTermsError(false)
+          }}
+          required
+          error={termsError ? 'A regisztrációhoz fogadd el a feltételeket és a tájékoztatót.' : undefined}
+          label={
+            <>
+              Elfogadom az <Link to="/aszf">általános szerződési feltételeket</Link> és az{' '}
+              <Link to="/adatkezeles">adatkezelési tájékoztatót</Link>.
+            </>
+          }
+        />
+        <SubmitButton busy={mutation.isPending} busyLabel="Fiók létrehozása…" size="lg">
+          Fiók létrehozása
+        </SubmitButton>
       </form>
-      <p className="text-sm text-slate-400">
-        Van már fiókod?{' '}
-        <Link to="/bejelentkezes" className="text-sky-400 hover:underline">
-          Jelentkezz be
-        </Link>
-      </p>
     </AuthCard>
   )
 }

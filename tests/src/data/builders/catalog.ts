@@ -1,4 +1,4 @@
-import type { TaskDetail, TaskListItem, TaskTopic, Topic } from '../../api/types'
+import type { TaskDetail, TaskListItem, TaskTopic, Topic, TrackDetail, TrackSummary } from '../../api/types'
 
 /**
  * Katalogus-entitasok (temakor, feladat) gyarai. Minden gyar ervenyes,
@@ -34,4 +34,37 @@ export function buildTaskDetail(overrides: Partial<TaskDetail> = {}): TaskDetail
 export function toTaskListItem(task: TaskDetail): TaskListItem {
   const { id, title, level, difficulty, allowed_languages, topic } = task
   return { id, title, level, difficulty, allowed_languages, topic }
+}
+
+/**
+ * Egyetlen kepzesi ag a megadott feladatokkal: temakoronkent egy modul, benne
+ * feladatonkent egy lecke. A feladatlista ag szerinti csoportositasahoz kell.
+ */
+export function buildTrackDetail(tasks: TaskDetail[], overrides: Partial<TrackDetail> = {}): TrackDetail {
+  const topics = [...new Map(tasks.map((task) => [task.topic.id, task.topic])).values()]
+
+  return {
+    id: 1,
+    slug: 'programozas',
+    title: 'Programozás',
+    description: null,
+    modules: topics.map((topic) => ({
+      id: topic.id,
+      slug: topic.slug,
+      title: topic.name,
+      description: null,
+      lessons: tasks
+        .filter((task) => task.topic.id === topic.id)
+        .map((task) => {
+          const { id, title, level, difficulty, allowed_languages } = task
+          return { id, slug: `lecke-${String(id)}`, title, is_free: true, exercises: [{ id, title, level, difficulty, allowed_languages }] }
+        }),
+    })),
+    ...overrides,
+  }
+}
+
+export function toTrackSummary(track: TrackDetail): TrackSummary {
+  const { id, slug, title, description, modules } = track
+  return { id, slug, title, description, lesson_count: modules.reduce((sum, module) => sum + module.lessons.length, 0) }
 }

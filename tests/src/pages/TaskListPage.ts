@@ -7,7 +7,7 @@ export class TaskListPage extends BasePage {
 
   constructor(page: Page) {
     super(page)
-    this.heading = page.getByRole('heading', { name: 'Feladatok' })
+    this.heading = page.getByRole('heading', { name: 'Feladatok', exact: true })
     this.taskCards = page.getByTestId('task-card')
   }
 

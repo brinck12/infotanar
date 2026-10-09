@@ -2,8 +2,11 @@ import { useMutation } from '@tanstack/react-query'
 import { useState, type FormEvent } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { hibaUzenet, mezoHibak } from '../../../shared/api/errors'
-import { Alert, AuthCard, Field, SubmitButton } from '../../../shared/ui/Form'
+import { Banner } from '../../../shared/ui/Banner'
+import { ButtonLink } from '../../../shared/ui/Button'
+import { Field, SubmitButton } from '../../../shared/ui/Form'
 import * as authApi from '../api'
+import { AuthCard } from '../components/AuthCard'
 
 export function ResetPassword() {
   const [params] = useSearchParams()
@@ -13,10 +16,10 @@ export function ResetPassword() {
   if (!token || !email) {
     return (
       <AuthCard title="Új jelszó beállítása">
-        <Alert kind="error">A link hiányos. Kérj új visszaállító linket.</Alert>
-        <Link to="/elfelejtett-jelszo" className="inline-block text-sm text-sky-400 hover:underline">
+        <Banner kind="error">A link hiányos. Kérj új visszaállító linket.</Banner>
+        <ButtonLink to="/elfelejtett-jelszo" variant="secondary">
           Új link kérése
-        </Link>
+        </ButtonLink>
       </AuthCard>
     )
   }
@@ -42,29 +45,27 @@ function ResetPasswordForm({ token, email }: { token: string; email: string }) {
 
   if (mutation.isSuccess) {
     return (
-      <AuthCard title="Új jelszó beállítása">
-        <Alert kind="success">{mutation.data}</Alert>
-        <Link to="/bejelentkezes" className="inline-block text-sky-400 hover:underline">
-          Bejelentkezés
-        </Link>
+      <AuthCard icon="check" title="Az új jelszavad elmentve" lead={mutation.data}>
+        <ButtonLink to="/bejelentkezes">Belépés</ButtonLink>
       </AuthCard>
     )
   }
 
   return (
-    <AuthCard title="Új jelszó beállítása">
-      <p className="text-sm text-slate-400">
-        Fiók: <span className="text-slate-200">{email}</span>
-      </p>
+    <AuthCard
+      title="Új jelszó beállítása"
+      lead={
+        <>
+          Válassz új jelszót a <strong className="text-ink">{email}</strong> fiókhoz. A régi jelszóval nem tudsz majd belépni.
+        </>
+      }
+    >
       {generalError && (
-        <Alert kind="error">
-          {generalError}{' '}
-          <Link to="/elfelejtett-jelszo" className="underline">
-            Új link kérése
-          </Link>
-        </Alert>
+        <Banner kind="error" action={<Link to="/elfelejtett-jelszo">Új link kérése</Link>}>
+          {generalError}
+        </Banner>
       )}
-      <form onSubmit={onSubmit} className="space-y-4" noValidate>
+      <form onSubmit={onSubmit} className="flex flex-col gap-5" noValidate>
         <Field
           label="Új jelszó"
           type="password"
@@ -73,10 +74,10 @@ function ResetPasswordForm({ token, email }: { token: string; email: string }) {
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           error={fieldErrors.password}
-          hint="Legalább 8 karakter, betűvel és számmal."
+          hint="Legalább 8 karakter, benne betű és szám is legyen."
         />
         <Field
-          label="Új jelszó még egyszer"
+          label="Új jelszó újra"
           type="password"
           autoComplete="new-password"
           required
@@ -84,7 +85,9 @@ function ResetPasswordForm({ token, email }: { token: string; email: string }) {
           onChange={(e) => setConfirmation(e.target.value)}
           error={fieldErrors.password_confirmation}
         />
-        <SubmitButton busy={mutation.isPending}>{mutation.isPending ? 'Mentés…' : 'Jelszó mentése'}</SubmitButton>
+        <SubmitButton busy={mutation.isPending} busyLabel="Mentés…" size="lg">
+          Jelszó mentése
+        </SubmitButton>
       </form>
     </AuthCard>
   )

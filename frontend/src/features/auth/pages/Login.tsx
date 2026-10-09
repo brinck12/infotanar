@@ -2,7 +2,9 @@ import { useMutation } from '@tanstack/react-query'
 import { useState, type FormEvent } from 'react'
 import { Link } from 'react-router-dom'
 import { hibaUzenet, mezoHibak } from '../../../shared/api/errors'
-import { Alert, AuthCard, Field, SubmitButton } from '../../../shared/ui/Form'
+import { Banner } from '../../../shared/ui/Banner'
+import { Field, SubmitButton } from '../../../shared/ui/Form'
+import { AuthCard } from '../components/AuthCard'
 import { useAuth } from '../context'
 
 /** Sikeres belépés után a GuestOnly guard visz tovább (a `from` helyre vagy a feladatokhoz). */
@@ -22,9 +24,17 @@ export function Login() {
   }
 
   return (
-    <AuthCard title="Bejelentkezés">
-      {generalError && <Alert kind="error">{generalError}</Alert>}
-      <form onSubmit={onSubmit} className="space-y-4" noValidate>
+    <AuthCard
+      title="Belépés"
+      lead="Folytasd ott, ahol abbahagytad."
+      footer={
+        <>
+          Még nincs fiókod? <Link to="/regisztracio">Regisztrálj</Link>, ingyenes.
+        </>
+      }
+    >
+      {generalError && <Banner kind="error">{generalError}</Banner>}
+      <form onSubmit={onSubmit} className="flex flex-col gap-5" noValidate>
         <Field
           label="E-mail-cím"
           type="email"
@@ -42,17 +52,12 @@ export function Login() {
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           error={errors.password}
+          labelAction={<Link to="/elfelejtett-jelszo">Elfelejtetted?</Link>}
         />
-        <SubmitButton busy={mutation.isPending}>{mutation.isPending ? 'Bejelentkezés…' : 'Bejelentkezem'}</SubmitButton>
+        <SubmitButton busy={mutation.isPending} busyLabel="Belépés…" size="lg">
+          Belépés
+        </SubmitButton>
       </form>
-      <div className="flex justify-between text-sm text-slate-400">
-        <Link to="/elfelejtett-jelszo" className="text-sky-400 hover:underline">
-          Elfelejtetted a jelszavad?
-        </Link>
-        <Link to="/regisztracio" className="text-sky-400 hover:underline">
-          Regisztráció
-        </Link>
-      </div>
     </AuthCard>
   )
 }

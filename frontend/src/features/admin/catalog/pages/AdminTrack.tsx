@@ -39,11 +39,11 @@ function TrackEditor({ track }: { track: AdminTrack }) {
   }
 
   return (
-    <AdminShell crumbs={[{ label: 'Admin' }, { label: 'Tananyag', to: '/admin/tananyag' }, { label: track.title }]} title={track.title}>
+    <AdminShell crumbs={[{ label: 'Admin', to: '/admin' }, { label: 'Katalógus', to: '/admin/tananyag' }, { label: track.title }]} title={track.title}>
       <Section title="Képzési ág adatai" aside={<SavedNote mutation={save} />}>
         <MutationError error={save.error} fields={['title', 'slug', 'description', 'is_published']} />
-        <form onSubmit={submit} noValidate className="grid gap-4">
-          <div className="grid gap-4 sm:grid-cols-2">
+        <form onSubmit={submit} noValidate className="grid gap-5">
+          <div className="grid gap-5 sm:grid-cols-2">
             <Field label="Cím" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} error={errors.title} />
             <Field label="URL-azonosító" value={form.slug} onChange={(e) => setForm({ ...form, slug: e.target.value })} error={errors.slug} />
           </div>
@@ -55,8 +55,8 @@ function TrackEditor({ track }: { track: AdminTrack }) {
             error={errors.description}
           />
           <CheckboxField
-            label="Publikált"
-            hint="Csak publikált képzési ág jelenik meg a diákoknak."
+            label="Közzétéve"
+            hint="Csak közzétett képzési ág jelenik meg a tanulóknak."
             checked={form.is_published}
             onChange={(e) => setForm({ ...form, is_published: e.target.checked })}
             error={errors.is_published}
@@ -84,7 +84,7 @@ function TrackEditor({ track }: { track: AdminTrack }) {
           onReorder={(ids) => modules.reorderChildren.mutate(ids)}
           onDelete={(moduleId) => modules.deleteChild.mutate(moduleId)}
         />
-        <div className="mt-5 border-t border-slate-800 pt-4">
+        <div className="mt-5 border-t border-grid pt-5">
           <MutationError error={modules.createChild.error} fields={['title', 'slug']} />
           <QuickCreate
             titleLabel="Új modul címe"

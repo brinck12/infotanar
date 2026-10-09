@@ -4,6 +4,8 @@ import { ApiClient } from '../api/ApiClient'
 import { Outbox } from '../api/Outbox'
 import { MockApi } from '../mocks/MockApi'
 import { serveMonacoLocally } from '../mocks/monaco'
+import { HomePage } from '../pages/HomePage'
+import { LearningPathPage } from '../pages/LearningPathPage'
 import { TaskListPage } from '../pages/TaskListPage'
 import { TaskSolvePage } from '../pages/TaskSolvePage'
 import { a11yFixtures, type A11yFixtures } from './a11y'
@@ -19,6 +21,8 @@ export interface FrameworkOptions {
 export interface FrameworkFixtures {
   /** Route-interception alapu backend mock; `mockBackend` eseten az alap katalogussal. */
   mockApi: MockApi
+  homePage: HomePage
+  learningPathPage: LearningPathPage
   taskListPage: TaskListPage
   taskSolvePage: TaskSolvePage
   /** Tipusos kliens a valodi backendhez (API tesztek). */
@@ -38,6 +42,10 @@ export const test = base.extend<FrameworkFixtures & A11yFixtures & FrameworkOpti
 
   context: async ({ context }, use) => {
     if (env.MONACO_SOURCE === 'local') await serveMonacoLocally(context)
+    // A tarolasi tajekoztato egyszeri, a kepernyo aljan all: a tesztekben mar nyugtazottnak szamit.
+    await context.addInitScript(() => {
+      localStorage.setItem('infotanar.storageNotice.v1', 'true')
+    })
     await use(context)
   },
 
@@ -49,6 +57,14 @@ export const test = base.extend<FrameworkFixtures & A11yFixtures & FrameworkOpti
 
   // Az oldalobjektumok a mockApi-tol fuggnek, igy a mockok mar a legelso
   // navigacio elott a helyukon vannak.
+  homePage: async ({ page, mockApi: _ }, use) => {
+    await use(new HomePage(page))
+  },
+
+  learningPathPage: async ({ page, mockApi: _ }, use) => {
+    await use(new LearningPathPage(page))
+  },
+
   taskListPage: async ({ page, mockApi: _ }, use) => {
     await use(new TaskListPage(page))
   },

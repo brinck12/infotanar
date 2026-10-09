@@ -1,12 +1,18 @@
-import { Editor, type OnMount } from '@monaco-editor/react'
+import { Editor, type BeforeMount, type OnMount } from '@monaco-editor/react'
 import { useEffect, useRef } from 'react'
+import { MONACO_FONT, MONACO_THEME, monacoTheme } from '../../../shared/ui/codeTheme'
 import type { LanguageKey } from '../../../types'
 
+/** A futtatható nyelveken túl a weboldal feladat fájltípusai is szerkeszthetők. */
+export type EditorLanguage = LanguageKey | 'html' | 'css'
+
 /** A nyelvkulcs és a Monaco saját nyelvazonosítójának megfeleltetése. */
-const MONACO_LANGUAGE: Record<LanguageKey, string> = {
+const MONACO_LANGUAGE: Record<EditorLanguage, string> = {
   python: 'python',
   csharp: 'csharp',
   sql: 'sql',
+  html: 'html',
+  css: 'css',
 }
 
 type MonacoEditor = Parameters<OnMount>[0]
@@ -21,7 +27,7 @@ export interface EditorReplacement {
 }
 
 interface Props {
-  language: LanguageKey
+  language: EditorLanguage
   /** A szerkesztő kezdőtartalma (csak mountkor számít). */
   initialValue: string
   onChange: (value: string) => void
@@ -42,6 +48,11 @@ interface Props {
 export function CodeEditor({ language, initialValue, onChange, replace, readOnly = false }: Props) {
   const editorRef = useRef<MonacoEditor | null>(null)
   const appliedSeq = useRef(replace?.seq ?? 0)
+
+  // A sötét kódfelület saját témája a tokenekből (a Monaco alaptémája más háttérszínű).
+  const beforeMount: BeforeMount = (monaco) => {
+    monaco.editor.defineTheme(MONACO_THEME, monacoTheme())
+  }
 
   const onMount: OnMount = (editor, monaco) => {
     editorRef.current = editor
@@ -66,18 +77,23 @@ export function CodeEditor({ language, initialValue, onChange, replace, readOnly
   }, [replace])
 
   return (
-    <div className="h-full overflow-hidden rounded-lg border border-slate-800">
+    <div className="on-dark h-full overflow-hidden bg-code">
       <Editor
         height="100%"
-        theme="vs-dark"
+        theme={MONACO_THEME}
         language={MONACO_LANGUAGE[language]}
         defaultValue={initialValue}
+        beforeMount={beforeMount}
         onMount={onMount}
         onChange={(next) => onChange((next ?? '').replace(/\r\n/g, '\n'))}
-        loading={<div className="p-4 text-sm text-slate-400">Szerkesztő betöltése…</div>}
+        loading={<div className="p-4 text-15 text-code-soft">Szerkesztő betöltése…</div>}
         options={{
           readOnly,
           fontSize: 14,
+          fontFamily: MONACO_FONT,
+          fontLigatures: false,
+          lineHeight: 24,
+          padding: { top: 16, bottom: 16 },
           minimap: { enabled: false },
           scrollBeyondLastLine: false,
           tabSize: 4,

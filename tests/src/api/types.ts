@@ -142,3 +142,33 @@ export interface TaskListQuery {
   topic?: string
   level?: Level
 }
+
+/** Kepzesi ag a listaban (GET /tracks). */
+export interface TrackSummary {
+  id: number
+  slug: string
+  title: string
+  description: string | null
+  lesson_count: number
+}
+
+/** Kepzesi ag szerkezete (GET /tracks/{slug}): modulok, leckek, feladatok. */
+export interface TrackDetail {
+  id: number
+  slug: string
+  title: string
+  description: string | null
+  modules: {
+    id: number
+    slug: string
+    title: string
+    description: string | null
+    lessons: {
+      id: number
+      slug: string
+      title: string
+      is_free: boolean
+      exercises: Pick<TaskListItem, 'id' | 'title' | 'level' | 'difficulty' | 'allowed_languages'>[]
+    }[]
+  }[]
+}

@@ -1,4 +1,6 @@
 import { useId, useRef, type KeyboardEvent, type ReactNode } from 'react'
+import { Badge } from '../../../shared/ui/Badge'
+import { cx } from '../../../shared/ui/cx'
 
 export type WorkspaceView = 'task' | 'code'
 
@@ -39,11 +41,7 @@ export function WorkspaceTabs({ view, onViewChange, task, code, codeBadge }: Pro
 
   return (
     <div>
-      <div
-        role="tablist"
-        aria-label="Munkaterület nézet"
-        className="sticky top-0 z-10 -mx-4 mb-4 flex border-b border-slate-800 bg-slate-950/95 px-4 backdrop-blur"
-      >
+      <div role="tablist" aria-label="Munkaterület nézet" className="sticky top-0 z-10 mb-4 flex gap-2 border-b border-line bg-paper pt-2">
         {TABS.map((tab) => {
           const selected = tab.view === view
           return (
@@ -61,14 +59,13 @@ export function WorkspaceTabs({ view, onViewChange, task, code, codeBadge }: Pro
               onClick={() => onViewChange(tab.view)}
               onKeyDown={(e) => onKeyDown(e, tab.view)}
               data-testid={`workspace-tab-${tab.view}`}
-              className={`-mb-px flex flex-1 items-center justify-center gap-2 border-b-2 px-4 py-3 text-sm font-medium transition focus:outline-none focus-visible:bg-slate-900 sm:flex-none ${
-                selected ? 'border-sky-400 text-slate-100' : 'border-transparent text-slate-400 hover:text-slate-200'
-              }`}
+              className={cx(
+                'flex min-h-12 flex-1 items-center justify-center gap-2 rounded-t-md px-5 text-16 text-ink sm:flex-none',
+                selected ? '-mb-px border border-b-3 border-line border-b-accent bg-sheet font-bold' : 'font-semibold hover:bg-note',
+              )}
             >
               {tab.label}
-              {tab.view === 'code' && codeBadge && !selected && (
-                <span className="rounded-full bg-sky-900 px-2 py-0.5 text-xs text-sky-200">{codeBadge}</span>
-              )}
+              {tab.view === 'code' && codeBadge && !selected && <Badge kind="neutral">{codeBadge}</Badge>}
             </button>
           )
         })}

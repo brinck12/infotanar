@@ -1,99 +1,195 @@
 import { useQuery } from '@tanstack/react-query'
 import { useSearchParams } from 'react-router-dom'
-import { hibaUzenet } from '../../../shared/api/errors'
-import type { Level } from '../../../types'
-import { tasksQuery, topicsQuery } from '../api'
-import { TaskCard } from '../components/TaskCard'
+import { readLastTask, userKeyOf } from '../../../shared/domain/lastTask'
+import { Banner } from '../../../shared/ui/Banner'
+import { ButtonLink } from '../../../shared/ui/Button'
+import { FilterChips, type FilterOption } from '../../../shared/ui/FilterChips'
+import { Panel } from '../../../shared/ui/Panel'
+import { CardSkeleton, EmptyState, LoadError } from '../../../shared/ui/States'
+import { TaskCard } from '../../../shared/ui/TaskCard'
+import { Lead, PageTitle, SectionTitle } from '../../../shared/ui/Text'
+import type { LessonProgressStatus, Level, TaskListItem } from '../../../types'
+import { useAuth } from '../../auth/context'
+import { useLessonStatuses } from '../../progress/useLessonStatuses'
+import { tasksQuery } from '../api'
+import { useCatalogTree, type CatalogTree } from '../useCatalogTree'
 
-const LEVELS: ReadonlyArray<{ value: Level | ''; label: string }> = [
-  { value: '', label: 'Mindkét szint' },
+type LevelFilter = Level | ''
+type StatusFilter = '' | 'todo' | 'done'
+
+const LEVELS: ReadonlyArray<FilterOption<LevelFilter>> = [
+  { value: '', label: 'Mind' },
   { value: 'kozep', label: 'Középszint' },
   { value: 'emelt', label: 'Emelt szint' },
+]
+
+const STATUSES: ReadonlyArray<FilterOption<StatusFilter>> = [
+  { value: '', label: 'Mind' },
+  { value: 'todo', label: 'Nincs kész' },
+  { value: 'done', label: 'Kész' },
 ]
 
 function isLevel(value: string): value is Level {
   return value === 'kozep' || value === 'emelt'
 }
 
+interface TaskGroup {
+  key: string
+  title: string
+  tasks: TaskListItem[]
+}
+
+/** Képzési áganként csoportosít; amíg a katalógus szerkezete nem ismert, témakörönként. */
+function groupTasks(tasks: TaskListItem[], tree: CatalogTree | null): TaskGroup[] {
+  const groups = new Map<string, TaskGroup>()
+
+  for (const task of tasks) {
+    const track = tree?.exercises.get(task.id)?.place.track
+    const key = track ? `sav:${track.slug}` : `tema:${task.topic.slug}`
+    const group = groups.get(key) ?? { key, title: track?.title ?? task.topic.name, tasks: [] }
+    group.tasks.push(task)
+    groups.set(key, group)
+  }
+
+  // Az ágak a katalógus sorrendjében, a többi a beérkezés sorrendjében.
+  const order = new Map((tree?.tracks ?? []).map((track, index) => [`sav:${track.slug}`, index]))
+  return [...groups.values()].sort((a, b) => (order.get(a.key) ?? order.size) - (order.get(b.key) ?? order.size))
+}
+
 export function TaskList() {
+  const { user } = useAuth()
   const [searchParams, setSearchParams] = useSearchParams()
   const topic = searchParams.get('temakor') ?? ''
+  const track = searchParams.get('sav') ?? ''
   const levelParam = searchParams.get('szint') ?? ''
-  const level = isLevel(levelParam) ? levelParam : ''
+  const level: LevelFilter = isLevel(levelParam) ? levelParam : ''
+  const statusParam = searchParams.get('allapot')
+  const status: StatusFilter = statusParam === 'todo' || statusParam === 'done' ? statusParam : ''
 
-  // A témakörlista hiánya nem blokkolja a feladatok megjelenítését.
-  const topics = useQuery(topicsQuery())
   const tasks = useQuery(tasksQuery({ topic: topic || undefined, level: level || undefined }))
+  // A katalógus szerkezetének hiánya nem blokkolja a feladatok megjelenítését.
+  const { tree } = useCatalogTree()
+  const lessonStatuses = useLessonStatuses()
+  const lastTask = readLastTask(userKeyOf(user))
 
-  function updateFilter(key: 'temakor' | 'szint', value: string) {
+  function updateFilter(key: 'sav' | 'szint' | 'allapot', value: string) {
     const next = new URLSearchParams(searchParams)
     if (value) next.set(key, value)
     else next.delete(key)
+    // Másik ág választásakor a témakör-szűrő (a morzsamenüből) már nem érvényes.
+    if (key === 'sav') next.delete('temakor')
     setSearchParams(next)
   }
 
+  function statusOf(task: TaskListItem): LessonProgressStatus | undefined {
+    if (!lessonStatuses) return undefined
+    const lessonId = tree?.exercises.get(task.id)?.place.lesson.id
+    return lessonId === undefined ? undefined : (lessonStatuses.get(lessonId) ?? 'not_started')
+  }
+
+  const trackOptions: Array<FilterOption<string>> = [
+    { value: '', label: 'Mind' },
+    ...(tree?.tracks ?? []).map((item) => ({ value: item.slug, label: item.title })),
+  ]
+
+  const visible = (tasks.data ?? []).filter((task) => {
+    if (track && tree?.exercises.get(task.id)?.place.track.slug !== track) return false
+    if (status === 'done') return statusOf(task) === 'completed'
+    if (status === 'todo') return statusOf(task) !== 'completed'
+    return true
+  })
+  const groups = groupTasks(visible, tree)
+  const hasLocked = visible.some((task) => task.locked)
+
   return (
-    <div className="mx-auto max-w-4xl px-4 py-10">
-      <h1 className="text-2xl font-semibold text-slate-100">Feladatok</h1>
+    <main className="mx-auto w-full max-w-page flex-1 px-4 pt-8 pb-24 md:px-6">
+      <PageTitle>Feladatok</PageTitle>
+      <Lead className="mt-3 max-w-prose text-18">Válassz egy témát, és kezdd el az első olyan feladattal, ami még nincs kész.</Lead>
 
-      <div className="mt-6 flex flex-wrap gap-4">
-        <label className="text-sm">
-          <span className="mb-1 block text-slate-400">Témakör</span>
-          <select
-            value={topic}
-            onChange={(e) => updateFilter('temakor', e.target.value)}
-            className="rounded-lg border border-slate-800 bg-slate-900 px-3 py-2 text-slate-100"
-          >
-            <option value="">Összes témakör</option>
-            {(topics.data ?? []).map((t) => (
-              <option key={t.id} value={t.slug}>
-                {t.name} ({t.task_count})
-              </option>
-            ))}
-          </select>
-        </label>
+      {lastTask && (
+        <Panel kind="highlight" className="mt-8 flex flex-wrap items-center gap-x-8 gap-y-4" data-testid="continue-task">
+          <div className="min-w-0 flex-1 basis-80">
+            <p className="text-15 text-ink-soft">Itt tartottál legutóbb</p>
+            <p className="mt-1 font-serif text-24 leading-snug font-semibold">{lastTask.title}</p>
+            <p className="mt-1.5 text-15 text-ink-soft">{lastTask.topic}</p>
+          </div>
+          <ButtonLink to={`/feladatok/${lastTask.id}`} size="lg">
+            Folytatás
+          </ButtonLink>
+        </Panel>
+      )}
 
-        <label className="text-sm">
-          <span className="mb-1 block text-slate-400">Szint</span>
-          <select
-            value={level}
-            onChange={(e) => updateFilter('szint', e.target.value)}
-            className="rounded-lg border border-slate-800 bg-slate-900 px-3 py-2 text-slate-100"
-          >
-            {LEVELS.map((l) => (
-              <option key={l.value} value={l.value}>
-                {l.label}
-              </option>
-            ))}
-          </select>
-        </label>
+      <div className="mt-10 flex flex-col gap-3">
+        {trackOptions.length > 2 && (
+          <FilterChips label="Téma" options={trackOptions} value={track} onChange={(value) => updateFilter('sav', value)} />
+        )}
+        <div className="flex flex-wrap gap-x-10 gap-y-3">
+          <FilterChips label="Szint" options={LEVELS} value={level} onChange={(value) => updateFilter('szint', value)} />
+          {lessonStatuses && (
+            <FilterChips label="Állapot" options={STATUSES} value={status} onChange={(value) => updateFilter('allapot', value)} />
+          )}
+        </div>
       </div>
 
-      <div className="mt-8">
-        {tasks.isPending && <p className="text-slate-400">Feladatok betöltése…</p>}
+      <div className="mt-12">
+        {tasks.isPending && <CardSkeleton count={6} label="Feladatok betöltése…" />}
 
         {tasks.isError && (
-          <p
-            role="alert"
-            data-testid="task-list-error"
-            className="rounded-lg border border-red-900 bg-red-950/60 p-4 text-red-200"
+          <div data-testid="task-list-error">
+            <LoadError error={tasks.error} onRetry={() => void tasks.refetch()} title="Nem sikerült betölteni a feladatokat" />
+          </div>
+        )}
+
+        {tasks.isSuccess && visible.length === 0 && (
+          <EmptyState
+            title="Nincs a szűrésnek megfelelő feladat"
+            action={
+              <ButtonLink to="/feladatok" variant="secondary">
+                Szűrők törlése
+              </ButtonLink>
+            }
           >
-            {hibaUzenet(tasks.error)}
-          </p>
+            Válassz másik témát vagy szintet.
+          </EmptyState>
         )}
 
-        {tasks.isSuccess && tasks.data.length === 0 && (
-          <p className="text-slate-400">Nincs a szűrésnek megfelelő feladat.</p>
-        )}
+        <div className="flex flex-col gap-12">
+          {groups.map((group) => {
+            const done = group.tasks.filter((task) => statusOf(task) === 'completed').length
+            return (
+              <section key={group.key} aria-labelledby={`csoport-${group.key}`}>
+                <div className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1">
+                  <SectionTitle id={`csoport-${group.key}`}>{group.title}</SectionTitle>
+                  {lessonStatuses && (
+                    <span className="text-15 text-ink-soft">
+                      {done} / {group.tasks.length} teljesítve
+                    </span>
+                  )}
+                </div>
+                <ul className="mt-5 grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
+                  {group.tasks.map((task) => (
+                    <TaskCard key={task.id} task={task} status={statusOf(task)} />
+                  ))}
+                </ul>
+              </section>
+            )
+          })}
+        </div>
 
-        {tasks.isSuccess && tasks.data.length > 0 && (
-          <ul className="space-y-3">
-            {tasks.data.map((task) => (
-              <TaskCard key={task.id} task={task} />
-            ))}
-          </ul>
+        {hasLocked && (
+          <Banner
+            kind="info"
+            className="mt-12"
+            action={
+              <ButtonLink to="/elofizetes" variant="secondary">
+                Prémium előfizetés
+              </ButtonLink>
+            }
+          >
+            A zárolt feladatokhoz Prémium előfizetés kell. Bármikor lemondható.
+          </Banner>
         )}
       </div>
-    </div>
+    </main>
   )
 }

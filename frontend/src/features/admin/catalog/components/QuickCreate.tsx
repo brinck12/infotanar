@@ -1,5 +1,6 @@
 import { useState, type FormEvent } from 'react'
-import { Field, SubmitButton } from '../../../../shared/ui/Form'
+import { Button } from '../../../../shared/ui/Button'
+import { Field } from '../../../../shared/ui/Form'
 import { slugify } from '../slug'
 
 interface Props {
@@ -25,8 +26,9 @@ export function QuickCreate({ titleLabel, submitLabel, busy, errors, onCreate }:
   }
 
   return (
-    <form onSubmit={submit} noValidate className="grid gap-3 sm:grid-cols-[1fr_1fr_auto] sm:items-end" aria-label={submitLabel}>
+    <form onSubmit={submit} noValidate className="flex flex-wrap items-start gap-4" aria-label={submitLabel}>
       <Field
+        className="flex-1 basis-56"
         label={titleLabel}
         value={title}
         required
@@ -37,7 +39,9 @@ export function QuickCreate({ titleLabel, submitLabel, busy, errors, onCreate }:
         error={errors.title}
       />
       <Field
+        className="flex-1 basis-56"
         label="URL-azonosító"
+        mono
         value={slug}
         required
         onChange={(e) => {
@@ -46,9 +50,12 @@ export function QuickCreate({ titleLabel, submitLabel, busy, errors, onCreate }:
         }}
         error={errors.slug}
       />
-      <SubmitButton busy={busy} fullWidth={false}>
-        {busy ? 'Létrehozás…' : submitLabel}
-      </SubmitButton>
+      {/* A gomb a mezők beviteli sorához igazodik (a címke magassága fölötte). */}
+      <div className="pt-7.5">
+        <Button type="submit" variant="secondary" icon="plus" busy={busy} busyLabel="Létrehozás…" className="min-h-12">
+          {submitLabel}
+        </Button>
+      </div>
     </form>
   )
 }

@@ -1,32 +1,47 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { useState } from 'react'
-import ReactMarkdown from 'react-markdown'
-import { Link, useParams } from 'react-router-dom'
-import remarkGfm from 'remark-gfm'
+import { useEffect, useState } from 'react'
+import { useParams } from 'react-router-dom'
+import { saveBlob } from '../../../shared/api/download'
 import { hibaUzenet, zarolasOka } from '../../../shared/api/errors'
-import { LANGUAGE_LABEL, LEVEL_LABEL } from '../../../shared/domain/labels'
+import { LANGUAGE_LABEL } from '../../../shared/domain/labels'
+import { rememberLastTask } from '../../../shared/domain/lastTask'
 import { useMediaQuery } from '../../../shared/hooks/useMediaQuery'
 import { usePersistentState } from '../../../shared/hooks/usePersistentState'
+import { Badge, LevelBadge } from '../../../shared/ui/Badge'
+import { Banner } from '../../../shared/ui/Banner'
+import { Button, ButtonLink } from '../../../shared/ui/Button'
+import { cx } from '../../../shared/ui/cx'
+import { FileChip } from '../../../shared/ui/Dropzone'
+import { formatBytes } from '../../../shared/ui/format'
 import { PageLoader } from '../../../shared/ui/PageLoader'
+import { Panel } from '../../../shared/ui/Panel'
+import { Prose } from '../../../shared/ui/Prose'
+import { useCrumbs } from '../../../shared/ui/shell'
 import { SplitPane } from '../../../shared/ui/SplitPane'
 import type { LanguageKey, RunRequest, TaskDetail, UnlockedTaskDetail } from '../../../types'
 import { useAuth } from '../../auth/context'
 import { catalogKeys, taskQuery } from '../../catalog/api'
+import { isUploadKind } from '../../filetasks/api'
+import { FileTaskWorkspace } from '../../filetasks/components/FileTaskWorkspace'
+import { DocPracticeWorkspace } from '../../practice/doc/DocPracticeWorkspace'
+import { SheetPracticeWorkspace } from '../../practice/sheet/SheetPracticeWorkspace'
 import { progressKeys } from '../../progress/api'
+import { WebTaskWorkspace } from '../../webtasks/components/WebTaskWorkspace'
 import { runCode, submitCode } from '../api'
 import { CodeEditor, type EditorReplacement } from '../components/CodeEditor'
 import { LessonVideo } from '../components/LessonVideo'
 import { Paywall } from '../components/Paywall'
 import { ResetCodeButton } from '../components/ResetCodeButton'
 import { ResultPanel } from '../components/ResultPanel'
+import { SqlSchemaPanel } from '../components/SqlSchemaPanel'
 import { WorkspaceTabs, type WorkspaceView } from '../components/WorkspaceTabs'
 import { useCodeDraft } from '../useCodeDraft'
 
 type Mode = 'run' | 'submit'
 
-/** Ettől a szélességtől (Tailwind `lg`) egymás mellett, húzható elválasztóval; alatta fülek. */
+/** Ettől a szélességtől egymás mellett, húzható elválasztóval; alatta fülek. */
 const WIDE_LAYOUT = '(min-width: 1024px)'
-const DEFAULT_SPLIT = 0.5
+const DEFAULT_SPLIT = 0.42
 
 function isSplitRatio(value: unknown): value is number {
   return typeof value === 'number' && value > 0.05 && value < 0.95
@@ -40,20 +55,28 @@ export function TaskSolve() {
 
   const task = useQuery({ ...taskQuery(taskId), enabled: validId })
 
+  useCrumbs(
+    task.data
+      ? [{ label: 'Feladatok', to: '/feladatok' }, { label: task.data.topic.name, to: `/feladatok?temakor=${task.data.topic.slug}` }, { label: task.data.title }]
+      : [{ label: 'Feladatok', to: '/feladatok' }],
+  )
+
   if (!validId || task.isError) {
     return (
-      <div className="mx-auto max-w-3xl px-4 py-16">
-        <p
-          role="alert"
+      <main className="mx-auto w-full max-w-form px-4 py-12 md:px-6">
+        <Banner
+          kind="error"
+          title="Nem sikerült megnyitni a feladatot"
           data-testid="task-load-error"
-          className="rounded-lg border border-red-900 bg-red-950/60 p-4 text-red-200"
+          action={
+            <ButtonLink to="/feladatok" variant="secondary">
+              Vissza a feladatokhoz
+            </ButtonLink>
+          }
         >
           {validId ? hibaUzenet(task.error) : 'Érvénytelen feladatazonosító.'}
-        </p>
-        <Link to="/feladatok" className="mt-4 inline-block text-sky-400 hover:underline">
-          Vissza a feladatokhoz
-        </Link>
-      </div>
+        </Banner>
+      </main>
     )
   }
 
@@ -62,30 +85,41 @@ export function TaskSolve() {
 
   if (task.data.locked) {
     return (
-      <div className="mx-auto max-w-3xl px-4 py-8">
-        <TaskHeader task={task.data} />
+      <main className="mx-auto w-full max-w-account px-4 py-8 md:px-6">
+        <TaskHeading task={task.data} />
         <div className="mt-6">
           <Paywall reason={task.data.locked_reason} message={task.data.locked_message} />
         </div>
-      </div>
+      </main>
     )
   }
+
+  // Fájlalapú feladat (táblázat, szöveg, bemutató): saját programban készül, feltöltve pontozzuk.
+  if (isUploadKind(task.data.kind)) return <FileTaskWorkspace key={`${task.data.id}:${user?.id ?? 'guest'}`} task={task.data} />
+
+  // A böngészőben megoldható változatok: weboldal, táblázatos és szöveges gyakorló.
+  if (task.data.web_task) return <WebTaskWorkspace key={task.data.id} task={task.data} info={task.data.web_task} />
+  if (task.data.sheet_practice) return <SheetPracticeWorkspace key={task.data.id} task={task.data} info={task.data.sheet_practice} />
+  if (task.data.doc_practice) return <DocPracticeWorkspace key={task.data.id} task={task.data} info={task.data.doc_practice} />
 
   // A key miatt másik feladatra lépve vagy felhasználóváltáskor (kijelentkezés)
   // a szerkesztő tisztán újraindul, és a piszkozat nem kerül át másik fiókhoz.
   return <Workspace key={`${task.data.id}:${user?.id ?? 'guest'}`} task={task.data} />
 }
 
-function TaskHeader({ task }: { task: TaskDetail }) {
+function TaskHeading({ task }: { task: TaskDetail }) {
   return (
     <>
-      <Link to="/feladatok" className="text-sm text-sky-400 hover:underline">
-        ← Vissza a feladatokhoz
-      </Link>
-      <h1 className="mt-3 text-2xl font-semibold text-slate-100">{task.title}</h1>
-      <p className="mt-1 text-sm text-slate-400">
-        {task.topic.name} · {LEVEL_LABEL[task.level]}
-      </p>
+      <h1 className="font-serif text-32 leading-tight font-semibold tracking-tight">{task.title}</h1>
+      <div className="mt-4 flex flex-wrap gap-2">
+        <LevelBadge level={task.level} />
+        {task.allowed_languages.map((language) => (
+          <Badge key={language} kind="lang">
+            {LANGUAGE_LABEL[language]}
+          </Badge>
+        ))}
+        {task.is_free === true && <Badge kind="free">Ingyenes</Badge>}
+      </div>
     </>
   )
 }
@@ -132,6 +166,7 @@ function Workspace({ task }: { task: UnlockedTaskDetail }) {
 
   /** A jelenlegi kód piszkozatként megmarad; az új nyelv saját piszkozata töltődik be. */
   function changeLanguage(next: LanguageKey) {
+    if (next === language) return
     const nextCode = switchLanguage(next)
     setReplacement((r) => ({ value: nextCode, seq: r.seq + 1, undoable: false }))
     execution.reset()
@@ -144,130 +179,172 @@ function Workspace({ task }: { task: UnlockedTaskDetail }) {
 
   const running = execution.isPending
 
+  // Az „Itt tartottál legutóbb” sorhoz megjegyezzük a megnyitott feladatot.
+  useEffect(() => {
+    rememberLastTask(userKey, { id: task.id, title: task.title, topic: task.topic.name })
+  }, [userKey, task.id, task.title, task.topic.name])
+
   const description = (
-    <section aria-label="Feladat leírása" className="space-y-4">
+    <section aria-label="Feladat leírása" className="flex flex-col gap-4">
+      <Panel pad="xl">
+        <TaskHeading task={task} />
+        {task.constraints && task.constraints.length > 0 && (
+          <Banner kind="info" title="Kódszabályok" className="mt-6" data-testid="task-constraints">
+            <ul className="list-disc pl-5">
+              {task.constraints.map((rule) => (
+                <li key={rule}>{rule}</li>
+              ))}
+            </ul>
+          </Banner>
+        )}
+        <Prose markdown={task.description} className="mt-8" />
+
+        {task.sql_task && <SqlSchemaPanel info={task.sql_task} />}
+
+        {task.sources && task.sources.length > 0 && (
+          <div className="mt-8">
+            <h2 className="font-serif text-19 leading-snug font-semibold">Forrásfájlok</h2>
+            <div className="mt-3 flex flex-wrap gap-3">
+              {task.sources.map((file) => (
+                <FileChip key={file.name} name={file.name} size={formatBytes(file.size)} href={file.url} />
+              ))}
+            </div>
+          </div>
+        )}
+
+        {task.example_test_cases.length > 0 && (
+          <div className="mt-8">
+            <h2 className="font-serif text-19 leading-snug font-semibold">Nyilvános tesztesetek</h2>
+            <ul className="mt-3 flex flex-col gap-3">
+              {task.example_test_cases.map((tc, i) => (
+                <li key={tc.id} className="flex flex-wrap gap-3">
+                  <ExampleBlock label={`${i + 1}. bemenet`} value={tc.stdin} />
+                  <ExampleBlock label="Elvárt kimenet" value={tc.expected_stdout} />
+                </li>
+              ))}
+            </ul>
+            {task.hidden_test_case_count > 0 && (
+              <p className="mt-3 text-15 leading-relaxed text-ink-soft">
+                Beadáskor további {task.hidden_test_case_count} rejtett teszteset is lefut.
+              </p>
+            )}
+          </div>
+        )}
+      </Panel>
+
       {task.lesson && <LessonVideo lesson={task.lesson} />}
-
-      <div className="prose-invert max-w-none rounded-lg border border-slate-800 bg-slate-900 p-5 text-slate-200 [&_code]:rounded [&_code]:bg-slate-950 [&_code]:px-1 [&_h2]:mt-0 [&_h2]:mb-3 [&_h2]:text-lg [&_h2]:font-semibold [&_h3]:mt-4 [&_h3]:mb-2 [&_h3]:font-medium [&_li]:ml-4 [&_li]:list-disc [&_p]:my-2">
-        <ReactMarkdown remarkPlugins={[remarkGfm]}>{task.description}</ReactMarkdown>
-      </div>
-
-      {task.example_test_cases.length > 0 && (
-        <div className="rounded-lg border border-slate-800 bg-slate-900 p-5">
-          <h2 className="mb-3 text-sm font-semibold text-slate-200">Nyilvános tesztesetek</h2>
-          <ul className="space-y-3">
-            {task.example_test_cases.map((tc, i) => (
-              <li key={tc.id} className="grid gap-2 sm:grid-cols-2">
-                <ExampleBlock label={`${i + 1}. bemenet`} value={tc.stdin} />
-                <ExampleBlock label="Elvárt kimenet" value={tc.expected_stdout} />
-              </li>
-            ))}
-          </ul>
-          {task.hidden_test_case_count > 0 && (
-            <p className="mt-3 text-xs text-slate-400">
-              Beadáskor további {task.hidden_test_case_count} rejtett teszteset is lefut.
-            </p>
-          )}
-        </div>
-      )}
     </section>
   )
 
   const solution = (
-    <section aria-label="Megoldás" className="space-y-4">
-      <div className="flex flex-wrap items-center gap-3">
-        <label className="text-sm">
-          <span className="mr-2 text-slate-400">Nyelv:</span>
-          <select
-            value={language}
-            onChange={(e) => changeLanguage(e.target.value as LanguageKey)}
-            className="rounded-lg border border-slate-800 bg-slate-900 px-3 py-1.5 text-slate-100"
-          >
-            {task.allowed_languages.map((l) => (
-              <option key={l} value={l}>
-                {LANGUAGE_LABEL[l]}
-              </option>
-            ))}
-          </select>
-        </label>
-
-        <ResetCodeButton dirty={code !== starterCode} disabled={running} onReset={resetCode} />
-
-        <div className="ml-auto flex gap-2">
-          <button
-            type="button"
-            onClick={() => execute('run')}
-            disabled={running}
-            className="rounded-lg border border-slate-700 bg-slate-800 px-4 py-1.5 text-sm font-medium text-slate-100 transition hover:bg-slate-700 disabled:cursor-not-allowed disabled:opacity-50"
-          >
-            Futtatás
-          </button>
-          <button
-            type="button"
-            onClick={() => execute('submit')}
-            disabled={running}
-            className="rounded-lg bg-sky-700 px-4 py-1.5 text-sm font-medium text-white transition hover:bg-sky-600 disabled:cursor-not-allowed disabled:opacity-50"
-          >
-            Beadás
-          </button>
+    <section aria-label="Megoldás">
+      <Panel kind="work" pad="none" className="overflow-hidden">
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-2 border-b border-grid px-5 py-3">
+          <LanguageSwitch languages={task.allowed_languages} value={language} onChange={changeLanguage} disabled={running} />
+          <span className="flex-auto" />
+          {language === 'sql' && (
+            <Button variant="text" icon="download" onClick={() => saveBlob(new Blob([code], { type: 'application/sql' }), `feladat-${task.id}.sql`)}>
+              Mentés .sql fájlba
+            </Button>
+          )}
+          <ResetCodeButton dirty={code !== starterCode} disabled={running} onReset={resetCode} />
         </div>
-      </div>
 
-      {restored && code !== starterCode && (
-        <p className="text-xs text-slate-400" data-testid="draft-restored">
-          A legutóbb szerkesztett kódodat töltöttük vissza ebből a böngészőből.
-        </p>
-      )}
+        {restored && code !== starterCode && (
+          <p className="border-b border-grid bg-note px-5 py-2 text-14 text-ink" data-testid="draft-restored">
+            A legutóbb szerkesztett kódodat töltöttük vissza ebből a böngészőből.
+          </p>
+        )}
 
-      <div className="h-[420px]">
-        <CodeEditor language={language} initialValue={code} onChange={setCode} replace={replacement} readOnly={running} />
-      </div>
+        <div className="h-105">
+          <CodeEditor language={language} initialValue={code} onChange={setCode} replace={replacement} readOnly={running} />
+        </div>
 
-      <ResultPanel
-        loading={running}
-        error={execution.isError ? hibaUzenet(execution.error) : null}
-        result={execution.data ?? null}
-        mode={mode}
-      />
+        <div className="on-dark flex flex-wrap items-center gap-3 border-t border-code-line bg-code px-5 py-3">
+          <Button icon="play" onClick={() => execute('run')} disabled={running}>
+            Futtatás
+          </Button>
+          <Button variant="dark" onClick={() => execute('submit')} disabled={running}>
+            Beadás
+          </Button>
+        </div>
+
+        <div aria-live="polite" className="px-5 pt-5 pb-6 md:px-6">
+          <ResultPanel
+            loading={running}
+            error={execution.isError ? hibaUzenet(execution.error) : null}
+            result={execution.data ?? null}
+            mode={mode}
+            hiddenCount={task.hidden_test_case_count}
+          />
+        </div>
+      </Panel>
     </section>
   )
 
   return (
-    // Széles kijelzőn (akár 4K) a munkaterület szélesebb, mint a szöveges oldalak.
-    <div className="mx-auto max-w-screen-2xl px-4 py-8">
-      <TaskHeader task={task} />
+    <main className="mx-auto w-full max-w-work px-4 py-6 md:px-6">
+      {wide ? (
+        <SplitPane
+          label="A feladatleírás és a szerkesztő közötti elválasztó"
+          ratio={split}
+          onRatioChange={setSplit}
+          defaultRatio={DEFAULT_SPLIT}
+          left={description}
+          right={solution}
+        />
+      ) : (
+        <WorkspaceTabs
+          view={view}
+          onViewChange={setView}
+          task={description}
+          code={solution}
+          codeBadge={running ? 'fut…' : execution.isSuccess || execution.isError ? 'eredmény' : null}
+        />
+      )}
+    </main>
+  )
+}
 
-      <div className="mt-6">
-        {wide ? (
-          <SplitPane
-            label="A feladatleírás és a szerkesztő közötti elválasztó"
-            ratio={split}
-            onRatioChange={setSplit}
-            defaultRatio={DEFAULT_SPLIT}
-            left={description}
-            right={solution}
-          />
-        ) : (
-          <WorkspaceTabs
-            view={view}
-            onViewChange={setView}
-            task={description}
-            code={solution}
-            codeBadge={running ? 'fut…' : execution.isSuccess || execution.isError ? 'eredmény' : null}
-          />
-        )}
-      </div>
+interface LanguageSwitchProps {
+  languages: ReadonlyArray<LanguageKey>
+  value: LanguageKey
+  onChange: (language: LanguageKey) => void
+  disabled: boolean
+}
+
+/** Nyelvváltó kapcsolósor; egyetlen nyelvnél csak a neve látszik. */
+function LanguageSwitch({ languages, value, onChange, disabled }: LanguageSwitchProps) {
+  if (languages.length < 2) return <Badge kind="lang">{LANGUAGE_LABEL[value]}</Badge>
+
+  return (
+    <div role="group" aria-label="Programozási nyelv" className="inline-flex overflow-hidden rounded-md border border-ink">
+      {languages.map((option, index) => (
+        <button
+          key={option}
+          type="button"
+          aria-pressed={option === value}
+          disabled={disabled}
+          onClick={() => onChange(option)}
+          data-language={option}
+          className={cx(
+            'min-h-11 px-4 text-15 font-semibold',
+            index > 0 && 'border-l border-ink',
+            option === value ? 'bg-ink text-sheet' : 'bg-sheet text-ink hover:bg-note',
+          )}
+        >
+          {LANGUAGE_LABEL[option]}
+        </button>
+      ))}
     </div>
   )
 }
 
 function ExampleBlock({ label, value }: { label: string; value: string }) {
   return (
-    <div>
-      <p className="mb-1 text-xs uppercase tracking-wide text-slate-400">{label}</p>
-      <pre className="rounded border border-slate-800 bg-slate-950 p-2 font-mono text-xs whitespace-pre-wrap text-slate-300">
-        {value || '(üres)'}
-      </pre>
+    <div className="min-w-0 flex-1 basis-36 overflow-hidden rounded-md border border-line">
+      <p className="border-b border-line bg-headrow px-3 py-1.5 text-14 font-semibold text-ink-soft">{label}</p>
+      <pre className="overflow-x-auto px-3 py-2.5 text-14 leading-relaxed whitespace-pre-wrap">{value || '(üres)'}</pre>
     </div>
   )
 }

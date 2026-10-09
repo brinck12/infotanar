@@ -42,8 +42,8 @@ function ModuleEditor({ module }: { module: AdminModule }) {
   return (
     <AdminShell
       crumbs={[
-        { label: 'Admin' },
-        { label: 'Tananyag', to: '/admin/tananyag' },
+        { label: 'Admin', to: '/admin' },
+        { label: 'Katalógus', to: '/admin/tananyag' },
         { label: track.data?.title ?? '…', to: `/admin/tananyag/agak/${module.track_id}` },
         { label: module.title },
       ]}
@@ -51,8 +51,8 @@ function ModuleEditor({ module }: { module: AdminModule }) {
     >
       <Section title="Modul adatai" aside={<SavedNote mutation={save} />}>
         <MutationError error={save.error} fields={['title', 'slug', 'description']} />
-        <form onSubmit={submit} noValidate className="grid gap-4">
-          <div className="grid gap-4 sm:grid-cols-2">
+        <form onSubmit={submit} noValidate className="grid gap-5">
+          <div className="grid gap-5 sm:grid-cols-2">
             <Field label="Cím" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} error={errors.title} />
             <Field label="URL-azonosító" value={form.slug} onChange={(e) => setForm({ ...form, slug: e.target.value })} error={errors.slug} />
           </div>
@@ -83,7 +83,7 @@ function ModuleEditor({ module }: { module: AdminModule }) {
               <>
                 <StatusPill tone="info">{lesson.exercise_count ?? 0} feladat</StatusPill>
                 {lesson.is_free && <StatusPill tone="free">Ingyenes</StatusPill>}
-                <StatusPill tone={lesson.is_published ? 'published' : 'draft'}>{lesson.is_published ? 'Publikált' : 'Vázlat'}</StatusPill>
+                <StatusPill tone={lesson.is_published ? 'published' : 'draft'}>{lesson.is_published ? 'Közzétéve' : 'Piszkozat'}</StatusPill>
               </>
             ),
           }))}
@@ -92,7 +92,7 @@ function ModuleEditor({ module }: { module: AdminModule }) {
           onReorder={(ids) => lessons.reorderChildren.mutate(ids)}
           onDelete={(lessonId) => lessons.deleteChild.mutate(lessonId)}
         />
-        <div className="mt-5 border-t border-slate-800 pt-4">
+        <div className="mt-5 border-t border-grid pt-5">
           <MutationError error={lessons.createChild.error} fields={['title', 'slug']} />
           <QuickCreate
             titleLabel="Új lecke címe"

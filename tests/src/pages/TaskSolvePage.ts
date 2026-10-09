@@ -7,7 +7,7 @@ import { ResultPanel } from './components/ResultPanel'
 export class TaskSolvePage extends BasePage {
   readonly editor: MonacoEditor
   readonly resultPanel: ResultPanel
-  readonly languageSelect: Locator
+  readonly languageSwitch: Locator
   readonly runButton: Locator
   readonly submitButton: Locator
 
@@ -15,7 +15,7 @@ export class TaskSolvePage extends BasePage {
     super(page)
     this.editor = new MonacoEditor(page)
     this.resultPanel = new ResultPanel(page)
-    this.languageSelect = page.getByLabel('Nyelv:')
+    this.languageSwitch = page.getByRole('group', { name: 'Programozási nyelv' })
     this.runButton = page.getByRole('button', { name: 'Futtatás' })
     this.submitButton = page.getByRole('button', { name: 'Beadás' })
   }
@@ -36,7 +36,7 @@ export class TaskSolvePage extends BasePage {
   }
 
   async selectLanguage(language: LanguageKey): Promise<void> {
-    await this.languageSelect.selectOption(language)
+    await this.languageSwitch.locator(`[data-language="${language}"]`).click()
   }
 
   async run(): Promise<void> {

@@ -17,7 +17,7 @@ test.describe('Feladat megoldása', () => {
       await expect(summary).toContainText('1 / 1 teszteset sikeres')
       await expect(results).toHaveCount(1)
       await expect(results.first()).toHaveAttribute('data-passed', 'true')
-      await expect(results.first()).toContainText('SIKERES')
+      await expect(results.first()).toContainText('Elfogadva')
     })
 
     test('hibás kód futtatása után piros eredmény és az eltérés látszik', { tag: '@regression' }, async ({ mockApi, taskSolvePage }) => {
@@ -28,7 +28,7 @@ test.describe('Feladat megoldása', () => {
 
       const panel = taskSolvePage.resultPanel
       await expect(panel.summary).toHaveAttribute('data-status', 'failed')
-      await expect(panel.result(0)).toContainText('HIBÁS')
+      await expect(panel.result(0)).toContainText('Hibás kimenet')
       await expect(panel.actualOutputOf(panel.result(0))).toBeVisible()
     })
 
@@ -56,7 +56,7 @@ test.describe('Feladat megoldása', () => {
 
       const panel = taskSolvePage.resultPanel
       await expect(panel.results).toHaveCount(2)
-      await expect(panel.result(1)).toContainText('rejtett')
+      await expect(panel.result(1)).toContainText('Rejtett')
       // A rejtett tesztesetnél nem jelenik meg kimenet.
       await expect(panel.actualOutputOf(panel.result(1))).toHaveCount(0)
     })

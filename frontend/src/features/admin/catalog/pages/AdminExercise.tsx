@@ -1,11 +1,16 @@
 import { useQuery } from '@tanstack/react-query'
-import { useState, type FormEvent, type ReactNode } from 'react'
-import ReactMarkdown from 'react-markdown'
+import { useId, useState, type FormEvent, type ReactNode } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import remarkGfm from 'remark-gfm'
 import { mezoHibak } from '../../../../shared/api/errors'
 import { LEVEL_LABEL } from '../../../../shared/domain/labels'
-import { CheckboxField, Field, SelectField, SubmitButton, TextAreaField } from '../../../../shared/ui/Form'
+import { Badge } from '../../../../shared/ui/Badge'
+import { Banner } from '../../../../shared/ui/Banner'
+import { Button } from '../../../../shared/ui/Button'
+import { CheckboxField, Field, SelectField, Switch, TextAreaField } from '../../../../shared/ui/Form'
+import { Icon } from '../../../../shared/ui/Icon'
+import { Panel } from '../../../../shared/ui/Panel'
+import { Prose } from '../../../../shared/ui/Prose'
+import { TabPanel, Tabs } from '../../../../shared/ui/Tabs'
 import type { LanguageKey, Level } from '../../../../types'
 import { CodeEditor } from '../../../workspace/components/CodeEditor'
 import {
@@ -18,7 +23,8 @@ import {
   type ExercisePayload,
   type LanguageOption,
 } from '../api'
-import { AdminShell, Section } from '../../components/AdminShell'
+import { AdminShell } from '../../components/AdminShell'
+import { RubricBuilder } from '../../exams/components/RubricBuilder'
 import { ConstraintEditor } from '../components/ConstraintEditor'
 import { MutationError, QueryState } from '../components/QueryState'
 import { TestCaseManager } from '../components/TestCaseManager'
@@ -53,12 +59,22 @@ function LessonContext({ lessonId, children }: { lessonId: number; children: (le
 const EXERCISE_FIELDS = ['title', 'description', 'level', 'difficulty', 'allowed_languages', 'allowed_languages.0', 'is_published', 'sql_order_sensitive', 'constraints', 'starter_code.python', 'starter_code.csharp', 'starter_code.sql'] as const
 
 const LEVEL_OPTIONS = (Object.keys(LEVEL_LABEL) as Level[]).map((level) => ({ value: level, label: LEVEL_LABEL[level] }))
-const DIFFICULTY_OPTIONS = [1, 2, 3, 4, 5].map((n) => ({ value: String(n), label: `${n} ${'★'.repeat(n)}` }))
+const DIFFICULTY_OPTIONS = [1, 2, 3, 4, 5].map((n) => ({ value: String(n), label: String(n) }))
+
+type EditorTab = 'leiras' | 'tesztek' | 'szabalyok' | 'ertekelolap'
+
+const TABS: ReadonlyArray<{ id: EditorTab; label: string }> = [
+  { id: 'leiras', label: 'Leírás és kód' },
+  { id: 'tesztek', label: 'Tesztesetek' },
+  { id: 'szabalyok', label: 'Szabályok' },
+  { id: 'ertekelolap', label: 'Értékelőlap' },
+]
 
 function ExerciseEditor({ lesson, exercise }: { lesson: AdminLesson; exercise: AdminExercise | null }) {
   const navigate = useNavigate()
+  const formId = useId()
   const languages = useQuery(languagesQuery())
-  const [preview, setPreview] = useState(false)
+  const [tab, setTab] = useState<EditorTab>('leiras')
   const [form, setForm] = useState<ExercisePayload>(() => ({
     lesson_id: lesson.id,
     title: exercise?.title ?? '',
@@ -76,7 +92,7 @@ function ExerciseEditor({ lesson, exercise }: { lesson: AdminLesson; exercise: A
   })
   const errors = mezoHibak(save.error)
   const set = <K extends keyof ExercisePayload>(key: K, value: ExercisePayload[K]) => setForm((f) => ({ ...f, [key]: value }))
-  // #48: publikálni csak nyilvános tesztesettel lehet (a /run azokon fut); a backend is ellenőrzi.
+  // #48: közzétenni csak nyilvános tesztesettel lehet (a /run azokon fut); a backend is ellenőrzi.
   const testCases = useQuery({ ...testCasesQuery(exercise?.id ?? 0), enabled: exercise !== null })
   const visibleTestCases = testCases.data?.filter((tc) => !tc.is_hidden).length ?? 0
   const [publishError, setPublishError] = useState<string | null>(null)
@@ -93,8 +109,8 @@ function ExerciseEditor({ lesson, exercise }: { lesson: AdminLesson; exercise: A
     if (form.is_published && visibleTestCases === 0) {
       setPublishError(
         exercise
-          ? 'Publikálás előtt adj hozzá legalább egy nyilvános tesztesetet (lent, a Tesztesetek résznél).'
-          : 'Új feladat csak vázlatként menthető: a tesztesetek a létrehozás után adhatók hozzá, utána publikálható.',
+          ? 'Közzététel előtt adj hozzá legalább egy nyilvános tesztesetet a Tesztesetek fülön.'
+          : 'Új feladat csak piszkozatként menthető. A tesztesetek a létrehozás után adhatók hozzá, utána tehető közzé.',
       )
       return
     }
@@ -105,24 +121,30 @@ function ExerciseEditor({ lesson, exercise }: { lesson: AdminLesson; exercise: A
   }
 
   const title = exercise ? exercise.title : 'Új feladat'
+  const languageError = errors.allowed_languages ?? errors['allowed_languages.0']
+  const publishMessage = publishError ?? errors.is_published
 
   return (
     <AdminShell
       crumbs={[
-        { label: 'Admin' },
-        { label: 'Tananyag', to: '/admin/tananyag' },
+        { label: 'Admin', to: '/admin' },
+        { label: 'Katalógus', to: '/admin/tananyag' },
         { label: lesson.title, to: `/admin/tananyag/leckek/${lesson.id}` },
         { label: title },
       ]}
       title={title}
     >
-      <form onSubmit={submit} noValidate className="space-y-8">
-        <Section title="Feladat" aside={<SavedNote mutation={save} />}>
-          <MutationError error={save.error} fields={EXERCISE_FIELDS} />
-          <div className="grid gap-4">
-            <Field label="Cím" value={form.title} onChange={(e) => set('title', e.target.value)} error={errors.title} />
-            <div className="grid gap-4 sm:grid-cols-2">
+      <Tabs label="Feladat részei" tabs={TABS} active={tab} onChange={setTab} idPrefix={formId} />
+
+      <MutationError error={save.error} fields={EXERCISE_FIELDS} />
+
+      <form id={formId} onSubmit={submit} noValidate>
+        <TabPanel idPrefix={formId} id="leiras" active={tab === 'leiras'} className="flex flex-col gap-5">
+          <Panel>
+            <div className="flex flex-wrap gap-5">
+              <Field className="flex-1 basis-72" label="Cím" value={form.title} onChange={(e) => set('title', e.target.value)} error={errors.title} />
               <SelectField
+                className="w-44"
                 label="Szint"
                 options={LEVEL_OPTIONS}
                 value={form.level}
@@ -130,6 +152,7 @@ function ExerciseEditor({ lesson, exercise }: { lesson: AdminLesson; exercise: A
                 error={errors.level}
               />
               <SelectField
+                className="w-32"
                 label="Nehézség"
                 options={DIFFICULTY_OPTIONS}
                 value={String(form.difficulty)}
@@ -137,111 +160,128 @@ function ExerciseEditor({ lesson, exercise }: { lesson: AdminLesson; exercise: A
                 error={errors.difficulty}
               />
             </div>
-
-            <div className="space-y-1">
-              <div className="flex justify-end">
-                <button type="button" onClick={() => setPreview((p) => !p)} className="text-xs text-sky-400 hover:underline" aria-pressed={preview}>
-                  {preview ? 'Vissza a szerkesztéshez' : 'Előnézet'}
-                </button>
+            <fieldset className="mt-5">
+              <legend className="text-15 font-semibold">Nyelvek</legend>
+              <div className="mt-2.5 flex flex-wrap gap-x-7 gap-y-3">
+                {(languages.data ?? []).map((language: LanguageOption) => (
+                  <CheckboxField
+                    key={language.key}
+                    label={language.label}
+                    checked={form.allowed_languages.includes(language.key)}
+                    onChange={(e) => toggleLanguage(language.key, e.target.checked)}
+                  />
+                ))}
               </div>
-              {preview ? (
-                <div aria-label="A leírás előnézete" role="region" className="prose-invert min-h-40 rounded-lg border border-slate-800 bg-slate-900 p-4 text-sm text-slate-200 [&_code]:rounded [&_code]:bg-slate-950 [&_code]:px-1 [&_li]:ml-4 [&_li]:list-disc [&_p]:my-2">
-                  <ReactMarkdown remarkPlugins={[remarkGfm]}>{form.description || '*(üres)*'}</ReactMarkdown>
+              {languageError && <InlineError>{languageError}</InlineError>}
+            </fieldset>
+          </Panel>
+
+          <Panel>
+            <div className="flex flex-wrap gap-5">
+              <TextAreaField
+                className="flex-1 basis-80"
+                label="Leírás (Markdown)"
+                rows={12}
+                mono
+                value={form.description}
+                onChange={(e) => set('description', e.target.value)}
+                error={errors.description}
+              />
+              <div className="min-w-0 flex-1 basis-80">
+                <p className="text-15 font-semibold">Előnézet</p>
+                <div role="region" aria-label="A leírás előnézete" className="mt-1.5 min-h-40 rounded-md border border-line px-5 py-4">
+                  <Prose markdown={form.description || '*(üres)*'} />
                 </div>
-              ) : (
-                <TextAreaField
-                  label="Leírás (Markdown)"
-                  rows={10}
-                  mono
-                  value={form.description}
-                  onChange={(e) => set('description', e.target.value)}
-                  error={errors.description}
-                />
-              )}
+              </div>
             </div>
+          </Panel>
 
-            <CheckboxField
-              label="Publikált"
-              hint="Csak publikált feladat jelenik meg a diákoknak (a leckének és a képzési ágnak is publikáltnak kell lennie)."
-              checked={form.is_published}
-              onChange={(e) => set('is_published', e.target.checked)}
-              error={publishError ?? errors.is_published}
-            />
-          </div>
-        </Section>
-
-        <Section title="Nyelvek és kiinduló kód">
-          <fieldset className="text-sm">
-            <legend className="mb-2 text-slate-300">Engedélyezett nyelvek</legend>
-            <div className="flex flex-wrap gap-4">
-              {(languages.data ?? []).map((language: LanguageOption) => (
-                <CheckboxField
-                  key={language.key}
-                  label={language.label}
-                  checked={form.allowed_languages.includes(language.key)}
-                  onChange={(e) => toggleLanguage(language.key, e.target.checked)}
-                />
-              ))}
-            </div>
-            {(errors.allowed_languages ?? errors['allowed_languages.0']) && (
-              <p className="mt-1 text-red-300">{errors.allowed_languages ?? errors['allowed_languages.0']}</p>
-            )}
-          </fieldset>
-
-          <div className="mt-5 space-y-5">
+          <Panel className="flex flex-col gap-5">
+            {form.allowed_languages.length === 0 && <p className="text-15 text-ink-soft">Jelölj be legalább egy nyelvet a kiinduló kódhoz.</p>}
             {form.allowed_languages.map((language) => (
               <div key={language}>
-                <p className="mb-1 text-sm text-slate-300">
-                  Kiinduló kód – {languages.data?.find((l) => l.key === language)?.label ?? language}
+                <p className="mb-2 text-15 font-semibold">
+                  Kiinduló kód ({languages.data?.find((l) => l.key === language)?.label ?? language})
                 </p>
-                <div className="h-48">
+                <div className="h-48 overflow-hidden rounded-md">
                   <CodeEditor
                     language={language}
                     initialValue={form.starter_code[language] ?? ''}
                     onChange={(code) => setForm((f) => ({ ...f, starter_code: { ...f.starter_code, [language]: code } }))}
                   />
                 </div>
-                {errors[`starter_code.${language}`] && <p className="mt-1 text-sm text-red-300">{errors[`starter_code.${language}`]}</p>}
+                {errors[`starter_code.${language}`] && <InlineError>{errors[`starter_code.${language}`]}</InlineError>}
               </div>
             ))}
-          </div>
 
-          {form.allowed_languages.includes('sql') && (
-            <div className="mt-5">
+            {form.allowed_languages.includes('sql') && (
               <CheckboxField
                 label="Az SQL eredmény sorrendje számít"
-                hint="Csak akkor jelöld, ha a feladat ORDER BY-t kér; különben a sorok sorrendje nem számít."
+                hint="Csak akkor jelöld, ha a feladat rendezést kér (ORDER BY); különben a sorok sorrendje nem számít."
                 checked={form.sql_order_sensitive}
                 onChange={(e) => set('sql_order_sensitive', e.target.checked)}
                 error={errors.sql_order_sensitive}
               />
-            </div>
-          )}
-        </Section>
+            )}
+          </Panel>
+        </TabPanel>
 
-        <Section title="Kódszabályok">
-          <ConstraintEditor
-            value={form.constraints}
-            onChange={(constraints) => set('constraints', constraints)}
-            allowedLanguages={form.allowed_languages}
-            error={errors.constraints}
-          />
-        </Section>
-
-        <div className="flex items-center gap-3">
-          <SubmitButton busy={save.isPending} fullWidth={false}>
-            {save.isPending ? 'Mentés…' : exercise ? 'Mentés' : 'Feladat létrehozása'}
-          </SubmitButton>
-          <SavedNote mutation={save} />
-        </div>
+        <TabPanel idPrefix={formId} id="szabalyok" active={tab === 'szabalyok'}>
+          <Panel>
+            <ConstraintEditor
+              value={form.constraints}
+              onChange={(constraints) => set('constraints', constraints)}
+              allowedLanguages={form.allowed_languages}
+              error={errors.constraints}
+            />
+          </Panel>
+        </TabPanel>
       </form>
 
-      {/* Külön űrlapok: nem lehetnek a feladat űrlapján belül. */}
-      {exercise && (
-        <Section title="Tesztesetek">
+      {/* A tesztesetek saját űrlapok: nem lehetnek a feladat űrlapján belül. */}
+      <TabPanel idPrefix={formId} id="tesztek" active={tab === 'tesztek'}>
+        {exercise ? (
           <TestCaseManager exerciseId={exercise.id} />
-        </Section>
-      )}
+        ) : (
+          <Banner kind="info" title="Előbb mentsd el a feladatot">
+            A tesztesetek a létrehozás után adhatók hozzá.
+          </Banner>
+        )}
+      </TabPanel>
+
+      <TabPanel idPrefix={formId} id="ertekelolap" active={tab === 'ertekelolap'}>
+        {exercise ? (
+          <RubricBuilder exerciseId={exercise.id} />
+        ) : (
+          <Banner kind="info" title="Előbb mentsd el a feladatot">
+            Az értékelőlap a létrehozás után szerkeszthető.
+          </Banner>
+        )}
+      </TabPanel>
+
+      <div className="flex flex-col gap-3">
+        {publishMessage && <Banner kind="error">{publishMessage}</Banner>}
+        <div className="flex flex-wrap items-center gap-x-6 gap-y-3">
+          <Button type="submit" form={formId} busy={save.isPending} busyLabel="Mentés…">
+            {exercise ? 'Mentés' : 'Feladat létrehozása'}
+          </Button>
+          <Switch label="Közzétéve" checked={form.is_published} onChange={(checked) => set('is_published', checked)} />
+          <Badge kind={exercise?.is_published ? 'pub' : 'draft'}>{exercise?.is_published ? 'Közzétéve' : 'Piszkozat'}</Badge>
+          <SavedNote mutation={save} />
+        </div>
+        <p className="text-14 leading-relaxed text-ink-soft">
+          Csak közzétett feladat jelenik meg a tanulóknak, és a leckének meg a képzési ágnak is közzétettnek kell lennie.
+        </p>
+      </div>
     </AdminShell>
+  )
+}
+
+function InlineError({ children }: { children: ReactNode }) {
+  return (
+    <p className="mt-1.5 flex items-start gap-1.5 text-14 leading-normal text-wrong">
+      <Icon name="warn" size={16} className="mt-0.5" />
+      <span>{children}</span>
+    </p>
   )
 }

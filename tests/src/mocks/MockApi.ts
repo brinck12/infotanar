@@ -1,6 +1,6 @@
 import type { Page, Route } from '@playwright/test'
 import type { RunResponse, SubmissionResponse, TaskDetail, Topic } from '../api/types'
-import { buildTaskDetail, buildTopic, toTaskListItem } from '../data/builders/catalog'
+import { buildTaskDetail, buildTopic, buildTrackDetail, toTaskListItem, toTrackSummary } from '../data/builders/catalog'
 
 /** Az app a relativ /api/v1 utvonalat hivja, barmelyik hoston fusson. */
 const API = '**/api/v1'
@@ -30,11 +30,18 @@ export class MockApi {
     return { topics: [buildTopic()], tasks: [buildTaskDetail()] }
   }
 
-  /** Az olvaso vegpontok (temakorok, feladatlista, feladat reszletei) mockolasa. */
+  /** Az olvaso vegpontok (temakorok, kepzesi agak, feladatlista, feladat reszletei) mockolasa. */
   async withCatalog(catalog: MockCatalog = MockApi.defaultCatalog()): Promise<void> {
     const list = { data: catalog.tasks.map(toTaskListItem) }
 
+    const track = buildTrackDetail(catalog.tasks)
+
     await this.page.route(`${API}/topics`, (route) => route.fulfill({ json: { data: catalog.topics } }))
+    await this.page.route(`${API}/tracks`, (route) => route.fulfill({ json: { data: [toTrackSummary(track)] } }))
+    await this.page.route(`${API}/tracks/*`, (route) => route.fulfill({ json: { data: track } }))
+    await this.page.route(`${API}/billing/plan`, (route) =>
+      route.fulfill({ json: { data: { name: 'InfoTanár Prémium', price_huf: 2990, period_months: 1 } } })
+    )
     // A lista a query stringtol (szures) fuggetlenul ugyanazt adja.
     await this.page.route(`${API}/tasks?*`, (route) => route.fulfill({ json: list }))
     await this.page.route(`${API}/tasks`, (route) => route.fulfill({ json: list }))

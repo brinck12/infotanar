@@ -2,6 +2,7 @@ import type { ReactNode } from 'react'
 import { Navigate, useLocation } from 'react-router-dom'
 import type { Role } from '../../types'
 import { PageLoader } from '../../shared/ui/PageLoader'
+import { Forbidden } from '../system/NotFound'
 import { useAuth } from './context'
 
 /** Bejelentkezés nélkül a login oldalra visz, onnan sikeres belépés után vissza. */
@@ -20,7 +21,7 @@ export function RequireRole({ allow, children }: { allow: Role; children: ReactN
 
   if (loading) return <PageLoader />
   if (!user) return <Navigate to="/bejelentkezes" replace />
-  if (user.role !== allow) return <Navigate to="/" replace />
+  if (user.role !== allow) return <Forbidden />
 
   return children
 }

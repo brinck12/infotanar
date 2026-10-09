@@ -20,7 +20,7 @@ export function AdminCatalog() {
   return (
     <QueryState query={tracks}>
       {(data) => (
-        <AdminShell crumbs={[{ label: 'Admin' }, { label: 'Tananyag' }]} title="Tananyag">
+        <AdminShell crumbs={[{ label: 'Admin', to: '/admin' }, { label: 'Katalógus' }]} title="Katalógus">
           <Section title="Képzési ágak">
             <MutationError error={deleteChild.error ?? reorderChildren.error} />
             <ChildList
@@ -32,7 +32,7 @@ export function AdminCatalog() {
                 meta: (
                   <>
                     <StatusPill tone="info">{track.module_count ?? 0} modul</StatusPill>
-                    <StatusPill tone={track.is_published ? 'published' : 'draft'}>{track.is_published ? 'Publikált' : 'Vázlat'}</StatusPill>
+                    <StatusPill tone={track.is_published ? 'published' : 'draft'}>{track.is_published ? 'Közzétéve' : 'Piszkozat'}</StatusPill>
                   </>
                 ),
               }))}

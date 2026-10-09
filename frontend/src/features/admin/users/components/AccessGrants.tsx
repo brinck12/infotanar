@@ -1,9 +1,12 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useState, type FormEvent } from 'react'
 import { mezoHibak } from '../../../../shared/api/errors'
+import { Badge } from '../../../../shared/ui/Badge'
+import { Banner } from '../../../../shared/ui/Banner'
 import { Field, SubmitButton, TextAreaField } from '../../../../shared/ui/Form'
+import { Skeleton } from '../../../../shared/ui/States'
 import { MutationError } from '../../catalog/components/QueryState'
-import { StatusPill } from '../../components/AdminShell'
+import { ConfirmAction } from '../../components/ConfirmAction'
 import { accessGrantsQuery, adminUserKeys, grantAccess, revokeAccess, type AccessGrant } from '../api'
 import { formatDate } from '../format'
 
@@ -38,24 +41,23 @@ export function AccessGrants({ userId }: { userId: number }) {
   }
 
   return (
-    <div className="space-y-5" data-testid="access-grants">
+    <div className="flex flex-col gap-6" data-testid="access-grants">
       {active ? (
-        <p className="text-sm text-slate-300">
-          Érvényes kézi hozzáférése van. Új kiadás előtt vond vissza a jelenlegit, vagy várd meg a lejáratát.
-        </p>
+        <Banner kind="info">Érvényes kézi hozzáférése van. Új kiadás előtt vond vissza a jelenlegit, vagy várd meg a lejáratát.</Banner>
       ) : (
-        <form onSubmit={submit} noValidate className="grid gap-3" aria-label="Kézi hozzáférés kiadása">
+        <form onSubmit={submit} noValidate className="flex flex-col gap-4" aria-label="Kézi hozzáférés kiadása">
           <MutationError error={grant.error} fields={['reason', 'ends_at']} />
           <TextAreaField
             label="Indoklás"
-            hint="Kötelező; később is kiderül belőle, miért kapott ingyenes hozzáférést."
+            hint="Kötelező. Később is kiderül belőle, miért kapott ingyenes hozzáférést."
             rows={2}
             value={reason}
             onChange={(e) => setReason(e.target.value)}
             error={errors.reason}
           />
           <Field
-            label="Lejárat (opcionális)"
+            className="max-w-xs"
+            label="Lejárat (nem kötelező)"
             type="date"
             min={new Date().toISOString().slice(0, 10)}
             value={endsAt}
@@ -64,8 +66,8 @@ export function AccessGrants({ userId }: { userId: number }) {
             error={errors.ends_at}
           />
           <div>
-            <SubmitButton busy={grant.isPending} fullWidth={false}>
-              {grant.isPending ? 'Kiadás…' : 'Prémium hozzáférés kiadása'}
+            <SubmitButton busy={grant.isPending} busyLabel="Kiadás…" fullWidth={false}>
+              Prémium hozzáférés kiadása
             </SubmitButton>
           </div>
         </form>
@@ -74,15 +76,15 @@ export function AccessGrants({ userId }: { userId: number }) {
       <MutationError error={revoke.error} />
 
       <div>
-        <h3 className="mb-2 text-sm font-medium text-slate-300">Előzmények</h3>
+        <h3 className="text-15 font-bold">Előzmények</h3>
         {grants.isPending ? (
-          <p className="text-sm text-slate-400">Betöltés…</p>
+          <Skeleton lines={2} className="mt-3" />
         ) : grants.isError ? (
           <MutationError error={grants.error} />
         ) : grants.data.length === 0 ? (
-          <p className="text-sm text-slate-400">Még nem kapott kézi hozzáférést.</p>
+          <p className="mt-2 text-15 text-ink-soft">Még nem kapott kézi hozzáférést.</p>
         ) : (
-          <ul className="divide-y divide-slate-800 rounded-lg border border-slate-800">
+          <ul className="mt-2">
             {grants.data.map((item) => (
               <GrantRow key={item.id} grant={item} busy={revoke.isPending} onRevoke={() => revoke.mutate(item.id)} />
             ))}
@@ -94,42 +96,27 @@ export function AccessGrants({ userId }: { userId: number }) {
 }
 
 function GrantRow({ grant, busy, onRevoke }: { grant: AccessGrant; busy: boolean; onRevoke: () => void }) {
-  const [confirming, setConfirming] = useState(false)
-
   return (
-    <li className="flex flex-wrap items-start gap-3 px-3 py-2.5 text-sm" data-testid="access-grant" data-active={grant.active}>
-      <div className="min-w-0 flex-1">
-        <p className="text-slate-100">„{grant.reason}”</p>
-        <p className="mt-0.5 text-xs text-slate-400">
-          Kiadta: {grant.granted_by?.name ?? 'ismeretlen'}, {formatDate(grant.granted_at)} ·{' '}
-          {grant.ends_at ? `lejárat: ${formatDate(grant.ends_at)}` : 'lejárat nélkül'}
-          {grant.revoked_at && ` · visszavonta: ${grant.revoked_by?.name ?? 'ismeretlen'}, ${formatDate(grant.revoked_at)}`}
+    <li className="flex flex-wrap items-center gap-x-4 gap-y-2 border-t border-grid py-3" data-testid="access-grant" data-active={grant.active}>
+      <div className="min-w-0 flex-1 basis-64">
+        <p className="text-16">„{grant.reason}”</p>
+        <p className="mt-0.5 text-14 leading-normal text-ink-soft">
+          Kiadta: {grant.granted_by?.name ?? 'ismeretlen'}, {formatDate(grant.granted_at)}.{' '}
+          {grant.ends_at ? `Lejárat: ${formatDate(grant.ends_at)}.` : 'Lejárat nélkül.'}
+          {grant.revoked_at && ` Visszavonta: ${grant.revoked_by?.name ?? 'ismeretlen'}, ${formatDate(grant.revoked_at)}.`}
         </p>
       </div>
-      <StatusPill tone={grant.active ? 'published' : 'draft'}>{grant.active ? 'Érvényes' : grant.revoked_at ? 'Visszavonva' : 'Lejárt'}</StatusPill>
-      {grant.active &&
-        (confirming ? (
-          <span role="group" aria-label="Visszavonás megerősítése" className="flex items-center gap-1 text-xs">
-            <button
-              type="button"
-              disabled={busy}
-              onClick={() => {
-                setConfirming(false)
-                onRevoke()
-              }}
-              className="rounded bg-red-800 px-2 py-1 text-white hover:bg-red-700 disabled:opacity-50"
-            >
-              Visszavonás
-            </button>
-            <button type="button" onClick={() => setConfirming(false)} className="rounded px-2 py-1 text-slate-300 hover:bg-slate-800">
-              Mégse
-            </button>
-          </span>
-        ) : (
-          <button type="button" onClick={() => setConfirming(true)} className="rounded px-2 py-1 text-xs text-red-300 hover:bg-red-950">
-            Visszavonás…
-          </button>
-        ))}
+      <Badge kind={grant.active ? 'ok' : 'draft'}>{grant.active ? 'Érvényes' : grant.revoked_at ? 'Visszavonva' : 'Lejárt'}</Badge>
+      {grant.active && (
+        <ConfirmAction
+          label="Hozzáférés visszavonása"
+          question="A kézi prémium hozzáférés azonnal megszűnik. Ha nincs előfizetése, a fizetős leckék bezárulnak előtte."
+          confirmLabel="Visszavonom"
+          danger
+          busy={busy}
+          onConfirm={onRevoke}
+        />
+      )}
     </li>
   )
 }

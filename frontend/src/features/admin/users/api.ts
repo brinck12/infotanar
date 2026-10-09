@@ -1,6 +1,7 @@
 import { keepPreviousData, queryOptions } from '@tanstack/react-query'
 import { http, type Envelope } from '../../../shared/api/client'
-import type { ProgressSummary, Role, SubscriptionStatus, TrackProgress } from '../../../types'
+import { saveBlob } from '../../../shared/api/download'
+import type { PaymentSummary, ProgressSummary, Role, SubscriptionStatus, TrackProgress } from '../../../types'
 
 /** Admin felhasználói áttekintés (#50). Fizetési adat nincs benne, csak státusz és dátumok. */
 export interface AdminUserSubscription {
@@ -100,4 +101,49 @@ export async function grantAccess(userId: number, payload: { reason: string; end
 
 export async function revokeAccess(grantId: number): Promise<void> {
   await http.delete(`/admin/access-grants/${grantId}`)
+}
+
+/** Szerepkör-váltás (#162). A választ nem használjuk: a részletek újratöltése az egyetlen igazság. */
+export async function changeRole(userId: number, role: Role): Promise<void> {
+  await http.put(`/admin/users/${userId}/role`, { role })
+}
+
+export async function resendVerification(userId: number): Promise<void> {
+  await http.post(`/admin/users/${userId}/verification-notification`)
+}
+
+export async function verifyEmail(userId: number, reason: string): Promise<void> {
+  await http.post(`/admin/users/${userId}/verify-email`, { reason })
+}
+
+export async function revokeTokens(userId: number): Promise<void> {
+  await http.delete(`/admin/users/${userId}/tokens`)
+}
+
+export async function sendPasswordReset(userId: number): Promise<void> {
+  await http.post(`/admin/users/${userId}/password-reset`)
+}
+
+/** Egy felhasználó fizetése: a saját nézet mezői plusz a szolgáltatói azonosítók. */
+export interface AdminPayment extends PaymentSummary {
+  provider_payment_id: string | null
+  provider_status: string | null
+}
+
+export interface AdminPaymentPage {
+  data: AdminPayment[]
+  meta: { current_page: number; last_page: number; total: number }
+}
+
+export const paymentsQuery = (userId: number, page: number) =>
+  queryOptions({
+    queryKey: [...adminUserKeys.detail(userId), 'payments', page] as const,
+    queryFn: async ({ signal }) => (await http.get<AdminPaymentPage>(`/admin/users/${userId}/payments`, { params: { page }, signal })).data,
+    placeholderData: keepPreviousData,
+  })
+
+/** A számla PDF-je (naplózott letöltés): Bearer token kell hozzá, ezért blobként kérjük le. */
+export async function downloadInvoice(userId: number, paymentId: string, invoiceNumber: string): Promise<void> {
+  const response = await http.get<Blob>(`/admin/users/${userId}/payments/${encodeURIComponent(paymentId)}/invoice`, { responseType: 'blob' })
+  saveBlob(response.data, `szamla-${invoiceNumber}.pdf`)
 }

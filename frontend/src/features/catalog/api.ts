@@ -1,6 +1,6 @@
 import { queryOptions } from '@tanstack/react-query'
 import { http, type Envelope } from '../../shared/api/client'
-import type { Level, TaskDetail, TaskListItem, Topic } from '../../types'
+import type { Level, TaskDetail, TaskListItem, Topic, TrackDetail, TrackSummary } from '../../types'
 
 export interface TaskFilter {
   topic?: string
@@ -31,4 +31,19 @@ export const taskQuery = (id: number) =>
   queryOptions({
     queryKey: catalogKeys.task(id),
     queryFn: async ({ signal }) => (await http.get<Envelope<TaskDetail>>(`/tasks/${id}`, { signal })).data.data,
+  })
+
+export const tracksQuery = () =>
+  queryOptions({
+    queryKey: [...catalogKeys.all, 'tracks'] as const,
+    queryFn: async ({ signal }) => (await http.get<Envelope<TrackSummary[]>>('/tracks', { signal })).data.data,
+    staleTime: 5 * 60_000,
+  })
+
+/** A katalógus szerkezete ritkán változik; a leckecímekhez és a feladat-linkekhez kell. */
+export const trackQuery = (slug: string) =>
+  queryOptions({
+    queryKey: [...catalogKeys.all, 'track', slug] as const,
+    queryFn: async ({ signal }) => (await http.get<Envelope<TrackDetail>>(`/tracks/${encodeURIComponent(slug)}`, { signal })).data.data,
+    staleTime: 5 * 60_000,
   })

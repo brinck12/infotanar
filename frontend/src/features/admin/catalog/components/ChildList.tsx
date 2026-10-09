@@ -1,5 +1,9 @@
 import { useState, type ReactNode } from 'react'
 import { Link } from 'react-router-dom'
+import { Button } from '../../../../shared/ui/Button'
+import { cx } from '../../../../shared/ui/cx'
+import { Icon, type IconName } from '../../../../shared/ui/Icon'
+import { Modal } from '../../../../shared/ui/Modal'
 
 export interface ChildItem {
   id: number
@@ -21,13 +25,13 @@ interface Props {
 
 /**
  * Egy szülő gyerekei sorrendben (#47): megnyitás, fel/le mozgatás és törlés
- * helyben megerősítve. A mozgatás gombokkal történik (billentyűzettel és
+ * megerősítéssel. A mozgatás gombokkal történik (billentyűzettel és
  * érintéssel is használható, szemben a drag and drop-pal).
  */
 export function ChildList({ items, emptyText, onReorder, onDelete, busy, noun }: Props) {
-  const [confirmingId, setConfirmingId] = useState<number | null>(null)
+  const [confirming, setConfirming] = useState<ChildItem | null>(null)
 
-  if (items.length === 0) return <p className="text-sm text-slate-400">{emptyText}</p>
+  if (items.length === 0) return <p className="text-15 text-ink-soft">{emptyText}</p>
 
   function move(index: number, delta: -1 | 1) {
     const ids = items.map((item) => item.id)
@@ -39,65 +43,69 @@ export function ChildList({ items, emptyText, onReorder, onDelete, busy, noun }:
   }
 
   return (
-    <ol className="divide-y divide-slate-800 rounded-lg border border-slate-800" data-testid="admin-child-list">
-      {items.map((item, index) => (
-        <li key={item.id} className="flex flex-wrap items-center gap-3 px-3 py-2.5">
-          <span className="w-6 text-right text-xs tabular-nums text-slate-500">{index + 1}.</span>
-          <Link to={item.to} className="min-w-0 flex-1 truncate text-sm text-slate-100 hover:text-sky-300 hover:underline">
-            {item.title}
-          </Link>
-          {item.meta && <span className="flex flex-wrap items-center gap-1.5">{item.meta}</span>}
-
-          {confirmingId === item.id ? (
-            <span role="group" aria-label={`${item.title} törlésének megerősítése`} className="flex items-center gap-2 text-xs">
-              <span className="text-amber-200">Biztosan törlöd?</span>
-              <button
-                type="button"
-                disabled={busy}
-                onClick={() => {
-                  setConfirmingId(null)
-                  onDelete(item.id)
-                }}
-                className="rounded bg-red-800 px-2 py-1 text-white hover:bg-red-700 disabled:opacity-50"
-              >
-                Törlés
-              </button>
-              <button type="button" onClick={() => setConfirmingId(null)} className="rounded px-2 py-1 text-slate-300 hover:bg-slate-800">
-                Mégse
-              </button>
-            </span>
-          ) : (
+    <>
+      <ol data-testid="admin-child-list">
+        {items.map((item, index) => (
+          <li key={item.id} className="flex flex-wrap items-center gap-x-3 gap-y-1 border-t border-grid py-1.5">
+            <span className="w-6 text-right text-14 text-ink-soft tabular-nums">{index + 1}.</span>
+            <Link to={item.to} className="inline-flex min-h-11 min-w-0 flex-1 basis-56 items-center text-16 font-medium text-ink">
+              {item.title}
+            </Link>
+            {item.meta && <span className="flex flex-wrap items-center gap-1.5">{item.meta}</span>}
             <span className="flex items-center gap-1">
-              <IconButton label={`${item.title} (${noun}) feljebb`} disabled={busy || index === 0} onClick={() => move(index, -1)}>
-                ↑
-              </IconButton>
-              <IconButton label={`${item.title} (${noun}) lejjebb`} disabled={busy || index === items.length - 1} onClick={() => move(index, 1)}>
-                ↓
-              </IconButton>
-              <IconButton label={`${item.title} (${noun}) törlése`} disabled={busy} onClick={() => setConfirmingId(item.id)} danger>
-                ✕
-              </IconButton>
+              <IconButton icon="chevron-up" label={`${item.title} (${noun}) feljebb`} disabled={busy || index === 0} onClick={() => move(index, -1)} />
+              <IconButton
+                icon="chevron-down"
+                label={`${item.title} (${noun}) lejjebb`}
+                disabled={busy || index === items.length - 1}
+                onClick={() => move(index, 1)}
+              />
+              <IconButton icon="trash" label={`${item.title} (${noun}) törlése`} disabled={busy} onClick={() => setConfirming(item)} danger />
             </span>
-          )}
-        </li>
-      ))}
-    </ol>
+          </li>
+        ))}
+      </ol>
+
+      <Modal
+        open={confirming !== null}
+        title={`Biztosan törlöd ezt: ${noun}?`}
+        onClose={() => setConfirming(null)}
+        actions={
+          <>
+            <Button variant="secondary" onClick={() => setConfirming(null)}>
+              Mégsem
+            </Button>
+            <Button
+              variant="danger"
+              icon="trash"
+              disabled={busy}
+              onClick={() => {
+                if (confirming) onDelete(confirming.id)
+                setConfirming(null)
+              }}
+            >
+              Törlés
+            </Button>
+          </>
+        }
+      >
+        <p>
+          <strong>{confirming?.title}</strong> és minden, ami alá tartozik, véglegesen törlődik. Ezt nem lehet visszavonni.
+        </p>
+      </Modal>
+    </>
   )
 }
 
-function IconButton({
-  label,
-  disabled,
-  onClick,
-  danger = false,
-  children,
-}: {
+interface IconButtonProps {
+  icon: IconName
   label: string
   disabled: boolean
   onClick: () => void
   danger?: boolean
-  children: ReactNode
-}) {
+}
+
+export function IconButton({ icon, label, disabled, onClick, danger = false }: IconButtonProps) {
   return (
     <button
       type="button"
@@ -105,11 +113,13 @@ function IconButton({
       title={label}
       disabled={disabled}
       onClick={onClick}
-      className={`h-7 w-7 rounded text-sm transition disabled:cursor-not-allowed disabled:opacity-30 ${
-        danger ? 'text-red-300 hover:bg-red-950' : 'text-slate-300 hover:bg-slate-800'
-      }`}
+      className={cx(
+        'inline-flex size-11 items-center justify-center rounded-md disabled:text-muted',
+        danger ? 'text-wrong hover:bg-wrong-soft' : 'text-ink hover:bg-note',
+        'disabled:hover:bg-transparent',
+      )}
     >
-      <span aria-hidden="true">{children}</span>
+      <Icon name={icon} />
     </button>
   )
 }
