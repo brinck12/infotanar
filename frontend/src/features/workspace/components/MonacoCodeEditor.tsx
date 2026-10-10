@@ -48,6 +48,7 @@ export function MonacoCodeEditor({ language, initialValue, onChange, replace, re
     appliedSeq.current = replace.seq
 
     if (replace.undoable) {
+      if (replace.resetTo !== undefined) model.setValue(replace.resetTo)
       editor.pushUndoStop()
       editor.executeEdits('replace', [{ range: model.getFullModelRange(), text: replace.value, forceMoveMarkers: true }])
       editor.pushUndoStop()
