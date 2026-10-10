@@ -59,6 +59,28 @@ return [
             'report' => false,
         ],
 
+        // Feladatokhoz es vizsgakhoz csatolt szerzoi fajlok (forrasfajl, mintakep,
+        // mintamegoldas, forras-zip): privat, letoltes csak alairt URL-en at
+        // (AttachmentUrls). Potolhatatlan tartalom, a mentes resze.
+        'exercise_files' => [
+            'driver' => 'local',
+            'root' => storage_path('app/private/exercise-files'),
+            'visibility' => 'private',
+            'throw' => false,
+            'report' => false,
+        ],
+
+        // A diakok feltoltott megoldasai: privat, soha nem futtatjuk es nem
+        // szolgaljuk ki beagyazva. Szandekosan nincs mentve (az eredmeny az
+        // adatbazisban van, a diak ujra feltoltheti).
+        'submission_files' => [
+            'driver' => 'local',
+            'root' => storage_path('app/private/submission-files'),
+            'visibility' => 'private',
+            'throw' => false,
+            'report' => false,
+        ],
+
         'public' => [
             'driver' => 'local',
             'root' => storage_path('app/public'),
