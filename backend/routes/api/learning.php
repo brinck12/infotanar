@@ -18,7 +18,7 @@ use Illuminate\Support\Facades\Route;
 | A korlatok harmadik parametere (pl. `throttle:60,1,oral-practice`) sajat
 | szamlalot ad. Enelkul a nev nelkuli korlatok felhasznalonkent egyetlen
 | kozos szamlalot novelnek, es a jegyzet gyakori mentese elfogyasztana a
-| kodfuttatas (`throttle:10,1`) keretet.
+| szukebb keretu vegpontoket is (pl. profilmodositas, `throttle:10,1`).
 */
 
 Route::middleware('auth:sanctum')->group(function (): void {
