@@ -69,8 +69,10 @@ test.describe('Tanulási út', () => {
     await learningPathPage.goto()
     await learningPathPage.openLesson(task.title)
 
-    await expect(page).toHaveURL(/\/leckek\/\d+$/)
+    // A regi, azonosito szerinti cim a vegleges, beszedes cimre iranyit.
+    await expect(page).toHaveURL(/\/tanulasi-ut\/programozas\/lecke-\d+$/)
     await expect(page.getByRole('heading', { level: 1, name: task.title })).toBeVisible()
+    await expect(page.getByRole('region', { name: 'Tananyag' })).toContainText('A lecke rövid összefoglalója.')
     await expect(page.getByRole('link', { name: 'Feladat megnyitása' })).toBeVisible()
   })
 })

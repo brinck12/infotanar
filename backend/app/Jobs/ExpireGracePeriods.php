@@ -4,7 +4,10 @@ declare(strict_types=1);
 
 namespace App\Jobs;
 
+use App\Actions\Billing\NotifySubscriber;
+use App\Enums\SubscriptionNoticeType;
 use App\Enums\SubscriptionStatus;
+use App\Jobs\Concerns\AlertsOperatorOnFailure;
 use App\Models\Subscription;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -18,18 +21,19 @@ use Illuminate\Support\Facades\Log;
  */
 final class ExpireGracePeriods implements ShouldBeUnique, ShouldQueue
 {
-    use Queueable;
+    use AlertsOperatorOnFailure, Queueable;
 
-    public function handle(): void
+    public function handle(NotifySubscriber $notify): void
     {
         $expired = 0;
 
         Subscription::query()
             ->where('status', SubscriptionStatus::PastDue)
             ->where('grace_ends_at', '<=', now())
-            ->chunkById(200, static function ($subscriptions) use (&$expired): void {
+            ->chunkById(200, static function ($subscriptions) use (&$expired, $notify): void {
                 foreach ($subscriptions as $subscription) {
                     $subscription->cancel();
+                    $notify->handle($subscription, SubscriptionNoticeType::Ended);
                     $expired++;
                 }
             });

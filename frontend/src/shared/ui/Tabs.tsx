@@ -80,6 +80,8 @@ export function TabPanel({ idPrefix, id, active, children, className }: TabPanel
       id={`${idPrefix}-panel-${id}`}
       aria-labelledby={`${idPrefix}-tab-${id}`}
       hidden={!active}
+      // A fülpanel a WAI-ARIA minta szerint fókuszálható, hogy a fülről Tabbal a tartalomra lehessen lépni.
+      // oxlint-disable-next-line jsx-a11y/no-noninteractive-tabindex
       tabIndex={0}
       className={className}
     >

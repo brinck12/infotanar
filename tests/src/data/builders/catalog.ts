@@ -1,4 +1,4 @@
-import type { TaskDetail, TaskListItem, TaskTopic, Topic, TrackDetail, TrackSummary } from '../../api/types'
+import type { LessonDetail, TaskDetail, TaskListItem, TaskTopic, Topic, TrackDetail, TrackSummary } from '../../api/types'
 
 /**
  * Katalogus-entitasok (temakor, feladat) gyarai. Minden gyar ervenyes,
@@ -57,7 +57,18 @@ export function buildTrackDetail(tasks: TaskDetail[], overrides: Partial<TrackDe
         .filter((task) => task.topic.id === topic.id)
         .map((task) => {
           const { id, title, level, difficulty, allowed_languages } = task
-          return { id, slug: `lecke-${String(id)}`, title, is_free: true, exercises: [{ id, title, level, difficulty, allowed_languages }] }
+          return {
+            id,
+            slug: `lecke-${String(id)}`,
+            title,
+            is_free: true,
+            locked: false,
+            locked_reason: null,
+            has_video: false,
+            exercise_count: 1,
+            status: null,
+            exercises: [{ id, title, level, difficulty, allowed_languages }],
+          }
         }),
     })),
     ...overrides,
@@ -66,5 +77,33 @@ export function buildTrackDetail(tasks: TaskDetail[], overrides: Partial<TrackDe
 
 export function toTrackSummary(track: TrackDetail): TrackSummary {
   const { id, slug, title, description, modules } = track
-  return { id, slug, title, description, lesson_count: modules.reduce((sum, module) => sum + module.lessons.length, 0) }
+  const lessonCount = modules.reduce((sum, module) => sum + module.lessons.length, 0)
+  return { id, slug, title, description, module_count: modules.length, lesson_count: lessonCount, free_lesson_count: lessonCount, progress: null }
+}
+
+/** A lecke oldala az ag szerkezetebol, ahogy a vendeg latja; `undefined`, ha nincs ilyen lecke. */
+export function toLessonDetail(track: TrackDetail, lessonSlug: string): LessonDetail | undefined {
+  const ordered = track.modules.flatMap((module) => module.lessons.map((lesson) => ({ module, lesson })))
+  const index = ordered.findIndex(({ lesson }) => lesson.slug === lessonSlug)
+  const found = ordered[index]
+  if (!found) return undefined
+
+  const link = (item: (typeof ordered)[number] | undefined) => (item ? { slug: item.lesson.slug, title: item.lesson.title } : null)
+  const { id, slug, title, is_free, has_video, exercises } = found.lesson
+
+  return {
+    id,
+    slug,
+    title,
+    track: { slug: track.slug, title: track.title },
+    module: { id: found.module.id, title: found.module.title },
+    is_free,
+    has_video,
+    status: null,
+    exercises,
+    previous: link(ordered[index - 1]),
+    next: link(ordered[index + 1]),
+    locked: false,
+    content: '## Jegyzet\n\nA lecke rövid összefoglalója.',
+  }
 }

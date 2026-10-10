@@ -121,6 +121,12 @@ final class User extends Authenticatable implements MustVerifyEmail
         return $this->hasMany(AccessGrant::class);
     }
 
+    /** @return HasMany<Consent, $this> */
+    public function consents(): HasMany
+    {
+        return $this->hasMany(Consent::class);
+    }
+
     /**
      * Az ervenyes kezi hozzaferes (#51), ha van.
      *

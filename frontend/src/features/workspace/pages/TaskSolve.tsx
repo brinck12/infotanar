@@ -1,10 +1,12 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useEffect, useState } from 'react'
-import { useParams } from 'react-router-dom'
+import { Link, useParams } from 'react-router-dom'
 import { saveBlob } from '../../../shared/api/download'
-import { hibaUzenet, zarolasOka } from '../../../shared/api/errors'
+import { hibaUzenet, varakozas, zarolasOka, type ExecutionWait } from '../../../shared/api/errors'
 import { LANGUAGE_LABEL } from '../../../shared/domain/labels'
 import { rememberLastTask } from '../../../shared/domain/lastTask'
+import { formatMemoryLimit, formatTimeLimit } from '../../../shared/domain/limits'
+import { useCountdown } from '../../../shared/hooks/useCountdown'
 import { useMediaQuery } from '../../../shared/hooks/useMediaQuery'
 import { usePersistentState } from '../../../shared/hooks/usePersistentState'
 import { Badge, LevelBadge } from '../../../shared/ui/Badge'
@@ -18,26 +20,46 @@ import { Panel } from '../../../shared/ui/Panel'
 import { Prose } from '../../../shared/ui/Prose'
 import { useCrumbs } from '../../../shared/ui/shell'
 import { SplitPane } from '../../../shared/ui/SplitPane'
-import type { LanguageKey, RunRequest, TaskDetail, UnlockedTaskDetail } from '../../../types'
+import type {
+  LanguageKey,
+  RunRequest,
+  RunResponse,
+  SubmissionDetail,
+  SubmissionResponse,
+  TaskDetail,
+  UnlockedTaskDetail,
+} from '../../../types'
 import { useAuth } from '../../auth/context'
 import { catalogKeys, taskQuery } from '../../catalog/api'
 import { isUploadKind } from '../../filetasks/api'
 import { FileTaskWorkspace } from '../../filetasks/components/FileTaskWorkspace'
+import { lessonPath } from '../../lesson/api'
 import { DocPracticeWorkspace } from '../../practice/doc/DocPracticeWorkspace'
 import { SheetPracticeWorkspace } from '../../practice/sheet/SheetPracticeWorkspace'
 import { progressKeys } from '../../progress/api'
+import { ExerciseStatusBadge } from '../../progress/components/ExerciseStatusBadge'
+import { submissionKeys } from '../../submissions/api'
+import { SubmissionHistory } from '../../submissions/components/SubmissionHistory'
 import { WebTaskWorkspace } from '../../webtasks/components/WebTaskWorkspace'
 import { runCode, submitCode } from '../api'
 import { CodeEditor, type EditorReplacement } from '../components/CodeEditor'
 import { LessonVideo } from '../components/LessonVideo'
+import { NextStep } from '../components/NextStep'
 import { Paywall } from '../components/Paywall'
+import { RateLimitNotice } from '../components/RateLimitNotice'
 import { ResetCodeButton } from '../components/ResetCodeButton'
 import { ResultPanel } from '../components/ResultPanel'
 import { SqlSchemaPanel } from '../components/SqlSchemaPanel'
+import { TaskStepper } from '../components/TaskStepper'
 import { WorkspaceTabs, type WorkspaceView } from '../components/WorkspaceTabs'
 import { useCodeDraft } from '../useCodeDraft'
 
 type Mode = 'run' | 'submit'
+
+/** Csak a beadás válaszában van `submission_id`. */
+function isSubmission(response: RunResponse): response is SubmissionResponse {
+  return 'submission_id' in response
+}
 
 /** Ettől a szélességtől egymás mellett, húzható elválasztóval; alatta fülek. */
 const WIDE_LAYOUT = '(min-width: 1024px)'
@@ -119,7 +141,13 @@ function TaskHeading({ task }: { task: TaskDetail }) {
           </Badge>
         ))}
         {task.is_free === true && <Badge kind="free">Ingyenes</Badge>}
+        {task.my_status && <ExerciseStatusBadge status={task.my_status} />}
       </div>
+      {task.lesson?.slug && task.lesson.track_slug && (
+        <p className="mt-4 text-15 text-ink-soft">
+          Lecke: <Link to={lessonPath(task.lesson.track_slug, task.lesson.slug)}>{task.lesson.title}</Link>
+        </p>
+      )}
     </>
   )
 }
@@ -143,6 +171,9 @@ function Workspace({ task }: { task: UnlockedTaskDetail }) {
   // Felhasználónként (ugyanazon a gépen) megőrzött panelarány (#29).
   const [split, setSplit] = usePersistentState(`infotanar.workspace.split.${user?.id ?? 'guest'}`, DEFAULT_SPLIT, isSplitRatio)
 
+  const [wait, setWait] = useState<ExecutionWait | null>(null)
+  const countdown = useCountdown()
+
   const execution = useMutation({
     mutationFn: ({ kind, payload }: { kind: Mode; payload: RunRequest }) =>
       kind === 'run' ? runCode(payload) : submitCode(payload),
@@ -150,10 +181,22 @@ function Workspace({ task }: { task: UnlockedTaskDetail }) {
     // a feladatot újratöltjük, és a szülő a zárolt nézetre vált.
     onError: (error) => {
       if (zarolasOka(error)) void queryClient.invalidateQueries({ queryKey: catalogKeys.task(task.id) })
+
+      // Futtatási korlát (#148): amíg a szerver szerint várni kell, a gombok sem élnek.
+      const limited = varakozas(error)
+      setWait(limited)
+      if (limited) countdown.start(limited.seconds)
     },
-    // Egy beadás (akár sikertelen) a lecke állapotát is változtathatja (#28).
+    // Egy beadás (akár sikertelen) a feladat és a lecke állapotát is változtathatja:
+    // a haladás oldal, a tanulási út, a feladatlisták és a beadások is ebből frissülnek.
     onSuccess: (_, { kind }) => {
-      if (kind === 'submit') void queryClient.invalidateQueries({ queryKey: progressKeys.all })
+      if (kind !== 'submit') return
+
+      void queryClient.invalidateQueries({ queryKey: progressKeys.all })
+      void queryClient.invalidateQueries({ queryKey: catalogKeys.tracks() })
+      void queryClient.invalidateQueries({ queryKey: catalogKeys.taskLists() })
+      void queryClient.invalidateQueries({ queryKey: catalogKeys.task(task.id) })
+      void queryClient.invalidateQueries({ queryKey: submissionKeys.all })
     },
   })
 
@@ -172,12 +215,30 @@ function Workspace({ task }: { task: UnlockedTaskDetail }) {
     execution.reset()
   }
 
+  /**
+   * #147: egy korábbi beadás kódja a szerkesztőbe, visszavonhatóan. Másik nyelvű beadásnál
+   * előbb arra a nyelvre váltunk (a mostani kód piszkozatként megmarad), és a visszavonás
+   * annak a nyelvnek a kódjához tér vissza.
+   */
+  function restoreSubmission(submission: SubmissionDetail) {
+    const resetTo = submission.language === language ? undefined : switchLanguage(submission.language)
+    setCode(submission.source_code)
+    setReplacement((r) => ({ value: submission.source_code, seq: r.seq + 1, undoable: true, resetTo }))
+    execution.reset()
+  }
+
   function execute(kind: Mode) {
     setMode(kind)
+    setWait(null)
     execution.mutate({ kind, payload: { task_id: task.id, language, source_code: code } })
   }
 
   const running = execution.isPending
+  const mustWait = countdown.seconds > 0
+  // A sima futtatás nem számít megoldásnak, csak az elfogadott beadás.
+  const accepted = execution.data && isSubmission(execution.data) && execution.data.status === 'passed' ? execution.data : null
+  // A korlát nyelvenként eltérhet (pl. a C# több időt kaphat), ezért a kiválasztott nyelvét mutatjuk.
+  const limits = task.limits?.[language]
 
   // Az „Itt tartottál legutóbb” sorhoz megjegyezzük a megnyitott feladatot.
   useEffect(() => {
@@ -198,6 +259,15 @@ function Workspace({ task }: { task: UnlockedTaskDetail }) {
           </Banner>
         )}
         <Prose markdown={task.description} className="mt-8" />
+
+        {limits && (
+          <p data-testid="execution-limits" className="mt-6 text-15 text-ink-soft">
+            Időkorlát: <strong className="text-ink">{formatTimeLimit(limits.time_limit_ms)}</strong>
+            <span aria-hidden="true"> · </span>
+            <span className="sr-only">, </span>
+            Memória: <strong className="text-ink">{formatMemoryLimit(limits.memory_limit_kb)}</strong>
+          </p>
+        )}
 
         {task.sql_task && <SqlSchemaPanel info={task.sql_task} />}
 
@@ -233,6 +303,8 @@ function Workspace({ task }: { task: UnlockedTaskDetail }) {
       </Panel>
 
       {task.lesson && <LessonVideo lesson={task.lesson} />}
+
+      {task.navigation && <TaskStepper navigation={task.navigation} />}
     </section>
   )
 
@@ -261,23 +333,33 @@ function Workspace({ task }: { task: UnlockedTaskDetail }) {
         </div>
 
         <div className="on-dark flex flex-wrap items-center gap-3 border-t border-code-line bg-code px-5 py-3">
-          <Button icon="play" onClick={() => execute('run')} disabled={running}>
+          <Button icon="play" onClick={() => execute('run')} disabled={running || mustWait}>
             Futtatás
           </Button>
-          <Button variant="dark" onClick={() => execute('submit')} disabled={running}>
+          <Button variant="dark" onClick={() => execute('submit')} disabled={running || mustWait}>
             Beadás
           </Button>
         </div>
 
-        <div aria-live="polite" className="px-5 pt-5 pb-6 md:px-6">
-          <ResultPanel
-            loading={running}
-            error={execution.isError ? hibaUzenet(execution.error) : null}
-            result={execution.data ?? null}
-            mode={mode}
-            hiddenCount={task.hidden_test_case_count}
-          />
+        <div aria-live="polite" className="flex flex-col gap-5 px-5 pt-5 pb-6 md:px-6">
+          {accepted && <NextStep task={task} lessonCompleted={accepted.lesson_completed === true} />}
+
+          {wait && !running ? (
+            <RateLimitNotice wait={wait} seconds={countdown.seconds} />
+          ) : (
+            <ResultPanel
+              loading={running}
+              error={execution.isError ? hibaUzenet(execution.error) : null}
+              result={execution.data ?? null}
+              mode={mode}
+              hiddenCount={task.hidden_test_case_count}
+              limits={limits}
+            />
+          )}
         </div>
+
+        {/* Vendég beadása nem kötődik fiókhoz, ezért neki nincs története. */}
+        {user && <SubmissionHistory taskId={task.id} allowedLanguages={task.allowed_languages} onRestore={restoreSubmission} />}
       </Panel>
     </section>
   )

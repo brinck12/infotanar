@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useId, useState } from 'react'
-import { Link, Navigate } from 'react-router-dom'
+import { Navigate } from 'react-router-dom'
 import { hibaUzenet, mezoHibak } from '../../../shared/api/errors'
 import { Banner } from '../../../shared/ui/Banner'
 import { Breadcrumb } from '../../../shared/ui/Breadcrumb'
@@ -13,6 +13,8 @@ import { LoadError } from '../../../shared/ui/States'
 import { CardTitle, PageTitle, SectionTitle } from '../../../shared/ui/Text'
 import type { BillingProfile, BillingProfilePayload, Plan } from '../../../types'
 import { useAuth } from '../../auth/context'
+import { LEGAL_VERSIONS } from '../../legal/documents'
+import { LegalLink } from '../../legal/LegalLink'
 import * as billingApi from '../api'
 import { billingKeys } from '../api'
 import { BillingProfileForm } from '../components/BillingProfileForm'
@@ -88,10 +90,12 @@ function CheckoutForm({ initial, plan }: { initial: BillingProfile | null; plan:
 
   const busy = save.isPending || checkout.isPending || checkout.isSuccess
   const fieldErrors = mezoHibak(save.error)
+  // A szerver sem indít fizetést az azonnali teljesítés kifejezett kérése nélkül (#133).
+  const consentError = mezoHibak(checkout.error).accept_immediate_performance
   const generalError =
     save.isError && Object.keys(fieldErrors).length === 0
       ? hibaUzenet(save.error)
-      : checkout.isError
+      : checkout.isError && !consentError
         ? hibaUzenet(checkout.error)
         : null
 
@@ -99,7 +103,9 @@ function CheckoutForm({ initial, plan }: { initial: BillingProfile | null; plan:
     setTermsError(!accepted)
     if (!accepted) return
     checkout.reset()
-    save.mutate(payload, { onSuccess: () => checkout.mutate() })
+    save.mutate(payload, {
+      onSuccess: () => checkout.mutate({ accept_immediate_performance: true, terms_version: LEGAL_VERSIONS.terms }),
+    })
   }
 
   return (
@@ -135,11 +141,12 @@ function CheckoutForm({ initial, plan }: { initial: BillingProfile | null; plan:
             setAccepted(e.target.checked)
             if (e.target.checked) setTermsError(false)
           }}
-          error={termsError ? 'A fizetéshez fogadd el a feltételeket és a tájékoztatót.' : undefined}
+          required
+          error={termsError ? 'A fizetéshez jelöld be ezt a nyilatkozatot.' : consentError}
           label={
             <>
-              Elfogadom az <Link to="/aszf">általános szerződési feltételeket</Link> és az{' '}
-              <Link to="/adatkezeles">adatkezelési tájékoztatót</Link>.
+              Kérem, hogy az előfizetés a fizetés után azonnal elinduljon, és tudomásul veszem az{' '}
+              <LegalLink to="terms">ÁSZF</LegalLink> elállási jogra vonatkozó szabályait.
             </>
           }
         />

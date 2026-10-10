@@ -45,9 +45,10 @@ function buildTree(tracks: TrackDetail[]): CatalogTree {
 }
 
 /**
- * A teljes közzétett katalógus (ág → modul → lecke → feladat) egyben. Nincs
- * külön lecke-végpont, ezért a leckeoldal és a tanulási út is ebből dolgozik;
- * az ágak ritkán változnak, a válaszok öt percig frissnek számítanak.
+ * A teljes közzétett katalógus (ág → modul → lecke → feladat) egyben: a
+ * tanulási út, a feladatlista szűrői és a lecke azonosító szerinti keresése
+ * ebből dolgozik. Az ágak a néző haladását is tartalmazzák, ezért beadás után
+ * a `catalogKeys.tracks()` érvénytelenítésével frissülnek.
  */
 export function useCatalogTree() {
   const tracks = useQuery(tracksQuery())

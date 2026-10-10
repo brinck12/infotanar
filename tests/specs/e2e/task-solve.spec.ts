@@ -60,6 +60,48 @@ test.describe('Feladat megoldása', () => {
       // A rejtett tesztesetnél nem jelenik meg kimenet.
       await expect(panel.actualOutputOf(panel.result(1))).toHaveCount(0)
     })
+
+    test('elfogadott beadás után megjelenik a megerősítés', { tag: '@regression' }, async ({ mockApi, taskSolvePage }) => {
+      await mockApi.onSubmit(aRunResponse().withResults(aTestResult()).buildSubmission())
+      await taskSolvePage.open(task.id)
+
+      await taskSolvePage.submit()
+
+      await expect(taskSolvePage.nextStep).toContainText('Feladat megoldva')
+    })
+
+    test('sikertelen beadás után nincs megerősítés', { tag: '@regression' }, async ({ mockApi, taskSolvePage }) => {
+      await mockApi.onSubmit(aRunResponse().withResults(aTestResult().failing('0\n')).buildSubmission())
+      await taskSolvePage.open(task.id)
+
+      await taskSolvePage.submit()
+
+      await expect(taskSolvePage.resultPanel.summary).toHaveAttribute('data-status', 'failed')
+      await expect(taskSolvePage.nextStep).toHaveCount(0)
+    })
+  })
+
+  test.describe('futtatási korlát', () => {
+    test('túl sok futtatásnál látszik a várakozás, és a gombok addig nem élnek', { tag: '@regression' }, async ({ mockApi, taskSolvePage }) => {
+      await mockApi.onRunLimited({ reason: 'rate_limited', retry_after: 30, guest: true })
+      await taskSolvePage.open(task.id)
+
+      await taskSolvePage.run()
+
+      await expect(taskSolvePage.rateLimitNotice).toContainText('Túl sok futtatás rövid idő alatt.')
+      await expect(taskSolvePage.rateLimitNotice.getByRole('link', { name: 'Belépés a magasabb limitért' })).toBeVisible()
+      await expect(taskSolvePage.runButton).toBeDisabled()
+      await expect(taskSolvePage.submitButton).toBeDisabled()
+    })
+
+    test('a feladat idő- és memóriakorlátja a leírásnál látszik', { tag: '@regression' }, async ({ mockApi, taskSolvePage }) => {
+      const limited = buildTaskDetail({ limits: { python: { time_limit_ms: 2000, memory_limit_kb: 128000 } } })
+      await mockApi.withCatalog({ topics: [], tasks: [limited] })
+      await taskSolvePage.open(limited.id)
+
+      await expect(taskSolvePage.executionLimits).toContainText('Időkorlát: 2 mp')
+      await expect(taskSolvePage.executionLimits).toContainText('Memória: 128 MB')
+    })
   })
 
   test.describe('szerkesztő', () => {

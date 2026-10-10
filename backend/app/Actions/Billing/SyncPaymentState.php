@@ -7,6 +7,7 @@ namespace App\Actions\Billing;
 use App\Actions\Billing\Invoicing\OpenInvoice;
 use App\Enums\PaymentPurpose;
 use App\Enums\PaymentStatus;
+use App\Enums\SubscriptionNoticeType;
 use App\Enums\SubscriptionStatus;
 use App\Models\Payment;
 use App\Models\Subscription;
@@ -35,6 +36,7 @@ final readonly class SyncPaymentState
         private ReactivateSubscription $reactivate,
         private MarkSubscriptionPastDue $markPastDue,
         private OpenInvoice $openInvoice,
+        private NotifySubscriber $notify,
     ) {}
 
     /** @throws BarionException */
@@ -117,10 +119,13 @@ final readonly class SyncPaymentState
 
         if ($subscription === null) {
             $subscription = $this->startSubscription($payment);
+            $notice = SubscriptionNoticeType::Started;
         } else {
+            $notice = SubscriptionNoticeType::Renewed;
+
             // Megujitas, vagy ket parhuzamos elso fizetesbol a masodik: a fizetett
             // idoszak a meglevo vegehez adodik, nem vesz el.
-            $start = $this->laterOf($subscription->current_period_end, now());
+            $start = $this->nextPeriodStart($payment, $subscription);
             $this->reactivate->handle($subscription, $start, $this->periodEnd($start));
 
             if ($payment->purpose === PaymentPurpose::CardChange && $cardRegistered) {
@@ -133,6 +138,27 @@ final readonly class SyncPaymentState
 
         // Minden sikeres terhelesrol pontosan egy szamla (#20); kiallitas a commit utan.
         $this->openInvoice->handle($payment);
+
+        $this->notify->handle($subscription, $notice);
+    }
+
+    /**
+     * A megujitas ahhoz az idoszakhoz csatlakozik, amelyet megujit: az uj idoszak a
+     * regi vegetol indul, akkor is, ha a terheles csak napokkal kesobb (pl. egy
+     * ujraprobalkozasnal, #138) sikerult. A turelmi ido alatt a hozzaferes megvolt,
+     * igy az nem ingyen nap. Minden mas befizetes a meglevo idoszak vegehez, de
+     * legkorabban a mostani pillanathoz adodik.
+     */
+    private function nextPeriodStart(Payment $payment, Subscription $subscription): CarbonInterface
+    {
+        $periodEnd = $subscription->current_period_end;
+
+        $renewsThisPeriod = $payment->purpose === PaymentPurpose::Renewal
+            && $subscription->isLive()
+            && $periodEnd !== null
+            && $payment->renews_period_ending_at?->equalTo($periodEnd) === true;
+
+        return $renewsThisPeriod ? $periodEnd : $this->laterOf($periodEnd, now());
     }
 
     private function applyFailure(Payment $payment): void

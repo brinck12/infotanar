@@ -303,3 +303,26 @@
     background: var(--color-headrow);
   }
 }
+
+@layer components {
+  /* Széles táblázat a saját keretén belül görgethető, nem tolja szét az oldalt. */
+  .prose-task .prose-scroll {
+    max-width: none;
+    margin: 12px 0 0;
+    overflow-x: auto;
+  }
+
+  .prose-task .prose-scroll table {
+    margin: 0;
+  }
+
+  /* Kerített kódblokk a tananyagban: a sötét kódfelület, a szöveg sans/mono marad. */
+  .prose-task .prose-code {
+    max-width: none;
+    margin: 16px 0 0;
+  }
+
+  .prose-task a {
+    overflow-wrap: anywhere;
+  }
+}

@@ -9,7 +9,7 @@ import { useAuth } from '../context'
 
 /** Sikeres belépés után a GuestOnly guard visz tovább (a `from` helyre vagy a feladatokhoz). */
 export function Login() {
-  const { login } = useAuth()
+  const { login, sessionExpired } = useAuth()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
 
@@ -33,6 +33,7 @@ export function Login() {
         </>
       }
     >
+      {sessionExpired && !generalError && <Banner kind="info">A munkameneted lejárt, lépj be újra.</Banner>}
       {generalError && <Banner kind="error">{generalError}</Banner>}
       <form onSubmit={onSubmit} className="flex flex-col gap-5" noValidate>
         <Field

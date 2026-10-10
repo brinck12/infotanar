@@ -12,6 +12,9 @@ return [
         'unreachable' => 'A kódfuttató szolgáltatás jelenleg nem elérhető, próbáld újra később.',
         'timed_out' => 'A kódfuttató szolgáltatás nem válaszolt időben. Próbáld újra később.',
     ],
+    'rate_limited' => 'Túl sok futtatás rövid idő alatt. Próbáld újra :seconds másodperc múlva.',
+    'daily_limit' => 'Elérted a napi futtatási keretet. Legkésőbb 24 óra múlva újra futtathatsz.',
+    'busy' => 'A kódfuttató most túlterhelt. Próbáld újra :seconds másodperc múlva.',
     'error_status_label' => 'Hiba',
     'sql_dot_command' => 'A megoldás csak SQL utasításokat tartalmazhat (ponttal kezdődő sqlite-parancsokat nem).',
     'verdicts' => [

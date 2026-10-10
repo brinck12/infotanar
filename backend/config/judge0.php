@@ -13,8 +13,8 @@ return [
 
     'auth_token' => env('JUDGE0_AUTH_TOKEN'),
 
-    // A teljes HTTP kereste vonatkozo timeout masodpercben. Bovebben kell
-    // legyen, mint a cpu_time_limit, kulonben sajat magunkat vagjuk el.
+    // A Judge0 fele meno HTTP keresek alap-timeoutja masodpercben (pl. /languages).
+    // Futtatasnal a SolutionEvaluator tesztesetenkent sajat idokeretet ad meg.
     'timeout' => (int) env('JUDGE0_TIMEOUT', 20),
 
     // Kapcsolodasi timeout: egy nem elerheto Judge0 azonnal hibat adjon,
@@ -26,16 +26,63 @@ return [
     // mindig ertelmes valaszt kapjon, ne vegtelen toltest.
     'evaluation_deadline' => (int) env('JUDGE0_EVALUATION_DEADLINE', 45),
 
+    // Tesztesetenkent a futas faliora-korlatjan felul ennyi ido (mp) jut a sorban
+    // allasra es a forditasra. A kiertekeles idokerete: tesztesetek szama x
+    // (faliora-korlat + ez), de legfeljebb az 'evaluation_deadline'.
+    'test_overhead' => (int) env('JUDGE0_TEST_OVERHEAD', 10),
+
     /*
     |--------------------------------------------------------------------------
     | Futtatasi limitek
     |--------------------------------------------------------------------------
-    | Minden Judge0 keresben elkuldjuk. A memory_limit kilobyte-ban ertendo.
+    | Minden Judge0 keresben elkuldjuk. Az idok masodpercben, a memoria
+    | kilobyte-ban ertendo. A 'cpu_time_limit' es a 'memory_limit' az alapertek:
+    | egy feladat feluldefinialhatja (exercises.time_limit_ms, memory_limit_kb),
+    | lasd ExecutionLimitResolver.
     */
+    /*
+    | Futtatasok szama (Futtatas + Beadas egyutt), lasd ExecutionRateLimit.
+    | Bejelentkezve fiokonkent, vendegnel IP-nkent szamolunk. A 'global_per_minute'
+    | az osszes felhasznalo egyuttes kerete: annyi legyen, amennyit a Judge0
+    | peldany kiszolgal; folotte 503 megy ki (nem 429), mert nem a kero hibaja.
+    */
+    'rate' => [
+        'guest_per_minute' => (int) env('JUDGE0_RATE_GUEST_PER_MINUTE', 10),
+        'user_per_minute' => (int) env('JUDGE0_RATE_USER_PER_MINUTE', 20),
+        'premium_per_minute' => (int) env('JUDGE0_RATE_PREMIUM_PER_MINUTE', 40),
+        'user_per_day' => (int) env('JUDGE0_RATE_USER_PER_DAY', 1000),
+        'global_per_minute' => (int) env('JUDGE0_RATE_GLOBAL_PER_MINUTE', 300),
+    ],
+
     'limits' => [
         'cpu_time_limit' => (float) env('JUDGE0_CPU_TIME_LIMIT', 2),
         'memory_limit' => (int) env('JUDGE0_MEMORY_LIMIT', 128000),
         'max_processes_and_or_threads' => (int) env('JUDGE0_MAX_PROCESSES', 60),
+
+        // Faliora-korlat = processzorido-korlat + ennyi. Az alap 2 mp-nel ez 10 mp,
+        // ami a Judge0 gyari faliora-korlatja.
+        'wall_time_margin' => (float) env('JUDGE0_WALL_TIME_MARGIN', 8),
+
+        // Felso hatarok: nem lehetnek nagyobbak, mint a Judge0 peldany sajat
+        // MAX_CPU_TIME_LIMIT, MAX_WALL_TIME_LIMIT es MAX_MEMORY_LIMIT beallitasa,
+        // kulonben a Judge0 a kerest elutasitja. Az alapertekek a Judge0 gyari ertekei.
+        'max_cpu_time_limit' => (float) env('JUDGE0_MAX_CPU_TIME_LIMIT', 15),
+        'max_wall_time_limit' => (float) env('JUDGE0_MAX_WALL_TIME_LIMIT', 20),
+        'max_memory_limit' => (int) env('JUDGE0_MAX_MEMORY_LIMIT', 512000),
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Nyelvenkenti idoszorzo
+    |--------------------------------------------------------------------------
+    | A processzorido-korlatot ennyivel szorozzuk az adott nyelvnel (a feladat
+    | sajat korlatjat is). Pl. a C# (Mono) lassabban indul, mint a Python: ha a
+    | diakok helyes C# megoldasai idotullepest kapnak, itt emelheto.
+    */
+    'language_time_factor' => [
+        'python' => (float) env('JUDGE0_TIME_FACTOR_PYTHON', 1),
+        'csharp' => (float) env('JUDGE0_TIME_FACTOR_CSHARP', 1),
+        'sql' => (float) env('JUDGE0_TIME_FACTOR_SQL', 1),
     ],
 
     /*

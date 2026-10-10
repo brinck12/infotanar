@@ -1,4 +1,5 @@
-import type { RunResponse, TestResult, Verdict } from '../../types'
+import { formatTimeLimit } from '../../shared/domain/limits'
+import type { ExecutionLimits, RunResponse, TestResult, Verdict } from '../../types'
 
 interface VerdictMeta {
   /** Tartalék felirat, ha a backend nem küld `verdict_label`-t. */
@@ -37,6 +38,15 @@ export const VERDICT_META: Readonly<Record<Verdict, VerdictMeta>> = {
     label: 'Rendszerhiba',
     hint: 'Ez nem a te hibád: a kiértékelés most nem sikerült. Próbáld újra kicsit később.',
   },
+}
+
+/** Az állapothoz tartozó tanács; időtúllépésnél a ténylegesen érvényes korláttal, ha ismert. */
+export function verdictHint(verdict: Verdict, limits?: ExecutionLimits): string {
+  if (verdict === 'time_limit_exceeded' && limits) {
+    return `A program túllépte az időkorlátot (${formatTimeLimit(limits.time_limit_ms)}). Keress végtelen ciklust, vagy gyorsabb megoldást.`
+  }
+
+  return VERDICT_META[verdict].hint
 }
 
 /** Mockolt vagy régebbi válaszoknál a verdict hiányozhat: a státuszból következtetünk. */

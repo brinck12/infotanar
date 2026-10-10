@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace App\Console\Commands;
 
+use App\Support\DisposableDatabase;
 use Database\Seeders\ApiTestSeeder;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
 
 /**
@@ -16,18 +18,36 @@ use Illuminate\Support\Facades\File;
  * mert a tests/api/playwright.config.ts webServer-je Windows alatt cmd.exe-n
  * keresztul futtatja a parancsot, es az idezojelekkel tuzdelt lancolt
  * parancsok ott megbizhatatlanul viselkednek.
+ *
+ * A migrate:fresh minden tablat eldob, ezert a parancs csak eldobhato
+ * adatbazison fut (DisposableDatabase, #124).
  */
 class PrepareApiTestFixtures extends Command
 {
     protected $signature = 'test:prepare-api-fixtures';
 
-    protected $description = 'Friss sqlite adatbázis és ApiTestSeeder fixture a Playwright API teszteknek';
+    protected $description = 'Friss adatbázis és ApiTestSeeder fixture a Playwright API teszteknek';
+
+    /** Eles kornyezetben a parancs a listaban sem jelenik meg. */
+    public function isHidden(): bool
+    {
+        return DisposableDatabase::refusal() !== null;
+    }
 
     public function handle(): int
     {
+        $refusal = DisposableDatabase::refusal();
+
+        if ($refusal !== null) {
+            $this->error($refusal);
+
+            return self::FAILURE;
+        }
+
         $path = database_path('testing.sqlite');
 
-        if (! file_exists($path)) {
+        // MySQL-en (#126) az adatbazist a kornyezet adja; sqlite-nal a fajlnak leteznie kell.
+        if (DB::connection()->getDriverName() === 'sqlite' && ! file_exists($path)) {
             touch($path);
         }
 

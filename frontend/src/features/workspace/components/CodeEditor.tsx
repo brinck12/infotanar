@@ -1,22 +1,10 @@
-import { Editor, type BeforeMount, type OnMount } from '@monaco-editor/react'
-import { useEffect, useRef } from 'react'
-import { MONACO_FONT, MONACO_THEME, monacoTheme } from '../../../shared/ui/codeTheme'
+import { Component, lazy, Suspense, type ReactNode } from 'react'
+import { Button } from '../../../shared/ui/Button'
 import type { LanguageKey } from '../../../types'
+import { EditorSkeleton } from './EditorSkeleton'
 
 /** A futtatható nyelveken túl a weboldal feladat fájltípusai is szerkeszthetők. */
 export type EditorLanguage = LanguageKey | 'html' | 'css'
-
-/** A nyelvkulcs és a Monaco saját nyelvazonosítójának megfeleltetése. */
-const MONACO_LANGUAGE: Record<EditorLanguage, string> = {
-  python: 'python',
-  csharp: 'csharp',
-  sql: 'sql',
-  html: 'html',
-  css: 'css',
-}
-
-type MonacoEditor = Parameters<OnMount>[0]
-type Monaco = Parameters<OnMount>[1]
 
 /** Kívülről kért tartalomcsere; minden új `seq` pontosan egyszer hat. */
 export interface EditorReplacement {
@@ -24,9 +12,14 @@ export interface EditorReplacement {
   seq: number
   /** Visszavonható szerkesztésként (pl. visszaállítás), vagy új dokumentumként (pl. nyelvváltás). */
   undoable: boolean
+  /**
+   * Nyelvváltással járó visszavonható csere (korábbi beadás betöltése): a dokumentum
+   * előbb erre áll be előzmény nélkül, így a visszavonás az új nyelv kódjához tér vissza.
+   */
+  resetTo?: string
 }
 
-interface Props {
+export interface CodeEditorProps {
   language: EditorLanguage
   /** A szerkesztő kezdőtartalma (csak mountkor számít). */
   initialValue: string
@@ -35,77 +28,56 @@ interface Props {
   readOnly?: boolean
 }
 
+/** A Monaco több megabájt: külön chunkban, csak a szerkesztőt mutató oldalakon töltődik le. */
+const MonacoCodeEditor = lazy(async () => ({ default: (await import('./MonacoCodeEditor')).MonacoCodeEditor }))
+
 /**
- * A szerkesztő a saját tartalmának gazdája (nem vezérelt `value`): a vezérelt
- * mód a @monaco-editor/react-ben minden renderkor visszaírja a propot, és ha
- * a gépelés gyorsabb a renderelésnél, elavult szöveget írna a modellbe.
- * A szülő az onChange-en követi a tartalmat, és csak a tényleges cseréket
- * (nyelvváltás, visszaállítás) kéri a `replace`-szel.
- *
- * Mindig LF sorvég: sortörés nélküli tartalom után a Monaco Windowson CRLF-re
- * válthat, és akkor a változatlan kiinduló kód is módosítottnak látszana.
+ * Kódszerkesztő (#150). Ez a könnyű burok azonnal megjelenik; a Monaco a
+ * háttérben töltődik: addig váz látszik, sikertelen letöltésnél pedig
+ * hibaüzenet újratöltés gombbal, nem üres doboz.
  */
-export function CodeEditor({ language, initialValue, onChange, replace, readOnly = false }: Props) {
-  const editorRef = useRef<MonacoEditor | null>(null)
-  const appliedSeq = useRef(replace?.seq ?? 0)
-
-  // A sötét kódfelület saját témája a tokenekből (a Monaco alaptémája más háttérszínű).
-  const beforeMount: BeforeMount = (monaco) => {
-    monaco.editor.defineTheme(MONACO_THEME, monacoTheme())
-  }
-
-  const onMount: OnMount = (editor, monaco) => {
-    editorRef.current = editor
-    editor.onDidChangeModelContent(() => ensureLf(editor, monaco))
-    ensureLf(editor, monaco)
-  }
-
-  useEffect(() => {
-    const editor = editorRef.current
-    const model = editor?.getModel()
-    if (!replace || replace.seq === appliedSeq.current || !editor || !model) return
-    appliedSeq.current = replace.seq
-
-    if (replace.undoable) {
-      editor.pushUndoStop()
-      editor.executeEdits('replace', [{ range: model.getFullModelRange(), text: replace.value, forceMoveMarkers: true }])
-      editor.pushUndoStop()
-    } else {
-      // Másik nyelv másik dokumentum: a visszavonási előzmény nem keveredhet.
-      model.setValue(replace.value)
-    }
-  }, [replace])
-
+export function CodeEditor(props: CodeEditorProps) {
   return (
     <div className="on-dark h-full overflow-hidden bg-code">
-      <Editor
-        height="100%"
-        theme={MONACO_THEME}
-        language={MONACO_LANGUAGE[language]}
-        defaultValue={initialValue}
-        beforeMount={beforeMount}
-        onMount={onMount}
-        onChange={(next) => onChange((next ?? '').replace(/\r\n/g, '\n'))}
-        loading={<div className="p-4 text-15 text-code-soft">Szerkesztő betöltése…</div>}
-        options={{
-          readOnly,
-          fontSize: 14,
-          fontFamily: MONACO_FONT,
-          fontLigatures: false,
-          lineHeight: 24,
-          padding: { top: 16, bottom: 16 },
-          minimap: { enabled: false },
-          scrollBeyondLastLine: false,
-          tabSize: 4,
-          automaticLayout: true,
-          renderWhitespace: 'selection',
-        }}
-      />
+      <EditorLoadBoundary>
+        <Suspense fallback={<EditorSkeleton />}>
+          <MonacoCodeEditor {...props} />
+        </Suspense>
+      </EditorLoadBoundary>
     </div>
   )
 }
 
-function ensureLf(editor: MonacoEditor, monaco: Monaco): void {
-  const model = editor.getModel()
-  if (model && model.getEOL() !== '\n') model.setEOL(monaco.editor.EndOfLineSequence.LF)
+/**
+ * Elkapja a szerkesztő betöltési hibáját (pl. megszakadt letöltés).
+ *
+ * Az újrapróbálás az oldal újratöltése: a Chrome a sikertelenül letöltött
+ * modult az oldal élettartamára megjegyzi, egy újabb `import()` ugyanazt a
+ * hibát adná vissza hálózati kérés nélkül.
+ */
+class EditorLoadBoundary extends Component<{ children: ReactNode }, { failed: boolean }> {
+  override state = { failed: false }
+
+  static getDerivedStateFromError(): { failed: boolean } {
+    return { failed: true }
+  }
+
+  override componentDidCatch(error: Error): void {
+    console.error('A kódszerkesztő betöltése nem sikerült', error)
+  }
+
+  override render() {
+    if (!this.state.failed) return this.props.children
+
+    return (
+      <div role="alert" data-testid="editor-load-error" className="flex h-full flex-col items-center justify-center gap-4 p-6 text-center">
+        <p className="text-15 leading-relaxed text-code-text">
+          A kódszerkesztőt nem sikerült betölteni. Ellenőrizd az internetkapcsolatot, majd próbáld újra.
+        </p>
+        <Button variant="dark" icon="refresh" onClick={() => window.location.reload()}>
+          Újrapróbálás
+        </Button>
+      </div>
+    )
+  }
 }

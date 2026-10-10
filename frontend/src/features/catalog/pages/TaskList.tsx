@@ -8,9 +8,8 @@ import { Panel } from '../../../shared/ui/Panel'
 import { CardSkeleton, EmptyState, LoadError } from '../../../shared/ui/States'
 import { TaskCard } from '../../../shared/ui/TaskCard'
 import { Lead, PageTitle, SectionTitle } from '../../../shared/ui/Text'
-import type { LessonProgressStatus, Level, TaskListItem } from '../../../types'
+import type { ExerciseStatus, Level, TaskListItem } from '../../../types'
 import { useAuth } from '../../auth/context'
-import { useLessonStatuses } from '../../progress/useLessonStatuses'
 import { tasksQuery } from '../api'
 import { useCatalogTree, type CatalogTree } from '../useCatalogTree'
 
@@ -25,8 +24,8 @@ const LEVELS: ReadonlyArray<FilterOption<LevelFilter>> = [
 
 const STATUSES: ReadonlyArray<FilterOption<StatusFilter>> = [
   { value: '', label: 'Mind' },
-  { value: 'todo', label: 'Nincs kész' },
-  { value: 'done', label: 'Kész' },
+  { value: 'todo', label: 'Még nincs megoldva' },
+  { value: 'done', label: 'Megoldva' },
 ]
 
 function isLevel(value: string): value is Level {
@@ -69,7 +68,6 @@ export function TaskList() {
   const tasks = useQuery(tasksQuery({ topic: topic || undefined, level: level || undefined }))
   // A katalógus szerkezetének hiánya nem blokkolja a feladatok megjelenítését.
   const { tree } = useCatalogTree()
-  const lessonStatuses = useLessonStatuses()
   const lastTask = readLastTask(userKeyOf(user))
 
   function updateFilter(key: 'sav' | 'szint' | 'allapot', value: string) {
@@ -81,10 +79,9 @@ export function TaskList() {
     setSearchParams(next)
   }
 
-  function statusOf(task: TaskListItem): LessonProgressStatus | undefined {
-    if (!lessonStatuses) return undefined
-    const lessonId = tree?.exercises.get(task.id)?.place.lesson.id
-    return lessonId === undefined ? undefined : (lessonStatuses.get(lessonId) ?? 'not_started')
+  /** A néző saját állapota a feladatnál (#146); vendégnél a szerver nem küldi, ott nem ismert. */
+  function statusOf(task: TaskListItem): ExerciseStatus | null | undefined {
+    return user ? (task.my_status ?? null) : undefined
   }
 
   const trackOptions: Array<FilterOption<string>> = [
@@ -94,8 +91,8 @@ export function TaskList() {
 
   const visible = (tasks.data ?? []).filter((task) => {
     if (track && tree?.exercises.get(task.id)?.place.track.slug !== track) return false
-    if (status === 'done') return statusOf(task) === 'completed'
-    if (status === 'todo') return statusOf(task) !== 'completed'
+    if (status === 'done') return statusOf(task) === 'solved'
+    if (status === 'todo') return statusOf(task) !== 'solved'
     return true
   })
   const groups = groupTasks(visible, tree)
@@ -125,7 +122,7 @@ export function TaskList() {
         )}
         <div className="flex flex-wrap gap-x-10 gap-y-3">
           <FilterChips label="Szint" options={LEVELS} value={level} onChange={(value) => updateFilter('szint', value)} />
-          {lessonStatuses && (
+          {user && (
             <FilterChips label="Állapot" options={STATUSES} value={status} onChange={(value) => updateFilter('allapot', value)} />
           )}
         </div>
@@ -155,14 +152,14 @@ export function TaskList() {
 
         <div className="flex flex-col gap-12">
           {groups.map((group) => {
-            const done = group.tasks.filter((task) => statusOf(task) === 'completed').length
+            const done = group.tasks.filter((task) => statusOf(task) === 'solved').length
             return (
               <section key={group.key} aria-labelledby={`csoport-${group.key}`}>
                 <div className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1">
                   <SectionTitle id={`csoport-${group.key}`}>{group.title}</SectionTitle>
-                  {lessonStatuses && (
+                  {user && (
                     <span className="text-15 text-ink-soft">
-                      {done} / {group.tasks.length} teljesítve
+                      {done} / {group.tasks.length} megoldva
                     </span>
                   )}
                 </div>

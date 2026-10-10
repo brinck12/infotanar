@@ -10,6 +10,11 @@ export class TaskSolvePage extends BasePage {
   readonly languageSwitch: Locator
   readonly runButton: Locator
   readonly submitButton: Locator
+  /** Elfogadott beadas utan a kovetkezo lepes (#145). */
+  readonly nextStep: Locator
+  /** A futtatasi korlat uzenete az eredmenypanel helyen (#148). */
+  readonly rateLimitNotice: Locator
+  readonly executionLimits: Locator
 
   constructor(page: Page) {
     super(page)
@@ -18,6 +23,9 @@ export class TaskSolvePage extends BasePage {
     this.languageSwitch = page.getByRole('group', { name: 'Programozási nyelv' })
     this.runButton = page.getByRole('button', { name: 'Futtatás' })
     this.submitButton = page.getByRole('button', { name: 'Beadás' })
+    this.nextStep = page.getByTestId('next-step')
+    this.rateLimitNotice = page.getByTestId('rate-limit-notice')
+    this.executionLimits = page.getByTestId('execution-limits')
   }
 
   /** A feladat oldala URL-je, pl. a navigacio ellenorzesehez. */

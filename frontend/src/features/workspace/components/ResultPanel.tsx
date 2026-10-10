@@ -3,8 +3,8 @@ import { Banner } from '../../../shared/ui/Banner'
 import { StateIcon } from '../../../shared/ui/Icon'
 import { OutputBlock, ResultRow } from '../../../shared/ui/ResultRow'
 import { Skeleton } from '../../../shared/ui/States'
-import type { RunResponse, TestResult } from '../../../types'
-import { runVerdict, testVerdict, VERDICT_META } from '../verdicts'
+import type { ExecutionLimits, RunResponse, TestResult } from '../../../types'
+import { runVerdict, testVerdict, VERDICT_META, verdictHint } from '../verdicts'
 
 interface Props {
   loading: boolean
@@ -14,9 +14,11 @@ interface Props {
   mode: 'run' | 'submit'
   /** Beadáskor ennyi további rejtett teszt fut le; futtatás után erre figyelmeztetünk. */
   hiddenCount?: number
+  /** A futtatásra érvényes korlátok: időtúllépésnél a tanács megnevezi a korlátot. */
+  limits?: ExecutionLimits
 }
 
-export function ResultPanel({ loading, error, result, mode, hiddenCount = 0 }: Props) {
+export function ResultPanel({ loading, error, result, mode, hiddenCount = 0, limits }: Props) {
   if (loading) {
     return (
       <div>
@@ -62,7 +64,7 @@ export function ResultPanel({ loading, error, result, mode, hiddenCount = 0 }: P
           {total > 0 && <Badge kind={accepted ? 'ok' : 'bad'}>{result.verdict_label ?? meta.label}</Badge>}
         </p>
         <p className="mt-1 text-15 leading-relaxed text-ink-soft">
-          {meta.hint}
+          {verdictHint(verdict, limits)}
           {mode === 'submit' && total > 0 && ' A rejtett teszteseteket is beleszámolva.'}
           {mode === 'run' && accepted && hiddenCount > 0 && ` Beadáskor további ${hiddenCount} rejtett teszteset is lefut.`}
         </p>

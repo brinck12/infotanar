@@ -11,6 +11,7 @@ import { Icon } from '../../../../shared/ui/Icon'
 import { Panel } from '../../../../shared/ui/Panel'
 import { Prose } from '../../../../shared/ui/Prose'
 import { TabPanel, Tabs } from '../../../../shared/ui/Tabs'
+import { CardTitle } from '../../../../shared/ui/Text'
 import type { LanguageKey, Level } from '../../../../types'
 import { CodeEditor } from '../../../workspace/components/CodeEditor'
 import {
@@ -26,6 +27,7 @@ import {
 import { AdminShell } from '../../components/AdminShell'
 import { RubricBuilder } from '../../exams/components/RubricBuilder'
 import { ConstraintEditor } from '../components/ConstraintEditor'
+import { ExecutionLimitFields } from '../components/ExecutionLimitFields'
 import { MutationError, QueryState } from '../components/QueryState'
 import { TestCaseManager } from '../components/TestCaseManager'
 import { SavedNote } from '../components/SavedNote'
@@ -56,7 +58,7 @@ function LessonContext({ lessonId, children }: { lessonId: number; children: (le
 }
 
 /** Az űrlapon megjelenített mezőhibák; minden más a szakasz tetején. */
-const EXERCISE_FIELDS = ['title', 'description', 'level', 'difficulty', 'allowed_languages', 'allowed_languages.0', 'is_published', 'sql_order_sensitive', 'constraints', 'starter_code.python', 'starter_code.csharp', 'starter_code.sql'] as const
+const EXERCISE_FIELDS = ['title', 'description', 'level', 'difficulty', 'allowed_languages', 'allowed_languages.0', 'is_published', 'sql_order_sensitive', 'time_limit_ms', 'memory_limit_kb', 'constraints', 'starter_code.python', 'starter_code.csharp', 'starter_code.sql'] as const
 
 const LEVEL_OPTIONS = (Object.keys(LEVEL_LABEL) as Level[]).map((level) => ({ value: level, label: LEVEL_LABEL[level] }))
 const DIFFICULTY_OPTIONS = [1, 2, 3, 4, 5].map((n) => ({ value: String(n), label: String(n) }))
@@ -85,6 +87,8 @@ function ExerciseEditor({ lesson, exercise }: { lesson: AdminLesson; exercise: A
     starter_code: exercise?.starter_code ?? {},
     constraints: exercise?.constraints ?? { require: [], forbid: [] },
     sql_order_sensitive: exercise?.sql_order_sensitive ?? false,
+    time_limit_ms: exercise?.time_limit_ms ?? null,
+    memory_limit_kb: exercise?.memory_limit_kb ?? null,
     is_published: exercise?.is_published ?? false,
   }))
   const save = useSaveEntity<AdminExercise>('exercises', exercise?.id ?? null, (saved) => {
@@ -95,6 +99,8 @@ function ExerciseEditor({ lesson, exercise }: { lesson: AdminLesson; exercise: A
   // #48: közzétenni csak nyilvános tesztesettel lehet (a /run azokon fut); a backend is ellenőrzi.
   const testCases = useQuery({ ...testCasesQuery(exercise?.id ?? 0), enabled: exercise !== null })
   const visibleTestCases = testCases.data?.filter((tc) => !tc.is_hidden).length ?? 0
+  // Amíg a tesztesetek töltődnek (vagy nem jöttek meg), nem tudjuk, van-e nyilvános: akkor a szerver dönt.
+  const knownWithoutVisibleTestCases = (exercise === null || testCases.isSuccess) && visibleTestCases === 0
   const [publishError, setPublishError] = useState<string | null>(null)
 
   function toggleLanguage(language: LanguageKey, on: boolean) {
@@ -106,7 +112,7 @@ function ExerciseEditor({ lesson, exercise }: { lesson: AdminLesson; exercise: A
 
   function submit(e: FormEvent) {
     e.preventDefault()
-    if (form.is_published && visibleTestCases === 0) {
+    if (form.is_published && knownWithoutVisibleTestCases) {
       setPublishError(
         exercise
           ? 'Közzététel előtt adj hozzá legalább egy nyilvános tesztesetet a Tesztesetek fülön.'
@@ -223,6 +229,20 @@ function ExerciseEditor({ lesson, exercise }: { lesson: AdminLesson; exercise: A
                 error={errors.sql_order_sensitive}
               />
             )}
+          </Panel>
+
+          <Panel as="section" aria-labelledby={`${formId}-korlatok`}>
+            <CardTitle id={`${formId}-korlatok`} as="h2">
+              Futtatási korlátok
+            </CardTitle>
+            <div className="mt-4">
+              <ExecutionLimitFields
+                value={{ time_limit_ms: form.time_limit_ms, memory_limit_kb: form.memory_limit_kb }}
+                onChange={(limits) => setForm((f) => ({ ...f, ...limits }))}
+                languages={(languages.data ?? []).filter((language) => form.allowed_languages.includes(language.key))}
+                errors={errors}
+              />
+            </div>
           </Panel>
         </TabPanel>
 

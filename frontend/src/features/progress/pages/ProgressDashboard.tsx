@@ -11,6 +11,7 @@ import { EmptyState, LoadError } from '../../../shared/ui/States'
 import { CardTitle, PageTitle } from '../../../shared/ui/Text'
 import type { ProgressReport } from '../../../types'
 import { useAuth } from '../../auth/context'
+import { RecentSubmissions } from '../../submissions/components/RecentSubmissions'
 import { progressQuery } from '../api'
 import { TrackProgressCard } from '../components/TrackProgressCard'
 
@@ -95,6 +96,8 @@ function Report({ report }: { report: ProgressReport }) {
           <TrackProgressCard key={track.id} track={track} defaultOpen={index === 0} />
         ))}
       </ul>
+
+      <RecentSubmissions />
     </>
   )
 }

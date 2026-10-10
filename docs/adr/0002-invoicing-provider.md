@@ -43,7 +43,7 @@ A Billingo API-ja kényelmesebb, de a Számlázz.hu mellett szól, hogy a száml
    - bizonytalan kimenetel (pl. időtúllépés) után **nem hívjuk újra vakon**, hanem rendelésszám alapján lekérdezzük, hogy készült-e már számla. Csak ha nem, akkor próbáljuk újra.
 3. Az XML fő részei:
    - `beallitasok`: agent-kulcs, `eszamla=true`, PDF-letöltés, válaszverzió;
-   - `fejlec`: teljesítés és fizetési határidő (a fizetés napja), a fizetési mód („bankkártya”), `HUF`, a számla nyelve (`hu`), a rendelésszám, és jelzés, hogy a számla már ki van fizetve;
+   - `fejlec`: kelt (a kiállítás napja), teljesítés (a fizetés napja), fizetési határidő (a kelt napja), a fizetési mód („bankkártya”), `HUF`, a számla nyelve (`hu`), a rendelésszám, és jelzés, hogy a számla már ki van fizetve;
    - `elado`: bank és e-mail beállítások;
    - `vevo`: név, cím, e-mail, adószám (#19), `sendEmail=true`;
    - `tetelek`: egy tétel (a csomag neve, 1 hónap, nettó/ÁFA/bruttó).
@@ -57,6 +57,7 @@ A Billingo API-ja kényelmesebb, de a Számlázz.hu mellett szól, hogy a száml
   - `SZAMLAZZ_INVOICE_PREFIX`: opcionális számlaszám-előtag;
   - `SZAMLAZZ_VAT_RATE`: pl. `27` vagy `AAM` alanyi adómentesség esetén. **Ezt a könyvelővel kell egyeztetni.**
 - Az XML-séma a Számlázz.hu dokumentációja alapján készül. A dokumentációs oldal kliensoldalon renderel, ezért élesítés előtt **egy teszt Agent-kulccsal végigfuttatott valós kérés kötelező**. Különösen ellenőrizni kell az elemsorrendet és a `sendEmail` viselkedését.
+- A számla dátumai a `BILLING_TIMEZONE` (alapértelmezés: `Europe/Budapest`) szerinti naptári napok, nem UTC szerintiek (#125). A kelt a tényleges kiállítás napja, a teljesítés a fizetésé. Késleltetett kiállításnál (újrapróbálás, admin újraküldés) a kettő eltér. **A teszt Agent-kulcsos futtatásnak ezt az esetet is le kell fednie** (a kelt későbbi, mint a teljesítés); ez az ellenőrzés még nem történt meg.
 - A Számlázz.hu leállása nem blokkolja a fizetést. A számla `failed` állapotban marad, a job exponenciális várakozással újrapróbál, a végleges hiba pedig kritikus naplóbejegyzést ad.
 - A visszatérítés (sztornó számla) jelenleg nincs a hatókörben. Ha szükséges, külön issue.
 

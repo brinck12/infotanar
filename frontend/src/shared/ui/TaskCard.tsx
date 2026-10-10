@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import type { LanguageKey, LessonProgressStatus, Level } from '../../types'
+import type { ExerciseStatus, LanguageKey, Level } from '../../types'
 import { LANGUAGE_LABEL } from '../domain/labels'
 import { Badge, LevelBadge } from './Badge'
 import { cx } from './cx'
@@ -16,22 +16,22 @@ export interface TaskCardData {
   locked?: boolean
 }
 
-const STATUS_LINE: Readonly<Record<LessonProgressStatus, { text: string; className: string }>> = {
-  completed: { text: 'Teljesítve', className: 'text-accent' },
-  in_progress: { text: 'A lecke folyamatban', className: 'text-ink' },
-  not_started: { text: 'Még nem kezdted el', className: 'text-ink-soft' },
+const STATUS_LINE: Readonly<Record<ExerciseStatus | 'none', { text: string; className: string }>> = {
+  solved: { text: 'Megoldva', className: 'text-accent' },
+  attempted: { text: 'Megpróbáltad, még nincs kész', className: 'text-ink' },
+  none: { text: 'Még nem kezdted el', className: 'text-ink-soft' },
 }
 
 interface TaskCardProps {
   task: TaskCardData
-  /** A tanuló állapota a feladatnál; bejelentkezés nélkül nem ismert. */
-  status?: LessonProgressStatus
+  /** A tanuló állapota a feladatnál (#146): `null`, ha még nem adott be; bejelentkezés nélkül nem ismert. */
+  status?: ExerciseStatus | null
 }
 
 /** Feladatkártya: minden állapotban ugyanaz az elrendezés, csak az alsó sor változik. */
 export function TaskCard({ task, status }: TaskCardProps) {
   const locked = task.locked ?? false
-  const line = locked ? { text: 'Prémium kell hozzá', className: 'text-ink-soft' } : status ? STATUS_LINE[status] : null
+  const line = locked ? { text: 'Prémium kell hozzá', className: 'text-ink-soft' } : status === undefined ? null : STATUS_LINE[status ?? 'none']
 
   return (
     <li className="flex">
@@ -48,7 +48,7 @@ export function TaskCard({ task, status }: TaskCardProps) {
           {locked ? (
             <Icon name="lock" className="mt-1 text-ink-soft" label="Zárolt" />
           ) : (
-            status === 'completed' && <StateIcon kind="ok" label="Teljesítve" />
+            status === 'solved' && <StateIcon kind="ok" label="Megoldva" />
           )}
         </span>
         <span className="flex flex-wrap gap-2">
@@ -68,7 +68,7 @@ export function TaskCard({ task, status }: TaskCardProps) {
         <Difficulty value={task.difficulty} />
         {line && (
           <span
-            {...(locked ? { 'data-testid': 'task-card-premium', 'data-locked': true } : {})}
+            {...(locked ? { 'data-testid': 'task-card-premium', 'data-locked': true } : { 'data-testid': 'exercise-status', 'data-status': status ?? 'none' })}
             className={cx('mt-auto border-t border-grid pt-3.5 text-15 font-semibold', line.className)}
           >
             {line.text}

@@ -1,7 +1,10 @@
 import { Suspense, type ReactNode } from 'react'
 import { BrowserRouter, Route, Routes } from 'react-router-dom'
 import { GuestOnly, RequireAuth, RequireRole } from '../features/auth/guards'
+import { LEGAL_DOCUMENTS } from '../features/legal/documents'
 import { NotFound } from '../features/system/NotFound'
+import { barionPixelEnabled } from '../shared/consent/barionPixel'
+import { CookieBanner } from '../shared/consent/CookieBanner'
 import { PageLoader } from '../shared/ui/PageLoader'
 import { ErrorBoundary } from './ErrorBoundary'
 import { Providers } from './Providers'
@@ -33,7 +36,8 @@ export default function App() {
               <Route path="/" element={<Pages.Home />} />
               <Route path="/tanulasi-ut" element={<Pages.LearningPath />} />
               <Route path="/tanulasi-ut/:sav" element={<Pages.TrackPage />} />
-              <Route path="/leckek/:id" element={<Pages.LessonPage />} />
+              <Route path="/tanulasi-ut/:sav/:lecke" element={<Pages.LessonPage />} />
+              <Route path="/leckek/:id" element={<Pages.LessonById />} />
               <Route path="/feladatok" element={<Pages.TaskList />} />
               <Route path="/vizsgak" element={<Pages.ExamList />} />
               <Route path="/vizsgak/:id" element={<RequireAuth><Pages.ExamStart /></RequireAuth>} />
@@ -43,8 +47,9 @@ export default function App() {
               <Route path="/szobeli/:tema" element={<Pages.OralTopic />} />
               <Route path="/arak" element={<Pages.Pricing />} />
               <Route path="/indulas" element={<Pages.Onboarding />} />
-              <Route path="/aszf" element={<Pages.TermsOfService />} />
-              <Route path="/adatkezeles" element={<Pages.PrivacyPolicy />} />
+              <Route path={LEGAL_DOCUMENTS.terms.path} element={<Pages.TermsOfService />} />
+              <Route path={LEGAL_DOCUMENTS.privacy.path} element={<Pages.PrivacyPolicy />} />
+              <Route path={LEGAL_DOCUMENTS.imprint.path} element={<Pages.Imprint />} />
               <Route path="/elofizetes" element={<RequireAuth><Pages.Subscribe /></RequireAuth>} />
               <Route path="/elofizetes/visszateres" element={<RequireAuth><Pages.PaymentReturn /></RequireAuth>} />
               <Route path="/haladas" element={<RequireAuth><Pages.ProgressDashboard /></RequireAuth>} />
@@ -71,6 +76,7 @@ export default function App() {
               <Route path="/email-megerosites" element={<Pages.VerifyEmail />} />
               <Route path="/elfelejtett-jelszo" element={<GuestOnly><Pages.ForgotPassword /></GuestOnly>} />
               <Route path="/jelszo-visszaallitas" element={<Pages.ResetPassword />} />
+              <Route path="/email-csere" element={<Pages.EmailChangeConfirm />} />
             </Route>
 
             <Route path="/admin" element={<RequireRole allow="admin"><Framed><AdminShell /></Framed></RequireRole>}>
@@ -88,7 +94,8 @@ export default function App() {
               <Route path="szamlak" element={<Pages.AdminInvoices />} />
             </Route>
           </Routes>
-          <StorageNotice />
+          {/* Barion Pixellel hozzájárulást kérünk; nélküle elég a tájékoztatás a tárolt adatokról. */}
+          {barionPixelEnabled ? <CookieBanner privacyPath={LEGAL_DOCUMENTS.privacy.path} /> : <StorageNotice />}
         </Providers>
       </BrowserRouter>
     </ErrorBoundary>

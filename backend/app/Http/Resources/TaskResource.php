@@ -6,6 +6,9 @@ namespace App\Http\Resources;
 
 use App\Enums\AccessDenial;
 use App\Models\Exercise;
+use App\Services\Catalog\TaskNavigation;
+use App\Services\Execution\ExecutionLimitResolver;
+use App\Services\Progress\ExerciseStatuses;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 use stdClass;
@@ -20,8 +23,12 @@ use stdClass;
  */
 final class TaskResource extends JsonResource
 {
-    public function __construct(Exercise $exercise, private readonly ?AccessDenial $denial = null)
-    {
+    public function __construct(
+        private readonly Exercise $exercise,
+        private readonly ?AccessDenial $denial = null,
+        private readonly ?TaskNavigation $navigation = null,
+        private readonly ?ExerciseStatuses $statuses = null,
+    ) {
         parent::__construct($exercise);
     }
 
@@ -40,16 +47,22 @@ final class TaskResource extends JsonResource
             'locked' => ! $unlocked,
             'locked_reason' => $this->denial?->value,
             'locked_message' => $this->denial?->message(),
+            // Csak bejelentkezett nezonel: "solved", "attempted", vagy null, ha meg nem adott be.
+            'my_status' => $this->when($this->statuses?->hasViewer() === true, fn (): ?string => $this->statuses?->of($this->id)?->value),
             'topic' => TopicResource::make($this->whenLoaded('lesson', fn () => $this->lesson->module)),
             // A videot a lejatszo kulon keri le (GET /lessons/{id}/video), rovid eletu URL-lel.
             'lesson' => $this->whenLoaded('lesson', fn (): array => [
                 'id' => $this->lesson->id,
+                'slug' => $this->lesson->slug,
+                'track_slug' => $this->lesson->module?->track?->slug,
                 'title' => $this->lesson->title,
                 'has_video' => $this->lesson->video_path !== null,
             ]),
             'description' => $this->when($unlocked, fn () => $this->description),
             // A diaknak elore lathato szabalyok, magyarul (pl. "for ciklust kell használnod").
             'constraints' => $this->when($unlocked, fn (): array => $this->constraints->describe()),
+            // Nyelvenkent az ervenyes ido- es memoriakorlat (#151), hogy a diak elore lassa.
+            'limits' => $this->when($unlocked, fn (): array => resolve(ExecutionLimitResolver::class)->describe($this->exercise)),
             // Ures objektum (nem ures tomb), hogy a kliens mindig map-kent kezelhesse.
             'starter_code' => $this->when($unlocked, fn () => $this->starter_code ?: new stdClass),
             'example_test_cases' => $this->when(
@@ -57,6 +70,8 @@ final class TaskResource extends JsonResource
                 fn () => ExampleTestCaseResource::collection($this->whenLoaded('visibleTestCases')),
             ),
             'hidden_test_case_count' => $this->whenCounted('hiddenTestCases'),
+            // Zarolt feladatnal is megy: a diak onnan is tovabb tud lepni.
+            'navigation' => $this->when($this->navigation !== null, fn (): ?array => $this->navigation?->toArray()),
         ];
     }
 }

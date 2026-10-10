@@ -1,11 +1,10 @@
 import { test as base } from '@playwright/test'
-import { env } from '../../config/env'
 import { ApiClient } from '../api/ApiClient'
 import { Outbox } from '../api/Outbox'
 import { MockApi } from '../mocks/MockApi'
-import { serveMonacoLocally } from '../mocks/monaco'
 import { HomePage } from '../pages/HomePage'
 import { LearningPathPage } from '../pages/LearningPathPage'
+import { RegisterPage } from '../pages/RegisterPage'
 import { TaskListPage } from '../pages/TaskListPage'
 import { TaskSolvePage } from '../pages/TaskSolvePage'
 import { a11yFixtures, type A11yFixtures } from './a11y'
@@ -23,6 +22,7 @@ export interface FrameworkFixtures {
   mockApi: MockApi
   homePage: HomePage
   learningPathPage: LearningPathPage
+  registerPage: RegisterPage
   taskListPage: TaskListPage
   taskSolvePage: TaskSolvePage
   /** Tipusos kliens a valodi backendhez (API tesztek). */
@@ -41,7 +41,6 @@ export const test = base.extend<FrameworkFixtures & A11yFixtures & FrameworkOpti
   mockBackend: [false, { option: true }],
 
   context: async ({ context }, use) => {
-    if (env.MONACO_SOURCE === 'local') await serveMonacoLocally(context)
     // A tarolasi tajekoztato egyszeri, a kepernyo aljan all: a tesztekben mar nyugtazottnak szamit.
     await context.addInitScript(() => {
       localStorage.setItem('infotanar.storageNotice.v1', 'true')
@@ -63,6 +62,10 @@ export const test = base.extend<FrameworkFixtures & A11yFixtures & FrameworkOpti
 
   learningPathPage: async ({ page, mockApi: _ }, use) => {
     await use(new LearningPathPage(page))
+  },
+
+  registerPage: async ({ page, mockApi: _ }, use) => {
+    await use(new RegisterPage(page))
   },
 
   taskListPage: async ({ page, mockApi: _ }, use) => {

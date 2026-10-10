@@ -1,19 +1,19 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { useId, useState, type FormEvent, type ReactNode } from 'react'
+import { useMutation } from '@tanstack/react-query'
+import { useId, useState, type ChangeEvent, type FormEvent, type ReactNode } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { hibaUzenet, mezoHibak } from '../../../shared/api/errors'
 import { tokenStore } from '../../../shared/api/tokenStore'
 import { Badge } from '../../../shared/ui/Badge'
 import { Banner } from '../../../shared/ui/Banner'
 import { Button } from '../../../shared/ui/Button'
-import { Field } from '../../../shared/ui/Form'
+import { Field, SubmitButton } from '../../../shared/ui/Form'
 import { Modal } from '../../../shared/ui/Modal'
 import { Panel } from '../../../shared/ui/Panel'
 import { SectionTitle } from '../../../shared/ui/Text'
 import { useToast } from '../../../shared/ui/useToast'
 import * as authApi from '../../auth/api'
 import { useAuth } from '../../auth/context'
-import { deleteAccount, exportAccountData } from '../api'
+import * as accountApi from '../api'
 
 /** Fiókom: profil, e-mail-cím, jelszó, az adataim letöltése és a fiók törlése. */
 export function AccountProfile() {
@@ -23,20 +23,20 @@ export function AccountProfile() {
   return (
     <div className="flex max-w-form flex-col gap-6">
       <Section id="profil" title="Profil">
-        <dl className="text-16">
-          <Row term="Név">{user.name}</Row>
-          <Row term="E-mail-cím">
-            <span className="flex flex-wrap items-center justify-end gap-2">
-              {user.email}
-              {user.email_verified_at ? <Badge kind="ok">Megerősítve</Badge> : <Badge kind="draft">Nincs megerősítve</Badge>}
-            </span>
-          </Row>
-        </dl>
+        <NameForm currentName={user.name} />
+      </Section>
+
+      <Section id="email" title="E-mail-cím">
+        <p className="flex flex-wrap items-center gap-2 text-16">
+          <strong className="break-all">{user.email}</strong>
+          {user.email_verified_at ? <Badge kind="ok">Megerősítve</Badge> : <Badge kind="draft">Nincs megerősítve</Badge>}
+        </p>
         {!user.email_verified_at && <ResendVerification />}
+        <ChangeEmail pendingEmail={user.pending_email} />
       </Section>
 
       <Section id="jelszo" title="Jelszó">
-        <PasswordReset email={user.email} />
+        <ChangePassword />
       </Section>
 
       <Section id="adataim" title="Az adataim">
@@ -61,12 +61,44 @@ function Section({ id, title, danger = false, children }: { id: string; title: s
   )
 }
 
-function Row({ term, children }: { term: string; children: ReactNode }) {
+/** A megjelenített név módosítása (#135). */
+function NameForm({ currentName }: { currentName: string }) {
+  const { refresh } = useAuth()
+  const toast = useToast()
+  const [name, setName] = useState(currentName)
+  const save = useMutation({
+    mutationFn: accountApi.updateName,
+    onSuccess: async () => {
+      await refresh()
+      toast.show('A nevedet elmentettük.')
+    },
+  })
+
+  const nameError = mezoHibak(save.error).name
+  const unchanged = name.trim() === currentName
+
+  function submit(event: FormEvent) {
+    event.preventDefault()
+    save.mutate(name.trim())
+  }
+
   return (
-    <div className="flex flex-wrap justify-between gap-x-6 gap-y-1 border-t border-grid py-3">
-      <dt className="text-ink-soft">{term}</dt>
-      <dd className="font-semibold">{children}</dd>
-    </div>
+    <form onSubmit={submit} noValidate className="flex flex-col gap-4">
+      <Field
+        label="Név"
+        autoComplete="name"
+        required
+        value={name}
+        onChange={(e) => setName(e.target.value)}
+        error={nameError ?? (save.isError ? hibaUzenet(save.error) : undefined)}
+        hint="Ez jelenik meg a fiókodban és a leveleinkben."
+      />
+      <div>
+        <SubmitButton busy={save.isPending} busyLabel="Mentés…" fullWidth={false} disabled={unchanged || name.trim() === ''}>
+          Név mentése
+        </SubmitButton>
+      </div>
+    </form>
   )
 }
 
@@ -74,7 +106,7 @@ function ResendVerification() {
   const resend = useMutation({ mutationFn: authApi.resendVerification })
 
   return (
-    <div className="mt-2 flex flex-col gap-3">
+    <div className="mt-4 flex flex-col gap-3">
       {resend.isSuccess && <Banner kind="success">{resend.data}</Banner>}
       {resend.isError && <Banner kind="error">{hibaUzenet(resend.error)}</Banner>}
       <div>
@@ -86,35 +118,133 @@ function ResendVerification() {
   )
 }
 
-function PasswordReset({ email }: { email: string }) {
-  const reset = useMutation({ mutationFn: () => authApi.forgotPassword(email) })
+/**
+ * E-mail-cím csere (#135). A belépés a régi címmel megy, amíg az új címre
+ * küldött linket meg nem nyitják; addig az új cím megerősítésre vár.
+ */
+function ChangeEmail({ pendingEmail }: { pendingEmail: string | null }) {
+  const { refresh } = useAuth()
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+
+  const request = useMutation({
+    mutationFn: accountApi.requestEmailChange,
+    onSuccess: async () => {
+      setEmail('')
+      setPassword('')
+      await refresh()
+    },
+  })
+
+  const errors = mezoHibak(request.error)
+  const generalError = request.isError && Object.keys(errors).length === 0 ? hibaUzenet(request.error) : null
+
+  function submit(event: FormEvent) {
+    event.preventDefault()
+    request.mutate({ email, current_password: password })
+  }
 
   return (
-    <>
-      <p className="text-16 leading-relaxed text-ink-soft">
-        Küldünk egy linket a <strong className="text-ink">{email}</strong> címre, azzal állíthatsz be új jelszót. A link rövid ideig
-        érvényes.
-      </p>
-      {reset.isSuccess && (
-        <Banner kind="success" className="mt-4">
-          {reset.data}
+    <form onSubmit={submit} noValidate className="mt-6 flex flex-col gap-4 border-t border-grid pt-5">
+      <h3 className="text-18 font-bold">Új e-mail-cím beállítása</h3>
+      {pendingEmail && (
+        <Banner kind="info" title="Megerősítésre vár" data-testid="pending-email">
+          Nyisd meg a(z) <strong className="break-all">{pendingEmail}</strong> címre küldött levélben lévő linket. Addig a jelenlegi
+          címeddel tudsz belépni.
         </Banner>
       )}
-      {reset.isError && (
-        <Banner kind="error" className="mt-4">
-          {hibaUzenet(reset.error)}
-        </Banner>
-      )}
-      <Button variant="secondary" icon="mail" busy={reset.isPending} busyLabel="Küldés…" onClick={() => reset.mutate()} className="mt-4">
-        Jelszó-visszaállító levél küldése
-      </Button>
-    </>
+      {request.isSuccess && <Banner kind="success">{request.data}</Banner>}
+      {generalError && <Banner kind="error">{generalError}</Banner>}
+      <Field
+        label="Új e-mail-cím"
+        type="email"
+        autoComplete="email"
+        required
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+        error={errors.email}
+      />
+      <Field
+        label="Jelenlegi jelszó"
+        type="password"
+        autoComplete="current-password"
+        required
+        value={password}
+        onChange={(e) => setPassword(e.target.value)}
+        error={errors.current_password}
+      />
+      <div>
+        <SubmitButton busy={request.isPending} busyLabel="Küldés…" fullWidth={false}>
+          Megerősítő levél kérése
+        </SubmitButton>
+      </div>
+    </form>
+  )
+}
+
+const EMPTY_PASSWORD: accountApi.ChangePasswordPayload = { current_password: '', password: '', password_confirmation: '' }
+
+/** Jelszócsere (#135): a többi eszközön kijelentkeztet, ezen a munkameneten nem. */
+function ChangePassword() {
+  const [form, setForm] = useState(EMPTY_PASSWORD)
+  const change = useMutation({ mutationFn: accountApi.changePassword, onSuccess: () => setForm(EMPTY_PASSWORD) })
+
+  const errors = mezoHibak(change.error)
+  const generalError = change.isError && Object.keys(errors).length === 0 ? hibaUzenet(change.error) : null
+
+  const set = (field: keyof accountApi.ChangePasswordPayload) => (e: ChangeEvent<HTMLInputElement>) =>
+    setForm((f) => ({ ...f, [field]: e.target.value }))
+
+  function submit(event: FormEvent) {
+    event.preventDefault()
+    change.mutate(form)
+  }
+
+  return (
+    <form onSubmit={submit} noValidate className="flex flex-col gap-4">
+      <p className="text-16 leading-relaxed text-ink-soft">A jelszócsere után a többi eszközödön újra be kell lépned; itt bejelentkezve maradsz.</p>
+      {change.isSuccess && <Banner kind="success">{change.data}</Banner>}
+      {generalError && <Banner kind="error">{generalError}</Banner>}
+      <Field
+        label="Jelenlegi jelszó"
+        type="password"
+        autoComplete="current-password"
+        required
+        value={form.current_password}
+        onChange={set('current_password')}
+        error={errors.current_password}
+      />
+      <Field
+        label="Új jelszó"
+        type="password"
+        autoComplete="new-password"
+        required
+        value={form.password}
+        onChange={set('password')}
+        error={errors.password}
+        hint="Legalább 8 karakter, benne betű és szám is legyen."
+      />
+      <Field
+        label="Új jelszó újra"
+        type="password"
+        autoComplete="new-password"
+        required
+        value={form.password_confirmation}
+        onChange={set('password_confirmation')}
+        error={errors.password_confirmation}
+      />
+      <div>
+        <SubmitButton busy={change.isPending} busyLabel="Mentés…" fullWidth={false}>
+          Jelszó módosítása
+        </SubmitButton>
+      </div>
+    </form>
   )
 }
 
 function DataExport() {
   const toast = useToast()
-  const download = useMutation({ mutationFn: exportAccountData, onSuccess: () => toast.show('Az adataidat letöltöttük.') })
+  const download = useMutation({ mutationFn: accountApi.downloadMyData, onSuccess: () => toast.show('Az adataidat letöltöttük.') })
 
   return (
     <>
@@ -134,20 +264,21 @@ function DataExport() {
 }
 
 function DeleteAccount() {
-  const queryClient = useQueryClient()
+  const { refresh } = useAuth()
+  const toast = useToast()
   const navigate = useNavigate()
   const formId = useId()
   const [open, setOpen] = useState(false)
   const [password, setPassword] = useState('')
 
   const remove = useMutation({
-    mutationFn: () => deleteAccount(password),
-    onSuccess: () => {
-      // A fiók megszűnt: a token érvénytelen, minden felhasználóhoz kötött adatot eldobunk.
+    mutationFn: () => accountApi.deleteMyAccount(password),
+    onSuccess: async () => {
+      // A szerver már visszavonta a tokent; a kliens állapotát is kijelentkezettre állítjuk.
       tokenStore.set(null)
-      queryClient.clear()
+      await refresh()
       navigate('/', { replace: true })
-      window.location.reload()
+      toast.show('A fiókodat töröltük.')
     },
   })
   const passwordError = mezoHibak(remove.error).password

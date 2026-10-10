@@ -4,11 +4,14 @@ import { Link, Navigate, useNavigate } from 'react-router-dom'
 import { hibaUzenet, mezoHibak } from '../../../shared/api/errors'
 import { Banner } from '../../../shared/ui/Banner'
 import { CheckboxField, Field, SubmitButton } from '../../../shared/ui/Form'
+import { LEGAL_VERSIONS } from '../../legal/documents'
+import { LegalLink } from '../../legal/LegalLink'
 import * as authApi from '../api'
 import { AuthCard } from '../components/AuthCard'
 import { useAuth } from '../context'
 
-type Form = authApi.RegisterPayload
+/** A begépelhető mezők; az elfogadás és a dokumentumverziók küldéskor kerülnek mellé. */
+type Form = Pick<authApi.RegisterPayload, 'name' | 'email' | 'password' | 'password_confirmation'>
 
 export function Register() {
   const { user, login } = useAuth()
@@ -18,7 +21,7 @@ export function Register() {
   const [termsError, setTermsError] = useState(false)
 
   const mutation = useMutation({
-    mutationFn: async (payload: Form) => {
+    mutationFn: async (payload: authApi.RegisterPayload) => {
       await authApi.register(payload)
       await login(payload.email, payload.password)
     },
@@ -36,7 +39,10 @@ export function Register() {
   function onSubmit(e: FormEvent) {
     e.preventDefault()
     setTermsError(!accepted)
-    if (accepted) mutation.mutate(form)
+    // A szerver az elfogadást a megjelenített dokumentumverziókkal együtt rögzíti (#133).
+    if (accepted) {
+      mutation.mutate({ ...form, accept_terms: true, terms_version: LEGAL_VERSIONS.terms, privacy_version: LEGAL_VERSIONS.privacy })
+    }
   }
 
   return (
@@ -87,11 +93,11 @@ export function Register() {
             if (e.target.checked) setTermsError(false)
           }}
           required
-          error={termsError ? 'A regisztrációhoz fogadd el a feltételeket és a tájékoztatót.' : undefined}
+          error={termsError ? 'A regisztrációhoz fogadd el a feltételeket és a tájékoztatót.' : errors.accept_terms}
           label={
             <>
-              Elfogadom az <Link to="/aszf">általános szerződési feltételeket</Link> és az{' '}
-              <Link to="/adatkezeles">adatkezelési tájékoztatót</Link>.
+              Elfogadom az <LegalLink to="terms">általános szerződési feltételeket</LegalLink>, és megismertem az{' '}
+              <LegalLink to="privacy">adatkezelési tájékoztatót</LegalLink>.
             </>
           }
         />

@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
-import { Link, useParams } from 'react-router-dom'
+import { Link, Navigate, useParams } from 'react-router-dom'
+import { httpStatus } from '../../../shared/api/errors'
 import { LANGUAGE_LABEL } from '../../../shared/domain/labels'
 import { Badge, LevelBadge } from '../../../shared/ui/Badge'
 import { Banner } from '../../../shared/ui/Banner'
@@ -9,21 +10,26 @@ import { cx } from '../../../shared/ui/cx'
 import { StateIcon } from '../../../shared/ui/Icon'
 import { PageLoader } from '../../../shared/ui/PageLoader'
 import { Panel } from '../../../shared/ui/Panel'
-import { LoadError, Skeleton } from '../../../shared/ui/States'
+import { Prose } from '../../../shared/ui/Prose'
+import { LoadError } from '../../../shared/ui/States'
 import { CardTitle, PageTitle } from '../../../shared/ui/Text'
-import type { LessonProgressStatus } from '../../../types'
-import { taskQuery } from '../../catalog/api'
-import { useCatalogTree, type LessonPlace } from '../../catalog/useCatalogTree'
-import { useLessonStatuses } from '../../progress/useLessonStatuses'
+import type { ExerciseSummary, LessonDetail } from '../../../types'
+import { trackQuery } from '../../catalog/api'
+import { useCatalogTree } from '../../catalog/useCatalogTree'
+import { lessonPath, lessonQuery } from '../../lesson/api'
+import { CompleteLesson } from '../../lesson/components/CompleteLesson'
+import { ExerciseStatusBadge } from '../../progress/components/ExerciseStatusBadge'
 import { NotFound } from '../../system/NotFound'
 import { LessonVideo } from '../../workspace/components/LessonVideo'
 import { Paywall } from '../../workspace/components/Paywall'
 
-/** Leckeoldal: videó, a modul vázlata és a leckéhez tartozó gyakorlófeladatok. */
-export function LessonPage() {
+/**
+ * A lecke azonosítójával érkező régi hivatkozás (`/leckek/:id`): a katalógusból
+ * kikeressük a sávot és a lecke nevét, majd a végleges címre irányítunk.
+ */
+export function LessonById() {
   const id = Number(useParams<{ id: string }>().id)
   const { tree, isPending, error, refetch } = useCatalogTree()
-  const statuses = useLessonStatuses()
 
   if (error) {
     return (
@@ -37,116 +43,167 @@ export function LessonPage() {
   const place = tree.lessons.get(id)
   if (!place) return <NotFound />
 
-  return <Lesson place={place} statuses={statuses} />
+  return <Navigate to={lessonPath(place.track.slug, place.lesson.slug)} replace />
 }
 
-function Lesson({ place, statuses }: { place: LessonPlace; statuses: Map<number, LessonProgressStatus> | null }) {
-  const { track, module, lesson, next } = place
+/** Leckeoldal (#143): videó, tananyag, gyakorlófeladatok, a modul vázlata és lépkedés a szomszédos leckékre. */
+export function LessonPage() {
+  const { sav = '', lecke = '' } = useParams<{ sav: string; lecke: string }>()
+  const lesson = useQuery(lessonQuery(sav, lecke))
+
+  if (lesson.isPending) return <PageLoader label="Lecke betöltése…" />
+
+  if (lesson.isError) {
+    if (httpStatus(lesson.error) === 404) return <NotFound />
+
+    return (
+      <main className="mx-auto w-full max-w-page flex-1 px-4 py-12 md:px-6">
+        <LoadError error={lesson.error} onRetry={() => void lesson.refetch()} title="Nem sikerült betölteni a leckét" />
+      </main>
+    )
+  }
+
+  return <Lesson lesson={lesson.data} />
+}
+
+function Lesson({ lesson }: { lesson: LessonDetail }) {
   const firstExercise = lesson.exercises[0]
-  // Nincs külön lecke-végpont: a hozzáférést és a videó meglétét a lecke első feladata mutatja meg.
-  const access = useQuery({ ...taskQuery(firstExercise?.id ?? 0), enabled: firstExercise !== undefined })
-  const status = statuses?.get(lesson.id)
-  const moduleDone = statuses ? module.lessons.filter((item) => statuses.get(item.id) === 'completed').length : 0
+  const trackPath = `/tanulasi-ut/${encodeURIComponent(lesson.track.slug)}`
 
   return (
     <main className="mx-auto w-full max-w-page flex-1 px-4 pt-8 pb-24 md:px-6">
-      <Breadcrumb items={[{ label: 'Tanulási út', to: '/tanulasi-ut' }, { label: track.title, to: `/tanulasi-ut/${track.slug}` }, { label: lesson.title }]} />
+      <title>{`${lesson.title} – InfoTanár`}</title>
+      <Breadcrumb items={[{ label: 'Tanulási út', to: '/tanulasi-ut' }, { label: lesson.track.title, to: trackPath }, { label: lesson.title }]} />
       <PageTitle size="compact" className="mt-4">
         {lesson.title}
       </PageTitle>
       <div className="mt-3 flex flex-wrap gap-2">
         {lesson.is_free ? <Badge kind="free">Ingyenes</Badge> : <Badge kind="prem">Prémium</Badge>}
-        {status === 'completed' && <Badge kind="ok">Teljesítve</Badge>}
-        {status === 'in_progress' && <Badge kind="neutral">Folyamatban</Badge>}
+        {lesson.status === 'completed' && <Badge kind="ok">Teljesítve</Badge>}
+        {lesson.status === 'in_progress' && <Badge kind="neutral">Folyamatban</Badge>}
       </div>
 
       <div className="mt-8 flex flex-wrap items-start gap-8">
         <div className="flex min-w-0 flex-1 basis-140 flex-col gap-6">
-          {access.isLoading ? (
-            <Skeleton lines={4} />
-          ) : access.data?.locked ? (
-            <Paywall reason={access.data.locked_reason} message={access.data.locked_message} />
+          {lesson.locked ? (
+            <Paywall reason={lesson.locked_reason} message={lesson.locked_message} />
           ) : (
             <>
-              {access.data?.lesson ? (
-                <LessonVideo lesson={access.data.lesson} />
+              {lesson.has_video ? (
+                <LessonVideo lesson={lesson} />
               ) : (
-                <Banner kind="info" title="Ehhez a leckéhez még nem készült videó">
-                  A lecke gyakorlófeladatait lent találod.
-                </Banner>
+                lesson.content.trim() === '' && (
+                  <Banner kind="info" title="Ehhez a leckéhez még nem készült videó és jegyzet">
+                    {lesson.exercises.length > 0 ? 'A lecke gyakorlófeladatait lent találod.' : 'Nézz vissza később, vagy folytasd a következő leckével.'}
+                  </Banner>
+                )
               )}
 
-              <Panel as="section" aria-labelledby="gyakorlas">
-                <CardTitle id="gyakorlas" as="h2">
-                  Gyakorlás
-                </CardTitle>
-                {lesson.exercises.length === 0 ? (
-                  <p className="mt-2 text-16 leading-relaxed text-ink-soft">Ehhez a leckéhez még nincs gyakorlófeladat.</p>
-                ) : (
-                  <ul className="mt-3">
-                    {lesson.exercises.map((exercise) => (
-                      <li key={exercise.id} className="flex flex-wrap items-center gap-x-3 gap-y-1 border-t border-grid py-1">
-                        <Link to={`/feladatok/${exercise.id}`} className="inline-flex min-h-11 min-w-0 flex-1 basis-56 items-center text-16 font-medium text-ink">
-                          {exercise.title}
-                        </Link>
-                        <LevelBadge level={exercise.level} />
-                        {exercise.allowed_languages.map((language) => (
-                          <Badge key={language} kind="lang">
-                            {LANGUAGE_LABEL[language]}
-                          </Badge>
-                        ))}
-                      </li>
-                    ))}
-                  </ul>
-                )}
-                <p className="mt-3 text-15 leading-relaxed text-ink-soft">
-                  A lecke akkor számít késznek, ha minden feladatát beadtad, és a rejtett teszteken is átment.
-                </p>
-              </Panel>
+              {lesson.content.trim() !== '' && (
+                <Panel as="section" pad="xl" aria-label="Tananyag" data-testid="lesson-content">
+                  <Prose markdown={lesson.content} codeBlocks />
+                </Panel>
+              )}
+
+              <Exercises exercises={lesson.exercises} />
+              <CompleteLesson lesson={lesson} />
             </>
           )}
 
           <div className="flex flex-wrap items-center gap-3">
-            {firstExercise && !access.data?.locked && <ButtonLink to={`/feladatok/${firstExercise.id}`}>Feladat megnyitása</ButtonLink>}
-            {next && (
-              <ButtonLink to={`/leckek/${next.id}`} variant="secondary">
-                Következő lecke: {next.title}
+            {firstExercise && !lesson.locked && <ButtonLink to={`/feladatok/${firstExercise.id}`}>Feladat megnyitása</ButtonLink>}
+            {lesson.previous && (
+              <ButtonLink to={lessonPath(lesson.track.slug, lesson.previous.slug)} variant="secondary" icon="chevron-left">
+                Előző lecke: {lesson.previous.title}
+              </ButtonLink>
+            )}
+            {lesson.next && (
+              <ButtonLink to={lessonPath(lesson.track.slug, lesson.next.slug)} variant="secondary">
+                Következő lecke: {lesson.next.title}
               </ButtonLink>
             )}
           </div>
         </div>
 
-        <aside className="w-full md:w-80 md:flex-none">
-          <Panel as="nav" aria-label="A modul leckéi">
-            <CardTitle as="h2">{module.title}</CardTitle>
-            {statuses && (
-              <p className="mt-1 text-15 text-ink-soft">
-                {moduleDone} / {module.lessons.length} kész
-              </p>
-            )}
-            <ul className="mt-3">
-              {module.lessons.map((item) => {
-                const current = item.id === lesson.id
-                return (
-                  <li key={item.id} className="border-t border-grid">
-                    <Link
-                      to={`/leckek/${item.id}`}
-                      aria-current={current ? 'page' : undefined}
-                      className={cx(
-                        'flex min-h-11 items-center gap-3 py-1.5 text-15 text-ink no-underline hover:underline',
-                        current && 'font-bold',
-                      )}
-                    >
-                      <StateIcon kind={statuses?.get(item.id) === 'completed' ? 'ok' : 'empty'} />
-                      {item.title}
-                    </Link>
-                  </li>
-                )
-              })}
-            </ul>
-          </Panel>
-        </aside>
+        <ModuleOutline lesson={lesson} />
       </div>
     </main>
+  )
+}
+
+function Exercises({ exercises }: { exercises: ExerciseSummary[] }) {
+  return (
+    <Panel as="section" aria-labelledby="gyakorlas">
+      <CardTitle id="gyakorlas" as="h2">
+        Gyakorlás
+      </CardTitle>
+      {exercises.length === 0 ? (
+        <p className="mt-2 text-16 leading-relaxed text-ink-soft">Ehhez a leckéhez nincs gyakorlófeladat.</p>
+      ) : (
+        <>
+          <ul className="mt-3">
+            {exercises.map((exercise) => (
+              <li key={exercise.id} data-testid="lesson-exercise" className="flex flex-wrap items-center gap-x-3 gap-y-1 border-t border-grid py-1">
+                <Link to={`/feladatok/${exercise.id}`} className="inline-flex min-h-11 min-w-0 flex-1 basis-56 items-center text-16 font-medium text-ink">
+                  {exercise.title}
+                </Link>
+                {exercise.my_status && <ExerciseStatusBadge status={exercise.my_status} />}
+                <LevelBadge level={exercise.level} />
+                {exercise.allowed_languages.map((language) => (
+                  <Badge key={language} kind="lang">
+                    {LANGUAGE_LABEL[language]}
+                  </Badge>
+                ))}
+              </li>
+            ))}
+          </ul>
+          <p className="mt-3 text-15 leading-relaxed text-ink-soft">
+            A lecke akkor számít késznek, ha minden feladatát beadtad, és a rejtett teszteken is átment.
+          </p>
+        </>
+      )}
+    </Panel>
+  )
+}
+
+/** A lecke moduljának többi leckéje; a sáv szerkezetéből jön, ezért a lecke után, külön töltődik. */
+function ModuleOutline({ lesson }: { lesson: LessonDetail }) {
+  const track = useQuery(trackQuery(lesson.track.slug))
+  const module = track.data?.modules.find((item) => item.id === lesson.module.id)
+
+  if (!module) return null
+
+  const done = module.lessons.filter((item) => item.status === 'completed').length
+  // Vendégnél nincs haladás: ott a számláló sem jelenik meg.
+  const tracked = module.lessons.some((item) => item.status !== null)
+
+  return (
+    <aside className="w-full md:w-80 md:flex-none">
+      <Panel as="nav" aria-label="A modul leckéi">
+        <CardTitle as="h2">{module.title}</CardTitle>
+        {tracked && (
+          <p className="mt-1 text-15 text-ink-soft">
+            {done} / {module.lessons.length} kész
+          </p>
+        )}
+        <ul className="mt-3">
+          {module.lessons.map((item) => {
+            const current = item.id === lesson.id
+            return (
+              <li key={item.id} className="border-t border-grid">
+                <Link
+                  to={lessonPath(lesson.track.slug, item.slug)}
+                  aria-current={current ? 'page' : undefined}
+                  className={cx('flex min-h-11 items-center gap-3 py-1.5 text-15 text-ink no-underline hover:underline', current && 'font-bold')}
+                >
+                  <StateIcon kind={item.status === 'completed' ? 'ok' : 'empty'} />
+                  {item.title}
+                </Link>
+              </li>
+            )
+          })}
+        </ul>
+      </Panel>
+    </aside>
   )
 }

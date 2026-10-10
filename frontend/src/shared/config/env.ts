@@ -30,7 +30,30 @@ function readExamDate(): string {
   return value
 }
 
+/** A build git commitja (a deploy állítja be); a hibajelentésekből így látszik, melyik kiadás hibázott. */
+function readRelease(): string | null {
+  const raw: unknown = import.meta.env.VITE_RELEASE
+
+  return typeof raw === 'string' && raw.trim() !== '' ? raw.trim() : null
+}
+
+/**
+ * Barion Pixel (#139). Azonosító nélkül a Pixel ki van kapcsolva. Alapértelmezésben
+ * csak a látogató hozzájárulása után töltődik be; `VITE_BARION_PIXEL_REQUIRES_CONSENT=false`
+ * esetén az alap Pixel a döntés előtt is betölt.
+ */
+function readBarionPixel(): { pixelId: string | null; requiresConsent: boolean } {
+  const id: unknown = import.meta.env.VITE_BARION_PIXEL_ID
+
+  return {
+    pixelId: typeof id === 'string' && id.trim() !== '' ? id.trim() : null,
+    requiresConsent: import.meta.env.VITE_BARION_PIXEL_REQUIRES_CONSENT !== 'false',
+  }
+}
+
 export const env = Object.freeze({
   apiUrl: readApiUrl(),
   examDate: readExamDate(),
+  release: readRelease(),
+  barionPixel: readBarionPixel(),
 })
