@@ -6,6 +6,7 @@ import remarkGfm from 'remark-gfm'
 import { hibaUzenet, varakozas, zarolasOka, type ExecutionWait } from '../../../shared/api/errors'
 import { LANGUAGE_LABEL, LEVEL_LABEL } from '../../../shared/domain/labels'
 import { formatMemoryLimit, formatTimeLimit } from '../../../shared/domain/limits'
+import { useCountdown } from '../../../shared/hooks/useCountdown'
 import { useMediaQuery } from '../../../shared/hooks/useMediaQuery'
 import { usePersistentState } from '../../../shared/hooks/usePersistentState'
 import { PageLoader } from '../../../shared/ui/PageLoader'
@@ -209,6 +210,10 @@ function Workspace({ task }: { task: UnlockedTaskDetail }) {
   }
 
   const running = execution.isPending
+  const mustWait = countdown.seconds > 0
+  const lesson = lessonOf(task)
+  // A sima futtatás nem számít megoldásnak, csak az elfogadott beadás.
+  const accepted = execution.data && isSubmission(execution.data) && execution.data.status === 'passed' ? execution.data : null
   // A korlát nyelvenként eltérhet (pl. a C# több időt kaphat), ezért a kiválasztott nyelvét mutatjuk.
   const limits = task.limits?.[language]
 
@@ -301,13 +306,22 @@ function Workspace({ task }: { task: UnlockedTaskDetail }) {
         <CodeEditor language={language} initialValue={code} onChange={setCode} replace={replacement} readOnly={running} />
       </div>
 
-      <ResultPanel
-        loading={running}
-        error={execution.isError ? hibaUzenet(execution.error) : null}
-        result={execution.data ?? null}
-        mode={mode}
-        limits={limits}
-      />
+      {accepted && <NextStep task={task} lessonCompleted={accepted.lesson_completed === true} />}
+
+      {wait && !running ? (
+        <RateLimitNotice wait={wait} seconds={countdown.seconds} />
+      ) : (
+        <ResultPanel
+          loading={running}
+          error={execution.isError ? hibaUzenet(execution.error) : null}
+          result={execution.data ?? null}
+          mode={mode}
+          limits={limits}
+        />
+      )}
+
+      {/* Vendég beadása nem kötődik fiókhoz, ezért neki nincs története. */}
+      {user && <SubmissionHistory taskId={task.id} allowedLanguages={task.allowed_languages} onRestore={restoreSubmission} />}
     </section>
   )
 

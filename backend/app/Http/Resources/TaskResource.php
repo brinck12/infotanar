@@ -6,7 +6,9 @@ namespace App\Http\Resources;
 
 use App\Enums\AccessDenial;
 use App\Models\Exercise;
+use App\Services\Catalog\TaskNavigation;
 use App\Services\Execution\ExecutionLimitResolver;
+use App\Services\Progress\ExerciseStatuses;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 use stdClass;
@@ -21,8 +23,12 @@ use stdClass;
  */
 final class TaskResource extends JsonResource
 {
-    public function __construct(private readonly Exercise $exercise, private readonly ?AccessDenial $denial = null)
-    {
+    public function __construct(
+        private readonly Exercise $exercise,
+        private readonly ?AccessDenial $denial = null,
+        private readonly ?TaskNavigation $navigation = null,
+        private readonly ?ExerciseStatuses $statuses = null,
+    ) {
         parent::__construct($exercise);
     }
 
