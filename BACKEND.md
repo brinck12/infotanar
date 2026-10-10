@@ -1119,3 +1119,46 @@ Common definition of done for every backend package: `composer lint` and `compos
 - The three Judge0-related claims about the dropped commits (`00c8e59`, `037e9f5`) describe their commit messages and ADR, not a line-by-line code review; implementers should `git show <sha>:<path>` the files they reuse.
 - The `CLAUDE.md` text shown to me while planning said `docs:endpoints` could not be found; the repository contains `GenerateEndpointDocs.php` and CI runs it, so this plan treats the command as existing.
 - Frontend behaviour was derived by reading, not by running the app.
+
+---
+
+## 11. The foundation as built (read this before your package; it overrides sections 3 to 7 where they differ)
+
+WP0 is merged on `fullstack/backend-platform`. Where it had to differ from the plan, the code is right and the plan text above is not. Read the classes themselves before relying on a signature.
+
+**Already built, although the plan gave it to another package**
+
+- `Http/Controllers/Api/V1/Catalog/AttachmentDownloadController` and the route `api.attachments.download` in `routes/api/typed-tasks.php` exist, because `AttachmentUrls` cannot sign without the route. WP1 extends them and does not create them.
+- `Exceptions/Catalog/AttachmentLimitReached` and `Exceptions/Catalog/InvalidAttachment` (422 on `name`, `test_case_id` or `role`) exist, thrown by `ManageAttachment`. All attachment messages are in `lang/hu/filetasks.php`.
+- The `ExamResultRecalculator` binding in `AppServiceProvider` switches to the real implementation by itself as soon as the class `App\Actions\Exams\RecomputeExamResult` exists and implements the interface. WP6 must use exactly that class name and does not touch the provider.
+
+**Signatures and names to code against**
+
+- `UploadedFileInspector::inspect(UploadedFile, list<string> $allowed, ?string $category = null, ?int $maxBytes = null): InspectedUpload`, with static helpers `safeName`, `extensionOf`, `categoryOf`, `maxBytesFor`, `maxKilobytesFor`.
+- `App\Services\Files\FileDisk` enum (`ExerciseFiles`, `SubmissionFiles`), used by `StoredFile` and `PrivateFileStore`.
+- `PrivateFileStore`: `put`, `bytes`, `stream`, `delete`, and also `putContents`, `exists`, `withLocalPath`, `deletePath`, `deleteDirectory`, `response` (the shared download headers).
+- `ZipSafety`: `open`, `assertSafe`, `read` (capped; `null` when the entry is missing; throws `UnreadableFile`). Ratio checks skip entries under 100 KB, because tiny repetitive XML exceeds 200:1 harmlessly.
+- `XmlSafety` is static: `load`, `reader`, `loadHtml`, `assertNoDoctype`. The other services are injected instances.
+- Model helpers: `Attachment::storedFile()`, `FileSubmission::storedFile()`, `ExamPart::order()`, `RubricItem::isManual()`; `ExerciseKind::isGradable()`, `uploadExtensions()`, `gradableValues()`; `FileSubmissionStatus::apiValue()`.
+- `CheckRegistry` allows several handlers per check type (`handlersFor`, `handlerFor($type, $file)`), since `image` spans documents and presentations. `RubricCheckCatalog::validate(RubricCheckType, string, string): ?string` passes when any handler accepts.
+- Reader and handler class names are fixed in `config/filetasks.php`, which only the integrator edits. Readers: `Spreadsheet\SpreadsheetReader`, `Document\DocumentReader`, `Presentation\PresentationReader`, `Vector\SvgReader`, `Web\HtmlReader`, `Image\PngReader`. Checks live in `<Family>\Checks\` (WP4's in `Document\Checks\`). WP5's slots: `Presentation\Checks\{SlideCheck,AnimationCheck,ShapeCheck,ImageCheck}`, `Vector\Checks\{ShapeCheck,ImageCheck}`, `Web\Checks\WebCheck`, `Image\Checks\ImageCheck`. Check the config for the exact list before naming a class.
+- Signed attachment URLs are absolute (request host, like lesson videos), not the relative path shown in 4.1.4.
+- `filetasks.extensions` also contains `.jpg`, `.jpeg`, `.webp` and `.csv`.
+
+**Attachment rules**
+
+- `sample_image`, `sample_solution` and `source_zip` are one per owner: a new upload replaces the old one whatever its name. A given `name` must keep the uploaded file's extension. `input` is only for code and sql kinds, `sample_solution` only for upload kinds. Replacing keeps the row id; old files are deleted after commit.
+- Deleting a test case cascades its `input` attachment rows but leaves the files on disk. WP1 fixes this where exercises and test cases are deleted, or reports it.
+
+**Data and configuration**
+
+- `oral_practices.checked` and `scores` have no database default (MySQL rejects JSON literals); the model supplies them. An empty `scores` reads back as `[]`, so the resource must cast it to an object.
+- Rate limits are config-driven (`FILETASKS_RATE_PER_MINUTE`, `FILETASKS_RATE_PER_DAY`, `FILETASKS_ADMIN_UPLOAD_PER_MINUTE`, `EXAMS_WRITE_PER_MINUTE`). The test backend sets all four very high, and sets `FILETASKS_MAX_DOCUMENT_MB=1`: the oversize test uploads a file over 1 MB and under 2 MB (PHP's default upload cap in `php -S`).
+- `test:prepare-api-fixtures` empties `storage/app/private/exercise-files` and `submission-files`. The test backend shares those directories with local development.
+
+**Fixtures and test helpers**
+
+- Fixture files are generated by `tests/fixtures/files/generate.ts` (`npm run fixtures`, byte-deterministic). Add new fixtures there. Beyond the plan it also writes `pw-ures-zip.xlsx`, `pw-makro-rejtett.xlsx`, `pw-minta.png`, `pw-adatok.txt`, `pw-forrasok.zip`. They were parsed with PHP only, never opened in Excel, LibreOffice or Word.
+- Seed ids (all in `tests/src/data/seed.ts`): rubric items 1 to 4 on exercise 5 and item 5 on exercise 6 (auto items have hints); attachments 1 (sample image), 2 (`adatok.txt`), 3 (exam zip); exam parts 1 and 2 on exam 1, part 3 on exam 2. `pw-tabla-rossz.xlsx` keeps the number format, so its expected score is 2.
+- `adminAccount()` shares one admin token across spec files. Admin login is limited to 5 per minute, so a spec must never log the admin in itself. Also available: `verifiedStudent`, `premiumStudent`, `fixtureFile`, `uploadOf`, and `zipArchive` in `tests/src/support/zip.ts`.
+- `tests/src/api/types.ts` re-exports every `types/*.ts`, so type names must be unique across those files.
