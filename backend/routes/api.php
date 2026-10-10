@@ -15,6 +15,9 @@ use App\Http\Controllers\Api\V1\Admin\Catalog\TrackController as AdminTrackContr
 use App\Http\Controllers\Api\V1\Admin\InvoiceController as AdminInvoiceController;
 use App\Http\Controllers\Api\V1\Admin\UserAccountController;
 use App\Http\Controllers\Api\V1\Admin\UserController as AdminUserController;
+use App\Http\Controllers\Api\V1\Admin\UserPaymentController;
+use App\Http\Controllers\Api\V1\Admin\UserRoleController;
+use App\Http\Controllers\Api\V1\Admin\UserSecurityController;
 use App\Http\Controllers\Api\V1\Auth\CurrentUserController;
 use App\Http\Controllers\Api\V1\Auth\EmailVerificationController;
 use App\Http\Controllers\Api\V1\Auth\PasswordResetController;
@@ -192,6 +195,26 @@ Route::prefix('v1')->name('api.')->middleware(RejectInvalidToken::class)->group(
         Route::get('/invoices', [AdminInvoiceController::class, 'index'])->name('invoices.index');
         Route::put('/invoices/{invoice}/buyer', [AdminInvoiceController::class, 'updateBuyer'])->name('invoices.buyer');
         Route::post('/invoices/{invoice}/retry', [AdminInvoiceController::class, 'retry'])->name('invoices.retry');
+
+        // Felhasznalo-kezeles (#162): szerepkor, megerosites, munkamenetek, jelszo-visszaallitas, fizetesek.
+        // Minden vegpont a UserPolicy egy jogosultsagan keresztul er el.
+        Route::put('/users/{user}/role', [UserRoleController::class, 'update'])
+            ->whereNumber('user')->middleware('can:changeRole,user')->name('users.role');
+
+        Route::middleware('can:manageSecurity,user')->whereNumber('user')->group(function (): void {
+            Route::post('/users/{user}/verification-notification', [UserSecurityController::class, 'resendVerification'])
+                ->middleware('throttle:admin-user-mail')->name('users.verification-notification');
+            Route::post('/users/{user}/verify-email', [UserSecurityController::class, 'verifyEmail'])->name('users.verify-email');
+            Route::delete('/users/{user}/tokens', [UserSecurityController::class, 'revokeTokens'])->name('users.tokens');
+            Route::post('/users/{user}/password-reset', [UserSecurityController::class, 'sendPasswordReset'])
+                ->middleware('throttle:admin-user-mail')->name('users.password-reset');
+        });
+
+        Route::middleware('can:viewBilling,user')->whereNumber('user')->group(function (): void {
+            Route::get('/users/{user}/payments', [UserPaymentController::class, 'index'])->name('users.payments');
+            Route::get('/users/{user}/payments/{payment}/invoice', [UserPaymentController::class, 'invoice'])
+                ->whereUuid('payment')->middleware('throttle:30,1')->name('users.payments.invoice');
+        });
 
         Route::middleware('can:manageAccount,user')->group(function (): void {
             Route::get('/users/{user}/export', [UserAccountController::class, 'export'])->name('users.export');

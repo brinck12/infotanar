@@ -15,7 +15,7 @@ use Illuminate\Http\Resources\Json\JsonResource;
  *
  * @mixin Payment
  */
-final class PaymentResource extends JsonResource
+class PaymentResource extends JsonResource
 {
     /** @return array<string, mixed> */
     public function toArray(Request $request): array
@@ -33,10 +33,14 @@ final class PaymentResource extends JsonResource
             'invoice' => $this->whenLoaded('invoice', fn (): ?array => $this->invoice === null ? null : [
                 'status' => $this->invoice->status->value,
                 'number' => $this->invoice->invoice_number,
-                'download_url' => $this->invoice->status === InvoiceStatus::Issued
-                    ? route('api.billing.payments.invoice', ['payment' => $this->request_id])
-                    : null,
+                'download_url' => $this->invoice->status === InvoiceStatus::Issued ? $this->invoiceDownloadUrl() : null,
             ]),
         ];
+    }
+
+    /** A letoltes vegpontja; az admin nezet (AdminPaymentResource) a sajatjara csereli. */
+    protected function invoiceDownloadUrl(): string
+    {
+        return route('api.billing.payments.invoice', ['payment' => $this->request_id]);
     }
 }

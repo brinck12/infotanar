@@ -112,6 +112,16 @@ final class AppServiceProvider extends ServiceProvider
         // Kodfuttatas: bejelentkezve fiokonkent, vendegnel IP-nkent, es egy kozos keret a Judge0 vedelmere.
         RateLimiter::for('execution', static fn (Request $request): array => app(ExecutionRateLimit::class)->limits($request));
 
+        // Egy admin egy felhasznalonak kuldott levelei (megerosites, jelszo-visszaallitas): ne lehessen
+        // vele elarasztani a cimzettet. Adminonkent es cimzettenkent szamol, a tobbi felhasznalo ne korlatozodjon.
+        RateLimiter::for('admin-user-mail', static function (Request $request) use ($userOrIp, $tooMany) {
+            $target = $request->route('user');
+
+            return Limit::perMinute(3)
+                ->by($userOrIp($request).'|target:'.($target instanceof User ? $target->id : (string) $target))
+                ->response($tooMany);
+        });
+
         // Jelszot ellenorzo, visszafordithatatlan muveletek: a jelszo ne legyen talalgathato.
         RateLimiter::for('sensitive', static fn (Request $request) => Limit::perMinute(5)
             ->by($userOrIp($request))
