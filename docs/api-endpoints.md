@@ -73,6 +73,12 @@ Minden végpont a `/api/v1` előtag alatt érhető el. A hozzáférés oszlop je
 | `POST` | `/admin/users/{user}/verification-notification` | admin | `admin-user-mail` |
 | `POST` | `/admin/users/{user}/verify-email` | admin | – |
 
+## attachments
+
+| Metódus | Útvonal | Hozzáférés | Limit |
+|---|---|---|---|
+| `GET` | `/attachments/{attachment}/download` | aláírt link | – |
+
 ## auth
 
 | Metódus | Útvonal | Hozzáférés | Limit |

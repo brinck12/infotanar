@@ -6,17 +6,27 @@ namespace App\Providers;
 
 use App\Jobs\Concerns\AlertsOperatorOnFailure;
 use App\Mail\OutboxTransport;
+use App\Models\Attachment;
+use App\Models\Exam;
+use App\Models\ExamAttempt;
+use App\Models\ExamPart;
 use App\Models\Exercise;
+use App\Models\FileSubmission;
 use App\Models\Invoice;
 use App\Models\Lesson;
 use App\Models\Module;
+use App\Models\RubricItem;
 use App\Models\Subscription;
 use App\Models\TestCase;
 use App\Models\Track;
 use App\Models\User;
+use App\Services\Exams\ExamResultRecalculator;
+use App\Services\Exams\NullExamResultRecalculator;
+use App\Services\FileTasks\CheckRegistry;
 use App\Support\Alerts\OperatorAlert;
 use App\Support\RateLimiting\ExecutionRateLimit;
 use Illuminate\Cache\RateLimiting\Limit;
+use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Http\JsonResponse;
@@ -31,6 +41,25 @@ use Illuminate\Validation\Rules\Password;
 
 final class AppServiceProvider extends ServiceProvider
 {
+    /**
+     * A vizsgaeredmenyt ujraszamolo Action, amelyet a vizsgak csomagja hoz
+     * letre. Szovegkent all itt, mert addig nem letezik; amint letezik (es
+     * megvalositja az ExamResultRecalculator interfeszt), a kotes ra valt.
+     */
+    private const EXAM_RESULT_RECALCULATOR = 'App\\Actions\\Exams\\RecomputeExamResult';
+
+    public function register(): void
+    {
+        // Az olvasok es vizsgalat-kezelok jegyzeke kerelmenkent egyszer epul fel.
+        $this->app->singleton(CheckRegistry::class);
+
+        $this->app->bind(ExamResultRecalculator::class, static function (Application $app): ExamResultRecalculator {
+            $recalculator = class_exists(self::EXAM_RESULT_RECALCULATOR) ? $app->make(self::EXAM_RESULT_RECALCULATOR) : null;
+
+            return $recalculator instanceof ExamResultRecalculator ? $recalculator : new NullExamResultRecalculator;
+        });
+    }
+
     public function boot(): void
     {
         // Fejlesztes es teszt alatt hangos hiba: N+1 lekerdezes, elnyelt
@@ -47,6 +76,12 @@ final class AppServiceProvider extends ServiceProvider
             'test_case' => TestCase::class,
             'subscription' => Subscription::class,
             'invoice' => Invoice::class,
+            'exam' => Exam::class,
+            'exam_part' => ExamPart::class,
+            'exam_attempt' => ExamAttempt::class,
+            'rubric_item' => RubricItem::class,
+            'attachment' => Attachment::class,
+            'file_submission' => FileSubmission::class,
         ]);
 
         Password::defaults(static fn () => Password::min(8)->letters()->numbers());
@@ -122,6 +157,26 @@ final class AppServiceProvider extends ServiceProvider
                 ->by($userOrIp($request).'|target:'.($target instanceof User ? $target->id : (string) $target))
                 ->response($tooMany);
         });
+
+        // Vizsga inditasa, reszfajl feltoltese, beadas: fiokonkent.
+        RateLimiter::for('exam-write', static fn (Request $request) => Limit::perMinute(Config::integer('exams.rate.write_per_minute'))
+            ->by($userOrIp($request))
+            ->response($tooMany));
+
+        // Fajlbeadas: minden feltoltes szinkron ertekeles, ezert percenkent es naponta is korlatos, fiokonkent.
+        RateLimiter::for('file-submission', static fn (Request $request): array => [
+            Limit::perMinute(Config::integer('filetasks.rate.per_minute'))
+                ->by('file-submission:minute:'.$userOrIp($request))
+                ->response($tooMany),
+            Limit::perDay(Config::integer('filetasks.rate.per_day'))
+                ->by('file-submission:day:'.$userOrIp($request))
+                ->response($tooMany),
+        ]);
+
+        // Admin fajlfeltoltesek (csatolmany, forras-zip, ertekelolap-proba): adminonkent.
+        RateLimiter::for('admin-upload', static fn (Request $request) => Limit::perMinute(Config::integer('filetasks.rate.admin_upload_per_minute'))
+            ->by($userOrIp($request))
+            ->response($tooMany));
 
         // Jelszot ellenorzo, visszafordithatatlan muveletek: a jelszo ne legyen talalgathato.
         RateLimiter::for('sensitive', static fn (Request $request) => Limit::perMinute(5)

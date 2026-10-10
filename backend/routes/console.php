@@ -2,8 +2,11 @@
 
 declare(strict_types=1);
 
+use App\Jobs\CloseExpiredExamAttempts;
 use App\Jobs\ExpireGracePeriods;
 use App\Jobs\ProcessDueSubscriptions;
+use App\Jobs\PruneExpiredFileSubmissions;
+use App\Jobs\PruneIdleExamAttempts;
 use App\Jobs\RecordQueueHeartbeat;
 use App\Jobs\ReportStuckBilling;
 use App\Jobs\RetryPendingInvoices;
@@ -36,6 +39,17 @@ Schedule::call(static function (): void {
     Heartbeat::beat(Heartbeat::SCHEDULER);
     RecordQueueHeartbeat::dispatch();
 })->everyMinute()->name('health-heartbeat');
+
+// Gyakorlo vizsgak: a lejart vizsgahelyzetu probalkozasok lezarasa es ertekelese
+// azoknak, akik bezartak a bongeszot, valamint a tetlen gyakorlasok lezarasa.
+Schedule::job(new CloseExpiredExamAttempts)->everyMinute()->withoutOverlapping();
+Schedule::job(new PruneIdleExamAttempts)->hourly();
+
+// Megorzes: a regi fajlbeadasok es vizsgaprobalkozasok torlese; ejszaka, magyar ido szerint.
+Schedule::job(new PruneExpiredFileSubmissions)->dailyAt('03:30')->timezone('Europe/Budapest');
+
+// Sor nelkuli fajlok a privat tarolokon; vasarnap hajnalban, magyar ido szerint.
+Schedule::command('files:prune-orphans')->weeklyOn(0, '04:00')->timezone('Europe/Budapest');
 
 // Karbantartas (#127): a lejart tokenek es a regi hibas jobok kulonben orokre megmaradnak.
 Schedule::command('sanctum:prune-expired --hours=24')->daily();
