@@ -1,13 +1,15 @@
 import { useQuery } from '@tanstack/react-query'
-import { Link, useSearchParams } from 'react-router-dom'
+import { useSearchParams } from 'react-router-dom'
 import { hibaUzenet } from '../../../shared/api/errors'
-import { Alert, AuthCard } from '../../../shared/ui/Form'
+import { ButtonLink } from '../../../shared/ui/Button'
+import { Skeleton } from '../../../shared/ui/States'
 import * as authApi from '../api'
+import { AuthCard } from '../components/AuthCard'
 import { useAuth } from '../context'
 
 export function VerifyEmail() {
   const [params] = useSearchParams()
-  const { refresh } = useAuth()
+  const { user, refresh } = useAuth()
 
   // Query (nem mutation), mert így a StrictMode kettős effektje és az
   // újrarenderelés sem váltja be kétszer ugyanazt a linket.
@@ -23,22 +25,33 @@ export function VerifyEmail() {
     gcTime: 0,
   })
 
+  if (verification.isPending) {
+    return (
+      <AuthCard title="E-mail megerősítése">
+        <Skeleton lines={2} label="Megerősítés folyamatban…" />
+      </AuthCard>
+    )
+  }
+
+  if (verification.isSuccess) {
+    return (
+      <AuthCard icon="check" title="Az e-mail-címed megerősítve" lead={verification.data}>
+        <ButtonLink to="/tanulasi-ut">Tovább a tanuláshoz</ButtonLink>
+      </AuthCard>
+    )
+  }
+
   return (
-    <AuthCard title="E-mail-cím megerősítése">
-      {verification.isPending && <p className="text-slate-400">Megerősítés folyamatban…</p>}
-      {verification.isSuccess && (
-        <>
-          <Alert kind="success">{verification.data}</Alert>
-          <Link to="/feladatok" className="inline-block text-sky-400 hover:underline">
-            Tovább a feladatokhoz
-          </Link>
-        </>
-      )}
-      {verification.isError && (
-        <>
-          <Alert kind="error">{hibaUzenet(verification.error)}</Alert>
-          <p className="text-sm text-slate-400">Jelentkezz be, és kérj új megerősítő levelet a fejlécben.</p>
-        </>
+    <AuthCard
+      icon="clock"
+      iconTone="neutral"
+      title="Ez a link nem érvényes"
+      lead={`${hibaUzenet(verification.error)} A megerősítő linkek rövid ideig érvényesek: kérj új levelet, és a legfrissebbet használd.`}
+    >
+      {user ? (
+        <ButtonLink to="/regisztracio/kesz">Új levél kérése</ButtonLink>
+      ) : (
+        <ButtonLink to="/bejelentkezes">Belépés és új levél kérése</ButtonLink>
       )}
     </AuthCard>
   )

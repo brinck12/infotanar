@@ -24,7 +24,7 @@ export function LessonVideo({ lesson }: { lesson: TaskLesson }) {
     return (
       <p
         data-testid="lesson-video-placeholder"
-        className="rounded-lg border border-dashed border-slate-800 px-4 py-3 text-sm text-slate-400"
+        className="rounded-md border-2 border-dashed border-muted bg-sheet px-4 py-3 text-15 text-ink-soft"
       >
         Ehhez a leckéhez még nem készült videós magyarázat.
       </p>
@@ -79,13 +79,13 @@ function Player({ lessonId, title }: { lessonId: number; title: string }) {
   }
 
   return (
-    <figure className="overflow-hidden rounded-lg border border-slate-800 bg-slate-900" data-testid="lesson-video">
+    <figure className="overflow-hidden rounded-md border border-line bg-sheet" data-testid="lesson-video">
       {source.isError ? (
-        <p role="alert" className="p-4 text-sm text-red-300">
+        <p role="alert" className="p-4 text-15 text-wrong">
           {hibaUzenet(source.error)}
         </p>
       ) : (
-        <div className="aspect-video bg-black">
+        <div className="aspect-video bg-code">
           {source.data && (
             <video
               ref={videoRef}
@@ -117,18 +117,16 @@ function Player({ lessonId, title }: { lessonId: number; title: string }) {
           )}
         </div>
       )}
-      <figcaption className="flex flex-wrap items-center justify-between gap-2 px-4 py-2 text-xs text-slate-400">
+      <figcaption className="flex flex-wrap items-center justify-between gap-2 px-4 py-2 text-14 text-ink-soft">
         <span>Videós magyarázat</span>
-        <span role="group" aria-label="Lejátszási sebesség" className="flex gap-1">
+        <span role="group" aria-label="Lejátszási sebesség" className="flex flex-wrap gap-1">
           {RATES.map((option) => (
             <button
               key={option}
               type="button"
               aria-pressed={rate === option}
               onClick={() => changeRate(option)}
-              className={`rounded px-2 py-0.5 tabular-nums transition ${
-                rate === option ? 'bg-sky-800 text-sky-100' : 'text-slate-400 hover:bg-slate-800 hover:text-slate-200'
-              }`}
+              className={`min-h-11 min-w-11 rounded-md px-2 text-14 font-semibold tabular-nums ${rate === option ? 'bg-ink text-sheet' : 'text-ink hover:bg-note'}`}
             >
               {option.toLocaleString('hu-HU')}×
             </button>

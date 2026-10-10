@@ -1,26 +1,10 @@
+import { Badge } from '../../../shared/ui/Badge'
+import { Banner } from '../../../shared/ui/Banner'
+import { StateIcon } from '../../../shared/ui/Icon'
+import { OutputBlock, ResultRow } from '../../../shared/ui/ResultRow'
+import { Skeleton } from '../../../shared/ui/States'
 import type { ExecutionLimits, RunResponse, TestResult } from '../../../types'
-import { runVerdict, testVerdict, VERDICT_META, verdictHint, type VerdictTone } from '../verdicts'
-import { VerdictIcon } from './VerdictIcon'
-
-const TONE_CARD: Readonly<Record<VerdictTone, string>> = {
-  success: 'border-emerald-800 bg-emerald-950/50 text-emerald-200',
-  danger: 'border-red-900 bg-red-950/50 text-red-200',
-  warning: 'border-amber-800 bg-amber-950/50 text-amber-200',
-  compile: 'border-fuchsia-900 bg-fuchsia-950/40 text-fuchsia-200',
-  runtime: 'border-orange-900 bg-orange-950/50 text-orange-200',
-  rule: 'border-indigo-800 bg-indigo-950/50 text-indigo-200',
-  neutral: 'border-slate-700 bg-slate-900 text-slate-200',
-}
-
-const TONE_CHIP: Readonly<Record<VerdictTone, string>> = {
-  success: 'border-emerald-800 text-emerald-300',
-  danger: 'border-red-800 text-red-300',
-  warning: 'border-amber-800 text-amber-300',
-  compile: 'border-fuchsia-800 text-fuchsia-300',
-  runtime: 'border-orange-800 text-orange-300',
-  rule: 'border-indigo-700 text-indigo-300',
-  neutral: 'border-slate-700 text-slate-300',
-}
+import { runVerdict, testVerdict, VERDICT_META, verdictHint } from '../verdicts'
 
 interface Props {
   loading: boolean
@@ -28,35 +12,38 @@ interface Props {
   result: RunResponse | null
   /** Beadásnál a rejtett teszteseteket is jelezzük. */
   mode: 'run' | 'submit'
+  /** Beadáskor ennyi további rejtett teszt fut le; futtatás után erre figyelmeztetünk. */
+  hiddenCount?: number
   /** A futtatásra érvényes korlátok: időtúllépésnél a tanács megnevezi a korlátot. */
   limits?: ExecutionLimits
 }
 
-export function ResultPanel({ loading, error, result, mode, limits }: Props) {
+export function ResultPanel({ loading, error, result, mode, hiddenCount = 0, limits }: Props) {
   if (loading) {
     return (
-      <div className="flex items-center gap-3 rounded-lg border border-slate-800 bg-slate-900 p-4 text-sm text-slate-300">
-        <span
-          className="h-4 w-4 animate-spin rounded-full border-2 border-slate-600 border-t-sky-400"
-          aria-hidden="true"
-        />
-        Futtatás folyamatban…
+      <div>
+        <p className="text-18 font-bold">Futtatás folyamatban…</p>
+        <Skeleton lines={2} label="Futtatás folyamatban…" className="mt-4" />
       </div>
     )
   }
 
   if (error) {
     return (
-      <div role="alert" data-testid="result-error" className="rounded-lg border border-red-900 bg-red-950/60 p-4 text-sm text-red-200">
+      <Banner kind="error" title="A futtatás nem sikerült" data-testid="result-error">
         {error}
-      </div>
+      </Banner>
     )
   }
 
   if (!result) {
     return (
-      <div className="rounded-lg border border-dashed border-slate-800 p-4 text-sm text-slate-400">
-        Még nem futtattál kódot. Nyomd meg a <strong className="text-slate-300">Futtatás</strong> gombot.
+      <div>
+        <p className="text-18 font-bold">Még nem futtattál kódot.</p>
+        <p className="mt-1 text-15 text-ink-soft">
+          A <strong className="text-ink">Futtatás</strong> a nyilvános teszteseteken próbálja ki a kódot, és nem ment semmit. A{' '}
+          <strong className="text-ink">Beadás</strong> minden teszten lefut, és elmenti az eredményt.
+        </p>
       </div>
     )
   }
@@ -65,92 +52,108 @@ export function ResultPanel({ loading, error, result, mode, limits }: Props) {
   const total = result.results.length
   const verdict = runVerdict(result)
   const meta = VERDICT_META[verdict]
+  const accepted = verdict === 'accepted'
+  const hasHidden = result.results.some((r) => r.hidden)
 
   return (
-    <div className="space-y-3">
-      <div
-        data-testid="result-summary"
-        data-status={result.status}
-        data-verdict={verdict}
-        role="status"
-        className={`rounded-lg border p-4 ${TONE_CARD[meta.tone]}`}
-      >
-        <p className="flex items-center gap-2 font-semibold">
-          <VerdictIcon verdict={verdict} />
-          {result.verdict_label ?? meta.label}
+    <div>
+      <div data-testid="result-summary" data-status={result.status} data-verdict={verdict} role="status">
+        <p className="flex flex-wrap items-center gap-x-3 gap-y-1.5 text-18 font-bold">
+          <StateIcon kind={accepted ? 'ok' : 'bad'} label={accepted ? 'Sikeres' : 'Sikertelen'} />
+          {total > 0 ? `${passedCount} / ${total} teszteset sikeres` : (result.verdict_label ?? meta.label)}
+          {total > 0 && <Badge kind={accepted ? 'ok' : 'bad'}>{result.verdict_label ?? meta.label}</Badge>}
         </p>
-        <p className="mt-1 text-sm opacity-90">{verdictHint(verdict, limits)}</p>
+        <p className="mt-1 text-15 leading-relaxed text-ink-soft">
+          {verdictHint(verdict, limits)}
+          {mode === 'submit' && total > 0 && ' A rejtett teszteseteket is beleszámolva.'}
+          {mode === 'run' && accepted && hiddenCount > 0 && ` Beadáskor további ${hiddenCount} rejtett teszteset is lefut.`}
+        </p>
+        {result.message && <p className="mt-1 text-15 leading-relaxed">{result.message}</p>}
         {result.violations && result.violations.length > 0 && (
-          <ul className="mt-2 list-disc space-y-1 pl-5 text-sm" data-testid="result-violations">
+          <ul className="mt-2 list-disc space-y-1 pl-6 text-15" data-testid="result-violations">
             {result.violations.map((violation) => (
               <li key={violation}>{violation}</li>
             ))}
           </ul>
         )}
-        {total > 0 && (
-          <p className="mt-2 text-sm opacity-80">
-            {passedCount} / {total} teszteset sikeres
-            {mode === 'submit' ? ' (a rejtett teszteseteket is beleértve)' : ''}
-          </p>
-        )}
       </div>
 
-      <ul className="space-y-2">
-        {result.results.map((testResult, index) => (
-          <TestResultRow key={testResult.test_case_id} index={index} result={testResult} />
-        ))}
-      </ul>
+      {result.subtasks && result.subtasks.length > 0 && (
+        <section aria-label="Részfeladatok" className="mt-4" data-testid="result-subtasks">
+          <p className="text-15 font-bold">
+            Részfeladatok: {result.subtasks.reduce((sum, item) => sum + item.points, 0)} /{' '}
+            {result.subtasks.reduce((sum, item) => sum + item.max_points, 0)} pont
+          </p>
+          <ul className="mt-1">
+            {result.subtasks.map((subtask) => (
+              <li key={subtask.label} className="flex flex-wrap items-center gap-x-3 gap-y-1 border-t border-grid py-2.5">
+                <StateIcon kind={subtask.passed ? 'ok' : 'bad'} label={subtask.passed ? 'Sikeres' : 'Sikertelen'} />
+                <span className="min-w-0 flex-1 text-15 font-semibold">{subtask.label}</span>
+                <Badge kind={subtask.passed ? 'ok' : 'bad'}>
+                  {subtask.points} / {subtask.max_points} pont
+                </Badge>
+                {subtask.note && <p className="basis-full pl-8 text-14 leading-normal text-ink-soft">{subtask.note}</p>}
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+
+      {total > 0 && (
+        <ul className="mt-4">
+          {result.results.map((testResult, index) => (
+            <TestResultRow key={testResult.test_case_id} index={index} result={testResult} />
+          ))}
+        </ul>
+      )}
+
+      {hasHidden && (
+        <p className="mt-4 text-15 leading-relaxed text-ink-soft">
+          Rejtett tesztesetnél csak az eredményt látod, a bemenetet nem. A nyilvános tesztesetek adataiból viszont kideríthető, mi
+          hiányzik.
+        </p>
+      )}
     </div>
   )
 }
 
 function TestResultRow({ index, result }: { index: number; result: TestResult }) {
   const verdict = testVerdict(result)
-  const meta = VERDICT_META[verdict]
+  const label = result.verdict_label ?? VERDICT_META[verdict].label
+
+  // Rejtett tesztesetnél a backend nem küld futási részleteket és kimenetet (csak az eredményt).
+  const outputs = !result.hidden && (
+    <div className="mt-3 grid gap-3 sm:grid-cols-2">
+      <OutputBlock label="Bemenet" value={result.stdin} />
+      <OutputBlock label="Elvárt kimenet" value={result.expected} />
+      <OutputBlock label="A te kimeneted" value={result.stdout} wrong={!result.passed} />
+      {result.stderr ? <OutputBlock label="Hibakimenet" value={result.stderr} wrong /> : null}
+      {result.compile_output ? <OutputBlock label="Fordítási üzenet" value={result.compile_output} wrong /> : null}
+    </div>
+  )
 
   return (
-    <li
-      data-testid="test-result"
-      data-passed={result.passed}
+    <ResultRow
+      passed={result.passed}
+      name={`${index + 1}. teszteset`}
+      verdict={label}
+      hidden={result.hidden}
       data-verdict={verdict}
-      className={[
-        'rounded-lg border p-3 text-sm',
-        result.passed ? 'border-emerald-900 bg-emerald-950/30' : 'border-red-900 bg-red-950/30',
-      ].join(' ')}
+      meta={!result.hidden && <RunMetrics time={result.time} exitCode={result.exit_code} />}
     >
-      <div className="flex flex-wrap items-center gap-2">
-        <span className={result.passed ? 'font-semibold text-emerald-300' : 'font-semibold text-red-300'}>
-          {result.passed ? 'SIKERES' : 'HIBÁS'}
-        </span>
-        <span className="text-slate-300">{index + 1}. teszteset</span>
-        {result.hidden && (
-          <span className="rounded bg-slate-800 px-2 py-0.5 text-xs text-slate-400">rejtett</span>
-        )}
-        {!result.passed && (
-          <span className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs ${TONE_CHIP[meta.tone]}`}>
-            <VerdictIcon verdict={verdict} className="h-3.5 w-3.5" />
-            {result.verdict_label ?? meta.label}
-          </span>
-        )}
-        {/* Rejtett tesztesetnél a backend nem küld futási részleteket (csak az eredményt). */}
-        {!result.hidden && <RunMetrics time={result.time} exitCode={result.exit_code} />}
-      </div>
-
-      {result.error && <p className="mt-2 text-red-300">{result.error}</p>}
-
-      {/* Rejtett teszteseteknél a backend nem küld kimenetet. */}
-      {!result.hidden && (
-        <div className="mt-3 grid gap-3 sm:grid-cols-2">
-          <OutputBlock label="Bemenet" value={result.stdin} />
-          <OutputBlock label="Elvárt kimenet" value={result.expected} />
-          <OutputBlock label="A te kimeneted" value={result.stdout} highlight={!result.passed} />
-          {result.stderr ? <OutputBlock label="Hibakimenet" value={result.stderr} highlight /> : null}
-          {result.compile_output ? (
-            <OutputBlock label="Fordítási üzenet" value={result.compile_output} highlight />
-          ) : null}
-        </div>
-      )}
-    </li>
+      {result.error && <p className="mt-2 text-15 text-wrong">{result.error}</p>}
+      {outputs &&
+        (result.passed ? (
+          <details className="mt-1.5">
+            <summary className="inline-flex min-h-11 items-center text-14 text-ink-soft underline underline-offset-4">
+              Bemenet és kimenet
+            </summary>
+            {outputs}
+          </details>
+        ) : (
+          outputs
+        ))}
+    </ResultRow>
   )
 }
 
@@ -161,11 +164,10 @@ function RunMetrics({ time, exitCode }: { time: number | null; exitCode: number 
   if (time === null && exitCode === null) return null
 
   return (
-    <span className="ml-auto flex items-center gap-3 font-mono text-xs text-slate-400" data-testid="run-metrics">
+    <span className="flex items-center gap-3 font-mono text-13 text-ink-soft" data-testid="run-metrics">
       {time !== null && (
         <span title="Futási idő" data-testid="run-time">
           <span className="sr-only">Futási idő: </span>
-          <span aria-hidden="true">⏱ </span>
           {seconds.format(time)} s
         </span>
       )}
@@ -173,35 +175,11 @@ function RunMetrics({ time, exitCode }: { time: number | null; exitCode: number 
         <span
           title="Kilépési kód"
           data-testid="exit-code"
-          className={exitCode === 0 ? '' : 'rounded bg-orange-950 px-1.5 text-orange-300'}
+          className={exitCode === 0 ? '' : 'rounded-sm bg-wrong-soft px-1.5 font-medium text-wrong'}
         >
           <span className="sr-only">Kilépési kód: </span>exit {exitCode}
         </span>
       )}
     </span>
-  )
-}
-
-function OutputBlock({
-  label,
-  value,
-  highlight = false,
-}: {
-  label: string
-  value?: string
-  highlight?: boolean
-}) {
-  return (
-    <div>
-      <p className="mb-1 text-xs uppercase tracking-wide text-slate-400">{label}</p>
-      <pre
-        className={[
-          'max-h-40 overflow-auto rounded border p-2 font-mono text-xs whitespace-pre-wrap',
-          highlight ? 'border-red-900 bg-slate-950 text-red-200' : 'border-slate-800 bg-slate-950 text-slate-300',
-        ].join(' ')}
-      >
-        {value === undefined || value === '' ? '(üres)' : value}
-      </pre>
-    </div>
   )
 }

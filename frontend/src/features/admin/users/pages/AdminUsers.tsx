@@ -1,8 +1,13 @@
 import { useQuery } from '@tanstack/react-query'
 import { useEffect, useRef, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
-import { hibaUzenet } from '../../../../shared/api/errors'
-import { Alert } from '../../../../shared/ui/Form'
+import { Badge } from '../../../../shared/ui/Badge'
+import { cx } from '../../../../shared/ui/cx'
+import { Field, SelectField } from '../../../../shared/ui/Form'
+import { Pager } from '../../../../shared/ui/Pager'
+import { Bar } from '../../../../shared/ui/Progress'
+import { LoadError, Skeleton } from '../../../../shared/ui/States'
+import { Table, Td, Th, Tr } from '../../../../shared/ui/Table'
 import { AdminShell } from '../../components/AdminShell'
 import { usersQuery, type UserFilters } from '../api'
 import { AccessBadge } from '../components/AccessBadge'
@@ -33,6 +38,25 @@ const PARAM: Record<keyof UserFilters, string> = {
   verified: 'megerositve',
   page: 'oldal',
 }
+
+const SUBSCRIPTION_OPTIONS = [
+  { value: '', label: 'Mind' },
+  { value: 'active', label: 'Aktív' },
+  { value: 'past_due', label: 'Fizetési hiba' },
+  { value: 'none', label: 'Nincs előfizetés' },
+] as const
+
+const ROLE_OPTIONS = [
+  { value: '', label: 'Mind' },
+  { value: 'student', label: 'Tanuló' },
+  { value: 'admin', label: 'Admin' },
+] as const
+
+const VERIFIED_OPTIONS = [
+  { value: '', label: 'Mind' },
+  { value: '1', label: 'Megerősítve' },
+  { value: '0', label: 'Nincs megerősítve' },
+] as const
 
 /**
  * Felhasználók áttekintése (#50): keresés és szűrés, előfizetési státusz és
@@ -66,126 +90,93 @@ export function AdminUsers() {
     searchTimer.current = window.setTimeout(() => update({ search: value }), SEARCH_DELAY_MS)
   }
 
-  const select = 'rounded-lg border border-slate-800 bg-slate-900 px-3 py-2 text-sm text-slate-100'
-
   return (
-    <AdminShell crumbs={[{ label: 'Admin' }, { label: 'Felhasználók' }]} title="Felhasználók">
-      <div className="flex flex-wrap items-end gap-3" role="search">
-        <label className="min-w-60 flex-1 text-sm">
-          <span className="mb-1 block text-slate-400">Keresés névre vagy e-mailre</span>
-          <input
-            type="search"
-            value={search}
-            onChange={(e) => onSearch(e.target.value)}
-            className="w-full rounded-lg border border-slate-800 bg-slate-900 px-3 py-2 text-slate-100"
-          />
-        </label>
-        <label className="text-sm">
-          <span className="mb-1 block text-slate-400">Előfizetés</span>
-          <select className={select} value={filters.subscription} onChange={(e) => update({ subscription: e.target.value as UserFilters['subscription'] })}>
-            <option value="">Mind</option>
-            <option value="active">Aktív</option>
-            <option value="past_due">Lejárt fizetés</option>
-            <option value="none">Nincs előfizetés</option>
-          </select>
-        </label>
-        <label className="text-sm">
-          <span className="mb-1 block text-slate-400">Szerep</span>
-          <select className={select} value={filters.role} onChange={(e) => update({ role: e.target.value as UserFilters['role'] })}>
-            <option value="">Mind</option>
-            <option value="student">Diák</option>
-            <option value="admin">Admin</option>
-          </select>
-        </label>
-        <label className="text-sm">
-          <span className="mb-1 block text-slate-400">E-mail</span>
-          <select className={select} value={filters.verified} onChange={(e) => update({ verified: e.target.value as UserFilters['verified'] })}>
-            <option value="">Mind</option>
-            <option value="1">Megerősítve</option>
-            <option value="0">Nincs megerősítve</option>
-          </select>
-        </label>
+    <AdminShell crumbs={[{ label: 'Admin', to: '/admin' }, { label: 'Felhasználók' }]} title="Felhasználók">
+      <div className="flex flex-wrap items-start gap-4" role="search">
+        <Field
+          className="flex-1 basis-64"
+          label="Keresés névre vagy e-mail-címre"
+          type="search"
+          value={search}
+          onChange={(e) => onSearch(e.target.value)}
+        />
+        <SelectField
+          className="w-48"
+          label="Előfizetés"
+          options={SUBSCRIPTION_OPTIONS}
+          value={filters.subscription}
+          onChange={(e) => update({ subscription: e.target.value as UserFilters['subscription'] })}
+        />
+        <SelectField
+          className="w-36"
+          label="Szerepkör"
+          options={ROLE_OPTIONS}
+          value={filters.role}
+          onChange={(e) => update({ role: e.target.value as UserFilters['role'] })}
+        />
+        <SelectField
+          className="w-52"
+          label="E-mail-cím"
+          options={VERIFIED_OPTIONS}
+          value={filters.verified}
+          onChange={(e) => update({ verified: e.target.value as UserFilters['verified'] })}
+        />
       </div>
 
       {users.isError ? (
-        <Alert kind="error">{hibaUzenet(users.error)}</Alert>
+        <LoadError error={users.error} onRetry={() => void users.refetch()} />
       ) : !users.data ? (
-        <p className="text-sm text-slate-400">Betöltés…</p>
+        <Skeleton lines={5} />
       ) : (
-        <div className={users.isPlaceholderData ? 'opacity-60 transition' : 'transition'}>
-          <p className="mb-2 text-sm text-slate-400" aria-live="polite">
+        <div className={cx(users.isPlaceholderData && 'opacity-60')}>
+          <p className="mb-2 text-15 text-ink-soft" aria-live="polite">
             {users.data.total} felhasználó
           </p>
-          <div className="overflow-x-auto rounded-lg border border-slate-800">
-            <table className="w-full text-left text-sm">
-              <thead className="bg-slate-900 text-xs uppercase tracking-wide text-slate-400">
-                <tr>
-                  <th scope="col" className="px-3 py-2">Felhasználó</th>
-                  <th scope="col" className="px-3 py-2">Hozzáférés</th>
-                  <th scope="col" className="px-3 py-2">Haladás</th>
-                  <th scope="col" className="px-3 py-2">Regisztrált</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-800">
-                {users.data.data.map((user) => (
-                  <tr key={user.id} data-testid="admin-user-row">
-                    <td className="px-3 py-2">
-                      <Link to={`/admin/felhasznalok/${user.id}`} className="font-medium text-slate-100 hover:text-sky-300 hover:underline">
-                        {user.name}
-                      </Link>
-                      <div className="text-xs text-slate-400">
-                        {user.email}
-                        {user.role === 'admin' && ' · admin'}
-                        {!user.email_verified_at && ' · nincs megerősítve'}
-                      </div>
-                    </td>
-                    <td className="px-3 py-2">
-                      <AccessBadge user={user} />
-                    </td>
-                    <td className="px-3 py-2">
-                      <span className="mr-2 inline-block h-1.5 w-24 overflow-hidden rounded-full bg-slate-800 align-middle" aria-hidden="true">
-                        <span className="block h-full bg-sky-500" style={{ width: `${user.progress.percent}%` }} />
-                      </span>
-                      <span className="sr-only">Haladás: </span>
+          <Table caption="Felhasználók">
+            <thead>
+              <tr>
+                <Th>Felhasználó</Th>
+                <Th>Hozzáférés</Th>
+                <Th>Haladás</Th>
+                <Th>Regisztrált</Th>
+              </tr>
+            </thead>
+            <tbody>
+              {users.data.data.map((user) => (
+                <Tr key={user.id}>
+                  <Td data-testid="admin-user-row">
+                    <Link to={`/admin/felhasznalok/${user.id}`} className="inline-flex min-h-8 items-center font-semibold text-ink">
+                      {user.name}
+                    </Link>
+                    <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-14 text-ink-soft">
+                      {user.email}
+                      {user.role === 'admin' && <Badge kind="admin">Admin</Badge>}
+                      {!user.email_verified_at && <Badge kind="draft">Nincs megerősítve</Badge>}
+                    </div>
+                  </Td>
+                  <Td>
+                    <AccessBadge user={user} />
+                  </Td>
+                  <Td>
+                    <span className="flex items-center gap-2 whitespace-nowrap">
+                      <Bar value={user.progress.percent} label={`Haladás: ${user.progress.percent} százalék`} className="w-24" />
                       {user.progress.percent}%
-                    </td>
-                    <td className="px-3 py-2 text-slate-400">{formatDate(user.registered_at)}</td>
-                  </tr>
-                ))}
-                {users.data.data.length === 0 && (
-                  <tr>
-                    <td colSpan={4} className="px-3 py-6 text-center text-slate-400">
-                      Nincs a szűrésnek megfelelő felhasználó.
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
+                    </span>
+                  </Td>
+                  <Td className="whitespace-nowrap text-ink-soft">{formatDate(user.registered_at)}</Td>
+                </Tr>
+              ))}
+              {users.data.data.length === 0 && (
+                <tr>
+                  <Td colSpan={4} className="py-6 text-center text-ink-soft">
+                    Nincs a szűrésnek megfelelő felhasználó. Módosítsd a keresést vagy a szűrőket.
+                  </Td>
+                </tr>
+              )}
+            </tbody>
+          </Table>
 
-          {users.data.last_page > 1 && (
-            <nav aria-label="Lapozás" className="mt-3 flex items-center justify-between text-sm">
-              <button
-                type="button"
-                disabled={filters.page <= 1}
-                onClick={() => update({ ...filters, page: filters.page - 1 })}
-                className="rounded px-3 py-1.5 text-slate-300 hover:bg-slate-800 disabled:opacity-30"
-              >
-                ← Előző
-              </button>
-              <span className="text-slate-400">
-                {users.data.current_page}. / {users.data.last_page} oldal
-              </span>
-              <button
-                type="button"
-                disabled={filters.page >= users.data.last_page}
-                onClick={() => update({ ...filters, page: filters.page + 1 })}
-                className="rounded px-3 py-1.5 text-slate-300 hover:bg-slate-800 disabled:opacity-30"
-              >
-                Következő →
-              </button>
-            </nav>
-          )}
+          <Pager page={users.data.current_page} lastPage={users.data.last_page} onChange={(page) => update({ ...filters, page })} />
         </div>
       )}
     </AdminShell>

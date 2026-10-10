@@ -1,5 +1,5 @@
-import { Link } from 'react-router-dom'
-import { LockIcon } from '../../../shared/ui/LockIcon'
+import { Banner } from '../../../shared/ui/Banner'
+import { ButtonLink } from '../../../shared/ui/Button'
 import type { UnlockedTaskDetail } from '../../../types'
 import { lessonPath } from '../../lesson/api'
 
@@ -43,37 +43,26 @@ export function NextStep({ task, lessonCompleted }: { task: UnlockedTaskDetail; 
   const trackSlug = task.lesson?.track_slug
 
   return (
-    <div
-      role="status"
+    <Banner
+      kind="success"
       data-testid="next-step"
-      className="flex flex-wrap items-center justify-between gap-x-6 gap-y-3 rounded-lg border border-emerald-800 bg-emerald-950/50 p-4"
-    >
-      <div className="text-emerald-100">
-        <p className="font-semibold">
-          {lessonCompleted && task.lesson ? `Lecke teljesítve: ${task.lesson.title}` : 'Feladat megoldva'}
-        </p>
-        {!step && <p className="mt-1 text-sm text-emerald-200">Ez volt a képzési ág utolsó leckéje.</p>}
-      </div>
-
-      {step ? (
-        <Link
-          to={step.to}
-          className="inline-flex items-center gap-2 rounded-lg bg-sky-700 px-4 py-2 text-sm font-medium text-white transition hover:bg-sky-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-300"
-        >
-          {step.locked && <LockIcon className="h-4 w-4" />}
-          {step.label}: {step.title}
-          {step.locked && <span className="sr-only"> (zárolt)</span>}
-        </Link>
-      ) : (
-        trackSlug && (
-          <Link
-            to={`/tananyag/${trackSlug}`}
-            className="rounded-sm text-sm text-sky-300 underline underline-offset-2 hover:text-sky-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-300"
-          >
-            Vissza a tananyaghoz
-          </Link>
+      title={lessonCompleted && task.lesson ? `Lecke teljesítve: ${task.lesson.title}` : 'Feladat megoldva'}
+      action={
+        step ? (
+          <ButtonLink to={step.to} icon={step.locked ? 'lock' : undefined}>
+            {step.label}: {step.title}
+            {step.locked && <span className="sr-only"> (zárolt)</span>}
+          </ButtonLink>
+        ) : (
+          trackSlug && (
+            <ButtonLink to={`/tanulasi-ut/${encodeURIComponent(trackSlug)}`} variant="secondary">
+              Vissza a tanulási úthoz
+            </ButtonLink>
+          )
         )
-      )}
-    </div>
+      }
+    >
+      {step ? 'Minden teszten átment. Folytasd a következővel, amíg lendületben vagy.' : 'Ez volt a sáv utolsó leckéje.'}
+    </Banner>
   )
 }

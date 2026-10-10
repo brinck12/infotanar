@@ -1,7 +1,9 @@
 import { useQuery } from '@tanstack/react-query'
-import { Link, useSearchParams } from 'react-router-dom'
+import { useSearchParams } from 'react-router-dom'
 import { hibaUzenet } from '../../../shared/api/errors'
-import { Alert, AuthCard } from '../../../shared/ui/Form'
+import { ButtonLink } from '../../../shared/ui/Button'
+import { Skeleton } from '../../../shared/ui/States'
+import { AuthCard } from '../../auth/components/AuthCard'
 import { useAuth } from '../../auth/context'
 import * as accountApi from '../api'
 
@@ -26,28 +28,33 @@ export function EmailChangeConfirm() {
     gcTime: 0,
   })
 
+  if (confirmation.isPending) {
+    return (
+      <AuthCard title="E-mail-cím módosítása">
+        <title>E-mail-cím módosítása – InfoTanár</title>
+        <Skeleton lines={2} label="Megerősítés folyamatban…" />
+      </AuthCard>
+    )
+  }
+
+  if (confirmation.isSuccess) {
+    return (
+      <AuthCard icon="check" title="Az új e-mail-címed él" lead={`${confirmation.data} Mostantól az új címeddel tudsz belépni.`}>
+        <title>E-mail-cím módosítása – InfoTanár</title>
+        {user ? <ButtonLink to="/fiok">Vissza a fiókomhoz</ButtonLink> : <ButtonLink to="/bejelentkezes">Belépés</ButtonLink>}
+      </AuthCard>
+    )
+  }
+
   return (
-    <AuthCard title="E-mail-cím módosítása">
+    <AuthCard
+      icon="clock"
+      iconTone="neutral"
+      title="Ez a link nem érvényes"
+      lead={`${hibaUzenet(confirmation.error)} A link lejárt, vagy már felhasználták. A fiókodban új cserét kérhetsz.`}
+    >
       <title>E-mail-cím módosítása – InfoTanár</title>
-      {confirmation.isPending && <p className="text-slate-400">Megerősítés folyamatban…</p>}
-      {confirmation.isSuccess && (
-        <>
-          <Alert kind="success">{confirmation.data}</Alert>
-          <p className="text-sm text-slate-300">Mostantól az új címeddel tudsz belépni.</p>
-          <Link
-            to={user ? '/fiok' : '/bejelentkezes'}
-            className="inline-block text-sky-400 underline underline-offset-2 hover:text-sky-300"
-          >
-            {user ? 'Vissza a fiókomhoz' : 'Bejelentkezés'}
-          </Link>
-        </>
-      )}
-      {confirmation.isError && (
-        <>
-          <Alert kind="error">{hibaUzenet(confirmation.error)}</Alert>
-          <p className="text-sm text-slate-400">A link lejárt vagy már felhasználták. A fiókodban új cserét kérhetsz.</p>
-        </>
-      )}
+      {user ? <ButtonLink to="/fiok#email">Új csere kérése</ButtonLink> : <ButtonLink to="/bejelentkezes">Belépés és új csere kérése</ButtonLink>}
     </AuthCard>
   )
 }

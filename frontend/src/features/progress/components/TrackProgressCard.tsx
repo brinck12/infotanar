@@ -2,10 +2,30 @@ import { useQuery } from '@tanstack/react-query'
 import { useId, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { hibaUzenet } from '../../../shared/api/errors'
+import { LESSON_STATUS_LABEL } from '../../../shared/domain/labels'
+import { Badge, type BadgeKind } from '../../../shared/ui/Badge'
+import { Button } from '../../../shared/ui/Button'
+import { Panel } from '../../../shared/ui/Panel'
+import { Tiles } from '../../../shared/ui/Progress'
+import { Skeleton } from '../../../shared/ui/States'
+import { CardTitle } from '../../../shared/ui/Text'
 import type { LessonProgressStatus, LessonSummary, TrackProgress } from '../../../types'
 import { trackQuery } from '../../catalog/api'
-import { LessonStatusBadge } from './LessonStatusBadge'
-import { ProgressBar } from './ProgressBar'
+
+const STATUS_BADGE: Readonly<Record<LessonProgressStatus, BadgeKind>> = {
+  completed: 'ok',
+  in_progress: 'neutral',
+  not_started: 'draft',
+}
+
+/** Egy lecke állapota: a szín mellett mindig szöveg is. */
+export function LessonStatusBadge({ status }: { status: LessonProgressStatus }) {
+  return (
+    <span data-testid="lesson-status" data-status={status}>
+      <Badge kind={STATUS_BADGE[status]}>{LESSON_STATUS_LABEL[status]}</Badge>
+    </span>
+  )
+}
 
 /** Egy képzési ág összesítője; kinyitva modulonként a leckék állapota. */
 export function TrackProgressCard({ track, defaultOpen }: { track: TrackProgress; defaultOpen: boolean }) {
@@ -13,45 +33,48 @@ export function TrackProgressCard({ track, defaultOpen }: { track: TrackProgress
   const panelId = useId()
 
   return (
-    <li className="rounded-lg border border-slate-800 bg-slate-900 p-5" data-testid="track-progress" data-track={track.slug}>
-      <h2 className="text-lg font-semibold text-slate-100">{track.title}</h2>
-      <div className="mt-3">
-        <ProgressBar label="Teljesített leckék" completed={track.completed} total={track.total} percent={track.percent} />
+    <Panel as="li" data-testid="track-progress" data-track={track.slug}>
+      <div className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1">
+        <CardTitle as="h3">
+          <Link to={`/tanulasi-ut/${track.slug}`} className="text-ink no-underline hover:underline">
+            {track.title}
+          </Link>
+        </CardTitle>
+        <span className="text-15 text-ink-soft">
+          {track.completed} / {track.total} lecke, {track.percent}%
+        </span>
       </div>
-      <button
-        type="button"
-        aria-expanded={open}
-        aria-controls={panelId}
-        onClick={() => setOpen((v) => !v)}
-        className="mt-4 text-sm text-sky-400 hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-400"
-      >
-        {open ? 'Leckék elrejtése' : 'Leckék megjelenítése'}
-      </button>
+      <Tiles done={track.completed} total={track.total} className="mt-3" />
+      <div className="mt-3">
+        <Button variant="text" aria-expanded={open} aria-controls={panelId} onClick={() => setOpen((v) => !v)}>
+          {open ? 'Leckék elrejtése' : 'Leckék megjelenítése'}
+        </Button>
+      </div>
       {open && (
-        <div id={panelId} className="mt-4">
+        <div id={panelId} className="mt-3">
           <LessonList slug={track.slug} statuses={track.lessons} />
         </div>
       )}
-    </li>
+    </Panel>
   )
 }
 
 function LessonList({ slug, statuses }: { slug: string; statuses: TrackProgress['lessons'] }) {
   const structure = useQuery(trackQuery(slug))
 
-  if (structure.isPending) return <p className="text-sm text-slate-400">Leckék betöltése…</p>
-  if (structure.isError) return <p className="text-sm text-red-300">{hibaUzenet(structure.error)}</p>
+  if (structure.isPending) return <Skeleton lines={3} label="Leckék betöltése…" />
+  if (structure.isError) return <p className="text-15 text-wrong">{hibaUzenet(structure.error)}</p>
 
   const statusById = new Map(statuses.map((l) => [l.id, l.status]))
 
   return (
-    <div className="space-y-5">
+    <div className="flex flex-col gap-5">
       {structure.data.modules
         .filter((module) => module.lessons.length > 0)
         .map((module) => (
           <section key={module.id} aria-label={module.title}>
-            <h3 className="text-sm font-medium text-slate-300">{module.title}</h3>
-            <ul className="mt-2 divide-y divide-slate-800 rounded-lg border border-slate-800">
+            <h4 className="text-15 font-bold">{module.title}</h4>
+            <ul className="mt-1">
               {module.lessons.map((lesson) => (
                 <LessonRow key={lesson.id} lesson={lesson} status={statusById.get(lesson.id) ?? 'not_started'} />
               ))}
@@ -63,18 +86,11 @@ function LessonList({ slug, statuses }: { slug: string; statuses: TrackProgress[
 }
 
 function LessonRow({ lesson, status }: { lesson: LessonSummary; status: LessonProgressStatus }) {
-  // A lecke a hozzá tartozó első feladatnál folytatható.
-  const firstExercise = lesson.exercises[0]
-
   return (
-    <li className="flex items-center justify-between gap-3 px-3 py-2.5">
-      {firstExercise ? (
-        <Link to={`/feladatok/${firstExercise.id}`} className="text-sm text-slate-200 hover:text-sky-300 hover:underline">
-          {lesson.title}
-        </Link>
-      ) : (
-        <span className="text-sm text-slate-300">{lesson.title}</span>
-      )}
+    <li className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 border-t border-grid py-1">
+      <Link to={`/leckek/${lesson.id}`} className="inline-flex min-h-11 items-center text-16 text-ink">
+        {lesson.title}
+      </Link>
       <LessonStatusBadge status={status} />
     </li>
   )

@@ -1,7 +1,8 @@
 import { useInfiniteQuery, useQuery } from '@tanstack/react-query'
 import { useState } from 'react'
-import { hibaUzenet } from '../../../shared/api/errors'
 import { LANGUAGE_LABEL } from '../../../shared/domain/labels'
+import { Button } from '../../../shared/ui/Button'
+import { LoadError, Skeleton } from '../../../shared/ui/States'
 import type { LanguageKey, RunResponse, SubmissionDetail, SubmissionSummary } from '../../../types'
 import { ResultPanel } from '../../workspace/components/ResultPanel'
 import { submissionQuery, taskSubmissionsQuery } from '../api'
@@ -31,23 +32,25 @@ export function SubmissionHistory({ taskId, allowedLanguages, onRestore }: Props
       onToggle={(event) => {
         if (event.currentTarget.open) setOpened(true)
       }}
-      className="rounded-lg border border-slate-800 bg-slate-900"
+      className="border-t border-grid"
     >
-      <summary className="cursor-pointer rounded-lg px-4 py-3 text-sm font-semibold text-slate-200 hover:text-sky-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-400">
+      <summary className="flex min-h-11 cursor-pointer items-center px-5 text-16 font-semibold text-ink hover:bg-note md:px-6">
         Beadásaim
       </summary>
 
-      <div className="border-t border-slate-800">
+      <div className="border-t border-grid">
         {history.isError ? (
-          <p role="alert" className="p-4 text-sm text-red-300">
-            {hibaUzenet(history.error)}
-          </p>
+          <div className="px-5 py-4 md:px-6">
+            <LoadError error={history.error} onRetry={() => void history.refetch()} title="Nem sikerült betölteni a beadásaidat" />
+          </div>
         ) : history.isPending ? (
-          <p className="p-4 text-sm text-slate-400">Beadások betöltése…</p>
+          <Skeleton lines={2} label="Beadások betöltése…" className="px-5 py-4 md:px-6" />
         ) : submissions.length === 0 ? (
-          <p className="p-4 text-sm text-slate-400">Ehhez a feladathoz még nincs beadásod.</p>
+          <p className="px-5 py-4 text-15 leading-relaxed text-ink-soft md:px-6">
+            Ehhez a feladathoz még nincs beadásod. A Beadás gomb menti el a megoldásodat.
+          </p>
         ) : (
-          <ul className="divide-y divide-slate-800">
+          <ul>
             {submissions.map((submission) => (
               <HistoryItem
                 key={submission.id}
@@ -62,15 +65,10 @@ export function SubmissionHistory({ taskId, allowedLanguages, onRestore }: Props
         )}
 
         {history.hasNextPage && (
-          <div className="border-t border-slate-800 p-3">
-            <button
-              type="button"
-              onClick={() => void history.fetchNextPage()}
-              disabled={history.isFetchingNextPage}
-              className="rounded-lg border border-slate-700 px-3 py-1.5 text-sm text-slate-200 transition hover:border-slate-500 disabled:opacity-60"
-            >
-              {history.isFetchingNextPage ? 'Betöltés…' : 'Korábbiak betöltése'}
-            </button>
+          <div className="border-t border-grid px-5 py-3 md:px-6">
+            <Button variant="secondary" busy={history.isFetchingNextPage} busyLabel="Betöltés…" onClick={() => void history.fetchNextPage()}>
+              Korábbiak betöltése
+            </Button>
           </div>
         )}
       </div>
@@ -90,18 +88,18 @@ function HistoryItem({ submission, open, onToggle, restorable, onRestore }: Item
   const panelId = `beadas-${submission.id}`
 
   return (
-    <li data-testid="submission-item">
+    <li data-testid="submission-item" className="border-b border-grid last:border-b-0">
       <button
         type="button"
         aria-expanded={open}
         aria-controls={panelId}
         onClick={onToggle}
-        className="block w-full px-4 py-3 text-left transition hover:bg-slate-800/50 focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-400 focus-visible:ring-inset"
+        className="flex min-h-11 w-full items-center px-5 py-2 text-left hover:bg-note md:px-6"
       >
         <SubmissionLine submission={submission} />
       </button>
       {open && (
-        <div id={panelId} className="space-y-3 border-t border-slate-800 bg-slate-950/40 p-4">
+        <div id={panelId} className="flex flex-col gap-4 border-t border-grid bg-paper px-5 py-4 md:px-6">
           <SubmissionDetails submission={submission} restorable={restorable} onRestore={onRestore} />
         </div>
       )}
@@ -112,23 +110,18 @@ function HistoryItem({ submission, open, onToggle, restorable, onRestore }: Item
 function SubmissionDetails({ submission, restorable, onRestore }: Pick<ItemProps, 'submission' | 'restorable' | 'onRestore'>) {
   const detail = useQuery(submissionQuery(submission.id))
 
-  if (detail.isError) return <p className="text-sm text-red-300">{hibaUzenet(detail.error)}</p>
-  if (detail.isPending) return <p className="text-sm text-slate-400">Beadás betöltése…</p>
+  if (detail.isError) return <LoadError error={detail.error} onRetry={() => void detail.refetch()} title="Nem sikerült betölteni a beadást" />
+  if (detail.isPending) return <Skeleton lines={2} label="Beadás betöltése…" />
 
   const result = asRunResult(detail.data)
 
   return (
     <>
-      <div className="flex flex-wrap items-center gap-3">
-        <button
-          type="button"
-          onClick={() => onRestore(detail.data)}
-          disabled={!restorable}
-          className="rounded-lg bg-sky-700 px-4 py-1.5 text-sm font-medium text-white transition hover:bg-sky-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-300 disabled:cursor-not-allowed disabled:opacity-50"
-        >
+      <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+        <Button variant="secondary" icon="undo" onClick={() => onRestore(detail.data)} disabled={!restorable}>
           Betöltés a szerkesztőbe
-        </button>
-        <p className="text-xs text-slate-400">
+        </Button>
+        <p className="min-w-0 flex-1 basis-56 text-14 leading-normal text-ink-soft">
           {restorable
             ? 'A mostani kódod helyére kerül; a szerkesztőben Ctrl+Z-vel visszavonható.'
             : `Ennél a feladatnál a(z) ${LANGUAGE_LABEL[submission.language]} nyelv már nem választható.`}
@@ -138,7 +131,9 @@ function SubmissionDetails({ submission, restorable, onRestore }: Pick<ItemProps
       {result ? (
         <ResultPanel loading={false} error={null} result={result} mode="submit" />
       ) : (
-        <p className="text-sm text-slate-400">Ennek a beadásnak a kiértékelése nem fejeződött be, ezért nincs eredménye.</p>
+        <p className="text-15 leading-relaxed text-ink-soft">
+          Ennek a beadásnak a kiértékelése nem fejeződött be, ezért nincs eredménye. Add be újra a megoldást.
+        </p>
       )}
     </>
   )

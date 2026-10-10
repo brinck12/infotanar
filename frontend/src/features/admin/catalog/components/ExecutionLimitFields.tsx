@@ -33,7 +33,7 @@ export function ExecutionLimitFields({ value, onChange, languages, errors }: Pro
   const scaled = languages.filter((language) => language.time_factor !== 1)
 
   return (
-    <div className="space-y-3">
+    <div className="flex flex-col gap-3">
       <div className="grid gap-4 sm:grid-cols-2">
         <Field
           label="Időkorlát (ms)"
@@ -60,7 +60,7 @@ export function ExecutionLimitFields({ value, onChange, languages, errors }: Pro
       </div>
 
       {languages.length > 0 && (
-        <p className="text-sm text-slate-400" data-testid="default-limits">
+        <p className="text-15 leading-relaxed text-ink-soft" data-testid="default-limits">
           Alapértelmezés:{' '}
           {languages
             .map((language) => `${LANGUAGE_LABEL[language.key]} – ${formatTimeLimit(language.default_limits.time_limit_ms)}, ${formatMemoryLimit(language.default_limits.memory_limit_kb)}`)
@@ -69,7 +69,7 @@ export function ExecutionLimitFields({ value, onChange, languages, errors }: Pro
       )}
 
       {scaled.length > 0 && (
-        <p className="text-sm text-slate-400">
+        <p className="text-15 leading-relaxed text-ink-soft">
           Az itt megadott időkorlát nyelvenként szorzóval érvényes:{' '}
           {scaled.map((language) => `${LANGUAGE_LABEL[language.key]} ×${factor.format(language.time_factor)}`).join(', ')}.
         </p>

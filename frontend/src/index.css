@@ -1,120 +1,328 @@
+@import "@fontsource-variable/figtree/index.css";
+@import "@fontsource-variable/literata/index.css";
+@import "@fontsource-variable/literata/wght-italic.css";
+@import "@fontsource-variable/jetbrains-mono/index.css";
 @import "tailwindcss";
 
-html,
-body,
-#root {
-  height: 100%;
-}
-
-body {
-  @apply bg-slate-950 text-slate-100 antialiased;
-}
-
 /*
- * Hosszabb, olvasásra szánt szöveg (shared/ui/Markdown.tsx). A Markdownból
- * generált elemekre nem tehető osztály, ezért itt, egy helyen kapnak stílust.
- * Olvashatóság: 1,625-ös sormagasság, a sorhosszt a tartalmazó oldal korlátozza
- * (kb. 70 karakter), a szövegszín a sötét háttéren legalább 4,5:1 kontrasztú.
+ * A felület tokenjei (FRONTEND.md 4. fejezet). Az alap paletta, betűméret-,
+ * árnyék- és töréspont-készlet törölve: ami itt nincs, azt nem lehet leírni.
+ * `static`: minden token CSS-változóként is kikerül, mert a Monaco témája és a
+ * Markdown-szedés közvetlenül a változókat olvassa.
  */
+@theme static {
+  --color-*: initial;
+  --color-transparent: transparent;
+  --color-current: currentColor;
+  --color-paper: #f6f7f4;
+  --color-sheet: #ffffff;
+  --color-grid: #e1e7e3;
+  --color-line: #d5dcd8;
+  --color-ink: #1a2330;
+  --color-ink-soft: #4a5666;
+  --color-muted: #7c8794;
+  --color-accent: #0b6b58;
+  --color-accent-dark: #09493c;
+  --color-accent-soft: #dcefe8;
+  --color-wrong: #b3321f;
+  --color-wrong-dark: #8f2616;
+  --color-wrong-soft: #f8e3de;
+  --color-note: #ecefea;
+  --color-chip: #e9eeea;
+  --color-chip-ink: #2f3b4a;
+  --color-faint: #fafaf8;
+  --color-headrow: #f1f3ef;
+  --color-disabled: #6b7684;
+  --color-backdrop: rgb(26 35 48 / 0.55);
+
+  /* A sötét kódfelület és a rajta lévő szöveg, keret, szintaxis. */
+  --color-code: #16202b;
+  --color-code-deep: #0f1821;
+  --color-code-hover: #243342;
+  --color-code-line: #2a3846;
+  --color-code-edge: #5e6e7d;
+  --color-code-text: #e3eaf0;
+  --color-code-soft: #9aa8b5;
+  --color-code-comment: #7c8b99;
+  --color-code-keyword: #e7a6ba;
+  --color-code-builtin: #8fd0c0;
+  --color-code-number: #f0cb8a;
+
+  --font-serif: "Literata Variable", "Literata", Georgia, serif;
+  --font-sans: "Figtree Variable", "Figtree", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono Variable", "JetBrains Mono", ui-monospace, monospace;
+
+  --text-*: initial;
+  --text-13: 13px;
+  --text-14: 14px;
+  --text-15: 15px;
+  --text-16: 16px;
+  --text-17: 17px;
+  --text-18: 18px;
+  --text-19: 19px;
+  --text-20: 20px;
+  --text-22: 22px;
+  --text-24: 24px;
+  --text-28: 28px;
+  --text-32: 32px;
+  --text-34: 34px;
+  --text-36: 36px;
+  --text-44: 44px;
+  --text-54: 54px;
+
+  --leading-tight: 1.15;
+  --leading-snug: 1.3;
+  --leading-normal: 1.5;
+  --leading-relaxed: 1.6;
+  --leading-loose: 1.7;
+
+  --tracking-tight: -0.015em;
+
+  --font-weight-logo: 650;
+  --text-inline: 0.9em;
+
+  --spacing: 4px;
+
+  --radius-*: initial;
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 14px;
+  --radius-full: 9999px;
+
+  --shadow-*: initial;
+  --shadow-sheet: 0 1px 0 #d5dcd8, 0 28px 44px -30px rgb(26 35 48 / 0.4);
+  --shadow-modal: 0 30px 60px -20px rgb(0 0 0 / 0.5);
+
+  --breakpoint-*: initial;
+  --breakpoint-sm: 480px;
+  --breakpoint-md: 760px;
+  --breakpoint-lg: 900px;
+  --breakpoint-xl: 1200px;
+
+  --container-auth: 460px;
+  --container-form: 560px;
+  --container-account: 760px;
+  --container-page: 1200px;
+  --container-work: 1360px;
+  --container-prose: 64ch;
+  --container-lead: 46ch;
+}
+
+@layer base {
+  html,
+  body,
+  #root {
+    min-height: 100%;
+  }
+
+  html {
+    font-family: var(--font-sans);
+    font-size: 16px;
+    line-height: 1.5;
+  }
+
+  body {
+    background: var(--color-paper);
+    color: var(--color-ink);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  #root {
+    display: flex;
+    min-height: 100vh;
+    flex-direction: column;
+  }
+
+  a {
+    color: var(--color-accent);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    padding-block: 3px;
+  }
+
+  a:hover {
+    color: var(--color-accent-dark);
+  }
+
+  /* A >= maradjon >=: a kódban nincs ligatúra. */
+  code,
+  pre,
+  kbd,
+  samp,
+  .font-mono {
+    font-family: var(--font-mono);
+    font-variant-ligatures: none;
+  }
+
+  button,
+  [role="tab"],
+  summary {
+    cursor: pointer;
+  }
+
+  button:disabled {
+    cursor: not-allowed;
+  }
+
+  :focus-visible {
+    outline: 3px solid var(--color-accent);
+    outline-offset: 2px;
+  }
+
+  .on-dark:focus-visible,
+  .on-dark :focus-visible {
+    outline-color: var(--color-code-builtin);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      transition: none !important;
+      animation: none !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
+/* Másfél pixeles keret az üzenetsávokon (figyelem, hiba, siker). */
+@utility border-strong {
+  border-width: 1.5px;
+}
+
+/* A kockás füzet rácsa: kizárólag a kezdőlap hőse mögött. */
+@utility bg-squared {
+  background-color: var(--color-paper);
+  background-image:
+    linear-gradient(var(--color-grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--color-grid) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
 @layer components {
-  .longform {
-    @apply leading-relaxed text-slate-300;
+  /* Feladat- és leckeszöveg (Markdown): tankönyvi hang, Literata 18/1.7. */
+  .prose-task {
+    font-family: var(--font-serif);
+    font-size: var(--text-18);
+    line-height: var(--leading-loose);
+    overflow-wrap: anywhere;
   }
 
-  .longform > :first-child {
-    @apply mt-0;
+  .prose-task > * {
+    max-width: var(--container-prose);
   }
 
-  .longform h2 {
-    @apply mt-10 mb-3 text-xl font-semibold text-balance text-slate-100;
+  .prose-task > :first-child {
+    margin-top: 0;
   }
 
-  .longform h3 {
-    @apply mt-6 mb-2 text-base font-semibold text-slate-100;
+  .prose-task h1,
+  .prose-task h2 {
+    margin: 28px 0 8px;
+    font-size: var(--text-22);
+    font-weight: 600;
+    line-height: var(--leading-snug);
   }
 
-  .longform p,
-  .longform ul,
-  .longform ol {
-    @apply my-4;
+  .prose-task h3,
+  .prose-task h4 {
+    margin: 28px 0 8px;
+    font-size: var(--text-19);
+    font-weight: 600;
+    line-height: var(--leading-snug);
   }
 
-  .longform ul {
-    @apply list-disc pl-6;
+  .prose-task p,
+  .prose-task ul,
+  .prose-task ol,
+  .prose-task pre,
+  .prose-task table,
+  .prose-task blockquote {
+    margin: 12px 0 0;
   }
 
-  .longform ol {
-    @apply list-decimal pl-6;
+  .prose-task ul {
+    list-style: disc;
+    padding-left: 24px;
   }
 
-  .longform li {
-    @apply my-1;
+  .prose-task ol {
+    list-style: decimal;
+    padding-left: 24px;
   }
 
-  .longform strong {
-    @apply font-semibold text-slate-100;
+  .prose-task li + li {
+    margin-top: 4px;
   }
 
-  .longform a {
-    @apply rounded-sm text-sky-400 underline underline-offset-2 hover:text-sky-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-400;
+  .prose-task code {
+    border-radius: var(--radius-sm);
+    background: var(--color-headrow);
+    padding: 1px 5px;
+    font-size: var(--text-inline);
   }
 
-  .longform code {
-    @apply rounded bg-slate-900 px-1 py-0.5 font-mono text-sm text-slate-200;
+  .prose-task pre {
+    max-width: none;
+    overflow-x: auto;
+    border: 1px solid var(--color-line);
+    border-radius: var(--radius-md);
+    background: var(--color-headrow);
+    padding: 12px;
+    font-size: var(--text-14);
+    line-height: var(--leading-relaxed);
   }
 
-  .longform-code {
-    @apply my-5 overflow-x-auto rounded-lg border border-slate-800 bg-slate-950 focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-400;
+  .prose-task pre code {
+    background: none;
+    padding: 0;
+    font-size: inherit;
   }
 
-  .longform pre {
-    @apply w-max min-w-full p-4 text-sm leading-normal;
+  .prose-task blockquote {
+    border-radius: var(--radius-md);
+    background: var(--color-note);
+    padding: 12px 16px;
   }
 
-  .longform pre code {
-    @apply bg-transparent p-0;
+  .prose-task table {
+    max-width: none;
+    border-collapse: collapse;
+    font-family: var(--font-sans);
+    font-size: var(--text-15);
   }
 
-  /* Kódkiemelés (highlight.js osztályok); minden szín legalább 4,5:1 kontrasztú a blokk hátterén. */
-  .longform .hljs-keyword,
-  .longform .hljs-literal,
-  .longform .hljs-operator {
-    @apply text-sky-300;
+  .prose-task th,
+  .prose-task td {
+    border: 1px solid var(--color-line);
+    padding: 6px 12px;
+    text-align: left;
   }
 
-  .longform .hljs-string,
-  .longform .hljs-regexp {
-    @apply text-emerald-300;
+  .prose-task th {
+    background: var(--color-headrow);
+  }
+}
+
+@layer components {
+  /* Széles táblázat a saját keretén belül görgethető, nem tolja szét az oldalt. */
+  .prose-task .prose-scroll {
+    max-width: none;
+    margin: 12px 0 0;
+    overflow-x: auto;
   }
 
-  .longform .hljs-number {
-    @apply text-amber-300;
+  .prose-task .prose-scroll table {
+    margin: 0;
   }
 
-  .longform .hljs-title,
-  .longform .hljs-built_in,
-  .longform .hljs-type {
-    @apply text-violet-300;
+  /* Kerített kódblokk a tananyagban: a sötét kódfelület, a szöveg sans/mono marad. */
+  .prose-task .prose-code {
+    max-width: none;
+    margin: 16px 0 0;
   }
 
-  .longform .hljs-comment {
-    @apply text-slate-400 italic;
-  }
-
-  .longform-table {
-    @apply my-6 overflow-x-auto rounded-lg border border-slate-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-400;
-  }
-
-  /* A legkisebb szélesség alatt a keret görget, a cellák nem préselődnek össze. */
-  .longform table {
-    @apply w-full min-w-[32rem] border-collapse text-left text-sm;
-  }
-
-  .longform th {
-    @apply bg-slate-900 px-3 py-2 align-bottom font-semibold text-slate-100;
-  }
-
-  .longform td {
-    @apply border-t border-slate-800 px-3 py-2 align-top;
+  .prose-task a {
+    overflow-wrap: anywhere;
   }
 }

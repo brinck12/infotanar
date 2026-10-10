@@ -15,6 +15,21 @@ function readApiUrl(): string {
   return value.replace(/\/+$/, '')
 }
 
+/**
+ * Az írásbeli érettségi napja (ÉÉÉÉ-HH-NN) a visszaszámláláshoz. Az alapérték
+ * helykitöltő: élesben a hivatalos vizsganaptár szerinti dátumot kell megadni.
+ */
+function readExamDate(): string {
+  const raw: unknown = import.meta.env.VITE_EXAM_DATE
+  const value = typeof raw === 'string' && raw.trim() !== '' ? raw.trim() : '2027-05-10'
+
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(value) || Number.isNaN(new Date(`${value}T08:00:00`).getTime())) {
+    throw new Error(`Érvénytelen VITE_EXAM_DATE: "${value}" (ÉÉÉÉ-HH-NN formátumú legyen)`)
+  }
+
+  return value
+}
+
 /** A build git commitja (a deploy állítja be); a hibajelentésekből így látszik, melyik kiadás hibázott. */
 function readRelease(): string | null {
   const raw: unknown = import.meta.env.VITE_RELEASE
@@ -38,6 +53,7 @@ function readBarionPixel(): { pixelId: string | null; requiresConsent: boolean }
 
 export const env = Object.freeze({
   apiUrl: readApiUrl(),
+  examDate: readExamDate(),
   release: readRelease(),
   barionPixel: readBarionPixel(),
 })

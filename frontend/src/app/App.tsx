@@ -1,91 +1,103 @@
-import { Suspense } from 'react'
-import { BrowserRouter, Link, Navigate, Outlet, Route, Routes } from 'react-router-dom'
-import { VerifyEmailBanner } from '../features/auth/components/VerifyEmailBanner'
+import { Suspense, type ReactNode } from 'react'
+import { BrowserRouter, Route, Routes } from 'react-router-dom'
 import { GuestOnly, RequireAuth, RequireRole } from '../features/auth/guards'
-import { PastDueBanner } from '../features/billing/components/PastDueBanner'
 import { LEGAL_DOCUMENTS } from '../features/legal/documents'
+import { NotFound } from '../features/system/NotFound'
+import { barionPixelEnabled } from '../shared/consent/barionPixel'
 import { CookieBanner } from '../shared/consent/CookieBanner'
 import { PageLoader } from '../shared/ui/PageLoader'
 import { ErrorBoundary } from './ErrorBoundary'
-import { Footer } from './Footer'
-import { Header } from './Header'
 import { Providers } from './Providers'
 import * as Pages from './routes'
+import { AccountShell } from './shells/AccountShell'
+import { AdminShell } from './shells/AdminShell'
+import { AuthShell } from './shells/AuthShell'
+import { OfflineNotice, StorageNotice } from './shells/SiteNotices'
+import { SiteShell } from './shells/SiteShell'
+import { WorkspaceShell } from './shells/WorkspaceShell'
+
+/** Egy keret tartalma: a lusta oldalak betöltése és hibája a kereten belül marad. */
+function Framed({ children }: { children: ReactNode }) {
+  return (
+    <ErrorBoundary>
+      <Suspense fallback={<PageLoader />}>{children}</Suspense>
+    </ErrorBoundary>
+  )
+}
 
 export default function App() {
   return (
     <ErrorBoundary>
       <BrowserRouter>
         <Providers>
-          <div className="flex min-h-full flex-col">
-            {/* Billentyűzettel az első Tab ide lép: a menü átugorható. Csak fókuszban látszik. */}
-            <a
-              href="#tartalom"
-              className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-50 focus:rounded-lg focus:bg-sky-700 focus:px-4 focus:py-2 focus:text-white"
-            >
-              Ugrás a tartalomra
-            </a>
-            <Header />
-            <VerifyEmailBanner />
-            <PastDueBanner />
+          <OfflineNotice />
+          <Routes>
+            <Route element={<Framed><SiteShell /></Framed>}>
+              <Route path="/" element={<Pages.Home />} />
+              <Route path="/tanulasi-ut" element={<Pages.LearningPath />} />
+              <Route path="/tanulasi-ut/:sav" element={<Pages.TrackPage />} />
+              <Route path="/tanulasi-ut/:sav/:lecke" element={<Pages.LessonPage />} />
+              <Route path="/leckek/:id" element={<Pages.LessonById />} />
+              <Route path="/feladatok" element={<Pages.TaskList />} />
+              <Route path="/vizsgak" element={<Pages.ExamList />} />
+              <Route path="/vizsgak/:id" element={<RequireAuth><Pages.ExamStart /></RequireAuth>} />
+              <Route path="/vizsgak/:id/eredmeny" element={<RequireAuth><Pages.ExamResult /></RequireAuth>} />
+              <Route path="/beadasok/:id" element={<RequireAuth><Pages.SubmissionPage /></RequireAuth>} />
+              <Route path="/szobeli" element={<Pages.Oral />} />
+              <Route path="/szobeli/:tema" element={<Pages.OralTopic />} />
+              <Route path="/arak" element={<Pages.Pricing />} />
+              <Route path="/indulas" element={<Pages.Onboarding />} />
+              <Route path={LEGAL_DOCUMENTS.terms.path} element={<Pages.TermsOfService />} />
+              <Route path={LEGAL_DOCUMENTS.privacy.path} element={<Pages.PrivacyPolicy />} />
+              <Route path={LEGAL_DOCUMENTS.imprint.path} element={<Pages.Imprint />} />
+              <Route path="/elofizetes" element={<RequireAuth><Pages.Subscribe /></RequireAuth>} />
+              <Route path="/elofizetes/visszateres" element={<RequireAuth><Pages.PaymentReturn /></RequireAuth>} />
+              <Route path="/haladas" element={<RequireAuth><Pages.ProgressDashboard /></RequireAuth>} />
+              <Route path="/fiok" element={<RequireAuth><AccountShell /></RequireAuth>}>
+                <Route index element={<Pages.AccountProfile />} />
+                <Route path="elofizetes" element={<Pages.AccountSubscription />} />
+                <Route path="fizetesek" element={<Pages.AccountPayments />} />
+                <Route path="szamlazasi-adatok" element={<Pages.AccountBilling />} />
+              </Route>
+              <Route path="*" element={<NotFound />} />
+            </Route>
 
-            <main id="tartalom" tabIndex={-1} className="flex-1 focus:outline-none">
-              <ErrorBoundary>
-                <Suspense fallback={<PageLoader />}>
-                  <Routes>
-                    <Route path="/" element={<Pages.Home />} />
-                    <Route path="/tananyag" element={<Pages.Curriculum />} />
-                    <Route path="/tananyag/:trackSlug" element={<Pages.TrackPage />} />
-                    <Route path="/tananyag/:trackSlug/:lessonSlug" element={<Pages.LessonPage />} />
-                    <Route path="/feladatok" element={<Pages.TaskList />} />
-                    <Route path="/feladatok/:id" element={<Pages.TaskSolve />} />
-                    <Route path="/regisztracio" element={<Pages.Register />} />
-                    <Route path="/regisztracio/kesz" element={<Pages.RegisterDone />} />
-                    <Route path="/bejelentkezes" element={<GuestOnly><Pages.Login /></GuestOnly>} />
-                    <Route path="/email-megerosites" element={<Pages.VerifyEmail />} />
-                    <Route path="/elfelejtett-jelszo" element={<GuestOnly><Pages.ForgotPassword /></GuestOnly>} />
-                    <Route path="/jelszo-visszaallitas" element={<Pages.ResetPassword />} />
-                    <Route path="/elofizetes" element={<RequireAuth><Pages.Subscribe /></RequireAuth>} />
-                    <Route path="/elofizetes/visszateres" element={<RequireAuth><Pages.PaymentReturn /></RequireAuth>} />
-                    <Route path="/haladas" element={<RequireAuth><Pages.ProgressDashboard /></RequireAuth>} />
-                    <Route path="/fiok" element={<RequireAuth><Pages.Account /></RequireAuth>} />
-                    <Route path="/email-csere" element={<Pages.EmailChangeConfirm />} />
-                    <Route path={LEGAL_DOCUMENTS.terms.path} element={<Pages.Terms />} />
-                    <Route path={LEGAL_DOCUMENTS.privacy.path} element={<Pages.Privacy />} />
-                    <Route path={LEGAL_DOCUMENTS.imprint.path} element={<Pages.Imprint />} />
-                    <Route path="/admin" element={<RequireRole allow="admin"><Outlet /></RequireRole>}>
-                      <Route index element={<Navigate to="/admin/tananyag" replace />} />
-                      <Route path="tananyag" element={<Pages.AdminCatalog />} />
-                      <Route path="tananyag/agak/:trackId" element={<Pages.AdminTrack />} />
-                      <Route path="tananyag/modulok/:moduleId" element={<Pages.AdminModule />} />
-                      <Route path="tananyag/leckek/:lessonId" element={<Pages.AdminLesson />} />
-                      <Route path="tananyag/leckek/:lessonId/uj-feladat" element={<Pages.AdminNewExercise />} />
-                      <Route path="tananyag/feladatok/:exerciseId" element={<Pages.AdminExercise />} />
-                      <Route path="felhasznalok" element={<Pages.AdminUsers />} />
-                      <Route path="felhasznalok/:userId" element={<Pages.AdminUserDetail />} />
-                      <Route path="szamlak" element={<Pages.AdminInvoices />} />
-                    </Route>
-                    <Route path="*" element={<NotFound />} />
-                  </Routes>
-                </Suspense>
-              </ErrorBoundary>
-            </main>
-            <Footer />
-            <CookieBanner />
-          </div>
+            <Route element={<Framed><WorkspaceShell /></Framed>}>
+              <Route path="/feladatok/:id" element={<Pages.TaskSolve />} />
+            </Route>
+
+            {/* A futó vizsgának saját fejléce van (időmérő, beadás), ezért kereten kívül áll. */}
+            <Route path="/vizsgak/:id/fut" element={<Framed><RequireAuth><Pages.ExamRunner /></RequireAuth></Framed>} />
+
+            <Route element={<Framed><AuthShell /></Framed>}>
+              <Route path="/regisztracio" element={<Pages.Register />} />
+              <Route path="/regisztracio/kesz" element={<Pages.RegisterDone />} />
+              <Route path="/bejelentkezes" element={<GuestOnly><Pages.Login /></GuestOnly>} />
+              <Route path="/email-megerosites" element={<Pages.VerifyEmail />} />
+              <Route path="/elfelejtett-jelszo" element={<GuestOnly><Pages.ForgotPassword /></GuestOnly>} />
+              <Route path="/jelszo-visszaallitas" element={<Pages.ResetPassword />} />
+              <Route path="/email-csere" element={<Pages.EmailChangeConfirm />} />
+            </Route>
+
+            <Route path="/admin" element={<RequireRole allow="admin"><Framed><AdminShell /></Framed></RequireRole>}>
+              <Route index element={<Pages.AdminOverview />} />
+              <Route path="tananyag" element={<Pages.AdminCatalog />} />
+              <Route path="tananyag/agak/:trackId" element={<Pages.AdminTrack />} />
+              <Route path="tananyag/modulok/:moduleId" element={<Pages.AdminModule />} />
+              <Route path="tananyag/leckek/:lessonId" element={<Pages.AdminLesson />} />
+              <Route path="tananyag/leckek/:lessonId/uj-feladat" element={<Pages.AdminNewExercise />} />
+              <Route path="tananyag/feladatok/:exerciseId" element={<Pages.AdminExercise />} />
+              <Route path="vizsgak" element={<Pages.AdminExams />} />
+              <Route path="vizsgak/:examId" element={<Pages.AdminExam />} />
+              <Route path="felhasznalok" element={<Pages.AdminUsers />} />
+              <Route path="felhasznalok/:userId" element={<Pages.AdminUserDetail />} />
+              <Route path="szamlak" element={<Pages.AdminInvoices />} />
+            </Route>
+          </Routes>
+          {/* Barion Pixellel hozzájárulást kérünk; nélküle elég a tájékoztatás a tárolt adatokról. */}
+          {barionPixelEnabled ? <CookieBanner privacyPath={LEGAL_DOCUMENTS.privacy.path} /> : <StorageNotice />}
         </Providers>
       </BrowserRouter>
     </ErrorBoundary>
-  )
-}
-
-function NotFound() {
-  return (
-    <div className="mx-auto max-w-3xl px-4 py-16">
-      <h1 className="text-xl font-semibold text-slate-100">A keresett oldal nem található</h1>
-      <Link to="/" className="mt-4 inline-block text-sky-400 hover:underline">
-        Vissza a kezdőlapra
-      </Link>
-    </div>
   )
 }

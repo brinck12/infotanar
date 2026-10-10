@@ -1,6 +1,10 @@
 import { useQuery } from '@tanstack/react-query'
 import { useState } from 'react'
-import { CheckboxField } from '../../../../shared/ui/Form'
+import { Banner } from '../../../../shared/ui/Banner'
+import { Button } from '../../../../shared/ui/Button'
+import { CheckboxField, Field, SelectField } from '../../../../shared/ui/Form'
+import { Icon } from '../../../../shared/ui/Icon'
+import { Skeleton } from '../../../../shared/ui/States'
 import type { LanguageKey } from '../../../../types'
 import { constraintOptionsQuery, type ConstraintSet } from '../api'
 
@@ -14,6 +18,11 @@ interface Props {
 
 const NAME_PATTERN = /^[A-Za-z_][A-Za-z0-9_]*$/
 
+const KIND_OPTIONS = [
+  { value: 'builtin', label: 'beépített függvény' },
+  { value: 'method', label: 'metódus' },
+] as const
+
 /**
  * Kódszabályok (#49) a feladat űrlapján: kötelező szerkezetek, javasolt és
  * egyedi tiltások. A feladattal együtt mentődik, és a következő beadástól
@@ -25,8 +34,8 @@ export function ConstraintEditor({ value, onChange, allowedLanguages, error }: P
   const [customName, setCustomName] = useState('')
   const [customError, setCustomError] = useState<string | null>(null)
 
-  if (options.isPending) return <p className="text-sm text-slate-400">Szabályok betöltése…</p>
-  if (options.isError) return <p className="text-sm text-red-300">A szabálylista nem tölthető be.</p>
+  if (options.isPending) return <Skeleton lines={3} label="Szabályok betöltése…" />
+  if (options.isError) return <Banner kind="error">A szabálylista nem tölthető be. Töltsd újra az oldalt.</Banner>
 
   const { require, forbid, enforced_languages: enforced } = options.data
   const suggested = new Set(forbid.map((f) => f.value))
@@ -40,7 +49,7 @@ export function ConstraintEditor({ value, onChange, allowedLanguages, error }: P
   function addCustom() {
     const name = customName.trim()
     if (!NAME_PATTERN.test(name)) {
-      setCustomError('Érvénytelen név: betűvel vagy aláhúzással kezdődjön, és csak betűt, számot, aláhúzást tartalmazzon.')
+      setCustomError('Érvénytelen név. Betűvel vagy aláhúzással kezdődjön, és csak betűt, számot, aláhúzást tartalmazzon.')
       return
     }
     const rule = `${customKind}:${name}`
@@ -50,17 +59,17 @@ export function ConstraintEditor({ value, onChange, allowedLanguages, error }: P
   }
 
   return (
-    <div className="space-y-5" data-testid="constraint-editor">
+    <div className="flex flex-col gap-6" data-testid="constraint-editor">
       {hasRules && unenforced.length > 0 && (
-        <p role="note" className="rounded-lg border border-amber-900 bg-amber-950/50 p-3 text-sm text-amber-200">
+        <Banner kind="warn" title="Nem minden nyelvre vonatkozik">
           A szabályokat csak ezekre a nyelvekre ellenőrizzük: {enforced.join(', ')}. A(z) {unenforced.join(', ')} megoldásokra nem
           vonatkoznak.
-        </p>
+        </Banner>
       )}
 
       <fieldset>
-        <legend className="mb-2 text-sm text-slate-300">Kötelező szerkezet</legend>
-        <div className="flex flex-wrap gap-4">
+        <legend className="text-15 font-semibold">Kötelező szerkezet</legend>
+        <div className="mt-2.5 flex flex-wrap gap-x-7 gap-y-3">
           {require.map((option) => (
             <CheckboxField
               key={option.value}
@@ -73,8 +82,8 @@ export function ConstraintEditor({ value, onChange, allowedLanguages, error }: P
       </fieldset>
 
       <fieldset>
-        <legend className="mb-2 text-sm text-slate-300">Tiltott beépített függvények és metódusok</legend>
-        <div className="grid gap-2 sm:grid-cols-2">
+        <legend className="text-15 font-semibold">Tiltott beépített függvények és metódusok</legend>
+        <div className="mt-2.5 grid gap-3 sm:grid-cols-2">
           {forbid.map((option) => (
             <CheckboxField
               key={option.value}
@@ -87,39 +96,38 @@ export function ConstraintEditor({ value, onChange, allowedLanguages, error }: P
       </fieldset>
 
       <div>
-        <p className="mb-2 text-sm text-slate-300">Egyedi tiltás</p>
+        <p className="text-15 font-semibold">Egyedi tiltás</p>
         {custom.length > 0 && (
-          <ul className="mb-3 flex flex-wrap gap-2" aria-label="Egyedi tiltások">
+          <ul className="mt-2.5 flex flex-wrap gap-2" aria-label="Egyedi tiltások">
             {custom.map((rule) => (
-              <li key={rule} className="flex items-center gap-1 rounded-full border border-slate-700 px-2.5 py-0.5 font-mono text-xs text-slate-200">
+              <li key={rule} className="flex items-center gap-1 rounded-md border border-muted bg-sheet pl-3 font-mono text-14">
                 {rule}
                 <button
                   type="button"
                   aria-label={`${rule} tiltás eltávolítása`}
                   onClick={() => toggle('forbid', rule, false)}
-                  className="ml-1 text-red-300 hover:text-red-200"
+                  className="inline-flex size-11 items-center justify-center rounded-md text-wrong hover:bg-wrong-soft"
                 >
-                  <span aria-hidden="true">✕</span>
+                  <Icon name="x" size={18} />
                 </button>
               </li>
             ))}
           </ul>
         )}
-        <div className="flex flex-wrap items-start gap-2 text-sm">
-          <select
-            aria-label="Tiltás típusa"
+        <div className="mt-2.5 flex flex-wrap items-start gap-4">
+          <SelectField
+            className="w-56"
+            label="Tiltás típusa"
+            options={KIND_OPTIONS}
             value={customKind}
             onChange={(e) => setCustomKind(e.target.value === 'method' ? 'method' : 'builtin')}
-            className="rounded-lg border border-slate-800 bg-slate-900 px-3 py-2 text-slate-100"
-          >
-            <option value="builtin">beépített függvény</option>
-            <option value="method">metódus</option>
-          </select>
-          <input
-            aria-label="Függvény vagy metódus neve"
-            aria-invalid={customError ? true : undefined}
-            placeholder="pl. min"
+          />
+          <Field
+            className="w-56"
+            label="Függvény vagy metódus neve"
+            mono
             value={customName}
+            error={customError ?? undefined}
             onChange={(e) => setCustomName(e.target.value)}
             onKeyDown={(e) => {
               // Enter ne küldje el a teljes feladat-űrlapot.
@@ -128,17 +136,17 @@ export function ConstraintEditor({ value, onChange, allowedLanguages, error }: P
                 addCustom()
               }
             }}
-            className="rounded-lg border border-slate-800 bg-slate-900 px-3 py-2 font-mono text-slate-100"
           />
-          <button type="button" onClick={addCustom} className="rounded-lg border border-slate-700 px-3 py-2 text-slate-200 hover:bg-slate-800">
-            Hozzáadás
-          </button>
+          <div className="pt-7.5">
+            <Button variant="secondary" icon="plus" onClick={addCustom} className="min-h-12">
+              Hozzáadás
+            </Button>
+          </div>
         </div>
-        {customError && <p className="mt-1 text-sm text-red-300">{customError}</p>}
       </div>
 
-      {error && <p className="text-sm text-red-300">{error}</p>}
-      <p className="text-xs text-slate-500">A szabályok a feladat mentése után a következő beadástól érvényesek.</p>
+      {error && <Banner kind="error">{error}</Banner>}
+      <p className="text-14 leading-relaxed text-ink-soft">A szabályok a feladat mentése után a következő beadástól érvényesek.</p>
     </div>
   )
 }

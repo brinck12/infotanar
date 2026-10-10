@@ -1,15 +1,17 @@
-import { Editor, type OnMount } from '@monaco-editor/react'
+import { Editor, type BeforeMount, type OnMount } from '@monaco-editor/react'
 import { useEffect, useRef } from 'react'
-import type { LanguageKey } from '../../../types'
+import { MONACO_FONT, MONACO_THEME, monacoTheme } from '../../../shared/ui/codeTheme'
 import { configureBundledMonaco } from '../monaco'
-import type { CodeEditorProps } from './CodeEditor'
+import type { CodeEditorProps, EditorLanguage } from './CodeEditor'
 import { EditorSkeleton } from './EditorSkeleton'
 
 /** A nyelvkulcs és a Monaco saját nyelvazonosítójának megfeleltetése. */
-const MONACO_LANGUAGE: Record<LanguageKey, string> = {
+const MONACO_LANGUAGE: Record<EditorLanguage, string> = {
   python: 'python',
   csharp: 'csharp',
   sql: 'sql',
+  html: 'html',
+  css: 'css',
 }
 
 type MonacoEditor = Parameters<OnMount>[0]
@@ -34,6 +36,11 @@ configureBundledMonaco()
 export function MonacoCodeEditor({ language, initialValue, onChange, replace, readOnly = false }: CodeEditorProps) {
   const editorRef = useRef<MonacoEditor | null>(null)
   const appliedSeq = useRef(replace?.seq ?? 0)
+
+  // A sötét kódfelület saját témája a tokenekből (a Monaco alaptémája más háttérszínű).
+  const beforeMount: BeforeMount = (monaco) => {
+    monaco.editor.defineTheme(MONACO_THEME, monacoTheme())
+  }
 
   const onMount: OnMount = (editor, monaco) => {
     editorRef.current = editor
@@ -61,15 +68,20 @@ export function MonacoCodeEditor({ language, initialValue, onChange, replace, re
   return (
     <Editor
       height="100%"
-      theme="vs-dark"
+      theme={MONACO_THEME}
       language={MONACO_LANGUAGE[language]}
       defaultValue={initialValue}
+      beforeMount={beforeMount}
       onMount={onMount}
       onChange={(next) => onChange((next ?? '').replace(/\r\n/g, '\n'))}
       loading={<EditorSkeleton />}
       options={{
         readOnly,
         fontSize: 14,
+        fontFamily: MONACO_FONT,
+        fontLigatures: false,
+        lineHeight: 24,
+        padding: { top: 16, bottom: 16 },
         minimap: { enabled: false },
         scrollBeyondLastLine: false,
         tabSize: 4,

@@ -1,6 +1,10 @@
 import { Component, lazy, Suspense, type ReactNode } from 'react'
+import { Button } from '../../../shared/ui/Button'
 import type { LanguageKey } from '../../../types'
 import { EditorSkeleton } from './EditorSkeleton'
+
+/** A futtatható nyelveken túl a weboldal feladat fájltípusai is szerkeszthetők. */
+export type EditorLanguage = LanguageKey | 'html' | 'css'
 
 /** Kívülről kért tartalomcsere; minden új `seq` pontosan egyszer hat. */
 export interface EditorReplacement {
@@ -16,7 +20,7 @@ export interface EditorReplacement {
 }
 
 export interface CodeEditorProps {
-  language: LanguageKey
+  language: EditorLanguage
   /** A szerkesztő kezdőtartalma (csak mountkor számít). */
   initialValue: string
   onChange: (value: string) => void
@@ -34,7 +38,7 @@ const MonacoCodeEditor = lazy(async () => ({ default: (await import('./MonacoCod
  */
 export function CodeEditor(props: CodeEditorProps) {
   return (
-    <div className="h-full overflow-hidden rounded-lg border border-slate-800">
+    <div className="on-dark h-full overflow-hidden bg-code">
       <EditorLoadBoundary>
         <Suspense fallback={<EditorSkeleton />}>
           <MonacoCodeEditor {...props} />
@@ -66,15 +70,13 @@ class EditorLoadBoundary extends Component<{ children: ReactNode }, { failed: bo
     if (!this.state.failed) return this.props.children
 
     return (
-      <div role="alert" data-testid="editor-load-error" className="flex h-full flex-col items-center justify-center gap-4 bg-slate-900 p-6 text-center">
-        <p className="text-sm text-slate-200">A kódszerkesztőt nem sikerült betölteni. Ellenőrizd az internetkapcsolatot, majd próbáld újra.</p>
-        <button
-          type="button"
-          onClick={() => window.location.reload()}
-          className="min-h-11 rounded-lg border border-slate-700 bg-slate-800 px-5 text-sm font-medium text-slate-100 transition hover:bg-slate-700"
-        >
+      <div role="alert" data-testid="editor-load-error" className="flex h-full flex-col items-center justify-center gap-4 p-6 text-center">
+        <p className="text-15 leading-relaxed text-code-text">
+          A kódszerkesztőt nem sikerült betölteni. Ellenőrizd az internetkapcsolatot, majd próbáld újra.
+        </p>
+        <Button variant="dark" icon="refresh" onClick={() => window.location.reload()}>
           Újrapróbálás
-        </button>
+        </Button>
       </div>
     )
   }

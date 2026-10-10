@@ -86,6 +86,91 @@ export interface TaskNavigation {
   next_lesson: { slug: string; title: string; locked: boolean } | null
 }
 
+/**
+ * A feladat fajtája (`exercises.kind`, FRONTEND.md 11.). A jelenlegi backend még
+ * nem küldi: hiányában a feladat kódfeladat (`code`, SQL nyelvnél `sql`).
+ */
+export type ExerciseKind = 'code' | 'sql' | 'sheet_upload' | 'sheet_browser' | 'doc_upload' | 'doc_browser' | 'web' | 'visual_upload'
+
+/** Letölthető forrásfájl vagy minta egy feladathoz (aláírt, rövid életű URL-lel). */
+export interface TaskFile {
+  name: string
+  size: number
+  url: string
+}
+
+/** A fájlfeltöltős feladatok többletadatai; csak a megfelelő `kind` mellett érkeznek. */
+export interface FileTaskInfo {
+  /** Számozott teendők a feladatlap szerint. */
+  steps: string[]
+  sources: TaskFile[]
+  /** A beadandó fájl neve kiterjesztés nélkül, pl. `hyrox`. */
+  deliverable: string | null
+  accepted_extensions: string[]
+  /** A használható programok, pl. `['Excel', 'LibreOffice Calc']`. */
+  software: string[]
+  /** A kész munka mintaképe. */
+  sample_image_url: string | null
+  /** Melyik vizsgafeladatból származik, pl. „2026. május, 3. feladat”. */
+  exam_reference: string | null
+  exam_points: number | null
+}
+
+/** SQL feladat: az adatbázis szerkezete és a mentendő lekérdezések (FRONTEND.md 8.). */
+export interface SqlTaskInfo {
+  database: string
+  tables: Array<{ name: string; columns: Array<{ name: string; primary?: boolean; references?: string | null }> }>
+  subtasks: Array<{ label: string; query_name: string; points: number }>
+}
+
+/** Weboldal feladat egy ellenőrzési pontja; a böngészőben, a kód alapján értékeljük ki. */
+export type WebCheck = { id: number; label: string; points: number; hint?: string | null } & (
+  | { type: 'title'; value: string }
+  | { type: 'element_count'; file?: string; selector: string; count: number }
+  | { type: 'css_declaration'; property: string; pattern: string }
+  | { type: 'css_selector'; selector: string }
+  | { type: 'link'; file?: string; href: string }
+)
+
+export interface WebTaskInfo {
+  /** A szerkeszthető fájlok kiinduló tartalommal; az első HTML fájl az előnézet. */
+  files: Array<{ name: string; language: 'html' | 'css'; content: string }>
+  checks: WebCheck[]
+  exam_reference: string | null
+}
+
+/** Böngészős táblázatos gyakorló: a kiinduló cellák és az ellenőrzőlista. */
+export interface SheetPracticeInfo {
+  columns: number
+  rows: number
+  /** Cellacím → kiinduló tartalom, pl. `{ "A1": "Szakasz", "B2": "30" }`. */
+  cells: Record<string, string>
+  checks: Array<
+    { id: number; label: string } & (
+      | { type: 'has_formula'; cell: string }
+      | { type: 'uses_function'; cell: string; function: string }
+      | { type: 'references'; cell: string; reference: string }
+      | { type: 'value'; cell: string; expected: string }
+      | { type: 'filled_down'; range: string }
+    )
+  >
+}
+
+/** Böngészős szövegszerkesztő gyakorló: a kiinduló bekezdések és az ellenőrzőlista. */
+export interface DocPracticeInfo {
+  paragraphs: string[]
+  checks: Array<
+    { id: number; label: string; paragraph: number } & (
+      | { type: 'align'; value: 'left' | 'center' | 'right' | 'justify' }
+      | { type: 'font_size'; value: number }
+      | { type: 'bold' }
+      | { type: 'italic' }
+      | { type: 'underline' }
+      | { type: 'line_spacing'; value: number }
+    )
+  >
+}
+
 export interface TaskLesson {
   id: number
   title: string
@@ -106,7 +191,17 @@ export interface LessonVideo {
 /** Hozzáférhető feladat: teljes leírással és a nem rejtett tesztesetekkel. */
 export interface UnlockedTaskDetail extends TaskDetailBase {
   locked?: false
+  kind?: ExerciseKind
+  file_task?: FileTaskInfo
+  sql_task?: SqlTaskInfo
+  web_task?: WebTaskInfo
+  sheet_practice?: SheetPracticeInfo
+  doc_practice?: DocPracticeInfo
+  /** Programozási feladat forrásfájljai (emelt szint: adatfájlok). */
+  sources?: TaskFile[]
   description: string
+  /** A diáknak előre látható kódszabályok, magyarul (pl. „for ciklust kell használnod”). */
+  constraints?: string[]
   starter_code: Partial<Record<LanguageKey, string>>
   example_test_cases: ExampleTestCase[]
   /** Nyelvenként az érvényes korlát; régebbi (vagy mockolt) válaszokban hiányozhat. */
@@ -159,6 +254,15 @@ export interface TestResult {
   error?: string
 }
 
+/** Részfeladatonkénti pontozás (emelt szintű programozás, az `N. feladat` fejlécek szerint). */
+export interface SubtaskScore {
+  label: string
+  points: number
+  max_points: number
+  passed: boolean
+  note?: string | null
+}
+
 export interface RunResponse {
   status: RunStatus
   verdict?: Verdict
@@ -166,6 +270,8 @@ export interface RunResponse {
   /** Kódszabály-sértések (constraint_violation), magyarul. */
   violations?: string[]
   results: TestResult[]
+  /** Csak részfeladatonként pontozott feladatnál. */
+  subtasks?: SubtaskScore[]
   message?: string
 }
 

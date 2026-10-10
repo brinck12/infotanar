@@ -1,5 +1,8 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { hibaUzenet } from '../../../shared/api/errors'
+import { Banner } from '../../../shared/ui/Banner'
+import { Button } from '../../../shared/ui/Button'
+import { Panel } from '../../../shared/ui/Panel'
 import type { LessonDetail, UnlockedLessonDetail } from '../../../types'
 import { catalogKeys } from '../../catalog/api'
 import { progressKeys } from '../../progress/api'
@@ -15,7 +18,7 @@ export function CompleteLesson({ lesson }: { lesson: UnlockedLessonDetail }) {
   const complete = useMutation({
     mutationFn: () => completeLesson(lesson.id),
     onSuccess: () => {
-      // Az állapot azonnal látszik; a haladás és a tananyag-nézet a háttérben frissül.
+      // Az állapot azonnal látszik; a haladás és a tanulási út a háttérben frissül.
       queryClient.setQueryData<LessonDetail>(lessonQuery(lesson.track.slug, lesson.slug).queryKey, (current) =>
         current ? { ...current, status: 'completed' } : current,
       )
@@ -27,30 +30,25 @@ export function CompleteLesson({ lesson }: { lesson: UnlockedLessonDetail }) {
   if (lesson.exercises.length > 0 || lesson.status === null) return null
 
   return (
-    // A státusz-régió végig a DOM-ban van, így a képernyőolvasó a változást bemondja.
-    <div className="rounded-lg border border-slate-800 bg-slate-900 p-5" data-testid="complete-lesson">
-      <p role="status" className="text-slate-300">
+    <Panel as="section" aria-label="A lecke lezárása" data-testid="complete-lesson">
+      {/* A státusz-régió végig a DOM-ban van, így a képernyőolvasó a változást bemondja. */}
+      <p role="status" className="text-16 leading-relaxed text-ink-soft">
         {lesson.status === 'completed'
           ? 'Ezt a leckét késznek jelölted.'
           : 'Ehhez a leckéhez nincs feladat. Ha átnézted, jelöld késznek, hogy a haladásodban is megjelenjen.'}
       </p>
 
       {lesson.status !== 'completed' && (
-        <button
-          type="button"
-          onClick={() => complete.mutate()}
-          disabled={complete.isPending}
-          className="mt-4 rounded-lg bg-sky-700 px-5 py-2.5 font-medium text-white transition hover:bg-sky-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-400 disabled:opacity-60"
-        >
-          {complete.isPending ? 'Mentés…' : 'Megjelöltem késznek'}
-        </button>
+        <Button icon="check" busy={complete.isPending} busyLabel="Mentés…" onClick={() => complete.mutate()} className="mt-4">
+          Megjelöltem késznek
+        </Button>
       )}
 
       {complete.isError && (
-        <p role="alert" className="mt-3 text-sm text-red-300">
+        <Banner kind="error" className="mt-4">
           {hibaUzenet(complete.error)}
-        </p>
+        </Banner>
       )}
-    </div>
+    </Panel>
   )
 }

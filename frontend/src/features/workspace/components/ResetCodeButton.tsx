@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, type KeyboardEvent } from 'react'
+import { Button } from '../../../shared/ui/Button'
 
 interface Props {
   /** Eltér-e a szerkesztő tartalma a kiinduló kódtól (különben nincs mit visszaállítani). */
@@ -41,29 +42,22 @@ export function ResetCodeButton({ dirty, disabled = false, onReset }: Props) {
         role="group"
         aria-label="Visszaállítás megerősítése"
         data-testid="reset-confirm"
-        className="flex flex-wrap items-center gap-2 rounded-lg border border-amber-800 bg-amber-950/60 px-3 py-1.5 text-sm text-amber-100"
+        className="flex flex-wrap items-center gap-2 rounded-md border-strong border-ink bg-sheet px-3 py-1.5 text-15"
       >
         <span>Elvesznek a módosításaid. Visszaállítod a kiinduló kódot?</span>
-        <button
-          type="button"
+        <Button
+          variant="danger"
           onClick={() => {
             onReset()
             close()
           }}
           onKeyDown={closeOnEscape}
-          className="rounded-md bg-amber-700 px-3 py-1 font-medium text-white transition hover:bg-amber-600"
         >
-          Igen, visszaállítom
-        </button>
-        <button
-          ref={cancelRef}
-          type="button"
-          onClick={close}
-          onKeyDown={closeOnEscape}
-          className="rounded-md border border-amber-800 px-3 py-1 transition hover:bg-amber-900"
-        >
+          Visszaállítom
+        </Button>
+        <Button ref={cancelRef} variant="secondary" onClick={close} onKeyDown={closeOnEscape}>
           Mégse
-        </button>
+        </Button>
       </div>
     )
   }
@@ -76,7 +70,7 @@ export function ResetCodeButton({ dirty, disabled = false, onReset }: Props) {
       disabled={disabled || !dirty}
       title={dirty ? 'A szerkesztő tartalmának visszaállítása a kiinduló kódra' : 'A kód megegyezik a kiinduló kóddal'}
       data-testid="reset-code"
-      className="rounded-lg border border-slate-700 px-3 py-1.5 text-sm text-slate-300 transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-40"
+      className="min-h-11 px-1 text-16 font-semibold text-ink-soft underline underline-offset-4 hover:text-ink disabled:text-muted disabled:no-underline"
     >
       Kiinduló kód visszaállítása
     </button>

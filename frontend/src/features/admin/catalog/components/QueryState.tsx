@@ -1,19 +1,13 @@
 import type { UseQueryResult } from '@tanstack/react-query'
 import type { ReactNode } from 'react'
 import { hibaUzenet, mezoHibak } from '../../../../shared/api/errors'
-import { Alert } from '../../../../shared/ui/Form'
-import { PageLoader } from '../../../../shared/ui/PageLoader'
+import { Banner } from '../../../../shared/ui/Banner'
+import { LoadError, Skeleton } from '../../../../shared/ui/States'
 
 /** Betöltés / hiba / adat egységes kezelése az admin oldalakon. */
 export function QueryState<T>({ query, children }: { query: UseQueryResult<T>; children: (data: T) => ReactNode }) {
-  if (query.isPending) return <PageLoader />
-  if (query.isError) {
-    return (
-      <div className="mx-auto max-w-5xl px-4 py-8">
-        <Alert kind="error">{hibaUzenet(query.error)}</Alert>
-      </div>
-    )
-  }
+  if (query.isPending) return <Skeleton lines={5} className="max-w-prose" />
+  if (query.isError) return <LoadError error={query.error} onRetry={() => void query.refetch()} />
   return children(query.data)
 }
 
@@ -31,7 +25,17 @@ export function MutationError({ error, fields = NO_FIELDS }: { error: unknown; f
     .filter(([key]) => !fields.includes(key))
     .map(([, message]) => message)
 
-  if (Object.keys(fieldErrors).length === 0) return <Alert kind="error">{hibaUzenet(error)}</Alert>
+  if (Object.keys(fieldErrors).length === 0) {
+    return (
+      <Banner kind="error" className="mb-4">
+        {hibaUzenet(error)}
+      </Banner>
+    )
+  }
   if (unshown.length === 0) return null
-  return <Alert kind="error">{unshown.join(' ')}</Alert>
+  return (
+    <Banner kind="error" className="mb-4">
+      {unshown.join(' ')}
+    </Banner>
+  )
 }

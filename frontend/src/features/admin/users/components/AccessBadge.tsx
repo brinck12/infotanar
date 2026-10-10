@@ -1,21 +1,20 @@
-import { StatusPill } from '../../components/AdminShell'
+import { Badge } from '../../../../shared/ui/Badge'
 import type { AdminUser } from '../api'
 
-const SUBSCRIPTION_LABEL = { active: 'Előfizető', past_due: 'Lejárt fizetés' } as const
+const SUBSCRIPTION_LABEL = { active: 'Előfizető', past_due: 'Fizetési hiba' } as const
 
 /** Előfizetés / kézi hozzáférés / ingyenes: szöveggel, nem csak színnel. */
 export function AccessBadge({ user }: { user: AdminUser }) {
   return (
-    <span className="flex flex-wrap gap-1">
+    <span className="flex flex-wrap gap-1.5">
       {user.subscription ? (
-        <StatusPill tone={user.subscription.status === 'active' ? 'published' : 'draft'}>
+        <Badge kind={user.subscription.status === 'active' ? 'ok' : 'bad'}>
           {SUBSCRIPTION_LABEL[user.subscription.status]}
           {user.subscription.cancel_at_period_end ? ' (lemondva)' : ''}
-        </StatusPill>
+        </Badge>
       ) : null}
-      {user.access_grant && <StatusPill tone="free">Kézi hozzáférés</StatusPill>}
-      {!user.subscription && !user.access_grant && <StatusPill tone="info">Ingyenes</StatusPill>}
+      {user.access_grant && <Badge kind="manual">Kézi hozzáférés</Badge>}
+      {!user.subscription && !user.access_grant && <Badge kind="prem">Ingyenes csomag</Badge>}
     </span>
   )
 }
-

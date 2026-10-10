@@ -1,7 +1,14 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useState, type FormEvent } from 'react'
 import { mezoHibak } from '../../../../shared/api/errors'
-import { CheckboxField, SubmitButton, TextAreaField } from '../../../../shared/ui/Form'
+import { Badge } from '../../../../shared/ui/Badge'
+import { Button } from '../../../../shared/ui/Button'
+import { CheckboxField, SubmitButton, Switch, TextAreaField } from '../../../../shared/ui/Form'
+import { Modal } from '../../../../shared/ui/Modal'
+import { Panel } from '../../../../shared/ui/Panel'
+import { OutputBlock } from '../../../../shared/ui/ResultRow'
+import { Skeleton } from '../../../../shared/ui/States'
+import { CardTitle } from '../../../../shared/ui/Text'
 import {
   createTestCase,
   deleteTestCase,
@@ -12,17 +19,17 @@ import {
   type AdminTestCase,
   type TestCasePayload,
 } from '../api'
-import { StatusPill } from '../../components/AdminShell'
+import { IconButton } from './ChildList'
 import { MutationError } from './QueryState'
 
 const TEST_CASE_FIELDS = ['stdin', 'expected_stdout', 'is_hidden'] as const
 
 /**
  * Tesztesetek kezelése egy feladathoz (#48): felvétel, szerkesztés, törlés,
- * sorrend, és a nyilvános/rejtett kapcsoló. Minden változás után a diák
+ * sorrend, és a nyilvános/rejtett kapcsoló. Minden változás után a tanulói
  * oldali feladat-cache is frissül, így a módosítás azonnal látszik.
  *
- * A backend nem engedi, hogy egy publikált feladat utolsó nyilvános
+ * A backend nem engedi, hogy egy közzétett feladat utolsó nyilvános
  * tesztesete rejtett legyen vagy törlődjön; ez a hiba az adott sornál jelenik meg.
  */
 export function TestCaseManager({ exerciseId }: { exerciseId: number }) {
@@ -34,7 +41,7 @@ export function TestCaseManager({ exerciseId }: { exerciseId: number }) {
     onSettled: refresh,
   })
 
-  if (testCases.isPending) return <p className="text-sm text-slate-400">Tesztesetek betöltése…</p>
+  if (testCases.isPending) return <Skeleton lines={3} label="Tesztesetek betöltése…" />
   if (testCases.isError) return <MutationError error={testCases.error} />
 
   const items = testCases.data
@@ -49,14 +56,14 @@ export function TestCaseManager({ exerciseId }: { exerciseId: number }) {
   }
 
   return (
-    <div className="space-y-4" data-testid="test-case-manager">
-      <p className="text-sm text-slate-400">
-        {items.length} teszteset · {visible} nyilvános · {items.length - visible} rejtett. A nyilvánosakat a diák látja és a
-        „Futtatás” ezeken fut; a rejtettek csak beadáskor, a diák elől elrejtve.
+    <div className="flex flex-col gap-4" data-testid="test-case-manager">
+      <p className="text-15 leading-relaxed text-ink-soft">
+        {items.length} teszteset, ebből {visible} nyilvános és {items.length - visible} rejtett. A nyilvánosakat a tanuló látja, és a
+        Futtatás ezeken fut; a rejtettek csak beadáskor futnak le, és az adatuk rejtve marad.
       </p>
       <MutationError error={reorderCases.error} />
 
-      <ol className="space-y-3">
+      <ol className="flex flex-col gap-4">
         {items.map((testCase, index) => (
           <TestCaseRow
             key={testCase.id}
@@ -74,19 +81,15 @@ export function TestCaseManager({ exerciseId }: { exerciseId: number }) {
   )
 }
 
-function TestCaseRow({
-  testCase,
-  index,
-  count,
-  busy,
-  onMove,
-}: {
+interface TestCaseRowProps {
   testCase: AdminTestCase
   index: number
   count: number
   busy: boolean
   onMove: (delta: -1 | 1) => void
-}) {
+}
+
+function TestCaseRow({ testCase, index, count, busy, onMove }: TestCaseRowProps) {
   const queryClient = useQueryClient()
   const [editing, setEditing] = useState(false)
   const [confirmDelete, setConfirmDelete] = useState(false)
@@ -107,76 +110,33 @@ function TestCaseRow({
   const hidden = pendingHidden ?? testCase.is_hidden
 
   return (
-    <li className="rounded-lg border border-slate-800 bg-slate-950/40 p-3" data-testid="test-case" data-hidden={hidden}>
-      <div className="flex flex-wrap items-center gap-2">
-        <span className="text-sm font-medium text-slate-200">{label}</span>
-        <StatusPill tone={hidden ? 'draft' : 'published'}>{hidden ? 'Rejtett' : 'Nyilvános'}</StatusPill>
+    <Panel as="li" pad="md" data-testid="test-case" data-hidden={hidden}>
+      <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+        <span className="text-16 font-bold">{label}</span>
+        <Badge kind={hidden ? 'hidden' : 'pub'}>{hidden ? 'Rejtett' : 'Nyilvános'}</Badge>
 
-        <div className="ml-auto flex flex-wrap items-center gap-2 text-xs">
-          <label className="flex items-center gap-1.5 text-slate-300">
-            <input
-              type="checkbox"
-              className="h-4 w-4 accent-sky-600"
-              checked={hidden}
-              disabled={update.isPending}
-              onChange={(e) => {
-                setPendingHidden(e.target.checked)
-                update.mutate({ is_hidden: e.target.checked })
-              }}
-            />
-            Rejtett
-          </label>
-          <button type="button" className="rounded px-2 py-1 text-slate-300 hover:bg-slate-800" onClick={() => setEditing((v) => !v)}>
-            {editing ? 'Mégse' : 'Szerkesztés'}
-          </button>
-          <button
-            type="button"
-            aria-label={`${label} feljebb`}
-            disabled={busy || index === 0}
-            onClick={() => onMove(-1)}
-            className="h-7 w-7 rounded text-slate-300 hover:bg-slate-800 disabled:opacity-30"
-          >
-            <span aria-hidden="true">↑</span>
-          </button>
-          <button
-            type="button"
-            aria-label={`${label} lejjebb`}
-            disabled={busy || index === count - 1}
-            onClick={() => onMove(1)}
-            className="h-7 w-7 rounded text-slate-300 hover:bg-slate-800 disabled:opacity-30"
-          >
-            <span aria-hidden="true">↓</span>
-          </button>
-          {confirmDelete ? (
-            <span role="group" aria-label={`${label} törlésének megerősítése`} className="flex items-center gap-1">
-              <button
-                type="button"
-                onClick={() => {
-                  setConfirmDelete(false)
-                  remove.mutate()
-                }}
-                className="rounded bg-red-800 px-2 py-1 text-white hover:bg-red-700"
-              >
-                Törlés
-              </button>
-              <button type="button" onClick={() => setConfirmDelete(false)} className="rounded px-2 py-1 text-slate-300 hover:bg-slate-800">
-                Mégse
-              </button>
-            </span>
-          ) : (
-            <button
-              type="button"
-              aria-label={`${label} törlése`}
-              onClick={() => setConfirmDelete(true)}
-              className="h-7 w-7 rounded text-red-300 hover:bg-red-950"
-            >
-              <span aria-hidden="true">✕</span>
-            </button>
-          )}
+        <div className="ml-auto flex flex-wrap items-center gap-x-3 gap-y-1">
+          <Switch
+            label="Rejtett"
+            checked={hidden}
+            disabled={update.isPending}
+            onChange={(checked) => {
+              setPendingHidden(checked)
+              update.mutate({ is_hidden: checked })
+            }}
+          />
+          <Button variant="text" onClick={() => setEditing((v) => !v)}>
+            {editing ? 'Mégsem' : 'Szerkesztés'}
+          </Button>
+          <IconButton icon="chevron-up" label={`${label} feljebb`} disabled={busy || index === 0} onClick={() => onMove(-1)} />
+          <IconButton icon="chevron-down" label={`${label} lejjebb`} disabled={busy || index === count - 1} onClick={() => onMove(1)} />
+          <IconButton icon="trash" label={`${label} törlése`} disabled={remove.isPending} onClick={() => setConfirmDelete(true)} danger />
         </div>
       </div>
 
-      <MutationError error={update.error ?? remove.error} fields={editing ? TEST_CASE_FIELDS : []} />
+      <div className="mt-3 empty:hidden">
+        <MutationError error={update.error ?? remove.error} fields={editing ? TEST_CASE_FIELDS : []} />
+      </div>
 
       {editing ? (
         <TestCaseForm
@@ -188,11 +148,36 @@ function TestCaseRow({
         />
       ) : (
         <div className="mt-3 grid gap-3 sm:grid-cols-2">
-          <Block label="Bemenet (stdin)" value={testCase.stdin} />
-          <Block label="Elvárt kimenet" value={testCase.expected_stdout} />
+          <OutputBlock label="Bemenet (stdin)" value={testCase.stdin} />
+          <OutputBlock label="Elvárt kimenet" value={testCase.expected_stdout} />
         </div>
       )}
-    </li>
+
+      <Modal
+        open={confirmDelete}
+        title={`Biztosan törlöd: ${label}?`}
+        onClose={() => setConfirmDelete(false)}
+        actions={
+          <>
+            <Button variant="secondary" onClick={() => setConfirmDelete(false)}>
+              Mégsem
+            </Button>
+            <Button
+              variant="danger"
+              icon="trash"
+              onClick={() => {
+                setConfirmDelete(false)
+                remove.mutate()
+              }}
+            >
+              Törlés
+            </Button>
+          </>
+        }
+      >
+        <p>A teszteset véglegesen törlődik. A korábbi beadások eredménye nem változik.</p>
+      </Modal>
+    </Panel>
   )
 }
 
@@ -207,9 +192,11 @@ function NewTestCase({ exerciseId }: { exerciseId: number }) {
   })
 
   return (
-    <div className="rounded-lg border border-dashed border-slate-700 p-3">
-      <h3 className="text-sm font-medium text-slate-200">Új teszteset</h3>
-      <MutationError error={create.error} fields={TEST_CASE_FIELDS} />
+    <div className="rounded-md border-2 border-dashed border-muted bg-sheet p-5">
+      <CardTitle as="h3">Új teszteset</CardTitle>
+      <div className="mt-3 empty:hidden">
+        <MutationError error={create.error} fields={TEST_CASE_FIELDS} />
+      </div>
       <TestCaseForm
         key={formKey}
         initial={null}
@@ -222,19 +209,15 @@ function NewTestCase({ exerciseId }: { exerciseId: number }) {
   )
 }
 
-function TestCaseForm({
-  initial,
-  busy,
-  errors,
-  submitLabel,
-  onSubmit,
-}: {
+interface TestCaseFormProps {
   initial: AdminTestCase | null
   busy: boolean
   errors: Record<string, string>
   submitLabel: string
   onSubmit: (payload: TestCasePayload) => void
-}) {
+}
+
+function TestCaseForm({ initial, busy, errors, submitLabel, onSubmit }: TestCaseFormProps) {
   const [form, setForm] = useState<TestCasePayload>({
     stdin: initial?.stdin ?? '',
     expected_stdout: initial?.expected_stdout ?? '',
@@ -247,8 +230,8 @@ function TestCaseForm({
   }
 
   return (
-    <form onSubmit={submit} noValidate className="mt-3 grid gap-3">
-      <div className="grid gap-3 sm:grid-cols-2">
+    <form onSubmit={submit} noValidate className="mt-3 flex flex-col gap-4">
+      <div className="grid gap-4 sm:grid-cols-2">
         <TextAreaField
           label="Bemenet (stdin)"
           rows={4}
@@ -268,27 +251,16 @@ function TestCaseForm({
       </div>
       <CheckboxField
         label="Rejtett teszteset"
-        hint="Csak beadáskor fut, a diák nem látja a bemenetét és a kimenetét."
+        hint="Csak beadáskor fut, a tanuló nem látja a bemenetét és a kimenetét."
         checked={form.is_hidden}
         onChange={(e) => setForm({ ...form, is_hidden: e.target.checked })}
         error={errors.is_hidden}
       />
       <div>
-        <SubmitButton busy={busy} fullWidth={false}>
-          {busy ? 'Mentés…' : submitLabel}
+        <SubmitButton busy={busy} busyLabel="Mentés…" fullWidth={false}>
+          {submitLabel}
         </SubmitButton>
       </div>
     </form>
-  )
-}
-
-function Block({ label, value }: { label: string; value: string }) {
-  return (
-    <div>
-      <p className="mb-1 text-xs uppercase tracking-wide text-slate-400">{label}</p>
-      <pre className="max-h-40 overflow-auto rounded border border-slate-800 bg-slate-950 p-2 font-mono text-xs whitespace-pre-wrap text-slate-300">
-        {value === '' ? '(üres)' : value}
-      </pre>
-    </div>
   )
 }

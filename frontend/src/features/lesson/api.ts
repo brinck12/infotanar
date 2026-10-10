@@ -25,5 +25,5 @@ export async function completeLesson(lessonId: number): Promise<void> {
 }
 
 export function lessonPath(trackSlug: string, lessonSlug: string): string {
-  return `/tananyag/${trackSlug}/${lessonSlug}`
+  return `/tanulasi-ut/${encodeURIComponent(trackSlug)}/${encodeURIComponent(lessonSlug)}`
 }

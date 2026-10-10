@@ -2,6 +2,9 @@ import { test as base } from '@playwright/test'
 import { ApiClient } from '../api/ApiClient'
 import { Outbox } from '../api/Outbox'
 import { MockApi } from '../mocks/MockApi'
+import { HomePage } from '../pages/HomePage'
+import { LearningPathPage } from '../pages/LearningPathPage'
+import { RegisterPage } from '../pages/RegisterPage'
 import { TaskListPage } from '../pages/TaskListPage'
 import { TaskSolvePage } from '../pages/TaskSolvePage'
 import { a11yFixtures, type A11yFixtures } from './a11y'
@@ -17,6 +20,9 @@ export interface FrameworkOptions {
 export interface FrameworkFixtures {
   /** Route-interception alapu backend mock; `mockBackend` eseten az alap katalogussal. */
   mockApi: MockApi
+  homePage: HomePage
+  learningPathPage: LearningPathPage
+  registerPage: RegisterPage
   taskListPage: TaskListPage
   taskSolvePage: TaskSolvePage
   /** Tipusos kliens a valodi backendhez (API tesztek). */
@@ -34,6 +40,14 @@ export interface FrameworkFixtures {
 export const test = base.extend<FrameworkFixtures & A11yFixtures & FrameworkOptions>({
   mockBackend: [false, { option: true }],
 
+  context: async ({ context }, use) => {
+    // A tarolasi tajekoztato egyszeri, a kepernyo aljan all: a tesztekben mar nyugtazottnak szamit.
+    await context.addInitScript(() => {
+      localStorage.setItem('infotanar.storageNotice.v1', 'true')
+    })
+    await use(context)
+  },
+
   mockApi: async ({ page, mockBackend }, use) => {
     const mockApi = new MockApi(page)
     if (mockBackend) await mockApi.withCatalog()
@@ -42,6 +56,18 @@ export const test = base.extend<FrameworkFixtures & A11yFixtures & FrameworkOpti
 
   // Az oldalobjektumok a mockApi-tol fuggnek, igy a mockok mar a legelso
   // navigacio elott a helyukon vannak.
+  homePage: async ({ page, mockApi: _ }, use) => {
+    await use(new HomePage(page))
+  },
+
+  learningPathPage: async ({ page, mockApi: _ }, use) => {
+    await use(new LearningPathPage(page))
+  },
+
+  registerPage: async ({ page, mockApi: _ }, use) => {
+    await use(new RegisterPage(page))
+  },
+
   taskListPage: async ({ page, mockApi: _ }, use) => {
     await use(new TaskListPage(page))
   },

@@ -1,8 +1,9 @@
 import { useQuery } from '@tanstack/react-query'
 import { useState, type FormEvent } from 'react'
-import { Link, useParams } from 'react-router-dom'
+import { useParams } from 'react-router-dom'
 import { mezoHibak } from '../../../../shared/api/errors'
 import { LEVEL_LABEL } from '../../../../shared/domain/labels'
+import { ButtonLink } from '../../../../shared/ui/Button'
 import { CheckboxField, Field, SubmitButton, TextAreaField } from '../../../../shared/ui/Form'
 import { lessonQuery, moduleQuery, trackQuery, type AdminExercise, type AdminLesson, type LessonPayload } from '../api'
 import { AdminShell, Section, StatusPill } from '../../components/AdminShell'
@@ -45,8 +46,8 @@ function LessonEditor({ lesson }: { lesson: AdminLesson }) {
   return (
     <AdminShell
       crumbs={[
-        { label: 'Admin' },
-        { label: 'Tananyag', to: '/admin/tananyag' },
+        { label: 'Admin', to: '/admin' },
+        { label: 'Katalógus', to: '/admin/tananyag' },
         { label: track.data?.title ?? '…', to: module.data ? `/admin/tananyag/agak/${module.data.track_id}` : undefined },
         { label: module.data?.title ?? '…', to: `/admin/tananyag/modulok/${lesson.module_id}` },
         { label: lesson.title },
@@ -55,8 +56,8 @@ function LessonEditor({ lesson }: { lesson: AdminLesson }) {
     >
       <Section title="Lecke adatai" aside={<SavedNote mutation={save} />}>
         <MutationError error={save.error} fields={['title', 'slug', 'content', 'video_path', 'captions_path', 'is_free', 'is_published']} />
-        <form onSubmit={submit} noValidate className="grid gap-4">
-          <div className="grid gap-4 sm:grid-cols-2">
+        <form onSubmit={submit} noValidate className="grid gap-5">
+          <div className="grid gap-5 sm:grid-cols-2">
             <Field label="Cím" value={form.title} onChange={(e) => set('title', e.target.value)} error={errors.title} />
             <Field label="URL-azonosító" value={form.slug} onChange={(e) => set('slug', e.target.value)} error={errors.slug} />
           </div>
@@ -84,7 +85,7 @@ function LessonEditor({ lesson }: { lesson: AdminLesson }) {
             onChange={(e) => set('captions_path', e.target.value)}
             error={errors.captions_path}
           />
-          <div className="flex flex-wrap gap-6">
+          <div className="flex flex-wrap gap-x-10 gap-y-4">
             <CheckboxField
               label="Ingyenes lecke"
               hint="Előfizetés nélkül is elérhető."
@@ -93,8 +94,8 @@ function LessonEditor({ lesson }: { lesson: AdminLesson }) {
               error={errors.is_free}
             />
             <CheckboxField
-              label="Publikált"
-              hint="Csak publikált lecke jelenik meg a diákoknak."
+              label="Közzétéve"
+              hint="Csak közzétett lecke jelenik meg a tanulóknak."
               checked={form.is_published}
               onChange={(e) => set('is_published', e.target.checked)}
               error={errors.is_published}
@@ -111,12 +112,9 @@ function LessonEditor({ lesson }: { lesson: AdminLesson }) {
       <Section
         title="Feladatok"
         aside={
-          <Link
-            to={`/admin/tananyag/leckek/${lesson.id}/uj-feladat`}
-            className="rounded-lg bg-sky-700 px-3 py-1.5 text-sm font-medium text-white transition hover:bg-sky-600"
-          >
+          <ButtonLink to={`/admin/tananyag/leckek/${lesson.id}/uj-feladat`} variant="secondary" icon="plus">
             Új feladat
-          </Link>
+          </ButtonLink>
         }
       >
         <MutationError error={exercises.deleteChild.error ?? exercises.reorderChildren.error} />
@@ -130,7 +128,7 @@ function LessonEditor({ lesson }: { lesson: AdminLesson }) {
               <>
                 <StatusPill tone="info">{LEVEL_LABEL[exercise.level]}</StatusPill>
                 <StatusPill tone="info">{exercise.test_case_count ?? 0} teszteset</StatusPill>
-                <StatusPill tone={exercise.is_published ? 'published' : 'draft'}>{exercise.is_published ? 'Publikált' : 'Vázlat'}</StatusPill>
+                <StatusPill tone={exercise.is_published ? 'published' : 'draft'}>{exercise.is_published ? 'Közzétéve' : 'Piszkozat'}</StatusPill>
               </>
             ),
           }))}

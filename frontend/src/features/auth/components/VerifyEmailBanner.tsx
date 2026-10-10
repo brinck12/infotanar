@@ -1,9 +1,11 @@
 import { useMutation } from '@tanstack/react-query'
 import { hibaUzenet } from '../../../shared/api/errors'
+import { Banner } from '../../../shared/ui/Banner'
+import { Button } from '../../../shared/ui/Button'
 import * as authApi from '../api'
 import { useAuth } from '../context'
 
-/** Meg nem erősített e-mail-címnél minden oldalon emlékeztet, és új levelet lehet kérni. */
+/** Megerősítetlen e-mail-címnél minden oldalon jelezzük, és kérhető új levél. */
 export function VerifyEmailBanner() {
   const { user } = useAuth()
   const resend = useMutation({ mutationFn: authApi.resendVerification })
@@ -13,22 +15,19 @@ export function VerifyEmailBanner() {
   const feedback = resend.isSuccess ? resend.data : resend.isError ? hibaUzenet(resend.error) : null
 
   return (
-    <div role="status" className="border-b border-amber-900 bg-amber-950/60">
-      <div className="mx-auto flex max-w-7xl flex-wrap items-center gap-3 px-4 py-2 text-sm text-amber-200">
-        <span>Erősítsd meg az e-mail-címed a levélben kapott linkkel.</span>
-        {feedback ? (
-          <span className="text-amber-100">{feedback}</span>
-        ) : (
-          <button
-            type="button"
-            onClick={() => resend.mutate()}
-            disabled={resend.isPending}
-            className="underline hover:text-amber-100"
-          >
-            {resend.isPending ? 'Küldés…' : 'Új levél küldése'}
-          </button>
-        )}
-      </div>
-    </div>
+    <Banner
+      kind="warn"
+      title="Erősítsd meg az e-mail-címed"
+      className="mb-3"
+      action={
+        feedback ? undefined : (
+          <Button variant="secondary" busy={resend.isPending} busyLabel="Küldés…" onClick={() => resend.mutate()}>
+            Új levél küldése
+          </Button>
+        )
+      }
+    >
+      {feedback ?? 'Kattints a levélben kapott linkre. A fizetős leckék csak megerősített címmel nyílnak meg.'}
+    </Banner>
   )
 }

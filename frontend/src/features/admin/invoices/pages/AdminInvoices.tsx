@@ -1,12 +1,19 @@
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { useState, type FormEvent } from 'react'
+import { useId, useState, type FormEvent } from 'react'
 import { Link } from 'react-router-dom'
-import { hibaUzenet, mezoHibak } from '../../../../shared/api/errors'
-import { Alert, Field, SelectField, SubmitButton } from '../../../../shared/ui/Form'
+import { mezoHibak } from '../../../../shared/api/errors'
+import { Badge } from '../../../../shared/ui/Badge'
+import { Banner } from '../../../../shared/ui/Banner'
+import { Button } from '../../../../shared/ui/Button'
+import { Field, SelectField } from '../../../../shared/ui/Form'
+import { Modal } from '../../../../shared/ui/Modal'
+import { Pager } from '../../../../shared/ui/Pager'
+import { Panel } from '../../../../shared/ui/Panel'
+import { LoadError, Skeleton } from '../../../../shared/ui/States'
 import type { CustomerType } from '../../../../types'
 import { formatHuf } from '../../../billing/format'
 import { MutationError } from '../../catalog/components/QueryState'
-import { AdminShell, StatusPill } from '../../components/AdminShell'
+import { AdminShell } from '../../components/AdminShell'
 import { formatDate } from '../../users/format'
 import { adminInvoiceKeys, attentionInvoices, correctBuyer, retryInvoice, type AdminInvoice, type BuyerPayload } from '../api'
 
@@ -25,39 +32,27 @@ export function AdminInvoices() {
   })
 
   return (
-    <AdminShell crumbs={[{ label: 'Admin' }, { label: 'Számlák' }]} title="Figyelmet igénylő számlák">
+    <AdminShell crumbs={[{ label: 'Admin', to: '/admin' }, { label: 'Számlák' }]} title="Sikertelen számlák">
       {invoices.isError ? (
-        <Alert kind="error">{hibaUzenet(invoices.error)}</Alert>
+        <LoadError error={invoices.error} onRetry={() => void invoices.refetch()} />
       ) : !invoices.data ? (
-        <p className="text-sm text-slate-400">Betöltés…</p>
+        <Skeleton lines={4} />
       ) : invoices.data.data.length === 0 ? (
-        <Alert kind="success">Nincs elakadt számla: minden sikeres fizetéshez elkészült a számla.</Alert>
+        <Banner kind="success" title="Nincs elakadt számla">
+          Minden sikeres fizetéshez elkészült a számla.
+        </Banner>
       ) : (
         <>
-          <p className="text-sm text-slate-400">
-            {invoices.data.meta.total} számla vár beavatkozásra. A vevő adatait a fizetéskori másolat tartalmazza; javítás után indítsd újra a
-            kiállítást.
-          </p>
-          <ul className="space-y-4">
+          <Banner kind="info">
+            {invoices.data.meta.total} számla vár beavatkozásra. A vevő adatait a fizetéskori másolat tartalmazza: javítsd ki, majd indítsd
+            újra a kiállítást.
+          </Banner>
+          <ul className="flex flex-col gap-4">
             {invoices.data.data.map((invoice) => (
               <InvoiceCard key={invoice.id} invoice={invoice} />
             ))}
           </ul>
-          {invoices.data.meta.last_page > 1 && (
-            <nav aria-label="Lapozás" className="flex justify-between text-sm">
-              <button type="button" disabled={page <= 1} onClick={() => setPage(page - 1)} className="text-slate-300 disabled:opacity-30">
-                ← Előző
-              </button>
-              <button
-                type="button"
-                disabled={page >= invoices.data.meta.last_page}
-                onClick={() => setPage(page + 1)}
-                className="text-slate-300 disabled:opacity-30"
-              >
-                Következő →
-              </button>
-            </nav>
-          )}
+          <Pager page={page} lastPage={invoices.data.meta.last_page} onChange={setPage} />
         </>
       )}
     </AdminShell>
@@ -71,49 +66,49 @@ function InvoiceCard({ invoice }: { invoice: AdminInvoice }) {
   const retry = useMutation({ mutationFn: () => retryInvoice(invoice.id), onSettled: refresh })
 
   return (
-    <li className="space-y-3 rounded-lg border border-slate-800 bg-slate-900/60 p-4 text-sm" data-testid="admin-invoice" data-status={invoice.status}>
-      <div className="flex flex-wrap items-center gap-2">
-        <StatusPill tone={invoice.status === 'failed' ? 'draft' : 'info'}>{invoice.status === 'failed' ? 'Elutasítva' : 'Régóta függő'}</StatusPill>
-        <span className="font-medium text-slate-100">{formatHuf(invoice.gross_amount)}</span>
-        <span className="text-slate-400">· fizetve: {formatDate(invoice.payment?.paid_at ?? null)}</span>
-        <span className="text-slate-400">· {invoice.attempts} kísérlet</span>
+    <Panel as="li" data-testid="admin-invoice" data-status={invoice.status}>
+      <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+        <Badge kind={invoice.status === 'failed' ? 'bad' : 'neutral'}>{invoice.status === 'failed' ? 'Elutasítva' : 'Régóta függő'}</Badge>
+        <span className="text-16 font-bold">{formatHuf(invoice.gross_amount)}</span>
+        <span className="text-15 text-ink-soft">Fizetve: {formatDate(invoice.payment?.paid_at ?? null)}</span>
+        <span className="text-15 text-ink-soft">{invoice.attempts} kísérlet</span>
         {invoice.user && (
-          <Link to={`/admin/felhasznalok/${invoice.user.id}`} className="ml-auto text-sky-400 hover:underline">
+          <Link to={`/admin/felhasznalok/${invoice.user.id}`} className="ml-auto inline-flex min-h-8 items-center text-15">
             {invoice.user.name}
           </Link>
         )}
       </div>
 
       {invoice.last_error && (
-        <p className="rounded border border-red-900 bg-red-950/50 p-2 font-mono text-xs text-red-200" data-testid="invoice-error">
-          {invoice.last_error}
-        </p>
+        <Banner kind="error" title="A kiállítás hibája" className="mt-4">
+          <span className="font-mono text-14" data-testid="invoice-error">
+            {invoice.last_error}
+          </span>
+        </Banner>
       )}
 
-      <p className="text-slate-300">
-        Vevő: {invoice.buyer.name}, {invoice.buyer.postal_code} {invoice.buyer.city}, {invoice.buyer.address_line}
-        {invoice.buyer.tax_number ? ` · adószám: ${invoice.buyer.tax_number}` : ''} · {invoice.buyer.email}
+      <p className="mt-4 text-15 leading-relaxed">
+        <span className="font-semibold">Vevő:</span> {invoice.buyer.name}, {invoice.buyer.postal_code} {invoice.buyer.city},{' '}
+        {invoice.buyer.address_line}
+        {invoice.buyer.tax_number ? `, adószám: ${invoice.buyer.tax_number}` : ''}, {invoice.buyer.email}
       </p>
 
-      <MutationError error={retry.error} />
-      {retry.isSuccess && <Alert kind="info">Újraindítva; a kiállítás a háttérben fut.</Alert>}
-
-      <div className="flex flex-wrap gap-2">
-        <button
-          type="button"
-          onClick={() => retry.mutate()}
-          disabled={retry.isPending}
-          className="rounded-lg bg-sky-700 px-3 py-1.5 text-white hover:bg-sky-600 disabled:opacity-60"
-        >
-          {retry.isPending ? 'Indítás…' : 'Kiállítás újraindítása'}
-        </button>
-        <button type="button" onClick={() => setEditing((v) => !v)} className="rounded-lg border border-slate-700 px-3 py-1.5 text-slate-200 hover:bg-slate-800">
-          {editing ? 'Mégse' : 'Vevő adatainak javítása'}
-        </button>
+      <div className="mt-4 empty:hidden">
+        <MutationError error={retry.error} />
+        {retry.isSuccess && <Banner kind="success">Újraindítva. A kiállítás a háttérben fut.</Banner>}
       </div>
 
-      {editing && <BuyerForm invoice={invoice} onSaved={() => setEditing(false)} />}
-    </li>
+      <div className="mt-4 flex flex-wrap gap-3">
+        <Button icon="refresh" busy={retry.isPending} busyLabel="Indítás…" onClick={() => retry.mutate()}>
+          Kiállítás újraindítása
+        </Button>
+        <Button variant="secondary" icon="edit" onClick={() => setEditing(true)}>
+          Vevő adatainak javítása
+        </Button>
+      </div>
+
+      <BuyerDialog invoice={invoice} open={editing} onClose={() => setEditing(false)} />
+    </Panel>
   )
 }
 
@@ -122,8 +117,9 @@ const CUSTOMER_TYPES = [
   { value: 'company', label: 'Cég vagy egyéni vállalkozó' },
 ] as const
 
-function BuyerForm({ invoice, onSaved }: { invoice: AdminInvoice; onSaved: () => void }) {
+function BuyerDialog({ invoice, open, onClose }: { invoice: AdminInvoice; open: boolean; onClose: () => void }) {
   const queryClient = useQueryClient()
+  const formId = useId()
   const [form, setForm] = useState<BuyerPayload>({
     customer_type: invoice.buyer.customer_type,
     name: invoice.buyer.name,
@@ -135,7 +131,7 @@ function BuyerForm({ invoice, onSaved }: { invoice: AdminInvoice; onSaved: () =>
   })
   const save = useMutation({
     mutationFn: (payload: BuyerPayload) => correctBuyer(invoice.id, payload),
-    onSuccess: onSaved,
+    onSuccess: onClose,
     onSettled: () => queryClient.invalidateQueries({ queryKey: adminInvoiceKeys.all }),
   })
   const errors = mezoHibak(save.error)
@@ -148,30 +144,56 @@ function BuyerForm({ invoice, onSaved }: { invoice: AdminInvoice; onSaved: () =>
   }
 
   return (
-    <form onSubmit={submit} noValidate className="grid gap-3 border-t border-slate-800 pt-3 sm:grid-cols-2" aria-label="Vevő adatainak javítása">
-      <div className="sm:col-span-2">
-        <MutationError error={save.error} fields={['customer_type', 'name', 'postal_code', 'city', 'address_line', 'tax_number', 'email']} />
-      </div>
-      <SelectField
-        label="Vevő típusa"
-        options={CUSTOMER_TYPES}
-        value={form.customer_type}
-        onChange={(e) => set('customer_type', e.target.value as CustomerType)}
-        error={errors.customer_type}
-      />
-      <Field label={isCompany ? 'Cégnév' : 'Név'} value={form.name} onChange={(e) => set('name', e.target.value)} error={errors.name} />
-      {isCompany && (
-        <Field label="Adószám" value={form.tax_number ?? ''} onChange={(e) => set('tax_number', e.target.value)} error={errors.tax_number} />
-      )}
-      <Field label="Irányítószám" value={form.postal_code} onChange={(e) => set('postal_code', e.target.value)} error={errors.postal_code} />
-      <Field label="Település" value={form.city} onChange={(e) => set('city', e.target.value)} error={errors.city} />
-      <Field label="Utca, házszám" value={form.address_line} onChange={(e) => set('address_line', e.target.value)} error={errors.address_line} />
-      <Field label="E-mail (ide küldi a számlát)" type="email" value={form.email} onChange={(e) => set('email', e.target.value)} error={errors.email} />
-      <div className="sm:col-span-2">
-        <SubmitButton busy={save.isPending} fullWidth={false}>
-          {save.isPending ? 'Mentés…' : 'Javítás mentése'}
-        </SubmitButton>
-      </div>
-    </form>
+    <Modal
+      open={open}
+      size="lg"
+      title="Vevő adatainak javítása"
+      onClose={onClose}
+      actions={
+        <>
+          <Button variant="secondary" onClick={onClose}>
+            Mégsem
+          </Button>
+          <Button type="submit" form={formId} busy={save.isPending} busyLabel="Mentés…">
+            Javítás mentése
+          </Button>
+        </>
+      }
+    >
+      <p className="text-15 text-ink-soft">Csak ennek a számlának a vevőadatai változnak, a felhasználó számlázási adatai nem.</p>
+      <form id={formId} onSubmit={submit} noValidate className="mt-4 grid gap-4 sm:grid-cols-2" aria-label="Vevő adatainak javítása">
+        <div className="empty:hidden sm:col-span-2">
+          <MutationError error={save.error} fields={['customer_type', 'name', 'postal_code', 'city', 'address_line', 'tax_number', 'email']} />
+        </div>
+        <SelectField
+          label="Vevő típusa"
+          options={CUSTOMER_TYPES}
+          value={form.customer_type}
+          onChange={(e) => set('customer_type', e.target.value as CustomerType)}
+          error={errors.customer_type}
+        />
+        <Field label={isCompany ? 'Cég neve' : 'Név'} value={form.name} onChange={(e) => set('name', e.target.value)} error={errors.name} />
+        {isCompany && (
+          <Field
+            label="Adószám"
+            hint="Formátum: 12345678-1-42"
+            value={form.tax_number ?? ''}
+            onChange={(e) => set('tax_number', e.target.value)}
+            error={errors.tax_number}
+          />
+        )}
+        <Field label="Irányítószám" value={form.postal_code} onChange={(e) => set('postal_code', e.target.value)} error={errors.postal_code} />
+        <Field label="Település" value={form.city} onChange={(e) => set('city', e.target.value)} error={errors.city} />
+        <Field label="Utca, házszám" value={form.address_line} onChange={(e) => set('address_line', e.target.value)} error={errors.address_line} />
+        <Field
+          label="Számla e-mail-címe"
+          type="email"
+          hint="Ide küldjük a számlát."
+          value={form.email}
+          onChange={(e) => set('email', e.target.value)}
+          error={errors.email}
+        />
+      </form>
+    </Modal>
   )
 }

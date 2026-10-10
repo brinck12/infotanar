@@ -1,81 +1,56 @@
 import type { ReactNode } from 'react'
-import { Link, NavLink } from 'react-router-dom'
+import { Badge, type BadgeKind } from '../../../shared/ui/Badge'
+import type { Crumb } from '../../../shared/ui/Breadcrumb'
+import { Panel } from '../../../shared/ui/Panel'
+import { useCrumbs } from '../../../shared/ui/shell'
+import { CardTitle, PageTitle } from '../../../shared/ui/Text'
 
-export interface Crumb {
-  label: string
-  to?: string
+export type { Crumb }
+
+interface AdminShellProps {
+  crumbs: Crumb[]
+  title: string
+  actions?: ReactNode
+  children: ReactNode
 }
 
-const ADMIN_SECTIONS = [
-  { to: '/admin/tananyag', label: 'Tananyag' },
-  { to: '/admin/felhasznalok', label: 'Felhasználók' },
-  { to: '/admin/szamlak', label: 'Számlák' },
-] as const
+/**
+ * Egy admin oldal tartalma: cím, műveletek és a szakaszok. A fejlécet és a
+ * bal oldali menüt az admin keret adja; a morzsamenüt innen kapja meg.
+ */
+export function AdminShell({ crumbs, title, actions, children }: AdminShellProps) {
+  useCrumbs(crumbs)
 
-/** Admin oldalkeret: morzsamenü, cím és a tartalom. */
-export function AdminShell({ crumbs, title, actions, children }: { crumbs: Crumb[]; title: string; actions?: ReactNode; children: ReactNode }) {
   return (
-    <div className="mx-auto max-w-5xl px-4 py-8">
-      {/* Keskeny kijelzőn a fülek a saját sorukban görgethetők, nem tolják szét az oldalt. */}
-      <nav aria-label="Admin menü" className="mb-4 flex gap-1 overflow-x-auto border-b border-slate-800 text-sm whitespace-nowrap">
-        {ADMIN_SECTIONS.map((section) => (
-          <NavLink
-            key={section.to}
-            to={section.to}
-            className={({ isActive }) =>
-              `-mb-px border-b-2 px-3 py-2 transition ${isActive ? 'border-sky-400 text-slate-100' : 'border-transparent text-slate-400 hover:text-slate-200'}`
-            }
-          >
-            {section.label}
-          </NavLink>
-        ))}
-      </nav>
-      <nav aria-label="Morzsamenü" className="text-sm text-slate-400">
-        <ol className="flex flex-wrap items-center gap-1">
-          {crumbs.map((crumb, i) => (
-            <li key={`${crumb.label}|${crumb.to ?? ''}`} className="flex items-center gap-1">
-              {i > 0 && <span aria-hidden="true">/</span>}
-              {crumb.to ? (
-                <Link to={crumb.to} className="hover:text-slate-200 hover:underline">
-                  {crumb.label}
-                </Link>
-              ) : (
-                <span aria-current="page" className="text-slate-300">
-                  {crumb.label}
-                </span>
-              )}
-            </li>
-          ))}
-        </ol>
-      </nav>
-      <div className="mt-3 flex flex-wrap items-center gap-3">
-        <h1 className="text-2xl font-semibold text-slate-100">{title}</h1>
-        {actions && <div className="ml-auto flex items-center gap-2">{actions}</div>}
+    <>
+      <div className="mb-7 flex flex-wrap items-center justify-between gap-x-6 gap-y-3">
+        <PageTitle size="compact">{title}</PageTitle>
+        {actions && <div className="flex flex-wrap gap-3">{actions}</div>}
       </div>
-      <div className="mt-6 space-y-8">{children}</div>
-    </div>
+      <div className="flex flex-col gap-6">{children}</div>
+    </>
   )
 }
 
 export function Section({ title, children, aside }: { title: string; children: ReactNode; aside?: ReactNode }) {
   return (
-    <section aria-label={title} className="rounded-lg border border-slate-800 bg-slate-900/60 p-5">
-      <div className="mb-4 flex items-center gap-3">
-        <h2 className="text-base font-semibold text-slate-100">{title}</h2>
-        {aside && <div className="ml-auto">{aside}</div>}
+    <Panel as="section" aria-label={title}>
+      <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+        <CardTitle as="h2">{title}</CardTitle>
+        {aside && <div>{aside}</div>}
       </div>
       {children}
-    </section>
+    </Panel>
   )
 }
 
-export function StatusPill({ tone, children }: { tone: 'published' | 'draft' | 'free' | 'info'; children: ReactNode }) {
-  const style = {
-    published: 'bg-emerald-950 text-emerald-300',
-    draft: 'bg-slate-800 text-slate-400',
-    free: 'bg-sky-950 text-sky-300',
-    info: 'bg-slate-800 text-slate-300',
-  }[tone]
+const PILL: Readonly<Record<'published' | 'draft' | 'free' | 'info', BadgeKind>> = {
+  published: 'pub',
+  draft: 'draft',
+  free: 'free',
+  info: 'neutral',
+}
 
-  return <span className={`rounded px-2 py-0.5 text-xs ${style}`}>{children}</span>
+export function StatusPill({ tone, children }: { tone: keyof typeof PILL; children: ReactNode }) {
+  return <Badge kind={PILL[tone]}>{children}</Badge>
 }

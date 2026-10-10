@@ -1,8 +1,16 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { useState, type ReactNode } from 'react'
+import { useId, useState } from 'react'
+import { Navigate } from 'react-router-dom'
 import { hibaUzenet, mezoHibak } from '../../../shared/api/errors'
-import { Alert, CheckboxField } from '../../../shared/ui/Form'
+import { Banner } from '../../../shared/ui/Banner'
+import { Breadcrumb } from '../../../shared/ui/Breadcrumb'
+import { Button } from '../../../shared/ui/Button'
+import { CheckboxField } from '../../../shared/ui/Form'
+import { StateIcon } from '../../../shared/ui/Icon'
 import { PageLoader } from '../../../shared/ui/PageLoader'
+import { Panel } from '../../../shared/ui/Panel'
+import { LoadError } from '../../../shared/ui/States'
+import { CardTitle, PageTitle, SectionTitle } from '../../../shared/ui/Text'
 import type { BillingProfile, BillingProfilePayload, Plan } from '../../../types'
 import { useAuth } from '../../auth/context'
 import { LEGAL_VERSIONS } from '../../legal/documents'
@@ -10,13 +18,14 @@ import { LegalLink } from '../../legal/LegalLink'
 import * as billingApi from '../api'
 import { billingKeys } from '../api'
 import { BillingProfileForm } from '../components/BillingProfileForm'
-import { SubscriptionManager } from '../components/SubscriptionManager'
 import { formatHuf } from '../format'
 
+const STEPS = ['Fiók', 'Számlázási adatok', 'Fizetés'] as const
+
 /**
- * Előfizetés (#19): számlázási adatok, majd tovább a Barion fizetőoldalára.
+ * Megrendelés (#19): számlázási adatok, majd tovább a Barion fizetőoldalára.
  * A számla ezekből az adatokból készül, ezért fizetni csak utánuk lehet.
- * Előfizetőknek ugyanitt az önkiszolgáló kezelés jelenik meg (#101).
+ * Aki már előfizető, azt a fiók Előfizetés oldalára visszük (#101).
  */
 export function Subscribe() {
   const { user } = useAuth()
@@ -27,36 +36,46 @@ export function Subscribe() {
   })
   const profile = useQuery({ queryKey: billingKeys.profile, queryFn: ({ signal }) => billingApi.profile(signal) })
 
-  if (plan.isError || subscription.isError || profile.isError) {
-    return (
-      <Page>
-        <Alert kind="error">{hibaUzenet(plan.error ?? subscription.error ?? profile.error)}</Alert>
-      </Page>
-    )
-  }
+  const error = plan.error ?? subscription.error ?? profile.error
 
-  if (!plan.isSuccess || !subscription.isSuccess || !profile.isSuccess) return <PageLoader />
+  if (subscription.data) return <Navigate to="/fiok/elofizetes" replace />
 
   return (
-    <Page>
-      {subscription.data ? (
-        <SubscriptionManager subscription={subscription.data} profile={profile.data} />
-      ) : (
-        <>
-          <PlanSummary plan={plan.data} />
-          {user?.email_verified_at ? (
-            <CheckoutForm initial={profile.data} />
-          ) : (
-            <Alert kind="info">Előfizetés előtt erősítsd meg az e-mail-címed a regisztrációkor kapott levélben.</Alert>
-          )}
-        </>
-      )}
-    </Page>
+    <main className="mx-auto w-full max-w-page flex-1 px-4 pt-8 pb-24 md:px-6">
+      <Breadcrumb items={[{ label: 'Árak', to: '/arak' }, { label: 'Megrendelés' }]} />
+      <PageTitle className="mt-4">Prémium előfizetés</PageTitle>
+
+      <ol className="mt-6 flex flex-wrap gap-x-8 gap-y-2">
+        {STEPS.map((step, index) => (
+          <li key={step} aria-current={index === 1 ? 'step' : undefined} className="flex items-center gap-2 text-16 font-semibold">
+            <StateIcon kind={index === 0 ? 'ok' : 'empty'} label={index === 0 ? 'Kész' : 'Hátravan'} />
+            {step}
+          </li>
+        ))}
+      </ol>
+
+      <div className="mt-8">
+        {error ? (
+          <LoadError error={error} />
+        ) : !plan.isSuccess || !subscription.isSuccess || !profile.isSuccess ? (
+          <PageLoader />
+        ) : user?.email_verified_at ? (
+          <CheckoutForm initial={profile.data} plan={plan.data} />
+        ) : (
+          <Banner kind="warn" title="Előbb erősítsd meg az e-mail-címed">
+            A regisztrációkor kapott levélben találod a linket. Megerősített cím nélkül nem indítható fizetés.
+          </Banner>
+        )}
+      </div>
+    </main>
   )
 }
 
-function CheckoutForm({ initial }: { initial: BillingProfile | null }) {
+function CheckoutForm({ initial, plan }: { initial: BillingProfile | null; plan: Plan }) {
   const queryClient = useQueryClient()
+  const formId = useId()
+  const [accepted, setAccepted] = useState(false)
+  const [termsError, setTermsError] = useState(false)
 
   // Két lépés egy gombnyomásra: az adatok mentése, majd a fizetés indítása.
   // A mentés hibái mezőnként jelennek meg; a fizetésé általános hibaként.
@@ -69,11 +88,9 @@ function CheckoutForm({ initial }: { initial: BillingProfile | null }) {
     onSuccess: ({ checkout_url }) => window.location.assign(checkout_url),
   })
 
-  // A vásárló kifejezett kérése az azonnali teljesítésre (#133); enélkül a szerver sem indít fizetést.
-  const [immediatePerformance, setImmediatePerformance] = useState(false)
-
   const busy = save.isPending || checkout.isPending || checkout.isSuccess
   const fieldErrors = mezoHibak(save.error)
+  // A szerver sem indít fizetést az azonnali teljesítés kifejezett kérése nélkül (#133).
   const consentError = mezoHibak(checkout.error).accept_immediate_performance
   const generalError =
     save.isError && Object.keys(fieldErrors).length === 0
@@ -83,66 +100,70 @@ function CheckoutForm({ initial }: { initial: BillingProfile | null }) {
         : null
 
   function submit(payload: BillingProfilePayload) {
+    setTermsError(!accepted)
+    if (!accepted) return
     checkout.reset()
     save.mutate(payload, {
-      onSuccess: () =>
-        checkout.mutate({ accept_immediate_performance: immediatePerformance, terms_version: LEGAL_VERSIONS.terms }),
+      onSuccess: () => checkout.mutate({ accept_immediate_performance: true, terms_version: LEGAL_VERSIONS.terms }),
     })
   }
 
   return (
-    <section aria-labelledby="billing-title" className="space-y-4">
-      <h2 id="billing-title" className="text-lg font-semibold text-slate-100">
-        Számlázási adatok
-      </h2>
-      {generalError && <Alert kind="error">{generalError}</Alert>}
-      <BillingProfileForm
-        initial={initial}
-        errors={fieldErrors}
-        busy={busy}
-        submitLabel={busy ? 'Átirányítás a fizetéshez…' : 'Tovább a fizetéshez'}
-        beforeSubmit={
-          <CheckboxField
-            label={
-              <span>
-                Kérem, hogy az előfizetés a fizetés után azonnal elinduljon, és tudomásul veszem az{' '}
-                <LegalLink to="terms">ÁSZF</LegalLink> elállási jogra vonatkozó szabályait.
-              </span>
-            }
-            required
-            checked={immediatePerformance}
-            onChange={(e) => setImmediatePerformance(e.target.checked)}
-            error={consentError}
-          />
-        }
-        onSubmit={submit}
-      />
-      <p className="text-xs text-slate-500">
-        A fizetés a Barion biztonságos oldalán történik; a kártyaadataid hozzánk nem jutnak el. A kártyád a havi
-        megújításhoz tárolásra kerül a Barionnál, és az előfizetés bármikor lemondható.
-      </p>
-    </section>
-  )
-}
+    <div className="flex flex-wrap items-start gap-8">
+      <Panel as="section" pad="xl" aria-labelledby="billing-title" className="min-w-0 flex-1 basis-96">
+        <SectionTitle id="billing-title" className="text-24">
+          Számlázási adatok
+        </SectionTitle>
+        <p className="mt-2 mb-6 text-16 leading-relaxed text-ink-soft">
+          Ezek kerülnek a számlára. Később a fiókodban módosíthatod, de a már kiállított számla nem változik.
+        </p>
+        <BillingProfileForm formId={formId} initial={initial} errors={fieldErrors} busy={busy} onSubmit={submit} />
+      </Panel>
 
-function PlanSummary({ plan }: { plan: Plan }) {
-  return (
-    <div className="rounded-lg border border-slate-800 bg-slate-900 p-5">
-      <p className="text-sm text-slate-400">{plan.name}</p>
-      <p className="mt-1 text-2xl font-semibold text-slate-100">
-        {formatHuf(plan.price_huf)}
-        <span className="text-base font-normal text-slate-400"> / hónap</span>
-      </p>
-      <p className="mt-2 text-sm text-slate-400">Minden feladat és videó elérhető, havonta megújul, bármikor lemondható.</p>
-    </div>
-  )
-}
+      <Panel as="aside" kind="highlight" aria-labelledby="summary-title" className="w-full md:w-96 md:flex-none">
+        <CardTitle id="summary-title">Összegzés</CardTitle>
+        <dl className="mt-4 text-16">
+          <div className="flex justify-between gap-4 border-t border-grid py-3">
+            <dt>{plan.name}, havi előfizetés</dt>
+            <dd className="font-semibold whitespace-nowrap">{formatHuf(plan.price_huf)}</dd>
+          </div>
+          <div className="flex justify-between gap-4 border-t border-ink py-3 font-bold">
+            <dt>Ma fizetendő</dt>
+            <dd className="whitespace-nowrap">{formatHuf(plan.price_huf)}</dd>
+          </div>
+        </dl>
+        <p className="text-14 leading-relaxed text-ink-soft">Ezután havonta, ugyanezen a napon. Bármikor lemondható a fiókodban.</p>
 
-function Page({ children }: { children: ReactNode }) {
-  return (
-    <div className="mx-auto max-w-lg space-y-6 px-4 py-12">
-      <h1 className="text-2xl font-semibold text-slate-100">Előfizetés</h1>
-      {children}
+        <CheckboxField
+          className="mt-5"
+          checked={accepted}
+          onChange={(e) => {
+            setAccepted(e.target.checked)
+            if (e.target.checked) setTermsError(false)
+          }}
+          required
+          error={termsError ? 'A fizetéshez jelöld be ezt a nyilatkozatot.' : consentError}
+          label={
+            <>
+              Kérem, hogy az előfizetés a fizetés után azonnal elinduljon, és tudomásul veszem az{' '}
+              <LegalLink to="terms">ÁSZF</LegalLink> elállási jogra vonatkozó szabályait.
+            </>
+          }
+        />
+
+        {generalError && (
+          <Banner kind="error" className="mt-4">
+            {generalError}
+          </Banner>
+        )}
+
+        <Button type="submit" form={formId} size="lg" icon="lock" fullWidth busy={busy} busyLabel="Átirányítás a Barionhoz…" className="mt-5">
+          Fizetés Barionnal
+        </Button>
+        <p className="mt-3 text-14 leading-relaxed text-ink-soft">
+          A Barion fizetőoldalára viszünk. A kártyaadataidat mi nem látjuk; a kártyát a Barion tárolja a havi megújításhoz.
+        </p>
+      </Panel>
     </div>
   )
 }

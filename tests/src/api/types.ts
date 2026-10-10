@@ -51,6 +51,8 @@ export interface TaskDetail {
   topic: TaskTopic
   example_test_cases: ExampleTestCase[]
   hidden_test_case_count: number
+  /** Nyelvenkent az ervenyes ido- es memoriakorlat (#151). */
+  limits?: Partial<Record<LanguageKey, { time_limit_ms: number; memory_limit_kb: number }>>
 }
 
 export type RunStatus = 'passed' | 'failed' | 'error'
@@ -148,4 +150,69 @@ export interface HealthResponse {
 export interface TaskListQuery {
   topic?: string
   level?: Level
+}
+
+/** Kepzesi ag a listaban (GET /tracks). */
+export interface TrackSummary {
+  id: number
+  slug: string
+  title: string
+  description: string | null
+  module_count: number
+  lesson_count: number
+  free_lesson_count: number
+  /** A nezo haladasa; vendegnel null. */
+  progress: null
+}
+
+type ExerciseSummary = Pick<TaskListItem, 'id' | 'title' | 'level' | 'difficulty' | 'allowed_languages'>
+
+interface LessonLink {
+  slug: string
+  title: string
+}
+
+/** Egy lecke oldala vendegkent, szabadon elerheto leckenel (GET /tracks/{track}/lessons/{lesson}). */
+export interface LessonDetail {
+  id: number
+  slug: string
+  title: string
+  track: LessonLink
+  module: { id: number; title: string | null }
+  is_free: boolean
+  has_video: boolean
+  status: null
+  exercises: ExerciseSummary[]
+  previous: LessonLink | null
+  next: LessonLink | null
+  locked: false
+  /** A tananyag Markdownban; ures, ha a leckehez meg nem keszult. */
+  content: string
+}
+
+/** Kepzesi ag szerkezete (GET /tracks/{slug}): modulok, leckek, feladatok. */
+export interface TrackDetail {
+  id: number
+  slug: string
+  title: string
+  description: string | null
+  modules: {
+    id: number
+    slug: string
+    title: string
+    description: string | null
+    lessons: {
+      id: number
+      slug: string
+      title: string
+      is_free: boolean
+      locked: boolean
+      locked_reason: null
+      has_video: boolean
+      exercise_count: number
+      /** A nezo haladasa; vendegnel null. */
+      status: null
+      exercises: ExerciseSummary[]
+    }[]
+  }[]
 }

@@ -15,7 +15,7 @@ interface Props {
   label: string
 }
 
-const HANDLE_PX = 12
+const HANDLE_PX = 24
 const KEY_STEP = 0.02
 
 /**
@@ -129,12 +129,10 @@ export function SplitPane({
         onDoubleClick={() => onRatioChange(clamp(defaultRatio))}
         onKeyDown={onKeyDown}
         data-testid="split-pane-handle"
-        className="group flex cursor-col-resize touch-none justify-center self-stretch focus:outline-none"
+        className="group flex cursor-col-resize touch-none justify-center self-stretch rounded-full"
       >
         <span
-          className={`h-full w-0.5 rounded-full transition-colors group-hover:bg-sky-500 group-focus-visible:bg-sky-400 ${
-            dragRatio !== null ? 'bg-sky-400' : 'bg-slate-800'
-          }`}
+          className={`h-full w-0.5 rounded-full group-hover:bg-accent group-focus-visible:bg-accent ${dragRatio !== null ? 'bg-accent' : 'bg-line'}`}
         />
       </div>
 
