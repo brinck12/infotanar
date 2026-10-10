@@ -65,6 +65,13 @@ Minden végpont a `/api/v1` előtag alatt érhető el. A hozzáférés oszlop je
 | `GET` | `/admin/users/{user}/access-grants` | admin | – |
 | `POST` | `/admin/users/{user}/access-grants` | admin | – |
 | `GET` | `/admin/users/{user}/export` | admin | – |
+| `POST` | `/admin/users/{user}/password-reset` | admin | `admin-user-mail` |
+| `GET` | `/admin/users/{user}/payments` | admin | – |
+| `GET` | `/admin/users/{user}/payments/{payment}/invoice` | admin | `30,1` |
+| `PUT` | `/admin/users/{user}/role` | admin | – |
+| `DELETE` | `/admin/users/{user}/tokens` | admin | – |
+| `POST` | `/admin/users/{user}/verification-notification` | admin | `admin-user-mail` |
+| `POST` | `/admin/users/{user}/verify-email` | admin | – |
 
 ## auth
 
@@ -133,14 +140,14 @@ Minden végpont a `/api/v1` előtag alatt érhető el. A hozzáférés oszlop je
 
 | Metódus | Útvonal | Hozzáférés | Limit |
 |---|---|---|---|
-| `POST` | `/run` | nyilvános | `10,1` |
+| `POST` | `/run` | nyilvános | `execution` |
 
 ## submissions
 
 | Metódus | Útvonal | Hozzáférés | Limit |
 |---|---|---|---|
 | `GET` | `/submissions` | bejelentkezve | – |
-| `POST` | `/submissions` | nyilvános | `10,1` |
+| `POST` | `/submissions` | nyilvános | `execution` |
 | `GET` | `/submissions/{submission}` | bejelentkezve | – |
 
 ## tasks
