@@ -17,6 +17,8 @@ Minden végpont a `/api/v1` előtag alatt érhető el. A hozzáférés oszlop je
 | `GET` | `/account/email/confirm/{id}/{hash}` | aláírt link | – |
 | `GET` | `/account/export` | bejelentkezve | `account-export` |
 | `PUT` | `/account/password` | bejelentkezve | `sensitive` |
+| `GET` | `/account/preferences` | bejelentkezve | – |
+| `PUT` | `/account/preferences` | bejelentkezve | `30,1,preferences` |
 | `PATCH` | `/account/profile` | bejelentkezve | `10,1` |
 
 ## admin
@@ -135,6 +137,14 @@ Minden végpont a `/api/v1` előtag alatt érhető el. A hozzáférés oszlop je
 | `GET` | `/lessons/{lesson}/video` | nyilvános | – |
 | `GET` | `/lessons/{lesson}/video/captions` | aláírt link | – |
 | `GET` | `/lessons/{lesson}/video/stream` | aláírt link | – |
+
+## oral
+
+| Metódus | Útvonal | Hozzáférés | Limit |
+|---|---|---|---|
+| `GET` | `/oral/practice` | bejelentkezve | – |
+| `PUT` | `/oral/practice/{topic}` | bejelentkezve | `60,1,oral-practice` |
+| `POST` | `/oral/practice/{topic}/attempts` | bejelentkezve | `60,1,oral-practice` |
 
 ## progress
 
