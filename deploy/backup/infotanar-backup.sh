@@ -12,6 +12,10 @@
 #   db/monthly/  a honap elso napjanak dumpjai, 12 honapig
 #   invoices/    a kiallitott szamlak PDF-jei (csak bovul, torles nem terjed at)
 #   videos/      lecke-videok es feliratok (hetente, lasd VIDEO_BACKUP_WEEKDAY)
+#   exercise-files/  feladatok es vizsgak csatolt fajljai (hetente, a videokkal egyutt)
+#
+# Szandekosan NEM mentjuk a diakok feltoltott megoldasait (submission-files/):
+# a pontszam es az eredmeny az adatbazisban van, a fajlt a diak ujra feltoltheti.
 #
 # Titkositas: a BACKUP_REMOTE legyen rclone "crypt" tarolo, akkor minden a
 # szerveren titkositva megy fel. Visszaallitas: docs/runbooks/backup-restore.md
@@ -109,6 +113,10 @@ copy_directory "$PRIVATE_STORAGE_DIR/invoices" "$BACKUP_REMOTE/invoices"
 if [ "$weekday" = "$VIDEO_BACKUP_WEEKDAY" ]; then
     log "Lecke-videok mentese"
     copy_directory "$PRIVATE_STORAGE_DIR/lesson-videos" "$BACKUP_REMOTE/videos"
+
+    # Szerzoi tartalom (forrasfajlok, mintak, mintamegoldasok): potolhatatlan.
+    log "Feladatfajlok mentese"
+    copy_directory "$PRIVATE_STORAGE_DIR/exercise-files" "$BACKUP_REMOTE/exercise-files"
 fi
 
 # A readiness vegpont (#130) ebbol latja, mikor volt az utolso sikeres mentes.

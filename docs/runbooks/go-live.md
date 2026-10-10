@@ -8,6 +8,13 @@ nincs kipipálva, az élesben el fog törni vagy észrevétlen marad.
 
 - [ ] **Csomagok** telepítve: nginx, PHP 8.3 + php-fpm, MySQL 8, **Python 3**, certbot, rclone.
       Ellenőrzés: `python3 --version` (nélküle a feladatok kódszabályai csendben nem érvényesülnek).
+- [ ] **PHP-kiterjesztések**: `zip`, `dom`, `fileinfo`, `intl`, `mbstring`, `pdo_mysql`, `curl` (a `zip` nélkül a feltöltött
+      xlsx, docx, ods fájlok nem értékelhetők ki, és a `composer install` is megáll).
+      Ellenőrzés: `php -m | grep -E "zip|dom|fileinfo|intl"`, és `php-fpm8.3 -m` ugyanezt mutatja.
+- [ ] **PHP-FPM feltöltési korlátok** a fájlfeladatokhoz (`/etc/php/8.3/fpm/php.ini`, utána `systemctl reload php8.3-fpm`):
+      `upload_max_filesize = 12M`, `post_max_size = 14M`, `max_file_uploads = 5`, `memory_limit = 256M`.
+      Az alkalmazás ezeket nem állítja be; a párjuk az nginx `client_max_body_size 12m` sora a PHP location-ben.
+      Ellenőrzés: egy 5 MB-os fájl feltöltése egy fájlfeladathoz sikerül; egy 11 MB-os magyar hibaüzenetet ad (422), nem nginx- vagy PHP-hibaoldalt.
 - [ ] **HTTPS**: tanúsítvány és a [`deploy/nginx/infotanar.conf`](../../deploy/nginx/infotanar.conf) telepítve.
       Ellenőrzés: `curl -I http://<domain>` 301-et ad; `curl -I https://<domain>` válaszában ott a `Strict-Transport-Security`.
 - [ ] **Judge0** fut, és csak localhostról érhető el.
@@ -20,6 +27,8 @@ nincs kipipálva, az élesben el fog törni vagy észrevétlen marad.
 - [ ] `APP_URL` és `FRONTEND_URL` a végleges `https://` cím (ezekből épülnek a levelek linkjei és a Barion visszairányítás).
 - [ ] **Levelezés**: valódi SMTP, a feladó domainjén SPF és DKIM beállítva.
       Ellenőrzés: regisztráció egy külső címmel; a megerősítő levél megérkezik, és nem a spamben köt ki.
+- [ ] A fájlfeladatok két privát tárolója írható a PHP-FPM felhasználójának (`storage/app/private/exercise-files`, `…/submission-files`; az első írásnál jönnek létre).
+      Ellenőrzés: az `app:check-config` nem jelez `EXERCISE_FILES_DISK`, `SUBMISSION_FILES_DISK` vagy `ext-zip` problémát.
 - [ ] `ALERT_EMAIL` beállítva (ide jönnek a riasztások), `HEALTH_TOKEN` generálva (`openssl rand -hex 32`).
 - [ ] GitHub: `DEPLOY_URL` és `HEALTH_TOKEN` secret, `DEPLOY_STRICT_CONFIG=true` változó.
 

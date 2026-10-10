@@ -11,6 +11,7 @@ negyedévente érdemes elvégezni.
 | MySQL adatbázis | `mysqldump --single-transaction`, gzip | éjszaka 02:30 | 7 napi, 4 heti, 12 havi |
 | Számlák (`storage/app/private/invoices`) | `rclone copy` (csak bővül) | éjszaka | korlátlan (számviteli megőrzés) |
 | Lecke-videók és feliratok (`…/lesson-videos`) | `rclone copy` | hetente (vasárnap) | korlátlan |
+| Feladatok és vizsgák csatolt fájljai (`…/exercise-files`): forrásfájlok, minták, mintamegoldások | `rclone copy` | hetente (vasárnap) | korlátlan |
 | Deploy előtti pillanatkép | `php artisan db:snapshot-before-migrate` | minden deploy, ha van új migráció | az utolsó 3, **a szerveren** |
 
 A szkript: [`deploy/backup/infotanar-backup.sh`](../../deploy/backup/infotanar-backup.sh).
@@ -22,6 +23,11 @@ való, hogy egy rossz migráció után percek alatt vissza lehessen állni.
 
 Amit **nem** mentünk: a `.env` (titkok; jelszókezelőben legyen meg), a naplók, a
 cache és a sor. A kód a GitHubon van.
+
+Szándékosan nem mentjük a diákok feltöltött megoldásait sem
+(`storage/app/private/submission-files`): a pontszám és az értékelés eredménye az
+adatbázisban van, a fájlt a diák újra feltöltheti. Visszaállítás után a régi
+beadások eredménye látszik, de a képes előnézetük hiányozhat.
 
 ## Egyszeri beállítás a szerveren
 
@@ -100,16 +106,22 @@ gunzip -c storage/app/private/db-snapshots/<fájl>.sql.gz | mysql -u infotanar -
 Ezután a **korábbi kódot** kell visszatenni (a hibás commit visszavonása és új
 deploy), különben a következő deploy újra lefuttatja a hibás migrációt.
 
-### Számlák és videók
+### Számlák, videók és feladatfájlok
 
 ```bash
 sudo rclone copy infotanar-offsite:invoices /var/www/infotanar/backend/storage/app/private/invoices
 sudo rclone copy infotanar-offsite:videos   /var/www/infotanar/backend/storage/app/private/lesson-videos
+sudo rclone copy infotanar-offsite:exercise-files /var/www/infotanar/backend/storage/app/private/exercise-files
 sudo chown -R www-data:www-data /var/www/infotanar/backend/storage/app/private
 ```
 
 Hiányzó számla-PDF a Számlázz.hu fiókból is letölthető; az adatbázisban a
 számlaszám megvan.
+
+A feladatfájlok heti mentése miatt egy visszaállítás után az utolsó hét új
+csatolmányai hiányozhatnak: az adatbázisban megvan a soruk, de a letöltésük 404-et
+ad. Ezeket az admin felületen újra fel kell tölteni (azonos névvel a régi sort
+cseréli).
 
 ## Visszaállítási próba
 
