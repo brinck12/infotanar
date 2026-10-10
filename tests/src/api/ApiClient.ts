@@ -26,6 +26,24 @@ import type {
  */
 export type RunPayload = Omit<RunRequest, 'language'> & { language: LanguageKey | (string & {}) }
 
+/** Egy feltoltendo fajl a multipart keresben (a Playwright `multipart` alakja). */
+export interface UploadFile {
+  name: string
+  mimeType: string
+  buffer: Buffer
+}
+
+/** A multipart keres szoveges mezoi. */
+export type MultipartFields = Record<string, string | number | boolean>
+
+/** Egy nyers (nem JSON) valasz: statusz, fejlecek (kisbetus nevekkel) es a torzs bajtjai. */
+export interface BinaryResult {
+  status: number
+  ok: boolean
+  headers: Record<string, string>
+  body: Buffer
+}
+
 /**
  * Egy API hivas eredmenye: a statusz es a mar feldolgozott JSON torzs.
  * A `body` tipusa a sikeres valaszt irja le; hibas statusznal az
@@ -171,31 +189,62 @@ export class ApiClient {
     return { client: this.withToken(body.data.token), user: body.data.user, token: body.data.token }
   }
 
+  // Az alabbi nyers HTTP metodusok nyilvanosak: az uj teruletek segedfuggvenyei
+  // (src/api/areas/*.ts) ezekre epulnek, igy ezt a fajlt nem kell bovitaniuk.
+  //
   // Megjegyzes: az utvonalak elejen NINCS perjel, kulonben a WHATWG URL
   // feloldas levagna a baseURL /api/v1/ reszet.
-  protected get<T>(path: string, params?: Record<string, string>): Promise<ApiResult<T>> {
+  get<T>(path: string, params?: Record<string, string>): Promise<ApiResult<T>> {
     return this.send<T>('GET', path, { params })
   }
 
-  protected post<T>(path: string, data: unknown): Promise<ApiResult<T>> {
+  post<T>(path: string, data: unknown): Promise<ApiResult<T>> {
     return this.send<T>('POST', path, { data })
   }
 
-  protected put<T>(path: string, data: unknown): Promise<ApiResult<T>> {
+  put<T>(path: string, data: unknown): Promise<ApiResult<T>> {
     return this.send<T>('PUT', path, { data })
   }
 
-  protected patch<T>(path: string, data: unknown): Promise<ApiResult<T>> {
+  patch<T>(path: string, data: unknown): Promise<ApiResult<T>> {
     return this.send<T>('PATCH', path, { data })
   }
 
-  protected delete<T>(path: string): Promise<ApiResult<T>> {
+  delete<T>(path: string): Promise<ApiResult<T>> {
     return this.send<T>('DELETE', path, {})
   }
 
-  private async send<T>(method: string, path: string, options: { params?: Record<string, string>; data?: unknown }): Promise<ApiResult<T>> {
-    const headers = this.token ? { Authorization: `Bearer ${this.token}` } : undefined
-    return this.toResult<T>(await this.request.fetch(path, { method, headers, ...options }))
+  /**
+   * multipart/form-data POST: fajlfeltoltes a szoveges mezokkel egyutt. A fajl
+   * elhagyhato (pl. ertekelolap-proba a mintamegoldassal), es mas mezonevvel
+   * is kuldheto, hogy a hianyzo/rossz mezo is tesztelheto legyen.
+   */
+  postMultipart<T>(path: string, fields: MultipartFields = {}, file?: UploadFile, fileField = 'file'): Promise<ApiResult<T>> {
+    const multipart: Record<string, string | number | boolean | UploadFile> = { ...fields }
+    if (file) multipart[fileField] = file
+    return this.send<T>('POST', path, { multipart })
+  }
+
+  /**
+   * Nyers (nem JSON) valasz letoltese: alairt fajl-URL-ekhez. Az utvonal lehet
+   * az API-hoz kepest relativ (`attachments/1/download?...`) vagy a valaszbol
+   * kapott teljes URL; a token (ha van) ilyenkor is megy.
+   */
+  async getBinary(path: string): Promise<BinaryResult> {
+    const response = await this.request.fetch(path, { method: 'GET', headers: this.authorization() })
+    return { status: response.status(), ok: response.ok(), headers: response.headers(), body: await response.body() }
+  }
+
+  private async send<T>(
+    method: string,
+    path: string,
+    options: { params?: Record<string, string>; data?: unknown; multipart?: Record<string, string | number | boolean | UploadFile> }
+  ): Promise<ApiResult<T>> {
+    return this.toResult<T>(await this.request.fetch(path, { method, headers: this.authorization(), ...options }))
+  }
+
+  private authorization(): Record<string, string> | undefined {
+    return this.token ? { Authorization: `Bearer ${this.token}` } : undefined
   }
 
   private async toResult<T>(response: APIResponse): Promise<ApiResult<T>> {

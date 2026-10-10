@@ -11,6 +11,7 @@
     "test:a11y": "playwright test --grep @a11y",
     "test:ui": "playwright test --ui",
     "report": "playwright show-report",
+    "fixtures": "tsx fixtures/files/generate.ts",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "typecheck": "tsc -p .",
