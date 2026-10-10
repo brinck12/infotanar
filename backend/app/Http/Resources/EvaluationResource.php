@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Resources;
 
 use App\Services\Execution\EvaluationResult;
+use App\Services\Execution\Subtasks\SubtaskScore;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -29,6 +30,8 @@ final class EvaluationResource extends JsonResource
             'violations' => $this->when($this->resource->violations !== [], $this->resource->violations),
             'message' => $this->when($this->resource->violations !== [], implode(' ', $this->resource->violations)),
             'results' => $this->resource->results,
+            // Csak reszfeladatonkent pontozott feladatnal: minden mas valasz alakja valtozatlan.
+            'subtasks' => $this->when($this->resource->subtasks !== null, fn (): array => SubtaskScore::listToArray($this->resource->subtasks ?? [])),
         ];
     }
 }

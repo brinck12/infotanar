@@ -30,11 +30,12 @@ final class Judge0Service
      * @param  string  $languageKey  A config/judge0.php 'languages' kulcsa (pl. 'python').
      * @param  ExecutionLimits  $limits  A futasra ervenyes ido- es memoriakorlat.
      * @param  int|null  $timeout  Erre a hivasra jutó ido (mp); nagyobb kell legyen a faliora-korlatnal.
+     * @param  string|null  $additionalFiles  Base64-elt zip: a program munkakonyvtaraba kicsomagolt adatfajlok (ExecutionFileArchive).
      * @return Judge0Run
      *
      * @throws Judge0Exception
      */
-    public function run(string $languageKey, string $sourceCode, ?string $stdin, ExecutionLimits $limits, ?int $timeout = null): array
+    public function run(string $languageKey, string $sourceCode, ?string $stdin, ExecutionLimits $limits, ?int $timeout = null, ?string $additionalFiles = null): array
     {
         $payload = [
             'cpu_time_limit' => $limits->cpuTimeSeconds(),
@@ -45,6 +46,11 @@ final class Judge0Service
             'source_code' => base64_encode($sourceCode),
             'stdin' => base64_encode((string) $stdin),
         ];
+
+        // Fajl nelkul a mezo ki is marad: a fajl nelkuli feladatok kerese valtozatlan.
+        if ($additionalFiles !== null) {
+            $payload['additional_files'] = $additionalFiles;
+        }
 
         $request = $this->request();
         if ($timeout !== null) {
