@@ -48,6 +48,7 @@ Minden végpont a `/api/v1` előtag alatt érhető el. A hozzáférés oszlop je
 | `GET` | `/admin/modules/{module}` | admin | – |
 | `PUT|PATCH` | `/admin/modules/{module}` | admin | – |
 | `PUT` | `/admin/modules/{module}/lessons/order` | admin | – |
+| `GET` | `/admin/overview` | admin | – |
 | `GET` | `/admin/ping` | admin | – |
 | `DELETE` | `/admin/test-cases/{testCase}` | admin | – |
 | `GET` | `/admin/test-cases/{testCase}` | admin | – |
