@@ -133,14 +133,14 @@ Minden végpont a `/api/v1` előtag alatt érhető el. A hozzáférés oszlop je
 
 | Metódus | Útvonal | Hozzáférés | Limit |
 |---|---|---|---|
-| `POST` | `/run` | nyilvános | `10,1` |
+| `POST` | `/run` | nyilvános | `execution` |
 
 ## submissions
 
 | Metódus | Útvonal | Hozzáférés | Limit |
 |---|---|---|---|
 | `GET` | `/submissions` | bejelentkezve | – |
-| `POST` | `/submissions` | nyilvános | `10,1` |
+| `POST` | `/submissions` | nyilvános | `execution` |
 | `GET` | `/submissions/{submission}` | bejelentkezve | – |
 
 ## tasks

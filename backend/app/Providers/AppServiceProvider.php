@@ -14,6 +14,7 @@ use App\Models\Subscription;
 use App\Models\TestCase;
 use App\Models\Track;
 use App\Models\User;
+use App\Support\Alerts\OperatorAlert;
 use App\Support\RateLimiting\ExecutionRateLimit;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Database\Eloquent\Model;
