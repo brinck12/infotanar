@@ -24,4 +24,11 @@ enum AuditAction: string
 
     case InvoiceBuyerCorrected = 'invoice.buyer_corrected';
     case InvoiceRetried = 'invoice.retried';
+    case InvoiceDownloaded = 'invoice.downloaded';
+
+    case UserRoleChanged = 'user.role_changed';
+    case UserVerificationResent = 'user.verification_resent';
+    case UserEmailVerified = 'user.email_verified';
+    case UserTokensRevoked = 'user.tokens_revoked';
+    case UserPasswordResetSent = 'user.password_reset_sent';
 }

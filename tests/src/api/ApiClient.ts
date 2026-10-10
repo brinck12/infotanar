@@ -1,5 +1,6 @@
 import type { APIRequestContext, APIResponse } from '@playwright/test'
 import type {
+  AdminUserRole,
   DataEnvelope,
   HealthResponse,
   LanguageKey,
@@ -15,6 +16,7 @@ import type {
   TaskListQuery,
   Topic,
   User,
+  UserRole,
   ValidationErrorResponse,
 } from './types'
 
@@ -120,6 +122,40 @@ export class ApiClient {
 
   resendVerification(): Promise<ApiResult<MessageResponse>> {
     return this.post('auth/email/verification-notification', {})
+  }
+
+  // Admin felhasznalo-kezeles (#162). A szerepkor szandekosan barmilyen string lehet a validacio tesztelesehez.
+  adminChangeRole(userId: number, role: UserRole | (string & {})): Promise<ApiResult<DataEnvelope<AdminUserRole>>> {
+    return this.put(`admin/users/${String(userId)}/role`, { role })
+  }
+
+  adminResendVerification(userId: number): Promise<ApiResult<MessageResponse>> {
+    return this.post(`admin/users/${String(userId)}/verification-notification`, {})
+  }
+
+  adminVerifyEmail(userId: number, reason?: string): Promise<ApiResult<null>> {
+    return this.post(`admin/users/${String(userId)}/verify-email`, { reason })
+  }
+
+  adminRevokeTokens(userId: number): Promise<ApiResult<null>> {
+    return this.delete(`admin/users/${String(userId)}/tokens`)
+  }
+
+  adminSendPasswordReset(userId: number): Promise<ApiResult<MessageResponse>> {
+    return this.post(`admin/users/${String(userId)}/password-reset`, {})
+  }
+
+  adminUserPayments(userId: number): Promise<ApiResult<DataEnvelope<unknown[]>>> {
+    return this.get(`admin/users/${String(userId)}/payments`)
+  }
+
+  /** Csak a hibaagakhoz: sikeres valasznal PDF jon, nem JSON. */
+  adminUserInvoice(userId: number, paymentId: string): Promise<ApiResult<MessageResponse>> {
+    return this.get(`admin/users/${String(userId)}/payments/${paymentId}/invoice`)
+  }
+
+  adminDeleteUser(userId: number): Promise<ApiResult<MessageResponse>> {
+    return this.delete(`admin/users/${String(userId)}`)
   }
 
   /** Ugyanez a kliens Bearer tokennel. */

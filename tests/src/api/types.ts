@@ -102,6 +102,9 @@ export interface DataEnvelope<T> {
 
 export type UserRole = 'student' | 'admin'
 
+/** A szerepkor-valtas valasza: csak az, ami valtozott. */
+export type AdminUserRole = Pick<User, 'id' | 'role'>
+
 export interface RegisterRequest {
   name: string
   email: string

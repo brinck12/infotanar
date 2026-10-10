@@ -19,6 +19,8 @@ export const SEEDED = {
   unpublishedTaskId: 2,
   /** A fo feladat tesztesetei: 2 nyilvanos + 2 rejtett. */
   mainTask: { exampleCount: 2, hiddenCount: 2, pythonStarter: 'print()\n' },
+  /** Rogzitett, megerositett fiokok; a jelszavuk a DEFAULT_PASSWORD. Az admin az egyetlen admin. */
+  accounts: { admin: 'admin@infotanar.test', student: 'student@infotanar.test' },
 } as const
 
 /**
