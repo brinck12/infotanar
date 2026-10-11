@@ -12,7 +12,7 @@ import { Panel } from '../../../../shared/ui/Panel'
 import { Prose } from '../../../../shared/ui/Prose'
 import { TabPanel, Tabs } from '../../../../shared/ui/Tabs'
 import { CardTitle } from '../../../../shared/ui/Text'
-import type { LanguageKey, Level } from '../../../../types'
+import type { ExerciseKind, LanguageKey, Level } from '../../../../types'
 import { CodeEditor } from '../../../workspace/components/CodeEditor'
 import {
   exerciseQuery,
@@ -26,11 +26,15 @@ import {
 } from '../api'
 import { AdminShell } from '../../components/AdminShell'
 import { RubricBuilder } from '../../exams/components/RubricBuilder'
+import { AttachmentManager } from '../components/AttachmentManager'
 import { ConstraintEditor } from '../components/ConstraintEditor'
 import { ExecutionLimitFields } from '../components/ExecutionLimitFields'
 import { MutationError, QueryState } from '../components/QueryState'
 import { TestCaseManager } from '../components/TestCaseManager'
+import { TypeDataEditor } from '../components/TypeDataEditor'
 import { SavedNote } from '../components/SavedNote'
+import { isEditorKind, isUploadExerciseKind, KIND_OPTIONS } from '../kinds'
+import { buildTypeData, initialTypeData, type TypeData } from '../typeData'
 import { useSaveEntity } from '../useCatalogMutations'
 
 /** Meglévő feladat szerkesztése. */
@@ -58,19 +62,24 @@ function LessonContext({ lessonId, children }: { lessonId: number; children: (le
 }
 
 /** Az űrlapon megjelenített mezőhibák; minden más a szakasz tetején. */
-const EXERCISE_FIELDS = ['title', 'description', 'level', 'difficulty', 'allowed_languages', 'allowed_languages.0', 'is_published', 'sql_order_sensitive', 'time_limit_ms', 'memory_limit_kb', 'constraints', 'starter_code.python', 'starter_code.csharp', 'starter_code.sql'] as const
+const EXERCISE_FIELDS = ['kind', 'title', 'description', 'level', 'difficulty', 'allowed_languages', 'allowed_languages.0', 'is_published', 'sql_order_sensitive', 'time_limit_ms', 'memory_limit_kb', 'constraints', 'starter_code.python', 'starter_code.csharp', 'starter_code.sql'] as const
 
 const LEVEL_OPTIONS = (Object.keys(LEVEL_LABEL) as Level[]).map((level) => ({ value: level, label: LEVEL_LABEL[level] }))
 const DIFFICULTY_OPTIONS = [1, 2, 3, 4, 5].map((n) => ({ value: String(n), label: String(n) }))
 
-type EditorTab = 'leiras' | 'tesztek' | 'szabalyok' | 'ertekelolap'
+type EditorTab = 'leiras' | 'tipus' | 'tesztek' | 'szabalyok' | 'ertekelolap' | 'fajlok'
 
-const TABS: ReadonlyArray<{ id: EditorTab; label: string }> = [
-  { id: 'leiras', label: 'Leírás és kód' },
-  { id: 'tesztek', label: 'Tesztesetek' },
-  { id: 'szabalyok', label: 'Szabályok' },
-  { id: 'ertekelolap', label: 'Értékelőlap' },
-]
+/** A fülek a feladat típusától függnek: a tesztesetek és szabályok a szerkesztős, az értékelőlap a feltöltős típusoké. */
+function tabsFor(kind: ExerciseKind): ReadonlyArray<{ id: EditorTab; label: string }> {
+  const tabs: Array<{ id: EditorTab; label: string }> = [
+    { id: 'leiras', label: isEditorKind(kind) ? 'Leírás és kód' : 'Leírás' },
+    { id: 'tipus', label: 'Típus-adatok' },
+  ]
+  if (isEditorKind(kind)) tabs.push({ id: 'tesztek', label: 'Tesztesetek' }, { id: 'szabalyok', label: 'Szabályok' })
+  if (isUploadExerciseKind(kind)) tabs.push({ id: 'ertekelolap', label: 'Értékelőlap' })
+  tabs.push({ id: 'fajlok', label: 'Fájlok' })
+  return tabs
+}
 
 function ExerciseEditor({ lesson, exercise }: { lesson: AdminLesson; exercise: AdminExercise | null }) {
   const navigate = useNavigate()
@@ -79,6 +88,7 @@ function ExerciseEditor({ lesson, exercise }: { lesson: AdminLesson; exercise: A
   const [tab, setTab] = useState<EditorTab>('leiras')
   const [form, setForm] = useState<ExercisePayload>(() => ({
     lesson_id: lesson.id,
+    kind: exercise?.kind ?? 'code',
     title: exercise?.title ?? '',
     description: exercise?.description ?? '',
     level: exercise?.level ?? 'kozep',
@@ -86,15 +96,26 @@ function ExerciseEditor({ lesson, exercise }: { lesson: AdminLesson; exercise: A
     allowed_languages: exercise?.allowed_languages ?? ['python'],
     starter_code: exercise?.starter_code ?? {},
     constraints: exercise?.constraints ?? { require: [], forbid: [] },
+    spec: exercise?.spec ?? null,
+    comparison: exercise?.comparison ?? null,
     sql_order_sensitive: exercise?.sql_order_sensitive ?? false,
     time_limit_ms: exercise?.time_limit_ms ?? null,
     memory_limit_kb: exercise?.memory_limit_kb ?? null,
     is_published: exercise?.is_published ?? false,
   }))
+  const [typeData, setTypeData] = useState<TypeData>(() => initialTypeData(exercise))
+  const [jsonError, setJsonError] = useState<string | null>(null)
   const save = useSaveEntity<AdminExercise>('exercises', exercise?.id ?? null, (saved) => {
     if (!exercise) navigate(`/admin/tananyag/feladatok/${saved.id}`, { replace: true })
+    // A szerver normalizál (pl. ellenőrzési azonosítókat ad): a szerkesztő a mentett alakot mutatja.
+    else if (saved.kind === form.kind) setTypeData(initialTypeData(saved))
   })
   const errors = mezoHibak(save.error)
+  const hasStudentData = (exercise?.submission_count ?? 0) > 0
+  const editorKind = isEditorKind(form.kind)
+  const tabs = tabsFor(form.kind)
+  const typeErrorKeys = Object.keys(errors).filter((key) => key === 'spec' || key.startsWith('spec.') || key === 'comparison' || key.startsWith('comparison.'))
+  const shownFields = [...EXERCISE_FIELDS, ...typeErrorKeys]
   const set = <K extends keyof ExercisePayload>(key: K, value: ExercisePayload[K]) => setForm((f) => ({ ...f, [key]: value }))
   // #48: közzétenni csak nyilvános tesztesettel lehet (a /run azokon fut); a backend is ellenőrzi.
   const testCases = useQuery({ ...testCasesQuery(exercise?.id ?? 0), enabled: exercise !== null })
@@ -102,6 +123,18 @@ function ExerciseEditor({ lesson, exercise }: { lesson: AdminLesson; exercise: A
   // Amíg a tesztesetek töltődnek (vagy nem jöttek meg), nem tudjuk, van-e nyilvános: akkor a szerver dönt.
   const knownWithoutVisibleTestCases = (exercise === null || testCases.isSuccess) && visibleTestCases === 0
   const [publishError, setPublishError] = useState<string | null>(null)
+
+  /** Típusváltáskor a régi típus adata nem maradhat: a nyelvek és a típus-adatok az új típushoz igazodnak. */
+  function changeKind(kind: ExerciseKind) {
+    setForm((f) => ({
+      ...f,
+      kind,
+      allowed_languages: kind === 'sql' ? ['sql'] : kind === 'code' ? (f.allowed_languages.filter((l) => l !== 'sql').length > 0 ? f.allowed_languages.filter((l) => l !== 'sql') : ['python']) : [],
+    }))
+    setTypeData(kind === exercise?.kind ? initialTypeData(exercise) : initialTypeData(null))
+    setJsonError(null)
+    if (tab === 'tesztek' || tab === 'szabalyok' || tab === 'ertekelolap') setTab('tipus')
+  }
 
   function toggleLanguage(language: LanguageKey, on: boolean) {
     setForm((f) => ({
@@ -112,7 +145,7 @@ function ExerciseEditor({ lesson, exercise }: { lesson: AdminLesson; exercise: A
 
   function submit(e: FormEvent) {
     e.preventDefault()
-    if (form.is_published && knownWithoutVisibleTestCases) {
+    if (form.is_published && editorKind && knownWithoutVisibleTestCases) {
       setPublishError(
         exercise
           ? 'Közzététel előtt adj hozzá legalább egy nyilvános tesztesetet a Tesztesetek fülön.'
@@ -121,9 +154,23 @@ function ExerciseEditor({ lesson, exercise }: { lesson: AdminLesson; exercise: A
       return
     }
     setPublishError(null)
-    // Csak az engedélyezett nyelvek kiinduló kódja megy el.
-    const starter = Object.fromEntries(form.allowed_languages.map((l) => [l, form.starter_code[l] ?? '']))
-    save.mutate({ ...form, starter_code: starter, sql_order_sensitive: form.allowed_languages.includes('sql') && form.sql_order_sensitive })
+    const built = buildTypeData(form.kind, typeData)
+    setJsonError(built.jsonError)
+    if (built.jsonError) {
+      setTab('tipus')
+      return
+    }
+    // Csak az engedélyezett nyelvek kiinduló kódja megy el; nem szerkesztős típusnál egyik sem.
+    const chosen = editorKind ? form.allowed_languages : []
+    const starter = Object.fromEntries(chosen.map((l) => [l, form.starter_code[l] ?? '']))
+    save.mutate({
+      ...form,
+      allowed_languages: chosen,
+      starter_code: starter,
+      spec: built.spec,
+      comparison: built.comparison,
+      sql_order_sensitive: chosen.includes('sql') && form.sql_order_sensitive,
+    })
   }
 
   const title = exercise ? exercise.title : 'Új feladat'
@@ -140,14 +187,41 @@ function ExerciseEditor({ lesson, exercise }: { lesson: AdminLesson; exercise: A
       ]}
       title={title}
     >
-      <Tabs label="Feladat részei" tabs={TABS} active={tab} onChange={setTab} idPrefix={formId} />
+      <Tabs label="Feladat részei" tabs={tabs} active={tab} onChange={setTab} idPrefix={formId} />
 
-      <MutationError error={save.error} fields={EXERCISE_FIELDS} />
+      <MutationError error={save.error} fields={shownFields} />
+      {typeErrorKeys.length > 0 && tab !== 'tipus' && (
+        <Banner
+          kind="error"
+          title="A Típus-adatok fülön hiba van"
+          action={
+            <Button variant="secondary" onClick={() => setTab('tipus')}>
+              Megnyitás
+            </Button>
+          }
+        >
+          A feladat típusához tartozó adatokat a szerver nem fogadta el. Nyisd meg a fület, ott a hibák a mezők alatt vannak.
+        </Banner>
+      )}
 
       <form id={formId} onSubmit={submit} noValidate>
         <TabPanel idPrefix={formId} id="leiras" active={tab === 'leiras'} className="flex flex-col gap-5">
           <Panel>
             <div className="flex flex-wrap gap-5">
+              <SelectField
+                className="w-full basis-96 sm:w-auto"
+                label="Típus"
+                options={KIND_OPTIONS}
+                value={form.kind}
+                disabled={hasStudentData}
+                onChange={(e) => changeKind(e.target.value as ExerciseKind)}
+                hint={
+                  hasStudentData
+                    ? 'A típus már nem módosítható, mert diákok dolgoztak a feladattal.'
+                    : 'A típus dönti el, milyen munkafelületet kap a tanuló és mit adsz meg hozzá.'
+                }
+                error={errors.kind}
+              />
               <Field className="flex-1 basis-72" label="Cím" value={form.title} onChange={(e) => set('title', e.target.value)} error={errors.title} />
               <SelectField
                 className="w-44"
@@ -166,10 +240,12 @@ function ExerciseEditor({ lesson, exercise }: { lesson: AdminLesson; exercise: A
                 error={errors.difficulty}
               />
             </div>
+            {editorKind && form.kind === 'sql' && <p className="mt-5 text-15 text-ink-soft">Az SQL feladat nyelve mindig az SQL.</p>}
+            {editorKind && form.kind === 'code' && (
             <fieldset className="mt-5">
               <legend className="text-15 font-semibold">Nyelvek</legend>
               <div className="mt-2.5 flex flex-wrap gap-x-7 gap-y-3">
-                {(languages.data ?? []).map((language: LanguageOption) => (
+                {(languages.data ?? []).filter((language) => language.key !== 'sql').map((language: LanguageOption) => (
                   <CheckboxField
                     key={language.key}
                     label={language.label}
@@ -180,6 +256,7 @@ function ExerciseEditor({ lesson, exercise }: { lesson: AdminLesson; exercise: A
               </div>
               {languageError && <InlineError>{languageError}</InlineError>}
             </fieldset>
+            )}
           </Panel>
 
           <Panel>
@@ -202,6 +279,7 @@ function ExerciseEditor({ lesson, exercise }: { lesson: AdminLesson; exercise: A
             </div>
           </Panel>
 
+          {editorKind && (
           <Panel className="flex flex-col gap-5">
             {form.allowed_languages.length === 0 && <p className="text-15 text-ink-soft">Jelölj be legalább egy nyelvet a kiinduló kódhoz.</p>}
             {form.allowed_languages.map((language) => (
@@ -230,7 +308,9 @@ function ExerciseEditor({ lesson, exercise }: { lesson: AdminLesson; exercise: A
               />
             )}
           </Panel>
+          )}
 
+          {editorKind && (
           <Panel as="section" aria-labelledby={`${formId}-korlatok`}>
             <CardTitle id={`${formId}-korlatok`} as="h2">
               Futtatási korlátok
@@ -244,6 +324,11 @@ function ExerciseEditor({ lesson, exercise }: { lesson: AdminLesson; exercise: A
               />
             </div>
           </Panel>
+          )}
+        </TabPanel>
+
+        <TabPanel idPrefix={formId} id="tipus" active={tab === 'tipus'}>
+          <TypeDataEditor kind={form.kind} value={typeData} onChange={setTypeData} errors={errors} jsonError={jsonError} />
         </TabPanel>
 
         <TabPanel idPrefix={formId} id="szabalyok" active={tab === 'szabalyok'}>
@@ -275,6 +360,16 @@ function ExerciseEditor({ lesson, exercise }: { lesson: AdminLesson; exercise: A
         ) : (
           <Banner kind="info" title="Előbb mentsd el a feladatot">
             Az értékelőlap a létrehozás után szerkeszthető.
+          </Banner>
+        )}
+      </TabPanel>
+
+      <TabPanel idPrefix={formId} id="fajlok" active={tab === 'fajlok'}>
+        {exercise ? (
+          <AttachmentManager exerciseId={exercise.id} editorBased={editorKind} />
+        ) : (
+          <Banner kind="info" title="Előbb mentsd el a feladatot">
+            A fájlok a létrehozás után tölthetők fel.
           </Banner>
         )}
       </TabPanel>

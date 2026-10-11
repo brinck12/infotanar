@@ -1,6 +1,6 @@
 import { queryOptions, type QueryClient } from '@tanstack/react-query'
 import { http, type Envelope } from '../../../shared/api/client'
-import type { ExecutionLimits, LanguageKey, Level } from '../../../types'
+import type { ExecutionLimits, ExerciseKind, LanguageKey, Level } from '../../../types'
 
 /** Az admin katalógus-API (#45) típusai: a publikálatlan elemeket is tartalmazzák. */
 export interface AdminTrack {
@@ -46,6 +46,8 @@ export interface AdminExercise {
   id: number
   lesson_id: number
   position: number
+  /** A feladat típusa; a szerver mindig küldi. */
+  kind: ExerciseKind
   title: string
   description: string
   level: Level
@@ -53,6 +55,10 @@ export interface AdminExercise {
   allowed_languages: LanguageKey[]
   starter_code: Partial<Record<LanguageKey, string>>
   constraints: ConstraintSet
+  /** A típushoz tartozó adatok (alakjuk típusonként más); `null`, ha még nincs. */
+  spec: ExerciseSpecValue | null
+  /** A kimenet összevetése kódfeladatnál; `null` = soronkénti egyezés. */
+  comparison: Comparison | null
   sql_order_sensitive: boolean
   /** Saját időkorlát (ms); `null` = az alapértelmezés érvényes. */
   time_limit_ms: number | null
@@ -61,6 +67,35 @@ export interface AdminExercise {
   is_published: boolean
   test_case_count?: number
   submission_count?: number
+  rubric_item_count?: number
+  attachments?: AdminAttachment[]
+}
+
+/** A `spec` JSON-ja; a pontos alakot a szerver ellenőrzi (BACKEND.md 4.1.3). */
+export type ExerciseSpecValue = Record<string, unknown>
+
+export type ComparisonMode = 'exact' | 'tokens' | 'numeric'
+
+export interface Comparison {
+  mode: ComparisonMode
+  case_insensitive: boolean
+  ignore_accents: boolean
+  ignore_blank_lines: boolean
+  abs_tol: number | null
+  rel_tol: number | null
+}
+
+export type AttachmentRole = 'source' | 'input' | 'sample_image' | 'sample_solution' | 'source_zip'
+
+export interface AdminAttachment {
+  id: number
+  role: AttachmentRole
+  name: string
+  size: number
+  /** Csak `input` szerepnél: a teszteset, amelynek a saját bemenete. */
+  test_case_id: number | null
+  /** Rövid életű, aláírt admin URL. */
+  url: string
 }
 
 export interface AdminTestCase {
@@ -104,6 +139,7 @@ export type LessonPayload = Pick<AdminLesson, 'module_id' | 'slug' | 'title' | '
 export type ExercisePayload = Pick<
   AdminExercise,
   | 'lesson_id'
+  | 'kind'
   | 'title'
   | 'description'
   | 'level'
@@ -111,6 +147,8 @@ export type ExercisePayload = Pick<
   | 'allowed_languages'
   | 'starter_code'
   | 'constraints'
+  | 'spec'
+  | 'comparison'
   | 'sql_order_sensitive'
   | 'time_limit_ms'
   | 'memory_limit_kb'
@@ -125,6 +163,7 @@ export const adminCatalogKeys = {
   lesson: (id: number) => [...adminCatalogKeys.all, 'lesson', id] as const,
   exercise: (id: number) => [...adminCatalogKeys.all, 'exercise', id] as const,
   testCases: (exerciseId: number) => [...adminCatalogKeys.all, 'exercise', exerciseId, 'test-cases'] as const,
+  attachments: (exerciseId: number) => [...adminCatalogKeys.all, 'exercise', exerciseId, 'attachments'] as const,
   languages: ['catalog', 'languages'] as const,
 }
 
@@ -164,6 +203,35 @@ export async function updateTestCase(id: number, payload: Partial<TestCasePayloa
 
 export async function deleteTestCase(id: number): Promise<void> {
   await http.delete(`/admin/test-cases/${id}`)
+}
+
+export const attachmentsQuery = (exerciseId: number) =>
+  queryOptions({
+    queryKey: adminCatalogKeys.attachments(exerciseId),
+    queryFn: ({ signal }) => get<AdminAttachment[]>(`/admin/exercises/${exerciseId}/attachments`, signal),
+  })
+
+export interface AttachmentUpload {
+  file: File
+  role: AttachmentRole
+  /** Csak `input` szerepnél kötelező. */
+  testCaseId?: number | null
+  /** Üres = a fájl eredeti neve. */
+  name?: string
+}
+
+/** Fájl csatolása a feladathoz (multipart). */
+export async function uploadAttachment(exerciseId: number, { file, role, testCaseId, name }: AttachmentUpload): Promise<AdminAttachment> {
+  const body = new FormData()
+  body.append('file', file)
+  body.append('role', role)
+  if (testCaseId) body.append('test_case_id', String(testCaseId))
+  if (name) body.append('name', name)
+  return (await http.post<Envelope<AdminAttachment>>(`/admin/exercises/${exerciseId}/attachments`, body)).data.data
+}
+
+export async function deleteAttachment(id: number): Promise<void> {
+  await http.delete(`/admin/attachments/${id}`)
 }
 
 export const constraintOptionsQuery = () =>

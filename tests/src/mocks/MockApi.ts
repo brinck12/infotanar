@@ -1,4 +1,5 @@
 import type { Page, Route } from '@playwright/test'
+import { AdminAuthoringMock, type AdminAuthoringOptions } from './AdminAuthoringMock'
 import type { RunResponse, SubmissionResponse, TaskDetail, Topic, User } from '../api/types'
 import { buildTaskDetail, buildTopic, buildTrackDetail, toLessonDetail, toTaskListItem, toTrackSummary } from '../data/builders/catalog'
 
@@ -230,6 +231,16 @@ export class MockApi {
       return route.fulfill({ status, json: { data: body } })
     })
     return () => uploads
+  }
+
+  /**
+   * Az admin szerkeszto vegpontjai (feladat, csatolmanyok, ertekelolap, vizsga) allapottal.
+   * A visszaadott objektum a kuldott hivasokat adja.
+   */
+  async withAdminAuthoring(options: AdminAuthoringOptions = {}): Promise<AdminAuthoringMock> {
+    const mock = new AdminAuthoringMock(this.page, options)
+    await mock.install()
+    return mock
   }
 
   private async fulfillTask(route: Route, tasks: TaskDetail[]): Promise<void> {
