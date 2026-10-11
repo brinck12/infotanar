@@ -4,8 +4,14 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Api\V1\Admin\Catalog;
 
-use App\Actions\Admin\Catalog\ManageCatalogItem;
+use App\Actions\Admin\Catalog\CreateExercise;
+use App\Actions\Admin\Catalog\DeleteExercise;
+use App\Actions\Admin\Catalog\UpdateExercise;
 use App\Exceptions\Catalog\CatalogItemInUse;
+use App\Exceptions\Catalog\ExerciseKindLocked;
+use App\Exceptions\Catalog\ExerciseUsedByExam;
+use App\Exceptions\Catalog\PublishedExerciseNeedsRubric;
+use App\Exceptions\Catalog\PublishedExerciseNeedsSpec;
 use App\Exceptions\Catalog\PublishedExerciseNeedsVisibleTestCase;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\Catalog\ExerciseRequest;
@@ -20,14 +26,13 @@ use Illuminate\Http\Response;
 
 final class ExerciseController extends Controller
 {
-    private const PARENT = 'lesson_id';
-
-    public function __construct(private readonly ManageCatalogItem $manage) {}
+    /** A lista es a reszletes nezet szamlaloi. */
+    private const COUNTS = ['testCases', 'submissions', 'rubricItems'];
 
     public function index(Request $request): AnonymousResourceCollection
     {
         $exercises = Exercise::query()
-            ->withCount(['testCases', 'submissions'])
+            ->withCount(self::COUNTS)
             ->when($request->integer('lesson_id'), static fn ($q, int $lessonId) => $q->where('lesson_id', $lessonId))
             ->orderBy('lesson_id')
             ->orderBy('position')
@@ -36,52 +41,42 @@ final class ExerciseController extends Controller
         return AdminExerciseResource::collection($exercises);
     }
 
+    /** A csatolt fajlok csak itt jonnek: a lista feladatonkent alairt URL-eket gyartana. */
     public function show(Exercise $exercise): AdminExerciseResource
     {
-        return AdminExerciseResource::make($exercise->loadCount(['testCases', 'submissions']));
+        return AdminExerciseResource::make($exercise->loadCount(self::COUNTS)->load('attachments'));
     }
 
     /**
-     * Uj feladatnak meg nincs tesztesete, ezert nem hozhato letre publikaltkent:
-     * letrehozas -> tesztesetek (#46) -> publikalas.
-     *
      * @throws PublishedExerciseNeedsVisibleTestCase
+     * @throws PublishedExerciseNeedsSpec
+     * @throws PublishedExerciseNeedsRubric
      */
-    public function store(ExerciseRequest $request, #[CurrentUser] User $admin): JsonResponse
+    public function store(ExerciseRequest $request, CreateExercise $create, #[CurrentUser] User $admin): JsonResponse
     {
-        if ($request->boolean('is_published')) {
-            throw new PublishedExerciseNeedsVisibleTestCase;
-        }
-
-        $exercise = $this->manage->create(new Exercise($request->validated()), self::PARENT, $admin);
+        $exercise = $create->handle($request->exerciseAttributes(), $admin);
 
         return AdminExerciseResource::make($exercise)->response()->setStatusCode(JsonResponse::HTTP_CREATED);
     }
 
-    /** @throws PublishedExerciseNeedsVisibleTestCase */
-    public function update(ExerciseRequest $request, Exercise $exercise, #[CurrentUser] User $admin): AdminExerciseResource
+    /**
+     * @throws ExerciseKindLocked
+     * @throws PublishedExerciseNeedsVisibleTestCase
+     * @throws PublishedExerciseNeedsSpec
+     * @throws PublishedExerciseNeedsRubric
+     */
+    public function update(ExerciseRequest $request, Exercise $exercise, UpdateExercise $update, #[CurrentUser] User $admin): AdminExerciseResource
     {
-        $published = $request->has('is_published') ? $request->boolean('is_published') : $exercise->is_published;
-        if ($published && ! $exercise->visibleTestCases()->exists()) {
-            throw new PublishedExerciseNeedsVisibleTestCase;
-        }
-
-        return AdminExerciseResource::make($this->manage->update($exercise, $request->validated(), self::PARENT, $admin));
+        return AdminExerciseResource::make($update->handle($exercise, $request->exerciseAttributes(), $admin));
     }
 
     /**
-     * A beadasok (es rajtuk keresztul a haladas) a feladathoz kotottek: ha
-     * mar van, a torles helyett rejteni kell.
-     *
      * @throws CatalogItemInUse
+     * @throws ExerciseUsedByExam
      */
-    public function destroy(Exercise $exercise, #[CurrentUser] User $admin): Response
+    public function destroy(Exercise $exercise, DeleteExercise $delete, #[CurrentUser] User $admin): Response
     {
-        if ($exercise->submissions()->exists()) {
-            throw CatalogItemInUse::hasStudentData();
-        }
-
-        $this->manage->delete($exercise, self::PARENT, $admin);
+        $delete->handle($exercise, $admin);
 
         return response()->noContent();
     }

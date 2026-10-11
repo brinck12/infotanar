@@ -1,7 +1,7 @@
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { hibaUzenet, httpStatus } from '../../../shared/api/errors'
+import { hibaUzenet, httpStatus, zarolasOka } from '../../../shared/api/errors'
 import { EXAM_PARTS } from '../../../shared/domain/exam'
 import { LEVEL_LABEL } from '../../../shared/domain/labels'
 import { Banner } from '../../../shared/ui/Banner'
@@ -15,6 +15,7 @@ import { PageLoader } from '../../../shared/ui/PageLoader'
 import { Panel } from '../../../shared/ui/Panel'
 import { EmptyState, LoadError } from '../../../shared/ui/States'
 import { CardTitle, PageTitle } from '../../../shared/ui/Text'
+import type { LockReason } from '../../../types'
 import { examQuery, startAttempt, type ExamDetail, type ExamMode } from '../api'
 
 const CHECKLIST = [
@@ -44,6 +45,31 @@ export function ExamStart() {
   }
 
   return <StartForm exam={exam.data} />
+}
+
+const LOCK_ACTION: Readonly<Record<LockReason, { to: string; label: string }>> = {
+  login_required: { to: '/bejelentkezes', label: 'Belépés' },
+  email_unverified: { to: '/fiok', label: 'E-mail-cím megerősítése' },
+  subscription_required: { to: '/elofizetes', label: 'Prémium előfizetés' },
+}
+
+/** Az indítás elutasítása: zárolásnál a következő lépéssel, egyébként csak az üzenettel. */
+function StartDenied({ error }: { error: unknown }) {
+  const lock = zarolasOka(error)
+  if (!lock) {
+    return (
+      <Banner kind="error" className="mt-4">
+        {hibaUzenet(error)}
+      </Banner>
+    )
+  }
+
+  const action = LOCK_ACTION[lock.reason]
+  return (
+    <Banner kind="warn" className="mt-4" action={<ButtonLink to={action.to}>{action.label}</ButtonLink>}>
+      {lock.message}
+    </Banner>
+  )
 }
 
 function StartForm({ exam }: { exam: ExamDetail }) {
@@ -144,11 +170,7 @@ function StartForm({ exam }: { exam: ExamDetail }) {
               <FileChip name={exam.source_zip.name} size={formatBytes(exam.source_zip.size)} href={exam.source_zip.url} />
             </div>
           )}
-          {start.isError && (
-            <Banner kind="error" className="mt-4">
-              {hibaUzenet(start.error)}
-            </Banner>
-          )}
+          {start.isError && <StartDenied error={start.error} />}
           <Button size="lg" icon="play" fullWidth busy={start.isPending} busyLabel="Indítás…" onClick={() => start.mutate()} className="mt-5">
             Indítás
           </Button>

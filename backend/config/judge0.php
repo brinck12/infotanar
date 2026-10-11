@@ -73,6 +73,20 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Adatfajlok
+    |--------------------------------------------------------------------------
+    | A kodfeladat forrasfajljai es a tesztesetek bemeneti fajljai zipben, az
+    | 'additional_files' mezoben mennek a Judge0-nak (ExecutionFileArchive). A
+    | darabszam- es meretkorlat a feltoltesnel ervenyesul (config/filetasks.php,
+    | 'attachments'). A kesz zip a fajlok neve es hash-e szerint cache-elodik;
+    | eddig (mp) tartjuk meg.
+    */
+    'files' => [
+        'archive_cache_ttl' => (int) env('JUDGE0_FILES_ARCHIVE_CACHE_TTL', 86400),
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | Nyelvenkenti idoszorzo
     |--------------------------------------------------------------------------
     | A processzorido-korlatot ennyivel szorozzuk az adott nyelvnel (a feladat
