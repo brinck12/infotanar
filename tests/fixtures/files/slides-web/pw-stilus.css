@@ -1,0 +1,5 @@
+/* alap stilus */
+h1 { color: #ff0000; font-size: 24px; margin: 10px 20px; }
+.kiemelt { color: blue; font-family: "Arial", sans-serif; }
+@media (max-width: 600px) { h1 { color: #00ff00; } }
+@font-face { font-family: X; src: url(x.woff); }
