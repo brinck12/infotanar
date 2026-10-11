@@ -450,7 +450,7 @@ test.describe('Admin: fajtaváltás és törlés', () => {
   test('csatolt fájl mellett a fajta nem váltható', { tag: '@regression' }, async ({ apiClient }) => {
     const admin = await adminAccount(apiClient)
     const exercise = await newExercise(admin.client)
-    const uploaded = await uploadAttachment(admin.client, exercise.id, uploadOf('adatok.txt', '1\n'), { role: 'source' })
+    const uploaded = await uploadAttachment(admin.client, exercise.id, uploadOf('adatok.txt', 'egy sor\n'), { role: 'source' })
     expect(uploaded.status).toBe(201)
 
     const blocked = await updateExercise(admin.client, exercise.id, { kind: 'sheet_browser' })
@@ -467,7 +467,7 @@ test.describe('Admin: csatolmányok', () => {
     const admin = await adminAccount(apiClient)
     const student = await verifiedStudent(apiClient, admin.client)
     const id = TYPED.subtasks.id
-    const file = uploadOf('uj.txt', 'x\n')
+    const file = uploadOf('uj.txt', 'minta\n')
 
     expect((await listAttachments(apiClient, id)).status).toBe(401)
     expect((await uploadAttachment(apiClient, id, file, { role: 'source' })).status).toBe(401)
@@ -488,7 +488,7 @@ test.describe('Admin: csatolmányok', () => {
     const upload = (name: string, contents: string, publicName?: string) =>
       uploadAttachment(admin.client, exercise.id, uploadOf(name, contents), { role: 'source', ...(publicName === undefined ? {} : { name: publicName }) })
 
-    const invalidName = await upload('adatok.txt', '1\n', 'adat fájl.txt')
+    const invalidName = await upload('adatok.txt', 'egy sor\n', 'adat fájl.txt')
     expect(invalidName.status).toBe(422)
     expect(invalidName.errorBody.errors).toHaveProperty('name')
 
@@ -507,10 +507,10 @@ test.describe('Admin: csatolmányok', () => {
     expect((await download(apiClient, replaced.body.data.url)).body.toString('utf8')).toBe('masodik\n')
 
     for (const name of ['b.txt', 'c.txt', 'd.txt', 'e.txt']) {
-      expect((await upload(name, 'x\n')).status, name).toBe(201)
+      expect((await upload(name, 'minta\n')).status, name).toBe(201)
     }
 
-    const sixth = await upload('f.txt', 'x\n')
+    const sixth = await upload('f.txt', 'minta\n')
     expect(sixth.status).toBe(422)
     expect(sixth.errorBody.errors).toHaveProperty('file')
 
@@ -522,7 +522,7 @@ test.describe('Admin: csatolmányok', () => {
   test('bemeneti fájl csak a feladat saját tesztesetéhez tölthető fel', { tag: '@smoke' }, async ({ apiClient }) => {
     const admin = await adminAccount(apiClient)
     const exercise = await newExercise(admin.client)
-    const testCase = await createTestCase(admin.client, exercise.id, { stdin: '1\n', expected_stdout: '1\n', is_hidden: true })
+    const testCase = await createTestCase(admin.client, exercise.id, { stdin: 'egy sor\n', expected_stdout: 'egy sor\n', is_hidden: true })
     const foreign = (await testCases(admin.client, TYPED.subtasks.id)).body.data[0]?.id ?? 0
     const file = uploadOf('adatok.txt', 'rejtett\n')
 
@@ -572,7 +572,7 @@ test.describe('Admin: csatolmányok', () => {
     const admin = await adminAccount(apiClient)
     const code = await newExercise(admin.client)
     const sheet = await newTypedExercise(admin.client, 'sheet_upload', { spec: UPLOAD_SPEC })
-    const testCase = await createTestCase(admin.client, code.id, { stdin: '1\n', expected_stdout: '1\n', is_hidden: true })
+    const testCase = await createTestCase(admin.client, code.id, { stdin: 'egy sor\n', expected_stdout: 'egy sor\n', is_hidden: true })
 
     const source = await uploadAttachment(admin.client, code.id, uploadOf('adatok.txt', 'kozos\n'), { role: 'source' })
     const input = await uploadAttachment(admin.client, code.id, uploadOf('adatok.txt', 'rejtett\n'), { role: 'input', test_case_id: testCase.body.data.id })
@@ -618,7 +618,7 @@ test.describe('Admin: csatolmányok', () => {
   test('törlés után a fájl nem tölthető le', { tag: '@smoke' }, async ({ apiClient }) => {
     const admin = await adminAccount(apiClient)
     const exercise = await newExercise(admin.client)
-    const uploaded = await uploadAttachment(admin.client, exercise.id, uploadOf('adatok.txt', '1\n'), { role: 'source' })
+    const uploaded = await uploadAttachment(admin.client, exercise.id, uploadOf('adatok.txt', 'egy sor\n'), { role: 'source' })
     expect((await download(apiClient, uploaded.body.data.url)).status).toBe(200)
 
     expect((await deleteAttachment(admin.client, uploaded.body.data.id)).status).toBe(204)
@@ -631,9 +631,9 @@ test.describe('Admin: csatolmányok', () => {
   test('a feladat törlése a csatolt fájljait is törli', { tag: '@smoke' }, async ({ apiClient }) => {
     const admin = await adminAccount(apiClient)
     const exercise = await newExercise(admin.client)
-    const testCase = await createTestCase(admin.client, exercise.id, { stdin: '1\n', expected_stdout: '1\n', is_hidden: false })
-    const source = await uploadAttachment(admin.client, exercise.id, uploadOf('adatok.txt', '1\n'), { role: 'source' })
-    const input = await uploadAttachment(admin.client, exercise.id, uploadOf('adatok.txt', '2\n'), { role: 'input', test_case_id: testCase.body.data.id })
+    const testCase = await createTestCase(admin.client, exercise.id, { stdin: 'egy sor\n', expected_stdout: 'egy sor\n', is_hidden: false })
+    const source = await uploadAttachment(admin.client, exercise.id, uploadOf('adatok.txt', 'egy sor\n'), { role: 'source' })
+    const input = await uploadAttachment(admin.client, exercise.id, uploadOf('adatok.txt', 'ket sor\n'), { role: 'input', test_case_id: testCase.body.data.id })
     expect([source.status, input.status]).toEqual([201, 201])
 
     expect((await deleteExercise(admin.client, exercise.id)).status).toBe(204)
@@ -647,9 +647,9 @@ test.describe('Admin: csatolmányok', () => {
   test('a teszteset törlése a saját bemeneti fájlját is törli, a közös forrásfájlt nem', { tag: '@regression' }, async ({ apiClient }) => {
     const admin = await adminAccount(apiClient)
     const exercise = await newExercise(admin.client)
-    const testCase = await createTestCase(admin.client, exercise.id, { stdin: '1\n', expected_stdout: '1\n', is_hidden: true })
-    const source = await uploadAttachment(admin.client, exercise.id, uploadOf('adatok.txt', '1\n'), { role: 'source' })
-    const input = await uploadAttachment(admin.client, exercise.id, uploadOf('adatok.txt', '2\n'), { role: 'input', test_case_id: testCase.body.data.id })
+    const testCase = await createTestCase(admin.client, exercise.id, { stdin: 'egy sor\n', expected_stdout: 'egy sor\n', is_hidden: true })
+    const source = await uploadAttachment(admin.client, exercise.id, uploadOf('adatok.txt', 'egy sor\n'), { role: 'source' })
+    const input = await uploadAttachment(admin.client, exercise.id, uploadOf('adatok.txt', 'ket sor\n'), { role: 'input', test_case_id: testCase.body.data.id })
     expect([source.status, input.status]).toEqual([201, 201])
 
     expect((await deleteTestCase(admin.client, testCase.body.data.id)).status).toBe(204)

@@ -23,7 +23,9 @@ final class CheckIds
     public static function assign(array $checks, mixed $previous): array
     {
         $sent = array_map(self::idOf(...), $checks);
-        $next = max(0, ...array_filter($sent), ...array_filter(array_map(self::idOf(...), SpecValue::items($previous)))) + 1;
+        $stored = array_map(self::idOf(...), SpecValue::items($previous));
+        // Tombkent adjuk at: azonosito nelkul a max() egyetlen szamot kapna, es hibat dobna.
+        $next = max([0, ...array_filter($sent), ...array_filter($stored)]) + 1;
 
         return array_map(static function (?int $id) use (&$next): int {
             return $id ?? $next++;
