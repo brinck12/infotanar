@@ -66,4 +66,16 @@ test.describe('Szóbeli gyakorlás', () => {
     const stored = await page.evaluate(() => localStorage.getItem('infotanar.oral.v1.u7.szovegszerkesztes'))
     expect(stored).toContain('"attempts":1')
   })
+
+  test('ha a lista nem töltődik be, hibát látsz, és semmi nem megy a szervernek', { tag: '@regression' }, async ({ mockApi, oralPage }) => {
+    await mockApi.signIn(USER)
+    await mockApi.withPreferences(null)
+    const oral = await mockApi.withOralPractice('error')
+
+    await oralPage.gotoTopic('szovegszerkesztes')
+
+    await expect(oralPage.loadError).toBeVisible()
+    await expect(oralPage.notes).toHaveCount(0)
+    expect(oral.saves()).toEqual([])
+  })
 })

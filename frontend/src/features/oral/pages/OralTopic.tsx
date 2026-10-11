@@ -9,8 +9,9 @@ import { CheckboxField, TextAreaField } from '../../../shared/ui/Form'
 import { Icon } from '../../../shared/ui/Icon'
 import { PageLoader } from '../../../shared/ui/PageLoader'
 import { Panel } from '../../../shared/ui/Panel'
+import { LoadError } from '../../../shared/ui/States'
 import { CardTitle, PageTitle } from '../../../shared/ui/Text'
-import { useStudyPreferences } from '../../onboarding/useStudyPreferences'
+import { useStudyPreferences } from '../../../shared/hooks/useStudyPreferences'
 import { NotFound } from '../../system/NotFound'
 import { formatClock } from '../practice'
 import { ORAL_MINUTES, ORAL_SCORING, ORAL_TOPICS, type OralTopic as Topic } from '../topics'
@@ -28,8 +29,8 @@ export function OralTopic() {
 }
 
 function Practice({ topic }: { topic: Topic }) {
-  const { preferences, loading: preferencesLoading } = useStudyPreferences()
-  const { loading: practiceLoading, practice, storedOnServer, update, recordAttempt } = useOralTopicPractice(topic.slug)
+  const { preferences, loading: preferencesLoading, loadError: preferencesError, retry: retryPreferences } = useStudyPreferences()
+  const { loading: practiceLoading, loadError: practiceError, retry: retryPractice, practice, storedOnServer, update, recordAttempt } = useOralTopicPractice(topic.slug)
   const [phase, setPhase] = useState<Phase>('idle')
   const [secondsLeft, setSecondsLeft] = useState(ORAL_MINUTES.preparation * 60)
   const [showSolution, setShowSolution] = useState(false)
@@ -65,6 +66,20 @@ function Practice({ topic }: { topic: Topic }) {
   const selfScored = ORAL_SCORING.filter((row) => row.selfAssessed)
   const selfTotal = selfScored.reduce((sum, row) => sum + (practice.scores[row.criterion] ?? 0), 0)
 
+  if (preferencesError !== null || practiceError !== null) {
+    return (
+      <main className="mx-auto w-full max-w-page flex-1 px-4 py-12 md:px-6">
+        <LoadError
+          error={preferencesError ?? practiceError}
+          onRetry={() => {
+            if (preferencesError !== null) retryPreferences()
+            if (practiceError !== null) retryPractice()
+          }}
+          title="Nem sikerült betölteni a gyakorlásodat"
+        />
+      </main>
+    )
+  }
   if (preferencesLoading || practiceLoading) return <PageLoader label="Gyakorlásod betöltése…" />
 
   return (
@@ -129,6 +144,7 @@ function Practice({ topic }: { topic: Topic }) {
             ))}
           </ul>
           <TextAreaField
+            maxLength={5000}
             className="mt-5"
             label="Jegyzeteid"
             rows={5}

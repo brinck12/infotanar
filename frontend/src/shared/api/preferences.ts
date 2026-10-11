@@ -1,6 +1,6 @@
 import { queryOptions } from '@tanstack/react-query'
-import { http, type Envelope } from '../../shared/api/client'
-import { DEFAULT_PREFERENCES, EXAM_PERIODS, WEEKLY_HOURS, type StudyPreferences } from '../../shared/domain/preferences'
+import { http, type Envelope } from './client'
+import { DEFAULT_PREFERENCES, EXAM_PERIODS, WEEKLY_HOURS, type StudyPreferences } from '../domain/preferences'
 
 /**
  * A tanuló céljai a szerveren (`users.preferences`). A vezetéken snake_case

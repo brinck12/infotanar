@@ -23,6 +23,9 @@ export interface OralPracticesState {
   loading: boolean
   /** Igaz, ha a gyakorlás a fiókhoz kerül; hamis, ha csak ebben a böngészőben marad. */
   storedOnServer: boolean
+  /** A lista nem töltődött be (nem 404): a mentés felülírhatná a szerver adatait, ezért nem szerkeszthető. */
+  loadError: unknown
+  retry: () => void
   rowOf: (slug: string) => OralPracticeRow | undefined
   attemptsOf: (slug: string) => number
 }
@@ -75,11 +78,20 @@ export function useOralPractices(): OralPracticesState {
     [storedOnServer, rowOf, userKey],
   )
 
-  return { loading: authLoading || (signedIn && server.isPending), storedOnServer, rowOf, attemptsOf }
+  return {
+    loading: authLoading || (signedIn && server.isPending),
+    storedOnServer,
+    loadError: signedIn && server.isError && !unavailable ? server.error : null,
+    retry: () => void server.refetch(),
+    rowOf,
+    attemptsOf,
+  }
 }
 
 export interface OralTopicPracticeState {
   loading: boolean
+  loadError: unknown
+  retry: () => void
   practice: OralPractice
   storedOnServer: boolean
   /** A jegyzet, a kipipált pontok vagy az önértékelés változása; a mentés késleltetve megy. */
@@ -94,7 +106,7 @@ export function useOralTopicPractice(slug: string): OralTopicPracticeState {
   const toast = useToast()
   const queryClient = useQueryClient()
   const userKey = userKeyOf(user)
-  const { loading, storedOnServer, rowOf } = useOralPractices()
+  const { loading, loadError, retry, storedOnServer, rowOf } = useOralPractices()
   const [local, saveLocal] = usePersistentState<OralPractice>(practiceKey(userKey, slug), EMPTY_PRACTICE, isOralPractice)
   const [draft, setDraft] = useState<OralPracticeInput | null>(null)
   const timer = useRef<number | null>(null)
@@ -116,11 +128,14 @@ export function useOralTopicPractice(slug: string): OralTopicPracticeState {
     saveOralPractice(slug, input).then(
       (saved) => upsertRow(queryClient, saved),
       (error: unknown) => {
-        if (httpStatus(error) === 404) return
+        if (httpStatus(error) === 404) {
+          saveLocal({ ...input, attempts: practice.attempts })
+          return
+        }
         toast.show('Nem sikerült elmenteni a gyakorlásodat. Próbáld újra egy kicsit később.', 'error')
       },
     )
-  }, [slug, queryClient, toast])
+  }, [slug, queryClient, toast, saveLocal, practice.attempts])
 
   // Oldalelhagyáskor a még el nem küldött változás is felmegy.
   useEffect(() => flush, [flush])
@@ -154,5 +169,5 @@ export function useOralTopicPractice(slug: string): OralTopicPracticeState {
     }
   }
 
-  return { loading, practice, storedOnServer, update, recordAttempt }
+  return { loading, loadError, retry, practice, storedOnServer, update, recordAttempt }
 }

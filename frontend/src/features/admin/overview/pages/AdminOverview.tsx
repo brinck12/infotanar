@@ -1,7 +1,9 @@
 import { useQuery } from '@tanstack/react-query'
 import type { ReactNode } from 'react'
 import { Link } from 'react-router-dom'
+import { httpStatus } from '../../../../shared/api/errors'
 import { Icon, type IconName } from '../../../../shared/ui/Icon'
+import { LoadError } from '../../../../shared/ui/States'
 import { Stat } from '../../../../shared/ui/Stat'
 import { tracksQuery } from '../../catalog/api'
 import { AdminShell, Section } from '../../components/AdminShell'
@@ -31,7 +33,7 @@ interface Figures {
  */
 export function AdminOverview() {
   const overview = useQuery(adminOverviewQuery())
-  const fallback = overview.isError
+  const fallback = httpStatus(overview.error) === 404
   const users = useQuery({ ...usersQuery(ALL), enabled: fallback })
   const subscribers = useQuery({ ...usersQuery({ ...ALL, subscription: 'active' }), enabled: fallback })
   const pastDue = useQuery({ ...usersQuery({ ...ALL, subscription: 'past_due' }), enabled: fallback })
@@ -96,7 +98,9 @@ export function AdminOverview() {
       </div>
 
       <Section title="Teendők">
-        {loading ? (
+        {overview.isError && !fallback ? (
+          <LoadError error={overview.error} onRetry={() => void overview.refetch()} />
+        ) : loading ? (
           <p className="text-15 text-ink-soft">Betöltés…</p>
         ) : todos.length === 0 ? (
           <p className="text-16 text-ink-soft">Nincs teendő: minden számla elkészült, és nincs elakadt fizetés.</p>

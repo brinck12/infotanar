@@ -10,9 +10,10 @@ import { RadioField, SelectField } from '../../../shared/ui/Form'
 import { Icon, type IconName } from '../../../shared/ui/Icon'
 import { PageLoader } from '../../../shared/ui/PageLoader'
 import { Panel } from '../../../shared/ui/Panel'
+import { LoadError } from '../../../shared/ui/States'
 import { CardTitle, Lead, PageTitle } from '../../../shared/ui/Text'
 import { useToast } from '../../../shared/ui/useToast'
-import { useStudyPreferences, type StudyPreferencesState } from '../useStudyPreferences'
+import { useStudyPreferences, type StudyPreferencesState } from '../../../shared/hooks/useStudyPreferences'
 
 const LEVEL_OPTIONS = [
   { value: 'kozep', title: 'Középszint', detail: '180 perc, 100 pont. Mind az öt gyakorlati rész.' },
@@ -26,10 +27,17 @@ const LANGUAGE_OPTIONS = [
 
 /** Indulás: négy kérdés a célokról, mellette a belőlük adódó terv. Kihagyható. */
 export function Onboarding() {
-  const { preferences, loading, storedOnServer, save } = useStudyPreferences()
+  const { preferences, loading, loadError, retry, storedOnServer, save } = useStudyPreferences()
 
   // Az űrlap a mentett célokból indul, ezért megvárjuk őket.
   if (loading) return <PageLoader label="Céljaid betöltése…" />
+  if (loadError !== null) {
+    return (
+      <main className="mx-auto w-full max-w-page flex-1 px-4 py-12 md:px-6">
+        <LoadError error={loadError} onRetry={retry} title="Nem sikerült betölteni a céljaidat" />
+      </main>
+    )
+  }
   return <GoalsForm initial={preferences} storedOnServer={storedOnServer} save={save} />
 }
 

@@ -9,6 +9,7 @@ export class OnboardingPage extends BasePage {
   readonly period: Locator
   readonly submitButton: Locator
   readonly saveError: Locator
+  readonly loadError: Locator
   readonly serverStorageNote: Locator
   readonly browserStorageNote: Locator
 
@@ -19,6 +20,7 @@ export class OnboardingPage extends BasePage {
     this.csharp = page.getByRole('radio', { name: 'C#' })
     this.period = page.getByLabel('Vizsgaidőszak')
     this.submitButton = page.getByRole('button', { name: 'Kész, kezdjük' })
+    this.loadError = page.getByText('Nem sikerült betölteni a céljaidat')
     this.saveError = page.getByText('Nem sikerült elmenteni a céljaidat')
     this.serverStorageNote = page.getByText('A beállításaidat a fiókodhoz mentjük')
     this.browserStorageNote = page.getByText('A beállításaidat egyelőre ez a böngésző őrzi meg')

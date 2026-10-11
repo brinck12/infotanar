@@ -62,4 +62,15 @@ test.describe('Tanulási célok', () => {
     const stored = await page.evaluate(() => localStorage.getItem('infotanar.preferences.v1.guest'))
     expect(stored).toContain('"level":"emelt"')
   })
+
+  test('ha a szerver nem válaszol, hibát látsz az alapértékek helyett, és nem mentesz', { tag: '@regression' }, async ({ mockApi, onboardingPage }) => {
+    await mockApi.signIn(USER)
+    const sent = await mockApi.withPreferences('error')
+
+    await onboardingPage.goto()
+
+    await expect(onboardingPage.loadError).toBeVisible()
+    await expect(onboardingPage.submitButton).toHaveCount(0)
+    expect(sent()).toBeUndefined()
+  })
 })

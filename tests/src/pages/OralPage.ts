@@ -8,6 +8,7 @@ export class OralPage extends BasePage {
   readonly startAnswer: Locator
   readonly finishAnswer: Locator
   readonly recorded: Locator
+  readonly loadError: Locator
 
   constructor(page: Page) {
     super(page)
@@ -15,6 +16,7 @@ export class OralPage extends BasePage {
     this.startPreparation = page.getByRole('button', { name: 'Felkészülés indítása' })
     this.startAnswer = page.getByRole('button', { name: 'Felelet indítása' })
     this.finishAnswer = page.getByRole('button', { name: 'Felelet vége' })
+    this.loadError = page.getByText('Nem sikerült betölteni a gyakorlásodat')
     this.recorded = page.getByText('A gyakorlást rögzítettük')
   }
 

@@ -136,14 +136,15 @@ export class MockApi {
   }
 
   /**
-   * A tanulasi celok vegpontja. `null`: meg sosem mentett; `'missing'`: a vegpont nincs kint (404).
+   * A tanulasi celok vegpontja. `null`: meg sosem mentett; `'missing'`: a vegpont nincs kint (404); `'error'`: az olvasas 500-at ad.
    * A visszaadott fuggveny az utolso PUT torzset adja (`undefined`, amig nem ment mentes).
    */
-  async withPreferences(initial: WirePreferences | null | 'missing'): Promise<() => unknown> {
-    let stored: WirePreferences | null = initial === 'missing' ? null : initial
+  async withPreferences(initial: WirePreferences | null | 'missing' | 'error'): Promise<() => unknown> {
+    let stored: WirePreferences | null = initial === 'missing' || initial === 'error' ? null : initial
     let sent: unknown
     await this.page.route(`${API}/account/preferences`, async (route) => {
       if (initial === 'missing') return route.fulfill({ status: 404, json: { message: 'Not Found' } })
+      if (initial === 'error' && route.request().method() === 'GET') return route.fulfill({ status: 500, json: { message: 'Hiba' } })
       if (route.request().method() === 'PUT') {
         sent = route.request().postDataJSON() as unknown
         stored = sent as WirePreferences
@@ -157,8 +158,8 @@ export class MockApi {
    * A szobeli gyakorlas vegpontjai. `'missing'`: a vegpontok nincsenek kint (404).
    * A visszaadott objektum a sorokat, az utolso mentest es a gyakorlasok szamlalasat adja.
    */
-  async withOralPractice(initial: MockOralRow[] | 'missing'): Promise<MockOralPractice> {
-    const rows: MockOralRow[] = initial === 'missing' ? [] : [...initial]
+  async withOralPractice(initial: MockOralRow[] | 'missing' | 'error'): Promise<MockOralPractice> {
+    const rows: MockOralRow[] = typeof initial === 'string' ? [] : [...initial]
     const saves: { topic: string; body: unknown }[] = []
     const attempts: string[] = []
     const missing = (route: Route) => route.fulfill({ status: 404, json: { message: 'Not Found' } })
@@ -174,7 +175,10 @@ export class MockApi {
       return row
     }
 
-    await this.page.route(`${API}/oral/practice`, (route) => (initial === 'missing' ? missing(route) : route.fulfill({ json: { data: rows } })))
+    await this.page.route(`${API}/oral/practice`, (route) => {
+      if (initial === 'error') return route.fulfill({ status: 500, json: { message: 'Hiba' } })
+      return initial === 'missing' ? missing(route) : route.fulfill({ json: { data: rows } })
+    })
     await this.page.route(`${API}/oral/practice/*`, (route) => {
       if (initial === 'missing') return missing(route)
       const topic = topicOf(route)

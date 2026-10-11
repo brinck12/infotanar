@@ -1,7 +1,7 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useCallback, useEffect, useRef } from 'react'
-import { httpStatus } from '../../shared/api/errors'
-import { userKeyOf } from '../../shared/domain/lastTask'
+import { httpStatus } from '../api/errors'
+import { userKeyOf } from '../domain/lastTask'
 import {
   DEFAULT_PREFERENCES,
   forgetStoredPreferences,
@@ -9,10 +9,10 @@ import {
   preferencesKey,
   readStoredPreferences,
   type StudyPreferences,
-} from '../../shared/domain/preferences'
-import { usePersistentState } from '../../shared/hooks/usePersistentState'
-import { useAuth } from '../auth/context'
-import { preferenceKeys, preferencesQuery, savePreferences } from './api'
+} from '../domain/preferences'
+import { usePersistentState } from './usePersistentState'
+import { useAuth } from '../../features/auth/context'
+import { preferenceKeys, preferencesQuery, savePreferences } from '../api/preferences'
 
 export interface StudyPreferencesState {
   preferences: StudyPreferences
@@ -20,6 +20,9 @@ export interface StudyPreferencesState {
   loading: boolean
   /** Igaz, ha a mentés a fiókhoz kerül; hamis, ha csak ebben a böngészőben marad. */
   storedOnServer: boolean
+  /** A szerver válasza hibás (nem 404): ilyenkor nem mutatunk és nem mentünk semmit, mert felülírhatnánk a mentett célokat. */
+  loadError: unknown
+  retry: () => void
   /** Elmenti a célokat. Belépve a szerver hibájával elutasít (a 404 kivételével). */
   save: (value: StudyPreferences) => Promise<void>
 }
@@ -38,7 +41,7 @@ export function useStudyPreferences(): StudyPreferencesState {
   const signedIn = user !== null
   const userKey = userKeyOf(user)
   const [local, saveLocal] = usePersistentState(preferencesKey(userKey), DEFAULT_PREFERENCES, isStudyPreferences)
-  const server = useQuery({ ...preferencesQuery(), enabled: signedIn })
+  const server = useQuery({ ...preferencesQuery(), enabled: signedIn, retry: (count, error) => httpStatus(error) !== 404 && count < 2 })
   const unavailable = httpStatus(server.error) === 404
   const neverSaved = signedIn && server.isSuccess && server.data === null
   const migrated = useRef<string | null>(null)
@@ -85,6 +88,8 @@ export function useStudyPreferences(): StudyPreferencesState {
     preferences: signedIn && server.data ? server.data : local,
     loading: authLoading || (signedIn && server.isPending),
     storedOnServer: signedIn && !unavailable,
+    loadError: signedIn && server.isError && !unavailable ? server.error : null,
+    retry: () => void server.refetch(),
     save,
   }
 }
