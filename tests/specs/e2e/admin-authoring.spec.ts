@@ -19,6 +19,8 @@ test.describe('Admin: új típusú tartalom szerkesztése', () => {
     await page.steps.fill('Töltsd be a hyrox.txt fájlt.\nSzámold ki az összidőt.')
     await page.deliverable.fill('hyrox')
     await expect(page.extension('.xlsx')).toBeChecked()
+    await expect(page.extension('.ods')).toBeChecked()
+    await page.extension('.ods').uncheck()
     await page.software.fill('Excel, LibreOffice Calc')
     await page.examPoints.fill('35')
     await page.save.click()
