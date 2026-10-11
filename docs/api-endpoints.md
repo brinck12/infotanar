@@ -26,12 +26,15 @@ Minden végpont a `/api/v1` előtag alatt érhető el. A hozzáférés oszlop je
 | Metódus | Útvonal | Hozzáférés | Limit |
 |---|---|---|---|
 | `DELETE` | `/admin/access-grants/{accessGrant}` | admin | – |
+| `DELETE` | `/admin/attachments/{attachment}` | admin | – |
 | `GET` | `/admin/constraint-options` | admin | – |
 | `GET` | `/admin/exercises` | admin | – |
 | `POST` | `/admin/exercises` | admin | – |
 | `DELETE` | `/admin/exercises/{exercise}` | admin | – |
 | `GET` | `/admin/exercises/{exercise}` | admin | – |
 | `PUT|PATCH` | `/admin/exercises/{exercise}` | admin | – |
+| `GET` | `/admin/exercises/{exercise}/attachments` | admin | – |
+| `POST` | `/admin/exercises/{exercise}/attachments` | admin | `admin-upload` |
 | `GET` | `/admin/exercises/{exercise}/test-cases` | admin | – |
 | `POST` | `/admin/exercises/{exercise}/test-cases` | admin | – |
 | `PUT` | `/admin/exercises/{exercise}/test-cases/order` | admin | – |
