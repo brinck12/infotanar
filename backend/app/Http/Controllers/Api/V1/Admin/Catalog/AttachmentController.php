@@ -32,7 +32,7 @@ final class AttachmentController extends Controller
 
     public function index(Exercise $exercise): AnonymousResourceCollection
     {
-        return AdminAttachmentResource::collection($exercise->attachments()->get());
+        return AdminAttachmentResource::collection($exercise->attachments()->orderBy('id')->get());
     }
 
     /**

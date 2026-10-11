@@ -21,6 +21,7 @@ import type { ApiClient } from '../../src/api/ApiClient'
 import type { AdminExercise, AdminExercisePayload } from '../../src/api/types'
 import { ECHO_PROGRAM, fixtureFile, FIXTURE_FILES, SEEDED, uploadOf } from '../../src/data'
 import { expect, test } from '../../src/fixtures'
+import { exerciseFilesOnDisk, newFilesSince } from '../../src/support/privateDisk'
 
 const TYPED = SEEDED.typed
 
@@ -618,11 +619,14 @@ test.describe('Admin: csatolmányok', () => {
   test('törlés után a fájl nem tölthető le', { tag: '@smoke' }, async ({ apiClient }) => {
     const admin = await adminAccount(apiClient)
     const exercise = await newExercise(admin.client)
+    const before = exerciseFilesOnDisk()
     const uploaded = await uploadAttachment(admin.client, exercise.id, uploadOf('adatok.txt', 'egy sor\n'), { role: 'source' })
     expect((await download(apiClient, uploaded.body.data.url)).status).toBe(200)
+    expect(newFilesSince(before)).toHaveLength(1)
 
     expect((await deleteAttachment(admin.client, uploaded.body.data.id)).status).toBe(204)
 
+    expect(newFilesSince(before)).toEqual([])
     expect((await download(apiClient, uploaded.body.data.url)).status).toBe(404)
     expect((await listAttachments(admin.client, exercise.id)).body.data).toEqual([])
     expect((await deleteAttachment(admin.client, uploaded.body.data.id)).status).toBe(404)
@@ -632,12 +636,15 @@ test.describe('Admin: csatolmányok', () => {
     const admin = await adminAccount(apiClient)
     const exercise = await newExercise(admin.client)
     const testCase = await createTestCase(admin.client, exercise.id, { stdin: 'egy sor\n', expected_stdout: 'egy sor\n', is_hidden: false })
+    const before = exerciseFilesOnDisk()
     const source = await uploadAttachment(admin.client, exercise.id, uploadOf('adatok.txt', 'egy sor\n'), { role: 'source' })
     const input = await uploadAttachment(admin.client, exercise.id, uploadOf('adatok.txt', 'ket sor\n'), { role: 'input', test_case_id: testCase.body.data.id })
     expect([source.status, input.status]).toEqual([201, 201])
+    expect(newFilesSince(before)).toHaveLength(2)
 
     expect((await deleteExercise(admin.client, exercise.id)).status).toBe(204)
 
+    expect(newFilesSince(before)).toEqual([])
     expect((await adminExercise(admin.client, exercise.id)).status).toBe(404)
     expect((await download(apiClient, source.body.data.url)).status).toBe(404)
     expect((await download(apiClient, input.body.data.url)).status).toBe(404)
@@ -648,12 +655,15 @@ test.describe('Admin: csatolmányok', () => {
     const admin = await adminAccount(apiClient)
     const exercise = await newExercise(admin.client)
     const testCase = await createTestCase(admin.client, exercise.id, { stdin: 'egy sor\n', expected_stdout: 'egy sor\n', is_hidden: true })
+    const before = exerciseFilesOnDisk()
     const source = await uploadAttachment(admin.client, exercise.id, uploadOf('adatok.txt', 'egy sor\n'), { role: 'source' })
     const input = await uploadAttachment(admin.client, exercise.id, uploadOf('adatok.txt', 'ket sor\n'), { role: 'input', test_case_id: testCase.body.data.id })
     expect([source.status, input.status]).toEqual([201, 201])
+    expect(newFilesSince(before)).toHaveLength(2)
 
     expect((await deleteTestCase(admin.client, testCase.body.data.id)).status).toBe(204)
 
+    expect(newFilesSince(before)).toHaveLength(1)
     expect((await download(apiClient, input.body.data.url)).status).toBe(404)
     expect((await download(apiClient, source.body.data.url)).status).toBe(200)
     expect((await listAttachments(admin.client, exercise.id)).body.data.map((attachment) => attachment.id)).toEqual([source.body.data.id])
