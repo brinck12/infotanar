@@ -1,5 +1,5 @@
 import { adminAccount, verifiedStudent } from '../../src/api/areas/accounts'
-import { fileSubmission, fileSubmissions, saveManualMarks, uploadFileSubmission } from '../../src/api/areas/fileTasks'
+import { fileSubmission, fileSubmissions, saveManualMarks, SHEET_FIXTURES, uploadFileSubmission } from '../../src/api/areas/fileTasks'
 import { zipBomb } from '../../src/api/areas/zip'
 import type { ApiClient } from '../../src/api/ApiClient'
 import { FIXTURE_FILES, registration, SEEDED, TEST_BACKEND } from '../../src/data'
@@ -136,6 +136,26 @@ test.describe('Fájlbeadás: értékelés', () => {
   })
 })
 
+test.describe('Fájlbeadás: ellenséges és LibreOffice-szerű fájlok', () => {
+  test('a styles.xml-ben tárolt számformátum és cellastílus is érvényesül (ugyanaz a pontszám, mint a content.xml-es ods-nél)', { tag: '@regression' }, async ({ apiClient }) => {
+    const result = await uploadFileSubmission(await student(apiClient), SHEET.id, fixtureFile(SHEET_FIXTURES.stylesOds))
+
+    expect(result.status).toBe(201)
+    expect(result.body.data.score).toBe(SHEET.expected.ok.score)
+    const format = result.body.data.items.find((item) => item.label === SHEET.rubric[2].label)
+    expect(format?.state).toBe('ok')
+  })
+
+  for (const file of [SHEET_FIXTURES.manyEmptyXlsx, SHEET_FIXTURES.manyEmptyOds, SHEET_FIXTURES.manyRepeatedOds]) {
+    test(`${file}: egyetlen sorban rengeteg üres cella: 201 és failed, nem összeomlás`, { tag: '@regression' }, async ({ apiClient }) => {
+      const result = await uploadFileSubmission(await student(apiClient), SHEET.id, fixtureFile(file))
+
+      expect(result.status).toBe(201)
+      expect(result.body.data).toMatchObject({ status: 'failed', score: 0, error: 'A fájl sérült, vagy nem a kért formátumban van.' })
+    })
+  }
+})
+
 test.describe('Fájlbeadás: feltöltési ellenőrzés', () => {
   test('nem engedélyezett kiterjesztés (.docx a táblázat feladatra): 422 a file mezőn', { tag: '@regression' }, async ({ apiClient }) => {
     const result = await uploadFileSubmission(await student(apiClient), SHEET.id, fixtureFile(FIXTURE_FILES.docA4))
@@ -259,10 +279,8 @@ test.describe('Fájlbeadás: más felhasználó beadása', () => {
     expect((await fileSubmissions(stranger, SHEET.id)).body.data).toEqual([])
   })
 
-  // A feladat törlését a törlési szabályok (WP1) tiltják le 409-cel, ha van hozzá fájlbeadás. A WP1 még
-  // nincs ezen az ágon (a külső kulcs most törli a beadásokat), ezért a teszt addig nem futtatható:
-  // futtatva törölné a 5. feladatot, és a további tesztek összeomlanának.
-  test.fixme('beadással rendelkező feladat törlése 409 (WP1 törlési szabálya kell hozzá)', async ({ apiClient }) => {
+  // A feladat törlését a törlési szabály (WP1) tiltja, ha van hozzá fájlbeadás.
+  test('beadással rendelkező feladat törlése 409', async ({ apiClient }) => {
     const admin = await adminAccount(apiClient)
     await uploadFileSubmission(await student(apiClient), SHEET.id, fixtureFile(FIXTURE_FILES.sheetOk))
 

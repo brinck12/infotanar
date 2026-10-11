@@ -66,6 +66,40 @@ final class Xml
         }
     }
 
+    /**
+     * Az olvaso aktualis elemenek kozvetlen gyerekelemeit adja at egyenkent,
+     * a gyerek reszfajat a visszahivas utan atugorja. A szulot nem bontja ki,
+     * igy a memoria egy gyerek merete, nem a szulo egesze. A visszahivas
+     * `expand()`-del olvashatja a gyereket. Visszatereskor az olvaso a szulo
+     * zaro elemen all (ures szulonel valtozatlan).
+     *
+     * @param  callable(XMLReader): void  $visit
+     */
+    public static function eachChildElement(XMLReader $reader, callable $visit): void
+    {
+        if ($reader->isEmptyElement) {
+            return;
+        }
+
+        $depth = $reader->depth;
+        $more = $reader->read();
+
+        while ($more) {
+            if ($reader->nodeType === XMLReader::END_ELEMENT && $reader->depth === $depth) {
+                return;
+            }
+
+            if ($reader->nodeType === XMLReader::ELEMENT && $reader->depth === $depth + 1) {
+                $visit($reader);
+                $more = $reader->next();
+
+                continue;
+            }
+
+            $more = $reader->read();
+        }
+    }
+
     /** Az olvaso aktualis eleme DOM-reszfakent (egy sor, egy stiluslista); null, ha nem bonthato ki. */
     public static function expand(XMLReader $reader): ?DOMElement
     {

@@ -6,6 +6,7 @@ namespace App\Services\FileTasks\Spreadsheet;
 
 use App\Services\FileTasks\Grammar\Numbers;
 use DOMElement;
+use XMLReader;
 
 /**
  * Az ods content.xml bejarasanak allapota: a folyamolvaso elemenkent hivja,
@@ -70,9 +71,10 @@ final class OdsSheetBuilder
 
     public function column(int $repeated, ?string $style, ?string $defaultCellStyle, ?string $visibility): bool
     {
+        $repeated = max(1, min(CellRange::MAX_COLUMN, $repeated));
         $first = $this->nextColumn;
-        $last = min(CellRange::MAX_COLUMN, $first + max(1, $repeated) - 1);
-        $this->nextColumn = $first + max(1, $repeated);
+        $last = min(CellRange::MAX_COLUMN, $first + $repeated - 1);
+        $this->nextColumn = $first + $repeated;
 
         if ($first > CellRange::MAX_COLUMN) {
             return false;
@@ -92,22 +94,47 @@ final class OdsSheetBuilder
         return false;
     }
 
-    public function row(?DOMElement $row): bool
+    public function row(XMLReader $reader): bool
     {
-        if ($row === null) {
-            return true;
-        }
-
-        $repeated = max(1, min(CellRange::MAX_ROW, (int) (OdfNs::attribute($row, OdfNs::TABLE, 'number-rows-repeated') ?? 1)));
+        // A sort nem bontjuk ki egyben: egy sor akar milliora cellat is tartalmazhat.
+        $repeated = self::repeat($reader->getAttributeNs('number-rows-repeated', OdfNs::TABLE), CellRange::MAX_ROW);
         $first = $this->nextRow;
         $this->nextRow += $repeated;
+        $this->budget->take();
 
-        $this->collectObjects($row);
+        $style = $reader->getAttributeNs('style-name', OdfNs::TABLE);
+        $visibility = $reader->getAttributeNs('visibility', OdfNs::TABLE);
+        $cells = [];
+        $column = 1;
 
-        $cells = $this->cells($row);
+        Xml::eachChildElement($reader, function (XMLReader $cellReader) use (&$cells, &$column): void {
+            if ($cellReader->namespaceURI !== OdfNs::TABLE || ! in_array($cellReader->localName, ['table-cell', 'covered-table-cell'], true)) {
+                return;
+            }
 
-        $style = OdfNs::attribute($row, OdfNs::TABLE, 'style-name');
-        $visibility = OdfNs::attribute($row, OdfNs::TABLE, 'visibility');
+            $count = self::repeat($cellReader->getAttributeNs('number-columns-repeated', OdfNs::TABLE), CellRange::MAX_COLUMN);
+            $isCell = $cellReader->localName === 'table-cell';
+            $element = Xml::expand($cellReader);
+
+            if ($element === null) {
+                return;
+            }
+
+            $this->collectObjects($element);
+            $cell = $isCell ? $this->cell($element, $column) : null;
+
+            // Minden cella szamit, mielott epulne belole; az ures, ismetlodo cella egynek.
+            $this->budget->take($cell === null ? 1 : $count);
+
+            if ($cell !== null) {
+                for ($offset = 0; $offset < $count && $column + $offset <= CellRange::MAX_COLUMN; $offset++) {
+                    $cells[$column + $offset] = $cell;
+                }
+            }
+
+            $column += $count;
+        });
+
         $hidden = $visibility === 'collapse' || $visibility === 'filter';
         $height = $this->styles->rowHeight($style);
 
@@ -116,16 +143,21 @@ final class OdsSheetBuilder
         }
 
         if ($cells === []) {
-            return true;
+            return false;
         }
 
-        $this->budget->take(count($cells) * $repeated);
+        $this->budget->take(count($cells) * ($repeated - 1));
 
         for ($offset = 0; $offset < $repeated && $first + $offset <= CellRange::MAX_ROW; $offset++) {
             $this->rows[$first + $offset] = $cells;
         }
 
-        return true;
+        return false;
+    }
+
+    private static function repeat(?string $attribute, int $limit): int
+    {
+        return max(1, min($limit, (int) $attribute));
     }
 
     public function conditionalFormats(?DOMElement $container): bool
@@ -209,36 +241,6 @@ final class OdsSheetBuilder
         $this->nextRow = 1;
     }
 
-    /** @return array<int, Cell> oszlop => cella */
-    private function cells(DOMElement $row): array
-    {
-        $cells = [];
-        $column = 1;
-
-        foreach ($row->childNodes as $element) {
-            if (! $element instanceof DOMElement || $element->namespaceURI !== OdfNs::TABLE) {
-                continue;
-            }
-
-            if ($element->localName !== 'table-cell' && $element->localName !== 'covered-table-cell') {
-                continue;
-            }
-
-            $repeated = max(1, min(CellRange::MAX_COLUMN, (int) (OdfNs::attribute($element, OdfNs::TABLE, 'number-columns-repeated') ?? 1)));
-            $cell = $element->localName === 'table-cell' ? $this->cell($element, $column) : null;
-
-            if ($cell !== null) {
-                for ($offset = 0; $offset < $repeated && $column + $offset <= CellRange::MAX_COLUMN; $offset++) {
-                    $cells[$column + $offset] = $cell;
-                }
-            }
-
-            $column += $repeated;
-        }
-
-        return $cells;
-    }
-
     private function cell(DOMElement $element, int $column): ?Cell
     {
         $style = OdfNs::attribute($element, OdfNs::TABLE, 'style-name') ?? $this->columnStyle($column);
@@ -295,9 +297,9 @@ final class OdsSheetBuilder
         return null;
     }
 
-    private function collectObjects(DOMElement $row): void
+    private function collectObjects(DOMElement $cell): void
     {
-        foreach ($row->getElementsByTagNameNS(OdfNs::DRAW, 'object') as $object) {
+        foreach ($cell->getElementsByTagNameNS(OdfNs::DRAW, 'object') as $object) {
             $href = $object->getAttributeNS(OdfNs::XLINK, 'href');
 
             if ($href !== '' && $this->name !== null) {

@@ -10,6 +10,11 @@ import type { DataEnvelope, FileSubmission } from '../types'
 export const SHEET_FIXTURES = {
   fullXlsx: 'pw-tabla-teljes.xlsx',
   fullOds: 'pw-tabla-teljes.ods',
+  hungarianXlsx: 'pw-tabla-magyar.xlsx',
+  stylesOds: 'pw-tabla-stilus.ods',
+  manyEmptyXlsx: 'pw-tabla-sok-ures.xlsx',
+  manyEmptyOds: 'pw-tabla-sok-ures.ods',
+  manyRepeatedOds: 'pw-tabla-sok-ismetelt.ods',
 } as const
 
 export function uploadFileSubmission(client: ApiClient, exerciseId: number, file: UploadFile): Promise<ApiResult<DataEnvelope<FileSubmission>>> {

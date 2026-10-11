@@ -34,7 +34,14 @@ final readonly class OdsParser
         $named = $this->zip->read($archive, 'styles.xml');
 
         if ($named !== null) {
-            $styles->add(XmlSafety::load($named)->documentElement ?? throw new UnreadableFile('Ures styles.xml.'));
+            $root = XmlSafety::load($named)->documentElement ?? throw new UnreadableFile('Ures styles.xml.');
+
+            // A gyoker csak tarolo (`office:styles`, `office:automatic-styles`, ...): a stilusok azok gyerekei.
+            foreach ([['styles'], ['automatic-styles']] as [$container]) {
+                foreach (OdfNs::children($root, OdfNs::OFFICE, $container) as $element) {
+                    $styles->add($element);
+                }
+            }
         }
 
         $walk = new OdsSheetBuilder($styles, new CellBudget(Config::integer('filetasks.max_dom_nodes')));
@@ -63,7 +70,7 @@ final readonly class OdsParser
                             $reader->getAttributeNs('default-cell-style-name', OdfNs::TABLE),
                             $reader->getAttributeNs('visibility', OdfNs::TABLE),
                         ),
-                        'table-row' => $walk->row(Xml::expand($reader)),
+                        'table-row' => $walk->row($reader),
                         default => false,
                     };
                 }

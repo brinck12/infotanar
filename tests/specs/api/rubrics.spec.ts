@@ -200,3 +200,34 @@ test.describe('Értékelőlap: minden táblázatos vizsgálat xlsx-en és ods-en
     })
   }
 })
+
+/** Magyar rendezés (pw-tabla-magyar.xlsx): A1:A11 magyar sorrendben áll, B1:B11 az ASCII-sorrendben (ami magyarul hibás). */
+const SORT_CHECKS: { label: string; property: string; expected: string; state: 'ok' | 'bad' }[] = [
+  { label: 'cs a c után (Cukor, Csaba)', property: 'Munka1!A1:A11', expected: 'asc', state: 'ok' },
+  { label: 'ASCII-sorrend hibás magyarul', property: 'Munka1!B1:B11', expected: 'asc', state: 'bad' },
+  { label: 'csökkenő nem igaz', property: 'Munka1!A1:A11', expected: 'desc', state: 'bad' },
+  { label: 'Zoltán a Zsolt előtt', property: 'Munka1!A10:A11', expected: 'asc', state: 'ok' },
+  { label: 'ekezetes magánhangzó (Eper, Épület)', property: 'Munka1!A4:A5', expected: 'asc', state: 'ok' },
+  { label: 'rövid a hosszú előtt (Szel, Szél)', property: 'Munka1!A8:A9', expected: 'asc', state: 'ok' },
+  { label: 'g a gy előtt (Géza, Gyula)', property: 'Munka1!A6:A7', expected: 'asc', state: 'ok' },
+  { label: 'fordítva a Szél, Szel hibás', property: 'Munka1!A8:A9', expected: 'desc', state: 'bad' },
+]
+
+test('a szöveges rendezés a magyar ábécé szerint ítélkezik', { tag: '@regression' }, async ({ apiClient }) => {
+  const admin = (await adminAccount(apiClient)).client
+  const ids: number[] = []
+  try {
+    for (const check of SORT_CHECKS) {
+      const created = await createRubricItem(admin, SHEET.id, rubricItemInput({ check_type: 'sort_order', label: `PW ${check.label}`, property: check.property, expected: check.expected }))
+      expect(created.status, check.label).toBe(201)
+      ids.push(created.body.data.id)
+    }
+
+    const result = await rubricCheck(admin, SHEET.id, fixtureFile(SHEET_FIXTURES.hungarianXlsx))
+
+    const states = new Map(result.body.data.items.map((item) => [item.label, item.state]))
+    for (const check of SORT_CHECKS) expect(states.get(`PW ${check.label}`), check.label).toBe(check.state)
+  } finally {
+    await removeTemporary(admin, ids)
+  }
+})

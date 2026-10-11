@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Services\FileTasks\Spreadsheet;
 
+use App\Services\FileTasks\UnreadableFile;
+
 /**
  * Kepletek egyseges (kanonikus) alakja, hogy az xlsx, az ods es a szerzo
  * altal beirt elvaras osszevetheto legyen.
@@ -62,6 +64,9 @@ final class FormulaNormalizer
     private const HARMLESS_NUMBERS = [0.0, 1.0];
 
     /** Egy token tipusa. */
+    /** Ennyi byte-nal hosszabb kepletet nem ertelmezunk. */
+    private const MAX_FORMULA_BYTES = 8192;
+
     public const STRING = 'string';
 
     public const REFERENCE = 'reference';
@@ -301,9 +306,14 @@ final class FormulaNormalizer
             .'|(?<operator><=|>=|<>|.)'
             .')~us';
 
+        $length = strlen($formula);
+
+        if ($length > self::MAX_FORMULA_BYTES) {
+            throw new UnreadableFile('Egy keplet tul hosszu.');
+        }
+
         $tokens = [];
         $offset = 0;
-        $length = strlen($formula);
 
         while ($offset < $length && preg_match($pattern, $formula, $match, PREG_UNMATCHED_AS_NULL, $offset) === 1) {
             $offset += strlen((string) $match[0]);
@@ -315,6 +325,11 @@ final class FormulaNormalizer
                     break;
                 }
             }
+        }
+
+        // Megallt a beolvasas a keplet vege elott (ervenytelen UTF-8 vagy regex-korlat): ne csonkolt kepletet vizsgaljunk.
+        if ($offset < $length) {
+            throw new UnreadableFile('Egy keplet nem ertelmezheto.');
         }
 
         return $tokens;

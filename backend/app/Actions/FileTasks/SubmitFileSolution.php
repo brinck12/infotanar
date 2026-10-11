@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Actions\FileTasks;
 
 use App\Actions\Progress\RecordLessonProgress;
+use App\Enums\FileSubmissionStatus;
 use App\Exceptions\Access\PremiumContentLocked;
 use App\Exceptions\FileTasks\EvaluatorBusy;
 use App\Exceptions\FileTasks\MacroEnabledFile;
@@ -126,11 +127,34 @@ final readonly class SubmitFileSolution
 
     private function evaluate(User $user, Exercise $exercise, FileSubmission $submission): void
     {
-        $this->evaluator->evaluate($exercise, $submission->storedFile())->applyTo($submission);
-        $submission->save();
+        try {
+            $this->evaluator->evaluate($exercise, $submission->storedFile())->applyTo($submission);
+            $submission->save();
+        } catch (Throwable $exception) {
+            // A sor ne maradjon `stored` allapotban orokre: sikertelen beadasnak latszik, a hiba pedig tovabbmegy.
+            $this->markFailed($submission);
+
+            throw $exception;
+        }
 
         if ($submission->passed) {
             $this->recordLessonProgress->handle($user, $exercise->lesson);
+        }
+    }
+
+    private function markFailed(FileSubmission $submission): void
+    {
+        try {
+            $submission->status = FileSubmissionStatus::Failed;
+            $submission->result = null;
+            $submission->score = 0;
+            $submission->max_score = 0;
+            $submission->passed = false;
+            $submission->error = __('filetasks.unreadable');
+            $submission->save();
+        } catch (Throwable $secondary) {
+            // Ha a mentes sem megy (pl. nincs adatbazis), az eredeti hiba a fontos.
+            report($secondary);
         }
     }
 

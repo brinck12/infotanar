@@ -308,9 +308,142 @@ function ods(): Buffer {
 
 // ---------------------------------------------------------------------------
 
+// ---------------------------------------------------------------------------
+// Kiegeszito fixture-ok: magyar rendezes, ellenseges sor, stilusok a styles.xml-ben
+// ---------------------------------------------------------------------------
+
+/** Legkisebb munkafuzet egyetlen munkalappal; a cellak szovege beagyazott (inlineStr). */
+function miniXlsx(sheetData: string): Buffer {
+  return zipArchive([
+    {
+      name: '[Content_Types].xml',
+      data:
+        `${XML}<Types xmlns="${CONTENT_TYPES_NS}"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>` +
+        '<Default Extension="xml" ContentType="application/xml"/>' +
+        '<Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/>' +
+        '<Override PartName="/xl/worksheets/sheet1.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/></Types>',
+    },
+    {
+      name: '_rels/.rels',
+      data: `${XML}<Relationships xmlns="${PACKAGE_REL_NS}"><Relationship Id="rId1" Type="${REL_NS}/officeDocument" Target="xl/workbook.xml"/></Relationships>`,
+    },
+    {
+      name: 'xl/workbook.xml',
+      data: `${XML}<workbook xmlns="${SHEET_NS}" xmlns:r="${REL_NS}"><sheets><sheet name="Munka1" sheetId="1" r:id="rId1"/></sheets></workbook>`,
+    },
+    {
+      name: 'xl/_rels/workbook.xml.rels',
+      data: `${XML}<Relationships xmlns="${PACKAGE_REL_NS}"><Relationship Id="rId1" Type="${REL_NS}/worksheet" Target="worksheets/sheet1.xml"/></Relationships>`,
+    },
+    { name: 'xl/worksheets/sheet1.xml', data: `${XML}<worksheet xmlns="${SHEET_NS}"><sheetData>${sheetData}</sheetData></worksheet>` },
+  ])
+}
+
+/** A: magyar ABC szerint rendezett (cs, gy, sz, zs onallo betu, az ekezet masodlagos), B: az ASCII-sorrend, ami magyarul hibas. */
+const HUNGARIAN_ORDER = ['Cukor', 'Csaba', 'Dóra', 'Eper', 'Épület', 'Géza', 'Gyula', 'Szel', 'Szél', 'Zoltán', 'Zsolt']
+const ASCII_ORDER = ['Csaba', 'Cukor', 'Dóra', 'Eper', 'Épület', 'Géza', 'Gyula', 'Szel', 'Szél', 'Zoltán', 'Zsolt']
+
+function hungarianXlsx(): Buffer {
+  const text = (address: string, value: string): string => `<c r="${address}" t="inlineStr"><is><t>${value}</t></is></c>`
+  const rows = HUNGARIAN_ORDER.map((name, index) => {
+    const row = String(index + 1)
+    return `<row r="${row}">${text(`A${row}`, name)}${text(`B${row}`, ASCII_ORDER[index] ?? '')}</row>`
+  })
+  return miniXlsx(rows.join(''))
+}
+
+/**
+ * Ellenseges fajl: egyetlen sorban negyedmillio ures cella (`<c s="N"/>`). Egy sor, mert a sor egyben kerul
+ * a memoriaba, ha az olvaso nem szamolja a cellakat. A veletlen stilusindex miatt a zip-arany joval a 200-as
+ * hatar alatt van, a zip-vedelem tehat atengedi, a cellakeret viszont megallitja.
+ */
+function manyEmptyCellsXlsx(): Buffer {
+  let seed = 12345
+  const cells: string[] = []
+  for (let index = 0; index < 250_000; index++) {
+    seed = (seed * 1103515245 + 12345) % 2147483648
+    cells.push(`<c s="${String(seed % 10)}"/>`)
+  }
+  return miniXlsx(`<row r="1">${cells.join('')}</row>`)
+}
+
+/** Ellenseges ods: huszszor ismetelt, nem ures cella egyetlen sorban (cellankent 16384-re vagott ismetlessel kb. 330 ezer cella). */
+function manyRepeatedCellsOds(): Buffer {
+  const cells = '<table:table-cell office:value-type="float" office:value="1" table:number-columns-repeated="1000000"/>'.repeat(20)
+  return odsPackage(`<table:table table:name="Munka1"><table:table-row>${cells}</table:table-row></table:table>`, '', '')
+}
+
+/** Ellenseges ods: egyetlen sorban 210 ezer ures, stilusos cella (rovid `t:` eloteggel, hogy a resz 8 MB alatt maradjon). */
+function manyEmptyCellsOds(): Buffer {
+  let seed = 4321
+  const cells: string[] = []
+  for (let index = 0; index < 210_000; index++) {
+    seed = (seed * 1103515245 + 12345) % 2147483648
+    cells.push(`<t:table-cell t:style-name="c${String(seed % 10)}"/>`)
+  }
+  const styles = Array.from({ length: 10 }, (_, index) => `<style:style style:name="c${String(index)}" style:family="table-cell"/>`).join('')
+  return odsPackage(`<table:table table:name="Munka1"><t:table-row>${cells.join('')}</t:table-row></table:table>`, styles, '')
+}
+
+function odsPackage(body: string, automaticStyles: string, namedStyles: string, dataStyles = ''): Buffer {
+  return zipArchive([
+    { name: 'mimetype', data: ODS_MIME, store: true },
+    {
+      name: 'META-INF/manifest.xml',
+      data:
+        '<?xml version="1.0" encoding="UTF-8"?>\n<manifest:manifest xmlns:manifest="urn:oasis:names:tc:opendocument:xmlns:manifest:1.0" manifest:version="1.2">' +
+        `<manifest:file-entry manifest:full-path="/" manifest:version="1.2" manifest:media-type="${ODS_MIME}"/>` +
+        '<manifest:file-entry manifest:full-path="content.xml" manifest:media-type="text/xml"/>' +
+        '<manifest:file-entry manifest:full-path="styles.xml" manifest:media-type="text/xml"/></manifest:manifest>',
+    },
+    {
+      name: 'content.xml',
+      data:
+        `<?xml version="1.0" encoding="UTF-8"?>\n<office:document-content ${ODF_NS} xmlns:t="urn:oasis:names:tc:opendocument:xmlns:table:1.0" office:version="1.2"><office:automatic-styles>${automaticStyles}</office:automatic-styles>` +
+        `<office:body><office:spreadsheet>${body}</office:spreadsheet></office:body></office:document-content>`,
+    },
+    {
+      name: 'styles.xml',
+      data: `<?xml version="1.0" encoding="UTF-8"?>\n<office:document-styles ${ODF_NS} office:version="1.2"><office:styles>${dataStyles}${namedStyles}</office:styles></office:document-styles>`,
+    },
+  ])
+}
+
+/**
+ * Az 5. feladat jo megoldasa, de a szamformatum (adatstilus) es a cellastilus is a styles.xml-ben el, a
+ * content.xml-ben nincs automatikus stilus: igy menti a LibreOffice a nevesitett stilusokat.
+ * Vart pontszam: ugyanaz, mint a pw-tabla.ods-e (9).
+ */
+function odsStylesInStylesXml(): Buffer {
+  const number = (value: number, attributes = ''): string =>
+    `<table:table-cell${attributes} office:value-type="float" office:value="${String(value)}"><text:p>${String(value)}</text:p></table:table-cell>`
+  const rows = [10, 8, 12, 7, 5].map((value, index) => {
+    const row = index + 1
+    const extra =
+      row === 1
+        ? '<table:table-cell office:value-type="string"><text:p>Összeg</text:p></table:table-cell>'
+        : row === 2
+          ? number(42, ' table:style-name="Szamok"')
+          : row === 3
+            ? number(42, ' table:formula="of:=SUM([.A1:.A5])"')
+            : ''
+    return `<table:table-row>${number(value)}${extra}</table:table-row>`
+  })
+  const dataStyles =
+    '<number:number-style style:name="N2"><number:number number:decimal-places="2" number:min-decimal-places="2" number:min-integer-digits="1"/></number:number-style>'
+  const namedStyles =
+    '<style:style style:name="Default" style:family="table-cell"/><style:style style:name="Szamok" style:family="table-cell" style:parent-style-name="Default" style:data-style-name="N2"/>'
+  return odsPackage(`<table:table table:name="Munka1"><table:table-column table:number-columns-repeated="2"/>${rows.join('')}</table:table>`, '', namedStyles, dataStyles)
+}
+
 const FILES: Record<string, Buffer> = {
   'pw-tabla-teljes.xlsx': xlsx(),
   'pw-tabla-teljes.ods': ods(),
+  'pw-tabla-magyar.xlsx': hungarianXlsx(),
+  'pw-tabla-sok-ures.xlsx': manyEmptyCellsXlsx(),
+  'pw-tabla-sok-ures.ods': manyEmptyCellsOds(),
+  'pw-tabla-sok-ismetelt.ods': manyRepeatedCellsOds(),
+  'pw-tabla-stilus.ods': odsStylesInStylesXml(),
 }
 
 const directory = join(__dirname, '..')

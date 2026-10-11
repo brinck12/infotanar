@@ -55,6 +55,8 @@ final readonly class XlsxParser
         $printAreas = $this->printAreas($workbook);
 
         $budget = new CellBudget(Config::integer('filetasks.max_dom_nodes'));
+        $properties = Xml::descendant($workbook, 'workbookPr');
+        $budget->date1904 = $properties !== null && Xml::flag($properties, 'date1904');
         $sheets = [];
         $charts = [];
 
@@ -94,7 +96,7 @@ final readonly class XlsxParser
     /** @throws UnreadableFile */
     private function part(ZipArchive $archive, string $path): string
     {
-        return $this->zip->read($archive, $path) ?? throw new UnreadableFile("Hianyzo resz: {$path}.");
+        return $this->zip->read($archive, $path) ?? throw new UnreadableFile('Hianyzik egy kotelezo resz.');
     }
 
     /**
@@ -361,7 +363,15 @@ final readonly class XlsxParser
         Xml::stream($xml, function (XMLReader $reader) use (&$rows, &$columns, &$rowSpans, &$conditional, &$sharedFormulas, &$defaultWidth, &$defaultHeight, &$nextRow, $strings, $formats, $fills, $budget): void {
             Xml::eachElement($reader, function (XMLReader $reader) use (&$rows, &$columns, &$rowSpans, &$conditional, &$sharedFormulas, &$defaultWidth, &$defaultHeight, &$nextRow, $strings, $formats, $fills, $budget): bool {
                 $name = $reader->localName;
-                $element = in_array($name, ['sheetFormatPr', 'col', 'row', 'conditionalFormatting'], true) ? Xml::expand($reader) : null;
+
+                if ($name === 'row') {
+                    // A sort nem bontjuk ki egyben: egy sor akar milliora cellat is tartalmazhat.
+                    $nextRow = $this->row($reader, $nextRow, $rows, $rowSpans, $sharedFormulas, $strings, $formats, $budget);
+
+                    return false;
+                }
+
+                $element = in_array($name, ['sheetFormatPr', 'col', 'conditionalFormatting'], true) ? Xml::expand($reader) : null;
 
                 if ($element === null) {
                     return false;
@@ -386,11 +396,6 @@ final readonly class XlsxParser
 
                         return false;
 
-                    case 'row':
-                        $nextRow = $this->row($element, $nextRow, $rows, $rowSpans, $sharedFormulas, $strings, $formats, $budget);
-
-                        return true;
-
                     case 'conditionalFormatting':
                         array_push($conditional, ...$this->conditionalFormats($element, $fills));
 
@@ -406,7 +411,9 @@ final readonly class XlsxParser
     }
 
     /**
-     * Egy `row` elem: a sorszamot adja vissza a kovetkezo sor alapertelmezesehez.
+     * Egy `row` elem folyamolvasassal: a cellakat egyenkent bontjuk ki, es
+     * MINDEN `c` elem (az ures is) levon a kozos keretbol, mielott barmi
+     * epulne belole. A sorszamot adja vissza a kovetkezo sor alapertelmezesehez.
      *
      * @param  array<int, array<int, Cell>>  $rows
      * @param  list<AxisSpan>  $rowSpans
@@ -414,37 +421,51 @@ final readonly class XlsxParser
      * @param  list<string>  $strings
      * @param  array<int, string>  $formats
      */
-    private function row(DOMElement $row, int $nextRow, array &$rows, array &$rowSpans, array &$sharedFormulas, array $strings, array $formats, CellBudget $budget): int
+    private function row(XMLReader $reader, int $nextRow, array &$rows, array &$rowSpans, array &$sharedFormulas, array $strings, array $formats, CellBudget $budget): int
     {
-        $rowIndex = (int) (Xml::number($row, 'r') ?? $nextRow);
+        $budget->take();
+
+        $number = $reader->getAttribute('r');
+        $rowIndex = is_numeric($number) ? (int) $number : $nextRow;
 
         if ($rowIndex < 1 || $rowIndex > CellRange::MAX_ROW) {
             throw new UnreadableFile('Ervenytelen sorszam.');
         }
 
-        $height = Xml::number($row, 'ht');
+        $height = $reader->getAttribute('ht');
+        $custom = in_array(strtolower((string) $reader->getAttribute('customHeight')), ['1', 'true', 'on'], true);
+        $hidden = in_array(strtolower((string) $reader->getAttribute('hidden')), ['1', 'true', 'on'], true);
 
-        if (($height !== null && Xml::flag($row, 'customHeight')) || Xml::flag($row, 'hidden')) {
-            $rowSpans[] = new AxisSpan($rowIndex, $rowIndex, Xml::flag($row, 'customHeight') ? $height : null, Xml::flag($row, 'hidden'));
+        if (($custom && is_numeric($height)) || $hidden) {
+            $rowSpans[] = new AxisSpan($rowIndex, $rowIndex, $custom && is_numeric($height) ? (float) $height : null, $hidden);
         }
 
         $nextColumn = 1;
 
-        foreach (Xml::children($row, 'c') as $cell) {
+        Xml::eachChildElement($reader, function (XMLReader $reader) use (&$nextColumn, &$rows, &$sharedFormulas, $rowIndex, $strings, $formats, $budget): void {
+            if ($reader->localName !== 'c') {
+                return;
+            }
+
+            $budget->take();
+
+            $cell = Xml::expand($reader);
+
+            if ($cell === null) {
+                return;
+            }
+
             $reference = Xml::attribute($cell, 'r');
             $address = $reference === null ? null : CellRange::parse($reference);
             $column = $address !== null && $address->isSingleCell() ? $address->firstColumn : $nextColumn;
             $nextColumn = $column + 1;
 
-            $parsed = $this->cell($cell, $column, $rowIndex, $sharedFormulas, $strings, $formats);
+            $parsed = $this->cell($cell, $column, $rowIndex, $sharedFormulas, $strings, $formats, $budget->date1904);
 
-            if ($parsed === null) {
-                continue;
+            if ($parsed !== null) {
+                $rows[$rowIndex][$column] = $parsed;
             }
-
-            $budget->take();
-            $rows[$rowIndex][$column] = $parsed;
-        }
+        });
 
         return $rowIndex + 1;
     }
@@ -454,7 +475,7 @@ final readonly class XlsxParser
      * @param  list<string>  $strings
      * @param  array<int, string>  $formats
      */
-    private function cell(DOMElement $cell, int $column, int $row, array &$sharedFormulas, array $strings, array $formats): ?Cell
+    private function cell(DOMElement $cell, int $column, int $row, array &$sharedFormulas, array $strings, array $formats, bool $date1904 = false): ?Cell
     {
         $style = (int) (Xml::number($cell, 's') ?? 0);
         $format = $formats[$style] ?? NumberFormatCode::GENERAL;
@@ -474,6 +495,11 @@ final readonly class XlsxParser
             is_numeric($raw) => [CellType::Number, (float) $raw],
             default => [CellType::Text, $raw],
         };
+
+        // 1904-es datumrendszer: a sorszamok 1462 nappal kevesebbet jelentenek, mint az 1900-asban.
+        if ($date1904 && $cellType === CellType::Number && is_float($value) && NumberFormatCode::parse($format)->isDateTime()) {
+            $value += 1462.0;
+        }
 
         $formatted = NumberFormatCode::parse($format)->canonical !== NumberFormatCode::parse(NumberFormatCode::GENERAL)->canonical;
 

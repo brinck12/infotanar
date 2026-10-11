@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Actions\Admin\Catalog;
 
 use App\Enums\AttachmentRole;
+use App\Exceptions\FileTasks\EvaluatorBusy;
 use App\Exceptions\FileTasks\MacroEnabledFile;
 use App\Exceptions\FileTasks\NotAFileTask;
 use App\Exceptions\FileTasks\SampleSolutionMissing;
@@ -16,6 +17,7 @@ use App\Services\Files\FileDisk;
 use App\Services\Files\PrivateFileStore;
 use App\Services\Files\UploadedFileInspector;
 use App\Services\FileTasks\AcceptedExtensions;
+use App\Services\FileTasks\EvaluationGate;
 use App\Services\FileTasks\FileEvaluator;
 use App\Services\FileTasks\FileSubmissionPresenter;
 use App\Services\FileTasks\FileSubmissionView;
@@ -40,6 +42,7 @@ final readonly class CheckRubric
     public function __construct(
         private UploadedFileInspector $inspector,
         private PrivateFileStore $files,
+        private EvaluationGate $gate,
         private FileEvaluator $evaluator,
         private FileSubmissionPresenter $presenter,
     ) {}
@@ -50,6 +53,7 @@ final readonly class CheckRubric
      * @throws NotAFileTask ha a feladat nem feltoltos fajtaju
      * @throws SampleSolutionMissing ha nincs fajl, es a feladatnak nincs mintamegoldasa
      * @throws UnsupportedUpload|UploadTooLarge|MacroEnabledFile ha a probafajl nem fogadhato el
+     * @throws EvaluatorBusy ha minden ertekelo hely foglalt
      */
     public function handle(Exercise $exercise, ?UploadedFile $file, User $admin): FileSubmissionView
     {
@@ -61,16 +65,20 @@ final readonly class CheckRubric
             $sample = $exercise->attachments()->ofRole(AttachmentRole::SampleSolution)->first()?->storedFile()
                 ?? throw new SampleSolutionMissing;
 
-            return $this->presenter->trial($exercise, $this->evaluator->evaluate($exercise, $sample), $sample, $admin);
+            return $this->gate->run(fn (): FileSubmissionView => $this->presenter->trial($exercise, $this->evaluator->evaluate($exercise, $sample), $sample, $admin));
         }
 
         $upload = $this->inspector->inspect($file, AcceptedExtensions::for($exercise));
-        $stored = $this->files->put(FileDisk::SubmissionFiles, self::TRIAL_DIRECTORY, $upload);
 
-        try {
-            return $this->presenter->trial($exercise, $this->evaluator->evaluate($exercise, $stored), $stored, $admin);
-        } finally {
-            $this->files->delete($stored);
-        }
+        // A probafajl csak addig el a tarolon, amig egy ertekelo hely foglalt.
+        return $this->gate->run(function () use ($exercise, $upload, $admin): FileSubmissionView {
+            $stored = $this->files->put(FileDisk::SubmissionFiles, self::TRIAL_DIRECTORY, $upload);
+
+            try {
+                return $this->presenter->trial($exercise, $this->evaluator->evaluate($exercise, $stored), $stored, $admin);
+            } finally {
+                $this->files->delete($stored);
+            }
+        });
     }
 }

@@ -6,11 +6,11 @@ namespace App\Services\FileTasks\Spreadsheet\Checks;
 
 use App\Enums\RubricCheckType;
 use App\Services\FileTasks\CheckOutcome;
-use App\Services\FileTasks\Grammar\Text;
 use App\Services\FileTasks\Spreadsheet\Cell;
 use App\Services\FileTasks\Spreadsheet\CellRange;
 use App\Services\FileTasks\Spreadsheet\CellReference;
 use App\Services\FileTasks\Spreadsheet\CellType;
+use App\Services\FileTasks\Spreadsheet\HungarianCollation;
 use App\Services\FileTasks\Spreadsheet\Sheet;
 use App\Services\FileTasks\Spreadsheet\SpreadsheetModel;
 
@@ -227,7 +227,7 @@ final class SortOrderCheck extends SpreadsheetCheck
             return ($left->number() ?? 0.0) <=> ($right->number() ?? 0.0);
         }
 
-        return strcmp(Text::fold($left->display()), Text::fold($right->display()));
+        return HungarianCollation::compare($left->display(), $right->display());
     }
 
     /**
