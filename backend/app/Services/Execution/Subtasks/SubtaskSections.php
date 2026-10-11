@@ -14,10 +14,14 @@ namespace App\Services\Execution\Subtasks;
  * "feladat" szo utan allo szoveg is hozza tartozik, igy az egysoros
  * "2. feladat: 42" es a ketsoros "2. feladat" + "42" ugyanazt adja. Az elso
  * fejlec elotti szoveg egyik reszfeladathoz sem tartozik.
+ *
+ * A fejlec felismerese ekezetfuggetlen: a minta a "feladat" maganhangzoit
+ * ekezettel is elfogadja, igy a sort nem kell atirni, es a szakasz szovege
+ * pontosan az marad, amit a program kiirt.
  */
 final class SubtaskSections
 {
-    private const HEADER = '/^\s*(\d{1,2})\s*[.)]?\s*feladat\b\s*[:.]?\s*(.*)$/iu';
+    private const HEADER = '/^\s*(\d{1,2})\s*[.)]?\s*f[eé]l[aá]d[aá]t\b\s*[:.]?\s*(.*)$/iu';
 
     /**
      * @return array<int, string> sorszam => a szakasz szovege; ismetelt sorszamnal az elso szamit
