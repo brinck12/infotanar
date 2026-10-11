@@ -18,7 +18,7 @@ test.describe('Admin: új típusú tartalom szerkesztése', () => {
     await page.tab('Típus-adatok').click()
     await page.steps.fill('Töltsd be a hyrox.txt fájlt.\nSzámold ki az összidőt.')
     await page.deliverable.fill('hyrox')
-    await page.extension('.xlsx').check()
+    await expect(page.extension('.xlsx')).toBeChecked()
     await page.software.fill('Excel, LibreOffice Calc')
     await page.examPoints.fill('35')
     await page.save.click()
@@ -45,6 +45,9 @@ test.describe('Admin: új típusú tartalom szerkesztése', () => {
     await expect(page.attachmentList).toContainText('hyrox.txt')
     await page.attach('Mintamegoldás (csak adminnak)', 'minta.xlsx', 'xlsx')
     await expect(page.attachmentList).toContainText('minta.xlsx')
+    const path = '/admin/exercises/100/attachments'
+    expect(admin.uploadRoles(path)).toEqual(['source', 'sample_solution'])
+    expect(admin.lastUpload(path)).toMatchObject({ role: 'sample_solution', test_case_id: null, filename: 'minta.xlsx' })
 
     // Értékelőlap: a négy új vizsgálattípus választható, a kipróbálás megmutatja a pontot.
     await page.tab('Értékelőlap').click()
@@ -66,6 +69,43 @@ test.describe('Admin: új típusú tartalom szerkesztése', () => {
     await page.save.click()
     await expect(page.saved).toBeVisible()
     expect(admin.lastBody('PUT', '/admin/exercises/100')).toMatchObject({ is_published: true, kind: 'sheet_upload' })
+  })
+
+  test('kódfeladatnál a bemeneti fájl a kiválasztott tesztesethez megy', { tag: '@regression' }, async ({ mockApi, adminExercisePage: page }) => {
+    await mockApi.signIn(ADMIN)
+    const admin = await mockApi.withAdminAuthoring({ testCases: [{ id: 5, order: 1 }] })
+
+    await page.gotoNew(1)
+    await page.fillBasics('Beolvasás')
+    await page.save.click()
+    await expect(page.page).toHaveURL(/feladatok\/100$/)
+
+    await page.tab('Fájlok').click()
+    await expect(page.roleOption('Mintamegoldás (csak adminnak)')).toHaveCount(0)
+    await page.attachmentRole.selectOption({ label: 'Teszteset bemeneti fájlja (rejtett)' })
+    await page.attachmentTestCase.selectOption({ label: '1. teszteset' })
+    await page.attachmentFile.setInputFiles({ name: 'be.txt', mimeType: 'text/plain', buffer: Buffer.from('1 2') })
+    await page.uploadAttachment.click()
+
+    await expect(page.attachmentList).toContainText('be.txt')
+    expect(admin.lastUpload('/admin/exercises/100/attachments')).toMatchObject({ role: 'input', test_case_id: '5', filename: 'be.txt' })
+  })
+
+  test('weboldal-feladatnál nincs mintamegoldás szerep', { tag: '@regression' }, async ({ mockApi, adminExercisePage: page }) => {
+    await mockApi.signIn(ADMIN)
+    await mockApi.withAdminAuthoring()
+
+    await page.gotoNew(1)
+    await page.kind.selectOption({ label: 'Weboldal (böngészőben ellenőrzött)' })
+    await page.fillBasics('Oldal')
+    await page.save.click()
+    await expect(page.page).toHaveURL(/feladatok\/100$/)
+
+    await page.tab('Fájlok').click()
+    await expect(page.roleOption('Forrásfájl (a tanuló letöltheti)')).toHaveCount(1)
+    await expect(page.roleOption('Mintakép (a tanulónak)')).toHaveCount(1)
+    await expect(page.roleOption('Mintamegoldás (csak adminnak)')).toHaveCount(0)
+    await expect(page.roleOption('Teszteset bemeneti fájlja (rejtett)')).toHaveCount(0)
   })
 
   test('az értékelőlap pontja szerkeszthető', { tag: '@regression' }, async ({ mockApi, adminExercisePage: page }) => {
@@ -165,6 +205,7 @@ test.describe('Admin: új típusú tartalom szerkesztése', () => {
 
     await page.attachZip('forrasok.zip')
     await expect(page.fileLink('forrasok.zip')).toBeVisible()
+    expect(admin.lastUpload('/admin/exams/7/attachments')).toMatchObject({ role: 'source_zip', filename: 'forrasok.zip' })
 
     await page.fileDelete('forrasok.zip').click()
     await expect(page.fileLink('forrasok.zip')).toHaveCount(0)

@@ -226,7 +226,6 @@ function CodeForm({ value, onChange, errors }: FormProps) {
                   <IconButton
                     icon="trash"
                     label={`${index + 1}. részfeladat törlése`}
-                    disabled={false}
                     danger
                     onClick={() => onChange({ ...value, subtasks: value.subtasks.filter((_, i) => i !== index) })}
                   />

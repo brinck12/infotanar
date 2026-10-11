@@ -1,6 +1,6 @@
 import type { ExerciseKind } from '../../../types'
 import type { AdminExercise, Comparison, ExerciseSpecValue } from './api'
-import { isJsonKind, isUploadExerciseKind, SPEC_SAMPLES } from './kinds'
+import { isJsonKind, isUploadExerciseKind, SPEC_SAMPLES, UPLOAD_EXTENSIONS } from './kinds'
 
 /** A „Típus-adatok” fül űrlapállapota: szöveges mezők, hogy a félig kitöltött érték se vesszen el. */
 export interface UploadFields {
@@ -41,8 +41,8 @@ export function emptyUploadFields(): UploadFields {
 }
 
 /** A mentett feladat `spec` és `comparison` mezőiből a szerkesztő állapota. */
-export function initialTypeData(exercise: AdminExercise | null): TypeData {
-  const kind = exercise?.kind ?? 'code'
+export function initialTypeData(exercise: AdminExercise | null, newKind: ExerciseKind = 'code'): TypeData {
+  const kind = exercise?.kind ?? newKind
   const spec = exercise?.spec ?? null
   const data: TypeData = { upload: emptyUploadFields(), specText: '', subtasks: [], comparison: exercise?.comparison ?? null }
 
@@ -66,10 +66,18 @@ export function initialTypeData(exercise: AdminExercise | null): TypeData {
     })
   }
 
+  // Feltöltős típusnál legalább egy kiterjesztés kell (a szerver piszkozatnál is kéri): alapból mind be van jelölve.
+  if (isUploadExerciseKind(kind) && data.upload.accepted_extensions.length === 0) {
+    data.upload.accepted_extensions = [...UPLOAD_EXTENSIONS[kind as keyof typeof UPLOAD_EXTENSIONS]]
+  }
+
   return data
 }
 
-const nullableNumber = (value: string): number | null => (value.trim() === '' ? null : Number(value))
+const nullableNumber = (value: string): number | null => {
+  const parsed = Number(value)
+  return value.trim() === '' || Number.isNaN(parsed) ? null : parsed
+}
 const nullableText = (value: string): string | null => (value.trim() === '' ? null : value.trim())
 const lines = (value: string): string[] =>
   value

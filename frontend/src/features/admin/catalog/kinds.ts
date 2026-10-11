@@ -17,6 +17,13 @@ export const isEditorKind = (kind: ExerciseKind): boolean => kind === 'code' || 
 
 export const isUploadExerciseKind = (kind: ExerciseKind): boolean => kind === 'sheet_upload' || kind === 'doc_upload' || kind === 'visual_upload'
 
+/** A feladathoz feltölthető fájlszerepek típusonként (a szerver `ManageAttachment::assertRoleFits` szabályával egyező). */
+export function attachmentRolesFor(kind: ExerciseKind): ReadonlyArray<'source' | 'input' | 'sample_image' | 'sample_solution'> {
+  if (isEditorKind(kind)) return ['source', 'input']
+  if (isUploadExerciseKind(kind)) return ['source', 'sample_image', 'sample_solution']
+  return ['source', 'sample_image']
+}
+
 /** Ezeknél a `spec` JSON-ként szerkeszthető (mély szerkezet). */
 export const isJsonKind = (kind: ExerciseKind): boolean => kind === 'web' || kind === 'sheet_browser' || kind === 'doc_browser' || kind === 'sql'
 

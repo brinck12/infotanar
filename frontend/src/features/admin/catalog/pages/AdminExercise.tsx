@@ -131,7 +131,7 @@ function ExerciseEditor({ lesson, exercise }: { lesson: AdminLesson; exercise: A
       kind,
       allowed_languages: kind === 'sql' ? ['sql'] : kind === 'code' ? (f.allowed_languages.filter((l) => l !== 'sql').length > 0 ? f.allowed_languages.filter((l) => l !== 'sql') : ['python']) : [],
     }))
-    setTypeData(kind === exercise?.kind ? initialTypeData(exercise) : initialTypeData(null))
+    setTypeData(kind === exercise?.kind ? initialTypeData(exercise) : initialTypeData(null, kind))
     setJsonError(null)
     if (tab === 'tesztek' || tab === 'szabalyok' || tab === 'ertekelolap') setTab('tipus')
   }
@@ -245,7 +245,7 @@ function ExerciseEditor({ lesson, exercise }: { lesson: AdminLesson; exercise: A
             <fieldset className="mt-5">
               <legend className="text-15 font-semibold">Nyelvek</legend>
               <div className="mt-2.5 flex flex-wrap gap-x-7 gap-y-3">
-                {(languages.data ?? []).filter((language) => language.key !== 'sql').map((language: LanguageOption) => (
+                {(languages.data ?? []).filter((language) => language.key !== 'sql' || form.allowed_languages.includes('sql')).map((language: LanguageOption) => (
                   <CheckboxField
                     key={language.key}
                     label={language.label}
@@ -366,7 +366,7 @@ function ExerciseEditor({ lesson, exercise }: { lesson: AdminLesson; exercise: A
 
       <TabPanel idPrefix={formId} id="fajlok" active={tab === 'fajlok'}>
         {exercise ? (
-          <AttachmentManager exerciseId={exercise.id} editorBased={editorKind} />
+          <AttachmentManager exerciseId={exercise.id} kind={form.kind} />
         ) : (
           <Banner kind="info" title="Előbb mentsd el a feladatot">
             A fájlok a létrehozás után tölthetők fel.

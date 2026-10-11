@@ -16,6 +16,7 @@ export class AdminExercisePage extends BasePage {
   readonly insertSample: Locator
   readonly attachmentRole: Locator
   readonly attachmentFile: Locator
+  readonly attachmentTestCase: Locator
   readonly uploadAttachment: Locator
   readonly attachmentList: Locator
   readonly rubricLabel: Locator
@@ -44,6 +45,7 @@ export class AdminExercisePage extends BasePage {
     this.specJson = page.getByLabel('A feladat adatai (JSON)')
     this.insertSample = page.getByRole('button', { name: 'Minta beillesztése' })
     this.attachmentRole = page.getByLabel('A fájl szerepe')
+    this.attachmentTestCase = page.getByLabel('Melyik teszteset')
     this.attachmentFile = page.getByLabel('Fájl', { exact: true })
     this.uploadAttachment = page.getByRole('button', { name: 'Fájl feltöltése' })
     this.attachmentList = page.getByRole('table', { name: 'A feladat csatolt fájljai' })
@@ -86,6 +88,10 @@ export class AdminExercisePage extends BasePage {
 
   async fillBasics(title: string): Promise<void> {
     await this.title.fill(title)
+  }
+
+  roleOption(name: string): Locator {
+    return this.attachmentRole.getByRole('option', { name })
   }
 
   async attach(role: string, name: string, content: string): Promise<void> {

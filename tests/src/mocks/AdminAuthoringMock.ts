@@ -17,6 +17,8 @@ export interface AdminAuthoringOptions {
   rubricAvailable?: boolean
   /** A feladat mentesenek egymas utani elutasitasai (422, a `spec` mezon); ha elfogy, a mentes sikerul. */
   specErrors?: string[]
+  /** A feladat tesztesetei (id, sorszam) az `input` fajlok teszteset-valasztojahoz. */
+  testCases?: { id: number; order: number }[]
 }
 
 interface Stored {
@@ -52,6 +54,7 @@ export class AdminAuthoringMock {
   private nextId = 100
   private readonly specErrors: string[]
   private readonly rubricAvailable: boolean
+  private readonly testCases: { id: number; order: number }[]
 
   constructor(
     private readonly page: Page,
@@ -59,11 +62,23 @@ export class AdminAuthoringMock {
   ) {
     this.rubricAvailable = options.rubricAvailable ?? true
     this.specErrors = [...(options.specErrors ?? [])]
+    this.testCases = options.testCases ?? []
   }
 
   /** Az utolso, a megadott modszerrel es utvonallal erkezett hivas torzse. */
   lastBody(method: string, path: string): Json | null {
     return this.calls.filter((call) => call.method === method && call.path === path).at(-1)?.body ?? null
+  }
+
+  /** Az utolso feltoltes mezoi (multipart), a megadott utvonalon. */
+  lastUpload(path: string): MultipartFields | null {
+    const call = this.calls.filter((item) => item.method === 'POST' && item.path === path).at(-1)
+    return call ? parseMultipart(call.raw) : null
+  }
+
+  /** Az osszes feltoltes szerepe a megadott utvonalon, sorrendben. */
+  uploadRoles(path: string): (string | null)[] {
+    return this.calls.filter((item) => item.method === 'POST' && item.path === path).map((item) => parseMultipart(item.raw).role)
   }
 
   async install(): Promise<void> {
@@ -107,7 +122,9 @@ export class AdminAuthoringMock {
         return ok(this.view())
       }
     }
-    if (/^\/admin\/exercises\/\d+\/test-cases$/.test(path)) return ok([])
+    if (/^\/admin\/exercises\/\d+\/test-cases$/.test(path)) {
+      return ok(this.testCases.map((tc) => ({ ...tc, exercise_id: 100, stdin: '', expected_stdout: '', is_hidden: false, updated_at: null })))
+    }
 
     // Csatolmanyok
     if (/^\/admin\/exercises\/\d+\/attachments$/.test(path)) {
@@ -168,21 +185,20 @@ export class AdminAuthoringMock {
     return { ...this.exercise, rubric_item_count: this.rubric.length }
   }
 
+  /** A hianyzo szerep nem kap alaperteket, hogy a teszt a hibat lassa. */
   private storeUpload(raw: string): Stored {
-    const field = (name: string): string | null => new RegExp(`name="${name}"\\r\\n\\r\\n([^\\r]*)`).exec(raw)?.[1] ?? null
-    const filename = /filename="([^"]*)"/.exec(raw)?.[1] ?? 'fajl'
-    const testCase = field('test_case_id')
+    const fields = parseMultipart(raw)
     return {
       id: this.nextId++,
-      name: field('name') ?? filename,
+      name: fields.name ?? fields.filename ?? 'fajl',
       size: 1024,
-      role: field('role') ?? 'source_zip',
-      test_case_id: testCase === null ? null : Number(testCase),
+      role: fields.role ?? 'hianyzo_szerep',
+      test_case_id: fields.test_case_id === null ? null : Number(fields.test_case_id),
     }
   }
 
   private attachmentView(item: Stored): Json {
-    return { id: item.id, role: item.role ?? 'source', name: item.name, size: item.size, test_case_id: item.test_case_id ?? null, url: `/download/${item.id}` }
+    return { id: item.id, role: item.role, name: item.name, size: item.size, test_case_id: item.test_case_id ?? null, url: `/download/${item.id}` }
   }
 
   private checkResult(): Json {
@@ -199,4 +215,17 @@ export class AdminAuthoringMock {
     const total = this.rubric.reduce((sum, item) => sum + Number(item.points), 0)
     return { status: 'evaluated', score: total, max_score: total, groups: [], items, facts: [], error: null }
   }
+}
+
+export interface MultipartFields {
+  role: string | null
+  test_case_id: string | null
+  name: string | null
+  filename: string | null
+}
+
+/** A multipart torzs szoveges mezoi es a fajl neve. */
+function parseMultipart(raw: string): MultipartFields {
+  const field = (name: string): string | null => new RegExp(`name="${name}"\\r\\n\\r\\n([^\\r]*)`).exec(raw)?.[1] ?? null
+  return { role: field('role'), test_case_id: field('test_case_id'), name: field('name'), filename: /filename="([^"]*)"/.exec(raw)?.[1] ?? null }
 }

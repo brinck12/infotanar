@@ -11,6 +11,8 @@ import { EmptyState, LoadError, Skeleton } from '../../../../shared/ui/States'
 import { Table, Td, Th, Tr } from '../../../../shared/ui/Table'
 import { CardTitle } from '../../../../shared/ui/Text'
 import { attachmentsQuery, adminCatalogKeys, deleteAttachment, testCasesQuery, uploadAttachment, type AdminAttachment, type AttachmentRole } from '../api'
+import type { ExerciseKind } from '../../../../types'
+import { attachmentRolesFor, isEditorKind } from '../kinds'
 import { MutationError } from './QueryState'
 import { IconButton } from './ChildList'
 
@@ -31,7 +33,8 @@ const ROLE_HINT: Readonly<Record<AttachmentRole, string>> = {
 }
 
 /** Egy feladat csatolt fájljai: lista, feltöltés szereppel, törlés. Minden típusnál ugyanez. */
-export function AttachmentManager({ exerciseId, editorBased }: { exerciseId: number; editorBased: boolean }) {
+export function AttachmentManager({ exerciseId, kind }: { exerciseId: number; kind: ExerciseKind }) {
+  const editorBased = isEditorKind(kind)
   const queryClient = useQueryClient()
   const attachments = useQuery(attachmentsQuery(exerciseId))
   const testCases = useQuery({ ...testCasesQuery(exerciseId), enabled: editorBased })
@@ -57,7 +60,7 @@ export function AttachmentManager({ exerciseId, editorBased }: { exerciseId: num
   const remove = useMutation({ mutationFn: deleteAttachment, onSettled: refresh })
   const errors = mezoHibak(upload.error)
 
-  const roles: AttachmentRole[] = editorBased ? ['source', 'input'] : ['source', 'sample_image', 'sample_solution']
+  const roles = attachmentRolesFor(kind)
   const roleOptions = roles.map((value) => ({ value, label: ROLE_LABEL[value] }))
   const testCaseOptions = [
     { value: '', label: 'Válassz tesztesetet…' },
