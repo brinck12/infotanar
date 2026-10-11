@@ -28,7 +28,8 @@ final class RunCodeRequest extends FormRequest
     }
 
     /**
-     * A feladat maga is korlatozhatja, mely nyelveken oldhato meg.
+     * Csak szerkesztos (kod, SQL) feladat futtathato, es a feladat maga is
+     * korlatozhatja, mely nyelveken oldhato meg.
      *
      * @return list<Closure(Validator): void>
      */
@@ -37,6 +38,13 @@ final class RunCodeRequest extends FormRequest
         return [
             function (Validator $validator): void {
                 if ($validator->errors()->isNotEmpty()) {
+                    return;
+                }
+
+                // Fajlfeltoltos es bongeszos feladathoz nincs mit futtatni (nyelvuk sincs).
+                if (! $this->exercise()->kind->isEditorBased()) {
+                    $validator->errors()->add('task_id', __('execution.not_a_code_task'));
+
                     return;
                 }
 
