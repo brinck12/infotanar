@@ -63,11 +63,15 @@ export function isUploadKind(kind: ExerciseKind | undefined): boolean {
   return kind !== undefined && UPLOAD_KINDS.has(kind)
 }
 
+/** Amíg egy beadás értékelése tart, ilyen gyakran kérdezzük le újra. */
+const POLL_MS = 1500
+
 export const submissionQuery = (id: number) =>
   queryOptions({
     queryKey: fileTaskKeys.one(id),
     queryFn: async ({ signal }) => (await http.get<Envelope<FileSubmission>>(`/file-submissions/${id}`, { signal })).data.data,
     retry: false,
+    refetchInterval: (query) => (query.state.data?.status === 'processing' ? POLL_MS : false),
   })
 
 /** A feladat próbálkozásai, a legújabb elöl. */
@@ -77,6 +81,7 @@ export const submissionsQuery = (exerciseId: number) =>
     queryFn: async ({ signal }) =>
       (await http.get<Envelope<FileSubmission[]>>(`/exercises/${exerciseId}/file-submissions`, { signal })).data.data,
     retry: false,
+    refetchInterval: (query) => (query.state.data?.some((item) => item.status === 'processing') ? POLL_MS : false),
   })
 
 export async function uploadSubmission(exerciseId: number, file: File, onProgress: (percent: number) => void): Promise<FileSubmission> {

@@ -19,6 +19,8 @@ Ez a dokumentum **vázlat**: a szakaszcímek a végleges szerkezetet mutatják, 
 
 A bankkártya adatait nem kezeljük: azokat a fizetési szolgáltató kezeli.
 
+[JOGI SZÖVEG JÓVÁHAGYÁSRA VÁR: a tulajdonosnak kell elfogadnia vagy átírnia.] Ha a felhasználó feladatot vagy gyakorló vizsgát old meg, a feltöltött fájlokat (táblázat, dokumentum, kép), a gyakorló vizsgák próbálkozásait és eredményeit, a szóbeli gyakorláshoz írt jegyzeteket és önértékelést, valamint a megadott tanulási célokat (szint, vizsgaidőszak, programozási nyelv, heti óraszám) a fiókhoz kapcsolva tároljuk. A feltöltött fájlokat és a vizsgapróbálkozásokat 365 nap után automatikusan töröljük. A fiók törlésekor ezek is törlődnek.
+
 ## 3. Adatfeldolgozók és adattovábbítás
 
 | Címzett | Tevékenység | Átadott adatok |

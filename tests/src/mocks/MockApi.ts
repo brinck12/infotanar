@@ -21,6 +21,37 @@ export interface MockExecutionWait {
   guest?: boolean
 }
 
+/** A tanulasi celok a vezetekes (snake_case) alakban. */
+export interface WirePreferences {
+  level: string
+  exam_period: string
+  language: string
+  weekly_hours: string
+}
+
+export interface MockOralRow {
+  topic: string
+  checked: number[]
+  notes: string
+  scores: Record<string, number>
+  attempts: number
+  last_practiced_at: string | null
+}
+
+export interface MockOralPractice {
+  rows: () => MockOralRow[]
+  /** A PUT hivasok torzsei, sorrendben. */
+  saves: () => { topic: string; body: unknown }[]
+  /** A gyakorlast rogzito POST hivasok temakorei. */
+  attempts: () => string[]
+}
+
+export interface MockExamOptions {
+  detail?: object
+  attempt?: object
+  startError?: { status: number; body: object }
+}
+
 /**
  * A backend mockolasa route interceptionnel, hogy az E2E tesztek elo
  * backend es Judge0 nelkul, determinisztikusan fussanak.
@@ -93,6 +124,108 @@ export class MockApi {
   /** A /submissions valasza. */
   async onSubmit(body: SubmissionResponse | RunResponse, { status = 200 }: MockResponseOptions = {}): Promise<void> {
     await this.page.route(`${API}/submissions`, (route) => route.fulfill({ status, json: body }))
+  }
+
+  /**
+   * Bejelentkezett nezo: a token a helyi tarolobol jon, a /auth/me a felhasznalot adja.
+   * A frontend a felhasznalo azonositojabol kepezi a helyi kulcsokat (`u<id>`).
+   */
+  async signIn(user: User): Promise<void> {
+    await this.page.addInitScript(() => { localStorage.setItem('infotanar.token', 'pw-mock-token'); })
+    await this.page.route(`${API}/auth/me`, (route) => route.fulfill({ json: { data: user } }))
+  }
+
+  /**
+   * A tanulasi celok vegpontja. `null`: meg sosem mentett; `'missing'`: a vegpont nincs kint (404).
+   * A visszaadott fuggveny az utolso PUT torzset adja (`undefined`, amig nem ment mentes).
+   */
+  async withPreferences(initial: WirePreferences | null | 'missing'): Promise<() => unknown> {
+    let stored: WirePreferences | null = initial === 'missing' ? null : initial
+    let sent: unknown
+    await this.page.route(`${API}/account/preferences`, async (route) => {
+      if (initial === 'missing') return route.fulfill({ status: 404, json: { message: 'Not Found' } })
+      if (route.request().method() === 'PUT') {
+        sent = route.request().postDataJSON() as unknown
+        stored = sent as WirePreferences
+      }
+      return route.fulfill({ json: { data: stored } })
+    })
+    return () => sent
+  }
+
+  /**
+   * A szobeli gyakorlas vegpontjai. `'missing'`: a vegpontok nincsenek kint (404).
+   * A visszaadott objektum a sorokat, az utolso mentest es a gyakorlasok szamlalasat adja.
+   */
+  async withOralPractice(initial: MockOralRow[] | 'missing'): Promise<MockOralPractice> {
+    const rows: MockOralRow[] = initial === 'missing' ? [] : [...initial]
+    const saves: { topic: string; body: unknown }[] = []
+    const attempts: string[] = []
+    const missing = (route: Route) => route.fulfill({ status: 404, json: { message: 'Not Found' } })
+    const topicOf = (route: Route) => new URL(route.request().url()).pathname.split('/').filter(Boolean)[4] ?? ''
+    const upsert = (topic: string, patch: Partial<MockOralRow>): MockOralRow => {
+      const index = rows.findIndex((row) => row.topic === topic)
+      const row: MockOralRow = {
+        ...(rows[index] ?? { topic, checked: [], notes: '', scores: {}, attempts: 0, last_practiced_at: null }),
+        ...patch,
+      }
+      if (index === -1) rows.push(row)
+      else rows[index] = row
+      return row
+    }
+
+    await this.page.route(`${API}/oral/practice`, (route) => (initial === 'missing' ? missing(route) : route.fulfill({ json: { data: rows } })))
+    await this.page.route(`${API}/oral/practice/*`, (route) => {
+      if (initial === 'missing') return missing(route)
+      const topic = topicOf(route)
+      const body = route.request().postDataJSON() as Partial<MockOralRow>
+      saves.push({ topic, body })
+      return route.fulfill({ json: { data: upsert(topic, body) } })
+    })
+    await this.page.route(`${API}/oral/practice/*/attempts`, (route) => {
+      if (initial === 'missing') return missing(route)
+      const topic = topicOf(route)
+      attempts.push(topic)
+      const current = rows.find((row) => row.topic === topic)
+      return route.fulfill({ json: { data: upsert(topic, { attempts: (current?.attempts ?? 0) + 1 }) } })
+    })
+
+    return { rows: () => rows, saves: () => saves, attempts: () => attempts }
+  }
+
+  /** Gyakorlo vizsgak: lista, egy feladatsor, egy probalkozas. A `startError` az indito POST hibaja. */
+  async withExams(exams: object[], options: MockExamOptions = {}): Promise<void> {
+    await this.page.route(`${API}/exams`, (route) => route.fulfill({ json: { data: exams } }))
+    if (options.detail) await this.page.route(`${API}/exams/*`, (route) => route.fulfill({ json: { data: options.detail } }))
+    if (options.attempt) await this.page.route(`${API}/exam-attempts/*`, (route) => route.fulfill({ json: { data: options.attempt } }))
+    if (options.startError) {
+      const { status, body } = options.startError
+      await this.page.route(`${API}/exams/*/attempts`, (route) => route.fulfill({ status, json: body }))
+    }
+  }
+
+  /** Egy fajlfeladat beadasai (lista es egyedi lekeres). */
+  async withFileTask(submissions: { id: number }[]): Promise<void> {
+    await this.page.route(`${API}/exercises/*/file-submissions`, (route) => {
+      if (route.request().method() !== 'GET') return route.fallback()
+      return route.fulfill({ json: { data: submissions } })
+    })
+    await this.page.route(`${API}/file-submissions/*`, (route) => {
+      const id = Number(new URL(route.request().url()).pathname.split('/').pop())
+      const found = submissions.find((item) => item.id === id)
+      return found ? route.fulfill({ json: { data: found } }) : route.fulfill({ status: 404, json: { message: 'Not Found' } })
+    })
+  }
+
+  /** A fajlfeltoltes valasza; a visszaadott fuggveny a feltoltesek szamat adja. */
+  async onFileUpload(body: object, { status = 201 }: MockResponseOptions = {}): Promise<() => number> {
+    let uploads = 0
+    await this.page.route(`${API}/exercises/*/file-submissions`, (route) => {
+      if (route.request().method() !== 'POST') return route.fallback()
+      uploads += 1
+      return route.fulfill({ status, json: { data: body } })
+    })
+    return () => uploads
   }
 
   private async fulfillTask(route: Route, tasks: TaskDetail[]): Promise<void> {

@@ -1,12 +1,10 @@
 import { Link } from 'react-router-dom'
-import { userKeyOf } from '../../../shared/domain/lastTask'
 import { Icon } from '../../../shared/ui/Icon'
 import { Panel } from '../../../shared/ui/Panel'
 import { Table, Td, Th } from '../../../shared/ui/Table'
 import { CardTitle, Lead, PageTitle, SectionTitle } from '../../../shared/ui/Text'
-import { useAuth } from '../../auth/context'
-import { readPractice } from '../practice'
 import { ORAL_MINUTES, ORAL_SCORING, ORAL_TOPICS } from '../topics'
+import { useOralPractices } from '../useOralPractice'
 
 const STEPS = [
   'Húzol egy tételt: az A) rész egy elméleti téma a hat közül, a B) rész egy programozási feladat.',
@@ -21,8 +19,7 @@ function attemptsLabel(attempts: number): string {
 
 /** Szóbeli: hogyan zajlik, mire jár pont, és a hat elméleti téma gyakorlása. */
 export function Oral() {
-  const { user } = useAuth()
-  const userKey = userKeyOf(user)
+  const { attemptsOf } = useOralPractices()
 
   return (
     <main className="mx-auto w-full max-w-page flex-1 px-4 pt-8 pb-24 md:px-6">
@@ -88,7 +85,7 @@ export function Oral() {
                 <span className="font-serif text-22 leading-snug font-semibold">{topic.title}</span>
                 <span className="text-16 leading-relaxed text-ink-soft">Elméleti téma kifejtése, majd egy programozási feladat bemutatása.</span>
                 <span className="mt-auto border-t border-grid pt-3 text-15 font-semibold text-ink-soft">
-                  {attemptsLabel(readPractice(userKey, topic.slug).attempts)}
+                  {attemptsLabel(attemptsOf(topic.slug))}
                 </span>
               </Link>
             </li>

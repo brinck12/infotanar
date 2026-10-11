@@ -1,8 +1,5 @@
 import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
-import { userKeyOf } from '../../../shared/domain/lastTask'
-import { DEFAULT_PREFERENCES, isStudyPreferences, preferencesKey } from '../../../shared/domain/preferences'
-import { usePersistentState } from '../../../shared/hooks/usePersistentState'
 import { Banner } from '../../../shared/ui/Banner'
 import { Breadcrumb } from '../../../shared/ui/Breadcrumb'
 import { Button } from '../../../shared/ui/Button'
@@ -10,12 +7,14 @@ import { CodeBlock } from '../../../shared/ui/CodeBlock'
 import { cx } from '../../../shared/ui/cx'
 import { CheckboxField, TextAreaField } from '../../../shared/ui/Form'
 import { Icon } from '../../../shared/ui/Icon'
+import { PageLoader } from '../../../shared/ui/PageLoader'
 import { Panel } from '../../../shared/ui/Panel'
 import { CardTitle, PageTitle } from '../../../shared/ui/Text'
-import { useAuth } from '../../auth/context'
+import { useStudyPreferences } from '../../onboarding/useStudyPreferences'
 import { NotFound } from '../../system/NotFound'
-import { EMPTY_PRACTICE, formatClock, isOralPractice, practiceKey, type OralPractice } from '../practice'
+import { formatClock } from '../practice'
 import { ORAL_MINUTES, ORAL_SCORING, ORAL_TOPICS, type OralTopic as Topic } from '../topics'
+import { useOralTopicPractice } from '../useOralPractice'
 
 type Phase = 'idle' | 'preparation' | 'answer' | 'done'
 
@@ -29,10 +28,8 @@ export function OralTopic() {
 }
 
 function Practice({ topic }: { topic: Topic }) {
-  const { user } = useAuth()
-  const userKey = userKeyOf(user)
-  const [preferences] = usePersistentState(preferencesKey(userKey), DEFAULT_PREFERENCES, isStudyPreferences)
-  const [practice, savePractice] = usePersistentState<OralPractice>(practiceKey(userKey, topic.slug), EMPTY_PRACTICE, isOralPractice)
+  const { preferences, loading: preferencesLoading } = useStudyPreferences()
+  const { loading: practiceLoading, practice, storedOnServer, update, recordAttempt } = useOralTopicPractice(topic.slug)
   const [phase, setPhase] = useState<Phase>('idle')
   const [secondsLeft, setSecondsLeft] = useState(ORAL_MINUTES.preparation * 60)
   const [showSolution, setShowSolution] = useState(false)
@@ -57,16 +54,18 @@ function Practice({ topic }: { topic: Topic }) {
 
   function finish() {
     setPhase('done')
-    savePractice({ ...practice, attempts: practice.attempts + 1 })
+    void recordAttempt()
   }
 
   const toggleItem = (index: number, on: boolean) =>
-    savePractice({ ...practice, checked: on ? [...practice.checked, index] : practice.checked.filter((item) => item !== index) })
+    update({ checked: on ? [...practice.checked, index] : practice.checked.filter((item) => item !== index) })
 
   const timerLabel = phase === 'answer' ? 'felelet' : 'felkészülés'
   const expired = running && secondsLeft === 0
   const selfScored = ORAL_SCORING.filter((row) => row.selfAssessed)
   const selfTotal = selfScored.reduce((sum, row) => sum + (practice.scores[row.criterion] ?? 0), 0)
+
+  if (preferencesLoading || practiceLoading) return <PageLoader label="Gyakorlásod betöltése…" />
 
   return (
     <main className="mx-auto w-full max-w-page flex-1 px-4 pt-8 pb-24 md:px-6">
@@ -134,8 +133,8 @@ function Practice({ topic }: { topic: Topic }) {
             label="Jegyzeteid"
             rows={5}
             value={practice.notes}
-            onChange={(e) => savePractice({ ...practice, notes: e.target.value })}
-            hint="A jegyzeted ebben a böngészőben marad meg."
+            onChange={(e) => update({ notes: e.target.value })}
+            hint={storedOnServer ? 'A jegyzetedet a fiókodhoz mentjük.' : 'A jegyzeted ebben a böngészőben marad meg.'}
           />
         </Panel>
 
@@ -178,7 +177,7 @@ function Practice({ topic }: { topic: Topic }) {
                           type="button"
                           aria-pressed={pressed}
                           aria-label={`${row.criterion}: ${points} pont`}
-                          onClick={() => savePractice({ ...practice, scores: { ...practice.scores, [row.criterion]: points } })}
+                          onClick={() => update({ scores: { ...practice.scores, [row.criterion]: points } })}
                           className={cx(
                             'size-11 rounded-md border text-16 font-semibold',
                             pressed ? 'border-ink bg-ink text-sheet' : 'border-muted bg-sheet text-ink hover:bg-note',
