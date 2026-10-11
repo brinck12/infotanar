@@ -1,8 +1,9 @@
 import type { Level } from '../../types'
 
 /**
- * A tanuló céljai (szint, vizsgaidőszak, nyelv, heti óraszám). Amíg a szerveren
- * nincs hozzá mező (`users.preferences`), a böngészőben tároljuk, felhasználónként.
+ * A tanuló céljai (szint, vizsgaidőszak, nyelv, heti óraszám). Belépve a
+ * szerver őrzi (`GET/PUT /account/preferences`, lásd `features/onboarding`);
+ * vendégnél, és amíg a végpont nem érhető el, a böngésző, felhasználónként.
  */
 export type WeeklyHours = '1-2' | '3-4' | '5+'
 export type StudyLanguage = 'python' | 'csharp'
@@ -44,4 +45,24 @@ export function isStudyPreferences(value: unknown): value is StudyPreferences {
     (prefs.language === 'python' || prefs.language === 'csharp') &&
     WEEKLY_HOURS.some((option) => option.value === prefs.weeklyHours)
   )
+}
+
+/** A böngészőben mentett célok; `null`, ha nincs ilyen (vagy sérült, vagy a tárhely tiltott). */
+export function readStoredPreferences(userKey: string): StudyPreferences | null {
+  try {
+    const raw = localStorage.getItem(preferencesKey(userKey))
+    const parsed: unknown = raw === null ? null : JSON.parse(raw)
+    return isStudyPreferences(parsed) ? parsed : null
+  } catch {
+    return null
+  }
+}
+
+/** A böngészőbeli példány törlése, miután a szerver átvette. */
+export function forgetStoredPreferences(userKey: string): void {
+  try {
+    localStorage.removeItem(preferencesKey(userKey))
+  } catch {
+    // Tiltott tárhelyen nincs mit törölni.
+  }
 }

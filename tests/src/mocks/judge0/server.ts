@@ -8,9 +8,16 @@
 // (lasd JUDGE0_CONTROL a src/data/seed.ts-ben):
 //   - PW_JUDGE0_FORCE_WRONG       -> ervenyes, de rossz kimenet
 //   - PW_JUDGE0_FORCE_UNAVAILABLE -> HTTP 503 (a szolgaltatas elerhetetlen)
+// Ketto pedig a reszfeladatos, adatfajlos fixture feladat megoldasait jatssza
+// (lasd JUDGE0_EXECUTION_CONTROL a controls.ts-ben):
+//   - PW_JUDGE0_SUBTASKS          -> az 1. resz jo, a 2. resz hibas
+//   - PW_JUDGE0_REQUIRE_FILE      -> az `additional_files` adatfajljabol szamol;
+//                                    fajl nelkul hibas kimenet
 
 import http, { type IncomingMessage, type ServerResponse } from 'node:http'
 import { JUDGE0_CONTROL } from '../../data/seed'
+import { hasAdditionalFiles, readAdditionalFiles } from './additional-files'
+import { DATA_FILE_NAME, JUDGE0_EXECUTION_CONTROL, JUDGE0_FILE_OUTPUT, SUBTASKS_PARTIAL_STDOUT, subtasksStdout } from './controls'
 
 const PORT = Number(process.env.JUDGE0_MOCK_PORT ?? 2358)
 
@@ -22,6 +29,8 @@ const LANGUAGES = [
 interface SubmissionRequest {
   source_code?: string
   stdin?: string
+  /** Base64-elt zip a program adatfajljaival; fajl nelkuli feladatnal a mezo hianyzik. */
+  additional_files?: string
 }
 
 const fromBase64 = (value: unknown): string => Buffer.from(typeof value === 'string' ? value : '', 'base64').toString('utf8')
@@ -66,6 +75,20 @@ function acceptedWithStdout(stdout: string) {
   }
 }
 
+/**
+ * A reszfeladatos fixture helyes megoldasa: az adatfajl szamainak darabszama
+ * es osszege. A fajlt csak a kereshez mellekelt zipbol ismerheti, ezert a
+ * helyes kimenet azt bizonyitja, hogy a backend a jo fajlt a jo neven kuldte.
+ */
+function solveFromDataFile(additionalFiles: unknown): string {
+  if (!hasAdditionalFiles(additionalFiles)) return JUDGE0_FILE_OUTPUT.noArchive
+
+  const dataFile = readAdditionalFiles(additionalFiles).get(DATA_FILE_NAME)
+  if (!dataFile) return JUDGE0_FILE_OUTPUT.noDataFile
+
+  return subtasksStdout(dataFile.toString('utf8').split(/\s+/).filter(Boolean).map(Number))
+}
+
 async function handle(req: IncomingMessage, res: ServerResponse): Promise<void> {
   const url = new URL(req.url ?? '/', `http://${req.headers.host ?? '127.0.0.1'}`)
 
@@ -99,6 +122,16 @@ async function handle(req: IncomingMessage, res: ServerResponse): Promise<void> 
 
     if (sourceCode.includes(JUDGE0_CONTROL.forceWrong)) {
       send(res, 200, acceptedWithStdout('rossz\n'))
+      return
+    }
+
+    if (sourceCode.includes(JUDGE0_EXECUTION_CONTROL.subtasks)) {
+      send(res, 200, acceptedWithStdout(SUBTASKS_PARTIAL_STDOUT))
+      return
+    }
+
+    if (sourceCode.includes(JUDGE0_EXECUTION_CONTROL.requireFile)) {
+      send(res, 200, acceptedWithStdout(solveFromDataFile(body.additional_files)))
       return
     }
 
