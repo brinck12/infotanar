@@ -1,23 +1,19 @@
+import { useMutation } from '@tanstack/react-query'
 import { useState, type FormEvent, type ReactNode } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { hibaUzenet } from '../../../shared/api/errors'
 import { daysUntilExam, EXAM_PARTS } from '../../../shared/domain/exam'
-import { userKeyOf } from '../../../shared/domain/lastTask'
-import {
-  DEFAULT_PREFERENCES,
-  EXAM_PERIODS,
-  isStudyPreferences,
-  preferencesKey,
-  WEEKLY_HOURS,
-  type StudyPreferences,
-} from '../../../shared/domain/preferences'
-import { usePersistentState } from '../../../shared/hooks/usePersistentState'
+import { EXAM_PERIODS, WEEKLY_HOURS, type StudyPreferences } from '../../../shared/domain/preferences'
+import { Banner } from '../../../shared/ui/Banner'
 import { Button, ButtonLink } from '../../../shared/ui/Button'
 import { RadioField, SelectField } from '../../../shared/ui/Form'
 import { Icon, type IconName } from '../../../shared/ui/Icon'
+import { PageLoader } from '../../../shared/ui/PageLoader'
 import { Panel } from '../../../shared/ui/Panel'
+import { LoadError } from '../../../shared/ui/States'
 import { CardTitle, Lead, PageTitle } from '../../../shared/ui/Text'
 import { useToast } from '../../../shared/ui/useToast'
-import { useAuth } from '../../auth/context'
+import { useStudyPreferences, type StudyPreferencesState } from '../../../shared/hooks/useStudyPreferences'
 
 const LEVEL_OPTIONS = [
   { value: 'kozep', title: 'Középszint', detail: '180 perc, 100 pont. Mind az öt gyakorlati rész.' },
@@ -31,18 +27,40 @@ const LANGUAGE_OPTIONS = [
 
 /** Indulás: négy kérdés a célokról, mellette a belőlük adódó terv. Kihagyható. */
 export function Onboarding() {
-  const { user } = useAuth()
+  const { preferences, loading, loadError, retry, storedOnServer, save } = useStudyPreferences()
+
+  // Az űrlap a mentett célokból indul, ezért megvárjuk őket.
+  if (loading) return <PageLoader label="Céljaid betöltése…" />
+  if (loadError !== null) {
+    return (
+      <main className="mx-auto w-full max-w-page flex-1 px-4 py-12 md:px-6">
+        <LoadError error={loadError} onRetry={retry} title="Nem sikerült betölteni a céljaidat" />
+      </main>
+    )
+  }
+  return <GoalsForm initial={preferences} storedOnServer={storedOnServer} save={save} />
+}
+
+interface GoalsFormProps extends Pick<StudyPreferencesState, 'storedOnServer' | 'save'> {
+  initial: StudyPreferences
+}
+
+function GoalsForm({ initial, storedOnServer, save }: GoalsFormProps) {
   const navigate = useNavigate()
   const toast = useToast()
-  const [saved, save] = usePersistentState(preferencesKey(userKeyOf(user)), DEFAULT_PREFERENCES, isStudyPreferences)
-  const [form, setForm] = useState<StudyPreferences>(saved)
+  const [form, setForm] = useState<StudyPreferences>(initial)
   const set = <K extends keyof StudyPreferences>(key: K, value: StudyPreferences[K]) => setForm((current) => ({ ...current, [key]: value }))
+  const saving = useMutation({
+    mutationFn: save,
+    onSuccess: () => {
+      toast.show('A céljaidat elmentettük.')
+      navigate('/tanulasi-ut')
+    },
+  })
 
   function submit(e: FormEvent) {
     e.preventDefault()
-    save(form)
-    toast.show('A céljaidat elmentettük.')
-    navigate('/tanulasi-ut')
+    saving.mutate(form)
   }
 
   const days = daysUntilExam()
@@ -119,8 +137,14 @@ export function Onboarding() {
             </div>
           </Question>
 
+          {saving.isError && (
+            <Banner kind="error" title="Nem sikerült elmenteni a céljaidat">
+              {hibaUzenet(saving.error)} Próbáld újra egy kicsit később.
+            </Banner>
+          )}
+
           <div className="flex flex-wrap items-center gap-3">
-            <Button type="submit" size="lg">
+            <Button type="submit" size="lg" busy={saving.isPending} busyLabel="Mentés…">
               Kész, kezdjük
             </Button>
             <ButtonLink to="/tanulasi-ut" variant="text">
@@ -149,7 +173,10 @@ export function Onboarding() {
             )}
           </ul>
           <p className="mt-4 text-14 leading-relaxed text-ink-soft">
-            A terv csak javaslat. Bármelyik sávot megnyithatod. A beállításaidat egyelőre ez a böngésző őrzi meg.
+            A terv csak javaslat. Bármelyik sávot megnyithatod.{' '}
+            {storedOnServer
+              ? 'A beállításaidat a fiókodhoz mentjük, így másik eszközön is megmaradnak.'
+              : 'A beállításaidat egyelőre ez a böngésző őrzi meg.'}
           </p>
         </Panel>
       </div>
