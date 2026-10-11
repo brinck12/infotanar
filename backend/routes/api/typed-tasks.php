@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Http\Controllers\Api\V1\Admin\Catalog\AttachmentController;
 use App\Http\Controllers\Api\V1\Catalog\AttachmentDownloadController;
 use Illuminate\Support\Facades\Route;
 
@@ -25,3 +26,12 @@ Route::get('/attachments/{attachment}/download', AttachmentDownloadController::c
     ->whereNumber('attachment')
     ->middleware('signed:relative')
     ->name('attachments.download');
+
+Route::prefix('admin')->name('admin.')->middleware(['auth:sanctum', 'admin'])->group(function (): void {
+    // Lista es feltoltes a feladat alatt, torles kozvetlenul a csatolmanyon (mint a teszteseteknel).
+    Route::get('/exercises/{exercise}/attachments', [AttachmentController::class, 'index'])->name('exercises.attachments.index');
+    Route::post('/exercises/{exercise}/attachments', [AttachmentController::class, 'store'])
+        ->middleware('throttle:admin-upload')
+        ->name('exercises.attachments.store');
+    Route::delete('/attachments/{attachment}', [AttachmentController::class, 'destroy'])->name('attachments.destroy');
+});

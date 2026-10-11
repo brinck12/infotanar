@@ -13,7 +13,9 @@ use App\Http\Resources\TaskSummaryResource;
 use App\Models\Exercise;
 use App\Models\User;
 use App\Services\Access\ContentAccess;
+use App\Services\Catalog\Spec\TaskPayload;
 use App\Services\Progress\ExerciseStatuses;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -49,10 +51,19 @@ final class TaskController extends Controller
             ->findOrFail($task);
 
         $viewer = $this->viewer($request);
+        $denial = $this->access->denialFor($viewer, $exercise->lesson);
+
+        if ($denial === null) {
+            // A letoltheto fajlok (forrasfajlok, mintakep) csak feloldott feladatnal toltodnek be,
+            // es kozuluk is csak az, ami diaknak megmutathato: tesztesethez kotott bemenet soha.
+            $exercise->load(['attachments' => static fn (Relation $attachments) => $attachments
+                ->whereNull('test_case_id')
+                ->whereIn('role', TaskPayload::attachmentRoles())]);
+        }
 
         return new TaskResource(
             $exercise,
-            $this->access->denialFor($viewer, $exercise->lesson),
+            $denial,
             $buildNavigation->handle($viewer, $exercise),
             ExerciseStatuses::for($viewer),
         );
