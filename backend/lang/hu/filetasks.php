@@ -29,4 +29,28 @@ return [
     'attachment_test_case_required' => 'Bemeneti fájlhoz ki kell választani a tesztesetet.',
     'attachment_test_case_not_allowed' => 'A teszteset nem ehhez a feladathoz tartozik, vagy ehhez a fájltípushoz nem adható meg.',
     'attachment_role_not_allowed' => 'Ilyen fájl ehhez a feladattípushoz nem csatolható.',
+
+    // Fajlbeadas (SubmitFileSolution, UploadFileSubmissionRequest).
+    'not_a_file_task' => 'Ehhez a feladathoz nem tölthető fel fájl. Használd a szerkesztőt.',
+    'file_required' => 'Válaszd ki a feltöltendő fájlt.',
+    'too_large_for_request' => 'A fájl túl nagy. Legfeljebb :max KB lehet.',
+    'evaluator_busy' => 'A fájlfeldolgozó most túlterhelt, próbáld újra egy perc múlva.',
+
+    // Az ertekeles nem sikerult (a beadas `error` mezoje; a valasz 201 marad).
+    'no_reader' => 'Ezt a fájltípust (:ext) még nem tudjuk automatikusan ellenőrizni.',
+    'evaluation_timed_out' => 'A fájl ellenőrzése túl sokáig tartott. Egyszerűsítsd a fájlt, és töltsd fel újra.',
+
+    // Az eredmeny pontjai (FileEvaluator).
+    'group_other' => 'Egyéb',
+    'found_not_checkable' => 'Ezt a pontot ebben a fájltípusban nem tudjuk ellenőrizni.',
+
+    // Kezi pontok (SaveManualMarks, SaveManualMarksRequest); mind a `marks` mezohoz tartozik.
+    'manual_marks_required' => 'Jelöld meg legalább egy kézi tételnél, hogy megvan-e.',
+    'manual_mark_not_boolean' => 'A jelölés csak igaz vagy hamis lehet.',
+    'manual_mark_not_manual' => 'Ez a tétel nem jelölhető kézzel.',
+    'manual_mark_not_evaluated' => 'Ezt a beadást nem sikerült kiértékelni, ezért nincs mit megjelölni. Töltsd fel újra a fájlt.',
+    'manual_mark_exam_open' => 'A jelölés a feladatsor beadása után lehetséges.',
+
+    // Ertekelolap-proba (CheckRubric).
+    'sample_solution_missing' => 'Ehhez a feladathoz nincs mintamegoldás feltöltve. Tölts fel egy fájlt a próbához, vagy csatold a mintamegoldást.',
 ];
