@@ -35,6 +35,10 @@ Minden végpont a `/api/v1` előtag alatt érhető el. A hozzáférés oszlop je
 | `PUT|PATCH` | `/admin/exercises/{exercise}` | admin | – |
 | `GET` | `/admin/exercises/{exercise}/attachments` | admin | – |
 | `POST` | `/admin/exercises/{exercise}/attachments` | admin | `admin-upload` |
+| `POST` | `/admin/exercises/{exercise}/rubric-check` | admin | `admin-upload` |
+| `GET` | `/admin/exercises/{exercise}/rubric-items` | admin | – |
+| `POST` | `/admin/exercises/{exercise}/rubric-items` | admin | – |
+| `PUT` | `/admin/exercises/{exercise}/rubric-items/order` | admin | – |
 | `GET` | `/admin/exercises/{exercise}/test-cases` | admin | – |
 | `POST` | `/admin/exercises/{exercise}/test-cases` | admin | – |
 | `PUT` | `/admin/exercises/{exercise}/test-cases/order` | admin | – |
@@ -55,6 +59,8 @@ Minden végpont a `/api/v1` előtag alatt érhető el. A hozzáférés oszlop je
 | `PUT` | `/admin/modules/{module}/lessons/order` | admin | – |
 | `GET` | `/admin/overview` | admin | – |
 | `GET` | `/admin/ping` | admin | – |
+| `DELETE` | `/admin/rubric-items/{item}` | admin | – |
+| `PUT` | `/admin/rubric-items/{item}` | admin | – |
 | `DELETE` | `/admin/test-cases/{testCase}` | admin | – |
 | `GET` | `/admin/test-cases/{testCase}` | admin | – |
 | `PUT|PATCH` | `/admin/test-cases/{testCase}` | admin | – |
@@ -119,6 +125,21 @@ Minden végpont a `/api/v1` előtag alatt érhető el. A hozzáférés oszlop je
 | Metódus | Útvonal | Hozzáférés | Limit |
 |---|---|---|---|
 | `POST` | `/client-errors` | nyilvános | `10,1` |
+
+## exercises
+
+| Metódus | Útvonal | Hozzáférés | Limit |
+|---|---|---|---|
+| `GET` | `/exercises/{exercise}/file-submissions` | bejelentkezve | – |
+| `POST` | `/exercises/{exercise}/file-submissions` | bejelentkezve | `file-submission` |
+
+## file-submissions
+
+| Metódus | Útvonal | Hozzáférés | Limit |
+|---|---|---|---|
+| `GET` | `/file-submissions/{submission}` | bejelentkezve | – |
+| `GET` | `/file-submissions/{submission}/file` | aláírt link | – |
+| `PUT` | `/file-submissions/{submission}/manual` | bejelentkezve | `30,1` |
 
 ## health
 

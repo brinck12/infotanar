@@ -1,7 +1,11 @@
+import { randomUUID } from 'node:crypto'
 import type { ApiClient } from '../../src/api/ApiClient'
 import { adminAccount } from '../../src/api/areas/accounts'
+import { createExercise, deleteExercise } from '../../src/api/areas/typedTasks'
+import { SEEDED } from '../../src/data'
 import { fixtureFile } from '../../src/data/files'
 import { expect, test } from '../../src/fixtures'
+import { evaluateWithCli, type CliResult } from '../../src/support/filetasksCli'
 
 /**
  * WP5: a bemutato- (pptx, odp), vektor- (svg) es kepvizsgalatok (png) a valodi
@@ -9,15 +13,12 @@ import { expect, test } from '../../src/fixtures'
  *
  * Minden teszt egy ideiglenes `visual_upload` feladatot hoz letre az admin API-n
  * at, rakot egy-egy ertekelolap-pontot minden esethez, es a fixture-fajlt a
- * probara kuldi. A web (html, css) vizsgalat nem szerepel: nincs olyan feladatfajta,
- * amely html-t vagy css-t fogadna (a `visual_upload` kiterjesztesei: .pptx .odp
- * .svg .png), ezeket a `php artisan filetasks:evaluate` fedi (lasd a jelentest).
+ * probara kuldi. A html es css vizsgalat nincs ebben a reszben: nincs olyan feladatfajta,
+ * amely html-t vagy css-t fogadna (a `visual_upload` kiterjesztesei: .pptx .odp .svg .png), ezeket
+ * (es a hostile bemeneteket) a fajl alja `php artisan filetasks:evaluate`-en at fedi.
  *
  * A fixture-fajlokat a tests/fixtures/files/slides-web/generate.ts allitja elo;
  * PowerPointban, Impressben es bongeszoben soha nem nyitottuk meg oket.
- *
- * A feladat letrehozasa a WP1 csomagra (a `kind` mezo az admin feladat-API-ban)
- * var: amig az nincs a backenden, a tesztek `fixme`-k.
  */
 
 interface Envelope<T> {
@@ -39,19 +40,15 @@ interface Case {
   ok: boolean
 }
 
-const WP1_FIXME = 'A feladat létrehozása `kind` mezővel a WP1 csomagra vár (admin feladat-API); a merge után a teszt magától fut.'
-
-/** Letrehoz egy visual_upload feladatot; null, ha a backend (WP1 nélkül) nem ismeri a fajtát. */
-async function createVisualExercise(admin: ApiClient): Promise<number | null> {
-  const lesson = 5
-  const created = await admin.post<Envelope<{ id: number; kind?: string }>>('admin/exercises', {
-    lesson_id: lesson,
-    title: `PW WP5 ${String(Date.now())}-${String(Math.floor(Math.random() * 1e6))}`,
+/** Letrehoz egy visual_upload feladatot az admin API-n; sikertelen letrehozasnal a teszt elbukik. */
+async function createVisualExercise(admin: ApiClient): Promise<number> {
+  const created = await createExercise(admin, {
+    lesson_id: SEEDED.typed.sheetUpload.lessonId,
+    title: `PW WP5 ${randomUUID()}`,
     description: 'Ideiglenes feladat a bemutató- és vektorvizsgálatok teszteléséhez.',
     level: 'kozep',
     difficulty: 1,
     kind: 'visual_upload',
-    allowed_languages: [],
     spec: {
       steps: ['Töltsd fel a fájlt.'],
       deliverable: 'bemutato',
@@ -63,21 +60,10 @@ async function createVisualExercise(admin: ApiClient): Promise<number | null> {
     },
     is_published: false,
   })
+  expect(created.status, JSON.stringify(created.body)).toBe(201)
+  expect(created.body.data.kind).toBe('visual_upload')
 
-  if (created.status !== 201 && created.status !== 200) return null
-  const body = created.body as Envelope<{ id: number; kind?: string }>
-  return body.data.kind === 'visual_upload' ? body.data.id : null
-}
-
-/** A feladat azonositoja; a WP1 nelkuli backenden a hivo teszt `fixme`-vel megall. */
-async function requireVisualExercise(admin: ApiClient): Promise<number> {
-  const exercise = await createVisualExercise(admin)
-  if (exercise === null) {
-    test.fixme(true, WP1_FIXME)
-    throw new Error('A teszt fixme-vel megallt.')
-  }
-
-  return exercise
+  return created.body.data.id
 }
 
 async function addItems(admin: ApiClient, exercise: number, cases: Case[]): Promise<void> {
@@ -96,7 +82,7 @@ async function addItems(admin: ApiClient, exercise: number, cases: Case[]): Prom
 }
 
 async function runCases(admin: ApiClient, file: string, cases: Case[]): Promise<RubricResult> {
-  const exercise = await requireVisualExercise(admin)
+  const exercise = await createVisualExercise(admin)
 
   try {
     await addItems(admin, exercise, cases)
@@ -105,7 +91,7 @@ async function runCases(admin: ApiClient, file: string, cases: Case[]): Promise<
 
     return check.body.data
   } finally {
-    await admin.delete(`admin/exercises/${String(exercise)}`)
+    await deleteExercise(admin, exercise)
   }
 }
 
@@ -242,7 +228,7 @@ test.describe('Bemutató-, vektor- és képvizsgálatok (rubric-check)', () => {
 
   test('nem támogatott tulajdonság szerkesztéskor 422 a property mezőn', { tag: '@regression' }, async ({ apiClient }) => {
     const { client: admin } = await adminAccount(apiClient)
-    const exercise = await requireVisualExercise(admin)
+    const exercise = await createVisualExercise(admin)
 
     try {
       for (const bad of [
@@ -265,10 +251,154 @@ test.describe('Bemutató-, vektor- és képvizsgálatok (rubric-check)', () => {
         expect(Object.keys(created.body.errors ?? {}), bad.property).toContain('property')
       }
     } finally {
-      await admin.delete(`admin/exercises/${String(exercise)}`)
+      await deleteExercise(admin, exercise)
     }
   })
+})
 
-  // A html/css vizsgálatnak nincs feltöltő feladatfajtája (visual_upload: .pptx .odp .svg .png), ezért
-  // az API-n át nem tesztelhető; a WebCheck-et a `php artisan filetasks:evaluate` esettáblája fedi.
+const WEB_CASES: Case[] = [
+  c('web', 'title', 'PW oldal', true),
+  c('web', 'title', 'Más', false),
+  c('web', 'title', '~oldal', true),
+  c('web', 'element_count[h1]', '1', true),
+  c('web', 'element_count[p]', '2', true),
+  c('web', 'element_count[p]', '3', false),
+  c('web', 'element_count[.kiemelt]', '1', true),
+  c('web', 'element_count[p.kiemelt]', '>=1', true),
+  c('web', 'element_count[#x]', '0', true),
+  // A h1 alap szine piros, a @media blokkban zold: a feltetel nelkuli szabaly szamit.
+  c('web', 'css[h1.color]', 'piros', true),
+  c('web', 'css[h1.color]', '#00ff00', false),
+  c('web', 'css[h1.font-size]', '24px', true),
+  c('web', 'css[h1.font-size]', '18pt', true),
+  c('web', 'css[h1.margin-left]', '20px', true),
+  c('web', 'css[.kiemelt.color]', 'kék', true),
+  c('web', 'css[.kiemelt.font-family]', 'Arial, sans-serif', true),
+  c('web', 'css[h1.border]', 'x', false),
+  c('web', 'class_used[kiemelt]', 'igen', true),
+  c('web', 'class_used[nincs]', 'igen', false),
+  c('web', 'class_used[nincs]', 'nem', true),
+  c('web', 'link[https://example.com]', 'igen', true),
+  c('web', 'link[https://example.com]', '~példa', true),
+  c('web', 'link[https://nincs.hu]', 'igen', false),
+  c('web', 'img_size[1]', '200x100', true),
+  c('web', 'img_size[1]', '100x100', false),
+  c('web', 'img_size[2]', '1x1', false),
+]
+
+const CSS_CASES: Case[] = [
+  c('web', 'css[h1.color]', 'piros', true),
+  c('web', 'css[h1.color]', '#00ff00', false),
+  c('web', 'css[.kiemelt.color]', 'blue', true),
+  c('web', 'title', 'x', false),
+]
+
+/** DOCTYPE nélküli HTML-töredék: nincs <html>, <head>, <title>. */
+const FRAGMENT_CASES: Case[] = [c('web', 'element_count[h1]', '1', true), c('web', 'element_count[p]', '1', true), c('web', 'title', 'x', false)]
+
+function cliStates(result: CliResult, cases: Case[]): number {
+  expect(result.status).toBe('evaluated')
+  expect(result.items).toHaveLength(cases.length)
+  for (const [index, item] of cases.entries()) {
+    const actual = result.items[index]
+    expect(actual?.state, `${item.type}|${item.property}|${item.expected} (${actual?.found ?? 'nincs found'})`).toBe(item.ok ? 'ok' : 'bad')
+  }
+
+  return cases.length
+}
+
+/** Egy hostile bemenet feldolgozása ennyi ms alatt végezzen (a környezet falióra-korlátja 25 s). */
+const HOSTILE_BUDGET_MS = 10_000
+
+/**
+ * A `php artisan filetasks:evaluate` parancson át: ide kerül az a két család, amelyet semmilyen
+ * feltöltős feladatfajta nem fogad (html, css), a bemutató- és vektorfixture-ok ugyanazon esetei, valamint
+ * a hostile bemenetek. A parancs ugyanazt a FileEvaluator-t és olvasókat futtatja, mint a rubric-check.
+ */
+test.describe('Vizsgálatok a filetasks:evaluate parancson át (html, css, hostile bemenetek)', () => {
+  const fixtures = (name: string): Buffer => fixtureFile(`slides-web/${name}`).buffer
+
+  test('html: cím, elemszám, CSS (komment és @media mellett), osztály, link, képméret', { tag: '@regression' }, () => {
+    const result = evaluateWithCli('pw-oldal.html', fixtures('pw-oldal.html'), WEB_CASES)
+
+    cliStates(result, WEB_CASES)
+    expect(result.facts.map((fact) => fact.label)).toContain('Oldalcím')
+  })
+
+  test('css fájl: szabályok kommenttel, @media és @font-face blokkal', { tag: '@regression' }, () => {
+    expect(cliStates(evaluateWithCli('pw-stilus.css', fixtures('pw-stilus.css'), CSS_CASES), CSS_CASES)).toBe(CSS_CASES.length)
+  })
+
+  test('DOCTYPE nélküli HTML-töredék is olvasható', { tag: '@regression' }, () => {
+    expect(cliStates(evaluateWithCli('pw-torzs.html', fixtures('pw-torzs.html'), FRAGMENT_CASES), FRAGMENT_CASES)).toBe(FRAGMENT_CASES.length)
+  })
+
+  test('csak @media blokkban beállított tulajdonságot a hint megnevezi', { tag: '@regression' }, () => {
+    const html = '<html><head><style>p { color: blue } @media (max-width: 600px) { p { margin-top: 5px } }</style></head><body><p>a</p></body></html>'
+    const cases = [c('web', 'css[p.margin-top]', '5px', false)]
+    const result = evaluateWithCli('media.html', html, cases)
+
+    cliStates(result, cases)
+    expect(result.items[0]?.found).toContain('@media')
+  })
+
+  for (const [file, cases] of [
+    ['pw-bemutato.pptx', PRESENTATION_CASES],
+    ['pw-bemutato.odp', PRESENTATION_CASES],
+    ['pw-rajz.svg', SVG_CASES],
+    ['pw-kep-80x40.png', PNG_CASES],
+  ] as const) {
+    test(`${file}: az esettábla a parancson át is egyezik`, { tag: '@regression' }, () => {
+      expect(cliStates(evaluateWithCli(file, fixtures(file), cases), cases)).toBe(cases.length)
+    })
+  }
+
+  test('svg DOCTYPE-pal olvashatatlan: failed, hibaüzenettel', { tag: '@regression' }, () => {
+    const result = evaluateWithCli('pw-rajz-doctype.svg', fixtures('pw-rajz-doctype.svg'), [c('shape', 'count', '3', true)])
+
+    expect(result.status).toBe('failed')
+    expect(result.error).not.toBeNull()
+  })
+
+  test('hostile: pontosvesszőkből álló CSS-fájl lineáris idő alatt feldolgozódik', { tag: '@regression' }, () => {
+    const result = evaluateWithCli('pontosvesszo.css', 'a;'.repeat(100_000), [c('web', 'css[h1.color]', 'piros', false)])
+
+    expect(result.status).toBe('evaluated')
+    expect(result.elapsedMs).toBeLessThan(HOSTILE_BUDGET_MS)
+  })
+
+  test('hostile: pontosvesszőkből álló svg <style> lineáris idő alatt feldolgozódik', { tag: '@regression' }, () => {
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10"><style>${';'.repeat(200_000)}</style><rect width="1" height="1"/></svg>`
+    const result = evaluateWithCli('pontosvesszo.svg', svg, [c('shape', 'count', '1', true)])
+
+    expect(result.status).toBe('evaluated')
+    expect(result.elapsedMs).toBeLessThan(HOSTILE_BUDGET_MS)
+  })
+
+  test('hostile: túl hosszú CSS olvashatatlan, tiszta failed', { tag: '@regression' }, () => {
+    const result = evaluateWithCli('hatalmas.css', `h1 { color: red }\n${'/* x */'.repeat(60_000)}`, [c('web', 'css[h1.color]', 'piros', true)])
+
+    expect(result.status).toBe('failed')
+    expect(result.elapsedMs).toBeLessThan(HOSTILE_BUDGET_MS)
+  })
+
+  test('hostile: sok stílusszabályos svg olvashatatlan (szabálykorlát)', { tag: '@regression' }, () => {
+    const rules = Array.from({ length: 2_500 }, (_, index) => `.c${String(index)}{fill:red}`).join('')
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10"><style>${rules}</style><rect class="c1" width="1" height="1"/></svg>`
+    const result = evaluateWithCli('szabalyok.svg', svg, [c('shape', 'count', '1', true)])
+
+    expect(result.status).toBe('failed')
+    expect(result.elapsedMs).toBeLessThan(HOSTILE_BUDGET_MS)
+  })
+
+  test('hostile: sok elemre sok szabály nem lassít (indexelt illesztés)', { tag: '@regression' }, () => {
+    const rules = Array.from({ length: 1_900 }, (_, index) => `.c${String(index)}{fill:red}`).join('')
+    const rects = Array.from({ length: 5_000 }, (_, index) => `<rect class="c${String(index % 1_900)}" width="1" height="1"/>`).join('')
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10"><style>${rules}</style>${rects}</svg>`
+    const cases = [c('shape', 'count', '5000', true)]
+    const result = evaluateWithCli('sok.svg', svg, cases)
+
+    cliStates(result, cases)
+    expect(result.elapsedMs).toBeLessThan(HOSTILE_BUDGET_MS)
+  })
 })

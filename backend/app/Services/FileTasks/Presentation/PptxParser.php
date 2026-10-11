@@ -84,7 +84,7 @@ final readonly class PptxParser
         $slides = [];
 
         foreach ($paths as $index => $path) {
-            $document = $package->document($path) ?? throw new UnreadableFile('Hianyzik egy dia.');
+            $document = $package->document($path, false) ?? throw new UnreadableFile('Hianyzik egy dia.');
             $layoutPath = $package->relatedPart($path, '/slideLayout');
             $layout = $layoutPath === null ? null : $package->document($layoutPath);
             $masterPath = $layoutPath === null ? null : $package->relatedPart($layoutPath, '/slideMaster');

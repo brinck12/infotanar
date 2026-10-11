@@ -23,28 +23,51 @@ final class OoxmlPackage
     /** A beolvasott reszek legfeljebb ennyi darabja tarolodik egy csomagnal. */
     private const MAX_PARTS = 3000;
 
+    /** Az osszes beolvasott XML-resz osszmerete (byte); ennel tobbet egy csomagbol nem olvasunk. */
+    private const MAX_TOTAL_BYTES = 32 * 1024 * 1024;
+
     /** @var array<string, DOMDocument|null> */
     private array $documents = [];
+
+    private int $bytesRead = 0;
 
     public function __construct(
         private readonly ZipArchive $zip,
         private readonly ZipSafety $zips,
     ) {}
 
-    /** A resz XML-je; null, ha a csomagban nincs ilyen resz. */
-    public function document(string $path): ?DOMDocument
+    /**
+     * A resz XML-je; null, ha a csomagban nincs ilyen resz.
+     *
+     * A $cache hamis erteknel a DOM nem marad meg a csomagban: a dia-reszeket
+     * egyszer olvassuk, es a libxml memoriaja (a PHP memory_limit-en kivul)
+     * a XML merete tobbszorose, ezert egyszerre csak egy dia lehet a memoriaban.
+     */
+    public function document(string $path, bool $cache = true): ?DOMDocument
     {
-        if (array_key_exists($path, $this->documents)) {
+        if ($cache && array_key_exists($path, $this->documents)) {
             return $this->documents[$path];
         }
 
-        if (count($this->documents) >= self::MAX_PARTS) {
+        if ($cache && count($this->documents) >= self::MAX_PARTS) {
             throw new UnreadableFile('Tul sok resz a csomagban.');
         }
 
         $xml = $this->zips->read($this->zip, $path);
 
-        return $this->documents[$path] = $xml === null ? null : XmlSafety::load($xml);
+        if ($xml === null) {
+            return $cache ? $this->documents[$path] = null : null;
+        }
+
+        $this->bytesRead += strlen($xml);
+
+        if ($this->bytesRead > self::MAX_TOTAL_BYTES) {
+            throw new UnreadableFile('A csomag XML-reszei egyutt tul nagyok.');
+        }
+
+        $document = XmlSafety::load($xml);
+
+        return $cache ? $this->documents[$path] = $document : $document;
     }
 
     public function exists(string $path): bool
@@ -62,7 +85,7 @@ final class OoxmlPackage
     {
         $directory = dirname($partPath);
         $relsPath = ($directory === '.' ? '' : $directory.'/').'_rels/'.basename($partPath).'.rels';
-        $document = $this->document($relsPath);
+        $document = $this->document($relsPath, false);
 
         if ($document === null) {
             return [];

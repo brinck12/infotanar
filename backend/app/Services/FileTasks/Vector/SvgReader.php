@@ -51,6 +51,9 @@ final readonly class SvgReader implements FileReader
 
     private const MAX_DEPTH = 64;
 
+    /** Egy svg-ben legfeljebb ennyi stilusszabaly lehet. */
+    private const MAX_RULES = 2000;
+
     public function __construct(
         private PrivateFileStore $files,
         private CssParser $css,
@@ -81,27 +84,40 @@ final readonly class SvgReader implements FileReader
         $rules = $this->rules($document);
         $shapes = [];
         $images = [];
-        $this->walk($root, ['fill' => 'black', 'fill-opacity' => '1'], 1.0, $rules, $shapes, $images, 0);
+        $this->walk($root, $this->style($root, $rules), ['fill' => 'black', 'fill-opacity' => '1'], 1.0, $rules, $shapes, $images, 0);
 
         [$width, $height] = $this->size($root);
 
         return new SvgModel($width, $height, $shapes, $images);
     }
 
-    /** @return list<CssRule> */
+    /**
+     * A feltetel nelkuli szabalyok szelektor szerint indexelve; minden szabaly mellett a
+     * dokumentum-sorrendbeli sorszama (a kesobbi szabaly nyer). Az osszes szabaly szama
+     * a dokumentumban korlatos, igy az elemenkenti keresés is.
+     *
+     * @return array<string, list<array{0: int, 1: CssRule}>>
+     */
     private function rules(DOMDocument $document): array
     {
-        $rules = [];
+        $indexed = [];
+        $count = 0;
 
         foreach ($document->getElementsByTagNameNS(self::NS, 'style') as $style) {
             foreach ($this->css->parse($style->textContent) as $rule) {
-                if ($rule->media === null) {
-                    $rules[] = $rule;
+                if ($rule->media !== null) {
+                    continue;
                 }
+
+                if (++$count > self::MAX_RULES) {
+                    throw new UnreadableFile('Az svg tul sok CSS-szabalyt tartalmaz.');
+                }
+
+                $indexed[$rule->selector][] = [$count, $rule];
             }
         }
 
-        return $rules;
+        return $indexed;
     }
 
     /** @return array{0: float|null, 1: float|null} */
@@ -119,18 +135,18 @@ final readonly class SvgReader implements FileReader
     }
 
     /**
+     * @param  array<string, string>  $style  az elem sajat, mar kiszamolt stilusa
      * @param  array<string, string>  $inherited
-     * @param  list<CssRule>  $rules
+     * @param  array<string, list<array{0: int, 1: CssRule}>>  $rules
      * @param  list<ShapeModel>  $shapes
      * @param  list<ImageModel>  $images
      */
-    private function walk(DOMElement $element, array $inherited, float $opacity, array $rules, array &$shapes, array &$images, int $depth): void
+    private function walk(DOMElement $element, array $style, array $inherited, float $opacity, array $rules, array &$shapes, array &$images, int $depth): void
     {
         if ($depth > self::MAX_DEPTH) {
             throw new UnreadableFile('Az svg tul melyen egymasba agyazott.');
         }
 
-        $style = $this->style($element, $rules);
         $inherited['fill'] = $style['fill'] ?? $inherited['fill'];
         $inherited['fill-opacity'] = $style['fill-opacity'] ?? $inherited['fill-opacity'];
         $opacity *= $this->number($style['opacity'] ?? '1');
@@ -146,13 +162,14 @@ final readonly class SvgReader implements FileReader
                 continue;
             }
 
+            $own = $this->style($child, $rules);
+
             if (in_array($name, self::CONTAINERS, true)) {
-                $this->walk($child, $inherited, $opacity, $rules, $shapes, $images, $depth + 1);
+                $this->walk($child, $own, $inherited, $opacity, $rules, $shapes, $images, $depth + 1);
 
                 continue;
             }
 
-            $own = $this->style($child, $rules);
             $fill = $own['fill'] ?? $inherited['fill'];
             $fillOpacity = $this->number($own['fill-opacity'] ?? $inherited['fill-opacity']);
             $effective = $opacity * $this->number($own['opacity'] ?? '1') * $fillOpacity;
@@ -190,7 +207,7 @@ final readonly class SvgReader implements FileReader
     /**
      * Az elem deklaralt stilusa: megjelenitesi attributumok, majd a stilusfajl, majd a style attributum.
      *
-     * @param  list<CssRule>  $rules
+     * @param  array<string, list<array{0: int, 1: CssRule}>>  $rules
      * @return array<string, string>
      */
     private function style(DOMElement $element, array $rules): array
@@ -216,12 +233,20 @@ final readonly class SvgReader implements FileReader
             array_push($candidates, '.'.$class, $tag.'.'.$class);
         }
 
-        foreach ($rules as $rule) {
-            if (in_array($rule->selector, $candidates, true)) {
-                foreach ($rule->declarations as [$name, $value]) {
-                    if (in_array($name, ['fill', 'fill-opacity', 'opacity'], true)) {
-                        $style[$name] = $value;
-                    }
+        $matching = [];
+
+        foreach (array_unique($candidates) as $candidate) {
+            foreach ($rules[$candidate] ?? [] as $entry) {
+                $matching[$entry[0]] = $entry[1];
+            }
+        }
+
+        ksort($matching);
+
+        foreach ($matching as $rule) {
+            foreach ($rule->declarations as [$name, $value]) {
+                if (in_array($name, ['fill', 'fill-opacity', 'opacity'], true)) {
+                    $style[$name] = $value;
                 }
             }
         }

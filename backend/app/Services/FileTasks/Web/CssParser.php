@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Services\FileTasks\Web;
 
+use App\Services\FileTasks\UnreadableFile;
+
 /**
  * Kis, elnezo CSS-ertelmezo: kommentek, @media/@supports blokkok (a szabalyaik
  * a feltetelukkel egyutt megmaradnak), egyeb at-szabalyok (@keyframes,
@@ -16,6 +18,9 @@ namespace App\Services\FileTasks\Web;
  */
 final class CssParser
 {
+    /** Ennel hosszabb stilusszoveget nem ertelmezunk (hasznos stilusfajl ennek tized resze). */
+    private const MAX_BYTES = 256 * 1024;
+
     private const MAX_RULES = 20000;
 
     private const MAX_DEPTH = 4;
@@ -23,6 +28,10 @@ final class CssParser
     /** @return list<CssRule> */
     public function parse(string $css): array
     {
+        if (strlen($css) > self::MAX_BYTES) {
+            throw new UnreadableFile('A CSS tul nagy.');
+        }
+
         $css = preg_replace('~/\*.*?\*/~s', '', $css) ?? $css;
         $rules = [];
         $this->block($css, null, 0, $rules);
@@ -37,19 +46,21 @@ final class CssParser
         $position = 0;
 
         while ($position < $length && count($rules) < self::MAX_RULES) {
-            $open = $this->find($css, '{', $position);
-            $semicolon = $this->find($css, ';', $position);
+            // Egyetlen elorefele atfutas: a kovetkezo '{' vagy ';' a stringeken es zarojeleken kivul.
+            [$stop, $char] = $this->nextStop($css, $position);
 
-            if ($semicolon !== null && ($open === null || $semicolon < $open)) {
+            if ($stop === null) {
+                return;
+            }
+
+            if ($char === ';') {
                 // Blokk nelkuli at-szabaly (@import, @charset) vagy elarvult deklaracio.
-                $position = $semicolon + 1;
+                $position = $stop + 1;
 
                 continue;
             }
 
-            if ($open === null) {
-                return;
-            }
+            $open = $stop;
 
             $prelude = trim(substr($css, $position, $open - $position));
             $close = $this->matching($css, $open);
@@ -162,8 +173,12 @@ final class CssParser
         return $parts;
     }
 
-    /** A kovetkezo $needle poziciója a stringeken es zarojeleken kivul; null, ha nincs. */
-    private function find(string $css, string $needle, int $from): ?int
+    /**
+     * A $from utani elso '{' vagy ';' a stringeken es zarojeleken kivul.
+     *
+     * @return array{0: int|null, 1: string|null}
+     */
+    private function nextStop(string $css, int $from): array
     {
         $length = strlen($css);
         $quote = null;
@@ -186,15 +201,12 @@ final class CssParser
                 $depth++;
             } elseif ($char === ')' && $depth > 0) {
                 $depth--;
-            } elseif ($char === $needle && $depth === 0) {
-                return $index;
-            } elseif ($needle === ';' && $char === '{') {
-                // Egy blokk kezdete elott nincs ';' - nem kell tovabb keresni.
-                return null;
+            } elseif ($depth === 0 && ($char === '{' || $char === ';')) {
+                return [$index, $char];
             }
         }
 
-        return null;
+        return [null, null];
     }
 
     /** A $open pozicioju '{' parja; null, ha nincs lezarva. */

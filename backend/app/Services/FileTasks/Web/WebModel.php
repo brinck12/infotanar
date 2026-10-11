@@ -118,6 +118,24 @@ final readonly class WebModel implements OpenedFile
         return $value;
     }
 
+    /** Van-e a szelektorra a tulajdonsagot beallito deklaracio feltetelhez kotott (@media) szabalyban. */
+    public function cssValueOnlyInMedia(string $selector, string $property): bool
+    {
+        foreach ($this->rules as $rule) {
+            if ($rule->media === null || $rule->selector !== $selector) {
+                continue;
+            }
+
+            foreach ($rule->declarations as [$name, $declared]) {
+                if (isset(self::expand($name, $declared)[$property])) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
     /** @return list<Fact> */
     public function facts(): array
     {

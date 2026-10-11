@@ -88,7 +88,7 @@ final class ImageCheck extends SelectorCheck
         $wanted = $this->parseSize($item->expected, $file->dpi ?? self::DEFAULT_DPI);
         $actual = $selector->key === 'width' ? $file->width : $file->height;
 
-        return new CheckOutcome($wanted !== null && abs($actual - $wanted) <= 1.0, $selector->key === 'width' ? $file->width.' px ('.$found.')' : $file->height.' px ('.$found.')');
+        return new CheckOutcome($wanted !== null && abs($actual - $wanted) <= 1.0, $found);
     }
 
     /** Pixelben megadott meret: "800", "800px" vagy hosszusag a felbontassal. */

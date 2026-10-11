@@ -197,7 +197,7 @@ final class WebCheck implements CheckHandler
         $actual = $file->cssValue($selector, $property);
 
         if ($actual === null) {
-            return CheckOutcome::fail(Message::get('found_no_css_value'));
+            return CheckOutcome::fail(Message::get($file->cssValueOnlyInMedia($selector, $property) ? 'found_css_only_in_media' : 'found_no_css_value'));
         }
 
         return new CheckOutcome($this->cssValuesMatch($property, $actual, $expected), Expected::excerpt($actual, 80));

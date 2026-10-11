@@ -71,6 +71,7 @@ return [
     'found_no_link' => 'nincs ilyen hivatkozás',
     'found_no_img_size' => 'a kép mérete nincs megadva',
     'found_no_css_value' => 'nincs ilyen beállítás',
+    'found_css_only_in_media' => 'ez a beállítás csak @media blokkban van, ott nem vizsgáljuk',
 
     // Nevek
     'background_solid' => 'egyszínű',
