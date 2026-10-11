@@ -64,6 +64,8 @@ final class OdtParser
 
     private ?SectionInfo $currentPage = null;
 
+    private int $tableDepth = 0;
+
     /** @var list<ParagraphInfo> */
     private array $paragraphs = [];
 
@@ -140,7 +142,7 @@ final class OdtParser
         return new DocumentModel(
             'odt',
             $this->paragraphs,
-            [$firstSection, ...array_slice($this->sections, 1)],
+            [$this->sections[0] ?? $firstSection, ...array_slice($this->sections, 1)],
             $this->tables,
             $this->images,
             $this->definedStyleNames(),
@@ -252,7 +254,8 @@ final class OdtParser
                     break;
                 case 'table':
                     if ($child->namespaceURI === self::TABLE) {
-                        $this->table($child, $depth, false);
+                        $this->enterMasterPage(Dom::attr($child, self::TABLE, 'style-name'));
+                        $this->table($child, $depth, $this->tableDepth > 0);
                     }
                     break;
                 case 'list':
@@ -437,10 +440,16 @@ final class OdtParser
             $this->tables[] = $this->tableInfo($table);
         }
 
-        foreach (Dom::elements($this->content, './/table:table-cell | .//table:covered-table-cell', $table) as $cell) {
-            if ($this->nearestTable($cell) === $table) {
-                $this->walk($cell, $depth + 1, null, 0);
+        $this->tableDepth++;
+
+        try {
+            foreach (Dom::elements($this->content, './/table:table-cell | .//table:covered-table-cell', $table) as $cell) {
+                if ($this->nearestTable($cell) === $table) {
+                    $this->walk($cell, $depth + 1, null, 0);
+                }
             }
+        } finally {
+            $this->tableDepth--;
         }
     }
 
@@ -570,7 +579,14 @@ final class OdtParser
         if ($master !== null && $master !== '' && $master !== $this->currentMaster && isset($this->masterPages[$master])) {
             $this->currentMaster = $master;
             $this->currentPage = $this->pageSection($master, 'page');
-            $this->sections[] = $this->currentPage;
+
+            // Tartalom előtt a névleges első mesteroldal nem létező oldal (LibreOffice a docx-ből
+            // konvertált fájlokban az első bekezdésen választ másik mesteroldalt): lecseréljük.
+            if ($this->paragraphs === [] && $this->tables === [] && count($this->sections) === 1) {
+                $this->sections = [$this->currentPage];
+            } else {
+                $this->sections[] = $this->currentPage;
+            }
         }
     }
 

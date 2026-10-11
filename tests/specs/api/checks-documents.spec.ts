@@ -1,6 +1,7 @@
 import { execFileSync } from 'node:child_process'
 import path from 'node:path'
 import { adminAccount } from '../../src/api/areas/accounts'
+import { createExercise, deleteExercise } from '../../src/api/areas/typedTasks'
 import { SEEDED } from '../../src/data'
 import { fixtureFile } from '../../src/data/files'
 import { expect, test } from '../../src/fixtures'
@@ -13,8 +14,8 @@ import { expect, test } from '../../src/fixtures'
  * futnak (nem modositjak az adatbazist, igy a tobbi spec 6. feladatat sem
  * zavarjak); a vegpont-szintu esetek a valodi rubric-check vegponton at mennek
  * a 6. (doc_upload) feladat tarolt ertekelolapjan, amely csak a lapmeretet
- * vizsgalja. A teljes matrix a vegponton at WP1 (feladat letrehozasa `kind`-dal)
- * utan irhato at; lasd a test.fixme esetet.
+ * vizsgalja. A BACKEND.md 7.6 esetei a vegponton at is futnak ideiglenes doc_upload
+ * feladattal (docx es odt).
  */
 
 type State = 'ok' | 'bad'
@@ -297,6 +298,70 @@ test.describe('Dokumentum-vizsgálatok: Letter lap', () => {
   }
 })
 
+/** pw-dok-konvertalt*.odt: Letter, 2 hasab, 2,54 cm margo; 1. tablazat 1 sor (beagyazott nem szamit), 2. tablazat 3 sor. */
+const CONVERTED_CASES: readonly Case[] = [
+  ['page_setup', 'page_size', 'Letter', 'ok'],
+  ['page_setup', 'page_size', 'A4', 'bad'],
+  ['page_setup', 'margin_left', '2,54 cm', 'ok'],
+  ['page_setup', 'margin_left', '2 cm', 'bad'],
+  ['section', 'columns', '2', 'ok'],
+  ['section', 'columns[section=1]', '1', 'bad'],
+  ['section', 'columns[section=2]', '2', 'bad'],
+  ['document_table', 'rows[table=1]', '1', 'ok'],
+  ['document_table', 'rows[table=2]', '3', 'ok'],
+  ['document_table', 'rows[table=3]', '2', 'bad'],
+]
+
+/** A BACKEND.md 7.6 listaja: minden eset pozitiv es negativ valtozata, mindket formatumon azonos ertekkel. */
+const HTTP_CASES: readonly Case[] = [
+  ['page_setup', 'page_size', 'A4', 'ok'],
+  ['page_setup', 'page_size', 'Letter', 'bad'],
+  ['page_setup', 'orientation', 'álló', 'ok'],
+  ['page_setup', 'orientation', 'fekvő', 'bad'],
+  ['page_setup', 'margin_top', '2,5 cm', 'ok'],
+  ['page_setup', 'margin_top', '3 cm', 'bad'],
+  ['character_format', 'font[heading=1]', 'Arial', 'ok'],
+  ['character_format', 'font_size[heading=1]', '12', 'bad'],
+  ['character_format', 'bold[heading=1]', 'igen', 'ok'],
+  ['character_format', 'font[paragraph=2]', 'Verdana', 'ok'],
+  ['character_format', 'font_size[paragraph=2]', '12', 'bad'],
+  ['character_format', 'bold[paragraph=2]', 'nem', 'bad'],
+  ['paragraph_format', 'alignment[paragraph=2]', 'sorkizárt', 'ok'],
+  ['paragraph_format', 'alignment[paragraph=2]', 'jobbra', 'bad'],
+  ['paragraph_format', 'line_spacing[paragraph=2]', '1,5', 'ok'],
+  ['paragraph_format', 'line_spacing[paragraph=2]', '2', 'bad'],
+  ['style', 'applied[paragraph=5]', 'Idézet', 'ok'],
+  ['style', 'applied[paragraph=5]', 'Címsor 1', 'bad'],
+  ['document_table', 'rows', '3', 'ok'],
+  ['document_table', 'rows', '5', 'bad'],
+  ['document_table', 'columns', '2', 'ok'],
+  ['document_table', 'columns', '4', 'bad'],
+  ['image', 'aspect_ratio', '2', 'ok'],
+  ['image', 'aspect_ratio', '1', 'bad'],
+  ['image', 'width', '8 cm', 'ok'],
+  ['image', 'width', '4 cm', 'bad'],
+  ['tab_stop', 'position[paragraph=2]', '12 cm', 'ok'],
+  ['tab_stop', 'position[paragraph=2]', '9 cm', 'bad'],
+  ['tab_stop', 'leader[paragraph=2]', 'pont', 'ok'],
+  ['tab_stop', 'leader[paragraph=2]', 'aláhúzás', 'bad'],
+  ['section', 'columns', '1', 'ok'],
+  ['section', 'columns[section=2]', '2', 'ok'],
+  ['section', 'columns[section=2]', '3', 'bad'],
+]
+
+test.describe('Dokumentum-vizsgálatok: LibreOffice-konvertált odt', () => {
+  test('@regression az első használt mesteroldal az 1. szakasz, nincs szellem-szakasz (bekezdés)', () => {
+    const result = evaluate('pw-dok-konvertalt.odt', CONVERTED_CASES)
+    expect(result.items.map((item) => item.state)).toEqual(CONVERTED_CASES.map(([, , , state]) => state))
+    expect(result.facts.find((fact) => fact.label === 'Lapméret')?.value).toBe('Letter, álló')
+  })
+
+  test('@regression az első táblázat stílusának mesteroldala is az 1. szakaszt adja', () => {
+    const result = evaluate('pw-dok-konvertalt-tabla.odt', CONVERTED_CASES)
+    expect(result.items.map((item) => item.state)).toEqual(CONVERTED_CASES.map(([, , , state]) => state))
+  })
+})
+
 test.describe('Dokumentum-vizsgálatok: a vegponton at', () => {
   test('@regression az A4 docx teljesiti, a Letter nem teljesiti a 6. feladat lapmeret-pontját', async ({ apiClient }) => {
     const admin = (await adminAccount(apiClient)).client
@@ -348,10 +413,54 @@ test.describe('Dokumentum-vizsgálatok: a vegponton at', () => {
     }
   })
 
-  // WP1 (feladat letrehozasa `kind: "doc_upload"`-dal) utan: ideiglenes doc_upload feladat, feladatonkent egypontos
-  // ertekelolap, es a COMMON matrix minden esete a rubric-check vegponton at (docx es .odt: spec.accepted_extensions).
-  test.fixme('a teljes matrix a rubric-check vegponton at, ideiglenes doc_upload feladattal (WP1-re var)', () => {
-    // A controller a merge-ek utan kapcsolja be.
-    expect(SEEDED.typed.docUpload.kind).toBe('doc_upload')
+  test('@regression a BACKEND.md 7.6 esetei a rubric-check vegponton at, ideiglenes doc_upload feladattal (docx es odt)', async ({ apiClient }) => {
+    const admin = (await adminAccount(apiClient)).client
+    const created = await createExercise(admin, {
+      lesson_id: SEEDED.typed.sheetUpload.lessonId,
+      title: 'PW WP4: ideiglenes dokumentum-feladat',
+      description: 'Playwright API teszt: a teszt végén törlődik.',
+      level: 'kozep',
+      difficulty: 1,
+      kind: 'doc_upload',
+      allowed_languages: [],
+      spec: { accepted_extensions: ['.docx', '.odt'] },
+    })
+    expect(created.status, JSON.stringify(created.errorBody)).toBe(201)
+    const exerciseId = created.body.data.id
+
+    try {
+      const ids: number[] = []
+      for (const [type, property, expected] of HTTP_CASES) {
+        const item = await admin.post<{ data: { id: number } }>(`admin/exercises/${String(exerciseId)}/rubric-items`, {
+          label: `${type} ${property}`,
+          group: 'PW',
+          check_type: type,
+          property,
+          expected,
+          points: 1,
+          mode: 'auto',
+        })
+        expect(item.status, `${type} ${property}=${expected}: ${JSON.stringify(item.errorBody)}`).toBe(201)
+        ids.push(item.body.data.id)
+      }
+
+      for (const format of ['docx', 'odt'] as const) {
+        const result = await admin.postMultipart<{ data: { status: string; items: { rubric_item_id: number; state: State }[] } }>(
+          `admin/exercises/${String(exerciseId)}/rubric-check`,
+          {},
+          fixtureFile(`documents/pw-dok-minta.${format}`)
+        )
+        expect(result.status, format).toBe(200)
+        expect(result.body.data.status, format).toBe('evaluated')
+        const states = new Map(result.body.data.items.map((item) => [item.rubric_item_id, item.state]))
+        const mismatches = HTTP_CASES.flatMap(([type, property, expected, state], index) => {
+          const actual = states.get(ids[index] ?? -1)
+          return actual === state ? [] : [`${format}: ${type} ${property}=${expected}: vart ${state}, kapott ${String(actual)}`]
+        })
+        expect(mismatches).toEqual([])
+      }
+    } finally {
+      await deleteExercise(admin, exerciseId)
+    }
   })
 })

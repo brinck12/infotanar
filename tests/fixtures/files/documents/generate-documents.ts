@@ -245,11 +245,27 @@ function letterOdt(): Buffer {
   return odtPackage(content, styles, false)
 }
 
+/**
+ * LibreOffice-fele "Converted1" sorrend: a styles.xml elso mesteroldala (Standard, A4) nincs hasznalatban,
+ * a tartalom az elso bekezdesen (vagy az elso tablazat stilusan) valaszt masik mesteroldalt (Letter, 2 hasab).
+ * A tablazat: az 1. tablazat 1 sor, benne beagyazott 2x2 tablazat; a 2. tablazat 3 sor.
+ */
+function convertedOdt(startsWithTable: boolean): Buffer {
+  const styles = `${XML}<office:document-styles ${NS}><office:styles><style:style style:name="Standard" style:family="paragraph"/></office:styles><office:automatic-styles>${layout('pm1', '21cm', '29.7cm', 'portrait', ['2cm', '2cm', '2cm', '2cm'])}${layout('pm2', '21.59cm', '27.94cm', 'portrait', ['2.54cm', '2.54cm', '2.54cm', '2.54cm'], 2)}</office:automatic-styles><office:master-styles><style:master-page style:name="Standard" style:page-layout-name="pm1"/><style:master-page style:name="Converted1" style:page-layout-name="pm2"/></office:master-styles></office:document-styles>`
+  const nested = '<table:table table:name="Beagyazott"><table:table-column table:number-columns-repeated="2"/><table:table-row><table:table-cell><text:p>N1</text:p></table:table-cell><table:table-cell><text:p>N2</text:p></table:table-cell></table:table-row><table:table-row><table:table-cell><text:p>N3</text:p></table:table-cell><table:table-cell><text:p>N4</text:p></table:table-cell></table:table-row></table:table>'
+  const tables = `<table:table table:name="T1"${startsWithTable ? ' table:style-name="TableConv"' : ''}><table:table-column/><table:table-row><table:table-cell>${nested}<text:p/></table:table-cell></table:table-row></table:table><table:table table:name="T2"><table:table-column/><table:table-row><table:table-cell><text:p>X1</text:p></table:table-cell></table:table-row><table:table-row><table:table-cell><text:p>X2</text:p></table:table-cell></table:table-row><table:table-row><table:table-cell><text:p>X3</text:p></table:table-cell></table:table-row></table:table>`
+  const body = startsWithTable ? `${tables}<text:p>Szöveg</text:p>` : `<text:p text:style-name="PConv">Szöveg</text:p>${tables}`
+  const content = `${XML}<office:document-content ${NS}><office:automatic-styles><style:style style:name="PConv" style:family="paragraph" style:parent-style-name="Standard" style:master-page-name="Converted1"/><style:style style:name="TableConv" style:family="table" style:master-page-name="Converted1"/></office:automatic-styles><office:body><office:text>${body}</office:text></office:body></office:document-content>`
+  return odtPackage(content, styles, false)
+}
+
 const FILES: Record<string, Buffer> = {
   'pw-dok-minta.docx': sampleDocx(),
   'pw-dok-minta.odt': sampleOdt(),
   'pw-dok-letter.docx': letterDocx(),
   'pw-dok-letter.odt': letterOdt(),
+  'pw-dok-konvertalt.odt': convertedOdt(false),
+  'pw-dok-konvertalt-tabla.odt': convertedOdt(true),
   'pw-dok-serult.docx': brokenDocx(),
   'pw-dok-doctype.docx': doctypeDocx(),
 }
