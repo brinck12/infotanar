@@ -2,6 +2,9 @@
 
 declare(strict_types=1);
 
+use App\Http\Controllers\Api\V1\Admin\OverviewController;
+use Illuminate\Support\Facades\Route;
+
 /*
 |--------------------------------------------------------------------------
 | Admin attekinto (WP9)
@@ -14,3 +17,8 @@ declare(strict_types=1);
 |
 | Ide tartozik: /admin/overview.
 */
+
+Route::prefix('admin')->name('admin.')->middleware(['auth:sanctum', 'admin'])->group(function (): void {
+    // Az admin kezdooldal szamai es a legutobbi naplozott muveletek, egy keresben.
+    Route::get('/overview', OverviewController::class)->name('overview');
+});
