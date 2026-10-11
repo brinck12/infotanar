@@ -45,6 +45,10 @@ final readonly class SubmitSolution
             'status' => $result->status,
             'verdict' => $result->verdict,
             'results' => $result->results,
+            'score' => $result->score,
+            'max_score' => $result->maxScore,
+            // Megjegyzesek nelkul: azok a teszteset elvart kimenetebol ideznek.
+            'subtasks' => $result->storedSubtasks(),
         ]);
 
         // Haladas csak bejelentkezett felhasznalonak es csak elfogadott beadasra.
@@ -52,6 +56,6 @@ final readonly class SubmitSolution
             && $result->status === 'passed'
             && $this->recordLessonProgress->handle($user, $exercise->lesson);
 
-        return new SubmissionOutcome($submission, $lessonCompleted, $result->violations);
+        return new SubmissionOutcome($submission, $lessonCompleted, $result->violations, $result->subtasks);
     }
 }

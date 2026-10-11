@@ -10,6 +10,8 @@ Ez a dokumentum **vázlat**: a szakaszcímek a végleges szerkezetet mutatják, 
 
 Az InfoTanár online felkészítő a közép- és emelt szintű digitális kultúra érettségire: tananyag, videós magyarázatok és böngészőben megoldható, automatikusan kiértékelt programozási feladatok.
 
+[JOGI SZÖVEG JÓVÁHAGYÁSRA VÁR: a tulajdonosnak kell elfogadnia vagy átírnia.] A felhasználó által feltöltött fájlokat és a gyakorló vizsgák próbálkozásait a szolgáltató 365 napig őrzi, utána törli; a feltöltött fájlokra a felhasználó felel, és csak olyat tölthet fel, amelynek feltöltésére jogosult.
+
 [KITÖLTENDŐ: mi érhető el ingyenesen és mi előfizetéssel; a szolgáltatás igénybevételének technikai feltételei.]
 
 ## 3. Regisztráció és felhasználói fiók
