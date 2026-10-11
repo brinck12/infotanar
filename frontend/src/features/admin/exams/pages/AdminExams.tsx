@@ -10,6 +10,7 @@ import { Table, Td, Th, Tr } from '../../../../shared/ui/Table'
 import { MutationError } from '../../catalog/components/QueryState'
 import { AdminShell } from '../../components/AdminShell'
 import { adminExamKeys, adminExamsQuery, createExam } from '../api'
+import { DEFAULT_SESSION } from '../sessions'
 
 /** Gyakorló vizsgák listája az adminban; innen nyílik a szerkesztő. */
 export function AdminExams() {
@@ -17,7 +18,7 @@ export function AdminExams() {
   const queryClient = useQueryClient()
   const exams = useQuery(adminExamsQuery())
   const create = useMutation({
-    mutationFn: () => createExam({ title: 'Új gyakorló vizsga', level: 'kozep', minutes: 180, points: 100, is_published: false, timed_mode: true }),
+    mutationFn: () => createExam({ title: 'Új gyakorló vizsga', session: DEFAULT_SESSION, level: 'kozep', minutes: 180, points: 100, is_published: false, timed_mode: true }),
     onSuccess: async (exam) => {
       await queryClient.invalidateQueries({ queryKey: adminExamKeys.all })
       navigate(`/admin/vizsgak/${exam.id}`)

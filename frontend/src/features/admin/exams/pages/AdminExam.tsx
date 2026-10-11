@@ -12,6 +12,7 @@ import { formatBytes } from '../../../../shared/ui/format'
 import { Field, SelectField, Switch } from '../../../../shared/ui/Form'
 import { Table, Td, Th, Tr } from '../../../../shared/ui/Table'
 import type { Level } from '../../../../types'
+import { deleteAttachment } from '../../catalog/api'
 import { IconButton } from '../../catalog/components/ChildList'
 import { MutationError, QueryState } from '../../catalog/components/QueryState'
 import { SavedNote } from '../../catalog/components/SavedNote'
@@ -26,8 +27,10 @@ import {
   type AdminExam as Exam,
   type ExamPartPayload,
   type ExamPayload,
+  uploadExamZip,
   type RubricStatus,
 } from '../api'
+import { sessionOptionsFor } from '../sessions'
 
 const LEVEL_OPTIONS = (Object.keys(LEVEL_LABEL) as Level[]).map((level) => ({ value: level, label: LEVEL_LABEL[level] }))
 
@@ -50,6 +53,7 @@ function ExamEditor({ exam }: { exam: Exam }) {
   const refresh = () => queryClient.invalidateQueries({ queryKey: adminExamKeys.all })
   const [form, setForm] = useState<ExamPayload>({
     title: exam.title,
+    session: exam.session,
     level: exam.level,
     minutes: exam.minutes,
     points: exam.points,
@@ -60,6 +64,7 @@ function ExamEditor({ exam }: { exam: Exam }) {
   const save = useMutation({ mutationFn: (payload: ExamPayload) => updateExam(exam.id, payload), onSuccess: refresh })
   const reorder = useMutation({ mutationFn: (ids: number[]) => reorderExamParts(exam.id, ids), onSettled: refresh })
   const remove = useMutation({ mutationFn: removeExamPart, onSettled: refresh })
+  const removeFile = useMutation({ mutationFn: deleteAttachment, onSettled: refresh })
   const errors = mezoHibak(save.error)
   const incomplete = exam.parts.filter((part) => part.rubric_status === 'incomplete')
   const partsBusy = reorder.isPending || remove.isPending
@@ -95,10 +100,18 @@ function ExamEditor({ exam }: { exam: Exam }) {
       )}
 
       <Section title="A vizsga adatai" aside={<SavedNote mutation={save} />}>
-        <MutationError error={save.error} fields={['title', 'level', 'minutes', 'points', 'is_published', 'timed_mode']} />
+        <MutationError error={save.error} fields={['title', 'session', 'level', 'minutes', 'points', 'is_published', 'timed_mode']} />
         <form onSubmit={submit} noValidate className="flex flex-col gap-5">
           <div className="flex flex-wrap gap-5">
             <Field className="flex-1 basis-72" label="Megnevezés" value={form.title} onChange={(e) => set('title', e.target.value)} error={errors.title} />
+            <SelectField
+              className="w-60"
+              label="Vizsgaidőszak"
+              options={sessionOptionsFor(form.session)}
+              value={form.session ?? ''}
+              onChange={(e) => set('session', e.target.value)}
+              error={errors.session}
+            />
             <SelectField
               className="w-44"
               label="Szint"
@@ -206,15 +219,20 @@ function ExamEditor({ exam }: { exam: Exam }) {
       </Section>
 
       <Section title="Fájlok">
+        <MutationError error={removeFile.error} />
         {exam.files.length === 0 ? (
           <p className="text-15 text-ink-soft">Még nincs feltöltött fájl.</p>
         ) : (
           <div className="flex flex-wrap gap-3">
             {exam.files.map((file) => (
-              <FileChip key={file.name} name={file.name} size={formatBytes(file.size)} href={file.url} />
+              <span key={file.id} className="inline-flex items-center gap-1">
+                <FileChip name={file.name} size={formatBytes(file.size)} href={file.url} />
+                <IconButton icon="trash" label={`${file.name} törlése`} danger disabled={removeFile.isPending} onClick={() => removeFile.mutate(file.id)} />
+              </span>
             ))}
           </div>
         )}
+        <ZipUpload examId={exam.id} replaces={exam.files.length > 0} onUploaded={refresh} />
         <p className="mt-4 max-w-prose text-14 leading-relaxed text-ink-soft">
           A forrásfájlokat a tanuló egyetlen zipben tölti le. A hivatalos feladatlapra és útmutatóra hivatkozunk, a szerzői jogot az Oktatási
           Hivatal tartja.
@@ -286,6 +304,52 @@ function AddPart({ exam, onAdded }: { exam: Exam; onAdded: () => unknown }) {
         <div className="pt-7.5">
           <Button type="submit" variant="secondary" icon="plus" busy={add.isPending} busyLabel="Hozzáadás…" className="min-h-12">
             Rész hozzáadása
+          </Button>
+        </div>
+      </div>
+    </form>
+  )
+}
+
+/** A forrásfájlok zipje: egy van, az új feltöltés a régit cseréli. */
+function ZipUpload({ examId, replaces, onUploaded }: { examId: number; replaces: boolean; onUploaded: () => unknown }) {
+  const [file, setFile] = useState<File | null>(null)
+  const [fileKey, setFileKey] = useState(0)
+  const upload = useMutation({
+    mutationFn: () => {
+      if (!file) throw new Error('Nincs kiválasztott fájl.')
+      return uploadExamZip(examId, file)
+    },
+    onSuccess: () => {
+      setFile(null)
+      setFileKey((key) => key + 1)
+    },
+    onSettled: onUploaded,
+  })
+  const errors = mezoHibak(upload.error)
+
+  function submit(e: FormEvent) {
+    e.preventDefault()
+    if (file) upload.mutate()
+  }
+
+  return (
+    <form onSubmit={submit} noValidate aria-label="Forrásfájlok feltöltése" className="mt-5 border-t border-grid pt-5">
+      <MutationError error={upload.error} fields={['file']} />
+      <div className="flex flex-wrap items-end gap-4">
+        <Field
+          key={fileKey}
+          className="flex-1 basis-72"
+          label="Forrásfájlok (zip)"
+          type="file"
+          accept=".zip"
+          hint={replaces ? 'Az új zip lecseréli a mostanit.' : 'Egyetlen zip, amelyben a vizsga összes forrásfájlja benne van.'}
+          onChange={(e) => setFile(e.target.files?.[0] ?? null)}
+          error={errors.file}
+        />
+        <div className="pb-1">
+          <Button type="submit" variant="secondary" icon="upload" busy={upload.isPending} busyLabel="Feltöltés…" disabled={file === null}>
+            Zip feltöltése
           </Button>
         </div>
       </div>

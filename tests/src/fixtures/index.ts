@@ -2,6 +2,8 @@ import { test as base } from '@playwright/test'
 import { ApiClient } from '../api/ApiClient'
 import { Outbox } from '../api/Outbox'
 import { MockApi } from '../mocks/MockApi'
+import { AdminExamPage } from '../pages/AdminExamPage'
+import { AdminExercisePage } from '../pages/AdminExercisePage'
 import { ExamPage } from '../pages/ExamPage'
 import { HomePage } from '../pages/HomePage'
 import { LearningPathPage } from '../pages/LearningPathPage'
@@ -23,6 +25,8 @@ export interface FrameworkOptions {
 export interface FrameworkFixtures {
   /** Route-interception alapu backend mock; `mockBackend` eseten az alap katalogussal. */
   mockApi: MockApi
+  adminExamPage: AdminExamPage
+  adminExercisePage: AdminExercisePage
   examPage: ExamPage
   homePage: HomePage
   onboardingPage: OnboardingPage
@@ -62,6 +66,14 @@ export const test = base.extend<FrameworkFixtures & A11yFixtures & FrameworkOpti
 
   // Az oldalobjektumok a mockApi-tol fuggnek, igy a mockok mar a legelso
   // navigacio elott a helyukon vannak.
+  adminExamPage: async ({ page, mockApi: _ }, use) => {
+    await use(new AdminExamPage(page))
+  },
+
+  adminExercisePage: async ({ page, mockApi: _ }, use) => {
+    await use(new AdminExercisePage(page))
+  },
+
   examPage: async ({ page, mockApi: _ }, use) => {
     await use(new ExamPage(page))
   },

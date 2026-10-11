@@ -11,7 +11,19 @@ import { Table, Td, Th, Tr } from '../../../../shared/ui/Table'
 import { CardTitle } from '../../../../shared/ui/Text'
 import { IconButton } from '../../catalog/components/ChildList'
 import { MutationError } from '../../catalog/components/QueryState'
-import { adminExamKeys, createRubricItem, deleteRubricItem, reorderRubricItems, rubricQuery, type RubricItemPayload } from '../api'
+import { RubricItem as RubricResultRow } from '../../../../shared/ui/RubricItem'
+import {
+  adminExamKeys,
+  checkRubric,
+  createRubricItem,
+  deleteRubricItem,
+  reorderRubricItems,
+  rubricQuery,
+  updateRubricItem,
+  type RubricCheckResult,
+  type RubricItem,
+  type RubricItemPayload,
+} from '../api'
 
 /** A vizsgálat típusai fájlfajtánként (FRONTEND.md 9.). */
 const CHECK_TYPES = [
@@ -23,14 +35,18 @@ const CHECK_TYPES = [
   { value: 'image', label: 'Kép' },
   { value: 'section', label: 'Szakasz és hasáb' },
   { value: 'tab_stop', label: 'Tabulátor' },
+  { value: 'list_format', label: 'Felsorolás' },
   { value: 'cell_value', label: 'Cellaérték' },
   { value: 'cell_formula', label: 'Képlet' },
   { value: 'number_format', label: 'Számformátum' },
   { value: 'sort_order', label: 'Rendezés' },
   { value: 'chart', label: 'Diagram' },
   { value: 'print_area', label: 'Nyomtatási terület' },
+  { value: 'sheet_format', label: 'Munkalap és oszlopok' },
+  { value: 'conditional_format', label: 'Feltételes formázás' },
   { value: 'slide', label: 'Dia (méret, háttér, áttűnés)' },
   { value: 'animation', label: 'Animáció' },
+  { value: 'shape', label: 'Alakzat' },
   { value: 'web', label: 'Weboldal (HTML, CSS)' },
   { value: 'manual', label: 'Összevetés a mintával' },
 ] as const
@@ -47,10 +63,18 @@ export function RubricBuilder({ exerciseId }: { exerciseId: number }) {
   const refresh = () => queryClient.invalidateQueries({ queryKey: adminExamKeys.rubric(exerciseId) })
   const items = useQuery(rubricQuery(exerciseId))
   const [form, setForm] = useState<RubricItemPayload>(EMPTY)
+  /** A szerkesztett tétel azonosítója; `null` = új tétel felvétele. */
+  const [editing, setEditing] = useState<number | null>(null)
   const set = <K extends keyof RubricItemPayload>(key: K, value: RubricItemPayload[K]) => setForm((current) => ({ ...current, [key]: value }))
   const create = useMutation({
-    mutationFn: () => createRubricItem(exerciseId, { ...form, hint: form.hint?.trim() || null }),
-    onSuccess: () => setForm((current) => ({ ...EMPTY, group: current.group, check_type: current.check_type })),
+    mutationFn: () => {
+      const payload = { ...form, hint: form.hint?.trim() || null }
+      return editing === null ? createRubricItem(exerciseId, payload) : updateRubricItem(editing, payload)
+    },
+    onSuccess: () => {
+      setEditing(null)
+      setForm((current) => ({ ...EMPTY, group: current.group, check_type: current.check_type }))
+    },
     onSettled: refresh,
   })
   const remove = useMutation({ mutationFn: deleteRubricItem, onSettled: refresh })
@@ -78,6 +102,27 @@ export function RubricBuilder({ exerciseId }: { exerciseId: number }) {
     if (moved === undefined) return
     ids.splice(index + delta, 0, moved)
     reorder.mutate(ids)
+  }
+
+  function startEditing(item: RubricItem) {
+    create.reset()
+    setEditing(item.id)
+    setForm({
+      label: item.label,
+      group: item.group,
+      check_type: item.check_type,
+      property: item.property,
+      expected: item.expected,
+      points: item.points,
+      mode: item.mode,
+      hint: item.hint,
+    })
+  }
+
+  function cancelEditing() {
+    create.reset()
+    setEditing(null)
+    setForm(EMPTY)
   }
 
   function submit(e: FormEvent) {
@@ -123,6 +168,7 @@ export function RubricBuilder({ exerciseId }: { exerciseId: number }) {
                     <Td>{item.mode === 'manual' ? <Badge kind="manual">Kézi</Badge> : <Badge kind="neutral">Automatikus</Badge>}</Td>
                     <Td>
                       <span className="flex items-center justify-end gap-1">
+                        <IconButton icon="edit" label={`${item.label} szerkesztése`} disabled={busy} onClick={() => startEditing(item)} />
                         <IconButton icon="chevron-up" label={`${item.label} feljebb`} disabled={busy || index === 0} onClick={() => move(index, -1)} />
                         <IconButton
                           icon="chevron-down"
@@ -130,7 +176,16 @@ export function RubricBuilder({ exerciseId }: { exerciseId: number }) {
                           disabled={busy || index === items.data.length - 1}
                           onClick={() => move(index, 1)}
                         />
-                        <IconButton icon="trash" label={`${item.label} törlése`} disabled={busy} onClick={() => remove.mutate(item.id)} danger />
+                        <IconButton
+                          icon="trash"
+                          label={`${item.label} törlése`}
+                          disabled={busy}
+                          onClick={() => {
+                            if (editing === item.id) cancelEditing()
+                            remove.mutate(item.id)
+                          }}
+                          danger
+                        />
                       </span>
                     </Td>
                   </Tr>
@@ -142,8 +197,8 @@ export function RubricBuilder({ exerciseId }: { exerciseId: number }) {
       </Panel>
 
       <Panel>
-        <CardTitle as="h2">Új értékelési pont</CardTitle>
-        <form onSubmit={submit} noValidate className="mt-4 flex flex-col gap-5" aria-label="Új értékelési pont">
+        <CardTitle as="h2">{editing === null ? 'Új értékelési pont' : 'Értékelési pont szerkesztése'}</CardTitle>
+        <form onSubmit={submit} noValidate className="mt-4 flex flex-col gap-5" aria-label={editing === null ? 'Új értékelési pont' : 'Értékelési pont szerkesztése'}>
           <MutationError error={create.error} fields={FIELDS} />
           <div className="flex flex-wrap gap-5">
             <Field className="flex-1 basis-80" label="Megnevezés" value={form.label} onChange={(e) => set('label', e.target.value)} error={errors.label} />
@@ -193,13 +248,102 @@ export function RubricBuilder({ exerciseId }: { exerciseId: number }) {
             onChange={(e) => set('hint', e.target.value)}
             error={errors.hint}
           />
-          <div>
-            <Button type="submit" variant="secondary" icon="plus" busy={create.isPending} busyLabel="Hozzáadás…">
-              Pont hozzáadása
-            </Button>
+          <div className="flex flex-wrap items-center gap-3">
+            {editing === null ? (
+              <Button type="submit" variant="secondary" icon="plus" busy={create.isPending} busyLabel="Hozzáadás…">
+                Pont hozzáadása
+              </Button>
+            ) : (
+              <>
+                <Button type="submit" busy={create.isPending} busyLabel="Mentés…">
+                  Pont mentése
+                </Button>
+                <Button variant="text" onClick={cancelEditing}>
+                  Mégse
+                </Button>
+              </>
+            )}
           </div>
         </form>
       </Panel>
+
+      <RubricTryout exerciseId={exerciseId} hasItems={items.data.length > 0} />
     </div>
+  )
+}
+
+/**
+ * Az értékelőlap kipróbálása: lefut a mintamegoldáson vagy egy feltöltött fájlon,
+ * és megmutatja, mennyi pontot adna. Semmi nem tárolódik.
+ */
+function RubricTryout({ exerciseId, hasItems }: { exerciseId: number; hasItems: boolean }) {
+  const [file, setFile] = useState<File | null>(null)
+  const [fileKey, setFileKey] = useState(0)
+  const check = useMutation({ mutationFn: () => checkRubric(exerciseId, file) })
+  const result: RubricCheckResult | undefined = check.data
+
+  return (
+    <Panel as="section" aria-label="Kipróbálás">
+      <CardTitle as="h2">Kipróbálás</CardTitle>
+      <p className="mt-2 max-w-prose text-15 leading-relaxed text-ink-soft">
+        Futtasd le az értékelőlapot a mintamegoldáson, és nézd meg, hány pontot adna. Saját fájllal is kipróbálhatod. A kipróbálás nem hoz létre
+        beadást.
+      </p>
+      <div className="mt-4 flex flex-wrap items-end gap-5">
+        <Field
+          key={fileKey}
+          className="flex-1 basis-72"
+          label="Saját fájl (nem kötelező)"
+          type="file"
+          hint="Fájl nélkül a feladat Fájlok fülén feltöltött mintamegoldás fut le."
+          onChange={(e) => setFile(e.target.files?.[0] ?? null)}
+        />
+        <div className="flex flex-wrap items-center gap-3 pb-1">
+          <Button variant="secondary" icon="check" busy={check.isPending} busyLabel="Kipróbálás…" disabled={!hasItems} onClick={() => check.mutate()}>
+            {file ? 'Kipróbálás a fájllal' : 'Kipróbálás mintamegoldással'}
+          </Button>
+          {file && (
+            <Button
+              variant="text"
+              onClick={() => {
+                setFile(null)
+                setFileKey((key) => key + 1)
+              }}
+            >
+              Fájl elvetése
+            </Button>
+          )}
+        </div>
+      </div>
+      {!hasItems && <p className="mt-2 text-14 text-ink-soft">Előbb vegyél fel legalább egy értékelési pontot.</p>}
+      <div className="mt-4">
+        <MutationError error={check.error} />
+        {result && result.status === 'failed' && (
+          <Banner kind="error" title="A fájlt nem sikerült feldolgozni">
+            {result.error ?? 'A fájl sérült, vagy nem a kért formátumban van.'}
+          </Banner>
+        )}
+        {result && result.status !== 'failed' && (
+          <div aria-live="polite" data-testid="rubric-check-result">
+            <p className="font-serif text-24 font-semibold">
+              {result.score} / {result.max_score} pont
+            </p>
+            <ul className="mt-2">
+              {result.items.map((item) => (
+                <RubricResultRow
+                  key={item.rubric_item_id}
+                  state={item.state}
+                  text={item.label}
+                  points={item.points}
+                  maxPoints={item.max_points}
+                  found={item.found}
+                  hint={item.state === 'ok' ? null : item.hint}
+                />
+              ))}
+            </ul>
+          </div>
+        )}
+      </div>
+    </Panel>
   )
 }

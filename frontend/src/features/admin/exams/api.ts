@@ -23,8 +23,15 @@ export interface AdminExamPart {
   missing_points: number
 }
 
+/** A vizsga csatolt fájlja; az `id` a törléshez kell (`DELETE /admin/attachments/{id}`). */
+export interface AdminExamFile extends TaskFile {
+  id: number
+}
+
 export interface AdminExam {
   id: number
+  /** A vizsgaidőszak `ÉÉÉÉ-HH` alakban, pl. `2026-05`. */
+  session: string
   title: string
   level: Level
   minutes: number
@@ -33,10 +40,10 @@ export interface AdminExam {
   /** Engedélyezett-e a vizsgahelyzet (időzítő, automatikus beadás). */
   timed_mode: boolean
   parts: AdminExamPart[]
-  files: TaskFile[]
+  files: AdminExamFile[]
 }
 
-export type ExamPayload = Pick<AdminExam, 'title' | 'level' | 'minutes' | 'points' | 'is_published' | 'timed_mode'>
+export type ExamPayload = Pick<AdminExam, 'title' | 'level' | 'minutes' | 'points' | 'is_published' | 'timed_mode'> & { session?: string }
 export type ExamPartPayload = Pick<AdminExamPart, 'key' | 'name' | 'exercise_id' | 'points' | 'minutes'>
 
 export type RubricMode = 'auto' | 'manual'
@@ -53,9 +60,31 @@ export interface RubricItem {
   points: number
   mode: RubricMode
   hint: string | null
+  /** Szerkezeti kiegészítés; az űrlap nem szerkeszti, a szerver csak kitöltve küldi. */
+  params?: Record<string, unknown>
 }
 
-export type RubricItemPayload = Omit<RubricItem, 'id'>
+/** A „Kipróbálás” eredménye: a beadás alakja, de semmi nem tárolódik. */
+export interface RubricCheckResult {
+  status: 'processing' | 'evaluated' | 'failed'
+  score: number
+  max_score: number
+  groups: Array<{ name: string; score: number; max_score: number }>
+  items: Array<{
+    rubric_item_id: number
+    label: string
+    state: 'ok' | 'bad' | 'manual'
+    points: number
+    max_points: number
+    found: string | null
+    hint: string | null
+    manual_mark: boolean | null
+  }>
+  facts: Array<{ label: string; value: string }>
+  error: string | null
+}
+
+export type RubricItemPayload = Omit<RubricItem, 'id' | 'params'>
 
 export const adminExamKeys = {
   all: ['admin', 'exams'] as const,
@@ -110,4 +139,26 @@ export async function deleteRubricItem(id: number): Promise<void> {
 
 export async function reorderRubricItems(exerciseId: number, ids: number[]): Promise<void> {
   await http.put(`/admin/exercises/${exerciseId}/rubric-items/order`, { ids })
+}
+
+export async function updateRubricItem(id: number, payload: RubricItemPayload): Promise<RubricItem> {
+  return (await http.put<Envelope<RubricItem>>(`/admin/rubric-items/${id}`, payload)).data.data
+}
+
+/**
+ * Az értékelőlap kipróbálása: a mintamegoldáson (nincs `file`), vagy egy feltöltött fájlon.
+ * Nem tárol beadást.
+ */
+export async function checkRubric(exerciseId: number, file?: File | null): Promise<RubricCheckResult> {
+  const body = new FormData()
+  if (file) body.append('file', file)
+  return (await http.post<Envelope<RubricCheckResult>>(`/admin/exercises/${exerciseId}/rubric-check`, body)).data.data
+}
+
+/** A vizsga forrásfájljainak zipje (egy van; az új a régit cseréli). */
+export async function uploadExamZip(examId: number, file: File): Promise<void> {
+  const body = new FormData()
+  body.append('file', file)
+  body.append('role', 'source_zip')
+  await http.post(`/admin/exams/${examId}/attachments`, body)
 }
