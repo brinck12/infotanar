@@ -124,18 +124,18 @@ final readonly class Sheet
     /** Az oszlop szelessege milliméterben; ha a fajl nem adja meg, a lap alapszelessege. */
     public function columnWidth(int $column): float
     {
-        return $this->spanFor($this->columns, $column)?->size ?? $this->defaultColumnWidth;
+        return $this->spanFor($this->columns, $column)->size ?? $this->defaultColumnWidth;
     }
 
     public function columnHidden(int $column): bool
     {
-        return $this->spanFor($this->columns, $column)?->hidden ?? false;
+        return $this->spanFor($this->columns, $column)->hidden ?? false;
     }
 
     /** A sor magassaga pontban; ha a fajl nem adja meg, a lap alapmagassaga. */
     public function rowHeight(int $row): float
     {
-        return $this->spanFor($this->rowSpans, $row)?->size ?? $this->defaultRowHeight;
+        return $this->spanFor($this->rowSpans, $row)->size ?? $this->defaultRowHeight;
     }
 
     /** @param list<AxisSpan> $spans */

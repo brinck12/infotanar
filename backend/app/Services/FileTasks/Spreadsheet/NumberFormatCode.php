@@ -199,13 +199,6 @@ final readonly class NumberFormatCode
         $segments = [];
         $pattern = '';
 
-        $flush = static function () use (&$segments, &$pattern): void {
-            if ($pattern !== '') {
-                $segments[] = [false, $pattern];
-                $pattern = '';
-            }
-        };
-
         for ($index = 0; $index < $count; $index++) {
             $character = $characters[$index];
 
@@ -221,10 +214,16 @@ final readonly class NumberFormatCode
                     $literal .= $characters[$index];
                 }
 
-                $flush();
+                if ($pattern !== '') {
+                    $segments[] = [false, $pattern];
+                    $pattern = '';
+                }
                 $segments[] = [true, $literal];
             } elseif ($character === '\\') {
-                $flush();
+                if ($pattern !== '') {
+                    $segments[] = [false, $pattern];
+                    $pattern = '';
+                }
                 $segments[] = [true, $characters[++$index] ?? ''];
             } elseif ($character === '_' || $character === '*') {
                 // Helykihagyo es kitolto jel: a kovetkezo karakterrel egyutt csak a megjelenest igazitja.
@@ -238,7 +237,10 @@ final readonly class NumberFormatCode
 
                 if (str_starts_with($content, '$')) {
                     // Penznem es nyelvi kod: [$Ft-40E] => "Ft", [$-40E] => semmi.
-                    $flush();
+                    if ($pattern !== '') {
+                        $segments[] = [false, $pattern];
+                        $pattern = '';
+                    }
                     $segments[] = [true, explode('-', substr($content, 1), 2)[0]];
                 } elseif (preg_match('/^(h+|m+|s+|ó+|p+)$/iu', $content) === 1) {
                     // Eltelt ido ([h]:mm): a formatum resze.
@@ -250,7 +252,10 @@ final readonly class NumberFormatCode
             }
         }
 
-        $flush();
+        if ($pattern !== '') {
+            $segments[] = [false, $pattern];
+            $pattern = '';
+        }
 
         return $segments;
     }

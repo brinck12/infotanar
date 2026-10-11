@@ -48,7 +48,7 @@ final class SerialDate
         }
 
         return isset($match[4])
-            ? $date + self::fromTime((int) $match[4], (int) $match[5], (float) ($match[6] ?? 0))
+            ? $date + self::fromTime((int) $match[4], (int) ($match[5] ?? 0), (float) ($match[6] ?? 0))
             : $date;
     }
 
@@ -79,7 +79,7 @@ final class SerialDate
                 return null;
             }
 
-            return isset($match[4]) ? $date + self::fromTime((int) $match[4], (int) $match[5], (float) ($match[6] ?? 0)) : $date;
+            return isset($match[4]) ? $date + self::fromTime((int) $match[4], (int) ($match[5] ?? 0), (float) ($match[6] ?? 0)) : $date;
         }
 
         if (preg_match('/^\s*'.$time.'\s*$/', $text, $match) === 1) {
