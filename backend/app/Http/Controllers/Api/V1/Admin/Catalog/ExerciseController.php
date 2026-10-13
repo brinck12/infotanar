@@ -27,7 +27,7 @@ use Illuminate\Http\Response;
 final class ExerciseController extends Controller
 {
     /** A lista es a reszletes nezet szamlaloi. */
-    private const COUNTS = ['testCases', 'submissions', 'rubricItems'];
+    private const COUNTS = ['testCases', 'submissions', 'fileSubmissions', 'rubricItems'];
 
     public function index(Request $request): AnonymousResourceCollection
     {

@@ -8,8 +8,11 @@ use App\Actions\Audit\RecordAuditEvent;
 use App\Enums\AuditAction;
 use App\Models\AccessGrant;
 use App\Models\Consent;
+use App\Models\ExamAttempt;
+use App\Models\FileSubmission;
 use App\Models\Invoice;
 use App\Models\LessonCompletion;
+use App\Models\OralPractice;
 use App\Models\Payment;
 use App\Models\Submission;
 use App\Models\Subscription;
@@ -127,6 +130,56 @@ final readonly class ExportAccountData
                     'type' => $consent->type->value,
                     'document_version' => $consent->document_version,
                     'accepted_at' => $consent->created_at->toIso8601String(),
+                ])
+                ->all(),
+            // Tanulasi celok (onboarding) es szobeli gyakorlas: a diak sajat bejegyzesei.
+            'preferences' => $user->preferences,
+            'oral_practice' => $user->oralPractices()
+                ->oldest('id')
+                ->get()
+                ->map(static fn (OralPractice $practice): array => [
+                    'topic' => $practice->topic,
+                    'checked' => $practice->checked,
+                    'notes' => $practice->notes,
+                    'scores' => (object) $practice->scores,
+                    'attempts' => $practice->attempts,
+                    'last_practiced_at' => $practice->last_practiced_at?->toIso8601String(),
+                ])
+                ->all(),
+            // Feltoltesek (8.9): csak a metaadatok es az ertekeles pillanatkepe, a fajlok maguk nem.
+            'file_submissions' => $user->fileSubmissions()
+                ->with('exercise:id,title')
+                ->oldest('id')
+                ->get()
+                ->map(static fn (FileSubmission $submission): array => [
+                    'id' => $submission->id,
+                    'exercise' => ['id' => $submission->exercise_id, 'title' => $submission->exercise->title],
+                    'attempt' => $submission->attempt,
+                    'file_name' => $submission->original_name,
+                    'size' => $submission->size,
+                    'status' => $submission->status->apiValue(),
+                    'score' => $submission->score,
+                    'max_score' => $submission->max_score,
+                    'passed' => $submission->passed,
+                    'exam_attempt_id' => $submission->exam_attempt_id,
+                    'submitted_at' => $submission->created_at?->toIso8601String(),
+                    'result' => $submission->result,
+                ])
+                ->all(),
+            'exam_attempts' => $user->examAttempts()
+                ->with('exam:id,title,level')
+                ->oldest('id')
+                ->get()
+                ->map(static fn (ExamAttempt $attempt): array => [
+                    'id' => $attempt->id,
+                    'exam' => ['id' => $attempt->exam_id, 'title' => $attempt->exam->title, 'level' => $attempt->exam->level],
+                    'mode' => $attempt->mode->value,
+                    'state' => $attempt->state->value,
+                    'started_at' => $attempt->started_at->toIso8601String(),
+                    'submitted_at' => $attempt->submitted_at?->toIso8601String(),
+                    'score' => $attempt->score,
+                    'max_score' => $attempt->max_score,
+                    'parts' => $attempt->result ?? [],
                 ])
                 ->all(),
         ];

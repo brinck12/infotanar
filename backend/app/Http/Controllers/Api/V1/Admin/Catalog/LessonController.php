@@ -39,7 +39,7 @@ final class LessonController extends Controller
 
     public function show(Lesson $lesson): AdminLessonResource
     {
-        return AdminLessonResource::make($lesson->load(['exercises' => static fn (Relation $q) => $q->withCount(['testCases', 'submissions'])]));
+        return AdminLessonResource::make($lesson->load(['exercises' => static fn (Relation $q) => $q->withCount(['testCases', 'submissions', 'fileSubmissions'])]));
     }
 
     public function store(LessonRequest $request, #[CurrentUser] User $admin): JsonResponse

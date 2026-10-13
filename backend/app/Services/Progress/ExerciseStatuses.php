@@ -6,12 +6,11 @@ namespace App\Services\Progress;
 
 use App\Enums\ExerciseProgressStatus;
 use App\Models\User;
-use Illuminate\Support\Facades\DB;
 
 /**
  * Egy nezo feladatonkenti allapota (#146): megoldotta, probalta, vagy meg nem
- * nyult hozza. Egyetlen csoportositott lekerdezes a beadasokon, akarhany
- * feladatot listazunk; vendegnel lekerdezes sincs.
+ * nyult hozza. Egyetlen lekerdezes a kod- es a gyakorlo fajlbeadasokon
+ * (ExerciseAttempts), akarhany feladatot listazunk; vendegnel lekerdezes sincs.
  */
 final readonly class ExerciseStatuses
 {
@@ -27,18 +26,10 @@ final readonly class ExerciseStatuses
             return new self(false, []);
         }
 
-        $rows = DB::table('submissions')
-            ->where('user_id', $viewer->id)
-            ->groupBy('exercise_id')
-            ->selectRaw("exercise_id, MAX(CASE WHEN status = 'passed' THEN 1 ELSE 0 END) AS solved")
-            ->pluck('solved', 'exercise_id');
-
         $byExercise = [];
 
-        foreach ($rows as $exerciseId => $solved) {
-            $byExercise[(int) $exerciseId] = is_numeric($solved) && (int) $solved === 1
-                ? ExerciseProgressStatus::Solved
-                : ExerciseProgressStatus::Attempted;
+        foreach (ExerciseAttempts::outcomesFor($viewer) as $exerciseId => $solved) {
+            $byExercise[$exerciseId] = $solved ? ExerciseProgressStatus::Solved : ExerciseProgressStatus::Attempted;
         }
 
         return new self(true, $byExercise);

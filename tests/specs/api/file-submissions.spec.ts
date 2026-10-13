@@ -1,5 +1,6 @@
 import { adminAccount, verifiedStudent } from '../../src/api/areas/accounts'
 import { fileSubmission, fileSubmissions, saveManualMarks, SHEET_FIXTURES, uploadFileSubmission } from '../../src/api/areas/fileTasks'
+import { adminExercise } from '../../src/api/areas/typedTasks'
 import { zipBomb } from '../../src/api/areas/zip'
 import type { ApiClient } from '../../src/api/ApiClient'
 import { FIXTURE_FILES, registration, SEEDED, TEST_BACKEND } from '../../src/data'
@@ -146,6 +147,14 @@ test.describe('Fájlbeadás: ellenséges és LibreOffice-szerű fájlok', () => 
     expect(format?.state).toBe('ok')
   })
 
+  test('ertek nelkuli, formazott cellak sor vegi millios ismetlese (egesz sor/oszlop formazasa) nem fogy el a cellakeret: ugyanaz a pontszam', { tag: '@regression' }, async ({ apiClient }) => {
+    const result = await uploadFileSubmission(await student(apiClient), SHEET.id, fixtureFile(SHEET_FIXTURES.formattedColumnOds))
+
+    expect(result.status).toBe(201)
+    expect(result.body.data.status).not.toBe('failed')
+    expect(result.body.data.score).toBe(SHEET.expected.ok.score)
+  })
+
   for (const file of [SHEET_FIXTURES.manyEmptyXlsx, SHEET_FIXTURES.manyEmptyOds, SHEET_FIXTURES.manyRepeatedOds]) {
     test(`${file}: egyetlen sorban rengeteg üres cella: 201 és failed, nem összeomlás`, { tag: '@regression' }, async ({ apiClient }) => {
       const result = await uploadFileSubmission(await student(apiClient), SHEET.id, fixtureFile(file))
@@ -154,6 +163,18 @@ test.describe('Fájlbeadás: ellenséges és LibreOffice-szerű fájlok', () => 
       expect(result.body.data).toMatchObject({ status: 'failed', score: 0, error: 'A fájl sérült, vagy nem a kért formátumban van.' })
     })
   }
+})
+
+test.describe('Fájlbeadás: admin számláló', () => {
+  test('a feladat submission_count értéke a fájlbeadásokat is számolja', { tag: '@regression' }, async ({ apiClient }) => {
+    const admin = await adminAccount(apiClient)
+    const uploaded = await uploadFileSubmission(await student(apiClient), SHEET.id, fixtureFile(FIXTURE_FILES.sheetOk))
+    expect(uploaded.status).toBe(201)
+
+    const detail = await adminExercise(admin.client, SHEET.id)
+
+    expect(detail.body.data.submission_count).toBeGreaterThanOrEqual(1)
+  })
 })
 
 test.describe('Fájlbeadás: feltöltési ellenőrzés', () => {

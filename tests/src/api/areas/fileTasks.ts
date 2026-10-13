@@ -12,6 +12,7 @@ export const SHEET_FIXTURES = {
   fullOds: 'pw-tabla-teljes.ods',
   hungarianXlsx: 'pw-tabla-magyar.xlsx',
   stylesOds: 'pw-tabla-stilus.ods',
+  formattedColumnOds: 'pw-tabla-formazott-oszlop.ods',
   manyEmptyXlsx: 'pw-tabla-sok-ures.xlsx',
   manyEmptyOds: 'pw-tabla-sok-ures.ods',
   manyRepeatedOds: 'pw-tabla-sok-ismetelt.ods',

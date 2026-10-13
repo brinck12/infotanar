@@ -545,6 +545,21 @@ test.describe('Admin: csatolmányok', () => {
     expect(input.body.data).toMatchObject({ role: 'input', name: 'adatok.txt', test_case_id: testCase.body.data.id })
   })
 
+  test('a 2 bájtos szöveges bemeneti fájl is elfogadott, a bináris tartalom .txt névvel nem', { tag: '@regression' }, async ({ apiClient }) => {
+    const admin = await adminAccount(apiClient)
+    const exercise = await newExercise(admin.client)
+    const testCase = await createTestCase(admin.client, exercise.id, { stdin: '1\n', expected_stdout: '1\n', is_hidden: true })
+
+    // A finfo a "1\n" tartalmat application/octet-stream-nek latja.
+    const tiny = await uploadAttachment(admin.client, exercise.id, uploadOf('szam.txt', '1\n'), { role: 'input', test_case_id: testCase.body.data.id })
+    expect(tiny.status).toBe(201)
+    expect(tiny.body.data).toMatchObject({ name: 'szam.txt', size: 2 })
+
+    const binary = await uploadAttachment(admin.client, exercise.id, uploadOf('nul.txt', 'a\0b\n'), { role: 'source' })
+    expect(binary.status).toBe(422)
+    expect(binary.errorBody.errors).toHaveProperty('file')
+  })
+
   test('a szerep a fajtához kötött: mintamegoldás csak fájlfeladathoz, forrás-zip feladathoz soha', { tag: '@regression' }, async ({ apiClient }) => {
     const admin = await adminAccount(apiClient)
     const code = await newExercise(admin.client)

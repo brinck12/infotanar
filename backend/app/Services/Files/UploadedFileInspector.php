@@ -259,11 +259,35 @@ final readonly class UploadedFileInspector
             || str_starts_with($mime, 'application/vnd.oasis.opendocument.');
     }
 
-    /** Szoveg: a finfo szerint szoveges, es a fajl eleje nem tartalmaz NUL byte-ot. */
+    /**
+     * Szoveg: a finfo szerint szoveges, es a fajl eleje nem tartalmaz NUL byte-ot.
+     * Egy nagyon rovid szoveget (pl. "1\n") a finfo `application/octet-stream`-nek
+     * latja: azt akkor fogadjuk el, ha nincs benne NUL byte es ervenyes UTF-8.
+     * Ez csak a szoveges kiterjesztesekre hat, binaris kiterjesztesre nem.
+     */
     private function isText(string $head, string $mime): bool
     {
-        return (str_starts_with($mime, 'text/') || in_array($mime, self::TEXT_LIKE_MIME, true))
-            && ! str_contains($head, "\0");
+        if (str_contains($head, "\0")) {
+            return false;
+        }
+
+        if (str_starts_with($mime, 'text/') || in_array($mime, self::TEXT_LIKE_MIME, true)) {
+            return true;
+        }
+
+        return $mime === 'application/octet-stream' && self::isValidUtf8Prefix($head);
+    }
+
+    /** Ervenyes UTF-8-e a minta; a vegen elvagott tobbbyte-os karaktert eltureunk. */
+    private static function isValidUtf8Prefix(string $head): bool
+    {
+        for ($cut = 0; $cut <= 3 && $cut < strlen($head); $cut++) {
+            if (mb_check_encoding(substr($head, 0, strlen($head) - $cut), 'UTF-8')) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**

@@ -106,8 +106,10 @@ final class OdsSheetBuilder
         $visibility = $reader->getAttributeNs('visibility', OdfNs::TABLE);
         $cells = [];
         $column = 1;
+        // Ertek nelkuli, de formazott cellak ismetlodo futama: csak akkor epul ki es szamit, ha utana meg jon tartalom.
+        $pending = [];
 
-        Xml::eachChildElement($reader, function (XMLReader $cellReader) use (&$cells, &$column): void {
+        Xml::eachChildElement($reader, function (XMLReader $cellReader) use (&$cells, &$column, &$pending): void {
             if ($cellReader->namespaceURI !== OdfNs::TABLE || ! in_array($cellReader->localName, ['table-cell', 'covered-table-cell'], true)) {
                 return;
             }
@@ -122,6 +124,26 @@ final class OdsSheetBuilder
 
             $this->collectObjects($element);
             $cell = $isCell ? $this->cell($element, $column) : null;
+
+            if ($cell !== null && $count > 1 && $cell->type === CellType::Blank && $cell->formula === null) {
+                // A sor vegen levo, ertek nelkuli ismetlodes (egesz oszlop/sor formazasa) nem szamit; a futam elejet egy cellakent szamoljuk.
+                $this->budget->take();
+                $pending[] = [$column, $count, $cell];
+                $column += $count;
+
+                return;
+            }
+
+            // Tartalmas cella elott a fuggoben levo formazott futamok is beepulnek (es szamitanak).
+            foreach ($pending as [$start, $run, $blank]) {
+                $this->budget->take($run);
+
+                for ($offset = 0; $offset < $run && $start + $offset <= CellRange::MAX_COLUMN; $offset++) {
+                    $cells[$start + $offset] = $blank;
+                }
+            }
+
+            $pending = [];
 
             // Minden cella szamit, mielott epulne belole; az ures, ismetlodo cella egynek.
             $this->budget->take($cell === null ? 1 : $count);
