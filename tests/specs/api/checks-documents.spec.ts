@@ -284,6 +284,40 @@ for (const [format, extra] of [
   })
 }
 
+/** A BACKEND.md 4.4.3 dokumentumcsaladjanak property-i: mindegyikhez kell pozitiv es negativ eset. */
+const DOCUMENT_PROPERTIES: Record<string, readonly string[]> = {
+  page_setup: ['page_size', 'orientation', 'margin_top', 'margin_bottom', 'margin_left', 'margin_right'],
+  character_format: ['font', 'font_size', 'bold', 'italic', 'underline', 'small_caps', 'superscript', 'subscript', 'color'],
+  paragraph_format: ['alignment', 'space_before', 'space_after', 'line_spacing', 'indent_left', 'indent_first', 'hyphenation', 'page_break_before'],
+  style: ['exists', 'applied'],
+  document_table: ['rows', 'columns', 'border', 'width', 'height', 'shading', 'alignment'],
+  image: ['width', 'height', 'aspect_ratio', 'wrap', 'alt_text', 'count'],
+  section: ['columns', 'break_before', 'page_orientation'],
+  tab_stop: ['position', 'type', 'leader'],
+  list_format: ['type', 'level', 'symbol'],
+}
+
+test.describe('Dokumentum-vizsgálatok: lefedettség', () => {
+  for (const [format, extra] of [
+    ['docx', DOCX_ONLY],
+    ['odt', ODT_ONLY],
+  ] as const) {
+    test(`@regression a 4.4.3 minden dokumentum-tulajdonságához van pozitiv es negativ eset (${format})`, () => {
+      const cases = [...COMMON, ...extra]
+      const missing = Object.entries(DOCUMENT_PROPERTIES).flatMap(([type, properties]) =>
+        properties.flatMap((property) =>
+          (['ok', 'bad'] as const).flatMap((state) =>
+            cases.some(([caseType, caseProperty, , caseState]) => caseType === type && caseProperty.replace(/\[.*$/, '') === property && caseState === state)
+              ? []
+              : [`${type}.${property}: nincs ${state} eset`]
+          )
+        )
+      )
+      expect(missing).toEqual([])
+    })
+  }
+})
+
 test.describe('Dokumentum-vizsgálatok: Letter lap', () => {
   for (const format of ['docx', 'odt'] as const) {
     test(`@regression a Letter lap nem A4 (${format})`, () => {

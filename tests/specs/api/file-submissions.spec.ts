@@ -1,5 +1,6 @@
 import { adminAccount, verifiedStudent } from '../../src/api/areas/accounts'
 import { fileSubmission, fileSubmissions, saveManualMarks, SHEET_FIXTURES, uploadFileSubmission } from '../../src/api/areas/fileTasks'
+import { progress, taskStatus } from '../../src/api/areas/progress'
 import { adminExercise } from '../../src/api/areas/typedTasks'
 import { zipBomb } from '../../src/api/areas/zip'
 import type { ApiClient } from '../../src/api/ApiClient'
@@ -253,6 +254,24 @@ test.describe('Fájlbeadás: kézi pontok', () => {
     const unmarked = await saveManualMarks(client, id, { [String(SHEET.manualItemId)]: false })
     expect(unmarked.body.data.score).toBe(SHEET.expected.ok.score)
     expect(unmarked.body.data.items.find((row) => row.rubric_item_id === SHEET.manualItemId)).toMatchObject({ manual_mark: false, points: 0 })
+  })
+
+  test('manual mark on the manual item gives score 10 and completes the lesson', { tag: '@regression' }, async ({ apiClient }) => {
+    const client = await student(apiClient)
+    const lessonStatus = async (): Promise<string | undefined> =>
+      (await progress(client)).body.data.tracks.flatMap((track) => track.lessons).find((lesson) => lesson.id === SHEET.lessonId)?.status
+
+    const created = await uploadFileSubmission(client, SHEET.id, fixtureFile(FIXTURE_FILES.sheetOk))
+    expect(created.status).toBe(201)
+    expect(created.body.data.score).toBe(SHEET.expected.ok.score)
+
+    const marked = await saveManualMarks(client, created.body.data.id, { [String(SHEET.manualItemId)]: true })
+
+    expect(marked.status).toBe(200)
+    expect(marked.body.data.score).toBe(10)
+    expect(marked.body.data.max_score).toBe(10)
+    expect((await taskStatus(client, SHEET.id)).body.data.my_status).toBe('solved')
+    expect(await lessonStatus()).toBe('completed')
   })
 
   test('nem kézi tétel jelölése 422 a marks mezőn', { tag: '@regression' }, async ({ apiClient }) => {

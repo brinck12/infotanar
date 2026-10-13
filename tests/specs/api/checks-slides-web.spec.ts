@@ -3,7 +3,7 @@ import type { ApiClient } from '../../src/api/ApiClient'
 import { adminAccount } from '../../src/api/areas/accounts'
 import { createExercise, deleteExercise } from '../../src/api/areas/typedTasks'
 import { SEEDED } from '../../src/data'
-import { fixtureFile } from '../../src/data/files'
+import { fixtureFile, uploadOf } from '../../src/data/files'
 import { expect, test } from '../../src/fixtures'
 import { evaluateWithCli, type CliResult } from '../../src/support/filetasksCli'
 
@@ -224,6 +224,58 @@ test.describe('Bemutató-, vektor- és képvizsgálatok (rubric-check)', () => {
     const result = await runCases(admin, 'slides-web/pw-kep-80x40.png', PNG_CASES)
     expectStates(result, PNG_CASES)
     expect(result.items.length).toBeGreaterThan(0)
+  })
+
+  test('html és css fájlt a végpont nem fogad el (a feladatfajták kiterjesztés-listáján nincs): 422 a file mezőn', { tag: '@regression' }, async ({ apiClient }) => {
+    const { client: admin } = await adminAccount(apiClient)
+    const exercise = await createVisualExercise(admin)
+
+    try {
+      for (const file of ['slides-web/pw-oldal.html', 'slides-web/pw-torzs.html', 'slides-web/pw-stilus.css']) {
+        const check = await admin.postMultipart<{ errors?: Record<string, string[]> }>(`admin/exercises/${String(exercise)}/rubric-check`, {}, fixtureFile(file))
+        expect(check.status, file).toBe(422)
+        expect(Object.keys(check.body.errors ?? {}), file).toContain('file')
+      }
+    } finally {
+      await deleteExercise(admin, exercise)
+    }
+  })
+
+  test('hostile svg a végponton át: pontosvesszős <style> lineáris idő alatt feldolgozódik', { tag: '@regression' }, async ({ apiClient }) => {
+    const { client: admin } = await adminAccount(apiClient)
+    const exercise = await createVisualExercise(admin)
+
+    try {
+      await addItems(admin, exercise, [c('shape', 'count', '1', true)])
+      const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10"><style>${';'.repeat(200_000)}</style><rect width="1" height="1"/></svg>`
+      const started = Date.now()
+      const check = await admin.postMultipart<Envelope<RubricResult>>(`admin/exercises/${String(exercise)}/rubric-check`, {}, uploadOf('pontosvesszo.svg', svg))
+
+      expect(check.status).toBe(200)
+      expect(check.body.data.status).toBe('evaluated')
+      expect(check.body.data.items[0]?.state).toBe('ok')
+      expect(Date.now() - started).toBeLessThan(HOSTILE_BUDGET_MS)
+    } finally {
+      await deleteExercise(admin, exercise)
+    }
+  })
+
+  test('hostile svg a végponton át: sok stílusszabály olvashatatlan (failed), nem 500', { tag: '@regression' }, async ({ apiClient }) => {
+    const { client: admin } = await adminAccount(apiClient)
+    const exercise = await createVisualExercise(admin)
+
+    try {
+      await addItems(admin, exercise, [c('shape', 'count', '1', true)])
+      const rules = Array.from({ length: 2_500 }, (_, index) => `.c${String(index)}{fill:red}`).join('')
+      const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10"><style>${rules}</style><rect class="c1" width="1" height="1"/></svg>`
+      const check = await admin.postMultipart<Envelope<RubricResult>>(`admin/exercises/${String(exercise)}/rubric-check`, {}, uploadOf('szabalyok.svg', svg))
+
+      expect(check.status).toBe(200)
+      expect(check.body.data.status).toBe('failed')
+      expect(check.body.data.error).not.toBeNull()
+    } finally {
+      await deleteExercise(admin, exercise)
+    }
   })
 
   test('nem támogatott tulajdonság szerkesztéskor 422 a property mezőn', { tag: '@regression' }, async ({ apiClient }) => {
