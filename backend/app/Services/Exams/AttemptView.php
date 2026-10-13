@@ -8,7 +8,6 @@ use App\Models\ExamAttempt;
 use App\Models\FileSubmission;
 use App\Models\Submission;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
-use Illuminate\Support\Carbon;
 
 /**
  * Egy vagy tobb probalkozas allapota a reszek szerint: melyik reszhez van
@@ -58,9 +57,9 @@ final readonly class AttemptView
                 $submission = $code[$attempt->id][$part->id] ?? null;
 
                 if ($upload !== null) {
-                    $parts[] = new PartProgress($part->id, $part->order(), $upload->original_name, $upload->created_at);
+                    $parts[] = new PartProgress($part->id, $part->order(), $upload->original_name, $upload->created_at ?? $attempt->started_at);
                 } elseif ($submission !== null) {
-                    $parts[] = new PartProgress($part->id, $part->order(), $this->editorFileName($submission), $submission->created_at);
+                    $parts[] = new PartProgress($part->id, $part->order(), $this->editorFileName($submission), $submission->created_at ?? $attempt->started_at);
                 }
             }
 
@@ -119,6 +118,7 @@ final readonly class AttemptView
                 $found = $this->scorer->bestOf($submissions->filter(
                     static fn (Submission $submission): bool => $submission->user_id === $attempt->user_id
                         && $submission->exercise_id === $part->exercise_id
+                        && $submission->created_at !== null
                         && $submission->created_at->greaterThanOrEqualTo($attempt->started_at)
                         && $submission->created_at->lessThanOrEqualTo($end),
                 ));

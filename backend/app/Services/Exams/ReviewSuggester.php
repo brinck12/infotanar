@@ -39,7 +39,11 @@ final class ReviewSuggester
             }
 
             $lesson = $part->exercise->lesson;
-            $track = $lesson->module->track;
+            $track = $lesson->module?->track;
+
+            if ($track === null) {
+                continue;
+            }
 
             $earlier = Lesson::query()
                 ->published()

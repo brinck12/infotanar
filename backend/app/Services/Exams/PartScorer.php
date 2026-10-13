@@ -187,7 +187,7 @@ final class PartScorer
         if ($subtasks !== []) {
             $definitions = SubtaskDefinition::listFrom($spec);
 
-            foreach (array_values($subtasks) as $index => $subtask) {
+            foreach ($subtasks as $index => $subtask) {
                 if ($subtask['passed']) {
                     continue;
                 }
@@ -204,6 +204,10 @@ final class PartScorer
         // Reszfeladat nelkul csak darabszamot mondunk: a tesztesetek tartalma (a rejtetteke) nem szivároghat ki.
         $failed = $rawMax - $raw;
 
-        return $failed > 0 ? __('exams.summary.tests_failed', ['failed' => $failed, 'total' => $rawMax]) : null;
+        if ($failed <= 0) {
+            return null;
+        }
+
+        return __('exams.summary.tests_failed', ['failed' => $failed, 'total' => $rawMax]);
     }
 }

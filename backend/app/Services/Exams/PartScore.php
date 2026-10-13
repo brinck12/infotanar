@@ -28,6 +28,29 @@ final readonly class PartScore
     ) {}
 
     /**
+     * A tarolt `result` egy elemebol (a fuggo kezi pont nem tarolodik, ujraszamolaskor a fajlbol jon).
+     *
+     * @param  array<string, mixed>  $row
+     */
+    public static function fromArray(array $row): self
+    {
+        $int = static fn (mixed $value): int => is_numeric($value) ? (int) $value : 0;
+        $nullableInt = static fn (mixed $value): ?int => is_numeric($value) ? (int) $value : null;
+
+        return new self(
+            $int($row['part_id'] ?? 0),
+            $int($row['order'] ?? 0),
+            $int($row['score'] ?? 0),
+            $int($row['max_score'] ?? 0),
+            $int($row['raw_score'] ?? 0),
+            $int($row['raw_max'] ?? 0),
+            is_string($row['summary'] ?? null) ? $row['summary'] : null,
+            $nullableInt($row['file_submission_id'] ?? null),
+            $nullableInt($row['submission_id'] ?? null),
+        );
+    }
+
+    /**
      * @return array{part_id: int, order: int, score: int, max_score: int, raw_score: int, raw_max: int, summary: string|null, file_submission_id: int|null, submission_id: int|null}
      */
     public function toArray(): array
