@@ -414,9 +414,11 @@ function odsPackage(body: string, automaticStyles: string, namedStyles: string, 
  * content.xml-ben nincs automatikus stilus: igy menti a LibreOffice a nevesitett stilusokat.
  * Vart pontszam: ugyanaz, mint a pw-tabla.ods-e (9).
  */
-function odsStylesInStylesXml(): Buffer {
+function odsStylesInStylesXml(wholeFormatting = false): Buffer {
   const number = (value: number, attributes = ''): string =>
     `<table:table-cell${attributes} office:value-type="float" office:value="${String(value)}"><text:p>${String(value)}</text:p></table:table-cell>`
+  // A LibreOffice egesz oszlop/sor formazasakor a sor vegen ertek nelkuli, formazott cellak millios ismetlesevel er veget.
+  const trailing = wholeFormatting ? '<table:table-cell table:style-name="Szamok" table:number-columns-repeated="1000000"/>' : ''
   const rows = [10, 8, 12, 7, 5].map((value, index) => {
     const row = index + 1
     const extra =
@@ -427,13 +429,15 @@ function odsStylesInStylesXml(): Buffer {
           : row === 3
             ? number(42, ' table:formula="of:=SUM([.A1:.A5])"')
             : ''
-    return `<table:table-row>${number(value)}${extra}</table:table-row>`
+    return `<table:table-row>${number(value)}${extra}${trailing}</table:table-row>`
   })
   const dataStyles =
     '<number:number-style style:name="N2"><number:number number:decimal-places="2" number:min-decimal-places="2" number:min-integer-digits="1"/></number:number-style>'
   const namedStyles =
     '<style:style style:name="Default" style:family="table-cell"/><style:style style:name="Szamok" style:family="table-cell" style:parent-style-name="Default" style:data-style-name="N2"/>'
-  return odsPackage(`<table:table table:name="Munka1"><table:table-column table:number-columns-repeated="2"/>${rows.join('')}</table:table>`, '', namedStyles, dataStyles)
+  // Egesz sor formazasa: a vegtelen ures sor is milliomszor ismetlodik.
+  const wholeRows = wholeFormatting ? `<table:table-row table:number-rows-repeated="1000000">${trailing}</table:table-row>` : ''
+  return odsPackage(`<table:table table:name="Munka1"><table:table-column table:number-columns-repeated="2"/>${rows.join('')}${wholeRows}</table:table>`, '', namedStyles, dataStyles)
 }
 
 const FILES: Record<string, Buffer> = {
@@ -444,6 +448,7 @@ const FILES: Record<string, Buffer> = {
   'pw-tabla-sok-ures.ods': manyEmptyCellsOds(),
   'pw-tabla-sok-ismetelt.ods': manyRepeatedCellsOds(),
   'pw-tabla-stilus.ods': odsStylesInStylesXml(),
+  'pw-tabla-formazott-oszlop.ods': odsStylesInStylesXml(true),
 }
 
 const directory = join(__dirname, '..')

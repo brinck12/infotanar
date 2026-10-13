@@ -147,6 +147,14 @@ test.describe('Fájlbeadás: ellenséges és LibreOffice-szerű fájlok', () => 
     expect(format?.state).toBe('ok')
   })
 
+  test('ertek nelkuli, formazott cellak sor vegi millios ismetlese (egesz sor/oszlop formazasa) nem fogy el a cellakeret: ugyanaz a pontszam', { tag: '@regression' }, async ({ apiClient }) => {
+    const result = await uploadFileSubmission(await student(apiClient), SHEET.id, fixtureFile(SHEET_FIXTURES.formattedColumnOds))
+
+    expect(result.status).toBe(201)
+    expect(result.body.data.status).not.toBe('failed')
+    expect(result.body.data.score).toBe(SHEET.expected.ok.score)
+  })
+
   for (const file of [SHEET_FIXTURES.manyEmptyXlsx, SHEET_FIXTURES.manyEmptyOds, SHEET_FIXTURES.manyRepeatedOds]) {
     test(`${file}: egyetlen sorban rengeteg üres cella: 201 és failed, nem összeomlás`, { tag: '@regression' }, async ({ apiClient }) => {
       const result = await uploadFileSubmission(await student(apiClient), SHEET.id, fixtureFile(file))
