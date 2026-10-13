@@ -6,7 +6,6 @@ namespace App\Services\Progress;
 
 use App\Enums\LessonProgressStatus;
 use App\Models\LessonCompletion;
-use App\Models\Submission;
 use App\Models\User;
 
 /**
@@ -29,11 +28,7 @@ final readonly class LessonStatuses
     {
         $completed = LessonCompletion::query()->where('user_id', $user->id)->pluck('lesson_id');
 
-        $attempted = Submission::query()
-            ->join('exercises', 'exercises.id', '=', 'submissions.exercise_id')
-            ->where('submissions.user_id', $user->id)
-            ->distinct()
-            ->pluck('exercises.lesson_id');
+        $attempted = ExerciseAttempts::attemptedLessonsOf($user);
 
         return new self(self::idSet($completed->all()), self::idSet($attempted->all()));
     }

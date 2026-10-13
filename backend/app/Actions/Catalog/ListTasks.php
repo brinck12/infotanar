@@ -8,10 +8,9 @@ use App\Enums\ExerciseProgressStatus;
 use App\Models\Exercise;
 use App\Models\User;
 use App\Services\Catalog\TaskFilters;
-use Closure;
+use App\Services\Progress\ExerciseAttempts;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Database\Query\Builder as QueryBuilder;
 
 /**
  * A publikalt feladatok szurt listaja, nehezseg szerint. Az allapot szerinti
@@ -49,16 +48,17 @@ final class ListTasks
     /** @param Builder<Exercise> $query */
     private function whereStatus(Builder $query, string $status, int $viewerId): void
     {
-        $submissions = static fn (bool $onlyPassed): Closure => static fn (QueryBuilder $submissions) => $submissions
-            ->from('submissions')
-            ->whereColumn('submissions.exercise_id', 'exercises.id')
-            ->where('submissions.user_id', $viewerId)
-            ->when($onlyPassed, static fn (QueryBuilder $passed) => $passed->where('submissions.status', 'passed'));
-
         match ($status) {
-            ExerciseProgressStatus::Solved->value => $query->whereExists($submissions(true)),
-            ExerciseProgressStatus::Attempted->value => $query->whereExists($submissions(false))->whereNotExists($submissions(true)),
-            default => $query->whereNotExists($submissions(true)),
+            ExerciseProgressStatus::Solved->value => ExerciseAttempts::existsClause($query, $viewerId, onlyPassed: true),
+            ExerciseProgressStatus::Attempted->value => $this->attemptedNotSolved($query, $viewerId),
+            default => ExerciseAttempts::existsClause($query, $viewerId, onlyPassed: true, negate: true),
         };
+    }
+
+    /** @param Builder<Exercise> $query */
+    private function attemptedNotSolved(Builder $query, int $viewerId): void
+    {
+        ExerciseAttempts::existsClause($query, $viewerId, onlyPassed: false);
+        ExerciseAttempts::existsClause($query, $viewerId, onlyPassed: true, negate: true);
     }
 }
