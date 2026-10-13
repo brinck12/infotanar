@@ -27,6 +27,9 @@ const judge0Mock: WebServer = {
   env: { JUDGE0_MOCK_PORT: String(env.JUDGE0_MOCK_PORT) },
 }
 
+/** A teszt-backend APP_KEY-e: csak a helyi, eldobhato backendhez tartozik, nem titok. */
+export const TEST_APP_KEY = 'base64:IuoO2O2E2ePTfNKZ3XNlVF5ZfvMJM5zld0sDIFlKhQ8='
+
 /** Alapbol eldobhato sqlite fajl; API_DATABASE_URL megadasakor az eles motorral egyezo MySQL. */
 const backendDatabase: Record<string, string> = env.API_DATABASE_URL
   ? { DB_CONNECTION: 'mysql', DB_URL: env.API_DATABASE_URL }
@@ -53,8 +56,7 @@ const backend: WebServer = {
   timeout: 60_000,
   env: {
     APP_ENV: 'testing',
-    // Csak a helyi, eldobhato teszt-backendhez; nem titok.
-    APP_KEY: 'base64:IuoO2O2E2ePTfNKZ3XNlVF5ZfvMJM5zld0sDIFlKhQ8=',
+    APP_KEY: TEST_APP_KEY,
     APP_DEBUG: 'true',
     ...backendDatabase,
     SESSION_DRIVER: 'array',

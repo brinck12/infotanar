@@ -8,14 +8,9 @@
  */
 import { createHmac } from 'node:crypto'
 import { env } from '../../../config/env'
+import { TEST_APP_KEY } from '../../../config/web-servers'
 import type { ApiClient, ApiResult, BinaryResult, UploadFile } from '../ApiClient'
 import type { AdminAttachment, AttachmentRole, DataEnvelope } from '../types'
-
-/**
- * A teszt-backend APP_KEY-e (config/web-servers.ts): csak a helyi, eldobhato
- * backendhez tartozik, nem titok. A `studentDownloadUrl` ezzel ir ala.
- */
-const TEST_APP_KEY = 'base64:IuoO2O2E2ePTfNKZ3XNlVF5ZfvMJM5zld0sDIFlKhQ8='
 
 /** A feltoltes szoveges mezoi; a szerep barmilyen szoveg lehet, hogy a validacio is tesztelheto legyen. */
 export interface AttachmentFields {
