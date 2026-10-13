@@ -18,7 +18,7 @@ import {
   uploadPartFile,
 } from '../../src/api/areas/exams'
 import { fileSubmission, saveManualMarks } from '../../src/api/areas/fileTasks'
-import { tinkerJson } from '../../src/support/artisan'
+import { artisan, tinkerJson } from '../../src/support/artisan'
 import { createExercise, createTestCase, deleteExercise } from '../../src/api/areas/typedTasks'
 import type { ApiClient } from '../../src/api/ApiClient'
 import { deleteAttachment } from '../../src/api/areas/attachments'
@@ -447,13 +447,40 @@ test.describe('Vizsgák: feltöltés, beadás, eredmény', () => {
   })
 })
 
+const JOB = ['App', 'Jobs', 'CloseExpiredExamAttempts'].join('\\')
+const CACHE = ['Illuminate', 'Support', 'Facades', 'Cache'].join('\\')
+const DB = ['Illuminate', 'Support', 'Facades', 'DB'].join('\\')
+const ATTEMPT = ['App', 'Models', 'ExamAttempt'].join('\\')
+
+function holdGates(): void {
+  tinkerJson(`foreach ([0, 1, 2, 3] as $i) { ${CACHE}::lock('filetasks.eval.' . $i, 120)->get(); } return true;`)
+}
+
+function releaseGates(): void {
+  tinkerJson(`foreach ([0, 1, 2, 3] as $i) { ${CACHE}::lock('filetasks.eval.' . $i)->forceRelease(); } return true;`)
+}
+
+/** A job `times`-szor lefut; a feladott probalkozasok azonositoit adja vissza. */
+function runJob(times: number): number[] {
+  return tinkerJson(`for ($i = 0; $i < ${String(times)}; $i++) { app()->call([new ${JOB}, 'handle']); } return ${JOB}::gaveUp();`) as number[]
+}
+
+function backdateAndRunJob(attemptId: number, times: number): number[] {
+  tinkerJson(`${ATTEMPT}::query()->whereKey(${String(attemptId)})->update(['submitted_at' => now()->subMinutes(2)]); return true;`)
+  return runJob(times)
+}
+
+function gaveUpIds(): number[] {
+  return tinkerJson(`return ${JOB}::gaveUp();`) as number[]
+}
+
 test.describe('Vizsgák: ertekelés foglalt értékelő mellett', () => {
   test('ha minden értékelő hely foglalt, a beadás után az eredmény 409, és a job kész eredményt hoz', { tag: '@regression' }, async ({ apiClient }) => {
     const { student } = await actors(apiClient)
     const created = await start(student, MAIN.id)
     await uploadOk(student, created.id)
 
-    tinkerJson("foreach ([0, 1, 2, 3] as $i) { Illuminate\\Support\\Facades\\Cache::lock('filetasks.eval.' . $i, 120)->get(); } return true;")
+    tinkerJson(`foreach ([0, 1, 2, 3] as $i) { ${CACHE}::lock('filetasks.eval.' . $i, 120)->get(); } return true;`)
     try {
       const submitted = await submitAttempt(student, created.id)
       expect(submitted.status).toBe(200)
@@ -463,7 +490,7 @@ test.describe('Vizsgák: ertekelés foglalt értékelő mellett', () => {
       // A masodik beadas nem ertekel ujra, es nem valtoztat.
       expect((await submitAttempt(student, created.id)).body.data.state).toBe('submitted')
     } finally {
-      tinkerJson("foreach ([0, 1, 2, 3] as $i) { Illuminate\\Support\\Facades\\Cache::lock('filetasks.eval.' . $i)->forceRelease(); } return true;")
+      tinkerJson(`foreach ([0, 1, 2, 3] as $i) { ${CACHE}::lock('filetasks.eval.' . $i)->forceRelease(); } return true;`)
     }
 
     tinkerJson(`App\\Models\\ExamAttempt::query()->whereKey(${String(created.id)})->update(['submitted_at' => now()->subMinutes(2)]); app()->call([new App\\Jobs\\CloseExpiredExamAttempts, 'handle']); return true;`)
@@ -472,16 +499,56 @@ test.describe('Vizsgák: ertekelés foglalt értékelő mellett', () => {
     expect((await attemptResult(student, created.id)).body.data).toMatchObject({ score: SHEET.expected.ok.score })
   })
 
+  test('a foglalt értékelő nem számít a job újrapróbálási korlátjába', { tag: '@regression' }, async ({ apiClient }) => {
+    const { student } = await actors(apiClient)
+    const created = await start(student, MAIN.id)
+    await uploadOk(student, created.id)
+
+    holdGates()
+    try {
+      await submitAttempt(student, created.id)
+      const gaveUp = backdateAndRunJob(created.id, 7)
+      expect(gaveUp).not.toContain(created.id)
+    } finally {
+      releaseGates()
+    }
+
+    runJob(1)
+    expect((await getAttempt(student, created.id)).body.data.state).toBe('evaluated')
+  })
+
+  test('az ismételten hibázó értékelés a korlátnál feladódik, és kézzel (exams:evaluate) pótolható', { tag: '@regression' }, async ({ apiClient }) => {
+    const { student } = await actors(apiClient)
+    const created = await start(student, MAIN.id)
+    await uploadOk(student, created.id)
+
+    tinkerJson(`${DB}::unprepared('CREATE TRIGGER pw_fail_eval BEFORE UPDATE OF state ON exam_attempts WHEN NEW.state = char(101,118,97,108,117,97,116,101,100) BEGIN SELECT abs(-9223372036854775807 - 1); END'); return true;`)
+    try {
+      expect((await submitAttempt(student, created.id)).body.data.state).toBe('submitted')
+      expect(backdateAndRunJob(created.id, 5)).toContain(created.id)
+    } finally {
+      tinkerJson(`${DB}::unprepared('DROP TRIGGER IF EXISTS pw_fail_eval'); return true;`)
+    }
+
+    // A hiba megszűnt, de a feladott próbálkozást a job már nem veszi fel.
+    runJob(1)
+    expect((await getAttempt(student, created.id)).body.data.state).toBe('submitted')
+
+    expect(artisan(['exams:evaluate', String(created.id)])).toContain('Kiértékelve')
+    expect((await getAttempt(student, created.id)).body.data.state).toBe('evaluated')
+    expect(gaveUpIds()).not.toContain(created.id)
+  })
+
   test('fájl nélküli (csak szerkesztős) beadás nem foglal értékelő helyet', { tag: '@regression' }, async ({ apiClient }) => {
     const { student } = await actors(apiClient)
     const created = await start(student, MAIN.id)
     await submitPartialCode(student)
 
-    tinkerJson("foreach ([0, 1, 2, 3] as $i) { Illuminate\\Support\\Facades\\Cache::lock('filetasks.eval.' . $i, 120)->get(); } return true;")
+    tinkerJson(`foreach ([0, 1, 2, 3] as $i) { ${CACHE}::lock('filetasks.eval.' . $i, 120)->get(); } return true;`)
     try {
       expect((await submitAttempt(student, created.id)).body.data.state).toBe('evaluated')
     } finally {
-      tinkerJson("foreach ([0, 1, 2, 3] as $i) { Illuminate\\Support\\Facades\\Cache::lock('filetasks.eval.' . $i)->forceRelease(); } return true;")
+      tinkerJson(`foreach ([0, 1, 2, 3] as $i) { ${CACHE}::lock('filetasks.eval.' . $i)->forceRelease(); } return true;`)
     }
   })
 })
