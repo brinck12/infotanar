@@ -22,10 +22,12 @@ return [
     ],
 
     'parts_locked' => 'Közzétett vizsgához nem adható új rész. Előbb vond vissza a közzétételt.',
+    'parts_locked_remove' => 'Közzétett vizsgából nem törölhető rész. Előbb vond vissza a közzétételt.',
     'part_exercise_kind' => 'Ehhez a részhez csak szerkesztős vagy fájlfeltöltős feladat választható.',
     'attachment_role' => 'A vizsgához csak a forrásfájlok zipje csatolható.',
 
     'summary' => [
+        'unreadable' => 'A feltöltött fájlt nem sikerült feldolgozni.',
         'no_file' => 'Ebben a részben nem adtál be fájlt.',
         'no_solution' => 'Nem adtál be megoldást ebben a részben.',
         'lost_group' => 'A legtöbb pont itt veszett el: :group (:lost pont).',

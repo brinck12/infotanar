@@ -75,6 +75,10 @@ final readonly class ManageExamPart
                 throw CatalogItemInUse::hasStudentData();
             }
 
+            if ($exam->is_published) {
+                throw PublishedExamLocked::forRemoval();
+            }
+
             $this->audit->handle(AuditAction::CatalogDeleted, $actor, $part, ['attributes' => $part->attributesToArray()]);
             $part->delete();
             $this->order->compact($this->siblings($exam));

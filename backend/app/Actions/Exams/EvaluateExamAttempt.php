@@ -29,6 +29,10 @@ use Illuminate\Support\Facades\DB;
  */
 final readonly class EvaluateExamAttempt
 {
+    private const BUSY_TRIES = 4;
+
+    private const BUSY_WAIT_MICROSECONDS = 250_000;
+
     public function __construct(
         private PartScorer $scorer,
         private AttemptView $view,
@@ -48,7 +52,10 @@ final readonly class EvaluateExamAttempt
 
         $attempt->load(['exam.parts.exercise.rubricItems']);
 
-        $scores = $this->gate->run(fn (): array => $this->scoreParts($attempt));
+        // Fajl nelkuli (csak szerkesztos) vizsga nem foglal ertekelo helyet: nincs mit olvasni.
+        $scores = $attempt->fileSubmissions()->exists()
+            ? $this->inGate(fn (): array => $this->scoreParts($attempt))
+            : $this->scoreParts($attempt);
 
         return DB::transaction(function () use ($attempt, $scores): ExamAttempt {
             $locked = ExamAttempt::query()->lockForUpdate()->findOrFail($attempt->id);
@@ -64,6 +71,29 @@ final readonly class EvaluateExamAttempt
 
             return $locked;
         });
+    }
+
+    /**
+     * Egy ertekelo helyen fut; ha mind foglalt, par rovid ujraprobalkozas utan adja fel (a job folytatja).
+     *
+     * @param  callable(): list<PartScore>  $work
+     * @return list<PartScore>
+     *
+     * @throws EvaluatorBusy
+     */
+    private function inGate(callable $work): array
+    {
+        for ($try = 1; ; $try++) {
+            try {
+                return $this->gate->run($work(...));
+            } catch (EvaluatorBusy $busy) {
+                if ($try >= self::BUSY_TRIES) {
+                    throw $busy;
+                }
+
+                usleep(self::BUSY_WAIT_MICROSECONDS);
+            }
+        }
     }
 
     /** @return list<PartScore> */

@@ -14,6 +14,7 @@ use Carbon\CarbonImmutable;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Config;
 use Throwable;
 
@@ -32,7 +33,10 @@ final class CloseExpiredExamAttempts implements ShouldBeUnique, ShouldQueue
     use AlertsOperatorOnFailure, Queueable;
 
     /** A beadott, de ertekeletlen probalkozast ennyi ideig hagyjuk, mielott a job ujraprobalja (a kerest ne zavarjuk). */
-    private const STUCK_AFTER_MINUTES = 2;
+    private const STUCK_AFTER_SECONDS = 30;
+
+    /** Ennyiszer probaljuk ujra egy elakadt ertekelest; utana jelezzuk, es hagyjuk. */
+    private const MAX_RETRIES = 5;
 
     public function handle(SubmitExamAttempt $submit, EvaluateExamAttempt $evaluate): void
     {
@@ -54,12 +58,21 @@ final class CloseExpiredExamAttempts implements ShouldBeUnique, ShouldQueue
 
         $stuck = ExamAttempt::query()
             ->where('state', ExamAttemptState::Submitted)
-            ->where('submitted_at', '<', $now->subMinutes(self::STUCK_AFTER_MINUTES))
+            ->where('submitted_at', '<', $now->subSeconds(self::STUCK_AFTER_SECONDS))
             ->orderBy('id')
             ->limit($batch)
             ->get();
 
         foreach ($stuck as $attempt) {
+            $key = 'exams.evaluate_retries.'.$attempt->id;
+            $retries = Cache::get($key);
+            $retries = is_int($retries) ? $retries : 0;
+
+            if ($retries >= self::MAX_RETRIES) {
+                continue;
+            }
+
+            Cache::put($key, $retries + 1, now()->addDay());
             $this->guard(static fn (): ExamAttempt => $evaluate->handle($attempt));
         }
     }

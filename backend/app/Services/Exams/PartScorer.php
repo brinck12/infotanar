@@ -43,7 +43,7 @@ final class PartScorer
 
         if ($row->status !== FileSubmissionStatus::Evaluated) {
             // Feldolgozhatatlan (vagy meg nem ertekelt) fajl: nulla pont, az ok a diaknak szolo magyar szoveg.
-            return new PartScore($partId, $order, 0, $points, 0, $points, $row->error ?? __('filetasks.unreadable'), $row->id, null);
+            return new PartScore($partId, $order, 0, $points, 0, $points, __('exams.summary.unreadable'), $row->id, null);
         }
 
         // Ures ertekelolap (0 pont osszesen): a resz pontja a nevezo, a nyers pont ugyis 0.

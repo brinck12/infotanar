@@ -29,21 +29,24 @@ final readonly class SubmitExamAttempt
 
     public function handle(ExamAttempt $attempt): ExamAttempt
     {
-        $current = DB::transaction(function () use ($attempt): ExamAttempt {
+        // Csak az a hivo ertekel, amelyik az allapotot nyitottrol beadottra valtotta: a masodik lap vagy
+        // a parhuzamos lekeres nem ertekel ujra (az elakadtat a job viszi tovabb).
+        [$current, $claimed] = DB::transaction(function () use ($attempt): array {
             $locked = ExamAttempt::query()->lockForUpdate()->findOrFail($attempt->id);
 
-            if ($locked->state === ExamAttemptState::InProgress) {
-                $locked->state = ExamAttemptState::Submitted;
-                $locked->submitted_at = CarbonImmutable::now();
-                $locked->in_progress_marker = null;
-                $locked->save();
+            if ($locked->state !== ExamAttemptState::InProgress) {
+                return [$locked, false];
             }
 
-            return $locked;
+            $locked->state = ExamAttemptState::Submitted;
+            $locked->submitted_at = CarbonImmutable::now();
+            $locked->in_progress_marker = null;
+            $locked->save();
+
+            return [$locked, true];
         });
 
-        // A beadott, de meg nem ertekelt probalkozas (egy korabbi hiba utan) itt ujra megprobalkozik.
-        return $current->state === ExamAttemptState::Submitted ? $this->tryEvaluate($current) : $current;
+        return $claimed ? $this->tryEvaluate($current) : $current;
     }
 
     /**

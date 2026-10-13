@@ -18,6 +18,7 @@ import {
   uploadPartFile,
 } from '../../src/api/areas/exams'
 import { fileSubmission, saveManualMarks } from '../../src/api/areas/fileTasks'
+import { tinkerJson } from '../../src/support/artisan'
 import { createExercise, createTestCase, deleteExercise } from '../../src/api/areas/typedTasks'
 import type { ApiClient } from '../../src/api/ApiClient'
 import { deleteAttachment } from '../../src/api/areas/attachments'
@@ -333,6 +334,7 @@ test.describe('Vizsgák: feltöltés, beadás, eredmény', () => {
 
     expect(first.status).toBe(200)
     expect(second.status).toBe(200)
+    expect(Number.isNaN(Date.parse(first.body.data.server_time))).toBe(false)
     expect(second.body.data).toEqual({ ...first.body.data, server_time: second.body.data.server_time })
     expect(late.status).toBe(409)
     expect(late.errorBody.message).toBe('A feladatsor már be van adva, a megoldások nem módosíthatók.')
@@ -393,10 +395,13 @@ test.describe('Vizsgák: feltöltés, beadás, eredmény', () => {
     const { student } = await actors(apiClient)
     // A kódbeadás a próbálkozás kezdete elött történt: nem tartozik hozzá.
     await submitPartialCode(student)
-    await new Promise((resolve) => setTimeout(resolve, 1100))
+    // Az idobelyegek masodperc pontossagu: az indulas a kodbeadas utani masodpercre essen.
+    const submittedSecond = Math.floor(Date.now() / 1000)
+    await expect.poll(() => Math.floor(Date.now() / 1000), { intervals: [100] }).toBeGreaterThan(submittedSecond)
     const created = await start(student, MAIN.id, 'practice')
 
     const open = (await getAttempt(student, created.id)).body.data
+    expect(Number.isNaN(Date.parse(open.server_time))).toBe(false)
     expect(open).toMatchObject({ mode: 'practice', state: 'in_progress', deadline: null, submissions: [] })
 
     await submitAttempt(student, created.id)
@@ -439,6 +444,45 @@ test.describe('Vizsgák: feltöltés, beadás, eredmény', () => {
     expect(upload.status).toBe(409)
     expect((await getAttempt(student, started.id)).body.data.state).toBe('evaluated')
     expect((await submitAttempt(student, started.id)).body.data.state).toBe('evaluated')
+  })
+})
+
+test.describe('Vizsgák: ertekelés foglalt értékelő mellett', () => {
+  test('ha minden értékelő hely foglalt, a beadás után az eredmény 409, és a job kész eredményt hoz', { tag: '@regression' }, async ({ apiClient }) => {
+    const { student } = await actors(apiClient)
+    const created = await start(student, MAIN.id)
+    await uploadOk(student, created.id)
+
+    tinkerJson("foreach ([0, 1, 2, 3] as $i) { Illuminate\\Support\\Facades\\Cache::lock('filetasks.eval.' . $i, 120)->get(); } return true;")
+    try {
+      const submitted = await submitAttempt(student, created.id)
+      expect(submitted.status).toBe(200)
+      expect(submitted.body.data.state).toBe('submitted')
+      expect((await attemptResult(student, created.id)).status).toBe(409)
+      expect((await getAttempt(student, created.id)).body.data.state).toBe('submitted')
+      // A masodik beadas nem ertekel ujra, es nem valtoztat.
+      expect((await submitAttempt(student, created.id)).body.data.state).toBe('submitted')
+    } finally {
+      tinkerJson("foreach ([0, 1, 2, 3] as $i) { Illuminate\\Support\\Facades\\Cache::lock('filetasks.eval.' . $i)->forceRelease(); } return true;")
+    }
+
+    tinkerJson(`App\\Models\\ExamAttempt::query()->whereKey(${String(created.id)})->update(['submitted_at' => now()->subMinutes(2)]); app()->call([new App\\Jobs\\CloseExpiredExamAttempts, 'handle']); return true;`)
+
+    expect((await getAttempt(student, created.id)).body.data.state).toBe('evaluated')
+    expect((await attemptResult(student, created.id)).body.data).toMatchObject({ score: SHEET.expected.ok.score })
+  })
+
+  test('fájl nélküli (csak szerkesztős) beadás nem foglal értékelő helyet', { tag: '@regression' }, async ({ apiClient }) => {
+    const { student } = await actors(apiClient)
+    const created = await start(student, MAIN.id)
+    await submitPartialCode(student)
+
+    tinkerJson("foreach ([0, 1, 2, 3] as $i) { Illuminate\\Support\\Facades\\Cache::lock('filetasks.eval.' . $i, 120)->get(); } return true;")
+    try {
+      expect((await submitAttempt(student, created.id)).body.data.state).toBe('evaluated')
+    } finally {
+      tinkerJson("foreach ([0, 1, 2, 3] as $i) { Illuminate\\Support\\Facades\\Cache::lock('filetasks.eval.' . $i)->forceRelease(); } return true;")
+    }
   })
 })
 
@@ -554,6 +598,20 @@ test.describe('Vizsgaszerkesztő: vizsga és részek', () => {
     expect((await removeAdminExamPart(admin, must(a))).status).toBe(204)
     expect((await adminExam(admin, exam.id)).body.data.parts.map((part) => [part.id, part.order])).toEqual([[c, 1], [b, 2]])
     expect((await removeAdminExamPart(admin, must(a))).status).toBe(404)
+  })
+
+  test('közzétett vizsgából nem törölhető rész (422), a visszavonás után igen', { tag: '@regression' }, async ({ apiClient }) => {
+    const admin = (await adminAccount(apiClient)).client
+    const exam = await publishedExam(admin)
+    const partId = must(exam.parts[0]).id
+
+    const refused = await removeAdminExamPart(admin, partId)
+    expect(refused.status).toBe(422)
+    expect(refused.errorBody.message).toBe('Közzétett vizsgából nem törölhető rész. Előbb vond vissza a közzétételt.')
+    expect((await adminExam(admin, exam.id)).body.data.parts).toHaveLength(1)
+
+    await unpublish(admin, exam)
+    expect((await removeAdminExamPart(admin, partId)).status).toBe(204)
   })
 
   test('olyan vizsga részét, amelyen már van próbálkozás, nem lehet törölni (409)', { tag: '@regression' }, async ({ apiClient }) => {

@@ -55,6 +55,8 @@ final readonly class StartExamAttempt
             return DB::transaction(function () use ($user, $exam, $mode): ExamAttempt {
                 // A felhasznalo soranak zarolasa sorba allitja az egyszerre erkezo inditasokat.
                 User::query()->whereKey($user->id)->lockForUpdate()->first();
+                // A vizsga sora is zarolt: a reszt torlo admin ne fusson egybe az uj probalkozassal.
+                Exam::query()->whereKey($exam->id)->lockForUpdate()->first();
 
                 $existing = $this->openAttempt($user, $exam);
 

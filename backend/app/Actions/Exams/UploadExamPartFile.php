@@ -24,6 +24,7 @@ use App\Services\Files\UploadedFileInspector;
 use App\Services\FileTasks\AcceptedExtensions;
 use Carbon\CarbonImmutable;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Throwable;
 
@@ -137,7 +138,10 @@ final readonly class UploadExamPartFile
         }
 
         $replaced = $row->storedFile();
-        $row->fill($fields)->save();
+        $row->fill($fields);
+        // A csere ideje az `uploaded_at`: a sor elso feltoltese nem maradhat meg.
+        $row->created_at = Carbon::now();
+        $row->save();
 
         DB::afterCommit(fn () => $this->files->delete($replaced));
     }
