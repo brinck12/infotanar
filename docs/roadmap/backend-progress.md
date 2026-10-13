@@ -45,12 +45,13 @@ Nincs blokkolo hiany egyik csomagban sem. Apro eltérések:
 - WP3: a "kezi pont -> lecke teljesites" eset a `progress-privacy.spec.ts`-ben van, nem a `file-submissions.spec.ts`-ben.
 - WP7: lezarva, nem hiba. `checked` indexei 0..29 (`between:0,29`, max 30 elem); a terv "30 -> 422" szovege a 30-as indexre vonatkozik.
 
-## Hatra van (frissitve: a negy apro teszt lezarva, +6 teszt)
+## Hatra van
 
-1. MySQL ellenorzes (CI MySQL job; helyben nincs MySQL).
-2. Opcionalis: a fenti negy apro pont.
-3. Merge `main`-be es push (deployt indit; elotte `docs/runbooks/go-live.md`). Csak a felhasznalo jovahagyasaval.
+1. Merge `main`-be es push: a harness letiltotta (production deploy), a felhasznalo dontsek. Az integracios ag kesz, ccff65c a teteje.
+2. MySQL ellenorzes: a CI MySQL job fedi, push utan nezendo.
+3. Takarítas: ~12 regi worktree/ag (mind merge-elt, 0 egyedi commit), `.claude/` untracked.
+4. `docs/runbooks/go-live.md` operacios tetelei (szerver, SMTP, Barion, Szamlazz.hu, jogi szovegek).
 
 ## Naplo
 
-- 2026-10-14: allapotfelmeres, kapuk futtatva, ket audit lefutott, API tesztek 289/289.
+- 2026-10-14: allapotfelmeres, kapuk, ket audit, API tesztek 289/289; negy apro teszt lezarva (+6, 295); tests/testplan.md megirva.
