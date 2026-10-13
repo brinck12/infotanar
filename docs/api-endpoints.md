@@ -28,6 +28,14 @@ Minden végpont a `/api/v1` előtag alatt érhető el. A hozzáférés oszlop je
 | `DELETE` | `/admin/access-grants/{accessGrant}` | admin | – |
 | `DELETE` | `/admin/attachments/{attachment}` | admin | – |
 | `GET` | `/admin/constraint-options` | admin | – |
+| `DELETE` | `/admin/exam-parts/{part}` | admin | – |
+| `GET` | `/admin/exams` | admin | – |
+| `POST` | `/admin/exams` | admin | – |
+| `GET` | `/admin/exams/{exam}` | admin | – |
+| `PUT` | `/admin/exams/{exam}` | admin | – |
+| `POST` | `/admin/exams/{exam}/attachments` | admin | `admin-upload` |
+| `POST` | `/admin/exams/{exam}/parts` | admin | – |
+| `PUT` | `/admin/exams/{exam}/parts/order` | admin | – |
 | `GET` | `/admin/exercises` | admin | – |
 | `POST` | `/admin/exercises` | admin | – |
 | `DELETE` | `/admin/exercises/{exercise}` | admin | – |
@@ -125,6 +133,23 @@ Minden végpont a `/api/v1` előtag alatt érhető el. A hozzáférés oszlop je
 | Metódus | Útvonal | Hozzáférés | Limit |
 |---|---|---|---|
 | `POST` | `/client-errors` | nyilvános | `10,1` |
+
+## exam-attempts
+
+| Metódus | Útvonal | Hozzáférés | Limit |
+|---|---|---|---|
+| `GET` | `/exam-attempts/{attempt}` | bejelentkezve | – |
+| `POST` | `/exam-attempts/{attempt}/parts/{part}/file` | bejelentkezve | `exam-write` |
+| `GET` | `/exam-attempts/{attempt}/result` | bejelentkezve | – |
+| `POST` | `/exam-attempts/{attempt}/submit` | bejelentkezve | `exam-write` |
+
+## exams
+
+| Metódus | Útvonal | Hozzáférés | Limit |
+|---|---|---|---|
+| `GET` | `/exams` | nyilvános | – |
+| `GET` | `/exams/{exam}` | bejelentkezve | – |
+| `POST` | `/exams/{exam}/attempts` | bejelentkezve | `exam-write` |
 
 ## exercises
 
