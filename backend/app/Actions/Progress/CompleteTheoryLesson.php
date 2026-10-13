@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions\Progress;
 
+use App\Enums\ExerciseKind;
 use App\Exceptions\Access\PremiumContentLocked;
 use App\Exceptions\Catalog\LessonHasExercises;
 use App\Models\Lesson;
@@ -37,7 +38,7 @@ final readonly class CompleteTheoryLesson
             throw new PremiumContentLocked($denial);
         }
 
-        if ($lesson->exercises()->where('is_published', true)->exists()) {
+        if ($lesson->exercises()->where('is_published', true)->whereIn('kind', ExerciseKind::gradableValues())->exists()) {
             throw new LessonHasExercises;
         }
 
