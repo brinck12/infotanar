@@ -39,7 +39,8 @@ final class AdminExerciseResource extends JsonResource
             'memory_limit_kb' => $this->memory_limit_kb,
             'is_published' => $this->is_published,
             'test_case_count' => $this->whenCounted('testCases'),
-            'submission_count' => $this->whenCounted('submissions'),
+            // Kod- es fajlbeadasok egyutt: a feladat fajtaja addig nem valthato, amig van diakadat.
+            'submission_count' => $this->whenCounted('submissions', fn (int $codeSubmissions): int => $codeSubmissions + $this->file_submissions_count),
             'rubric_item_count' => $this->whenCounted('rubricItems'),
             // Csak a reszletes nezetben: minden szerep, a tesztesetek bemeneti fajljaival egyutt.
             'attachments' => AdminAttachmentResource::collection($this->whenLoaded('attachments')),

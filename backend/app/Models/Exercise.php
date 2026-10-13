@@ -41,6 +41,7 @@ use Illuminate\Database\Eloquent\Relations\MorphMany;
  * @property int|null $time_limit_ms Sajat processzorido-korlat (#151); null = globalis alapertek.
  * @property int|null $memory_limit_kb Sajat memoriakorlat (#151); null = globalis alapertek.
  * @property bool $is_published
+ * @property-read int $file_submissions_count Csak `withCount('fileSubmissions')` utan elerheto (strict modban egyebkent hibat dob).
  * @property-read Lesson $lesson A lesson_id NOT NULL + cascade: a lecke mindig letezik.
  */
 final class Exercise extends Model
