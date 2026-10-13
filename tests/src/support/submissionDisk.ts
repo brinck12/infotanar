@@ -3,7 +3,7 @@
  * testvere az `exercise-files` tarolohoz). A backend konyvtarat a TEST_BACKEND_PATH adja
  * (alapertelmezes: ../backend).
  */
-import { existsSync, mkdirSync, utimesSync, writeFileSync } from 'node:fs'
+import { existsSync, mkdirSync, readdirSync, rmSync, utimesSync, writeFileSync } from 'node:fs'
 import { dirname, join, resolve } from 'node:path'
 
 const BACKEND_PATH = process.env.TEST_BACKEND_PATH ?? '../backend'
@@ -34,4 +34,22 @@ export function plantExerciseFile(relativePath: string): string {
   mkdirSync(dirname(target), { recursive: true })
   writeFileSync(target, 'arva')
   return target
+}
+
+function walk(directory: string): string[] {
+  return readdirSync(directory, { withFileTypes: true }).flatMap((entry) => {
+    const path = join(directory, entry.name)
+    return entry.isDirectory() ? walk(path) : [path]
+  })
+}
+
+/** Egy felhasznalo beadasi fajljai (abszolut utvonalak). */
+export function submissionFilesOf(userId: number): string[] {
+  const directory = userSubmissionDir(userId)
+  return existsSync(directory) ? walk(directory) : []
+}
+
+/** Teszt utani takaritas: a felhasznalo beadasi mappaja. */
+export function removeUserSubmissionDir(userId: number): void {
+  rmSync(userSubmissionDir(userId), { recursive: true, force: true })
 }

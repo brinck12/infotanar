@@ -5,8 +5,8 @@ import { fileSubmission, saveManualMarks, uploadFileSubmission } from '../../src
 import { FIXTURE_FILES, registration, SEEDED } from '../../src/data'
 import { fixtureFile } from '../../src/data/files'
 import { expect, test } from '../../src/fixtures'
-import { ageFileSubmission, pruneOrphans, rowCount, runRetentionJob, seedExamAttempt, statusQueryCount } from '../../src/support/artisan'
-import { plantExerciseFile, plantSubmissionFile, submissionFileExists, userSubmissionDir } from '../../src/support/submissionDisk'
+import { ageFileSubmission, plantOralPractice, pruneOrphans, rowCount, runRetentionJob, seedExamAttempt, statusQueryCount, storedPreferences } from '../../src/support/artisan'
+import { plantExerciseFile, plantSubmissionFile, removeUserSubmissionDir, submissionFileExists, submissionFilesOf, userSubmissionDir } from '../../src/support/submissionDisk'
 import { existsSync, rmSync } from 'node:fs'
 
 /**
@@ -195,6 +195,7 @@ test.describe('Fiók törlése', () => {
     expect(rowCount('file_submissions', id)).toBe(0)
     expect(rowCount('exam_attempts', id)).toBe(0)
     expect(rowCount('oral_practices', id)).toBe(0)
+    expect(storedPreferences(id)).toBeNull()
     expect((await client.me()).status).toBe(401)
     expect((await apiClient.login({ email, password })).status).not.toBe(200)
   })
@@ -221,6 +222,7 @@ test.describe('Megőrzési takarítás', () => {
     ageFileSubmission(old.body.data.id, 400)
     const oldExam = seedExamAttempt(id, 400)
     const freshExam = seedExamAttempt(id, 1)
+    const filesBefore = submissionFilesOf(id).length
 
     runRetentionJob()
 
@@ -230,6 +232,26 @@ test.describe('Megőrzési takarítás', () => {
     expect(submissionFileExists(freshExam.path)).toBe(true)
     expect(rowCount('exam_attempts', id)).toBe(1)
     expect(rowCount('file_submissions', id)).toBe(2)
+    // Fajl szinten: a regi gyakorlo fajl es a regi vizsgafajl ment el, a ket friss maradt.
+    expect(filesBefore - submissionFilesOf(id).length).toBe(2)
+    removeUserSubmissionDir(id)
+  })
+
+  test('a torolt fiok maradekat a megorzesi job kiseperi (ha a torleskori listener hibazott)', { tag: '@regression' }, async ({ apiClient, request }) => {
+    const { id, token, password } = await student(apiClient)
+    expect(await deleteAccount(request, token, password)).toBe(204)
+    // A hibas listener maradekat utanozzuk: a torolt fiokhoz sorok es fajlok kerulnek.
+    const exam = seedExamAttempt(id)
+    plantOralPractice(id)
+    expect(submissionFileExists(exam.path)).toBe(true)
+
+    runRetentionJob()
+
+    expect(submissionFileExists(exam.path)).toBe(false)
+    expect(rowCount('file_submissions', id)).toBe(0)
+    expect(rowCount('exam_attempts', id)).toBe(0)
+    expect(rowCount('oral_practices', id)).toBe(0)
+    removeUserSubmissionDir(id)
   })
 
   test('files:prune-orphans: a sor nélküli régi fájlt törli, a frisset és a sorral bírót nem, a szerzői fájlt csak jelenti', { tag: '@regression' }, async ({ apiClient }) => {
@@ -252,5 +274,6 @@ test.describe('Megőrzési takarítás', () => {
     expect(stillThere).toBe(true)
     expect(output).toContain(`pw-wp8-${String(id)}/szerzoi-arva.txt`)
     expect(output).toContain('nem töröljük')
+    removeUserSubmissionDir(id)
   })
 })

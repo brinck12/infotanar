@@ -10,6 +10,7 @@ use App\Services\Files\FileDisk;
 use Illuminate\Console\Command;
 use Illuminate\Filesystem\FilesystemAdapter;
 use Illuminate\Support\Facades\Storage;
+use Throwable;
 
 /**
  * Arva fajlok takaritasa a privat tarolokon (hetente, routes/console.php).
@@ -39,9 +40,18 @@ class PruneOrphanFiles extends Command
             $known = array_flip(FileSubmission::query()->whereIn('path', $paths)->get(['path'])->map(static fn (FileSubmission $row): string => $row->path)->all());
 
             foreach ($paths as $path) {
-                if (! isset($known[$path]) && $submissions->lastModified($path) <= $cutoff) {
-                    $submissions->delete($path);
-                    $deleted++;
+                if (isset($known[$path])) {
+                    continue;
+                }
+
+                try {
+                    // Kozben torolt fajl (parhuzamos torles): kihagyjuk.
+                    if ($submissions->lastModified($path) <= $cutoff) {
+                        $submissions->delete($path);
+                        $deleted++;
+                    }
+                } catch (Throwable) {
+                    continue;
                 }
             }
         }
@@ -85,7 +95,7 @@ class PruneOrphanFiles extends Command
 
         $this->warn(__('retention.orphans_reported', ['count' => count($orphans)]));
 
-        foreach ($orphans as $path) {
+        foreach (array_slice($orphans, 0, 100) as $path) {
             $this->line($path);
         }
     }

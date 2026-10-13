@@ -99,3 +99,13 @@ export function statusQueryCount(userId: number): number {
     return count(Illuminate\\Support\\Facades\\DB::getQueryLog());
   `))
 }
+
+/** A felhasznalo `preferences` oszlopa a nyers adatbazisbol (torolt fiokot is lat). */
+export function storedPreferences(userId: number): unknown {
+  return tinkerJson(`return Illuminate\\Support\\Facades\\DB::table('users')->where('id', ${String(userId)})->value('preferences');`)
+}
+
+/** Szobeli gyakorlas sort ir egy (akar torolt) felhasznalonak: a seprés tesztjehez. */
+export function plantOralPractice(userId: number): void {
+  tinkerJson(`App\\Models\\OralPractice::query()->create(['user_id' => ${String(userId)}, 'topic' => 'szovegszerkesztes']); return true;`)
+}
