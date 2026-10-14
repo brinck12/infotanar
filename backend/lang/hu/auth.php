@@ -27,6 +27,12 @@ return [
 
     'password_change' => [
         'done' => 'A jelszavad megváltozott. A többi eszközön kijelentkeztettünk.',
+        'mail' => [
+            'subject' => 'A jelszavad megváltozott',
+            'greeting' => 'Szia :name!',
+            'intro' => 'Az InfoTanár-fiókod jelszava éppen most megváltozott.',
+            'outro' => 'Ha nem te voltál, azonnal kérj új jelszót a „Elfelejtett jelszó” oldalon, és írj nekünk.',
+        ],
     ],
 
     'email_change' => [

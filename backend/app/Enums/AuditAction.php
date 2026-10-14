@@ -11,6 +11,13 @@ enum AuditAction: string
     case AccountPasswordChanged = 'account.password_changed';
     case AccountEmailChanged = 'account.email_changed';
 
+    // Hitelesites: csak azonositok kerulnek a naplora (e-mail-cim, jelszo soha).
+    case AuthLoginSucceeded = 'auth.login_succeeded';
+    case AuthLoginFailed = 'auth.login_failed';
+    case AuthPasswordReset = 'auth.password_reset';
+
+    case FileSubmissionManuallyMarked = 'file_submission.manually_marked';
+
     case CatalogCreated = 'catalog.created';
     case CatalogUpdated = 'catalog.updated';
     case CatalogDeleted = 'catalog.deleted';
