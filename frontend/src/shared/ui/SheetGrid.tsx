@@ -26,14 +26,17 @@ const isNumeric = (value: string) => /^-?\d+(,\d+)?$/.test(value)
 export function SheetGrid({ columns, rows, valueOf, selected, onSelect, onEdit, label }: SheetGridProps) {
   function onKeyDown(event: KeyboardEvent<HTMLTableElement>) {
     if (onEdit && !event.ctrlKey && !event.metaKey && !event.altKey) {
+      // A fókuszban lévő cella a szerkesztett, ha az eltér a kijelöltől (pl. Tab után).
+      const focused = event.target instanceof HTMLElement ? event.target.closest<HTMLElement>('[data-cell]')?.dataset['cell'] : undefined
+      const target = focused ?? selected
       if (event.key.length === 1 && event.key !== ' ') {
         event.preventDefault()
-        onEdit(selected, event.key)
+        onEdit(target, event.key)
         return
       }
       if (event.key === 'F2') {
         event.preventDefault()
-        onEdit(selected, null)
+        onEdit(target, null)
         return
       }
     }
