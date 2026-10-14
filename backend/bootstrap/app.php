@@ -5,10 +5,10 @@ declare(strict_types=1);
 use App\Exceptions\DomainException;
 use App\Exceptions\Judge0Exception;
 use App\Http\Middleware\EnsureUserIsAdmin;
+use App\Support\RateLimiting\WaitTime;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Foundation\Application;
-use App\Support\RateLimiting\WaitTime;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Exceptions\ThrottleRequestsException;
@@ -28,13 +28,6 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->alias(['admin' => EnsureUserIsAdmin::class]);
-
-        // CDN/proxy mogott a vendegek valodi IP-je az X-Forwarded-For-bol jon; TRUSTED_PROXIES: "*" vagy vesszovel
-        // elvalasztott IP/CIDR lista. Alapbol nincs megbizott proxy (kozvetlen kapcsolat).
-        $trusted = env('TRUSTED_PROXIES');
-        if (is_string($trusted) && $trusted !== '') {
-            $middleware->trustProxies(at: $trusted === '*' ? '*' : array_map('trim', explode(',', $trusted)));
-        }
 
         // A jogosultsag-ellenorzes a route model binding ELOTT fusson, kulonben egy
         // nem-admin a 404/403 kulonbsegbol kideritheti, mely azonositok leteznek.

@@ -51,6 +51,9 @@ Schedule::job(new PruneExpiredFileSubmissions)->dailyAt('03:30')->timezone('Euro
 // Sor nelkuli fajlok a privat tarolokon; vasarnap hajnalban, magyar ido szerint.
 Schedule::command('files:prune-orphans')->weeklyOn(0, '04:00')->timezone('Europe/Budapest');
 
+// Az audit naplo IP-jenek lejarata es a beallitott korlat szerinti torles (PRIV-4); ejszaka, magyar ido szerint.
+Schedule::command('audit:prune')->dailyAt('03:45')->timezone('Europe/Budapest');
+
 // Karbantartas (#127): a lejart tokenek es a regi hibas jobok kulonben orokre megmaradnak.
 Schedule::command('sanctum:prune-expired --hours=24')->daily();
 Schedule::command('queue:prune-failed --hours=720')->daily();
