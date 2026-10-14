@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Support\Config;
 
+use App\Services\Files\FileDisk;
 use Illuminate\Support\Facades\Config;
 
 /**
@@ -27,7 +28,52 @@ final class ProductionConfigAudit
             ...$this->mail(),
             ...$this->billing(),
             ...$this->queue(),
+            ...$this->fileStorage(),
         ]));
+    }
+
+    /**
+     * Fajlfeladatok: a feltoltesek es a feladatfajlok privat taroloi irhatok
+     * legyenek, es a zip-alapu formatumok (xlsx, docx, ods...) olvasasahoz
+     * kell az ext-zip. Enelkul az elso feltoltes 500-as hibaval allna meg.
+     *
+     * @return list<ConfigProblem|null>
+     */
+    private function fileStorage(): array
+    {
+        return [
+            extension_loaded('zip')
+                ? null
+                : new ConfigProblem('ext-zip', 'A PHP zip kiterjesztése nincs betöltve: a feltöltött fájlok (xlsx, docx, ods…) nem értékelhetők ki.'),
+            $this->writableDisk(FileDisk::ExerciseFiles, 'EXERCISE_FILES_DISK'),
+            $this->writableDisk(FileDisk::SubmissionFiles, 'SUBMISSION_FILES_DISK'),
+        ];
+    }
+
+    /** Helyi tarolonal a gyoker (vagy a legkozelebbi letezo szuloje) legyen irhato; tavoli tarolot nem vizsgalunk. */
+    private function writableDisk(FileDisk $disk, string $variable): ?ConfigProblem
+    {
+        $name = $disk->diskName();
+
+        if ($this->text("filesystems.disks.{$name}.driver") === '') {
+            return new ConfigProblem($variable, "A(z) \"{$name}\" tároló nincs definiálva (config/filesystems.php).");
+        }
+
+        $root = $this->text("filesystems.disks.{$name}.root");
+
+        if ($this->text("filesystems.disks.{$name}.driver") !== 'local' || $root === '') {
+            return null;
+        }
+
+        // A mappa az elso irasnal jon letre: addig a szulojenek kell irhatonak lennie.
+        $existing = $root;
+        while (! is_dir($existing) && dirname($existing) !== $existing) {
+            $existing = dirname($existing);
+        }
+
+        return is_writable($existing)
+            ? null
+            : new ConfigProblem($variable, "A(z) \"{$name}\" tároló mappája nem írható ({$root}): a fájlok nem menthetők el.");
     }
 
     /** @return list<ConfigProblem|null> */

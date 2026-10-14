@@ -17,6 +17,8 @@ Minden végpont a `/api/v1` előtag alatt érhető el. A hozzáférés oszlop je
 | `GET` | `/account/email/confirm/{id}/{hash}` | aláírt link | – |
 | `GET` | `/account/export` | bejelentkezve | `account-export` |
 | `PUT` | `/account/password` | bejelentkezve | `sensitive` |
+| `GET` | `/account/preferences` | bejelentkezve | – |
+| `PUT` | `/account/preferences` | bejelentkezve | `30,1,preferences` |
 | `PATCH` | `/account/profile` | bejelentkezve | `10,1` |
 
 ## admin
@@ -24,12 +26,27 @@ Minden végpont a `/api/v1` előtag alatt érhető el. A hozzáférés oszlop je
 | Metódus | Útvonal | Hozzáférés | Limit |
 |---|---|---|---|
 | `DELETE` | `/admin/access-grants/{accessGrant}` | admin | – |
+| `DELETE` | `/admin/attachments/{attachment}` | admin | – |
 | `GET` | `/admin/constraint-options` | admin | – |
+| `DELETE` | `/admin/exam-parts/{part}` | admin | – |
+| `GET` | `/admin/exams` | admin | – |
+| `POST` | `/admin/exams` | admin | – |
+| `GET` | `/admin/exams/{exam}` | admin | – |
+| `PUT` | `/admin/exams/{exam}` | admin | – |
+| `POST` | `/admin/exams/{exam}/attachments` | admin | `admin-upload` |
+| `POST` | `/admin/exams/{exam}/parts` | admin | – |
+| `PUT` | `/admin/exams/{exam}/parts/order` | admin | – |
 | `GET` | `/admin/exercises` | admin | – |
 | `POST` | `/admin/exercises` | admin | – |
 | `DELETE` | `/admin/exercises/{exercise}` | admin | – |
 | `GET` | `/admin/exercises/{exercise}` | admin | – |
 | `PUT|PATCH` | `/admin/exercises/{exercise}` | admin | – |
+| `GET` | `/admin/exercises/{exercise}/attachments` | admin | – |
+| `POST` | `/admin/exercises/{exercise}/attachments` | admin | `admin-upload` |
+| `POST` | `/admin/exercises/{exercise}/rubric-check` | admin | `admin-upload` |
+| `GET` | `/admin/exercises/{exercise}/rubric-items` | admin | – |
+| `POST` | `/admin/exercises/{exercise}/rubric-items` | admin | – |
+| `PUT` | `/admin/exercises/{exercise}/rubric-items/order` | admin | – |
 | `GET` | `/admin/exercises/{exercise}/test-cases` | admin | – |
 | `POST` | `/admin/exercises/{exercise}/test-cases` | admin | – |
 | `PUT` | `/admin/exercises/{exercise}/test-cases/order` | admin | – |
@@ -48,7 +65,10 @@ Minden végpont a `/api/v1` előtag alatt érhető el. A hozzáférés oszlop je
 | `GET` | `/admin/modules/{module}` | admin | – |
 | `PUT|PATCH` | `/admin/modules/{module}` | admin | – |
 | `PUT` | `/admin/modules/{module}/lessons/order` | admin | – |
+| `GET` | `/admin/overview` | admin | – |
 | `GET` | `/admin/ping` | admin | – |
+| `DELETE` | `/admin/rubric-items/{item}` | admin | – |
+| `PUT` | `/admin/rubric-items/{item}` | admin | – |
 | `DELETE` | `/admin/test-cases/{testCase}` | admin | – |
 | `GET` | `/admin/test-cases/{testCase}` | admin | – |
 | `PUT|PATCH` | `/admin/test-cases/{testCase}` | admin | – |
@@ -72,6 +92,12 @@ Minden végpont a `/api/v1` előtag alatt érhető el. A hozzáférés oszlop je
 | `DELETE` | `/admin/users/{user}/tokens` | admin | – |
 | `POST` | `/admin/users/{user}/verification-notification` | admin | `admin-user-mail` |
 | `POST` | `/admin/users/{user}/verify-email` | admin | – |
+
+## attachments
+
+| Metódus | Útvonal | Hozzáférés | Limit |
+|---|---|---|---|
+| `GET` | `/attachments/{attachment}/download` | aláírt link | – |
 
 ## auth
 
@@ -108,6 +134,38 @@ Minden végpont a `/api/v1` előtag alatt érhető el. A hozzáférés oszlop je
 |---|---|---|---|
 | `POST` | `/client-errors` | nyilvános | `10,1` |
 
+## exam-attempts
+
+| Metódus | Útvonal | Hozzáférés | Limit |
+|---|---|---|---|
+| `GET` | `/exam-attempts/{attempt}` | bejelentkezve | – |
+| `POST` | `/exam-attempts/{attempt}/parts/{part}/file` | bejelentkezve | `exam-write` |
+| `GET` | `/exam-attempts/{attempt}/result` | bejelentkezve | – |
+| `POST` | `/exam-attempts/{attempt}/submit` | bejelentkezve | `exam-write` |
+
+## exams
+
+| Metódus | Útvonal | Hozzáférés | Limit |
+|---|---|---|---|
+| `GET` | `/exams` | nyilvános | – |
+| `GET` | `/exams/{exam}` | bejelentkezve | – |
+| `POST` | `/exams/{exam}/attempts` | bejelentkezve | `exam-write` |
+
+## exercises
+
+| Metódus | Útvonal | Hozzáférés | Limit |
+|---|---|---|---|
+| `GET` | `/exercises/{exercise}/file-submissions` | bejelentkezve | – |
+| `POST` | `/exercises/{exercise}/file-submissions` | bejelentkezve | `file-submission` |
+
+## file-submissions
+
+| Metódus | Útvonal | Hozzáférés | Limit |
+|---|---|---|---|
+| `GET` | `/file-submissions/{submission}` | bejelentkezve | – |
+| `GET` | `/file-submissions/{submission}/file` | aláírt link | – |
+| `PUT` | `/file-submissions/{submission}/manual` | bejelentkezve | `30,1` |
+
 ## health
 
 | Metódus | Útvonal | Hozzáférés | Limit |
@@ -129,6 +187,14 @@ Minden végpont a `/api/v1` előtag alatt érhető el. A hozzáférés oszlop je
 | `GET` | `/lessons/{lesson}/video` | nyilvános | – |
 | `GET` | `/lessons/{lesson}/video/captions` | aláírt link | – |
 | `GET` | `/lessons/{lesson}/video/stream` | aláírt link | – |
+
+## oral
+
+| Metódus | Útvonal | Hozzáférés | Limit |
+|---|---|---|---|
+| `GET` | `/oral/practice` | bejelentkezve | – |
+| `PUT` | `/oral/practice/{topic}` | bejelentkezve | `60,1,oral-practice` |
+| `POST` | `/oral/practice/{topic}/attempts` | bejelentkezve | `60,1,oral-practice` |
 
 ## progress
 

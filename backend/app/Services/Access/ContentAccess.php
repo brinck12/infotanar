@@ -18,10 +18,16 @@ final class ContentAccess
     /** null = hozzafer; kulonben az elutasitas oka. */
     public function denialFor(?User $user, Lesson $lesson): ?AccessDenial
     {
-        if ($lesson->is_free) {
-            return null;
-        }
+        return $lesson->is_free ? null : $this->premiumDenialFor($user);
+    }
 
+    /**
+     * A leckehez nem kotott premium tartalom (pl. gyakorlo vizsga) szabalya:
+     * bejelentkezes, megerositett e-mail, es elo elofizetes vagy kezi
+     * hozzaferes; az admin mindig hozzafer. null = hozzafer.
+     */
+    public function premiumDenialFor(?User $user): ?AccessDenial
+    {
         if ($user === null) {
             return AccessDenial::LoginRequired;
         }

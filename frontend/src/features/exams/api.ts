@@ -82,6 +82,8 @@ export interface ExamAttempt {
   started_at: string
   /** Vizsgahelyzetben a szerver szerinti határidő; gyakorlásnál `null`. */
   deadline: string | null
+  /** A szerver órája a válasz pillanatában; a számláló ehhez igazodik, nem a gép órájához. */
+  server_time: string
   submissions: PartSubmission[]
 }
 

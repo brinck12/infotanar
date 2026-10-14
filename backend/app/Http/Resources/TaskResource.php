@@ -6,6 +6,7 @@ namespace App\Http\Resources;
 
 use App\Enums\AccessDenial;
 use App\Models\Exercise;
+use App\Services\Catalog\Spec\TaskPayload;
 use App\Services\Catalog\TaskNavigation;
 use App\Services\Execution\ExecutionLimitResolver;
 use App\Services\Progress\ExerciseStatuses;
@@ -16,8 +17,12 @@ use stdClass;
 /**
  * v1 reszletes nezet ("task"). Rejtett tesztesetbol csak a darabszam megy
  * ki, a tartalmuk soha. Zarolt (fizetos, jogosultsag nelkuli) feladatnal a
- * szoveg, a kiindulo kod es a peldak is kimaradnak: a kliens a `locked` es
- * a `locked_reason` alapjan mutat paywallt.
+ * szoveg, a kiindulo kod, a peldak, a fajta es a fajtafuggo adatok (a
+ * letoltheto fajlokkal egyutt) is kimaradnak: a kliens a `locked` es a
+ * `locked_reason` alapjan mutat paywallt.
+ *
+ * A fajlokhoz a hivonak kell betoltenie az `attachments` kapcsolatot, es csak
+ * feloldott feladatnal (TaskController::show).
  *
  * @mixin Exercise
  */
@@ -42,7 +47,8 @@ final class TaskResource extends JsonResource
             'title' => $this->title,
             'level' => $this->level,
             'difficulty' => $this->difficulty,
-            'allowed_languages' => $this->allowed_languages,
+            // Nem szerkesztos fajtanal (fajlfeltoltes, bongeszos gyakorlo) ures lista.
+            'allowed_languages' => $this->allowed_languages ?? [],
             'is_free' => $this->whenLoaded('lesson', fn () => $this->lesson->is_free),
             'locked' => ! $unlocked,
             'locked_reason' => $this->denial?->value,
@@ -58,11 +64,14 @@ final class TaskResource extends JsonResource
                 'title' => $this->lesson->title,
                 'has_video' => $this->lesson->video_path !== null,
             ]),
+            // A fajta donti el, melyik munkaterulet nyilik meg, es melyik fajtafuggo mezo jon (lent).
+            'kind' => $this->when($unlocked, fn (): string => $this->kind->value),
             'description' => $this->when($unlocked, fn () => $this->description),
             // A diaknak elore lathato szabalyok, magyarul (pl. "for ciklust kell használnod").
             'constraints' => $this->when($unlocked, fn (): array => $this->constraints->describe()),
             // Nyelvenkent az ervenyes ido- es memoriakorlat (#151), hogy a diak elore lassa.
-            'limits' => $this->when($unlocked, fn (): array => resolve(ExecutionLimitResolver::class)->describe($this->exercise)),
+            // Nyelv nelkuli fajtanal ures objektum (nem ures tomb), mint a starter_code.
+            'limits' => $this->when($unlocked, fn (): array|stdClass => resolve(ExecutionLimitResolver::class)->describe($this->exercise) ?: new stdClass),
             // Ures objektum (nem ures tomb), hogy a kliens mindig map-kent kezelhesse.
             'starter_code' => $this->when($unlocked, fn () => $this->starter_code ?: new stdClass),
             'example_test_cases' => $this->when(
@@ -72,6 +81,9 @@ final class TaskResource extends JsonResource
             'hidden_test_case_count' => $this->whenCounted('hiddenTestCases'),
             // Zarolt feladatnal is megy: a diak onnan is tovabb tud lepni.
             'navigation' => $this->when($this->navigation !== null, fn (): ?array => $this->navigation?->toArray()),
+            // Fajtankent: file_task | sql_task | web_task | sheet_practice | doc_practice, es a
+            // letoltheto forrasfajlok. Alairt URL-eket tartalmaz, ezert zarolt feladatnal kimarad.
+            ...($unlocked ? resolve(TaskPayload::class)->for($this->exercise) : []),
         ];
     }
 }

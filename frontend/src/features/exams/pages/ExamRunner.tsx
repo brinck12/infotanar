@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link, Navigate, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { hibaUzenet } from '../../../shared/api/errors'
 import { LEVEL_LABEL } from '../../../shared/domain/labels'
@@ -47,10 +47,10 @@ export function ExamRunner() {
   if (!exam.data || !attempt.data) return <PageLoader label="Vizsga betöltése…" />
   if (attempt.data.state !== 'in_progress') return <Navigate to={`/vizsgak/${examId}/eredmeny?proba=${attemptId}`} replace />
 
-  return <Runner exam={exam.data} attempt={attempt.data} />
+  return <Runner exam={exam.data} attempt={attempt.data} fetchedAt={attempt.dataUpdatedAt} />
 }
 
-function Runner({ exam, attempt }: { exam: ExamDetail; attempt: ExamAttempt }) {
+function Runner({ exam, attempt, fetchedAt }: { exam: ExamDetail; attempt: ExamAttempt; fetchedAt: number }) {
   const navigate = useNavigate()
   const queryClient = useQueryClient()
   const [now, setNow] = useState(() => Date.now())
@@ -71,9 +71,16 @@ function Runner({ exam, attempt }: { exam: ExamDetail; attempt: ExamAttempt }) {
     },
   })
 
+  // A szerver órája és a gépé eltérhet: a válasz pillanatában mért különbséggel igazítjuk a gép óráját.
+  const offset = useMemo(() => {
+    const difference = timeOf(attempt.server_time) - fetchedAt
+    return Number.isFinite(difference) ? difference : 0
+  }, [attempt.server_time, fetchedAt])
+  const serverNow = now + offset
+
   // Vizsgahelyzetben a szerver szerinti határidő számít; gyakorlásnál az eltelt időt mérjük.
-  const remaining = attempt.deadline ? (timeOf(attempt.deadline) - now) / 1000 : null
-  const elapsed = (now - timeOf(attempt.started_at)) / 1000
+  const remaining = attempt.deadline ? (timeOf(attempt.deadline) - serverNow) / 1000 : null
+  const elapsed = (serverNow - timeOf(attempt.started_at)) / 1000
   const expired = remaining !== null && remaining <= 0
 
   // Az idő lejártakor egyszer, magától beadjuk (a szerver is lezárja a határidőnél).

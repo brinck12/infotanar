@@ -1,0 +1,14 @@
+# Tartalom-audit (ugynok jelentes, tomoritve)
+
+Leltar: 2 agi (programozas, adatbazis-kezeles), 3 modul, 6 lecke, 6 feladat (1 lecke = 1 feladat). Kozep 5, emelt 1. Python 5, C# 5, SQL 1. Elmeleti tartalom/video: nincs. Ingyenes ~3, premium ~3; az SQL ag 1 leckeje teljesen ingyenes (a fizetofal ott semmit nem csinal).
+Motor 8 feladattipust tud (code, sql, sheet_upload, doc_upload, visual_upload, sheet_browser, doc_browser, web), a 6 nem-kod tipushoz 0 tartalom. Vizsga (mock): 0 betoltott feladatsor. Szobeli: 6 temakor, a vazlatok HELYKITOLTOK. `VITE_EXAM_DATE=2027-05-10` helyorzo, ellenorizni az OH naptarral. A bongeszos dokumentum-gyakorlo az 25 pontos szovegszerkesztesi feladat kis reszhalmazat tudja (nincs tabulator, tabla, stilus, tartalomjegyzek, hasab).
+
+Hivatalos szerkezet (OH vizsgaleiras, tukorforras farkascs.hu; az OH PDF-eket nem sikerult megnyitni): KOZEP gyakorlati 180 perc / 100 pont: szovegszerkesztes 25, vizualis elemek (kepszerkesztes+bemutato) 20, tablazat 25, adatbazis 15, programozas 15. EMELT gyakorlati 240 perc / 120 pont: dokumentumkeszites VAGY tablazat 35, adatbazis 35, programozas 50. Emelt szobeli 30 pont (30 perc felkeszules, 20 perc felelet, A teruletek + B programozasi feladat; pontozas 8/10/4/4/4). Szoftver: Python 3.13, C#/VS2022 stb.; emelt adatbazis MariaDB/phpMyAdmin (a platform sqlite-ot hasznal: dialektus-elteres kockazat). Bizonytalan: halozat/kriptografia/digitalis tarsadalom nem gyakorlati resz a forrasok szerint (ellenorizni).
+
+Lefedettsegi matrix: teljes 0, reszleges 3 (SQL 1 feladat, programozas 6 feladat, szobeli vazlat), nincs ~7 terulet (szovegszerkesztes, vizualis, bemutato, web, tablazat, mock vizsgak, halozat stb.).
+
+Utiterv: 0. fazis (1-2 het): magyarazat + megoldas-lepesek + 2-3 tipp a 6 meglevo feladathoz; tobb SQL lecke; szobeli vazlatok. 1. fazis MVP (~100-150 feladat, 8-10 het): programozas 10 lecke/50 feladat, SQL 8 lecke/40, tablazat 6/12, szovegszerkesztes 6/8, vizualis 4/6, web 3/6, mock 4 kozep + 3 emelt. Idobecsles: 1-3 ora/kodfeladat, 3-5 ora/feltoltos feladat, 15-25 ora/teljes mock. Mockok a 2024 majus - 2026 majus feladatsorokbol (jogi hasznalat ellenorizendo; "stilusaban" ujraalkotas biztonsagosabb).
+Elkotelezodes: napi cel + sorozat, temakori checklist, "gyenge pontjaid" (temacimke kell a feladatokra), visszaszamlalo heti terv, megoldas magyarazattal, 3 lepcsos tippek, 3-4 perces video leckenkent, idozitett mock reszenkenti pontveszteseg-bontassal.
+Kockazatok: sqlite vs MariaDB; emelt fajlbemenet a Judge0 alatt (stdin?); docx/xlsx/pptx ertekelo pontossaga; OH felhasznalasi jogok; kozep szobeli letezese.
+
+Forrasok: farkascs.hu/dig-kult-erettsegi, dload-oktatas.educatio.hu/erettsegi, eduline.hu 2024/2025 kozepszint feladatok, petrik.hu Digitalis_kultura.pdf, publikaciotar.uni-bge.hu 22.cikk, FRONTEND.md 11-13. szakasz.

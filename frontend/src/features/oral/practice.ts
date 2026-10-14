@@ -42,3 +42,23 @@ export function formatClock(seconds: number): string {
   const safe = Math.max(0, seconds)
   return `${String(Math.floor(safe / 60)).padStart(2, '0')}:${String(safe % 60).padStart(2, '0')}`
 }
+
+/** A böngészőben mentett gyakorlás; `null`, ha nincs ilyen (vagy sérült, vagy a tárhely tiltott). */
+export function readStoredPractice(userKey: string, slug: string): OralPractice | null {
+  try {
+    const raw = localStorage.getItem(practiceKey(userKey, slug))
+    const parsed: unknown = raw === null ? null : JSON.parse(raw)
+    return isOralPractice(parsed) ? parsed : null
+  } catch {
+    return null
+  }
+}
+
+/** A böngészőbeli példány törlése, miután a szerver átvette. */
+export function forgetStoredPractice(userKey: string, slug: string): void {
+  try {
+    localStorage.removeItem(practiceKey(userKey, slug))
+  } catch {
+    // Tiltott tárhelyen nincs mit törölni.
+  }
+}

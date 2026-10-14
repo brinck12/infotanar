@@ -216,3 +216,15 @@ export interface TrackDetail {
     }[]
   }[]
 }
+
+// Teruletenkenti tipusok: mindegyik fajlnak egy csomag a gazdaja (lasd a fajlok fejlecet),
+// igy ezt a fajlt nem kell modositaniuk.
+export * from './types/typedTasks'
+export * from './types/attachments'
+export * from './types/execution'
+export * from './types/fileTasks'
+export * from './types/rubrics'
+export * from './types/exams'
+export * from './types/learning'
+export * from './types/progress'
+export * from './types/adminOverview'

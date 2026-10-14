@@ -47,6 +47,8 @@ final readonly class DeleteAccount
                 'password' => Str::random(64),
                 'email_verified_at' => null,
                 'remember_token' => null,
+                // A tanulasi celok szemelyes adatok.
+                'preferences' => null,
             ])->save();
 
             $user->delete();

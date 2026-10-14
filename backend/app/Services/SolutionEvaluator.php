@@ -4,18 +4,28 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use App\Enums\ExerciseKind;
 use App\Enums\Verdict;
 use App\Exceptions\Judge0Exception;
 use App\Models\Exercise;
 use App\Models\TestCase;
 use App\Services\Constraints\ConstraintChecker;
+use App\Services\Execution\Comparison\ComparisonSettings;
+use App\Services\Execution\Comparison\OutputComparators;
 use App\Services\Execution\EvaluationResult;
 use App\Services\Execution\ExecutionLimitResolver;
+use App\Services\Execution\Files\ExecutionFileArchive;
+use App\Services\Execution\Files\ExecutionFilesUnavailable;
 use App\Services\Execution\HiddenResultRedactor;
 use App\Services\Execution\Sql\SqlProgram;
 use App\Services\Execution\Sql\SqlResultComparator;
+use App\Services\Execution\Subtasks\SubtaskDefinition;
+use App\Services\Execution\Subtasks\SubtaskScore;
+use App\Services\Execution\Subtasks\SubtaskScorer;
+use App\Services\Execution\Subtasks\TestCaseOutput;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\Log;
 
 /**
  * Egy megoldas lefuttatasa tesztesetenkent, es az eredmeny osszevetese az
@@ -23,6 +33,12 @@ use Illuminate\Support\Facades\Config;
  *
  * Az osszevetest szandekosan itt vegezzuk, nem a Judge0 expected_output
  * mezojevel: igy tudjuk, pontosan mi jott ki, es informativ hibat adhatunk.
+ * Az osszevetes modja a feladat beallitasa (ComparisonSettings); beallitas es
+ * reszfeladatok nelkul a regi, soronkenti egyezes.
+ *
+ * Ha a kodfeladatnak pontozott reszfeladatai vannak (`spec.subtasks`), az
+ * eredmeny reszfeladatonkenti pontokat is tartalmaz (SubtaskScorer), es a
+ * megoldas csak akkor elfogadott, ha minden reszfeladat teljes pontot er.
  *
  * @phpstan-import-type Judge0Run from Judge0Service
  */
@@ -36,22 +52,33 @@ final readonly class SolutionEvaluator
         private HiddenResultRedactor $redactor,
         private ConstraintChecker $constraints,
         private ExecutionLimitResolver $limits,
+        private OutputComparators $comparators,
+        private ExecutionFileArchive $files,
+        private SubtaskScorer $subtaskScorer,
     ) {}
 
     /** @param Collection<int, TestCase> $testCases */
     public function evaluate(Exercise $exercise, string $language, string $sourceCode, Collection $testCases): EvaluationResult
     {
+        $subtasks = $this->subtasksOf($exercise, $language);
+
         // A kodszabalyokat a sandbox elott ellenorizzuk: a szabalyserto megoldas
         // el sem jut a Judge0-ig (idot es futtatasi kapacitast sporol).
         $violations = $this->constraints->violations($exercise->constraints, $language, $sourceCode);
         if ($violations !== []) {
-            return EvaluationResult::constraintViolation($violations);
+            return EvaluationResult::constraintViolation($violations, $this->maxScore($subtasks, $testCases->count()));
         }
 
         $results = [];
         $verdicts = [];
+        $outputs = [];
 
         $limits = $this->limits->forExercise($exercise, $language);
+        $comparison = ComparisonSettings::resolve($exercise->comparison, $subtasks !== []);
+
+        // Az adatfajlok leiroi egyetlen lekerdezessel jonnek, nem tesztesetenkent.
+        // SQL-nel nincs fajl: ott a teszteset bemenete az adatkeszlet-szkript.
+        $attachments = $language === self::SQL ? null : $this->files->attachmentsOf($exercise);
 
         // Egy tesztesetre ennyi ido (mp) jut: a futas faliora-korlatja, plusz a sorban allas es a forditas.
         $perTestCase = (int) ceil($limits->wallTimeSeconds()) + Config::integer('judge0.test_overhead');
@@ -74,9 +101,9 @@ final readonly class SolutionEvaluator
                 $timeout = min($remaining, $perTestCase);
 
                 // SQL-nel a teszteset bemenete az adatkeszlet-szkript, ami a programba kerul.
-                $run = $language === self::SQL
+                $run = $attachments === null
                     ? $this->judge0->run($language, SqlProgram::build((string) $testCase->stdin, $sourceCode), null, $limits, $timeout)
-                    : $this->judge0->run($language, $sourceCode, $testCase->stdin, $limits, $timeout);
+                    : $this->judge0->run($language, $sourceCode, $testCase->stdin, $limits, $timeout, $this->files->for($attachments, $testCase));
             } catch (Judge0Exception $e) {
                 $verdicts[] = Verdict::SystemError;
                 $results[] = $this->errorResult($testCase, $e->getMessage());
@@ -84,13 +111,29 @@ final readonly class SolutionEvaluator
                 // Ha a futtato szolgaltatas elerhetetlen, a tobbi teszteset
                 // sem fog menni - nincs ertelme tovabb probalkozni.
                 break;
+            } catch (ExecutionFilesUnavailable $e) {
+                // A feladat adatfajlja hianyzik vagy nem olvashato: ez sem a megoldas hibaja.
+                Log::error('Execution: exercise data files are unavailable.', ['exercise_id' => $exercise->id, 'error' => $e->getMessage()]);
+
+                $verdicts[] = Verdict::SystemError;
+                $results[] = $this->errorResult($testCase, __('execution.files_unavailable'));
+
+                break;
             }
 
-            $verdict = $language === self::SQL
-                ? $this->sqlVerdict($run, $testCase, $exercise->sql_order_sensitive)
-                : Verdict::fromJudge0($run['status_id'], $this->outputMatches($run['stdout'], $testCase->expected_stdout));
+            // SQL-nel a sajat osszevetes dont (SqlResultComparator); a tobbi nyelvnel a feladat beallitasa.
+            if ($language === self::SQL) {
+                $verdict = $this->sqlVerdict($run, $testCase, $exercise->sql_order_sensitive);
+                $difference = null;
+            } else {
+                $compared = $this->comparators->compare($run['stdout'], $testCase->expected_stdout, $comparison);
+                $verdict = Verdict::fromJudge0($run['status_id'], $compared->matches);
+                $difference = $verdict === Verdict::WrongAnswer ? $compared->difference : null;
+                $outputs[] = new TestCaseOutput($testCase->is_hidden, $run['stdout'], $testCase->expected_stdout);
+            }
+
             $verdicts[] = $verdict;
-            $results[] = $this->buildResult($testCase, $run, $verdict);
+            $results[] = $this->buildResult($testCase, $run, $verdict, $difference);
 
             // Forditasi hiba minden tesztesetnel ugyanaz lenne: a tobbit nem futtatjuk.
             if ($verdict === Verdict::CompilationError) {
@@ -99,12 +142,70 @@ final readonly class SolutionEvaluator
         }
 
         $overall = $this->overallVerdict($verdicts);
+        $scores = $subtasks === [] ? null : $this->scoreSubtasks($subtasks, $outputs, $overall, $comparison);
+
+        // Reszfeladatos feladat csak teljes pontszammal elfogadott (pl. ha az
+        // elvart kimenetbol hianyzik egy resz, a tesztesetek onmagukban atmennenek).
+        if ($scores !== null && $overall === Verdict::Accepted && $this->points($scores) < $this->maxScore($subtasks, 0)) {
+            $overall = Verdict::WrongAnswer;
+        }
 
         return new EvaluationResult(
             $this->legacyStatus($overall, $verdicts),
             $overall,
             $this->redactor->redact($results),
+            subtasks: $scores,
+            score: $scores === null ? count(array_keys($verdicts, Verdict::Accepted, true)) : $this->points($scores),
+            maxScore: $this->maxScore($subtasks, $testCases->count()),
         );
+    }
+
+    /**
+     * A feladat pontozott reszfeladatai. Csak kodfeladatnal ertelmezett: az
+     * SQL-feladat `spec.subtasks` listaja tajekoztato (lekerdezesnevek), nem pontoz.
+     *
+     * @return list<SubtaskDefinition>
+     */
+    private function subtasksOf(Exercise $exercise, string $language): array
+    {
+        return $exercise->kind === ExerciseKind::Code && $language !== self::SQL
+            ? SubtaskDefinition::listFrom($exercise->spec)
+            : [];
+    }
+
+    /**
+     * Forditasi vagy rendszerhibanal a megoldas nem futott ertekelhetoen: senki
+     * nem kap pontot. Minden mas esetben (futasideju hiba, idotullepes is) az
+     * addig kiirt reszek pontot erhetnek.
+     *
+     * @param  non-empty-list<SubtaskDefinition>  $subtasks
+     * @param  list<TestCaseOutput>  $outputs
+     * @return non-empty-list<SubtaskScore>
+     */
+    private function scoreSubtasks(array $subtasks, array $outputs, Verdict $overall, ComparisonSettings $comparison): array
+    {
+        return in_array($overall, [Verdict::SystemError, Verdict::CompilationError], true)
+            ? $this->subtaskScorer->unscored($subtasks)
+            : $this->subtaskScorer->score($subtasks, $outputs, $comparison);
+    }
+
+    /** @param list<SubtaskScore> $scores */
+    private function points(array $scores): int
+    {
+        return array_sum(array_map(static fn (SubtaskScore $score): int => $score->points, $scores));
+    }
+
+    /**
+     * Az elerheto pontszam: reszfeladatos feladatnal a reszek pontjainak
+     * osszege, kulonben a kiertekeles teszteseteinek szama.
+     *
+     * @param  list<SubtaskDefinition>  $subtasks
+     */
+    private function maxScore(array $subtasks, int $testCaseCount): int
+    {
+        return $subtasks === []
+            ? $testCaseCount
+            : array_sum(array_map(static fn (SubtaskDefinition $subtask): int => $subtask->points, $subtasks));
     }
 
     /**
@@ -127,30 +228,11 @@ final readonly class SolutionEvaluator
     }
 
     /**
-     * Kimenet-osszevetes. A sorvegi whitespace-t es a zaro ures sorokat
-     * normalizaljuk, mert ezek erettsegi-feladatoknal nem relevans elteresek.
-     */
-    public function outputMatches(string $actual, string $expected): bool
-    {
-        return $this->normalize($actual) === $this->normalize($expected);
-    }
-
-    private function normalize(string $value): string
-    {
-        $lines = array_map(rtrim(...), explode("\n", str_replace("\r\n", "\n", $value)));
-
-        while ($lines !== [] && end($lines) === '') {
-            array_pop($lines);
-        }
-
-        return implode("\n", $lines);
-    }
-
-    /**
      * @param  Judge0Run  $run
+     * @param  string|null  $difference  az elso elteres leirasa (elemenkenti osszevetesnel, hibas kimenetnel)
      * @return array<string, mixed>
      */
-    private function buildResult(TestCase $testCase, array $run, Verdict $verdict): array
+    private function buildResult(TestCase $testCase, array $run, Verdict $verdict, ?string $difference): array
     {
         $result = [
             'test_case_id' => $testCase->id,
@@ -171,7 +253,9 @@ final readonly class SolutionEvaluator
             'expected' => $testCase->expected_stdout,
             'stderr' => $run['stderr'],
             'compile_output' => $run['compile_output'],
-        ];
+            // Az elvart kimenetbol idez: a `difference` nincs a redactor fehérlistajan, igy
+            // rejtett tesztesetnel nem megy ki. Ha nincs mit mondani, a kulcs is kimarad.
+        ] + ($difference === null ? [] : ['difference' => $difference]);
     }
 
     /** @return array<string, mixed> */

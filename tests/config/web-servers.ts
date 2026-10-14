@@ -27,6 +27,9 @@ const judge0Mock: WebServer = {
   env: { JUDGE0_MOCK_PORT: String(env.JUDGE0_MOCK_PORT) },
 }
 
+/** A teszt-backend APP_KEY-e: csak a helyi, eldobhato backendhez tartozik, nem titok. */
+export const TEST_APP_KEY = 'base64:IuoO2O2E2ePTfNKZ3XNlVF5ZfvMJM5zld0sDIFlKhQ8='
+
 /** Alapbol eldobhato sqlite fajl; API_DATABASE_URL megadasakor az eles motorral egyezo MySQL. */
 const backendDatabase: Record<string, string> = env.API_DATABASE_URL
   ? { DB_CONNECTION: 'mysql', DB_URL: env.API_DATABASE_URL }
@@ -53,8 +56,7 @@ const backend: WebServer = {
   timeout: 60_000,
   env: {
     APP_ENV: 'testing',
-    // Csak a helyi, eldobhato teszt-backendhez; nem titok.
-    APP_KEY: 'base64:IuoO2O2E2ePTfNKZ3XNlVF5ZfvMJM5zld0sDIFlKhQ8=',
+    APP_KEY: TEST_APP_KEY,
     APP_DEBUG: 'true',
     ...backendDatabase,
     SESSION_DRIVER: 'array',
@@ -69,6 +71,19 @@ const backend: WebServer = {
     MAIL_MAILER: 'outbox',
     FRONTEND_URL: env.BASE_URL,
     JUDGE0_URL,
+    // Vizsgak: nincs turelmi ido a hatarido utan, igy a 0 perces fixture vizsga
+    // probalkozasa azonnal lejar, es az idotullepes varakozas nelkul tesztelheto.
+    EXAMS_GRACE_SECONDS: '0',
+    // A "tul nagy fajl" ag a PHP sajat 2 MB-os feltoltesi korlatja alatt is
+    // tesztelheto legyen: dokumentumbol 1 MB a korlat (a fixture-ok par KB-osak).
+    FILETASKS_MAX_DOCUMENT_MB: '1',
+    // A feltoltesi keretek ne fogjak vissza a teszteket: egy spec percenkent
+    // tobb tucat fajlt kuld, az admin token pedig kozos. Magukat a limitereket
+    // nem teszteljuk (az api-rate-limit projekt nem bovul).
+    FILETASKS_RATE_PER_MINUTE: '10000',
+    FILETASKS_RATE_PER_DAY: '100000',
+    FILETASKS_ADMIN_UPLOAD_PER_MINUTE: '10000',
+    EXAMS_WRITE_PER_MINUTE: '10000',
   },
 }
 

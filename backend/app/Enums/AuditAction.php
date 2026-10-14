@@ -16,6 +16,14 @@ enum AuditAction: string
     case CatalogDeleted = 'catalog.deleted';
     case CatalogReordered = 'catalog.reordered';
 
+    // Feladathoz vagy vizsgahoz csatolt fajlok; az alany maga a csatolmany.
+    case AttachmentUploaded = 'attachment.uploaded';
+    case AttachmentDeleted = 'attachment.deleted';
+
+    // A vizsga, a vizsgaresz es az ertekelesi pont szerkesztese a Catalog* eseteket hasznalja.
+    case ExamPublished = 'exam.published';
+    case ExamUnpublished = 'exam.unpublished';
+
     case AccessGranted = 'access.granted';
     case AccessRevoked = 'access.revoked';
 

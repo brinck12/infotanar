@@ -25,7 +25,11 @@ use Laravel\Sanctum\HasApiTokens;
  * A `role` szandekosan nincs a $fillable-ben: csak forceFill-lel (admin
  * parancs, seeder) allithato, a kliens nem adhatja meg magának.
  *
+ * A `preferences` (tanulasi celok) sem tomegesen kitoltheto: csak a sajat
+ * vegpontja irja, ellenorzott ertekekkel.
+ *
  * @property Role $role
+ * @property array{level: string, exam_period: string, language: string, weekly_hours: string}|null $preferences NULL = meg nem mentett celokat.
  * @property CarbonImmutable|Carbon|null $email_verified_at
  */
 final class User extends Authenticatable implements MustVerifyEmail
@@ -58,6 +62,7 @@ final class User extends Authenticatable implements MustVerifyEmail
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'role' => Role::class,
+            'preferences' => 'array',
         ];
     }
 
@@ -70,6 +75,28 @@ final class User extends Authenticatable implements MustVerifyEmail
     public function submissions(): HasMany
     {
         return $this->hasMany(Submission::class);
+    }
+
+    /**
+     * A feltoltott fajlok: gyakorlo es vizsgaban keletkezett sorok egyutt.
+     *
+     * @return HasMany<FileSubmission, $this>
+     */
+    public function fileSubmissions(): HasMany
+    {
+        return $this->hasMany(FileSubmission::class);
+    }
+
+    /** @return HasMany<ExamAttempt, $this> */
+    public function examAttempts(): HasMany
+    {
+        return $this->hasMany(ExamAttempt::class);
+    }
+
+    /** @return HasMany<OralPractice, $this> */
+    public function oralPractices(): HasMany
+    {
+        return $this->hasMany(OralPractice::class);
     }
 
     /** @return HasMany<LessonCompletion, $this> */

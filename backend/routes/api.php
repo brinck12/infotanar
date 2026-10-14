@@ -221,4 +221,12 @@ Route::prefix('v1')->name('api.')->middleware(RejectInvalidToken::class)->group(
             Route::delete('/users/{user}', [UserAccountController::class, 'destroy'])->name('users.destroy');
         });
     });
+
+    // Teruletenkenti utvonalfajlok: mindegyiknek egy csomag a gazdaja, es maga
+    // nyitja meg a sajat (auth, admin) csoportjait, igy ehhez a fajlhoz nem kell nyulniuk.
+    require __DIR__.'/api/typed-tasks.php';
+    require __DIR__.'/api/file-tasks.php';
+    require __DIR__.'/api/exams.php';
+    require __DIR__.'/api/learning.php';
+    require __DIR__.'/api/admin-overview.php';
 });

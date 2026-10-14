@@ -100,12 +100,12 @@ export function ChildList({ items, emptyText, onReorder, onDelete, busy, noun }:
 interface IconButtonProps {
   icon: IconName
   label: string
-  disabled: boolean
+  disabled?: boolean
   onClick: () => void
   danger?: boolean
 }
 
-export function IconButton({ icon, label, disabled, onClick, danger = false }: IconButtonProps) {
+export function IconButton({ icon, label, disabled = false, onClick, danger = false }: IconButtonProps) {
   return (
     <button
       type="button"

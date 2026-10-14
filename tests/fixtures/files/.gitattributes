@@ -1,0 +1,5 @@
+# A fixture fajlok bajtra pontosan szamitanak (meret, hash, sorvegek): a git ne
+# normalizalja oket, akkor sem, ha szovegnek latszanak (pl. pw-serult.xlsx).
+* -text
+*.ts text eol=lf
+.gitattributes text eol=lf

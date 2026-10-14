@@ -4,12 +4,14 @@ declare(strict_types=1);
 
 namespace App\Console\Commands;
 
+use App\Services\Files\FileDisk;
 use App\Support\DisposableDatabase;
 use Database\Seeders\ApiTestSeeder;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Storage;
 
 /**
  * Friss adatbazis + fixture adatok a Playwright API teszteknek (tests/api).
@@ -49,6 +51,20 @@ class PrepareApiTestFixtures extends Command
         // MySQL-en (#126) az adatbazist a kornyezet adja; sqlite-nal a fajlnak leteznie kell.
         if (DB::connection()->getDriverName() === 'sqlite' && ! file_exists($path)) {
             touch($path);
+        }
+
+        // A feladatfajlok es a beadasok taroloja a seed ELOTT urul: a seeder ide irja a
+        // fixture csatolmanyokat, es egy korabbi futtatas fajljai ne maradjanak meg.
+        foreach (FileDisk::cases() as $disk) {
+            $storage = Storage::disk($disk->diskName());
+
+            foreach ($storage->directories() as $directory) {
+                if (is_string($directory)) {
+                    $storage->deleteDirectory($directory);
+                }
+            }
+
+            $storage->delete($storage->files());
         }
 
         $this->call('migrate:fresh', ['--force' => true]);

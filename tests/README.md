@@ -32,12 +32,17 @@ tests/
 │   ├── env.ts                zod-dal validált, típusos környezet
 │   ├── environments/         <stage>.env alapértékek (local, ci, staging)
 │   └── web-servers.ts        frontend / backend / Judge0 mock indítása
+├── fixtures/
+│   └── files/                bináris fixture-ök (xlsx, ods, docx…) és a generátoruk
 ├── src/
 │   ├── api/                  ApiClient + a backend szerződés típusai
+│   │   ├── areas/            területenkénti segédfüggvények (fájlbeadás, vizsga…)
+│   │   └── types/            területenkénti választípusok
 │   ├── pages/                oldalobjektumok (BasePage, TaskListPage, TaskSolvePage)
 │   │   └── components/       újrahasznosítható komponensek (MonacoEditor, ResultPanel)
 │   ├── fixtures/             test.extend: pages, apiClient, mockApi, a11y (axe)
 │   ├── mocks/                MockApi (route interception), Judge0 mock szerver
+│   ├── support/              függőség nélküli segédek (zip-író)
 │   └── data/                 adatbuilderek és a seedelt fixture adatok leírása
 └── specs/
     ├── e2e/                  böngészős tesztek
@@ -117,5 +122,32 @@ MySQL adatbázist fogad el, és csak `APP_ENV=testing` mellett.
 
 1. Új oldal → `src/pages/<Nev>Page.ts` a `BasePage`-ből, majd fixture a
    `src/fixtures/index.ts`-ben.
-2. Új végpont → típus a `src/api/types.ts`-be, metódus az `ApiClient`-be.
+2. Új végpont → típus a `src/api/types/<terulet>.ts`-be, segédfüggvény a
+   `src/api/areas/<terulet>.ts`-be. A segédfüggvény egy `ApiClient`-et kap, és a
+   nyilvános `get`, `post`, `put`, `patch`, `delete`, `postMultipart`,
+   `getBinary` metódusaira épül (minta: `areas/accounts.ts`), így az
+   `ApiClient.ts` és a `types.ts` nem bővül, és két terület nem ütközik.
+   A típusnevek legyenek egyediek: a `types.ts` mindet újraexportálja.
 3. Spec a `specs/e2e` vagy `specs/api` alá, `@smoke`/`@regression` címkével.
+
+### API tesztek: fiókok, fájlok, korlátok
+
+- **Admin:** `adminAccount(apiClient)` (`areas/accounts.ts`). A tokent a
+  spec fájlok megosztják, mert a bejelentkezés fiókonként percenként 5-re
+  korlátozott; ne léptesd be az admint közvetlenül.
+- **Diákok:** `verifiedStudent` (megerősített e-mail, előfizetés nélkül) és
+  `premiumStudent` (megerősített e-mail és kézi hozzáférés).
+- **Fájlok:** `fixtureFile(FIXTURE_FILES.sheetOk)` egy `fixtures/files` alatti
+  fájlt ad feltölthető alakban, az `uploadOf(név, tartalom)` egy memóriában
+  összerakottat (pl. a `src/support/zip.ts` `zipArchive` függvényével).
+  A fájlok maradjanak 1,5 MB alatt: a teszt-backend PHP-je 2 MB-nál nagyobb
+  feltöltést nem fogad.
+- **Új bináris fixture:** a `fixtures/files/generate.ts`-be (vagy a terület saját
+  almappájába, saját generátorral), majd `npm run fixtures`. A kimenet bájtra
+  determinisztikus; a fájlokat verziókezeljük.
+- **A teszt-backend eltérései** (`config/web-servers.ts`, tükre a
+  `TEST_BACKEND` a `seed.ts`-ben): dokumentumból 1 MB a méretkorlát, a
+  vizsgáknál nincs türelmi idő, a feltöltési keretek gyakorlatilag korlátlanok.
+- A `test:prepare-api-fixtures` minden futás előtt **kiüríti** a
+  `backend/storage/app/private/exercise-files` és `…/submission-files` mappát:
+  helyi fejlesztésnél ide ne tegyél megőrzendő fájlt.
