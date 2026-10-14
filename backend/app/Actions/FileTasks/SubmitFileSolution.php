@@ -163,6 +163,7 @@ final readonly class SubmitFileSolution
     {
         // Feltoltesenkent rendszerint egyetlen sor esik ki; a korlat csak a lekerdezest tartja vegesen.
         $stale = $this->practiceAttempts($user, $exercise)
+            ->prunable()
             ->orderByDesc('id')
             ->offset(max(1, Config::integer('filetasks.keep_per_exercise')))
             ->limit(self::PRUNE_BATCH)

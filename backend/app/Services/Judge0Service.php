@@ -134,28 +134,44 @@ final class Judge0Service
     public function languages(): array
     {
         // v2: id => nev alak; a regi (lista) alaku cache bejegyzesek igy nem olvasodnak vissza.
-        return Cache::remember(
+        $cached = Cache::get('judge0.languages.v2');
+
+        if (is_array($cached) && $cached !== []) {
+            /** @var array<int, string> $cached */
+            return $cached;
+        }
+
+        $languages = $this->fetchLanguages();
+
+        // Ures eredmenyt (hiba) csak rovid ideig tartunk meg, hogy egy kieses ne maradjon egy oraig fallback ID-kkel.
+        Cache::put(
             'judge0.languages.v2',
-            Config::integer('judge0.languages_cache_ttl'),
-            function (): array {
-                try {
-                    $response = $this->request()->get('/languages');
-                } catch (Throwable $e) {
-                    Log::warning('Judge0: /languages request failed.', ['error' => $e->getMessage()]);
-
-                    return [];
-                }
-
-                $languages = [];
-                foreach ((array) ($response->successful() ? $response->json() : []) as $language) {
-                    if (is_array($language) && is_int($language['id'] ?? null) && is_string($language['name'] ?? null)) {
-                        $languages[$language['id']] = $language['name'];
-                    }
-                }
-
-                return $languages;
-            }
+            $languages,
+            $languages === [] ? Config::integer('judge0.languages_failure_ttl') : Config::integer('judge0.languages_cache_ttl'),
         );
+
+        return $languages;
+    }
+
+    /** @return array<int, string> */
+    private function fetchLanguages(): array
+    {
+        try {
+            $response = $this->request()->get('/languages');
+        } catch (Throwable $e) {
+            Log::warning('Judge0: /languages request failed.', ['error' => $e->getMessage()]);
+
+            return [];
+        }
+
+        $languages = [];
+        foreach ((array) ($response->successful() ? $response->json() : []) as $language) {
+            if (is_array($language) && is_int($language['id'] ?? null) && is_string($language['name'] ?? null)) {
+                $languages[$language['id']] = $language['name'];
+            }
+        }
+
+        return $languages;
     }
 
     /** Elerheto-e egyaltalan a Judge0. */

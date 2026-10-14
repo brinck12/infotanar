@@ -10,6 +10,7 @@ use App\Services\Files\StoredFile;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Carbon;
@@ -122,6 +123,24 @@ final class FileSubmission extends Model
     protected function practice(Builder $query): void
     {
         $query->whereNull('exam_attempt_id');
+    }
+
+    /**
+     * Megorzesi takaritasra kijelolheto gyakorlo beadasok: a feladatonkenti legutolso
+     * sikeres beadas sosem, kulonben a "megoldva" allapot es a lecke-haladas visszaesne.
+     *
+     * @param  Builder<FileSubmission>  $query
+     */
+    #[Scope]
+    protected function prunable(Builder $query): void
+    {
+        $query->whereNull('exam_attempt_id')->whereNotIn('id', static function (QueryBuilder $best): void {
+            $best->from('file_submissions')
+                ->whereNull('exam_attempt_id')
+                ->where('passed', true)
+                ->groupBy('user_id', 'exercise_id')
+                ->selectRaw('MAX(id)');
+        });
     }
 
     public function isPractice(): bool

@@ -21,7 +21,7 @@ final class RunCodeRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'task_id' => ['required', 'integer', 'exists:exercises,id'],
+            'task_id' => ['required', 'integer'],
             'language' => ['required', 'string', Rule::in(array_keys(Config::array('judge0.languages')))],
             'source_code' => ['required', 'string', 'max:65535'],
         ];

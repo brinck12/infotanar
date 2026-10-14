@@ -166,6 +166,6 @@ final class Exercise extends Model
     protected function published(Builder $query): void
     {
         $query->where('is_published', true)
-            ->whereHas('lesson', static fn (Builder $lesson) => $lesson->where('is_published', true));
+            ->whereHas('lesson', static fn (Builder $lesson) => $lesson->published());
     }
 }
