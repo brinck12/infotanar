@@ -48,7 +48,18 @@ export function ResultPanel({ loading, error, result, mode, hiddenCount = 0, lim
     )
   }
 
-  const passedCount = result.results.filter((r) => r.passed).length
+  // Rendszerhibánál (pl. a futtató elérhetetlen) nincs mit mutatni a teszteseteken: üres
+  // Bemenet/Elvárt/Kimenet mezők helyett egyetlen, barátságos üzenet.
+  if (runVerdict(result) === 'system_error') {
+    return (
+      <Banner kind="warn" title="A kódfuttató most nem érhető el" data-testid="result-system-error">
+        Ez nem a te hibád, a kódod nem romlott el. Próbáld újra egy perc múlva.
+        {result.message && <span className="mt-1 block">{result.message}</span>}
+      </Banner>
+    )
+  }
+
+  const passedCount =result.results.filter((r) => r.passed).length
   const total = result.results.length
   const verdict = runVerdict(result)
   const meta = VERDICT_META[verdict]

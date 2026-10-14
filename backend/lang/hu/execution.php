@@ -16,6 +16,7 @@ return [
     'rate_limited' => 'Túl sok futtatás rövid idő alatt. Próbáld újra :seconds másodperc múlva.',
     'daily_limit' => 'Elérted a napi futtatási keretet. Legkésőbb 24 óra múlva újra futtathatsz.',
     'busy' => 'A kódfuttató most túlterhelt. Próbáld újra :seconds másodperc múlva.',
+    'capacity_busy' => 'Most sokan futtatnak kódot. Próbáld újra pár másodperc múlva.',
     'files_unavailable' => 'A feladat adatfájljai most nem érhetők el. Próbáld újra később.',
     'error_status_label' => 'Hiba',
     // Elemenkenti (tokens, numeric) osszevetes: az elso elteres leirasa a lathato tesztesetnel.
