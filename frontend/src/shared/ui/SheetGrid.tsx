@@ -8,6 +8,8 @@ interface SheetGridProps {
   valueOf: (cell: string) => string
   selected: string
   onSelect: (cell: string) => void
+  /** Szerkesztés indítása a kijelölt cellán: beírt karakterrel (csere) vagy F2-vel (`null`, a tartalom marad). */
+  onEdit?: (cell: string, text: string | null) => void
   /** A tábla neve a képernyőolvasónak. */
   label: string
 }
@@ -21,8 +23,23 @@ const isNumeric = (value: string) => /^-?\d+(,\d+)?$/.test(value)
  * Táblázatrács oszlopbetűkkel és sorszámokkal. A kijelölt cella zöld keretet
  * kap; a rács nyilakkal bejárható, a szerkesztés a képletsávban történik.
  */
-export function SheetGrid({ columns, rows, valueOf, selected, onSelect, label }: SheetGridProps) {
+export function SheetGrid({ columns, rows, valueOf, selected, onSelect, onEdit, label }: SheetGridProps) {
   function onKeyDown(event: KeyboardEvent<HTMLTableElement>) {
+    if (onEdit && !event.ctrlKey && !event.metaKey && !event.altKey) {
+      // A fókuszban lévő cella a szerkesztett, ha az eltér a kijelöltől (pl. Tab után).
+      const focused = event.target instanceof HTMLElement ? event.target.closest<HTMLElement>('[data-cell]')?.dataset['cell'] : undefined
+      const target = focused ?? selected
+      if (event.key.length === 1 && event.key !== ' ') {
+        event.preventDefault()
+        onEdit(target, event.key)
+        return
+      }
+      if (event.key === 'F2') {
+        event.preventDefault()
+        onEdit(target, null)
+        return
+      }
+    }
     const column = LETTERS.indexOf(selected.charAt(0))
     const row = Number(selected.slice(1)) - 1
     const step = { ArrowUp: [0, -1], ArrowDown: [0, 1], ArrowLeft: [-1, 0], ArrowRight: [1, 0] }[event.key]

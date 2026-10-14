@@ -84,10 +84,11 @@ export const submissionsQuery = (exerciseId: number) =>
     refetchInterval: (query) => (query.state.data?.some((item) => item.status === 'processing') ? POLL_MS : false),
   })
 
-export async function uploadSubmission(exerciseId: number, file: File, onProgress: (percent: number) => void): Promise<FileSubmission> {
+export async function uploadSubmission(exerciseId: number, file: File, onProgress: (percent: number) => void, signal?: AbortSignal): Promise<FileSubmission> {
   const body = new FormData()
   body.append('file', file)
   const response = await http.post<Envelope<FileSubmission>>(`/exercises/${exerciseId}/file-submissions`, body, {
+    signal,
     onUploadProgress: (event) => onProgress(event.total ? (event.loaded / event.total) * 100 : 0),
   })
   return response.data.data

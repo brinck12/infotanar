@@ -1,4 +1,5 @@
 import { useId, useRef, useState, type DragEvent } from 'react'
+import { Banner } from './Banner'
 import { Button } from './Button'
 import { cx } from './cx'
 import { Icon, StateIcon } from './Icon'
@@ -17,11 +18,15 @@ interface DropzoneProps {
   /** Mit töltsön fel a tanuló (a címsor): alapból „a kész fájlt”. */
   what?: string
   error?: string | null
+  /** Hálózati hibánál: ugyanazzal a fájllal újrapróbálja a feltöltést. */
+  onRetry?: () => void
+  /** A hibaüzenet elvetése (Mégse). */
+  onDismiss?: () => void
   disabled?: boolean
 }
 
 /** Fájlfeltöltő három állapottal: üres, feltöltés közben, kész. */
-export function Dropzone({ state, accept, onFile, what = 'a kész fájlt', error, disabled = false }: DropzoneProps) {
+export function Dropzone({ state, accept, onFile, what = 'a kész fájlt', error, onRetry, onDismiss, disabled = false }: DropzoneProps) {
   const inputId = useId()
   const inputRef = useRef<HTMLInputElement>(null)
   const [over, setOver] = useState(false)
@@ -67,18 +72,47 @@ export function Dropzone({ state, accept, onFile, what = 'a kész fájlt', error
     )
   }
 
+  const errorBanner = (title: string, text: string) => (
+    <Banner
+      kind="error"
+      title={title}
+      className="mt-2"
+      action={
+        onRetry || onDismiss ? (
+          <>
+            {onRetry && (
+              <Button variant="secondary" onClick={onRetry}>
+                Újra
+              </Button>
+            )}
+            {onDismiss && (
+              <Button variant="text" onClick={onDismiss}>
+                Mégse
+              </Button>
+            )}
+          </>
+        ) : undefined
+      }
+    >
+      {text}
+    </Banner>
+  )
+
   if (state.kind === 'done') {
     return (
-      <div className="flex flex-wrap items-center gap-3 rounded-md border border-accent bg-sheet px-4.5 py-3.5">
-        <StateIcon kind="ok" label="Feltöltve" />
-        <div className="min-w-0 flex-1 basis-48">
-          <p className="truncate text-15 font-semibold">{state.name}</p>
-          <p className="mt-0.5 text-13 text-ink-soft">{state.detail}</p>
+      <div>
+        <div className="flex flex-wrap items-center gap-3 rounded-md border border-accent bg-sheet px-4.5 py-3.5">
+          <StateIcon kind="ok" label="Feltöltve" />
+          <div className="min-w-0 flex-1 basis-48">
+            <p className="truncate text-15 font-semibold">{state.name}</p>
+            <p className="mt-0.5 text-13 text-ink-soft">{state.detail}</p>
+          </div>
+          {input}
+          <Button variant="text" onClick={open} disabled={disabled}>
+            Másik fájl
+          </Button>
         </div>
-        {input}
-        <Button variant="text" onClick={open} disabled={disabled}>
-          Másik fájl
-        </Button>
+        {error && errorBanner('Az új fájl NEM került be', `${error} A korábban feltöltött fájl (${state.name}) maradt érvényes.`)}
       </div>
     )
   }
@@ -105,12 +139,7 @@ export function Dropzone({ state, accept, onFile, what = 'a kész fájlt', error
           Fájl kiválasztása
         </Button>
       </div>
-      {error && (
-        <p role="alert" className="mt-1.5 flex items-start gap-1.5 text-14 leading-normal text-wrong">
-          <Icon name="warn" size={16} className="mt-0.5" />
-          <span>{error}</span>
-        </p>
-      )}
+      {error && errorBanner('A fájl nem került be', error)}
     </div>
   )
 }

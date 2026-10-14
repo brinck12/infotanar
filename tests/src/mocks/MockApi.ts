@@ -50,6 +50,8 @@ export interface MockOralPractice {
 export interface MockExamOptions {
   detail?: object
   attempt?: object
+  /** A probalkozas allapotvaltashoz: minden lekeresnel ujra kiertekelodik (az `attempt` helyett). */
+  attemptOf?: () => object
   startError?: { status: number; body: object }
 }
 
@@ -202,11 +204,53 @@ export class MockApi {
   async withExams(exams: object[], options: MockExamOptions = {}): Promise<void> {
     await this.page.route(`${API}/exams`, (route) => route.fulfill({ json: { data: exams } }))
     if (options.detail) await this.page.route(`${API}/exams/*`, (route) => route.fulfill({ json: { data: options.detail } }))
-    if (options.attempt) await this.page.route(`${API}/exam-attempts/*`, (route) => route.fulfill({ json: { data: options.attempt } }))
+    const { attempt, attemptOf } = options
+    if (attempt ?? attemptOf) {
+      await this.page.route(`${API}/exam-attempts/*`, (route) => route.fulfill({ json: { data: attemptOf ? attemptOf() : attempt } }))
+    }
     if (options.startError) {
       const { status, body } = options.startError
       await this.page.route(`${API}/exams/*/attempts`, (route) => route.fulfill({ status, json: body }))
     }
+  }
+
+  /** A belepett nezonek nincs elofizetese. */
+  async withoutSubscription(): Promise<void> {
+    await this.page.route(`${API}/billing/subscription`, (route) => route.fulfill({ json: { data: null } }))
+  }
+
+  /** A kijelentkezes vegpontja. */
+  async onLogout(): Promise<void> {
+    await this.page.route(`${API}/auth/logout`, (route) => route.fulfill({ status: 204 }))
+  }
+
+  /** A vizsga eredmenyoldalanak adata. */
+  async withExamResult(result: object): Promise<void> {
+    await this.page.route(`${API}/exam-attempts/*/result`, (route) => route.fulfill({ json: { data: result } }))
+  }
+
+  /** A vizsgareszhez feltoltes valasza; a visszaadott fuggveny a kuldott keresek szamat adja. */
+  async onExamPartUpload(response: { status: number; body: object }): Promise<() => number> {
+    let calls = 0
+    await this.page.route(`${API}/exam-attempts/*/parts/*/file`, (route) => {
+      calls += 1
+      return route.fulfill({ status: response.status, json: response.body })
+    })
+    return () => calls
+  }
+
+  /**
+   * A vizsga beadasa: a `respond` a hivas sorszamat (1-tol) kapja, es a valaszt adja.
+   * A visszaadott fuggveny a kuldott keresek szamat adja.
+   */
+  async onExamSubmit(respond: (call: number) => { status: number; body: object }): Promise<() => number> {
+    let calls = 0
+    await this.page.route(`${API}/exam-attempts/*/submit`, (route) => {
+      calls += 1
+      const { status, body } = respond(calls)
+      return route.fulfill({ status, json: body })
+    })
+    return () => calls
   }
 
   /** Egy fajlfeladat beadasai (lista es egyedi lekeres). */

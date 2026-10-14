@@ -43,3 +43,17 @@ export function buildExamAttempt(overrides: Record<string, unknown> = {}): Recor
     ...overrides,
   }
 }
+
+/** A vizsga eredmenyoldala (reszek nelkul). */
+export function buildExamResult(overrides: Record<string, unknown> = {}): Record<string, unknown> {
+  return {
+    attempt_id: 9,
+    exam: buildExamDetail(),
+    score: 40,
+    max_score: 100,
+    pending_manual_points: 0,
+    parts: [],
+    review: [],
+    ...overrides,
+  }
+}

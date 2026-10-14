@@ -1,4 +1,6 @@
-import { useId, useMemo, useState, type FormEvent } from 'react'
+import { useId, useMemo, useRef, useState, type FormEvent } from 'react'
+import { userKeyOf } from '../../../shared/domain/lastTask'
+import { usePersistentState } from '../../../shared/hooks/usePersistentState'
 import { Badge, LevelBadge } from '../../../shared/ui/Badge'
 import { Banner } from '../../../shared/ui/Banner'
 import { Button } from '../../../shared/ui/Button'
@@ -8,6 +10,7 @@ import { RubricItem } from '../../../shared/ui/RubricItem'
 import { SheetGrid } from '../../../shared/ui/SheetGrid'
 import { CardTitle } from '../../../shared/ui/Text'
 import type { SheetPracticeInfo, UnlockedTaskDetail } from '../../../types'
+import { useAuth } from '../../auth/context'
 import { runSheetChecks } from './checks'
 import { cellName, display, evaluateCell, parseCell, shiftFormula, type Cells } from './formula'
 
@@ -16,12 +19,19 @@ import { cellName, display, evaluateCell, parseCell, shiftFormula, type Cells } 
  * ellenőrzőlistával, telepített program nélkül. Rövid leckegyakorlatokhoz
  * való; a vizsgafeladatok a tanuló saját programjában készülnek.
  */
+function isCells(value: unknown): value is Cells {
+  return typeof value === 'object' && value !== null && !Array.isArray(value) && Object.values(value).every((item) => typeof item === 'string')
+}
+
 export function SheetPracticeWorkspace({ task, info }: { task: UnlockedTaskDetail; info: SheetPracticeInfo }) {
   const inputId = useId()
-  const [cells, setCells] = useState<Cells>(info.cells)
+  const inputRef = useRef<HTMLInputElement>(null)
+  const { user } = useAuth()
+  // A munka a böngészőben megmarad (felhasználónként és feladatonként), újratöltés után is.
+  const [cells, setCells] = usePersistentState<Cells>(`infotanar.practice.v1.${userKeyOf(user)}.sheet.${task.id}`, info.cells, isCells)
   const [history, setHistory] = useState<Cells[]>([])
   const [selected, setSelected] = useState('A1')
-  const [draft, setDraft] = useState(info.cells['A1'] ?? '')
+  const [draft, setDraft] = useState(cells['A1'] ?? '')
 
   const results = useMemo(() => runSheetChecks(info, cells), [info, cells])
   const done = results.filter((result) => result.state === 'ok').length
@@ -29,6 +39,13 @@ export function SheetPracticeWorkspace({ task, info }: { task: UnlockedTaskDetai
   function select(cell: string) {
     setSelected(cell)
     setDraft(cells[cell] ?? '')
+  }
+
+  /** Közvetlen szerkesztés: a cellára gépelt karakter a képletsávba kerül, ott folytatódik a beírás. */
+  function edit(cell: string, text: string | null) {
+    setSelected(cell)
+    setDraft(text ?? cells[cell] ?? '')
+    inputRef.current?.focus()
   }
 
   function apply(next: Cells) {
@@ -132,6 +149,7 @@ export function SheetPracticeWorkspace({ task, info }: { task: UnlockedTaskDetai
           </label>
           <input
             id={inputId}
+            ref={inputRef}
             value={draft}
             onChange={(e) => setDraft(e.target.value)}
             spellCheck={false}
@@ -150,13 +168,14 @@ export function SheetPracticeWorkspace({ task, info }: { task: UnlockedTaskDetai
             rows={info.rows}
             selected={selected}
             onSelect={select}
+            onEdit={edit}
             valueOf={(cell) => display(evaluateCell(cells, cell))}
           />
         </div>
         <p className="mt-2 inline-block rounded-b-md border border-t-0 border-line bg-sheet px-4 py-1.5 text-14 font-semibold">Munka1</p>
 
         <p className="mt-4 text-14 leading-relaxed text-ink-soft">
-          Jelölj ki egy cellát, írd be a tartalmát a képletsávba, és nyomj Entert. Az ellenőrzés a cellák tartalmát és képleteit nézi, és
+          Jelölj ki egy cellát, és kezdj el gépelni (vagy nyomj F2-t), vagy írd a tartalmát a képletsávba, és nyomj Entert. Az ellenőrzés a cellák tartalmát és képleteit nézi, és
           magától frissül.
         </p>
       </Panel>

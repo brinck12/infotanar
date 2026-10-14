@@ -133,7 +133,9 @@ function TestResultRow({ index, result }: { index: number; result: TestResult })
   const label = result.verdict_label ?? VERDICT_META[verdict].label
 
   // Rejtett tesztesetnél a backend nem küld futási részleteket és kimenetet (csak az eredményt).
-  const outputs = !result.hidden && (
+  // Rendszerhibánál (pl. a futtató nem elérhető) nincs értelmes bemenet és kimenet: üres rácsot nem mutatunk.
+  const systemError = verdict === 'system_error'
+  const outputs = !result.hidden && !systemError && (
     <div className="mt-3 grid gap-3 sm:grid-cols-2">
       <OutputBlock label="Bemenet" value={result.stdin} />
       <OutputBlock label="Elvárt kimenet" value={result.expected} />
@@ -153,6 +155,7 @@ function TestResultRow({ index, result }: { index: number; result: TestResult })
       meta={!result.hidden && <RunMetrics time={result.time} exitCode={result.exit_code} />}
     >
       {result.error && <p className="mt-2 text-15 text-wrong">{result.error}</p>}
+      {systemError && <p className="mt-2 text-15 text-ink-soft">Nem a te hibád, próbáld újra 1 perc múlva.</p>}
       {outputs &&
         (result.passed ? (
           <details className="mt-1.5">
