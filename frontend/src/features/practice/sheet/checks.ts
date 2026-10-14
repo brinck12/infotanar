@@ -1,6 +1,6 @@
 import type { RubricState } from '../../../shared/ui/RubricItem'
 import type { SheetPracticeInfo } from '../../../types'
-import { display, evaluateCell, expandRange, functionsOf, isFormula, parseCell, referencesOf, shiftFormula, type Cells } from './formula'
+import { ERROR, display, evaluateCell, expandRange, functionsOf, isFormula, parseCell, referencesOf, shiftFormula, type Cells } from './formula'
 
 type Check = SheetPracticeInfo['checks'][number]
 
@@ -66,9 +66,39 @@ function evaluate(check: Check, cells: Cells): { passed: boolean; found: string 
   }
 }
 
+const ERROR_VALUES: ReadonlySet<string> = new Set(Object.values(ERROR))
+
+/** A rövid magyar tipp a hibaértékhez: mit szokás elrontani. */
+export function errorHint(value: string): string {
+  switch (value) {
+    case ERROR.name:
+      return 'Ismeretlen név. A függvények magyarul vannak: SZUM, ÁTLAG, HA, DARABTELI. Az angol SUM vagy IF nem működik.'
+    case ERROR.value:
+      return 'A paramétereket pontosvessző választja el (nem vessző), a tizedesjel vessző. Nézd meg a zárójeleket és az idézőjeleket is.'
+    case ERROR.div:
+      return 'Nullával osztás. Ellenőrizd a nevezőt.'
+    case ERROR.ref:
+      return 'Hibás cellahivatkozás vagy tartomány.'
+    default:
+      return 'A képlet hibaértéket ad: javítsd, mielőtt pontot kaphatna.'
+  }
+}
+
+/** A hibaérték, ha az ellenőrzött cella(k) valamelyike hibát ad; a hibás képlet nem kaphat pontot. */
+function errorValueOf(check: Check, cells: Cells): { cell: string; value: string } | null {
+  const names = check.type === 'filled_down' ? expandRange(check.range) : [check.cell]
+  for (const cell of names) {
+    const value = display(evaluateCell(cells, cell))
+    if (ERROR_VALUES.has(value)) return { cell, value }
+  }
+  return null
+}
+
 /** Az ellenőrzőlista kiértékelése a cellák tartalmán és képletein. */
 export function runSheetChecks(info: SheetPracticeInfo, cells: Cells): SheetCheckResult[] {
   return info.checks.map((check) => {
+    const failure = errorValueOf(check, cells)
+    if (failure) return { check, state: 'bad', found: `${failure.cell}: ${failure.value}`, hint: errorHint(failure.value) }
     const { passed, found, hint } = evaluate(check, cells)
     return { check, state: passed ? 'ok' : 'bad', found, hint: passed ? null : hint }
   })

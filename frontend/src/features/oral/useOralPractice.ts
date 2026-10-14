@@ -111,6 +111,7 @@ export function useOralTopicPractice(slug: string): OralTopicPracticeState {
   const [draft, setDraft] = useState<OralPracticeInput | null>(null)
   const timer = useRef<number | null>(null)
   const pending = useRef<OralPracticeInput | null>(null)
+  const sending = useRef<OralPracticeInput | null>(null)
 
   const row = rowOf(slug)
   const stored = readStoredPractice(userKey, slug)
@@ -123,12 +124,19 @@ export function useOralTopicPractice(slug: string): OralTopicPracticeState {
     if (timer.current !== null) window.clearTimeout(timer.current)
     timer.current = null
     const input = pending.current
-    pending.current = null
-    if (input === null) return
+    if (input === null || sending.current === input) return
+    sending.current = input
+    // A függő változtatás addig marad, amíg a küldés nem sikerült: hiba után a következő mentés újra viszi.
     saveOralPractice(slug, input).then(
-      (saved) => upsertRow(queryClient, saved),
+      (saved) => {
+        sending.current = null
+        if (pending.current === input) pending.current = null
+        upsertRow(queryClient, saved)
+      },
       (error: unknown) => {
+        sending.current = null
         if (httpStatus(error) === 404) {
+          if (pending.current === input) pending.current = null
           saveLocal({ ...input, attempts: practice.attempts })
           return
         }
