@@ -168,6 +168,34 @@ final class Judge0Service
         }
     }
 
+    /**
+     * A Judge0 varakozo sora a /workers vegpontbol (a sorok `size` mezoinek osszege).
+     * Null, ha nem merheto: a vegpont nincs, hibat ad vagy nem a vart alakot.
+     */
+    public function queueDepth(): ?int
+    {
+        try {
+            $response = $this->request()->timeout(5)->get('/workers');
+        } catch (Throwable) {
+            return null;
+        }
+
+        $queues = $response->successful() ? $response->json() : null;
+        if (! is_array($queues)) {
+            return null;
+        }
+
+        $depth = 0;
+        foreach ($queues as $queue) {
+            if (! is_array($queue) || ! is_numeric($queue['size'] ?? null)) {
+                return null;
+            }
+            $depth += (int) $queue['size'];
+        }
+
+        return $depth;
+    }
+
     private function request(): PendingRequest
     {
         $request = Http::baseUrl(Config::string('judge0.url'))

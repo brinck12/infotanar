@@ -1,0 +1,45 @@
+# Masold judge0.conf neven (chmod 600), es cserald a jelszavakat/tokent.
+# A JUDGE0_AUTH_TOKEN erteke a backend .env-jebe is bekerul.
+
+# --- Hozzaferes ---
+AUTHN_HEADER=X-Auth-Token
+AUTHN_TOKEN=CSERELD_HOSSZU_VELETLEN_ERTEKRE
+ALLOW_ENABLE_NETWORK=false
+
+# --- Kapacitas (OPS-4) ---
+# Egyidejuleg futo workerek szama: ennyi beadas fut parhuzamosan. A magok
+# szamanal ne legyen tobb (kiindulo ertek: magok - 1).
+COUNT=4
+# Varakozo sor felso hatara; folotte a Judge0 elutasit (a backend 503-at ad).
+MAX_QUEUE_SIZE=100
+# Egy beadas ennyiszer fut le (tesztesetenkent egy kuldes, igy 1 elegendo).
+NUMBER_OF_RUNS=1
+
+# --- Sandbox alapertekek es korlatok ---
+# A backend felso hatarai (JUDGE0_MAX_*) ezeknel ne legyenek nagyobbak.
+ENABLE_NETWORK=false
+CPU_TIME_LIMIT=2
+MAX_CPU_TIME_LIMIT=15
+CPU_EXTRA_TIME=0.5
+WALL_TIME_LIMIT=10
+MAX_WALL_TIME_LIMIT=20
+MEMORY_LIMIT=128000
+MAX_MEMORY_LIMIT=512000
+STACK_LIMIT=64000
+MAX_STACK_LIMIT=64000
+MAX_PROCESSES_AND_OR_THREADS=60
+MAX_MAX_PROCESSES_AND_OR_THREADS=60
+MAX_FILE_SIZE=1024
+MAX_MAX_FILE_SIZE=4096
+ENABLE_PER_PROCESS_AND_THREAD_TIME_LIMIT=false
+ENABLE_PER_PROCESS_AND_THREAD_MEMORY_LIMIT=true
+
+# --- Hattertarak ---
+REDIS_HOST=redis
+REDIS_PORT=6379
+REDIS_PASSWORD=CSERELD_VELETLEN_JELSZORA
+POSTGRES_HOST=db
+POSTGRES_PORT=5432
+POSTGRES_DB=judge0
+POSTGRES_USER=judge0
+POSTGRES_PASSWORD=CSERELD_VELETLEN_JELSZORA
