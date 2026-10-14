@@ -18,6 +18,9 @@ Részletes nyers jelentések (azonosítókkal, fájl:sorral), a `docs/roadmap/re
 
 A tesztterv külön van: `tests/testplan.md`. A fejlesztési előzmények: `docs/roadmap/backend-progress.md`.
 
+**Éles üzemi kiegészítés:** `docs/roadmap/production-readiness.md` (OPS, PRIV, LAUNCH, REL tételek: deploy és visszagörgetés, vizsgaidei kapacitás, hibafigyelés, adatvédelem és kiskorúak, zárt béta, SEO, tartalom-csővezeték, kiadás-minőség). Ott van az új **0a fázis** (zárt béta előtti blokkolók), és az alábbi 5. fejezet fázisaihoz tartozó kiegészítések. A két dokumentum együtt a teljes terv; ütközésnél a `production-readiness.md` az újabb.
+**Indítási modell: zárt béta**, osztályonként, meghívókóddal. Nyilvános nyitás csak a 0a, 0, 1 fázis, a tartalom és a jogi szöveg után.
+
 ---
 
 ## 1. Rövid ítélet
@@ -165,7 +168,11 @@ Az azonosítók a fenti fájlokra mutatnak.
 
 A számlázás és a jogi szöveg élesítése a legvégére marad, ahogy kérted. A sorrend indoka: előbb a bizalom (ne vesszen el munka), aztán az első benyomás, aztán a tanár eszközei, és csak utána a tartalom tömeges gyártása (mert az eszköz nélkül nem lehet), végül az elköteleződés.
 
+### Fázis 0a: élesítési kapuk (új; a részletek a `production-readiness.md` 3. fejezetében)
+Kiadás-könyvtáras deploy és visszagörgetés (OPS-1, OPS-2, OPS-5, REL-7), vizsgaidei kapacitás és Redis (OPS-4, OPS-9), 5xx riasztás és uptime figyelő (OPS-3, OPS-11, OPS-12), `catalog:verify` (LAUNCH-3), zárt béta regisztrációs kapu (LAUNCH-2), naplók és localStorage adatvédelmi mechanikája (PRIV-5, PRIV-7, PRIV-9), éles füstpróba (REL-15). Ezek nélkül nincs béta.
+
 ### Fázis 0: megbízhatóság (kicsi, nagy hatás; 1-2 hét)
+Kiegészítések a `production-readiness.md` 4. fejezetében (REL-1 versenyhelyzetek, PRIV-3 teljes törlés, PRIV-4 megőrzés, PRIV-10 hitelesítés).
 Mind helyi javítás, a tesztterv P0 eseteivel együtt.
 - F01, F02, F03 (Dropzone hiba, 409 kezelés, auto-beadás újrapróba), F08/IA9 (kilépés-figyelmeztetés), F04, F05, CH5/CH6 (cache), CH4 (szóbeli piszkozat).
 - F10, F11 (gyakorlók piszkozata, cellaszerkesztés, hibaérték nem kap pontot), F12, F13.
@@ -207,6 +214,8 @@ Lásd `content.md`. Javaslat sorrendben:
 ## 6. Követőlista
 
 Pipáld ki, ha kész. A tételek mind a nyers jelentésekben vannak részletezve.
+
+**Fázis 0a:** lásd a `production-readiness.md` 10. fejezetének követőlistáját (OPS-1/2/3/4/5/9/11/12, LAUNCH-2/3, PRIV-5/7/9, REL-15).
 
 **Fázis 0**
 - [ ] F01 Dropzone hiba a kész állapotban

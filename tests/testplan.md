@@ -2,6 +2,8 @@
 
 Állapot: 2026-10-14, a `fullstack/backend-platform` ág alapján. A számok **becslések** a végpontlistából (`docs/api-endpoints.md`: 131 végpont) és az oldalakból; a cél a döntéshez szükséges nagyságrend, nem pontos szám. A meglévő darabszámok a `npx playwright test --project=<p> --list` kimenetéből vannak.
 
+> **Javítás (2026-10-14, lásd `docs/roadmap/production-readiness.md` 9. fejezet):** az A14 (API-tesztek MySQL-en) a `backend-mysql` CI jobban már megvan; `e2e-full` projekt még nincs; a javasolt cél kb. 560 eset (~905 helyett): API ~560, e2e-mocked ~100, e2e-full ~8, valódi Judge0 aranykészlet 12. Új tételek: REL-1 versenyhelyzetek MySQL-en, REL-3 szerződés-ellenőrzés, REL-4 valódi Judge0, REL-10 végpont-lefedettség.
+
 ## 1. Mi van ma
 
 | Projekt | Meglévő tesztek | Megjegyzés |
