@@ -87,6 +87,11 @@ export class ApiClient {
     return this.get('health')
   }
 
+  /** A frontend nem kezelt hibajanak bejelentese (naplozas, nincs tartalom a valaszban). */
+  reportClientError(payload: { message: string; url: string; stack?: string }): Promise<ApiResult<unknown>> {
+    return this.post('client-errors', payload)
+  }
+
   topics(): Promise<ApiResult<DataEnvelope<Topic[]>>> {
     return this.get('topics')
   }

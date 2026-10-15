@@ -19,7 +19,7 @@ Minden végpont a `/api/v1` előtag alatt érhető el. A hozzáférés oszlop je
 | `PUT` | `/account/password` | bejelentkezve | `sensitive` |
 | `GET` | `/account/preferences` | bejelentkezve | – |
 | `PUT` | `/account/preferences` | bejelentkezve | `30,1,preferences` |
-| `PATCH` | `/account/profile` | bejelentkezve | `10,1` |
+| `PATCH` | `/account/profile` | bejelentkezve | `profile-update` |
 
 ## admin
 
@@ -87,7 +87,7 @@ Minden végpont a `/api/v1` előtag alatt érhető el. A hozzáférés oszlop je
 | `GET` | `/admin/users/{user}/export` | admin | – |
 | `POST` | `/admin/users/{user}/password-reset` | admin | `admin-user-mail` |
 | `GET` | `/admin/users/{user}/payments` | admin | – |
-| `GET` | `/admin/users/{user}/payments/{payment}/invoice` | admin | `30,1` |
+| `GET` | `/admin/users/{user}/payments/{payment}/invoice` | admin | `admin-invoice-download` |
 | `PUT` | `/admin/users/{user}/role` | admin | – |
 | `DELETE` | `/admin/users/{user}/tokens` | admin | – |
 | `POST` | `/admin/users/{user}/verification-notification` | admin | `admin-user-mail` |
@@ -119,10 +119,10 @@ Minden végpont a `/api/v1` előtag alatt érhető el. A hozzáférés oszlop je
 | `POST` | `/billing/checkout` | bejelentkezve | `checkout` |
 | `GET` | `/billing/payments` | bejelentkezve | – |
 | `GET` | `/billing/payments/{payment}` | bejelentkezve | – |
-| `GET` | `/billing/payments/{payment}/invoice` | bejelentkezve | `30,1` |
+| `GET` | `/billing/payments/{payment}/invoice` | bejelentkezve | `invoice-download` |
 | `GET` | `/billing/plan` | nyilvános | – |
 | `GET` | `/billing/profile` | bejelentkezve | – |
-| `PUT` | `/billing/profile` | bejelentkezve | `10,1` |
+| `PUT` | `/billing/profile` | bejelentkezve | `billing-profile-update` |
 | `GET` | `/billing/subscription` | bejelentkezve | – |
 | `POST` | `/billing/subscription/cancel` | bejelentkezve | `sensitive` |
 | `POST` | `/billing/subscription/card` | bejelentkezve | `checkout` |
@@ -132,7 +132,7 @@ Minden végpont a `/api/v1` előtag alatt érhető el. A hozzáférés oszlop je
 
 | Metódus | Útvonal | Hozzáférés | Limit |
 |---|---|---|---|
-| `POST` | `/client-errors` | nyilvános | `10,1` |
+| `POST` | `/client-errors` | nyilvános | `client-errors` |
 
 ## exam-attempts
 
@@ -171,7 +171,7 @@ Minden végpont a `/api/v1` előtag alatt érhető el. A hozzáférés oszlop je
 | Metódus | Útvonal | Hozzáférés | Limit |
 |---|---|---|---|
 | `GET` | `/health` | nyilvános | – |
-| `GET` | `/health/ready` | nyilvános | `30,1` |
+| `GET` | `/health/ready` | nyilvános | `health-ready` |
 
 ## languages
 
@@ -183,7 +183,7 @@ Minden végpont a `/api/v1` előtag alatt érhető el. A hozzáférés oszlop je
 
 | Metódus | Útvonal | Hozzáférés | Limit |
 |---|---|---|---|
-| `POST` | `/lessons/{lesson}/complete` | bejelentkezve | `30,1` |
+| `POST` | `/lessons/{lesson}/complete` | bejelentkezve | `lesson-complete` |
 | `GET` | `/lessons/{lesson}/video` | nyilvános | – |
 | `GET` | `/lessons/{lesson}/video/captions` | aláírt link | – |
 | `GET` | `/lessons/{lesson}/video/stream` | aláírt link | – |
@@ -242,4 +242,4 @@ Minden végpont a `/api/v1` előtag alatt érhető el. A hozzáférés oszlop je
 
 | Metódus | Útvonal | Hozzáférés | Limit |
 |---|---|---|---|
-| `POST` | `/webhooks/barion` | nyilvános | `60,1` |
+| `POST` | `/webhooks/barion` | nyilvános | `barion-webhook` |
