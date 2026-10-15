@@ -249,7 +249,7 @@ test.describe('Vizsgák: feltöltés, beadás, eredmény', () => {
     expect(second.body.data.server_time).toBeTruthy()
 
     const list = (await listExams(student)).body.data.find((exam) => exam.id === MAIN.id)
-    expect(list?.attempt).toEqual({ id: created.id, state: 'in_progress', score: null, max_score: MAIN.points, completed_parts: [FILE_PART.order] })
+    expect(list?.attempt).toEqual({ id: created.id, mode: 'exam', state: 'in_progress', score: null, max_score: MAIN.points, completed_parts: [FILE_PART.order] })
     expect((await examDetail(student, MAIN.id)).body.data.attempt?.id).toBe(created.id)
   })
 
