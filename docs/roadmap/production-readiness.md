@@ -20,7 +20,13 @@ Az `fullstack/backend-platform` ágon elkészült és összefésülve (a teljes 
 
 **Kész, de még nincs a `main`-ben:** a deploy-ág (`fullstack/ops-deploy-releases`: OPS-1, OPS-2, OPS-5, REL-7, REL-15) szándékosan nincs összefésülve, amíg a szerveren el nem készül az egyszeri átállás (`docs/runbooks/release-layout.md`) és a GitHub `production` Environment + `DEPLOY_KNOWN_HOSTS` secret.
 
-**Nyitva a 0a/0 fázisból:** OPS-9 (Redis tényleges üzembe állítása a szerveren), OPS-11 (külső uptime figyelő beállítása), F05 szerkesztő-sáv, F08 "fut egy próbálkozásod" sáv, F13 (méret-hiba sorrend, backend), F10 cellaszerkesztés a cellában, F11 mobil visszajelzés; MySQL-en a REL-1 versenytesztek még nem futottak.
+**2. kör (szintén az integrációs ágon):**
+- **SEO és CSP:** oldalankénti cím/meta (`RouteMeta`), `robots.txt` + `sitemap.xml` build-időben (`VITE_SITE_URL` kell a deploy buildhez), kényszerített CSP (`docs/runbooks/csp.md`). Hiányzik: `og-image.png`, track/lecke URL a sitemapben (artisan parancs kell), valódi 404, a Barion pixel böngészős próbája.
+- **B13:** semleges regisztrációs válasz (201 minden esetben, foglalt címnél tájékoztató levél), versenyhelyzet-kezelés.
+- **Runbookok:** `docs/runbooks/redis.md` (OPS-9), `docs/runbooks/uptime-monitor.md` (OPS-11); `app:check-config` figyelmeztet az adatbázis-meghajtókra.
+- **Frontend rések:** F05, F08, F09, F11, F14 (részben), F15/F17/F20 (részben), F18. Az API új mezői: `mode` (próbálkozás-összegző), `locked` (vizsgarészletek), `submitted_at`, `auto_submitted`, `mode` (eredmény); a frontend a `locked`-ot már használja.
+
+**Nyitva:** OPS-9 és OPS-11 tényleges beállítása a szerveren (a runbook kész); F10 egér/Tab/dupla kattintásos cellaszerkesztés, F16/F19/F21/F22; `auto_submitted`/`submitted_at` megjelenítése az eredményoldalon; `lock_reason` mező; a REL-1 versenytesztek MySQL-en még nem futottak (a `backend-mysql` CI job futtatja).
 
 ---
 
