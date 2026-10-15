@@ -39,6 +39,12 @@ final class ExamResultResource extends JsonResource
         return [
             'attempt_id' => $attempt->id,
             'exam' => ExamSummaryResource::make($attempt->exam, $this->progress),
+            'mode' => $attempt->mode->value,
+            'submitted_at' => $attempt->submitted_at?->toIso8601String(),
+            // Az ido lejarta zarta le: a beadas a hatarido utan (vagy akkor) tortent.
+            'auto_submitted' => $attempt->submitted_at !== null
+                && $attempt->deadline_at !== null
+                && $attempt->submitted_at->greaterThanOrEqualTo($attempt->deadline_at),
             'score' => $attempt->score ?? 0,
             'max_score' => $attempt->max_score ?? 0,
             'pending_manual_points' => $attempt->pending_manual_points,

@@ -23,6 +23,7 @@ export interface ExamPartInfo {
 
 export interface ExamAttemptSummary {
   id: number
+  mode?: ExamMode
   state: AttemptState
   score: number | null
   max_score: number
@@ -66,6 +67,8 @@ export interface ExamPartDetail extends ExamPartInfo {
 export interface ExamDetail extends Omit<ExamSummary, 'parts'> {
   parts: ExamPartDetail[]
   source_zip: ExamFile | null
+  /** A szerver szerint a tartalom zárolt (nincs hozzáférése a nézőnek). */
+  locked?: boolean
 }
 
 export interface PartSubmission {
@@ -100,6 +103,10 @@ export interface PartResult {
 export interface ExamResult {
   attempt_id: number
   exam: ExamSummary
+  mode?: ExamMode
+  submitted_at?: string | null
+  /** Az idő lejárta zárta le a próbálkozást. */
+  auto_submitted?: boolean
   /** Vizsgapont (az átváltás után, lefelé kerekítve). */
   score: number
   max_score: number

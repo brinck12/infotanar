@@ -43,6 +43,7 @@ final class ExamDetailResource extends JsonResource
         return [
             ...ExamSummaryResource::header($this->exam),
             'parts' => $this->exam->parts->map(fn (ExamPart $part): array => $this->part($part, $urls))->all(),
+            'locked' => ! $this->unlocked,
             'attempt' => ExamSummaryResource::attemptPayload($this->exam, $this->progress),
             'source_zip' => $this->unlocked ? $this->sourceZip($urls) : null,
         ];

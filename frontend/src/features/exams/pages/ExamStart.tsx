@@ -61,7 +61,8 @@ const MODE_LABEL: Readonly<Record<ExamMode, string>> = { exam: 'vizsgahelyzet', 
  * leírást ad a részekhez (a szerkezet látszik, a tartalom nem).
  */
 function isLocked(exam: ExamDetail): boolean {
-  return exam.parts.length > 0 && exam.parts.every((part) => part.description === '')
+  if (exam.locked !== undefined) return exam.locked
+  return exam.parts.length > 0 &&exam.parts.every((part) => part.description === '')
 }
 
 /** Zárolt vizsga: a lépés a vizsgára szabott szöveggel, még az Indítás előtt. */

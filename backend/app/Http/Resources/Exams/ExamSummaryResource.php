@@ -68,7 +68,7 @@ final class ExamSummaryResource extends JsonResource
      * A néző próbálkozása a lista alakjában. A `max_score` mindig a vizsga
      * részeinek összpontja, az értékelésig is.
      *
-     * @return array{id: int, state: string, score: int|null, max_score: int, completed_parts: list<int>}|null
+     * @return array{id: int, mode: string, state: string, score: int|null, max_score: int, completed_parts: list<int>}|null
      */
     public static function attemptPayload(Exam $exam, ?AttemptProgress $progress): ?array
     {
@@ -78,6 +78,7 @@ final class ExamSummaryResource extends JsonResource
 
         return [
             'id' => $progress->attempt->id,
+            'mode' => $progress->attempt->mode->value,
             'state' => $progress->attempt->state->value,
             'score' => $progress->attempt->score,
             'max_score' => $exam->parts->reduce(static fn (int $carry, ExamPart $part): int => $carry + $part->points, 0),
