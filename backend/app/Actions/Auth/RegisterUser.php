@@ -11,6 +11,7 @@ use App\Models\User;
 use App\Notifications\AccountAlreadyExistsNotification;
 use App\Services\Registration\RegistrationGate;
 use Illuminate\Auth\Events\Registered;
+use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
@@ -44,7 +45,24 @@ final readonly class RegisterUser
             return;
         }
 
-        $user = DB::transaction(function () use ($name, $email, $password, $termsVersion, $privacyVersion, $inviteCode): User {
+        try {
+            $user = $this->createAccount($name, $email, $password, $termsVersion, $privacyVersion, $inviteCode);
+        } catch (UniqueConstraintViolationException) {
+            // Versenyhelyzet: egyszerre ket kerest ugyanarra a cimre, a masik nyert.
+            return;
+        }
+
+        // MustVerifyEmail eseten a keretrendszer erre az esemenyre kuldi ki a megerosito levelet.
+        event(new Registered($user));
+    }
+
+    /**
+     * @throws ValidationException
+     * @throws UniqueConstraintViolationException ha egy versenytars mar felvette a cimet
+     */
+    private function createAccount(string $name, string $email, string $password, string $termsVersion, string $privacyVersion, ?string $inviteCode): User
+    {
+        return DB::transaction(function () use ($name, $email, $password, $termsVersion, $privacyVersion, $inviteCode): User {
             $user = User::create([
                 'name' => $name,
                 'email' => $email,
@@ -64,8 +82,5 @@ final readonly class RegisterUser
 
             return $user;
         });
-
-        // MustVerifyEmail eseten a keretrendszer erre az esemenyre kuldi ki a megerosito levelet.
-        event(new Registered($user));
     }
 }

@@ -17,17 +17,15 @@ test.describe('SQLite es MySQL eltereseinek celzott esetei', () => {
 
     const first = await apiClient.register(mixed)
     expect(first.status).toBe(201)
-    // A tarolt cim kisbetus.
-    expect(first.body.data.email).toBe(lower.email)
 
-    // Kisbetus valtozat: ugyanaz a fiok, ezert nem regisztralhato ujra.
+    // A regisztracio valasza semleges (B13): a foglalt cim ugyanazt a valaszt adja.
+    // Hogy a kisbetus valtozat ugyanaz a fiok, a bejelentkezes mutatja.
     const duplicate = await apiClient.register(lower)
-    expect(duplicate.status).toBe(422)
-    expect(duplicate.errorBody.errors).toHaveProperty('email')
+    expect(duplicate.status).toBe(201)
+    expect(duplicate.body.message).toBe(first.body.message)
 
-    // Es forditva is: nagybetus valtozat egy mar kisbetusen regisztralt cimmel.
     const again = await apiClient.register({ ...mixed, email: mixed.email.toUpperCase() })
-    expect(again.status).toBe(422)
+    expect(again.status).toBe(201)
 
     // A bejelentkezes is mindket irasmoddal ugyanazt a fiokot adja.
     for (const email of [mixed.email, lower.email]) {
@@ -46,11 +44,10 @@ test.describe('SQLite es MySQL eltereseinek celzott esetei', () => {
     // A torolt fiok a soft delete ellenere nem foglalja a cimet.
     const again = await apiClient.register(payload)
     expect(again.status).toBe(201)
-    expect(again.body.data.id).not.toBe(user.id)
 
     const login = await apiClient.login({ email: payload.email, password: payload.password })
     expect(login.status).toBe(200)
-    expect(login.body.data.user.id).toBe(again.body.data.id)
+    expect(login.body.data.user.id).not.toBe(user.id)
   })
 
   test('ekezetes slug: a hosszu, ekezetes cimbol ASCII slug lesz, az ekezetes slug nem fogadhato el es nem keresheto', { tag: '@regression' }, async ({ apiClient }) => {

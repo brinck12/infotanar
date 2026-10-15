@@ -107,8 +107,8 @@ test.describe('Versenyhelyzetek @concurrency', () => {
 
     const results = await parallel(PARALLEL, () => apiClient.register(payload))
 
-    expect(results.filter((result) => result.status === 201)).toHaveLength(1)
-    for (const result of results.filter((entry) => entry.status !== 201)) expect(result.status).toBe(422)
+    // A valasz semleges (B13): mindenki 201-et kap, de a fiok egy van, es nincs 500.
+    for (const result of results) expect(result.status).toBe(201)
 
     const login = await apiClient.login({ email: payload.email, password: payload.password })
     expect(login.status).toBe(200)
