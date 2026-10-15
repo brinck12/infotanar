@@ -34,6 +34,7 @@ use Illuminate\Database\Eloquent\Relations\MorphMany;
  * @property int $difficulty
  * @property list<string>|null $allowed_languages
  * @property array<string, string>|null $starter_code
+ * @property array<string, string|null>|null $sample_solutions Nyelvenkenti mintamegoldas (csak admin latja); a `catalog:verify` es a publikalas ezt futtatja.
  * @property bool $sql_order_sensitive SQL-feladatnal szamit-e a sorok sorrendje.
  * @property ConstraintSet $constraints Statikus kodszabalyok (#42); ures, ha nincs.
  * @property array<string, mixed>|null $spec A fajtahoz tartozo adatok; az alakjat fajtankent a BACKEND.md 4.1.3 irja le.
@@ -48,7 +49,7 @@ final class Exercise extends Model
 {
     protected $fillable = [
         'lesson_id', 'position', 'kind', 'title', 'description', 'level',
-        'difficulty', 'allowed_languages', 'starter_code', 'constraints', 'spec', 'comparison',
+        'difficulty', 'allowed_languages', 'starter_code', 'sample_solutions', 'constraints', 'spec', 'comparison',
         'sql_order_sensitive', 'time_limit_ms', 'memory_limit_kb', 'is_published',
     ];
 
@@ -71,6 +72,7 @@ final class Exercise extends Model
             'spec' => 'array',
             'comparison' => 'array',
             'starter_code' => 'array',
+            'sample_solutions' => 'array',
             'is_published' => 'boolean',
             'sql_order_sensitive' => 'boolean',
             'constraints' => AsConstraintSet::class,

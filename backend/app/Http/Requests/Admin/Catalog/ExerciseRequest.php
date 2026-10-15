@@ -59,6 +59,8 @@ final class ExerciseRequest extends FormRequest
             'allowed_languages.*' => ['string', 'distinct', Rule::in($languages)],
             'starter_code' => ['sometimes', 'nullable', 'array'],
             'starter_code.*' => ['nullable', 'string', 'max:20000'],
+            'sample_solutions' => ['sometimes', 'nullable', 'array'],
+            'sample_solutions.*' => ['nullable', 'string', 'max:50000'],
             'constraints' => ['sometimes', 'nullable', 'array', new ValidConstraintSet],
             'sql_order_sensitive' => ['sometimes', 'boolean'],
             // Ures (null) = a globalis alapertek ervenyes.
@@ -84,6 +86,7 @@ final class ExerciseRequest extends FormRequest
         return [
             $this->checkLanguages(...),
             $this->checkStarterCode(...),
+            $this->checkSampleSolutions(...),
             $this->checkComparison(...),
             $this->checkSpec(...),
         ];
@@ -156,6 +159,7 @@ final class ExerciseRequest extends FormRequest
 
         if (! $kind->isEditorBased() && $kindChanges) {
             $attributes['starter_code'] = [];
+            $attributes['sample_solutions'] = [];
         }
 
         if ($this->has(ExerciseSpec::FIELD) || $kindChanges) {
@@ -224,6 +228,18 @@ final class ExerciseRequest extends FormRequest
         foreach (array_keys(SpecValue::map($this->input('starter_code'))) as $language) {
             if (! in_array($language, $allowed, true)) {
                 $validator->errors()->add('starter_code', __('admin.starter_code_language', ['language' => (string) $language]));
+            }
+        }
+    }
+
+    /** A mintamegoldas is csak a feladat nyelvein adhato meg. */
+    private function checkSampleSolutions(Validator $validator): void
+    {
+        $allowed = $this->languages();
+
+        foreach (array_keys(SpecValue::map($this->input('sample_solutions'))) as $language) {
+            if (! in_array($language, $allowed, true)) {
+                $validator->errors()->add('sample_solutions', __('catalog.sample_solution_language', ['language' => (string) $language]));
             }
         }
     }

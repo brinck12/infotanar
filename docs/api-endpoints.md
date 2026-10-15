@@ -50,6 +50,7 @@ Minden végpont a `/api/v1` előtag alatt érhető el. A hozzáférés oszlop je
 | `GET` | `/admin/exercises/{exercise}/test-cases` | admin | – |
 | `POST` | `/admin/exercises/{exercise}/test-cases` | admin | – |
 | `PUT` | `/admin/exercises/{exercise}/test-cases/order` | admin | – |
+| `POST` | `/admin/exercises/{exercise}/verify` | admin | `admin-upload` |
 | `GET` | `/admin/invoices` | admin | – |
 | `PUT` | `/admin/invoices/{invoice}/buyer` | admin | – |
 | `POST` | `/admin/invoices/{invoice}/retry` | admin | – |

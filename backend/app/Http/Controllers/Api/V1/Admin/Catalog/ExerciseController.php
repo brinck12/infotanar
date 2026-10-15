@@ -9,6 +9,7 @@ use App\Actions\Admin\Catalog\DeleteExercise;
 use App\Actions\Admin\Catalog\UpdateExercise;
 use App\Exceptions\Catalog\CatalogItemInUse;
 use App\Exceptions\Catalog\ExerciseKindLocked;
+use App\Exceptions\Catalog\ExerciseNotPublishable;
 use App\Exceptions\Catalog\ExerciseUsedByExam;
 use App\Exceptions\Catalog\PublishedExerciseNeedsRubric;
 use App\Exceptions\Catalog\PublishedExerciseNeedsSpec;
@@ -51,6 +52,7 @@ final class ExerciseController extends Controller
      * @throws PublishedExerciseNeedsVisibleTestCase
      * @throws PublishedExerciseNeedsSpec
      * @throws PublishedExerciseNeedsRubric
+     * @throws ExerciseNotPublishable
      */
     public function store(ExerciseRequest $request, CreateExercise $create, #[CurrentUser] User $admin): JsonResponse
     {
@@ -64,6 +66,7 @@ final class ExerciseController extends Controller
      * @throws PublishedExerciseNeedsVisibleTestCase
      * @throws PublishedExerciseNeedsSpec
      * @throws PublishedExerciseNeedsRubric
+     * @throws ExerciseNotPublishable
      */
     public function update(ExerciseRequest $request, Exercise $exercise, UpdateExercise $update, #[CurrentUser] User $admin): AdminExerciseResource
     {

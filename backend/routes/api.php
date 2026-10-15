@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\V1\Account\ProfileController;
 use App\Http\Controllers\Api\V1\Admin\AccessGrantController;
 use App\Http\Controllers\Api\V1\Admin\Catalog\ConstraintOptionsController;
 use App\Http\Controllers\Api\V1\Admin\Catalog\ExerciseController as AdminExerciseController;
+use App\Http\Controllers\Api\V1\Admin\Catalog\ExerciseVerifyController;
 use App\Http\Controllers\Api\V1\Admin\Catalog\LessonController as AdminLessonController;
 use App\Http\Controllers\Api\V1\Admin\Catalog\ModuleController as AdminModuleController;
 use App\Http\Controllers\Api\V1\Admin\Catalog\ReorderController;
@@ -177,6 +178,11 @@ Route::prefix('v1')->name('api.')->middleware(RejectInvalidToken::class)->group(
         Route::apiResource('exercises', AdminExerciseController::class);
 
         Route::get('/constraint-options', ConstraintOptionsController::class)->name('constraint-options');
+
+        // "Kiprobalas mintamegoldassal": a feladat lefut a sajat mintamegoldasan (minden teszteset), nem tarol semmit.
+        Route::post('/exercises/{exercise}/verify', ExerciseVerifyController::class)
+            ->middleware('throttle:admin-upload')
+            ->name('exercises.verify');
 
         // Felhasznalok attekintese (#50), csak olvasas.
         Route::get('/users', [AdminUserController::class, 'index'])->name('users.index');

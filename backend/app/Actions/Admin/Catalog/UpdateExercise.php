@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Actions\Admin\Catalog;
 
 use App\Exceptions\Catalog\ExerciseKindLocked;
+use App\Exceptions\Catalog\ExerciseNotPublishable;
 use App\Exceptions\Catalog\PublishedExerciseNeedsRubric;
 use App\Exceptions\Catalog\PublishedExerciseNeedsSpec;
 use App\Exceptions\Catalog\PublishedExerciseNeedsVisibleTestCase;
@@ -38,6 +39,7 @@ final readonly class UpdateExercise
      * @throws PublishedExerciseNeedsVisibleTestCase
      * @throws PublishedExerciseNeedsSpec
      * @throws PublishedExerciseNeedsRubric
+     * @throws ExerciseNotPublishable
      */
     public function handle(Exercise $exercise, array $attributes, User $admin): Exercise
     {
