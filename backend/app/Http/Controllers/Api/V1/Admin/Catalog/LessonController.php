@@ -4,8 +4,11 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Api\V1\Admin\Catalog;
 
+use App\Actions\Admin\Catalog\CreateLesson;
 use App\Actions\Admin\Catalog\ManageCatalogItem;
+use App\Actions\Admin\Catalog\UpdateLesson;
 use App\Exceptions\Catalog\CatalogItemInUse;
+use App\Exceptions\Catalog\LessonNotPublishable;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\Catalog\LessonRequest;
 use App\Http\Resources\Admin\AdminLessonResource;
@@ -42,16 +45,18 @@ final class LessonController extends Controller
         return AdminLessonResource::make($lesson->load(['exercises' => static fn (Relation $q) => $q->withCount(['testCases', 'submissions', 'fileSubmissions'])]));
     }
 
-    public function store(LessonRequest $request, #[CurrentUser] User $admin): JsonResponse
+    /** @throws LessonNotPublishable */
+    public function store(LessonRequest $request, CreateLesson $create, #[CurrentUser] User $admin): JsonResponse
     {
-        $lesson = $this->manage->create(new Lesson($request->validated()), self::PARENT, $admin);
+        $lesson = $create->handle($request->validated(), $admin);
 
         return AdminLessonResource::make($lesson)->response()->setStatusCode(JsonResponse::HTTP_CREATED);
     }
 
-    public function update(LessonRequest $request, Lesson $lesson, #[CurrentUser] User $admin): AdminLessonResource
+    /** @throws LessonNotPublishable */
+    public function update(LessonRequest $request, Lesson $lesson, UpdateLesson $update, #[CurrentUser] User $admin): AdminLessonResource
     {
-        return AdminLessonResource::make($this->manage->update($lesson, $request->validated(), self::PARENT, $admin));
+        return AdminLessonResource::make($update->handle($lesson, $request->validated(), $admin));
     }
 
     /** @throws CatalogItemInUse */

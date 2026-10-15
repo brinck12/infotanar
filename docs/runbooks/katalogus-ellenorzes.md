@@ -1,0 +1,45 @@
+# Katalógus-ellenőrzés kiadás előtt (`catalog:verify`)
+
+Mit csinál: minden **publikált** feladat mintamegoldását lefuttatja a saját tesztesetein (a rejtetteken is), ugyanazzal a `SolutionEvaluator`-ral, mint a diák beadását. Semmit nem tárol, felhasználó nincs. Ha bármelyik feladat nem megy át teljesen, a kilépési kód nem nulla, és a hibás feladat tesztesetenként kilistázva szerepel.
+
+Mikor futtasd: minden kiadás (deploy) előtt, és ha a Judge0 vagy a nyelvi csomagok változtak. Hibás elvárt kimenet a diákot rosszra tanítja, és nem különböztethető meg a diák hibájától.
+
+## Előfeltétel: valódi Judge0
+
+A Judge0 csak a szerver localhostján érhető el. Helyi futtatáshoz nyiss alagutat, és hagyd nyitva:
+
+```bash
+ssh -N -L 2358:localhost:2358 <user>@<szerver>
+```
+
+A `backend/.env`-ben legyen `JUDGE0_AUTH_TOKEN`. A szerveren közvetlenül futtatható (ott nem kell alagút).
+
+## Futtatás
+
+```bash
+cd backend
+php artisan catalog:verify                     # minden publikált feladat
+php artisan catalog:verify --track=python-alapok   # egy tanulási út (slug vagy azonosító)
+php artisan catalog:verify --exercise=12       # egy feladat (piszkozat is lehet)
+php artisan catalog:verify --json              # géppel olvasható kimenet (CI, naplózás)
+```
+
+Kimenet feladatonként: `OK`, `HIBA` (okkal és tesztesetenként), `KIHAGY` (böngészős feladat: a szerver nem ellenőrzi). Hibánál a kilépési kód 1.
+
+## Mit számít hibának
+
+- **Hiányzik a mintamegoldás.** Kódfeladatnál a `sample_solutions` mezőben legalább egy engedélyezett nyelven kell megoldás (az admin felületen a feladat szerkesztőjében). Fájlfeladatnál a `sample_solution` szerepű feltöltött fájl.
+- Nincs teszteset (kódfeladat) vagy nincs értékelőlap-pont (fájlfeladat).
+- Bármelyik teszteset nem `elfogadva` (rossz kimenet, fordítási hiba, futásidejű hiba, időtúllépés, szabálysértés).
+- Fájlfeladatnál a mintamegoldás nem kapja meg a teljes automatikus pontszámot az értékelőlapon.
+- Judge0 nem elérhető: a tesztesetek rendszerhibát jeleznek, a parancs hibával áll le (ilyenkor előbb az alagutat/Judge0-t nézd).
+
+## Hibajavítás
+
+1. Nyisd meg a feladatot az adminban, és a „Kipróbálás mintamegoldással” gombbal (`POST /admin/exercises/{id}/verify`) nézd meg a tesztesetenkénti eredményt.
+2. Javítsd a hibás elvárt kimenetet vagy a mintamegoldást, majd futtasd újra `--exercise=<id>`-val.
+3. Csak zöld futás után adj ki.
+
+## Publikálási kapu
+
+Ugyanezek a szabályok az admin felületen is érvényesek: kódfeladat mintamegoldás és legalább egy nyilvános teszteset nélkül, fájlfeladat mintamegoldás-fájl nélkül vagy az értékelőlapot el nem érő mintamegoldással, illetve üres lecke (nincs jegyzet, létező videó vagy feladat) nem publikálható (422, magyar hibaüzenettel). A kapu a kódfeladat mintamegoldását nem futtatja (ahhoz Judge0 kell), azt a `catalog:verify` teszi.

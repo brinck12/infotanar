@@ -46,3 +46,38 @@ export function createTestCase(
 export function deleteTestCase(admin: ApiClient, testCaseId: number): Promise<ApiResult<null>> {
   return admin.delete(`admin/test-cases/${String(testCaseId)}`)
 }
+
+/** Egy teszteset eredmenye a mintamegoldasos ellenorzesben. */
+export interface VerifyTestRow {
+  test_case_id: number | null
+  hidden: boolean
+  passed: boolean
+  verdict: string
+  verdict_label: string
+  time: string | null
+  message: string | null
+}
+
+export interface VerifyRun {
+  language: string
+  passed: boolean
+  verdict: string
+  verdict_label: string
+  score: number
+  max_score: number
+  tests: VerifyTestRow[]
+}
+
+/** `POST admin/exercises/{id}/verify`: a feladat lefut a sajat mintamegoldasan; nem tarol semmit. */
+export interface ExerciseVerification {
+  exercise_id: number
+  title: string
+  kind: string
+  status: 'passed' | 'failed' | 'skipped'
+  message: string | null
+  runs: VerifyRun[]
+}
+
+export function verifyExercise(client: ApiClient, id: number): Promise<ApiResult<DataEnvelope<ExerciseVerification>>> {
+  return client.post(`admin/exercises/${String(id)}/verify`, {})
+}

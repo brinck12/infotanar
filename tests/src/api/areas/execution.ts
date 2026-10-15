@@ -11,6 +11,7 @@ import { randomUUID } from 'node:crypto'
 import path from 'node:path'
 import { env } from '../../../config/env'
 import type { ApiClient, ApiResult, RunPayload } from '../ApiClient'
+import { ECHO_PROGRAM } from '../../data'
 import type { DataEnvelope, ExecutionComparison, ExecutionRunResponse, ExecutionSubmissionResponse } from '../types'
 
 /** `POST /run` az uj mezoket is ismero valasztipussal. */
@@ -74,7 +75,7 @@ export async function createCodeExercise(admin: ApiClient, testCases: TestCaseIn
     'A modul'
   )
   const lessonId = await created(
-    admin.post('admin/lessons', { module_id: moduleId, slug: `pw-futtatas-${suffix}`, title: `PW teszt futtatás ${suffix}`, is_free: true, is_published: true }),
+    admin.post('admin/lessons', { module_id: moduleId, slug: `pw-futtatas-${suffix}`, title: `PW teszt futtatás ${suffix}`, is_free: true, content: 'PW teszt tananyag', is_published: true }),
     'A lecke'
   )
   const exerciseId = await created(
@@ -95,7 +96,7 @@ export async function createCodeExercise(admin: ApiClient, testCases: TestCaseIn
   }
 
   // Publikalni csak lathato tesztesettel lehet, ezert a vegen.
-  const published = await admin.patch(`admin/exercises/${String(exerciseId)}`, { is_published: true })
+  const published = await admin.patch(`admin/exercises/${String(exerciseId)}`, { sample_solutions: { python: ECHO_PROGRAM }, is_published: true })
   if (!published.ok) throw new Error(`A feladat publikalasa sikertelen (${String(published.status)})`)
 
   return { moduleId, lessonId, exerciseId, testCaseIds }
