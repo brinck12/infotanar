@@ -28,6 +28,7 @@ final class ProductionConfigAudit
             ...$this->mail(),
             ...$this->billing(),
             ...$this->queue(),
+            ...$this->redis(),
             ...$this->fileStorage(),
         ]));
     }
@@ -134,6 +135,36 @@ final class ProductionConfigAudit
                 ? new ConfigProblem('QUEUE_CONNECTION', 'A "sync" sor a kérésen belül futtat mindent: a Barion callback kifuthat a határidejéből.')
                 : null,
         ];
+    }
+
+    /**
+     * OPS-9: eles terhelesnel a cache, a sor es a munkamenet Redisben van
+     * (docs/runbooks/redis.md); az adatbazis-alapu valtozat csak figyelmeztetes.
+     *
+     * @return list<ConfigProblem|null>
+     */
+    private function redis(): array
+    {
+        $onDatabase = [
+            'CACHE_STORE' => $this->text('cache.default'),
+            'QUEUE_CONNECTION' => $this->text('queue.default'),
+            'SESSION_DRIVER' => $this->text('session.driver'),
+        ];
+        $problems = [];
+
+        foreach ($onDatabase as $variable => $value) {
+            if ($value === 'database') {
+                $problems[] = new ConfigProblem($variable, 'Adatbázis-alapú: terhelés alatt a cache-zárak és a sor sorai versenyeznek a MySQL-lel. Éles környezetben "redis" kell (docs/runbooks/redis.md).');
+            }
+        }
+
+        $usesRedis = in_array('redis', $onDatabase, true);
+
+        if ($usesRedis && $this->text('database.redis.default.password') === '') {
+            $problems[] = new ConfigProblem('REDIS_PASSWORD', 'A Redis jelszó nélkül fut: a requirepass értékét kell megadni (docs/runbooks/redis.md).');
+        }
+
+        return $problems;
     }
 
     private function required(string $key, string $variable, string $consequence, bool $blocking = false): ?ConfigProblem

@@ -58,7 +58,6 @@ return [
             'required' => 'Az e-mail-cím megadása kötelező.',
             'email' => 'Érvénytelen e-mail-cím.',
             'max' => 'Az e-mail-cím legfeljebb :max karakter lehet.',
-            'unique' => 'Ezzel az e-mail-címmel már regisztráltak.',
         ],
         'password' => [
             'required' => 'A jelszó megadása kötelező.',
