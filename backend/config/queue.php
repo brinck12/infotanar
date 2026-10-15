@@ -29,6 +29,11 @@ return [
     |
     */
 
+    /*
+    | FIGYELEM: a `retry_after` ertekenek nagyobbnak kell lennie, mint a leghosszabb job
+    | idokorlatja (a worker `--timeout` kapcsoloja, deploy/systemd/infotanar-queue.service: 60 s;
+    | job-szinten a `$timeout`), kulonben a meg futo jobot a sor masodszor is kiadja.
+    */
     'connections' => [
 
         'sync' => [

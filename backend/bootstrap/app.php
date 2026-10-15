@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Exceptions\DomainException;
 use App\Exceptions\Judge0Exception;
 use App\Http\Middleware\EnsureUserIsAdmin;
+use App\Support\RateLimiting\WaitTime;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Foundation\Application;
@@ -65,6 +66,6 @@ return Application::configure(basePath: dirname(__DIR__))
             : null);
 
         $exceptions->render(static fn (ThrottleRequestsException $e, Request $request) => $isApi($request)
-            ? $message('http.too_many_requests', 429)->withHeaders($e->getHeaders())
+            ? response()->json(['message' => WaitTime::message('http.too_many_requests', $e->getHeaders()['Retry-After'] ?? null)], 429)->withHeaders($e->getHeaders())
             : null);
     })->create();

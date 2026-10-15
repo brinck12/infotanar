@@ -41,6 +41,8 @@ final class Lesson extends Model
     #[Scope]
     protected function published(Builder $query): void
     {
-        $query->where('is_published', true);
+        // A piszkozat track leckei sem lathatok diaknak (video, feladat, futtatas utan sem).
+        $query->where('is_published', true)
+            ->whereHas('module.track', static fn (Builder $track) => $track->where('is_published', true));
     }
 }

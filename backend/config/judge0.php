@@ -149,4 +149,7 @@ return [
 
     // Meddig tartsuk cache-ben a /languages valaszt (masodperc).
     'languages_cache_ttl' => (int) env('JUDGE0_LANGUAGES_CACHE_TTL', 3600),
+
+    // Ures (hibas) /languages valasz ennyi masodpercig marad cache-ben, hogy a kieses gyorsan javuljon.
+    'languages_failure_ttl' => (int) env('JUDGE0_LANGUAGES_FAILURE_TTL', 15),
 ];

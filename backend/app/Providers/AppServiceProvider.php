@@ -25,6 +25,7 @@ use App\Services\Exams\NullExamResultRecalculator;
 use App\Services\FileTasks\CheckRegistry;
 use App\Support\Alerts\OperatorAlert;
 use App\Support\RateLimiting\ExecutionRateLimit;
+use App\Support\RateLimiting\WaitTime;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Database\Eloquent\Model;
@@ -84,7 +85,10 @@ final class AppServiceProvider extends ServiceProvider
             'file_submission' => FileSubmission::class,
         ]);
 
-        Password::defaults(static fn () => Password::min(8)->letters()->numbers());
+        // Elesben a kiszivargott jelszavak listaja (HIBP) ellen is ellenorzunk; teszt alatt nincs halozati hivas.
+        Password::defaults(fn () => $this->app->isProduction()
+            ? Password::min(8)->letters()->numbers()->uncompromised()
+            : Password::min(8)->letters()->numbers());
 
         Mail::extend('outbox', static fn () => new OutboxTransport(Config::string('mail.mailers.outbox.path')));
 
@@ -115,17 +119,25 @@ final class AppServiceProvider extends ServiceProvider
 
     private function configureRateLimiting(): void
     {
-        $tooMany = static fn (): JsonResponse => response()->json(['message' => __('auth.throttle')], 429);
+        // A Limit::response() masodik argumentuma a fejlecek (Retry-After): az uzenet kiirja a varakozasi idot.
+        $tooMany = static function (Request $request, array $headers = []): JsonResponse {
+            $retryAfter = $headers['Retry-After'] ?? null;
+
+            return response()->json(['message' => WaitTime::message('auth.throttle', $retryAfter)], 429, $headers);
+        };
         $emailAndIp = static fn (Request $request): string => $request->string('email')->lower()->append('|', (string) $request->ip())->toString();
 
         // Fiokonkent (e-mail + IP), hogy egy tamado ne zarhassa ki a tobbi felhasznalot.
-        RateLimiter::for('login', static fn (Request $request) => Limit::perMinute(5)
-            ->by($emailAndIp($request))
-            ->response($tooMany));
+        // Emellett IP-nkent is korlatos (elosztott, sok cimet probalgato tamadas, levelbomba ellen).
+        RateLimiter::for('login', static fn (Request $request): array => [
+            Limit::perMinute(5)->by('login:account:'.$emailAndIp($request))->response($tooMany),
+            Limit::perMinute(Config::integer('auth.throttle.login_ip_per_minute'))->by('login:ip:'.$request->ip())->response($tooMany),
+        ]);
 
-        RateLimiter::for('password-reset', static fn (Request $request) => Limit::perMinute(5)
-            ->by($emailAndIp($request))
-            ->response($tooMany));
+        RateLimiter::for('password-reset', static fn (Request $request): array => [
+            Limit::perMinute(5)->by('reset:account:'.$emailAndIp($request))->response($tooMany),
+            Limit::perMinute(Config::integer('auth.throttle.reset_ip_per_minute'))->by('reset:ip:'.$request->ip())->response($tooMany),
+        ]);
 
         $userOrIp = static fn (Request $request): string => $request->user() instanceof User
             ? 'user:'.$request->user()->id

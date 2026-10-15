@@ -168,6 +168,10 @@ final readonly class SubmitFileSolution
             ->limit(self::PRUNE_BATCH)
             ->get(['id', 'path']);
 
+        // A legutolso sikeres beadas sosem esik ki: a "megoldva" allapot es a lecke-haladas ebbol szarmazik.
+        $bestPassedId = $this->practiceAttempts($user, $exercise)->where('passed', true)->max('id');
+        $stale = $stale->reject(static fn (FileSubmission $old): bool => $old->id === $bestPassedId);
+
         if ($stale->isEmpty()) {
             return;
         }
