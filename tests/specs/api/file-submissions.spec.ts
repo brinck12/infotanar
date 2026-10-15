@@ -221,6 +221,9 @@ test.describe('Fájlbeadás: feltöltési ellenőrzés', () => {
 
     expect(result.status).toBe(422)
     expect(result.errorBody.errors).toHaveProperty('file')
+    // A meret az elso ellenorzes: nem "a tartalma nem felel meg" (F13).
+    expect(result.errorBody.errors.file?.join(' ')).toMatch(/túl nagy/)
+    expect(result.errorBody.errors.file?.join(' ')).not.toMatch(/nem felel meg/)
   })
 
   test('a 11. feltöltés után csak a legutóbbi 10 sor marad', { tag: '@regression' }, async ({ apiClient }) => {

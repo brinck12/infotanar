@@ -20,7 +20,8 @@ final class RegisterRequest extends FormRequest
     {
         $rules = [
             'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email'],
+            // Nincs unique szabaly: a foglalt cim nem szivaroghat ki (B13); a RegisterUser kezeli.
+            'email' => ['required', 'string', 'email', 'max:255'],
             'password' => ['required', 'string', 'confirmed', Password::defaults()],
             // A kliens azt a verziot kuldi, amelyet a felhasznalo tenylegesen latott (#133).
             'accept_terms' => ['accepted'],

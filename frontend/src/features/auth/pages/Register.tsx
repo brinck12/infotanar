@@ -29,7 +29,12 @@ export function Register() {
   const mutation = useMutation({
     mutationFn: async (payload: authApi.RegisterPayload) => {
       await authApi.register(payload)
-      await login(payload.email, payload.password)
+      // A szerver foglalt cimre is ugyanazt valaszolja (B13): ott a belepes nem sikerul, ez nem hiba.
+      try {
+        await login(payload.email, payload.password)
+      } catch {
+        // A "Nézd meg a leveleidet" oldal bejelentkezés nélkül is jó.
+      }
     },
     onSuccess: (_, payload) => navigate('/regisztracio/kesz', { replace: true, state: { email: payload.email } }),
   })

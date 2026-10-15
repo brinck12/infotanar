@@ -7,6 +7,15 @@ return [
     'throttle' => 'Túl sok próbálkozás, próbáld újra később.',
 
     'register' => [
+        'accepted' => 'Elküldtük a további teendőket az e-mail-címedre. Nézd meg a leveleidet (a spam mappát is).',
+        'exists_mail' => [
+            'subject' => 'Már van fiókod az InfoTanáron',
+            'greeting' => 'Szia :name!',
+            'intro' => 'Valaki ezzel az e-mail-címmel próbált regisztrálni, de már van hozzá fiók.',
+            'action' => 'Belépés',
+            'forgot' => 'Ha elfelejtetted a jelszavad, a belépő oldalon kérhetsz új jelszót.',
+            'outro' => 'Ha nem te voltál, nincs teendőd: a fiókodhoz senki nem fért hozzá.',
+        ],
         'accept_terms' => 'A regisztrációhoz el kell fogadnod az Általános Szerződési Feltételeket és az Adatkezelési tájékoztatót.',
     ],
 

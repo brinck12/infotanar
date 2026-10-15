@@ -9,7 +9,7 @@
 
 [Unit]
 Description=InfoTanar queue worker
-After=network.target mysql.service
+After=network.target mysql.service redis-server.service
 StartLimitIntervalSec=300
 StartLimitBurst=5
 OnFailure=infotanar-alert@%n.service

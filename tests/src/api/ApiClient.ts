@@ -114,7 +114,7 @@ export class ApiClient {
     return this.post('submissions', payload)
   }
 
-  register(payload: Partial<RegisterRequest>): Promise<ApiResult<DataEnvelope<User>>> {
+  register(payload: Partial<RegisterRequest>): Promise<ApiResult<MessageResponse>> {
     return this.post('auth/register', payload)
   }
 
