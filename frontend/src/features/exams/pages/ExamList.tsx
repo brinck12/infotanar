@@ -41,6 +41,7 @@ export function ExamList() {
   // Amíg a vizsgamód nincs bekapcsolva a szerveren, a hivatalos feladatlapokat mutatjuk.
   const unavailable = exams.isError && httpStatus(exams.error) === 404
   const visible = (exams.data ?? []).filter((exam) => !level || exam.level === level)
+  const running = (exams.data ?? []).find((exam) => exam.attempt?.state === 'in_progress')
   const papers = OFFICIAL_PAPERS.filter((paper) => !level || paper.level === level)
 
   return (
@@ -49,6 +50,18 @@ export function ExamList() {
       <Lead className="mt-3 max-w-prose text-18">
         Régi érettségi feladatsorok időmérővel, vizsgahelyzetben. A végén megkapod a pontszámodat részenként.
       </Lead>
+
+      {running?.attempt && (
+        <Banner
+          kind="warn"
+          title="Fut egy próbálkozásod"
+          className="mt-8"
+          data-testid="running-attempt"
+          action={<ButtonLink to={`/vizsgak/${running.id}/fut?proba=${running.attempt.id}`}>Folytatás</ButtonLink>}
+        >
+          A(z) {running.title} feladatsort elkezdted, és még nem adtad be. Folytasd ott, ahol abbahagytad.
+        </Banner>
+      )}
 
       <Banner kind="info" title="A feladatsorok a hivatalos érettségi feladatok" className="mt-8">
         Az Oktatási Hivatal nyilvánosan közzétett feladataira épülnek, és a hivatalos javítási-értékelési útmutató szerint pontozunk. Az

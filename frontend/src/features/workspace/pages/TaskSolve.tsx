@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useEffect, useState } from 'react'
-import { Link, useParams } from 'react-router-dom'
+import { Link, useParams, useSearchParams } from 'react-router-dom'
 import { useDocumentMeta } from '../../../shared/hooks/useDocumentMeta'
 import { saveBlob } from '../../../shared/api/download'
 import { hibaUzenet, varakozas, zarolasOka, type ExecutionWait } from '../../../shared/api/errors'
@@ -32,6 +32,7 @@ import type {
 } from '../../../types'
 import { useAuth } from '../../auth/context'
 import { catalogKeys, taskQuery } from '../../catalog/api'
+import { ExamStrip } from '../../exams/components/ExamStrip'
 import { isUploadKind } from '../../filetasks/api'
 import { FileTaskWorkspace } from '../../filetasks/components/FileTaskWorkspace'
 import { lessonPath } from '../../lesson/api'
@@ -70,7 +71,25 @@ function isSplitRatio(value: unknown): value is number {
   return typeof value === 'number' && value > 0.05 && value < 0.95
 }
 
+/**
+ * Feladat megoldása. Ha a vizsga kódrészeként nyitották meg (`?vizsga=&proba=`),
+ * a futó vizsga ideje és a visszalépés a munkaterület fölött is látszik.
+ */
 export function TaskSolve() {
+  const [params] = useSearchParams()
+  const examId = Number(params.get('vizsga'))
+  const attemptId = Number(params.get('proba'))
+  const fromExam = Number.isInteger(examId) && examId > 0 && Number.isInteger(attemptId) && attemptId > 0
+
+  return (
+    <>
+      {fromExam && <ExamStrip examId={examId} attemptId={attemptId} />}
+      <TaskSolveContent />
+    </>
+  )
+}
+
+function TaskSolveContent() {
   const { id } = useParams<{ id: string }>()
   const { user, loading: authLoading } = useAuth()
   const taskId = Number(id)
