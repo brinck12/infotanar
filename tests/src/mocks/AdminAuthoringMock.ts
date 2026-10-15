@@ -19,6 +19,10 @@ export interface AdminAuthoringOptions {
   specErrors?: string[]
   /** A feladat tesztesetei (id, sorszam) az `input` fajlok teszteset-valasztojahoz. */
   testCases?: { id: number; order: number }[]
+  /** A kozzeteteli kapu egymas utani elutasitasai (422, az `is_published` mezon), csak kozzetetelt kero mentesnel. */
+  publishErrors?: string[]
+  /** A `POST /admin/exercises/{id}/verify` valasza (a `data` tartalma). */
+  verification?: Json
 }
 
 interface Stored {
@@ -55,6 +59,8 @@ export class AdminAuthoringMock {
   private readonly specErrors: string[]
   private readonly rubricAvailable: boolean
   private readonly testCases: { id: number; order: number }[]
+  private readonly publishErrors: string[]
+  private readonly verification: Json | null
 
   constructor(
     private readonly page: Page,
@@ -63,6 +69,8 @@ export class AdminAuthoringMock {
     this.rubricAvailable = options.rubricAvailable ?? true
     this.specErrors = [...(options.specErrors ?? [])]
     this.testCases = options.testCases ?? []
+    this.publishErrors = [...(options.publishErrors ?? [])]
+    this.verification = options.verification ?? null
   }
 
   /** Az utolso, a megadott modszerrel es utvonallal erkezett hivas torzse. */
@@ -118,9 +126,14 @@ export class AdminAuthoringMock {
       if (method === 'PUT') {
         const specError = this.specErrors.shift()
         if (specError) return route.fulfill({ status: 422, json: { message: specError, errors: { spec: [specError] } } })
+        const publishError = body?.is_published === true ? this.publishErrors.shift() : undefined
+        if (publishError) return route.fulfill({ status: 422, json: { message: publishError, errors: { is_published: [publishError] } } })
         this.exercise = { ...this.exercise, ...(body ?? {}) }
         return ok(this.view())
       }
+    }
+    if (/^\/admin\/exercises\/\d+\/verify$/.test(path) && method === 'POST') {
+      return this.verification ? ok(this.verification) : missing()
     }
     if (/^\/admin\/exercises\/\d+\/test-cases$/.test(path)) {
       return ok(this.testCases.map((tc) => ({ ...tc, exercise_id: 100, stdin: '', expected_stdout: '', is_hidden: false, updated_at: null })))

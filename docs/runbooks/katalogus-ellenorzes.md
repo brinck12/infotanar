@@ -36,7 +36,7 @@ Kimenet feladatonként: `OK`, `HIBA` (okkal és tesztesetenként), `KIHAGY` (bö
 
 ## Hibajavítás
 
-1. Nyisd meg a feladatot az adminban, és a „Kipróbálás mintamegoldással” gombbal (`POST /admin/exercises/{id}/verify`) nézd meg a tesztesetenkénti eredményt.
+1. Nyisd meg a feladatot az adminban, és a Mintamegoldás fülön az „Ellenőrzés (minden teszteset)” gombbal (`POST /admin/exercises/{id}/verify`) nézd meg a nyelvenkénti és tesztesetenkénti eredményt (a rejtett tesztesetnél csak a siker látszik). A gomb a legutóbb mentett mintamegoldást futtatja.
 2. Javítsd a hibás elvárt kimenetet vagy a mintamegoldást, majd futtasd újra `--exercise=<id>`-val.
 3. Csak zöld futás után adj ki.
 
