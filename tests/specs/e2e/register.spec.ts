@@ -20,16 +20,21 @@ test.describe('Regisztráció', () => {
     })
   })
 
-  test('elfogadás nélkül nem megy el a kérés, és a hiba megmondja, mi hiányzik', { tag: '@regression' }, async ({ mockApi, registerPage }) => {
-    const payload = registration()
-    const sent = await mockApi.onRegister({ id: 7, name: payload.name, email: payload.email, role: 'student', email_verified_at: null })
+  test('elfogadás nélkül is elmegy a kérés, és a szerver MINDEN hibáját egyszerre mutatja', { tag: '@regression' }, async ({ mockApi, registerPage, page }) => {
+    const sent = await mockApi.onRegisterRejected({
+      email: ['Ezzel az e-mail-címmel már regisztráltak.'],
+      password: ['A jelszónak legalább 8 karakteresnek kell lennie.'],
+      accept_terms: ['A regisztrációhoz el kell fogadnod az ÁSZF-et.'],
+    })
     await registerPage.goto()
 
-    await registerPage.fillForm(payload)
+    await registerPage.fillForm(registration({ password: 'rovid1', password_confirmation: 'rovid1' }))
     await registerPage.submit()
 
+    await expect(page.getByText('Ezzel az e-mail-címmel már regisztráltak.')).toBeVisible()
+    await expect(page.getByText('A jelszónak legalább 8 karakteresnek kell lennie.')).toBeVisible()
     await expect(registerPage.termsError).toBeVisible()
-    expect(sent()).toBeUndefined()
+    expect(sent()).toMatchObject({ accept_terms: false })
   })
 
   test('a feltételek új lapon nyílnak, hogy a kitöltött űrlap megmaradjon', { tag: '@regression' }, async ({ registerPage }) => {

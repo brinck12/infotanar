@@ -92,6 +92,7 @@ export default function App() {
               <Route path="felhasznalok" element={<Pages.AdminUsers />} />
               <Route path="felhasznalok/:userId" element={<Pages.AdminUserDetail />} />
               <Route path="szamlak" element={<Pages.AdminInvoices />} />
+              <Route path="meghivokodok" element={<Pages.AdminInviteCodes />} />
             </Route>
           </Routes>
           {/* Barion Pixellel hozzájárulást kérünk; nélküle elég a tájékoztatás a tárolt adatokról. */}

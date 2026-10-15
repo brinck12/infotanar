@@ -10,6 +10,12 @@ return [
         'accept_terms' => 'A regisztrációhoz el kell fogadnod az Általános Szerződési Feltételeket és az Adatkezelési tájékoztatót.',
     ],
 
+    'invite' => [
+        'required' => 'A regisztrációhoz meghívókód kell.',
+        'invalid' => 'Ez a meghívókód nem érvényes, lejárt, vagy már elfogyott.',
+        'waitlist_joined' => 'Feliratkoztál a várólistára. Ha felvesszük a bétába, a megadott címen értesítünk.',
+    ],
+
     'verification' => [
         'verified' => 'Az e-mail-címed megerősítve.',
         'already_verified' => 'Az e-mail-címed már meg van erősítve.',

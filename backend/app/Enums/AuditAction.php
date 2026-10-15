@@ -39,4 +39,10 @@ enum AuditAction: string
     case UserEmailVerified = 'user.email_verified';
     case UserTokensRevoked = 'user.tokens_revoked';
     case UserPasswordResetSent = 'user.password_reset_sent';
+
+    // Zart beta regisztracios kapu (LAUNCH-2); a hasznalat alanya a meghivokod.
+    case InviteCodeCreated = 'invite_code.created';
+    case InviteCodeDisabled = 'invite_code.disabled';
+    case InviteCodeUsed = 'invite_code.used';
+    case RegistrationModeChanged = 'registration.mode_changed';
 }

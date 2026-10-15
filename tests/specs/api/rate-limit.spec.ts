@@ -1,3 +1,5 @@
+import { randomUUID } from 'node:crypto'
+import { joinWaitlist } from '../../src/api/areas/registrationGate'
 import { ECHO_PROGRAM, SEEDED } from '../../src/data'
 import { expect, test } from '../../src/fixtures'
 
@@ -17,4 +19,19 @@ test('a futtatás és a beadás IP-nkénti rate limitnek van alávetve', { tag: 
   }
 
   expect(statuses).toContain(429)
+})
+
+/**
+ * A várólista nyilvános és névtelen, ezért IP-nkénti szűk limit van rajta
+ * (named limiter `waitlist`). A teszt-backend percenként 20-at enged
+ * (REGISTRATION_RATE_WAITLIST_PER_MINUTE, config/web-servers.ts).
+ */
+test('a várólista-feliratkozás IP-nkénti rate limitnek van alávetve', { tag: '@regression' }, async ({ apiClient }) => {
+  const statuses: number[] = []
+  for (let i = 0; i < 30; i++) {
+    statuses.push((await joinWaitlist(apiClient, { email: `pw-limit-${String(i)}-${randomUUID()}@example.test` })).status)
+  }
+
+  expect(statuses).toContain(429)
+  expect(statuses[0]).toBe(202)
 })

@@ -6,10 +6,12 @@ import { Banner } from '../../../shared/ui/Banner'
 import { Field, SubmitButton } from '../../../shared/ui/Form'
 import { AuthCard } from '../components/AuthCard'
 import { useAuth } from '../context'
+import { useRegistrationMode } from '../useRegistrationMode'
 
 /** Sikeres belépés után a GuestOnly guard visz tovább (a `from` helyre vagy a feladatokhoz). */
 export function Login() {
   const { login, sessionExpired } = useAuth()
+  const { mode } = useRegistrationMode()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
 
@@ -28,9 +30,16 @@ export function Login() {
       title="Belépés"
       lead="Folytasd ott, ahol abbahagytad."
       footer={
-        <>
-          Még nincs fiókod? <Link to="/regisztracio">Regisztrálj</Link>, ingyenes.
-        </>
+        mode === 'invite' ? (
+          <>
+            Zárt béta fut. Van meghívókódod? <Link to="/regisztracio">Regisztrálj vele</Link>. Nincs még? A regisztrációs oldalon
+            feliratkozhatsz a várólistára.
+          </>
+        ) : (
+          <>
+            Még nincs fiókod? <Link to="/regisztracio">Regisztrálj</Link>, ingyenes.
+          </>
+        )
       }
     >
       {sessionExpired && !generalError && <Banner kind="info">A munkameneted lejárt, lépj be újra.</Banner>}
