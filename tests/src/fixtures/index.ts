@@ -10,6 +10,7 @@ import { LearningPathPage } from '../pages/LearningPathPage'
 import { OnboardingPage } from '../pages/OnboardingPage'
 import { OralPage } from '../pages/OralPage'
 import { RegisterPage } from '../pages/RegisterPage'
+import { SheetPracticePage } from '../pages/SheetPracticePage'
 import { TaskListPage } from '../pages/TaskListPage'
 import { TaskSolvePage } from '../pages/TaskSolvePage'
 import { a11yFixtures, type A11yFixtures } from './a11y'
@@ -33,6 +34,7 @@ export interface FrameworkFixtures {
   oralPage: OralPage
   learningPathPage: LearningPathPage
   registerPage: RegisterPage
+  sheetPracticePage: SheetPracticePage
   taskListPage: TaskListPage
   taskSolvePage: TaskSolvePage
   /** Tipusos kliens a valodi backendhez (API tesztek). */
@@ -96,6 +98,10 @@ export const test = base.extend<FrameworkFixtures & A11yFixtures & FrameworkOpti
 
   registerPage: async ({ page, mockApi: _ }, use) => {
     await use(new RegisterPage(page))
+  },
+
+  sheetPracticePage: async ({ page, mockApi: _ }, use) => {
+    await use(new SheetPracticePage(page))
   },
 
   taskListPage: async ({ page, mockApi: _ }, use) => {

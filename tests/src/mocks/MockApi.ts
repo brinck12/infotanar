@@ -209,6 +209,11 @@ export class MockApi {
     }
   }
 
+  /** Egy vizsgaproba ertekelt eredmenye (`/exam-attempts/:id/result`). */
+  async withExamResult(result: object): Promise<void> {
+    await this.page.route(`${API}/exam-attempts/*/result`, (route) => route.fulfill({ json: { data: result } }))
+  }
+
   /** Egy fajlfeladat beadasai (lista es egyedi lekeres). */
   async withFileTask(submissions: { id: number }[]): Promise<void> {
     await this.page.route(`${API}/exercises/*/file-submissions`, (route) => {

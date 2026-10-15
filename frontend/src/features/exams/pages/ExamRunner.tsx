@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Link, Navigate, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { hibaUzenet } from '../../../shared/api/errors'
 import { LEVEL_LABEL } from '../../../shared/domain/labels'
@@ -16,16 +16,8 @@ import { PageLoader } from '../../../shared/ui/PageLoader'
 import { Panel } from '../../../shared/ui/Panel'
 import { Prose } from '../../../shared/ui/Prose'
 import { LoadError } from '../../../shared/ui/States'
+import { formatDuration, useAttemptClock } from '../clock'
 import { attemptQuery, examKeys, examQuery, submitAttempt, uploadPartFile, type ExamAttempt, type ExamDetail, type ExamPartDetail } from '../api'
-
-/** `óó:pp:mm` */
-function formatDuration(totalSeconds: number): string {
-  const seconds = Math.max(0, Math.floor(totalSeconds))
-  const two = (value: number) => String(value).padStart(2, '0')
-  return `${two(Math.floor(seconds / 3600))}:${two(Math.floor((seconds % 3600) / 60))}:${two(seconds % 60)}`
-}
-
-const timeOf = (iso: string) => new Date(iso).getTime()
 
 /** A futó vizsga: saját fejléc időmérővel, bal oldalt a részek, egyszerre egy rész látszik. */
 export function ExamRunner() {
@@ -34,7 +26,8 @@ export function ExamRunner() {
   const attemptId = Number(params.get('proba'))
   const valid = Number.isInteger(examId) && examId > 0 && Number.isInteger(attemptId) && attemptId > 0
   const exam = useQuery({ ...examQuery(examId), enabled: valid })
-  const attempt = useQuery({ ...attemptQuery(attemptId), enabled: valid })
+  // A szerkesztőből (másik lapról vagy visszalépve) érkezve a kész részek pipáinak frissülniük kell.
+  const attempt = useQuery({ ...attemptQuery(attemptId), enabled: valid, staleTime: 0, refetchOnWindowFocus: true })
 
   if (!valid) return <Navigate to="/vizsgak" replace />
   if (exam.isError || attempt.isError) {
@@ -53,15 +46,9 @@ export function ExamRunner() {
 function Runner({ exam, attempt, fetchedAt }: { exam: ExamDetail; attempt: ExamAttempt; fetchedAt: number }) {
   const navigate = useNavigate()
   const queryClient = useQueryClient()
-  const [now, setNow] = useState(() => Date.now())
   const [currentId, setCurrentId] = useState(() => exam.parts[0]?.id ?? 0)
   const [confirming, setConfirming] = useState(false)
   const autoSubmitted = useRef(false)
-
-  useEffect(() => {
-    const timer = window.setInterval(() => setNow(Date.now()), 1000)
-    return () => window.clearInterval(timer)
-  }, [])
 
   const submit = useMutation({
     mutationFn: () => submitAttempt(attempt.id),
@@ -71,17 +58,8 @@ function Runner({ exam, attempt, fetchedAt }: { exam: ExamDetail; attempt: ExamA
     },
   })
 
-  // A szerver órája és a gépé eltérhet: a válasz pillanatában mért különbséggel igazítjuk a gép óráját.
-  const offset = useMemo(() => {
-    const difference = timeOf(attempt.server_time) - fetchedAt
-    return Number.isFinite(difference) ? difference : 0
-  }, [attempt.server_time, fetchedAt])
-  const serverNow = now + offset
-
   // Vizsgahelyzetben a szerver szerinti határidő számít; gyakorlásnál az eltelt időt mérjük.
-  const remaining = attempt.deadline ? (timeOf(attempt.deadline) - serverNow) / 1000 : null
-  const elapsed = (serverNow - timeOf(attempt.started_at)) / 1000
-  const expired = remaining !== null && remaining <= 0
+  const { remaining, elapsed, expired } = useAttemptClock(attempt, fetchedAt)
 
   // Az idő lejártakor egyszer, magától beadjuk (a szerver is lezárja a határidőnél).
   useEffect(() => {
@@ -252,12 +230,12 @@ function PartView({ part, attempt, uploaded }: { part: ExamPartDetail; attempt: 
             kind="info"
             title="Ezt a részt a beépített szerkesztőben oldod meg"
             action={
-              <ButtonLink to={`/feladatok/${part.exercise_id}`} target="_blank" variant="secondary" icon="code">
-                Szerkesztő megnyitása új lapon
+              <ButtonLink to={`/feladatok/${part.exercise_id}?vizsga=${attempt.exam_id}&proba=${attempt.id}`} variant="secondary" icon="code">
+                Szerkesztő megnyitása
               </ButtonLink>
             }
           >
-            A beadott megoldásod a vizsga értékelésébe is beszámít.
+            A beadott megoldásod a vizsga értékelésébe is beszámít. Visszatérve a rész pipája magától frissül, a szerkesztő fölött pedig a vizsga ideje is látszik.
           </Banner>
         ) : (
           <>

@@ -16,7 +16,8 @@ import { Panel } from '../../../shared/ui/Panel'
 import { EmptyState, LoadError } from '../../../shared/ui/States'
 import { CardTitle, PageTitle } from '../../../shared/ui/Text'
 import type { LockReason } from '../../../types'
-import { examQuery, startAttempt, type ExamDetail, type ExamMode } from '../api'
+import { useAuth } from '../../auth/context'
+import { attemptQuery, examQuery, startAttempt, type ExamDetail, type ExamMode } from '../api'
 
 const CHECKLIST = [
   { label: 'Megnyitottam a programjaimat: táblázatkezelő, szövegszerkesztő, bemutatókészítő, képszerkesztő és egy programozási környezet.' },
@@ -53,6 +54,31 @@ const LOCK_ACTION: Readonly<Record<LockReason, { to: string; label: string }>> =
   subscription_required: { to: '/elofizetes', label: 'Prémium előfizetés' },
 }
 
+const MODE_LABEL: Readonly<Record<ExamMode, string>> = { exam: 'vizsgahelyzet', practice: 'gyakorlás időkorlát nélkül' }
+
+/**
+ * A zárolt vizsga felismerése betöltéskor: a backend a nem hozzáférőnek üres
+ * leírást ad a részekhez (a szerkezet látszik, a tartalom nem).
+ */
+function isLocked(exam: ExamDetail): boolean {
+  return exam.parts.length > 0 && exam.parts.every((part) => part.description === '')
+}
+
+/** Zárolt vizsga: a lépés a vizsgára szabott szöveggel, még az Indítás előtt. */
+function ExamLock({ reason }: { reason: LockReason }) {
+  const action = LOCK_ACTION[reason]
+  const text: Readonly<Record<LockReason, string>> = {
+    login_required: 'A gyakorló vizsgák feladatait és forrásfájljait belépés után éred el.',
+    email_unverified: 'A gyakorló vizsga indításához előbb erősítsd meg az e-mail-címedet. A feladatsor leírását és a forrásfájlokat ezután látod.',
+    subscription_required: 'Ez a gyakorló feladatsor Prémium előfizetéshez kötött. Előfizetés után indíthatod el, és megkapod a forrásfájlokat is.',
+  }
+  return (
+    <Banner kind="warn" title="A feladatsor zárolva van" className="mt-6" action={<ButtonLink to={action.to}>{action.label}</ButtonLink>} data-testid="exam-lock">
+      {text[reason]}
+    </Banner>
+  )
+}
+
 /** Az indítás elutasítása: zárolásnál a következő lépéssel, egyébként csak az üzenettel. */
 function StartDenied({ error }: { error: unknown }) {
   const lock = zarolasOka(error)
@@ -74,7 +100,14 @@ function StartDenied({ error }: { error: unknown }) {
 
 function StartForm({ exam }: { exam: ExamDetail }) {
   const navigate = useNavigate()
-  const [mode, setMode] = useState<ExamMode>('exam')
+  const { user } = useAuth()
+  // Alapértelmezés a gyakorlás: az időzített vizsgahelyzetet a tanuló külön választja.
+  const [mode, setMode] = useState<ExamMode>('practice')
+  const running = exam.attempt?.state === 'in_progress' ? exam.attempt : null
+  const runningAttempt = useQuery({ ...attemptQuery(running?.id ?? 0), enabled: running !== null })
+  const locked = isLocked(exam)
+  const lockReason: LockReason = !user ? 'login_required' : user.email_verified_at ? 'subscription_required' : 'email_unverified'
+  const mismatch = running && runningAttempt.data && runningAttempt.data.mode !== mode ? runningAttempt.data.mode : null
   const [checked, setChecked] = useState<ReadonlySet<number>>(new Set())
   const start = useMutation({
     mutationFn: () => startAttempt(exam.id, mode),
@@ -94,6 +127,21 @@ function StartForm({ exam }: { exam: ExamDetail }) {
     <main className="mx-auto w-full max-w-page flex-1 px-4 pt-8 pb-24 md:px-6">
       <Breadcrumb items={[{ label: 'Gyakorló vizsgák', to: '/vizsgak' }, { label: name }]} />
       <PageTitle className="mt-4">Készen állsz?</PageTitle>
+
+      {locked && <ExamLock reason={lockReason} />}
+
+      {running && (
+        <Banner
+          kind="info"
+          title="Fut egy próbálkozásod"
+          className="mt-6"
+          data-testid="running-attempt"
+          action={<ButtonLink to={`/vizsgak/${exam.id}/fut?proba=${running.id}`}>Folytatás</ButtonLink>}
+        >
+          {runningAttempt.data ? `Ez a próbálkozás ${MODE_LABEL[runningAttempt.data.mode]} módú. ` : ''}
+          Új indítás helyett ezt tudod folytatni.
+        </Banner>
+      )}
 
       <div className="mt-8 flex flex-wrap items-start gap-8">
         <div className="flex min-w-0 flex-1 basis-120 flex-col gap-6">
@@ -124,6 +172,11 @@ function StartForm({ exam }: { exam: ExamDetail }) {
                 }
               />
             </ChoiceGroup>
+            {mismatch && (
+              <p className="mt-4 text-15 font-semibold" data-testid="mode-mismatch">
+                A futó próbálkozásod {MODE_LABEL[mismatch]} módú, ezért az indítás azt folytatja, nem a most választott módot.
+              </p>
+            )}
           </Panel>
 
           <Panel>
@@ -171,8 +224,17 @@ function StartForm({ exam }: { exam: ExamDetail }) {
             </div>
           )}
           {start.isError && <StartDenied error={start.error} />}
-          <Button size="lg" icon="play" fullWidth busy={start.isPending} busyLabel="Indítás…" onClick={() => start.mutate()} className="mt-5">
-            Indítás
+          <Button
+            size="lg"
+            icon="play"
+            fullWidth
+            busy={start.isPending}
+            busyLabel="Indítás…"
+            disabled={locked}
+            onClick={() => start.mutate()}
+            className="mt-5"
+          >
+            {running ? 'Folytatás' : 'Indítás'}
           </Button>
           <p className="mt-3 text-14 leading-relaxed text-ink-soft">
             Az indítás után a számláló fut. Megszakadt kapcsolat esetén ott folytathatod, ahol abbahagytad.

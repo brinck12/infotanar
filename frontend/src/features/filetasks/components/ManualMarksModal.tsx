@@ -115,7 +115,7 @@ function Preview({ label, src, alt }: { label: string; src: string; alt: string 
   return (
     <figure className="min-w-0 flex-1 basis-56">
       <figcaption className="mb-1.5 text-14 font-semibold text-ink-soft">{label}</figcaption>
-      <img src={src} alt={alt} className="w-full rounded-sm border border-line" />
+      <img src={src} alt={alt} className="max-h-60 w-full rounded-sm border border-line bg-sheet object-contain" />
     </figure>
   )
 }

@@ -1,6 +1,6 @@
 import type { RubricState } from '../../../shared/ui/RubricItem'
 import type { SheetPracticeInfo } from '../../../types'
-import { display, evaluateCell, expandRange, functionsOf, isFormula, parseCell, referencesOf, shiftFormula, type Cells } from './formula'
+import { display, ERROR, evaluateCell, expandRange, functionsOf, isFormula, parseCell, referencesOf, shiftFormula, type Cells } from './formula'
 
 type Check = SheetPracticeInfo['checks'][number]
 
@@ -66,9 +66,39 @@ function evaluate(check: Check, cells: Cells): { passed: boolean; found: string 
   }
 }
 
-/** Az ellenőrzőlista kiértékelése a cellák tartalmán és képletein. */
+/** A cella képlete hibaértéket ad (#NÉV?, #ÉRTÉK! stb.); a beírt, `#`-tel kezdődő szöveg nem hiba. */
+export function errorOf(cells: Cells, name: string): string | null {
+  if (!isFormula(cells[name])) return null
+  const value = display(evaluateCell(cells, name))
+  return value.startsWith('#') ? value : null
+}
+
+/** Segítség a leggyakoribb hibaértékekhez: magyar függvénynevek és pontosvessző. */
+export function errorHint(error: string): string | null {
+  if (error === ERROR.name) {
+    return 'Magyar beállításnál magyar a függvények neve (például HA, SZUM, ÁTLAG), és a paramétereket pontosvessző választja el, nem vessző. Ellenőrizd a cellahivatkozásokat is.'
+  }
+  if (error === ERROR.value) {
+    return 'Nézd meg a paramétereket: pontosvessző válassza el őket, a tizedesjel vessző, a szöveget pedig idézőjelbe kell tenni.'
+  }
+  return null
+}
+
+const cellsOf = (check: Check): string[] => (check.type === 'filled_down' ? expandRange(check.range) : [check.cell])
+
+/** Az ellenőrzőlista kiértékelése a cellák tartalmán és képletein. Hibaértéket adó cella nem kap pontot. */
 export function runSheetChecks(info: SheetPracticeInfo, cells: Cells): SheetCheckResult[] {
   return info.checks.map((check) => {
+    const broken = cellsOf(check).find((name) => errorOf(cells, name) !== null)
+    if (broken) {
+      const error = errorOf(cells, broken) ?? ''
+      return {
+        check,
+        state: 'bad',
+        found: `${broken}: ${error}`,
+        hint: errorHint(error) ?? 'A képlet hibaértéket ad, ezért nem kaphat pontot. Javítsd ki.',
+      }
+    }
     const { passed, found, hint } = evaluate(check, cells)
     return { check, state: passed ? 'ok' : 'bad', found, hint: passed ? null : hint }
   })

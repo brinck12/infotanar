@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { solvedVerdict } from '../../../shared/domain/solved'
 import { Badge } from '../../../shared/ui/Badge'
 import { Banner } from '../../../shared/ui/Banner'
 import { Button } from '../../../shared/ui/Button'
@@ -35,6 +36,7 @@ export function SubmissionResult({ submission }: { submission: FileSubmission })
   }
 
   const pendingManual = submission.items.filter((item) => item.state === 'manual' && item.manual_mark === null)
+  const verdict = solvedVerdict(submission.score, submission.max_score, 'A feladat')
   const hasManual = submission.items.some((item) => item.state === 'manual' || item.manual_mark !== null)
 
   return (
@@ -51,6 +53,11 @@ export function SubmissionResult({ submission }: { submission: FileSubmission })
           {submission.previous_score !== null && <p className="text-14 text-ink-soft">Az előző: {submission.previous_score} pont</p>}
         </div>
       </div>
+
+      <Banner kind={verdict.solved ? 'success' : 'info'} className="mt-5" data-testid="solved-verdict">
+        {verdict.sentence}
+        {pendingManual.length > 0 && ' A kézi pontok jelölése után ez még változhat.'}
+      </Banner>
 
       {submission.groups.length > 0 && (
         <ul className="mt-5 grid gap-x-6 gap-y-4 sm:grid-cols-2">

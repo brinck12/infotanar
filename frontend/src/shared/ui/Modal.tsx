@@ -46,7 +46,10 @@ export function Modal({ open, title, onClose, children, actions, size = 'md' }: 
             {title}
           </h2>
           <div className="mt-3 text-16 leading-relaxed">{children}</div>
-          {actions && <div className="mt-6 flex flex-wrap justify-end gap-3">{actions}</div>}
+          {/* Hosszú tartalomnál a gombok az ablak alján maradnak (a dialógus maga görgethető). */}
+          {actions && (
+            <div className="sticky bottom-0 -mb-6 mt-6 flex flex-wrap justify-end gap-3 border-t border-grid bg-sheet py-4 md:-mb-8">{actions}</div>
+          )}
         </div>
       )}
     </dialog>

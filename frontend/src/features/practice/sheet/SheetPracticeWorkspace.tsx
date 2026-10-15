@@ -1,4 +1,5 @@
-import { useId, useMemo, useState, type FormEvent } from 'react'
+import { useId, useMemo, useRef, useState, type FormEvent } from 'react'
+import { usePersistentState } from '../../../shared/hooks/usePersistentState'
 import { Badge, LevelBadge } from '../../../shared/ui/Badge'
 import { Banner } from '../../../shared/ui/Banner'
 import { Button } from '../../../shared/ui/Button'
@@ -8,8 +9,13 @@ import { RubricItem } from '../../../shared/ui/RubricItem'
 import { SheetGrid } from '../../../shared/ui/SheetGrid'
 import { CardTitle } from '../../../shared/ui/Text'
 import type { SheetPracticeInfo, UnlockedTaskDetail } from '../../../types'
-import { runSheetChecks } from './checks'
+import { useAuth } from '../../auth/context'
+import { errorHint, errorOf, runSheetChecks } from './checks'
 import { cellName, display, evaluateCell, parseCell, shiftFormula, type Cells } from './formula'
+
+function isCells(value: unknown): value is Cells {
+  return typeof value === 'object' && value !== null && !Array.isArray(value) && Object.values(value).every((cell) => typeof cell === 'string')
+}
 
 /**
  * Böngészős táblázatos gyakorló: kis munkalap képletsávval és élő
@@ -18,17 +24,51 @@ import { cellName, display, evaluateCell, parseCell, shiftFormula, type Cells } 
  */
 export function SheetPracticeWorkspace({ task, info }: { task: UnlockedTaskDetail; info: SheetPracticeInfo }) {
   const inputId = useId()
-  const [cells, setCells] = useState<Cells>(info.cells)
+  const { user } = useAuth()
+  // A munkalap piszkozata a böngészőben marad (felhasználónként és feladatonként), újratöltés után is.
+  const [cells, setCells] = usePersistentState<Cells>(`infotanar.sheet.v1.${user?.id ?? 'guest'}.${task.id}`, info.cells, isCells)
   const [history, setHistory] = useState<Cells[]>([])
   const [selected, setSelected] = useState('A1')
-  const [draft, setDraft] = useState(info.cells['A1'] ?? '')
+  const [draft, setDraft] = useState(cells['A1'] ?? '')
+  const [editing, setEditing] = useState(false)
+  const editingRef = useRef(false)
 
   const results = useMemo(() => runSheetChecks(info, cells), [info, cells])
+  const selectedError = errorOf(cells, selected)
+  const errorMessage = selectedError ? { error: selectedError, hint: errorHint(selectedError) } : null
   const done = results.filter((result) => result.state === 'ok').length
 
   function select(cell: string) {
     setSelected(cell)
     setDraft(cells[cell] ?? '')
+  }
+
+  function startEdit(initial?: string) {
+    editingRef.current = true
+    setEditing(true)
+    setDraft(initial ?? cells[selected] ?? '')
+  }
+
+  function cancelEdit() {
+    editingRef.current = false
+    setEditing(false)
+    setDraft(cells[selected] ?? '')
+  }
+
+  /** Cellán belüli szerkesztés vége: Enter lefelé, Tab jobbra lép, a fókuszvesztés helyben marad. */
+  function commitEdit(move: 'down' | 'right' | 'none') {
+    if (!editingRef.current) return
+    editingRef.current = false
+    setEditing(false)
+    const next = (cells[selected] ?? '') !== draft ? { ...cells, [selected]: draft } : cells
+    if (next !== cells) apply(next)
+    const place = parseCell(selected)
+    if (!place || move === 'none') return
+    const column = move === 'right' ? Math.min(info.columns - 1, place.column + 1) : place.column
+    const row = move === 'down' ? Math.min(info.rows - 1, place.row + 1) : place.row
+    const name = cellName(column, row)
+    setSelected(name)
+    setDraft(next[name] ?? '')
   }
 
   function apply(next: Cells) {
@@ -41,7 +81,10 @@ export function SheetPracticeWorkspace({ task, info }: { task: UnlockedTaskDetai
     if ((cells[selected] ?? '') !== draft) apply({ ...cells, [selected]: draft })
     // Enter után a következő sorra lépünk, ahogy a táblázatkezelőkben.
     const place = parseCell(selected)
-    if (place && place.row + 1 < info.rows) select(cellName(place.column, place.row + 1))
+    if (place && place.row + 1 < info.rows) {
+      setSelected(cellName(place.column, place.row + 1))
+      setDraft(cells[cellName(place.column, place.row + 1)] ?? '')
+    }
   }
 
   /** A kijelölt cella tartalmát lemásolja az alatta lévő cellákba, amíg a bal oldali oszlopban adat van. */
@@ -67,6 +110,8 @@ export function SheetPracticeWorkspace({ task, info }: { task: UnlockedTaskDetai
   }
 
   function reset() {
+    editingRef.current = false
+    setEditing(false)
     setCells(info.cells)
     setHistory([])
     setDraft(info.cells[selected] ?? '')
@@ -151,12 +196,18 @@ export function SheetPracticeWorkspace({ task, info }: { task: UnlockedTaskDetai
             selected={selected}
             onSelect={select}
             valueOf={(cell) => display(evaluateCell(cells, cell))}
+            editor={{ active: editing, value: draft, onStart: startEdit, onChange: setDraft, onCommit: commitEdit, onCancel: cancelEdit }}
           />
         </div>
+        {errorMessage && (
+          <Banner kind="warn" title={`${selected}: ${errorMessage.error}`} className="mt-4" data-testid="sheet-error-hint">
+            {errorMessage.hint ?? 'A képlet hibaértéket ad, ezért az ellenőrzés nem fogadja el. Javítsd ki a képletet.'}
+          </Banner>
+        )}
         <p className="mt-2 inline-block rounded-b-md border border-t-0 border-line bg-sheet px-4 py-1.5 text-14 font-semibold">Munka1</p>
 
         <p className="mt-4 text-14 leading-relaxed text-ink-soft">
-          Jelölj ki egy cellát, írd be a tartalmát a képletsávba, és nyomj Entert. Az ellenőrzés a cellák tartalmát és képleteit nézi, és
+          Kattints egy cellára, és kezdj el gépelni: az Enter lefelé, a Tab jobbra lép, az Esc elveti a módosítást. Dupla kattintással vagy F2-vel a meglévő tartalmat szerkesztheted, a képletsáv is használható. A munkád ebben a böngészőben megmarad. Az ellenőrzés a cellák tartalmát és képleteit nézi, és
           magától frissül.
         </p>
       </Panel>

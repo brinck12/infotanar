@@ -31,6 +31,19 @@ export function WebTaskWorkspace({ task, info }: { task: UnlockedTaskDetail; inf
   const earned = results.reduce((sum, result) => sum + (result.state === 'ok' ? result.check.points : 0), 0)
   const total = info.checks.reduce((sum, check) => sum + check.points, 0)
   const dirty = files !== saved
+  // Mentés után a pontszám a gomb mellett is megjelenik (keskeny kijelzőn az ellenőrzőlista messze van).
+  const [justSaved, setJustSaved] = useState(false)
+
+  function save() {
+    setSaved(files)
+    setJustSaved(true)
+  }
+
+  function showPreview() {
+    const target = document.getElementById('web-elonezet')
+    target?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    target?.focus()
+  }
 
   return (
     <main className="mx-auto flex w-full max-w-work flex-wrap items-start gap-6 px-4 py-6 md:px-6">
@@ -105,16 +118,25 @@ export function WebTaskWorkspace({ task, info }: { task: UnlockedTaskDetail; inf
             )}
           </div>
           <div className="on-dark flex flex-wrap items-center gap-3 border-t border-code-line bg-code px-5 py-3">
-            <Button icon="play" onClick={() => setSaved(files)}>
+            <Button icon="play" onClick={save}>
               Mentés és előnézet
             </Button>
-            <span className="text-14 text-code-soft" aria-live="polite">
-              {dirty ? 'Vannak nem mentett módosításaid.' : 'Az előnézet a mentett kódodat mutatja.'}
+            <span className="text-14 text-code-soft" role="status" data-testid="web-save-status">
+              {dirty
+                ? 'Vannak nem mentett módosításaid.'
+                : justSaved
+                  ? `Mentve. Az ellenőrzés: ${pointsLabel(earned, total)}.`
+                  : 'Az előnézet a mentett kódodat mutatja.'}
             </span>
+            {justSaved && !dirty && (
+              <Button variant="dark" onClick={showPreview} className="lg:hidden">
+                Előnézet megnézése
+              </Button>
+            )}
           </div>
         </Panel>
 
-        <Panel pad="none" as="section" aria-label="Előnézet" className="overflow-hidden">
+        <Panel pad="none" as="section" aria-label="Előnézet" id="web-elonezet" tabIndex={-1} className="overflow-hidden">
           <div className="flex items-center gap-3 border-b border-line bg-headrow px-4 py-2.5">
             <span aria-hidden="true" className="flex gap-1.5">
               <span className="size-2.5 rounded-full bg-muted" />
