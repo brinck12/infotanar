@@ -1,29 +1,34 @@
 import type { Locator, Page } from '@playwright/test'
 import { BasePage } from './BasePage'
 
-/** Bongeszos tablazatos gyakorlo: a munkalap, a cellan beluli szerkesztes es az ellenorzolista. */
+/** Bongeszos tablazatos gyakorlo: munkalap, kepletsav es ellenorzolista. */
 export class SheetPracticePage extends BasePage {
-  readonly errorHint: Locator
-  readonly progress: Locator
+  readonly formulaBar: Locator
 
   constructor(page: Page) {
     super(page)
-    this.errorHint = page.getByTestId('sheet-error-hint')
-    this.progress = page.getByText(/\d+ \/ \d+ kész/)
+    this.formulaBar = page.getByLabel(/cella tartalma/)
   }
 
-  async open(taskId: number): Promise<void> {
+  async goto(taskId: number): Promise<void> {
     await this.navigate(`/feladatok/${taskId}`)
   }
 
+  /** A munkalap egy cellaja (a felirata `B3: 12` alaku). */
   cell(name: string): Locator {
-    return this.page.locator(`[data-cell="${name}"]`)
+    return this.page.getByRole('button', { name: new RegExp(`^${name}:`) })
   }
 
-  /** Rakattint a cellara, begepeli a szoveget es lezarja Entert (vagy Tabot) nyomva. */
-  async typeInto(name: string, text: string, finish: 'Enter' | 'Tab' = 'Enter'): Promise<void> {
-    await this.cell(name).click()
-    await this.page.keyboard.type(text)
-    await this.page.keyboard.press(finish)
+  /** Kozvetlen szerkesztes: a cellara gepelve a kepletsavban folytatodik a beiras, Enter beirja. */
+  async typeIntoCell(name: string, text: string): Promise<void> {
+    await this.cell(name).focus()
+    await this.page.keyboard.press(text.slice(0, 1))
+    await this.page.keyboard.type(text.slice(1))
+    await this.page.keyboard.press('Enter')
+  }
+
+  /** Egy ellenorzolista-tetel szovege (a tippel egyutt). */
+  checkItem(label: string): Locator {
+    return this.page.getByRole('listitem').filter({ hasText: label })
   }
 }

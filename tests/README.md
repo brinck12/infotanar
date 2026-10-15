@@ -18,6 +18,7 @@ npm run test:smoke # csak a @smoke tesztek
 npm run test:a11y  # csak az @a11y (axe-core, WCAG 2.1 AA) tesztek
 npm run test:ui    # Playwright UI mód
 npm run report     # az utolsó HTML riport
+npm run coverage:endpoints  # a test:api után: a docs/api-endpoints.md azon útvonalai, amelyekre nulla találat volt (egyelőre nem buktat)
 ```
 
 Az API tesztekhez PHP 8.3+ és `composer install` kell a `backend/`
@@ -151,3 +152,11 @@ MySQL adatbázist fogad el, és csak `APP_ENV=testing` mellett.
 - A `test:prepare-api-fixtures` minden futás előtt **kiüríti** a
   `backend/storage/app/private/exercise-files` és `…/submission-files` mappát:
   helyi fejlesztésnél ide ne tegyél megőrzendő fájlt.
+
+## Szerződés-ellenőrzés, versenyhelyzetek, végpont-lefedettség
+
+- `specs/api/contract.spec.ts`: a valódi backend ~30 válaszát zod sémák ellen validálja (`src/api/schemas`), amelyek a `frontend/src/types` típusait tükrözik. Ha a backend válasza eltér, itt bukik, nem a böngészőben. A sémák szándékosan nem `strict` objektumok: egy új extra mező nem tör, a hiányzó vagy rossz típusú igen.
+- `specs/api/concurrency.spec.ts` (`@concurrency`): ugyanaz a művelet 8 párhuzamos kéréssel. Csak MySQL-en (`API_DATABASE_URL`) bizonyít valamit: SQLite-on a `lockForUpdate` no-op, és a beépített PHP szerver egyszerre egy kérést szolgál ki. Futtatás külön: `--grep @concurrency`.
+- `specs/api/engine-differences.spec.ts`: SQLite és MySQL eltéréseinek célzott esetei (e-mail kis- és nagybetű, törölt cím újraregisztrálása, ékezetes slug, hosszú szöveg).
+- Végpont-lefedettség: az `ApiClient` minden kérését a `test-results/endpoint-hits.ndjson` fájlba naplózza; a Playwright minden futás elején törli a `test-results` mappát, így a fájl az utolsó futást tükrözi.
+

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions\Admin\Catalog;
 
+use App\Exceptions\Catalog\ExerciseNotPublishable;
 use App\Exceptions\Catalog\PublishedExerciseNeedsRubric;
 use App\Exceptions\Catalog\PublishedExerciseNeedsSpec;
 use App\Exceptions\Catalog\PublishedExerciseNeedsVisibleTestCase;
@@ -34,6 +35,7 @@ final readonly class CreateExercise
      * @throws PublishedExerciseNeedsVisibleTestCase
      * @throws PublishedExerciseNeedsSpec
      * @throws PublishedExerciseNeedsRubric
+     * @throws ExerciseNotPublishable
      */
     public function handle(array $attributes, User $admin): Exercise
     {

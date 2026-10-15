@@ -7,6 +7,9 @@
 [Unit]
 Description=InfoTanar scheduler
 After=network.target mysql.service
+StartLimitIntervalSec=300
+StartLimitBurst=5
+OnFailure=infotanar-alert@%n.service
 
 [Service]
 User=www-data
@@ -15,6 +18,7 @@ WorkingDirectory=/var/www/infotanar/backend
 ExecStart=/usr/bin/php artisan schedule:work
 Restart=always
 RestartSec=5
+TimeoutStopSec=120
 
 [Install]
 WantedBy=multi-user.target

@@ -1,0 +1,38 @@
+# Judge0 CE a kodfuttatashoz. Hasznalat: lasd README.md.
+# Minden port csak a szerver localhostjara van kotve: a Judge0 nem erheto el kivulrol,
+# a backend a JUDGE0_URL=http://127.0.0.1:2358 cimen eri el.
+x-judge0: &judge0
+  image: judge0/judge0:1.13.1
+  env_file: judge0.conf
+  # A sandbox (isolate) privilegizalt kontenert igenyel.
+  privileged: true
+  restart: unless-stopped
+
+services:
+  server:
+    <<: *judge0
+    command: ["./scripts/server"]
+    ports:
+      - "127.0.0.1:2358:2358"
+    depends_on: [db, redis]
+
+  workers:
+    <<: *judge0
+    command: ["./scripts/workers"]
+    depends_on: [db, redis]
+
+  db:
+    image: postgres:16.2
+    env_file: judge0.conf
+    volumes:
+      - judge0-postgres:/var/lib/postgresql/data
+    restart: unless-stopped
+
+  redis:
+    image: redis:7.2.4
+    command: ["bash", "-c", 'docker-entrypoint.sh --appendonly no --requirepass "$$REDIS_PASSWORD"']
+    env_file: judge0.conf
+    restart: unless-stopped
+
+volumes:
+  judge0-postgres:

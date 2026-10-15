@@ -17,8 +17,15 @@ export const SEEDED = {
    * jelenik meg listaban, igy nem kereshetunk ra cimmel.
    */
   unpublishedTaskId: 2,
+  /**
+   * Piszkozat (nem publikalt) track-ben levo, onmagaban publikalt lecke es feladat; a seeder utolso elemei.
+   * Az azonositokat cim alapjan kell kikeresni (src/support/reliability.ts).
+   */
+  draftTrackTask: 'PW teszt: Piszkozat track feladata',
   /** A fo feladat tesztesetei: 2 nyilvanos + 2 rejtett. */
-  mainTask: { exampleCount: 2, hiddenCount: 2, pythonStarter: 'print()\n' },
+  mainTask: { exampleCount: 2, hiddenCount: 2, pythonStarter: 'print()\n', pythonSample: 'print(input())\n' },
+  /** A fo feladat leckeje (ingyenes) es a track, ahol a diak a leckeoldalt kapja. */
+  mainLesson: { trackSlug: 'pw-teszt-track', lessonSlug: 'pw-teszt-osszegzes' },
   /** Rogzitett, megerositett fiokok; a jelszavuk a DEFAULT_PASSWORD. Az admin az egyetlen admin. */
   accounts: { admin: 'admin@infotanar.test', student: 'student@infotanar.test' },
 

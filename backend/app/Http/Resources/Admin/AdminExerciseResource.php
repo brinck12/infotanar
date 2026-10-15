@@ -28,6 +28,8 @@ final class AdminExerciseResource extends JsonResource
             // Nem szerkesztos fajtanal ures lista.
             'allowed_languages' => $this->allowed_languages ?? [],
             'starter_code' => $this->starter_code ?: new stdClass,
+            // Nyelvenkenti mintamegoldas; csak az admin API adja ki.
+            'sample_solutions' => $this->sample_solutions ?: new stdClass,
             'constraints' => $this->constraints->toArray(),
             // A fajtahoz tartozo adatok teljes alakban (a `raw_points`-szal egyutt); null, ha nincs.
             'spec' => resolve(ExerciseSpec::class)->export($this->kind, $this->spec),

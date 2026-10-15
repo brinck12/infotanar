@@ -108,6 +108,11 @@ export interface ExamResult {
   review: Array<{ lesson_id: number; title: string; track: string }>
 }
 
+/** Az eredményoldal értesítője: miért kerültünk ide a futó vizsgáról. */
+export interface ResultNavigationState {
+  notice?: 'conflict'
+}
+
 export const examKeys = {
   all: ['exams'] as const,
   list: () => [...examKeys.all, 'list'] as const,
@@ -153,10 +158,12 @@ export async function uploadPartFile(
   partId: number,
   file: File,
   onProgress: (percent: number) => void,
+  signal?: AbortSignal,
 ): Promise<ExamAttempt> {
   const body = new FormData()
   body.append('file', file)
   const response = await http.post<Envelope<ExamAttempt>>(`/exam-attempts/${attemptId}/parts/${partId}/file`, body, {
+    signal,
     onUploadProgress: (event) => onProgress(event.total ? (event.loaded / event.total) * 100 : 0),
   })
   return response.data.data

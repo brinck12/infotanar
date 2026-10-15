@@ -12,21 +12,30 @@ export class RegisterPage extends BasePage {
   readonly termsLink: Locator
   readonly submitButton: Locator
   readonly termsError: Locator
+  /** Csak zart beta (invite) modban jelenik meg. */
+  readonly inviteCode: Locator
+  readonly waitlistEmail: Locator
+  readonly waitlistSubmit: Locator
+  readonly waitlistDone: Locator
 
   constructor(page: Page) {
     super(page)
+    this.inviteCode = page.getByLabel('Meghívókód')
+    this.waitlistEmail = page.getByLabel('E-mail-cím a várólistához')
+    this.waitlistSubmit = page.getByRole('button', { name: 'Feliratkozom a várólistára' })
+    this.waitlistDone = page.getByTestId('waitlist-done')
     this.name = page.getByLabel('Név')
-    this.email = page.getByLabel('E-mail-cím')
+    this.email = page.getByLabel('E-mail-cím', { exact: true })
     this.password = page.getByLabel('Jelszó', { exact: true })
     this.passwordConfirmation = page.getByLabel('Jelszó újra')
     this.acceptTerms = page.getByRole('checkbox', { name: /Elfogadom/ })
     this.termsLink = page.getByRole('link', { name: /általános szerződési feltételeket/ })
     this.submitButton = page.getByRole('button', { name: 'Fiók létrehozása' })
-    this.termsError = page.getByText('A regisztrációhoz fogadd el a feltételeket és a tájékoztatót.')
+    this.termsError = page.getByText('A regisztrációhoz el kell fogadnod az ÁSZF-et.')
   }
 
-  async goto(): Promise<void> {
-    await this.navigate('/regisztracio')
+  async goto(query = ''): Promise<void> {
+    await this.navigate(`/regisztracio${query}`)
   }
 
   /** Kitolti a szoveges mezoket; az elfogadas kulon lepes. */

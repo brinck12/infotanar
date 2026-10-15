@@ -5,6 +5,7 @@ import { Banner } from '../../../shared/ui/Banner'
 import { Button } from '../../../shared/ui/Button'
 import { cx } from '../../../shared/ui/cx'
 import { Modal } from '../../../shared/ui/Modal'
+import { invalidateSolveState } from '../../catalog/invalidate'
 import { fileTaskKeys, saveManualMarks, type FileSubmission } from '../api'
 
 interface Props {
@@ -28,7 +29,11 @@ export function ManualMarksModal({ submission, open, onClose }: Props) {
     mutationFn: () => saveManualMarks(submission.id, marks),
     onSuccess: (updated) => {
       queryClient.setQueryData(fileTaskKeys.one(updated.id), updated)
+      queryClient.setQueryData<FileSubmission[]>(fileTaskKeys.forExercise(updated.exercise_id), (list) =>
+        list?.map((item) => (item.id === updated.id ? updated : item)),
+      )
       void queryClient.invalidateQueries({ queryKey: fileTaskKeys.forExercise(updated.exercise_id) })
+      invalidateSolveState(queryClient, updated.exercise_id)
       onClose()
     },
   })

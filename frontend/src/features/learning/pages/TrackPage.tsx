@@ -1,4 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
+import { useDocumentMeta } from '../../../shared/hooks/useDocumentMeta'
 import { Link, useParams } from 'react-router-dom'
 import { httpStatus } from '../../../shared/api/errors'
 import { trackIcon } from '../../../shared/domain/exam'
@@ -23,6 +24,7 @@ export function TrackPage() {
   const { user } = useAuth()
   const track = useQuery(trackQuery(sav))
   const statuses = useLessonStatuses()
+  useDocumentMeta(track.data ? { title: track.data.title, description: track.data.description ?? undefined } : null)
 
   if (track.isPending) return <PageLoader label="Sáv betöltése…" />
   if (track.isError) {

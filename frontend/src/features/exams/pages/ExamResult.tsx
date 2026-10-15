@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
-import { Link, Navigate, useParams, useSearchParams } from 'react-router-dom'
+import { Link, Navigate, useLocation, useParams, useSearchParams } from 'react-router-dom'
 import { EXAM_PARTS } from '../../../shared/domain/exam'
 import { LEVEL_LABEL } from '../../../shared/domain/labels'
 import { solvedVerdict } from '../../../shared/domain/solved'
@@ -12,7 +12,7 @@ import { Panel } from '../../../shared/ui/Panel'
 import { Bar } from '../../../shared/ui/Progress'
 import { LoadError } from '../../../shared/ui/States'
 import { CardTitle, PageTitle, SectionTitle } from '../../../shared/ui/Text'
-import { attemptQuery, resultQuery, type ExamAttempt, type ExamResult as Result } from '../api'
+import { attemptQuery, resultQuery, type ExamAttempt, type ExamResult as Result, type ResultNavigationState } from '../api'
 
 /**
  * A vizsga eredménye: összpontszám és százalék, részenként a fő hibaokkal.
@@ -55,6 +55,7 @@ interface ResultViewProps {
 function ResultView({ examId, attemptId, result, attempt }: ResultViewProps) {
   const { exam } = result
   const verdict = solvedVerdict(result.score, result.max_score, 'A feladatsor')
+  const navigationState = useLocation().state as ResultNavigationState | null
   const name = `${exam.title}, ${LEVEL_LABEL[exam.level].toLowerCase()}`
   const percent = result.max_score > 0 ? Math.floor((result.score / result.max_score) * 100) : 0
 
@@ -62,6 +63,12 @@ function ResultView({ examId, attemptId, result, attempt }: ResultViewProps) {
     <main className="mx-auto w-full max-w-page flex-1 px-4 pt-8 pb-24 md:px-6">
       <Breadcrumb items={[{ label: 'Gyakorló vizsgák', to: '/vizsgak' }, { label: name }]} />
       <PageTitle className="mt-4">Az eredményed</PageTitle>
+
+      {navigationState?.notice === 'conflict' && (
+        <Banner kind="warn" title="A vizsga már le van zárva" className="mt-6">
+          Az időd lejárt, vagy a vizsgát egy másik lapon már beadtad, ezért a most feltöltött fájl nem került be. Az eredményedet alább látod.
+        </Banner>
+      )}
 
       <div className="mt-8 flex flex-wrap items-start gap-8">
         <div className="min-w-0 flex-1 basis-120">

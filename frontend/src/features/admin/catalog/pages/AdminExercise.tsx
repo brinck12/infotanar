@@ -30,6 +30,7 @@ import { AttachmentManager } from '../components/AttachmentManager'
 import { ConstraintEditor } from '../components/ConstraintEditor'
 import { ExecutionLimitFields } from '../components/ExecutionLimitFields'
 import { MutationError, QueryState } from '../components/QueryState'
+import { SampleSolutionEditor } from '../components/SampleSolutionEditor'
 import { TestCaseManager } from '../components/TestCaseManager'
 import { TypeDataEditor } from '../components/TypeDataEditor'
 import { SavedNote } from '../components/SavedNote'
@@ -62,12 +63,12 @@ function LessonContext({ lessonId, children }: { lessonId: number; children: (le
 }
 
 /** Az űrlapon megjelenített mezőhibák; minden más a szakasz tetején. */
-const EXERCISE_FIELDS = ['kind', 'title', 'description', 'level', 'difficulty', 'allowed_languages', 'allowed_languages.0', 'is_published', 'sql_order_sensitive', 'time_limit_ms', 'memory_limit_kb', 'constraints', 'starter_code.python', 'starter_code.csharp', 'starter_code.sql'] as const
+const EXERCISE_FIELDS = ['kind', 'title', 'description', 'level', 'difficulty', 'allowed_languages', 'allowed_languages.0', 'is_published', 'sql_order_sensitive', 'time_limit_ms', 'memory_limit_kb', 'constraints', 'starter_code.python', 'starter_code.csharp', 'starter_code.sql', 'sample_solutions', 'is_hidden'] as const
 
 const LEVEL_OPTIONS = (Object.keys(LEVEL_LABEL) as Level[]).map((level) => ({ value: level, label: LEVEL_LABEL[level] }))
 const DIFFICULTY_OPTIONS = [1, 2, 3, 4, 5].map((n) => ({ value: String(n), label: String(n) }))
 
-type EditorTab = 'leiras' | 'tipus' | 'tesztek' | 'szabalyok' | 'ertekelolap' | 'fajlok'
+type EditorTab = 'leiras' | 'tipus' | 'tesztek' | 'mintamegoldas' | 'szabalyok' | 'ertekelolap' | 'fajlok'
 
 /** A fülek a feladat típusától függnek: a tesztesetek és szabályok a szerkesztős, az értékelőlap a feltöltős típusoké. */
 function tabsFor(kind: ExerciseKind): ReadonlyArray<{ id: EditorTab; label: string }> {
@@ -75,7 +76,7 @@ function tabsFor(kind: ExerciseKind): ReadonlyArray<{ id: EditorTab; label: stri
     { id: 'leiras', label: isEditorKind(kind) ? 'Leírás és kód' : 'Leírás' },
     { id: 'tipus', label: 'Típus-adatok' },
   ]
-  if (isEditorKind(kind)) tabs.push({ id: 'tesztek', label: 'Tesztesetek' }, { id: 'szabalyok', label: 'Szabályok' })
+  if (isEditorKind(kind)) tabs.push({ id: 'tesztek', label: 'Tesztesetek' }, { id: 'mintamegoldas', label: 'Mintamegoldás' }, { id: 'szabalyok', label: 'Szabályok' })
   if (isUploadExerciseKind(kind)) tabs.push({ id: 'ertekelolap', label: 'Értékelőlap' })
   tabs.push({ id: 'fajlok', label: 'Fájlok' })
   return tabs
@@ -95,6 +96,7 @@ function ExerciseEditor({ lesson, exercise }: { lesson: AdminLesson; exercise: A
     difficulty: exercise?.difficulty ?? 1,
     allowed_languages: exercise?.allowed_languages ?? ['python'],
     starter_code: exercise?.starter_code ?? {},
+    sample_solutions: exercise?.sample_solutions ?? {},
     constraints: exercise?.constraints ?? { require: [], forbid: [] },
     spec: exercise?.spec ?? null,
     comparison: exercise?.comparison ?? null,
@@ -123,6 +125,9 @@ function ExerciseEditor({ lesson, exercise }: { lesson: AdminLesson; exercise: A
   // Amíg a tesztesetek töltődnek (vagy nem jöttek meg), nem tudjuk, van-e nyilvános: akkor a szerver dönt.
   const knownWithoutVisibleTestCases = (exercise === null || testCases.isSuccess) && visibleTestCases === 0
   const [publishError, setPublishError] = useState<string | null>(null)
+  const hasSampleSolution = form.allowed_languages.some((l) => (form.sample_solutions[l] ?? '').trim() !== '')
+  // Az ellenőrzés a szerveren mentett állapotot futtatja: eltérésnél előbb menteni kell.
+  const solutionsUnsaved = form.allowed_languages.some((l) => (form.sample_solutions[l] ?? '').trim() !== (exercise?.sample_solutions[l] ?? '').trim())
 
   /** Típusváltáskor a régi típus adata nem maradhat: a nyelvek és a típus-adatok az új típushoz igazodnak. */
   function changeKind(kind: ExerciseKind) {
@@ -133,7 +138,7 @@ function ExerciseEditor({ lesson, exercise }: { lesson: AdminLesson; exercise: A
     }))
     setTypeData(kind === exercise?.kind ? initialTypeData(exercise) : initialTypeData(null, kind))
     setJsonError(null)
-    if (tab === 'tesztek' || tab === 'szabalyok' || tab === 'ertekelolap') setTab('tipus')
+    if (tab === 'tesztek' || tab === 'mintamegoldas' || tab === 'szabalyok' || tab === 'ertekelolap') setTab('tipus')
   }
 
   function toggleLanguage(language: LanguageKey, on: boolean) {
@@ -153,6 +158,10 @@ function ExerciseEditor({ lesson, exercise }: { lesson: AdminLesson; exercise: A
       )
       return
     }
+    if (form.is_published && editorKind && !hasSampleSolution) {
+      setPublishError('Közzététel előtt adj meg mintamegoldást legalább egy engedélyezett nyelven a Mintamegoldás fülön.')
+      return
+    }
     setPublishError(null)
     const built = buildTypeData(form.kind, typeData)
     setJsonError(built.jsonError)
@@ -163,10 +172,12 @@ function ExerciseEditor({ lesson, exercise }: { lesson: AdminLesson; exercise: A
     // Csak az engedélyezett nyelvek kiinduló kódja megy el; nem szerkesztős típusnál egyik sem.
     const chosen = editorKind ? form.allowed_languages : []
     const starter = Object.fromEntries(chosen.map((l) => [l, form.starter_code[l] ?? '']))
+    const samples = Object.fromEntries(chosen.flatMap((l) => ((form.sample_solutions[l] ?? '').trim() !== '' ? [[l, form.sample_solutions[l] ?? '']] : [])))
     save.mutate({
       ...form,
       allowed_languages: chosen,
       starter_code: starter,
+      sample_solutions: editorKind ? samples : {},
       spec: built.spec,
       comparison: built.comparison,
       sql_order_sensitive: chosen.includes('sql') && form.sql_order_sensitive,
@@ -175,7 +186,9 @@ function ExerciseEditor({ lesson, exercise }: { lesson: AdminLesson; exercise: A
 
   const title = exercise ? exercise.title : 'Új feladat'
   const languageError = errors.allowed_languages ?? errors['allowed_languages.0']
-  const publishMessage = publishError ?? errors.is_published
+  // A közzétételi kapu hibája (mintamegoldás, nyilvános teszteset, értékelőlap) a kapcsoló mellett jelenik meg.
+  const publishMessage = publishError ?? errors.is_published ?? errors.is_hidden
+  const publishFix = editorKind ? (!hasSampleSolution ? 'mintamegoldas' : knownWithoutVisibleTestCases ? 'tesztek' : null) : null
 
   return (
     <AdminShell
@@ -331,6 +344,18 @@ function ExerciseEditor({ lesson, exercise }: { lesson: AdminLesson; exercise: A
           <TypeDataEditor kind={form.kind} value={typeData} onChange={setTypeData} errors={errors} jsonError={jsonError} />
         </TabPanel>
 
+        <TabPanel idPrefix={formId} id="mintamegoldas" active={tab === 'mintamegoldas'}>
+          <SampleSolutionEditor
+            exerciseId={exercise?.id ?? null}
+            languages={form.allowed_languages}
+            options={languages.data ?? []}
+            value={form.sample_solutions}
+            onChange={(language, code) => setForm((f) => ({ ...f, sample_solutions: { ...f.sample_solutions, [language]: code } }))}
+            unsaved={solutionsUnsaved}
+            errors={errors}
+          />
+        </TabPanel>
+
         <TabPanel idPrefix={formId} id="szabalyok" active={tab === 'szabalyok'}>
           <Panel>
             <ConstraintEditor
@@ -375,7 +400,22 @@ function ExerciseEditor({ lesson, exercise }: { lesson: AdminLesson; exercise: A
       </TabPanel>
 
       <div className="flex flex-col gap-3">
-        {publishMessage && <Banner kind="error">{publishMessage}</Banner>}
+        {publishMessage && (
+          <Banner
+            kind="error"
+            title="A feladat nem tehető közzé"
+            data-testid="publish-error"
+            action={
+              publishFix ? (
+                <Button variant="secondary" onClick={() => setTab(publishFix)}>
+                  {publishFix === 'mintamegoldas' ? 'Mintamegoldás megnyitása' : 'Tesztesetek megnyitása'}
+                </Button>
+              ) : undefined
+            }
+          >
+            {publishMessage}
+          </Banner>
+        )}
         <div className="flex flex-wrap items-center gap-x-6 gap-y-3">
           <Button type="submit" form={formId} busy={save.isPending} busyLabel="Mentés…">
             {exercise ? 'Mentés' : 'Feladat létrehozása'}

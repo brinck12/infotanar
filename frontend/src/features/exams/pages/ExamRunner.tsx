@@ -1,8 +1,9 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useEffect, useRef, useState } from 'react'
 import { Link, Navigate, useNavigate, useParams, useSearchParams } from 'react-router-dom'
-import { hibaUzenet } from '../../../shared/api/errors'
+import { hibaUzenet, httpStatus } from '../../../shared/api/errors'
 import { LEVEL_LABEL } from '../../../shared/domain/labels'
+import { useFileUpload } from '../../../shared/hooks/useFileUpload'
 import { Badge } from '../../../shared/ui/Badge'
 import { Banner } from '../../../shared/ui/Banner'
 import { Button, ButtonLink } from '../../../shared/ui/Button'
@@ -16,8 +17,20 @@ import { PageLoader } from '../../../shared/ui/PageLoader'
 import { Panel } from '../../../shared/ui/Panel'
 import { Prose } from '../../../shared/ui/Prose'
 import { LoadError } from '../../../shared/ui/States'
+import { invalidateSolveState } from '../../catalog/invalidate'
+import { fileTaskKeys } from '../../filetasks/api'
+import {
+  attemptQuery,
+  examKeys,
+  examQuery,
+  submitAttempt,
+  uploadPartFile,
+  type ExamAttempt,
+  type ExamDetail,
+  type ExamPartDetail,
+  type ResultNavigationState,
+} from '../api'
 import { formatDuration, useAttemptClock } from '../clock'
-import { attemptQuery, examKeys, examQuery, submitAttempt, uploadPartFile, type ExamAttempt, type ExamDetail, type ExamPartDetail } from '../api'
 
 /** A futó vizsga: saját fejléc időmérővel, bal oldalt a részek, egyszerre egy rész látszik. */
 export function ExamRunner() {
@@ -26,11 +39,12 @@ export function ExamRunner() {
   const attemptId = Number(params.get('proba'))
   const valid = Number.isInteger(examId) && examId > 0 && Number.isInteger(attemptId) && attemptId > 0
   const exam = useQuery({ ...examQuery(examId), enabled: valid })
-  // A szerkesztőből (másik lapról vagy visszalépve) érkezve a kész részek pipáinak frissülniük kell.
-  const attempt = useQuery({ ...attemptQuery(attemptId), enabled: valid, staleTime: 0, refetchOnWindowFocus: true })
+  // A másik lapon beadott vagy lejárt kísérlet és a szerkesztőben megoldott kódrész is a lapra visszatérve látszik.
+  const attempt = useQuery({ ...attemptQuery(attemptId), enabled: valid, staleTime: 0, refetchOnWindowFocus: 'always' })
 
   if (!valid) return <Navigate to="/vizsgak" replace />
-  if (exam.isError || attempt.isError) {
+  // Egy fókuszra induló újratöltés hibája nem dobhatja el a már betöltött, futó vizsgát.
+  if ((exam.isError && !exam.data) || (attempt.isError && !attempt.data)) {
     return (
       <main className="mx-auto w-full max-w-form px-4 py-12 md:px-6">
         <LoadError error={exam.error ?? attempt.error} onRetry={() => void Promise.all([exam.refetch(), attempt.refetch()])} />
@@ -48,25 +62,60 @@ function Runner({ exam, attempt, fetchedAt }: { exam: ExamDetail; attempt: ExamA
   const queryClient = useQueryClient()
   const [currentId, setCurrentId] = useState(() => exam.parts[0]?.id ?? 0)
   const [confirming, setConfirming] = useState(false)
-  const autoSubmitted = useRef(false)
+  const [leaving, setLeaving] = useState(false)
+  const [autoFailures, setAutoFailures] = useState(0)
+  const submitting = useRef(false)
+  const resultPath = `/vizsgak/${exam.id}/eredmeny?proba=${attempt.id}`
+
+  // Futó vizsgán a lap bezárása vagy újratöltése előtt rákérdez a böngésző.
+  useEffect(() => {
+    const warn = (event: BeforeUnloadEvent) => event.preventDefault()
+    window.addEventListener('beforeunload', warn)
+    return () => window.removeEventListener('beforeunload', warn)
+  }, [])
 
   const submit = useMutation({
-    mutationFn: () => submitAttempt(attempt.id),
+    mutationFn: () => {
+      submitting.current = true
+      return submitAttempt(attempt.id)
+    },
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: examKeys.all })
-      navigate(`/vizsgak/${exam.id}/eredmeny?proba=${attempt.id}`, { replace: true })
+      void queryClient.invalidateQueries({ queryKey: fileTaskKeys.all })
+      invalidateSolveState(queryClient)
+      navigate(resultPath, { replace: true })
+    },
+    onError: (error) => {
+      // 409: egy másik lapon már beadták, vagy lejárt: az eredmény a hiteles állapot.
+      if (httpStatus(error) === 409) {
+        void queryClient.invalidateQueries({ queryKey: examKeys.all })
+        navigate(resultPath, { replace: true, state: { notice: 'conflict' } satisfies ResultNavigationState })
+        return
+      }
+      setAutoFailures((count) => count + 1)
+    },
+    onSettled: () => {
+      submitting.current = false
     },
   })
+  const submitNow = submit.mutate
 
   // Vizsgahelyzetben a szerver szerinti határidő számít; gyakorlásnál az eltelt időt mérjük.
   const { remaining, elapsed, expired } = useAttemptClock(attempt, fetchedAt)
 
-  // Az idő lejártakor egyszer, magától beadjuk (a szerver is lezárja a határidőnél).
+  // Az idő lejártakor magától beadjuk (a szerver is lezárja a határidőnél). Hiba esetén
+  // növekvő várakozással újrapróbáljuk (1, 2, 4… legfeljebb 30 mp), amíg sikerül.
   useEffect(() => {
-    if (!expired || autoSubmitted.current) return
-    autoSubmitted.current = true
-    submit.mutate()
-  }, [expired, submit])
+    if (!expired) return
+    const delay = autoFailures === 0 ? 0 : Math.min(30_000, 1000 * 2 ** autoFailures)
+    const timer = window.setTimeout(() => {
+      if (!submitting.current) submitNow()
+    }, delay)
+    return () => window.clearTimeout(timer)
+  }, [expired, autoFailures, submitNow])
+
+  // 10 / 5 / 1 percnél színt váltunk, és a képernyőolvasónak is bemondjuk.
+  const warning = remaining === null || expired ? null : remaining <= 60 ? 1 : remaining <= 300 ? 5 : remaining <= 600 ? 10 : null
 
   const uploadedOf = (partId: number) => attempt.submissions.find((item) => item.part_id === partId && item.file_name !== null)
   const current = exam.parts.find((part) => part.id === currentId) ?? exam.parts[0]
@@ -75,8 +124,16 @@ function Runner({ exam, attempt, fetchedAt }: { exam: ExamDetail; attempt: ExamA
 
   return (
     <>
-      <header className="flex w-full flex-wrap items-center gap-x-6 gap-y-3 border-b border-line bg-sheet px-4 py-3.5 md:px-6">
-        <Link to="/" aria-label="InfoTanár kezdőlap" className="inline-flex min-h-11 items-center py-0">
+      <header className="sticky top-0 z-10 flex w-full flex-wrap items-center gap-x-6 gap-y-3 border-b border-line bg-sheet px-4 py-3.5 md:px-6">
+        <Link
+          to="/"
+          aria-label="InfoTanár kezdőlap"
+          onClick={(event) => {
+            event.preventDefault()
+            setLeaving(true)
+          }}
+          className="inline-flex min-h-11 items-center py-0"
+        >
           <LogoMark className="size-6" />
         </Link>
         <div className="min-w-0 flex-1 basis-60">
@@ -88,7 +145,11 @@ function Runner({ exam, attempt, fetchedAt }: { exam: ExamDetail; attempt: ExamA
         <div
           role="timer"
           aria-label={remaining === null ? 'Eltelt idő' : 'Hátralévő idő'}
-          className={cx('inline-flex items-center gap-2.5 rounded-md border-strong bg-sheet px-4 py-2', expired ? 'border-wrong' : 'border-ink')}
+          className={cx(
+            'inline-flex items-center gap-2.5 rounded-md border-strong px-4 py-2',
+            expired || warning === 1 || warning === 5 ? 'border-wrong text-wrong' : 'border-ink',
+            warning === 1 || expired ? 'bg-wrong-soft' : warning === 10 ? 'bg-note' : 'bg-sheet',
+          )}
         >
           <Icon name="clock" />
           <span className="font-mono text-22 font-medium">{formatDuration(remaining ?? elapsed)}</span>
@@ -97,7 +158,33 @@ function Runner({ exam, attempt, fetchedAt }: { exam: ExamDetail; attempt: ExamA
         <Button onClick={() => setConfirming(true)} disabled={submit.isPending}>
           Beadás
         </Button>
+        {/* A küszöbök átlépését a képernyőolvasó is bemondja; a tartalom csak a küszöbnél változik. */}
+        <p role="status" aria-live="polite" className="sr-only">
+          {warning === null ? '' : `Figyelem, már csak ${warning === 1 ? 'egy percnél kevesebb' : `${warning} perc`} van hátra.`}
+        </p>
       </header>
+
+      {expired && (
+        <div className="mx-auto w-full max-w-work px-4 pt-4 md:px-6">
+          {submit.isError ? (
+            <Banner
+              kind="error"
+              title="Lejárt az idő, de a beadás nem sikerült"
+              action={
+                <Button onClick={() => submitNow()} busy={submit.isPending} busyLabel="Beadás…">
+                  Beadás
+                </Button>
+              }
+            >
+              {hibaUzenet(submit.error)} Magunktól újrapróbáljuk, de te is megnyomhatod a Beadás gombot. A feltöltött fájljaid megmaradnak.
+            </Banner>
+          ) : (
+            <Banner kind="warn" title="Lejárt az idő">
+              A vizsgát most adjuk be. Egy pillanat.
+            </Banner>
+          )}
+        </div>
+      )}
 
       <main className="mx-auto flex w-full max-w-work flex-1 flex-wrap items-start gap-8 px-4 py-6 md:px-6">
         <aside className="flex w-full flex-col gap-5 md:w-72 md:flex-none">
@@ -125,12 +212,26 @@ function Runner({ exam, attempt, fetchedAt }: { exam: ExamDetail; attempt: ExamA
               })}
             </ol>
           </Panel>
+          {exam.source_zip && (
+            <div>
+              <p className="mb-2 text-15 font-bold">Forrásfájlok</p>
+              <FileChip name={exam.source_zip.name} size={formatBytes(exam.source_zip.size)} href={exam.source_zip.url} />
+            </div>
+          )}
           <p className="text-14 leading-relaxed text-ink-soft">
             Kérdésed van a feladat értelmezéséről? A vizsgán erre nincs lehetőség, itt sincs. Dolgozz a leírás alapján.
           </p>
         </aside>
 
-        {current && <PartView key={current.id} part={current} attempt={attempt} uploaded={uploadedOf(current.id)?.file_name ?? null} />}
+        {current && (
+          <PartView
+            key={current.id}
+            part={current}
+            attempt={attempt}
+            uploaded={uploadedOf(current.id)?.file_name ?? null}
+            onConflict={() => navigate(resultPath, { replace: true, state: { notice: 'conflict' } satisfies ResultNavigationState })}
+          />
+        )}
       </main>
 
       <Modal
@@ -142,7 +243,7 @@ function Runner({ exam, attempt, fetchedAt }: { exam: ExamDetail; attempt: ExamA
             <Button variant="secondary" onClick={() => setConfirming(false)}>
               Vissza a feladatokhoz
             </Button>
-            <Button busy={submit.isPending} busyLabel="Beadás…" onClick={() => submit.mutate()}>
+            <Button busy={submit.isPending} busyLabel="Beadás…" onClick={() => submitNow()}>
               Beadás
             </Button>
           </>
@@ -175,19 +276,47 @@ function Runner({ exam, attempt, fetchedAt }: { exam: ExamDetail; attempt: ExamA
           </Banner>
         )}
       </Modal>
+
+      <Modal
+        open={leaving}
+        title="Kilépsz a vizsgából?"
+        onClose={() => setLeaving(false)}
+        actions={
+          <>
+            <Button variant="secondary" onClick={() => setLeaving(false)}>
+              Maradok
+            </Button>
+            <Button onClick={() => navigate('/')}>Kilépek</Button>
+          </>
+        }
+      >
+        <p>A vizsga időmérője kilépés után is fut. A feltöltött fájljaid megmaradnak, a vizsga listájából folytathatod.</p>
+      </Modal>
     </>
   )
 }
 
-function PartView({ part, attempt, uploaded }: { part: ExamPartDetail; attempt: ExamAttempt; uploaded: string | null }) {
+interface PartViewProps {
+  part: ExamPartDetail
+  attempt: ExamAttempt
+  uploaded: string | null
+  /** A feltöltés 409-et kapott: a vizsga már le van zárva. */
+  onConflict: () => void
+}
+
+function PartView({ part, attempt, uploaded, onConflict }: PartViewProps) {
   const queryClient = useQueryClient()
-  const [progress, setProgress] = useState<{ name: string; percent: number } | null>(null)
-  const upload = useMutation({
-    mutationFn: (file: File) => uploadPartFile(attempt.id, part.id, file, (percent) => setProgress({ name: file.name, percent })),
-    onMutate: (file) => setProgress({ name: file.name, percent: 0 }),
+  const upload = useFileUpload({
+    send: (file, onProgress, signal) => uploadPartFile(attempt.id, part.id, file, onProgress, signal),
     onSuccess: (updated) => queryClient.setQueryData(examKeys.attempt(attempt.id), updated),
-    onSettled: () => setProgress(null),
+    onError: (error) => {
+      if (httpStatus(error) === 409) {
+        void queryClient.invalidateQueries({ queryKey: examKeys.all })
+        onConflict()
+      }
+    },
   })
+  const progress = upload.progress
 
   const state: DropzoneState = progress
     ? { kind: 'uploading', name: progress.name, percent: progress.percent }
@@ -247,8 +376,10 @@ function PartView({ part, attempt, uploaded }: { part: ExamPartDetail; attempt: 
             <Dropzone
               state={state}
               accept={part.accepted_extensions}
-              onFile={(file) => upload.mutate(file)}
-              error={upload.isError ? hibaUzenet(upload.error) : null}
+              onFile={upload.start}
+              error={upload.error}
+              onRetry={upload.offline ? upload.retry : undefined}
+              onDismiss={upload.offline ? upload.dismiss : undefined}
             />
           </>
         )}

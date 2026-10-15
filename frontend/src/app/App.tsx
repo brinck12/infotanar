@@ -1,4 +1,5 @@
 import { Suspense, type ReactNode } from 'react'
+import { RouteMeta } from './RouteMeta'
 import { BrowserRouter, Route, Routes } from 'react-router-dom'
 import { GuestOnly, RequireAuth, RequireRole } from '../features/auth/guards'
 import { LEGAL_DOCUMENTS } from '../features/legal/documents'
@@ -31,6 +32,7 @@ export default function App() {
       <BrowserRouter>
         <Providers>
           <OfflineNotice />
+          <RouteMeta />
           <Routes>
             <Route element={<Framed><SiteShell /></Framed>}>
               <Route path="/" element={<Pages.Home />} />
@@ -92,6 +94,7 @@ export default function App() {
               <Route path="felhasznalok" element={<Pages.AdminUsers />} />
               <Route path="felhasznalok/:userId" element={<Pages.AdminUserDetail />} />
               <Route path="szamlak" element={<Pages.AdminInvoices />} />
+              <Route path="meghivokodok" element={<Pages.AdminInviteCodes />} />
             </Route>
           </Routes>
           {/* Barion Pixellel hozzájárulást kérünk; nélküle elég a tájékoztatás a tárolt adatokról. */}

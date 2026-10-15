@@ -31,6 +31,21 @@ return [
     // (faliora-korlat + ez), de legfeljebb az 'evaluation_deadline'.
     'test_overhead' => (int) env('JUDGE0_TEST_OVERHEAD', 10),
 
+    // Egyidejuleg futo kiertekelesek (Futtatas + Beadas) felso korlata. A percenkenti
+    // limitek kereseket szamolnak, ez a parhuzamossagot: egy kiertekeles egy php-fpm
+    // workert es Judge0 workereket tart (akar 'evaluation_deadline' masodpercig).
+    // Folotte azonnali 503 megy ki, nem allunk sorba. 0 = nincs korlat.
+    'max_concurrent_evaluations' => (int) env('JUDGE0_MAX_CONCURRENT', 20),
+
+    // Egy foglalas elettartama (mp): kicsit tobb, mint az 'evaluation_deadline', hogy egy
+    // elhalt folyamat slotja is magatol felszabaduljon. A 'busy_retry_after' a busy valasz
+    // 'retry_after' erteke (mp).
+    'concurrency_slot_ttl' => (int) env('JUDGE0_SLOT_TTL', 55),
+    'busy_retry_after' => (int) env('JUDGE0_BUSY_RETRY_AFTER', 5),
+
+    // Readiness: a Judge0 varakozo sora (/workers) ennyi folott figyelmeztet.
+    'queue_warn_depth' => (int) env('JUDGE0_QUEUE_WARN_DEPTH', 50),
+
     /*
     |--------------------------------------------------------------------------
     | Futtatasi limitek
@@ -134,4 +149,7 @@ return [
 
     // Meddig tartsuk cache-ben a /languages valaszt (masodperc).
     'languages_cache_ttl' => (int) env('JUDGE0_LANGUAGES_CACHE_TTL', 3600),
+
+    // Ures (hibas) /languages valasz ennyi masodpercig marad cache-ben, hogy a kieses gyorsan javuljon.
+    'languages_failure_ttl' => (int) env('JUDGE0_LANGUAGES_FAILURE_TTL', 15),
 ];

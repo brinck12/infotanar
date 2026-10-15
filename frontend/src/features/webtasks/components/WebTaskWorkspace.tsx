@@ -1,4 +1,6 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
+import { userKeyOf } from '../../../shared/domain/lastTask'
+import { usePersistentState } from '../../../shared/hooks/usePersistentState'
 import { Badge, LevelBadge } from '../../../shared/ui/Badge'
 import { Button } from '../../../shared/ui/Button'
 import { cx } from '../../../shared/ui/cx'
@@ -9,6 +11,7 @@ import { Prose } from '../../../shared/ui/Prose'
 import { RubricItem } from '../../../shared/ui/RubricItem'
 import { CardTitle } from '../../../shared/ui/Text'
 import type { UnlockedTaskDetail, WebTaskInfo } from '../../../types'
+import { useAuth } from '../../auth/context'
 import { CodeEditor } from '../../workspace/components/CodeEditor'
 import { previewDocument, runWebChecks } from '../checks'
 
@@ -17,8 +20,18 @@ import { previewDocument, runWebChecks } from '../checks'
  * böngészőkeretben az előnézet, alatta az ellenőrzőlista. Minden a böngészőben
  * történik; az előnézet homokozóban fut, szkript nélkül.
  */
+function isFileDrafts(value: unknown): value is Record<string, string> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value) && Object.values(value).every((item) => typeof item === 'string')
+}
+
 export function WebTaskWorkspace({ task, info }: { task: UnlockedTaskDetail; info: WebTaskInfo }) {
-  const [files, setFiles] = useState<ReadonlyMap<string, string>>(() => new Map(info.files.map((file) => [file.name, file.content])))
+  const { user } = useAuth()
+  // A kód a böngészőben megmarad (felhasználónként és feladatonként), újratöltés után is.
+  const [stored, storeFiles] = usePersistentState<Record<string, string>>(`infotanar.practice.v1.${userKeyOf(user)}.web.${task.id}`, {}, isFileDrafts)
+  const [files, setFiles] = useState<ReadonlyMap<string, string>>(() => new Map(info.files.map((file) => [file.name, stored[file.name] ?? file.content])))
+  useEffect(() => {
+    storeFiles(Object.fromEntries(files))
+  }, [files, storeFiles])
   const [active, setActive] = useState(info.files[0]?.name ?? '')
   // Az előnézet és az ellenőrzés a mentett állapotból dolgozik, nem minden leütésre frissül.
   const [saved, setSaved] = useState(files)

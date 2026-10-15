@@ -1,0 +1,28 @@
+# PELDA: a kodfuttato vegpontok kulon php-fpm poolra (deploy/php-fpm/pool.conf).
+# Az infotanar.conf szerver-blokkjaba kell illeszteni, a `location /api` melle: a regex
+# location elobb nyer a prefix `location /api`-nal. Nem include-olt fajl, peldaszoveg:
+# a SCRIPT_FILENAME es a root a fo `index.php` location-nel egyezik.
+
+location ~ ^/api/v1/(run|submissions)$ {
+    include snippets/infotanar-security-headers.conf;
+
+    root /var/www/infotanar/backend/public;
+    fastcgi_pass unix:/run/php/php8.3-fpm-run.sock;
+    include fastcgi_params;
+    fastcgi_param SCRIPT_FILENAME /var/www/infotanar/backend/public/index.php;
+    fastcgi_param SCRIPT_NAME /index.php;
+
+    # A kiertekeles legfeljebb 45 mp (JUDGE0_EVALUATION_DEADLINE).
+    fastcgi_read_timeout 60s;
+    client_max_body_size 1m;
+
+    # Ha a pool tele van, ne varakoztassuk a kerest: gyors 503.
+    fastcgi_connect_timeout 2s;
+    error_page 502 503 = @run_busy;
+}
+
+location @run_busy {
+    default_type application/json;
+    add_header Retry-After 5 always;
+    return 503 '{"status":"error","message":"Most sokan futtatnak kódot. Próbáld újra pár másodperc múlva.","reason":"busy","retry_after":5,"results":[]}';
+}

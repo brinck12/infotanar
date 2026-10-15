@@ -8,6 +8,7 @@ use App\Enums\ConsentType;
 use App\Models\Consent;
 use App\Models\Payment;
 use App\Models\User;
+use App\Support\Privacy\IpAnonymizer;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
@@ -26,7 +27,8 @@ final readonly class RecordConsent
             'type' => $type,
             'document_version' => $documentVersion,
             'payment_id' => $payment?->id,
-            'ip_address' => $this->request->ip(),
+            // /24 (IPv4) vagy /48 (IPv6) csonkolas: a bizonyitashoz az orszag/halozat eleg (PRIV-4).
+            'ip_address' => IpAnonymizer::truncate($this->request->ip()),
             'user_agent' => Str::limit((string) $this->request->userAgent(), 500, ''),
         ]);
     }

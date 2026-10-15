@@ -8,6 +8,22 @@ Jelölések: **blokkoló** = nélküle nem indulhat a zárt béta; **fontos** = 
 
 ---
 
+## Állapot (2026-10-15)
+
+Az `fullstack/backend-platform` ágon elkészült és összefésülve (a teljes kapu zöld: API + rate-limit + e2e-mocked 431 teszt):
+- **Kapacitás:** OPS-4 párhuzamossági korlát és `deploy/judge0/`, fpm pool, readiness sorhossz; L07 üzenet.
+- **Láthatóság:** OPS-3 5xx riasztás, kliens-hiba napi összefoglaló, OPS-12 systemd keményítés, `check-config` bővítés (PRIV-5), mail márka (InfoTanár), nevesített limiterek (B02).
+- **Zárt béta:** LAUNCH-2 meghívókódok, várólista, admin oldal, `register` limiter (B03).
+- **Tartalom-kapu:** LAUNCH-3 `catalog:verify`, közzétételi őrök, `sample_solutions`, admin "Mintamegoldás" fül, seedelt megoldások.
+- **Megbízhatóság:** B01, B07, B10/B11, B04, B09, S01, PRIV-3, PRIV-4, PRIV-10 (audit események, jelszócsere-értesítő), frontend F01-F04, F06-F08, F10-F12, CH4-CH6, PRIV-7.
+- **Tesztek:** REL-1 (SQLite-on), REL-3, REL-5, REL-9, REL-10, PRIV-9 (`docs/privacy/ropa.md`).
+
+**Kész, de még nincs a `main`-ben:** a deploy-ág (`fullstack/ops-deploy-releases`: OPS-1, OPS-2, OPS-5, REL-7, REL-15) szándékosan nincs összefésülve, amíg a szerveren el nem készül az egyszeri átállás (`docs/runbooks/release-layout.md`) és a GitHub `production` Environment + `DEPLOY_KNOWN_HOSTS` secret.
+
+**Nyitva a 0a/0 fázisból:** OPS-9 (Redis tényleges üzembe állítása a szerveren), OPS-11 (külső uptime figyelő beállítása), F05 szerkesztő-sáv, F08 "fut egy próbálkozásod" sáv, F13 (méret-hiba sorrend, backend), F10 cellaszerkesztés a cellában, F11 mobil visszajelzés; MySQL-en a REL-1 versenytesztek még nem futottak.
+
+---
+
 ## 1. Döntések (megerősítve)
 
 | Téma | Döntés |

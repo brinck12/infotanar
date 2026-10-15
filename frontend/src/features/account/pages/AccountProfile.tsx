@@ -3,6 +3,7 @@ import { useId, useState, type ChangeEvent, type FormEvent, type ReactNode } fro
 import { useNavigate } from 'react-router-dom'
 import { hibaUzenet, mezoHibak } from '../../../shared/api/errors'
 import { tokenStore } from '../../../shared/api/tokenStore'
+import { clearUserStorage } from '../../../shared/domain/userStorage'
 import { Badge } from '../../../shared/ui/Badge'
 import { Banner } from '../../../shared/ui/Banner'
 import { Button } from '../../../shared/ui/Button'
@@ -264,7 +265,7 @@ function DataExport() {
 }
 
 function DeleteAccount() {
-  const { refresh } = useAuth()
+  const { user, refresh } = useAuth()
   const toast = useToast()
   const navigate = useNavigate()
   const formId = useId()
@@ -276,6 +277,7 @@ function DeleteAccount() {
     onSuccess: async () => {
       // A szerver már visszavonta a tokent; a kliens állapotát is kijelentkezettre állítjuk.
       tokenStore.set(null)
+      if (user) clearUserStorage(user.id)
       await refresh()
       navigate('/', { replace: true })
       toast.show('A fiókodat töröltük.')

@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace App\Actions\FileTasks;
 
+use App\Actions\Audit\RecordAuditEvent;
 use App\Actions\Progress\RecordLessonProgress;
+use App\Enums\AuditAction;
 use App\Enums\ExamAttemptState;
 use App\Enums\FileSubmissionStatus;
 use App\Exceptions\FileTasks\ManualMarkRefused;
@@ -28,6 +30,7 @@ final readonly class SaveManualMarks
     public function __construct(
         private ExamResultRecalculator $examResults,
         private RecordLessonProgress $recordLessonProgress,
+        private RecordAuditEvent $audit,
     ) {}
 
     /**
@@ -70,6 +73,9 @@ final readonly class SaveManualMarks
             $locked->max_score = $marked->maxScore();
             $locked->passed = $marked->passed();
             $locked->save();
+
+            // Csak azonositok: melyik beadas, hany tetel; a pontokat a sor maga tartalmazza.
+            $this->audit->handle(AuditAction::FileSubmissionManuallyMarked, $user, $locked, ['items' => count($marks)]);
 
             if ($attempt !== null) {
                 // Vizsgasor: a haladasba nem szamit, de a vizsga pontszama es a fuggo kezi pontok kovetik.

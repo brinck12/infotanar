@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useEffect, useState } from 'react'
 import { Link, useParams, useSearchParams } from 'react-router-dom'
+import { useDocumentMeta } from '../../../shared/hooks/useDocumentMeta'
 import { saveBlob } from '../../../shared/api/download'
 import { hibaUzenet, varakozas, zarolasOka, type ExecutionWait } from '../../../shared/api/errors'
 import { LANGUAGE_LABEL } from '../../../shared/domain/labels'
@@ -96,6 +97,7 @@ function TaskSolveContent() {
 
   const task = useQuery({ ...taskQuery(taskId), enabled: validId })
 
+  useDocumentMeta(task.data ? { title: task.data.title, description: `Gyakorlófeladat: ${task.data.title}` } : null)
   useCrumbs(
     task.data
       ? [{ label: 'Feladatok', to: '/feladatok' }, { label: task.data.topic.name, to: `/feladatok?temakor=${task.data.topic.slug}` }, { label: task.data.title }]
