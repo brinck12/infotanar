@@ -1,4 +1,5 @@
 import type { APIRequestContext, APIResponse } from '@playwright/test'
+import { recordEndpointHit } from '../support/endpointHits'
 import type {
   AdminUserRole,
   DataEnvelope,
@@ -236,6 +237,7 @@ export class ApiClient {
    * kapott teljes URL; a token (ha van) ilyenkor is megy.
    */
   async getBinary(path: string): Promise<BinaryResult> {
+    recordEndpointHit('GET', path)
     const response = await this.request.fetch(path, { method: 'GET', headers: this.authorization() })
     return { status: response.status(), ok: response.ok(), headers: response.headers(), body: await response.body() }
   }
@@ -245,6 +247,7 @@ export class ApiClient {
     path: string,
     options: { params?: Record<string, string>; data?: unknown; multipart?: Record<string, string | number | boolean | UploadFile> }
   ): Promise<ApiResult<T>> {
+    recordEndpointHit(method, path)
     return this.toResult<T>(await this.request.fetch(path, { method, headers: this.authorization(), ...options }))
   }
 

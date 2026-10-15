@@ -1,0 +1,28 @@
+# Függőségfrissítések (REL-9): hetente, csomagkezelőnként. A dependabot csak pull requestet
+# tud nyitni: a repóban a PR-ek jelenleg ki vannak kapcsolva, ezért ezt be kell kapcsolni,
+# különben a fájl hatástalan (a biztonsági riasztások PR nélkül is működnek).
+version: 2
+updates:
+  - package-ecosystem: composer
+    directory: /backend
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+
+  - package-ecosystem: npm
+    directory: /frontend
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+
+  - package-ecosystem: npm
+    directory: /tests
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
