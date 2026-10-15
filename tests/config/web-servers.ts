@@ -87,6 +87,11 @@ const backend: WebServer = {
     // Az IP-nkenti belepes/jelszo-visszaallitas keret ne fogja a sok sajat fiokot letrehozo teszteket.
     AUTH_LOGIN_IP_PER_MINUTE: '10000',
     AUTH_RESET_IP_PER_MINUTE: '10000',
+    // A regisztracios limit (B03) ne fogja vissza a sok fiokot letrehozo spekeket;
+    // a varolista szuk limitjet az api-rate-limit projekt teszteli.
+    REGISTRATION_RATE_REGISTER_PER_MINUTE: '10000',
+    REGISTRATION_RATE_WAITLIST_PER_MINUTE: '20',
+    REGISTRATION_MODE: 'open',
   },
 }
 

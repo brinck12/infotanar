@@ -31,6 +31,7 @@ export const AdminExercise = page(() => import('../features/admin/catalog/pages/
 export const AdminNewExercise = page(() => import('../features/admin/catalog/pages/AdminExercise'), 'AdminNewExercise')
 export const AdminUsers = page(() => import('../features/admin/users/pages/AdminUsers'), 'AdminUsers')
 export const AdminUserDetail = page(() => import('../features/admin/users/pages/AdminUserDetail'), 'AdminUserDetail')
+export const AdminInviteCodes = page(() => import('../features/admin/registration/pages/AdminInviteCodes'), 'AdminInviteCodes')
 export const AdminInvoices = page(() => import('../features/admin/invoices/pages/AdminInvoices'), 'AdminInvoices')
 export const LearningPath = page(() => import('../features/learning/pages/LearningPath'), 'LearningPath')
 export const TrackPage = page(() => import('../features/learning/pages/TrackPage'), 'TrackPage')

@@ -51,6 +51,9 @@ Minden végpont a `/api/v1` előtag alatt érhető el. A hozzáférés oszlop je
 | `POST` | `/admin/exercises/{exercise}/test-cases` | admin | – |
 | `PUT` | `/admin/exercises/{exercise}/test-cases/order` | admin | – |
 | `POST` | `/admin/exercises/{exercise}/verify` | admin | `admin-upload` |
+| `GET` | `/admin/invite-codes` | admin | – |
+| `POST` | `/admin/invite-codes` | admin | `120,1` |
+| `POST` | `/admin/invite-codes/{inviteCode}/disable` | admin | `120,1` |
 | `GET` | `/admin/invoices` | admin | – |
 | `PUT` | `/admin/invoices/{invoice}/buyer` | admin | – |
 | `POST` | `/admin/invoices/{invoice}/retry` | admin | – |
@@ -68,6 +71,8 @@ Minden végpont a `/api/v1` előtag alatt érhető el. A hozzáférés oszlop je
 | `PUT` | `/admin/modules/{module}/lessons/order` | admin | – |
 | `GET` | `/admin/overview` | admin | – |
 | `GET` | `/admin/ping` | admin | – |
+| `GET` | `/admin/registration` | admin | – |
+| `PUT` | `/admin/registration` | admin | `120,1` |
 | `DELETE` | `/admin/rubric-items/{item}` | admin | – |
 | `PUT` | `/admin/rubric-items/{item}` | admin | – |
 | `DELETE` | `/admin/test-cases/{testCase}` | admin | – |
@@ -93,6 +98,7 @@ Minden végpont a `/api/v1` előtag alatt érhető el. A hozzáférés oszlop je
 | `DELETE` | `/admin/users/{user}/tokens` | admin | – |
 | `POST` | `/admin/users/{user}/verification-notification` | admin | `admin-user-mail` |
 | `POST` | `/admin/users/{user}/verify-email` | admin | – |
+| `GET` | `/admin/waitlist` | admin | – |
 
 ## attachments
 
@@ -109,7 +115,7 @@ Minden végpont a `/api/v1` előtag alatt érhető el. A hozzáférés oszlop je
 | `POST` | `/auth/login` | nyilvános | `login` |
 | `POST` | `/auth/logout` | bejelentkezve | – |
 | `GET` | `/auth/me` | bejelentkezve | – |
-| `POST` | `/auth/register` | nyilvános | – |
+| `POST` | `/auth/register` | nyilvános | `register` |
 | `POST` | `/auth/reset-password` | nyilvános | `password-reset` |
 | `GET` | `/auth/verify-email/{id}/{hash}` | aláírt link | – |
 
@@ -203,6 +209,12 @@ Minden végpont a `/api/v1` előtag alatt érhető el. A hozzáférés oszlop je
 |---|---|---|---|
 | `GET` | `/progress` | bejelentkezve | – |
 
+## registration
+
+| Metódus | Útvonal | Hozzáférés | Limit |
+|---|---|---|---|
+| `GET` | `/registration` | nyilvános | `60,1` |
+
 ## run
 
 | Metódus | Útvonal | Hozzáférés | Limit |
@@ -238,6 +250,12 @@ Minden végpont a `/api/v1` előtag alatt érhető el. A hozzáférés oszlop je
 | `GET` | `/tracks` | nyilvános | – |
 | `GET` | `/tracks/{slug}` | nyilvános | – |
 | `GET` | `/tracks/{trackSlug}/lessons/{lessonSlug}` | nyilvános | – |
+
+## waitlist
+
+| Metódus | Útvonal | Hozzáférés | Limit |
+|---|---|---|---|
+| `POST` | `/waitlist` | nyilvános | `waitlist` |
 
 ## webhooks
 

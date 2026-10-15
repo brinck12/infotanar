@@ -44,6 +44,7 @@ use App\Http\Controllers\Api\V1\HealthController;
 use App\Http\Controllers\Api\V1\Progress\LessonCompletionController;
 use App\Http\Controllers\Api\V1\Progress\ProgressController;
 use App\Http\Controllers\Api\V1\ReadinessController;
+use App\Http\Controllers\Api\V1\Registration\RegistrationController;
 use App\Http\Middleware\RejectInvalidToken;
 use Illuminate\Support\Facades\Route;
 
@@ -56,8 +57,12 @@ Route::prefix('v1')->name('api.')->middleware(RejectInvalidToken::class)->group(
     // A frontend nem kezelt hibainak bejelentese (#131); szuk limit, mert barki hivhatja.
     Route::post('/client-errors', ClientErrorController::class)->middleware('throttle:client-errors')->name('client-errors');
 
+    // Zart beta kapu (LAUNCH-2): a mod nyilvanos, a varolista szuk limitu es semleges valaszu.
+    Route::get('/registration', [RegistrationController::class, 'show'])->middleware('throttle:60,1')->name('registration');
+    Route::post('/waitlist', [RegistrationController::class, 'joinWaitlist'])->middleware('throttle:waitlist')->name('waitlist');
+
     Route::prefix('auth')->name('auth.')->group(function (): void {
-        Route::post('/register', RegisterController::class)->name('register');
+        Route::post('/register', RegisterController::class)->middleware('throttle:register')->name('register');
         Route::post('/login', [SessionController::class, 'store'])->middleware('throttle:login')->name('login');
 
         Route::get('/verify-email/{id}/{hash}', [EmailVerificationController::class, 'verify'])
@@ -235,4 +240,5 @@ Route::prefix('v1')->name('api.')->middleware(RejectInvalidToken::class)->group(
     require __DIR__.'/api/exams.php';
     require __DIR__.'/api/learning.php';
     require __DIR__.'/api/admin-overview.php';
+    require __DIR__.'/api/admin-registration.php';
 });

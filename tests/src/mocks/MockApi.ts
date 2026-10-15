@@ -77,6 +77,8 @@ export class MockApi {
 
     const track = buildTrackDetail(catalog.tasks)
 
+    // Alapbol nyitott a regisztracio; a zart beta esetekhez withRegistrationMode('invite').
+    await this.withRegistrationMode('open')
     await this.page.route(`${API}/topics`, (route) => route.fulfill({ json: { data: catalog.topics } }))
     await this.page.route(`${API}/tracks`, (route) => route.fulfill({ json: { data: [toTrackSummary(track)] } }))
     await this.page.route(`${API}/tracks/*`, (route) => route.fulfill({ json: { data: track } }))
@@ -120,6 +122,36 @@ export class MockApi {
       route.fulfill({ json: { data: { token: 'pw-mock-token', token_type: 'Bearer', user } } })
     )
     await this.page.route(`${API}/auth/me`, (route) => route.fulfill({ json: { data: user } }))
+
+    return () => sent
+  }
+
+  /** A regisztracios kapu modja (GET /registration); a kesobbi hivas felulirja az alapot (open). */
+  async withRegistrationMode(mode: 'open' | 'invite'): Promise<void> {
+    await this.page.route(`${API}/registration`, (route) => route.fulfill({ json: { data: { mode } } }))
+  }
+
+  /**
+   * A regisztracio elutasitasa 422-vel, mezonkenti hibakkal. A visszaadott
+   * fuggveny az elkuldott torzset adja (`undefined`, amig nem ment keres).
+   */
+  async onRegisterRejected(errors: Record<string, string[]>): Promise<() => unknown> {
+    let sent: unknown
+    await this.page.route(`${API}/auth/register`, async (route) => {
+      sent = route.request().postDataJSON() as unknown
+      await route.fulfill({ status: 422, json: { message: 'Hibas adatok.', errors } })
+    })
+
+    return () => sent
+  }
+
+  /** A varolista-feliratkozas (POST /waitlist); a visszaadott fuggveny az elkuldott torzsek listaja. */
+  async onWaitlist({ status = 202 }: MockResponseOptions = {}): Promise<() => unknown[]> {
+    const sent: unknown[] = []
+    await this.page.route(`${API}/waitlist`, async (route) => {
+      sent.push(route.request().postDataJSON() as unknown)
+      await route.fulfill({ status, json: status === 202 ? { message: 'Feliratkoztál a várólistára.' } : { message: 'Hiba.' } })
+    })
 
     return () => sent
   }

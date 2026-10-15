@@ -12,6 +12,7 @@ use App\Models\ExamAttempt;
 use App\Models\ExamPart;
 use App\Models\Exercise;
 use App\Models\FileSubmission;
+use App\Models\InviteCode;
 use App\Models\Invoice;
 use App\Models\Lesson;
 use App\Models\Module;
@@ -70,6 +71,7 @@ final class AppServiceProvider extends ServiceProvider
         // Polimorf kapcsolatokban (pl. audit naplo) stabil alias, ne az osztalynev keruljon az adatbazisba.
         Relation::enforceMorphMap([
             'user' => User::class,
+            'invite_code' => InviteCode::class,
             'track' => Track::class,
             'module' => Module::class,
             'lesson' => Lesson::class,
@@ -133,6 +135,16 @@ final class AppServiceProvider extends ServiceProvider
             Limit::perMinute(5)->by('login:account:'.$emailAndIp($request))->response($tooMany),
             Limit::perMinute(Config::integer('auth.throttle.login_ip_per_minute'))->by('login:ip:'.$request->ip())->response($tooMany),
         ]);
+
+        // Regisztracio IP-nkent (B03): a fiok-letrehozas draga (jelszo-hash, level) es botoknak vonzo.
+        RateLimiter::for('register', static fn (Request $request) => Limit::perMinute(Config::integer('registration.rate.register_per_minute'))
+            ->by('register:'.$request->ip())
+            ->response($tooMany));
+
+        // Varolista: barki hivhatja, ezert IP-nkent szuk.
+        RateLimiter::for('waitlist', static fn (Request $request) => Limit::perMinute(Config::integer('registration.rate.waitlist_per_minute'))
+            ->by('waitlist:'.$request->ip())
+            ->response($tooMany));
 
         RateLimiter::for('password-reset', static fn (Request $request): array => [
             Limit::perMinute(5)->by('reset:account:'.$emailAndIp($request))->response($tooMany),

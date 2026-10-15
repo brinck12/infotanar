@@ -116,6 +116,8 @@ export interface RegisterRequest {
   accept_terms: boolean
   terms_version: string
   privacy_version: string
+  /** Csak meghivos (zart beta) modban kotelezo. */
+  invite_code?: string
 }
 
 export interface User {
@@ -228,3 +230,4 @@ export * from './types/exams'
 export * from './types/learning'
 export * from './types/progress'
 export * from './types/adminOverview'
+export * from './types/registrationGate'

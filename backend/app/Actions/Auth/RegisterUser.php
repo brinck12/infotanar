@@ -5,27 +5,45 @@ declare(strict_types=1);
 namespace App\Actions\Auth;
 
 use App\Actions\Consent\RecordConsent;
+use App\Actions\Registration\ConsumeInviteCode;
 use App\Enums\ConsentType;
 use App\Models\User;
+use App\Services\Registration\RegistrationGate;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 
 final readonly class RegisterUser
 {
-    public function __construct(private RecordConsent $recordConsent) {}
+    public function __construct(
+        private RecordConsent $recordConsent,
+        private RegistrationGate $gate,
+        private ConsumeInviteCode $consumeInviteCode,
+    ) {}
 
     /**
      * A fiok es az elfogadott dokumentumok rogzitese egyutt tortenik (#133):
      * nem johet letre fiok ugy, hogy nincs nyoma, mit fogadott el a felhasznalo.
+     * Meghivos modban a kod felhasznalasa is ugyanebben a tranzakcioban tortenik.
+     *
+     * @throws ValidationException ha meghivos modban a kod hianyzik vagy mar nem hasznalhato
      */
-    public function handle(string $name, string $email, string $password, string $termsVersion, string $privacyVersion): User
+    public function handle(string $name, string $email, string $password, string $termsVersion, string $privacyVersion, ?string $inviteCode = null): User
     {
-        $user = DB::transaction(function () use ($name, $email, $password, $termsVersion, $privacyVersion): User {
+        $user = DB::transaction(function () use ($name, $email, $password, $termsVersion, $privacyVersion, $inviteCode): User {
             $user = User::create([
                 'name' => $name,
                 'email' => $email,
                 'password' => $password,
             ])->refresh();
+
+            if ($this->gate->requiresInvite()) {
+                if ($inviteCode === null || $inviteCode === '') {
+                    throw ValidationException::withMessages(['invite_code' => __('auth.invite.required')]);
+                }
+
+                $this->consumeInviteCode->handle($inviteCode, $user);
+            }
 
             $this->recordConsent->handle($user, ConsentType::Terms, $termsVersion);
             $this->recordConsent->handle($user, ConsentType::Privacy, $privacyVersion);
