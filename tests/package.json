@@ -12,6 +12,7 @@
     "test:ui": "playwright test --ui",
     "report": "playwright show-report",
     "fixtures": "tsx fixtures/files/generate.ts && tsx fixtures/files/spreadsheet/generate.ts && tsx fixtures/files/documents/generate-documents.ts && tsx fixtures/files/slides-web/generate.ts",
+    "coverage:endpoints": "tsx scripts/endpoint-coverage.ts",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "typecheck": "tsc -p .",
