@@ -123,6 +123,25 @@ final class ApiTestSeeder extends Seeder
         // igy a regi azonositok, a temakor feladatszama es a freemium-kiosztas valtozatlan.
         $typed = $this->typedTasks($track);
         $this->exams($typed['sheet'], $typed['subtasks']);
+
+        // Utolso, hogy a korabbi azonositok ne csusszanak el: piszkozat track publikalt leckevel es feladattal.
+        $this->draftTrack();
+    }
+
+    /** Nem publikalt track, amelynek leckeje es feladata onmagaban publikalt: diaknak sehol sem lathato (B10). */
+    private function draftTrack(): void
+    {
+        $track = Track::create(['slug' => 'pw-piszkozat-track', 'title' => 'PW piszkozat track', 'position' => 9, 'is_published' => false]);
+        $this->module = Module::create(['track_id' => $track->id, 'slug' => 'pw-piszkozat-temakor', 'title' => 'PW piszkozat témakör', 'position' => 0]);
+
+        $exercise = $this->exercise('PW teszt: Piszkozat track feladata', [
+            'level' => 'kozep',
+            'difficulty' => 1,
+            'allowed_languages' => ['python'],
+            'starter_code' => ['python' => "print()\n"],
+        ]);
+        $exercise->lesson->forceFill(['is_free' => true])->save();
+        $exercise->testCases()->create(['stdin' => "1\n", 'expected_stdout' => "1\n", 'is_hidden' => false, 'order' => 0]);
     }
 
     /**

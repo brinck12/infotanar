@@ -131,12 +131,12 @@ final class AppServiceProvider extends ServiceProvider
         // Emellett IP-nkent is korlatos (elosztott, sok cimet probalgato tamadas, levelbomba ellen).
         RateLimiter::for('login', static fn (Request $request): array => [
             Limit::perMinute(5)->by('login:account:'.$emailAndIp($request))->response($tooMany),
-            Limit::perMinute(20)->by('login:ip:'.$request->ip())->response($tooMany),
+            Limit::perMinute(Config::integer('auth.throttle.login_ip_per_minute'))->by('login:ip:'.$request->ip())->response($tooMany),
         ]);
 
         RateLimiter::for('password-reset', static fn (Request $request): array => [
             Limit::perMinute(5)->by('reset:account:'.$emailAndIp($request))->response($tooMany),
-            Limit::perMinute(10)->by('reset:ip:'.$request->ip())->response($tooMany),
+            Limit::perMinute(Config::integer('auth.throttle.reset_ip_per_minute'))->by('reset:ip:'.$request->ip())->response($tooMany),
         ]);
 
         $userOrIp = static fn (Request $request): string => $request->user() instanceof User

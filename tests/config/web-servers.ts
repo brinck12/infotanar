@@ -84,6 +84,9 @@ const backend: WebServer = {
     FILETASKS_RATE_PER_DAY: '100000',
     FILETASKS_ADMIN_UPLOAD_PER_MINUTE: '10000',
     EXAMS_WRITE_PER_MINUTE: '10000',
+    // Az IP-nkenti belepes/jelszo-visszaallitas keret ne fogja a sok sajat fiokot letrehozo teszteket.
+    AUTH_LOGIN_IP_PER_MINUTE: '10000',
+    AUTH_RESET_IP_PER_MINUTE: '10000',
   },
 }
 
