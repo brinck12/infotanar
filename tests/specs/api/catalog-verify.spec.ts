@@ -1,7 +1,7 @@
 import { adminAccount, verifiedStudent } from '../../src/api/areas/accounts'
 import { uploadAttachment } from '../../src/api/areas/attachments'
 import { createRubricItem, rubricItemInput, updateRubricItem } from '../../src/api/areas/rubrics'
-import { createExercise, createTestCase, deleteExercise, updateExercise, verifyExercise } from '../../src/api/areas/typedTasks'
+import { adminExercise, createExercise, createTestCase, deleteExercise, updateExercise, verifyExercise } from '../../src/api/areas/typedTasks'
 import type { ApiClient } from '../../src/api/ApiClient'
 import type { AdminExercise, AdminExercisePayload, DataEnvelope } from '../../src/api/types'
 import { ECHO_PROGRAM, fixtureFile, FIXTURE_FILES, JUDGE0_CONTROL, SEEDED } from '../../src/data'
@@ -103,6 +103,29 @@ test.describe('Publikálási kapu: kódfeladat', () => {
     expect(saved.status).toBe(200)
     const student = await apiClient.task(exercise.id)
     expect(JSON.stringify(student.body)).not.toContain('sample_solutions')
+  })
+
+  test('a seedelt feladat mintamegoldását az admin látja, a diák egyik nézete sem adja ki', { tag: '@regression' }, async ({ apiClient }) => {
+    const admin = await adminAccount(apiClient)
+    const taskId = await apiClient.taskIdByTitle(SEEDED.tasks.main)
+
+    const adminView = await adminExercise(admin.client, taskId)
+    expect(adminView.body.data.sample_solutions).toMatchObject({ python: SEEDED.mainTask.pythonSample })
+    expect(adminView.body.data.is_published).toBe(true)
+
+    const views = [
+      ['feladat', await apiClient.task(taskId)],
+      ['feladatlista', await apiClient.tasks()],
+      ['track', await apiClient.get(`tracks/${SEEDED.mainLesson.trackSlug}`)],
+      ['lecke', await apiClient.get(`tracks/${SEEDED.mainLesson.trackSlug}/lessons/${SEEDED.mainLesson.lessonSlug}`)],
+    ] as const
+
+    for (const [name, view] of views) {
+      expect(view.status, `${name} nézet`).toBe(200)
+      const body = JSON.stringify(view.body)
+      expect(body, `${name} nézet`).not.toContain('sample_solutions')
+      expect(body, `${name} nézet`).not.toContain(SEEDED.mainTask.pythonSample.trim())
+    }
   })
 
   test('teszteset nélkül a mintamegoldás sem elég', { tag: '@regression' }, async ({ apiClient }) => {

@@ -54,6 +54,8 @@ export interface AdminExercise {
   difficulty: number
   allowed_languages: LanguageKey[]
   starter_code: Partial<Record<LanguageKey, string>>
+  /** Nyelvenkénti mintamegoldás (csak az admin API adja ki); kód- és SQL-feladatnál. */
+  sample_solutions: Partial<Record<LanguageKey, string>>
   constraints: ConstraintSet
   /** A típushoz tartozó adatok (alakjuk típusonként más); `null`, ha még nincs. */
   spec: ExerciseSpecValue | null
@@ -146,6 +148,7 @@ export type ExercisePayload = Pick<
   | 'difficulty'
   | 'allowed_languages'
   | 'starter_code'
+  | 'sample_solutions'
   | 'constraints'
   | 'spec'
   | 'comparison'
@@ -154,6 +157,44 @@ export type ExercisePayload = Pick<
   | 'memory_limit_kb'
   | 'is_published'
 >
+
+export type VerificationStatus = 'passed' | 'failed' | 'skipped'
+
+/** Egy teszteset eredménye a mintamegoldáson; rejtett tesztesetnél a szerver csak a sikert és az ítéletet adja. */
+export interface VerificationTest {
+  test_case_id: number | null
+  hidden: boolean
+  passed: boolean
+  verdict: string
+  verdict_label: string
+  time: string | null
+  message: string | null
+}
+
+/** Egy nyelv futása a mintamegoldással. */
+export interface VerificationRun {
+  language: LanguageKey
+  passed: boolean
+  verdict: string
+  verdict_label: string
+  score: number
+  max_score: number
+  tests: VerificationTest[]
+}
+
+/** `POST /admin/exercises/{id}/verify`: a feladat lefuttatása a saját mintamegoldásán. */
+export interface ExerciseVerification {
+  exercise_id: number
+  title: string
+  kind: ExerciseKind
+  status: VerificationStatus
+  message: string | null
+  runs: VerificationRun[]
+}
+
+export async function verifyExercise(id: number): Promise<ExerciseVerification> {
+  return (await http.post<Envelope<ExerciseVerification>>(`/admin/exercises/${id}/verify`)).data.data
+}
 
 export const adminCatalogKeys = {
   all: ['admin', 'catalog'] as const,

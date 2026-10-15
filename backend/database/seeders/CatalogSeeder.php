@@ -117,6 +117,7 @@ A `diak` tábla a diákok nevét, osztályát és versenypontszámát tárolja:
 A sorok sorrendje nem számít.
 MD,
                 'starter_code' => ['sql' => "SELECT\n  \nFROM diak\nWHERE ;\n"],
+                'sample_solutions' => ['sql' => "SELECT nev, pont\nFROM diak\nWHERE osztaly = '10.A';\n"],
                 'test_cases' => [
                     [
                         'stdin' => $schema."INSERT INTO diak VALUES ('Anna', '10.A', 42), ('Bence', '10.B', 37), ('Csilla', '10.A', 51);\n",
@@ -167,6 +168,10 @@ MD,
                     'python' => "n = int(input())\nosszeg = 0\nfor _ in range(n):\n    szam = int(input())\n    # TODO: add hozzá az összeghez\nprint(osszeg)\n",
                     'csharp' => "using System;\n\nclass Program\n{\n    static void Main()\n    {\n        int n = int.Parse(Console.ReadLine());\n        int osszeg = 0;\n        for (int i = 0; i < n; i++)\n        {\n            int szam = int.Parse(Console.ReadLine());\n            // TODO: add hozzá az összeghez\n        }\n        Console.WriteLine(osszeg);\n    }\n}\n",
                 ],
+                'sample_solutions' => [
+                    'python' => "n = int(input())\nosszeg = 0\nfor _ in range(n):\n    szam = int(input())\n    osszeg += szam\nprint(osszeg)\n",
+                    'csharp' => "using System;\n\nclass Program\n{\n    static void Main()\n    {\n        int n = int.Parse(Console.ReadLine());\n        int osszeg = 0;\n        for (int i = 0; i < n; i++)\n        {\n            int szam = int.Parse(Console.ReadLine());\n            osszeg += szam;\n        }\n        Console.WriteLine(osszeg);\n    }\n}\n",
+                ],
                 'test_cases' => [
                     ['stdin' => "3\n5\n10\n15\n", 'expected_stdout' => "30\n", 'is_hidden' => false],
                     ['stdin' => "1\n42\n", 'expected_stdout' => "42\n", 'is_hidden' => false],
@@ -203,6 +208,10 @@ MD,
                 'starter_code' => [
                     'python' => "n = int(input())\ndb = 0\nfor _ in range(n):\n    szam = int(input())\n    # TODO: számold meg a párosakat\nprint(db)\n",
                     'csharp' => "using System;\n\nclass Program\n{\n    static void Main()\n    {\n        int n = int.Parse(Console.ReadLine());\n        int db = 0;\n        for (int i = 0; i < n; i++)\n        {\n            int szam = int.Parse(Console.ReadLine());\n            // TODO: számold meg a párosakat\n        }\n        Console.WriteLine(db);\n    }\n}\n",
+                ],
+                'sample_solutions' => [
+                    'python' => "n = int(input())\ndb = 0\nfor _ in range(n):\n    szam = int(input())\n    if szam % 2 == 0:\n        db += 1\nprint(db)\n",
+                    'csharp' => "using System;\n\nclass Program\n{\n    static void Main()\n    {\n        int n = int.Parse(Console.ReadLine());\n        int db = 0;\n        for (int i = 0; i < n; i++)\n        {\n            int szam = int.Parse(Console.ReadLine());\n            if (szam % 2 == 0)\n            {\n                db++;\n            }\n        }\n        Console.WriteLine(db);\n    }\n}\n",
                 ],
                 'test_cases' => [
                     ['stdin' => "4\n1\n2\n3\n4\n", 'expected_stdout' => "2\n", 'is_hidden' => false],
@@ -241,6 +250,10 @@ MD,
                     'python' => "n = int(input())\nmax_ertek = None\nfor _ in range(n):\n    szam = int(input())\n    # TODO: tartsd nyilván a legnagyobbat\nprint(max_ertek)\n",
                     'csharp' => "using System;\n\nclass Program\n{\n    static void Main()\n    {\n        int n = int.Parse(Console.ReadLine());\n        int maxErtek = int.MinValue;\n        for (int i = 0; i < n; i++)\n        {\n            int szam = int.Parse(Console.ReadLine());\n            // TODO: tartsd nyilván a legnagyobbat\n        }\n        Console.WriteLine(maxErtek);\n    }\n}\n",
                 ],
+                'sample_solutions' => [
+                    'python' => "n = int(input())\nmax_ertek = None\nfor _ in range(n):\n    szam = int(input())\n    if max_ertek is None or szam > max_ertek:\n        max_ertek = szam\nprint(max_ertek)\n",
+                    'csharp' => "using System;\n\nclass Program\n{\n    static void Main()\n    {\n        int n = int.Parse(Console.ReadLine());\n        int maxErtek = int.MinValue;\n        for (int i = 0; i < n; i++)\n        {\n            int szam = int.Parse(Console.ReadLine());\n            if (szam > maxErtek)\n            {\n                maxErtek = szam;\n            }\n        }\n        Console.WriteLine(maxErtek);\n    }\n}\n",
+                ],
                 'test_cases' => [
                     ['stdin' => "4\n3\n9\n2\n7\n", 'expected_stdout' => "9\n", 'is_hidden' => false],
                     ['stdin' => "1\n-5\n", 'expected_stdout' => "-5\n", 'is_hidden' => false],
@@ -278,6 +291,10 @@ MD,
                     'python' => "n = int(input())\nvan = False\nfor _ in range(n):\n    szam = int(input())\n    # TODO: jelöld, ha találtál negatívat\nprint('IGEN' if van else 'NEM')\n",
                     'csharp' => "using System;\n\nclass Program\n{\n    static void Main()\n    {\n        int n = int.Parse(Console.ReadLine());\n        bool van = false;\n        for (int i = 0; i < n; i++)\n        {\n            int szam = int.Parse(Console.ReadLine());\n            // TODO: jelöld, ha találtál negatívat\n        }\n        Console.WriteLine(van ? \"IGEN\" : \"NEM\");\n    }\n}\n",
                 ],
+                'sample_solutions' => [
+                    'python' => "n = int(input())\nvan = False\nfor _ in range(n):\n    szam = int(input())\n    if szam < 0:\n        van = True\nprint('IGEN' if van else 'NEM')\n",
+                    'csharp' => "using System;\n\nclass Program\n{\n    static void Main()\n    {\n        int n = int.Parse(Console.ReadLine());\n        bool van = false;\n        for (int i = 0; i < n; i++)\n        {\n            int szam = int.Parse(Console.ReadLine());\n            if (szam < 0)\n            {\n                van = true;\n            }\n        }\n        Console.WriteLine(van ? \"IGEN\" : \"NEM\");\n    }\n}\n",
+                ],
                 'test_cases' => [
                     ['stdin' => "3\n4\n-2\n8\n", 'expected_stdout' => "IGEN\n", 'is_hidden' => false],
                     ['stdin' => "3\n1\n2\n3\n", 'expected_stdout' => "NEM\n", 'is_hidden' => false],
@@ -314,6 +331,10 @@ MD,
                 'starter_code' => [
                     'python' => "n = int(input())\nfor _ in range(n):\n    szam = int(input())\n    # TODO: írd ki, ha nagyobb 10-nél\n",
                     'csharp' => "using System;\n\nclass Program\n{\n    static void Main()\n    {\n        int n = int.Parse(Console.ReadLine());\n        for (int i = 0; i < n; i++)\n        {\n            int szam = int.Parse(Console.ReadLine());\n            // TODO: írd ki, ha nagyobb 10-nél\n        }\n    }\n}\n",
+                ],
+                'sample_solutions' => [
+                    'python' => "n = int(input())\nfor _ in range(n):\n    szam = int(input())\n    if szam > 10:\n        print(szam)\n",
+                    'csharp' => "using System;\n\nclass Program\n{\n    static void Main()\n    {\n        int n = int.Parse(Console.ReadLine());\n        for (int i = 0; i < n; i++)\n        {\n            int szam = int.Parse(Console.ReadLine());\n            if (szam > 10)\n            {\n                Console.WriteLine(szam);\n            }\n        }\n    }\n}\n",
                 ],
                 'test_cases' => [
                     ['stdin' => "4\n5\n12\n3\n20\n", 'expected_stdout' => "12\n20\n", 'is_hidden' => false],
