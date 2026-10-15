@@ -1,0 +1,17 @@
+# Riasztas levelben, ha egy InfoTanar systemd egyseg elhal (OnFailure=).
+# A %i az elhalt egyseg neve. A cimzett az ALERT_EMAIL a backend .env-jebol.
+#
+# Egyszeri telepites a szerveren:
+#   sudo cp deploy/systemd/infotanar-alert@.service /etc/systemd/system/
+#   sudo systemctl daemon-reload
+# Kell hozza a `mail` parancs (pl. a mailutils csomag) beallitott MTA-val.
+
+[Unit]
+Description=InfoTanar alert for %i
+
+[Service]
+Type=oneshot
+User=www-data
+Group=www-data
+EnvironmentFile=-/var/www/infotanar/backend/.env
+ExecStart=/bin/sh -c 'if [ -n "$ALERT_EMAIL" ]; then systemctl status --no-pager --lines=30 "%i" 2>&1 | mail -s "[InfoTanar] Elhalt egyseg: %i" "$ALERT_EMAIL"; fi'

@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Exceptions\DomainException;
 use App\Exceptions\Judge0Exception;
 use App\Http\Middleware\EnsureUserIsAdmin;
+use App\Support\Alerts\OperatorAlert;
 use App\Support\RateLimiting\WaitTime;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Auth\AuthenticationException;
@@ -16,7 +17,9 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Exceptions\InvalidSignatureException;
 use Illuminate\Routing\Middleware\SubstituteBindings;
+use Illuminate\Validation\ValidationException;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
+use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 return Application::configure(basePath: dirname(__DIR__))
@@ -39,6 +42,29 @@ return Application::configure(basePath: dirname(__DIR__))
 
         // Elore lathato uzleti hibak: nem kerulnek a hibanaploba.
         $exceptions->dontReport([DomainException::class]);
+
+        // Kezeletlen szerverhiba (5xx): riasztas az uzemeltetonek, hibankent egyszer (az
+        // OperatorAlert idoablakos duplikacio-szurese a hiba osztalya es helye szerint).
+        // Helyi es teszt kornyezetben nem riaszt; a hook maga sosem dobhat.
+        $exceptions->reportable(static function (Throwable $e): void {
+            try {
+                if (app()->environment(['local', 'testing'])
+                    || $e instanceof DomainException
+                    || $e instanceof ValidationException
+                    || $e instanceof AuthenticationException
+                    || $e instanceof AuthorizationException
+                    || ($e instanceof HttpExceptionInterface && $e->getStatusCode() < 500)) {
+                    return;
+                }
+
+                app(OperatorAlert::class)->raise(
+                    __('alerts.server_error', ['class' => class_basename($e)]),
+                    ['where' => basename($e->getFile()).':'.$e->getLine(), 'class' => $e::class],
+                );
+            } catch (Throwable) {
+                // A riasztas hibaja nem torhatja meg a hibakezelest.
+            }
+        });
 
         $isApi = static fn (Request $request): bool => $request->is('api/*');
         $message = static fn (string $key, int $status): JsonResponse => response()->json(['message' => __($key)], $status);

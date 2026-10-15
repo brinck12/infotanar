@@ -50,10 +50,10 @@ use Illuminate\Support\Facades\Route;
 // vegpont vendegkent is hivhato (kulonben a lejart munkamenet csendben vendegge valna, #136).
 Route::prefix('v1')->name('api.')->middleware(RejectInvalidToken::class)->group(function (): void {
     Route::get('/health', HealthController::class)->name('health');
-    Route::get('/health/ready', ReadinessController::class)->middleware('throttle:30,1')->name('health.ready');
+    Route::get('/health/ready', ReadinessController::class)->middleware('throttle:health-ready')->name('health.ready');
 
     // A frontend nem kezelt hibainak bejelentese (#131); szuk limit, mert barki hivhatja.
-    Route::post('/client-errors', ClientErrorController::class)->middleware('throttle:10,1')->name('client-errors');
+    Route::post('/client-errors', ClientErrorController::class)->middleware('throttle:client-errors')->name('client-errors');
 
     Route::prefix('auth')->name('auth.')->group(function (): void {
         Route::post('/register', RegisterController::class)->name('register');
@@ -116,7 +116,7 @@ Route::prefix('v1')->name('api.')->middleware(RejectInvalidToken::class)->group(
     // Feladat nelkuli lecke kesznek jelolese (#144); a feladatos lecke beadassal teljesul.
     Route::post('/lessons/{lesson}/complete', [LessonCompletionController::class, 'store'])
         ->whereNumber('lesson')
-        ->middleware(['auth:sanctum', 'throttle:30,1'])
+        ->middleware(['auth:sanctum', 'throttle:lesson-complete'])
         ->name('lessons.complete');
 
     Route::prefix('account')->name('account.')->middleware('auth:sanctum')->group(function (): void {
@@ -124,7 +124,7 @@ Route::prefix('v1')->name('api.')->middleware(RejectInvalidToken::class)->group(
         Route::delete('/', [AccountController::class, 'destroy'])->middleware('throttle:sensitive')->name('destroy');
 
         // Sajat adatok modositasa (#135). A jelszot kero muveletek a talalgatas ellen szuk limitet kapnak.
-        Route::patch('/profile', [ProfileController::class, 'update'])->middleware('throttle:10,1')->name('profile.update');
+        Route::patch('/profile', [ProfileController::class, 'update'])->middleware('throttle:profile-update')->name('profile.update');
         Route::put('/password', [ProfileController::class, 'changePassword'])->middleware('throttle:sensitive')->name('password.update');
         Route::post('/email', [ProfileController::class, 'requestEmailChange'])->middleware('throttle:sensitive')->name('email.request');
     });
@@ -141,13 +141,13 @@ Route::prefix('v1')->name('api.')->middleware(RejectInvalidToken::class)->group(
     // onkiszolgalo kezeles (#17): lemondas/visszavonas, kartyacsere, tortenet.
     Route::prefix('billing')->name('billing.')->middleware('auth:sanctum')->group(function (): void {
         Route::get('/profile', [BillingProfileController::class, 'show'])->name('profile.show');
-        Route::put('/profile', [BillingProfileController::class, 'update'])->middleware('throttle:10,1')->name('profile.update');
+        Route::put('/profile', [BillingProfileController::class, 'update'])->middleware('throttle:billing-profile-update')->name('profile.update');
         Route::post('/checkout', CheckoutController::class)->middleware('throttle:checkout')->name('checkout');
         Route::get('/payments', [PaymentController::class, 'index'])->name('payments.index');
         Route::get('/payments/{payment}', [PaymentController::class, 'show'])->whereUuid('payment')->name('payments.show');
         Route::get('/payments/{payment}/invoice', [PaymentController::class, 'invoice'])
             ->whereUuid('payment')
-            ->middleware('throttle:30,1')
+            ->middleware('throttle:invoice-download')
             ->name('payments.invoice');
 
         Route::prefix('subscription')->name('subscription.')->group(function (): void {
@@ -160,7 +160,7 @@ Route::prefix('v1')->name('api.')->middleware(RejectInvalidToken::class)->group(
 
     // A Barion szerverrol szerverre hiv; nincs alairas, ezert a hivas csak
     // jelzes, az allapotot mindig a Barion API-bol kerdezzuk le (ADR 0001).
-    Route::post('/webhooks/barion', BarionCallbackController::class)->middleware('throttle:60,1')->name('webhooks.barion');
+    Route::post('/webhooks/barion', BarionCallbackController::class)->middleware('throttle:barion-webhook')->name('webhooks.barion');
 
     Route::prefix('admin')->name('admin.')->middleware(['auth:sanctum', 'admin'])->group(function (): void {
         Route::get('/ping', static fn () => response()->json(['ok' => true]))->name('ping');
@@ -213,7 +213,7 @@ Route::prefix('v1')->name('api.')->middleware(RejectInvalidToken::class)->group(
         Route::middleware('can:viewBilling,user')->whereNumber('user')->group(function (): void {
             Route::get('/users/{user}/payments', [UserPaymentController::class, 'index'])->name('users.payments');
             Route::get('/users/{user}/payments/{payment}/invoice', [UserPaymentController::class, 'invoice'])
-                ->whereUuid('payment')->middleware('throttle:30,1')->name('users.payments.invoice');
+                ->whereUuid('payment')->middleware('throttle:admin-invoice-download')->name('users.payments.invoice');
         });
 
         Route::middleware('can:manageAccount,user')->group(function (): void {

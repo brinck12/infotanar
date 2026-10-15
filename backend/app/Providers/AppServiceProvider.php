@@ -190,6 +190,22 @@ final class AppServiceProvider extends ServiceProvider
             ->by($userOrIp($request))
             ->response($tooMany));
 
+        // Korabban nevtelen `throttle:N,M` volt (B02). Mindegyik sajat nevet kap, hogy a
+        // szamlalok ne osztozzanak: bejelentkezve fiokonkent, egyebkent IP-nkent szamol.
+        // A 429-et a bootstrap/app.php egyseges JSON-valasza adja, mint korabban.
+        $perMinute = static function (string $name, int $max) use ($userOrIp): void {
+            RateLimiter::for($name, static fn (Request $request) => Limit::perMinute($max)
+                ->by($name.':'.$userOrIp($request)));
+        };
+        $perMinute('health-ready', 30);
+        $perMinute('client-errors', 10);
+        $perMinute('lesson-complete', 30);
+        $perMinute('profile-update', 10);
+        $perMinute('billing-profile-update', 10);
+        $perMinute('invoice-download', 30);
+        $perMinute('admin-invoice-download', 30);
+        $perMinute('barion-webhook', 60);
+
         // Jelszot ellenorzo, visszafordithatatlan muveletek: a jelszo ne legyen talalgathato.
         RateLimiter::for('sensitive', static fn (Request $request) => Limit::perMinute(5)
             ->by($userOrIp($request))

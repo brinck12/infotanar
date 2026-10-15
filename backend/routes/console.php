@@ -53,6 +53,8 @@ Schedule::command('files:prune-orphans')->weeklyOn(0, '04:00')->timezone('Europe
 
 // Az audit naplo IP-jenek lejarata es a beallitott korlat szerinti torles (PRIV-4); ejszaka, magyar ido szerint.
 Schedule::command('audit:prune')->dailyAt('03:45')->timezone('Europe/Budapest');
+// Az elozo nap bongeszo-hibainak osszegzoje levelben (OPS-9); ures napon nem megy level.
+Schedule::command('logs:digest-client-errors')->dailyAt('08:15')->timezone('Europe/Budapest');
 
 // Karbantartas (#127): a lejart tokenek es a regi hibas jobok kulonben orokre megmaradnak.
 Schedule::command('sanctum:prune-expired --hours=24')->daily();
