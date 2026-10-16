@@ -1,0 +1,31 @@
+<?php
+
+declare(strict_types=1);
+
+return [
+    'root_missing' => 'A tartalmi könyvtár nem található.',
+    'root_empty' => 'Nincs importálható tartalom: egyetlen track sem található.',
+    'unreadable' => 'A fájl nem olvasható.',
+    'missing_file' => 'Hiányzik a(z) :name fájl.',
+    'yaml_invalid' => 'Érvénytelen YAML: :error',
+    'yaml_not_map' => 'A fájl tartalma nem kulcs-érték lista.',
+    'header_missing' => 'A fájl nem „---” fejléc-sorral kezdődik.',
+    'header_unclosed' => 'A fejléc nincs lezárva: hiányzik a záró „---” sor.',
+    'unknown_key' => 'Ismeretlen kulcs: „:key”.',
+    'required' => 'Kötelező mező hiányzik: „:field”.',
+    'invalid_type' => 'A(z) „:field” értéke érvénytelen, :expected szükséges.',
+    'invalid_choice' => 'A(z) „:field” értéke („:value”) nem megengedett, lehetséges: :allowed.',
+    'too_long' => 'A(z) „:field” legfeljebb :max karakter lehet.',
+    'out_of_range' => 'A(z) „:field” értéke :min és :max között lehet.',
+    'slug_format' => 'A(z) „:field” csak kisbetűs ASCII betűt, számot és kötőjelet tartalmazhat.',
+    'slug_title_mismatch' => 'A feladat slugja („:slug”) nem egyezik a címből képzett slugéval („:expected”).',
+    'duplicate_slug' => 'Ismétlődő slug („:slug”) ugyanabban a szülőben, első előfordulás: :other',
+    'duplicate_position' => 'Ismétlődő position (:position) ugyanabban a szülőben, első előfordulás: :other',
+    'language_not_allowed' => 'A(z) „:field” nyelve („:language”) nincs az allowed_languages között.',
+    'no_tests' => 'Legalább egy tesztesetet meg kell adni a „tests” alatt.',
+    'test_invalid' => 'A(z) :number. teszteset hibás: :detail',
+    'live_not_available' => 'Az éles import még nem érhető el; használd a --dry-run kapcsolót.',
+    'problems_header' => ':count hiba található, semmi nem íródott.',
+    'summary' => ':lessons új lecke, :exercises új feladat',
+    'body_length' => ':path: törzs: :length karakter',
+];

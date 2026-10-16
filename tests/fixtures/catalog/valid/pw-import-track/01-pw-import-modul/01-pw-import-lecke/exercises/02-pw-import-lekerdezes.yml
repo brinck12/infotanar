@@ -1,0 +1,13 @@
+slug: pw-import-lekerdezes
+title: PW import lekérdezés
+position: 1
+kind: sql
+level: emelt
+difficulty: 2
+allowed_languages: [sql]
+description: Kérdezd le az összes sort.
+sample_solutions:
+  sql: SELECT 1;
+sql_order_sensitive: false
+tests:
+  - { stdin: "CREATE TABLE t(a);", expected: "1\n", hidden: false }

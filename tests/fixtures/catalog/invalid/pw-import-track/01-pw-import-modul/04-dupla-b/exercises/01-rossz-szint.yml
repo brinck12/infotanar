@@ -1,0 +1,12 @@
+slug: pw-import-rossz-szint
+title: PW import rossz szint
+position: 0
+kind: code
+level: nehez
+difficulty: 1
+allowed_languages: [python]
+description: x
+sample_solutions:
+  python: print(1)
+tests:
+  - { stdin: "", expected: "1\n" }

@@ -1,0 +1,25 @@
+slug: pw-import-osszeg
+title: PW import összeg
+position: 0
+kind: code
+level: kozep
+difficulty: 1
+published: false
+allowed_languages: [python, csharp]
+description: |
+  Olvass be egy egész számot, majd írd ki a négyzetét.
+starter_code:
+  python: |
+    # ide írd a megoldást
+  csharp: |
+    // ide írd a megoldást
+sample_solutions:
+  python: |
+    n = int(input())
+    print(n * n)
+  csharp: |
+    var n = int.Parse(Console.ReadLine()!);
+    Console.WriteLine(n * n);
+tests:
+  - { stdin: "3\n", expected: "9\n", hidden: false }
+  - { stdin: "0\n", expected: "0\n", hidden: true }
