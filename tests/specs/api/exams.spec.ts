@@ -522,7 +522,11 @@ test.describe('Vizsgák: ertekelés foglalt értékelő mellett', () => {
     const created = await start(student, MAIN.id)
     await uploadOk(student, created.id)
 
-    tinkerJson(`${DB}::unprepared('CREATE TRIGGER pw_fail_eval BEFORE UPDATE OF state ON exam_attempts WHEN NEW.state = char(101,118,97,108,117,97,116,101,100) BEGIN SELECT abs(-9223372036854775807 - 1); END'); return true;`)
+    // A trigger motorfuggo: SQLite-on egy tulcsordulo kifejezes, MySQL-en SIGNAL hibazik az "evaluated" allapotba lepeskor.
+    tinkerJson(
+      `$mysql = ${DB}::connection()->getDriverName() === 'mysql'; ` +
+        `${DB}::unprepared($mysql ? "CREATE TRIGGER pw_fail_eval BEFORE UPDATE ON exam_attempts FOR EACH ROW BEGIN IF NEW.state = 'evaluated' THEN SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'pw'; END IF; END" : 'CREATE TRIGGER pw_fail_eval BEFORE UPDATE OF state ON exam_attempts WHEN NEW.state = char(101,118,97,108,117,97,116,101,100) BEGIN SELECT abs(-9223372036854775807 - 1); END'); return true;`,
+    )
     try {
       expect((await submitAttempt(student, created.id)).body.data.state).toBe('submitted')
       expect(backdateAndRunJob(created.id, 5)).toContain(created.id)

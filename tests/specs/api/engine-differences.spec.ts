@@ -70,9 +70,10 @@ test.describe('SQLite es MySQL eltereseinek celzott esetei', () => {
       expect(found.status).toBe(200)
       expect(found.body.data.title).toBe(title)
 
-      // Ekezetes (szazalekkodolt) slug keresese: 404, soha 5xx.
+      // Ekezetes (szazalekkodolt) slug keresese: soha 5xx. SQLite-on 404; MySQL-en az ekezet-erzéketlen utf8mb4_unicode_ci
+      // collation az "á"-t az "a"-val azonosnak veszi, ezert a lecke itt is megjon (ugyanaz a tartalom, nem hiba).
       const accented = await apiClient.get(`tracks/${encodeURIComponent(`pw-árvíz-${suffix}`)}`)
-      expect(accented.status).toBe(404)
+      expect([200, 404]).toContain(accented.status)
 
       // Eltero nagybetu: MySQL-en (case-insensitive collation) megtalalja, SQLite-on nem. Mindketto elfogadhato,
       // de 5xx nem lehet; a kulonbseg ismert.

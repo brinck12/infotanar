@@ -100,7 +100,10 @@ export function deleteWithFailingOralPurge(userId: number): { threw: boolean; co
   return tinkerJson(`
     config(['app.key' => 'base64:IuoO2O2E2ePTfNKZ3XNlVF5ZfvMJM5zld0sDIFlKhQ8=']);
     $db = Illuminate\\Support\\Facades\\DB::class;
-    $db::unprepared('CREATE TRIGGER pw_block_oral BEFORE DELETE ON oral_practices BEGIN INSERT INTO pw_missing_table VALUES (1); END');
+    $mysql = $db::connection()->getDriverName() === 'mysql';
+    $db::unprepared($mysql
+      ? "CREATE TRIGGER pw_block_oral BEFORE DELETE ON oral_practices FOR EACH ROW SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'pw'"
+      : 'CREATE TRIGGER pw_block_oral BEFORE DELETE ON oral_practices BEGIN INSERT INTO pw_missing_table VALUES (1); END');
     $user = App\\Models\\User::query()->findOrFail(${String(userId)});
     $threw = false;
     try {
