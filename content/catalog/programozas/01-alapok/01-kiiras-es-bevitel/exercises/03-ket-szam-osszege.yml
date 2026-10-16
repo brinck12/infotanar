@@ -1,0 +1,35 @@
+slug: ket-szam-osszege
+title: Két szám összege
+position: 2
+kind: code
+level: kozep
+difficulty: 2
+published: false
+allowed_languages: [python, csharp]
+description: |
+  Olvass be két egész számot (mindegyiket külön sorban), majd írd ki az összegüket.
+
+  Példa: ha a bemenet a `3` és az `5` két külön sorban, a kimenet `8`.
+
+  Tipp: az `input()` és a `Console.ReadLine()` szöveget ad, ezért az összeadás előtt alakítsd mindkét értéket számmá.
+starter_code:
+  python: |
+    a = int(input())
+    # innen folytasd
+  csharp: |
+    var a = int.Parse(Console.ReadLine()!);
+    // innen folytasd
+sample_solutions:
+  python: |
+    a = int(input())
+    b = int(input())
+    print(a + b)
+  csharp: |
+    var a = int.Parse(Console.ReadLine()!);
+    var b = int.Parse(Console.ReadLine()!);
+    Console.WriteLine(a + b);
+tests:
+  - { stdin: "3\n5\n", expected: "8\n", hidden: false }
+  - { stdin: "-4\n10\n", expected: "6\n", hidden: true }
+  - { stdin: "0\n0\n", expected: "0\n", hidden: true }
+  - { stdin: "1200\n3400\n", expected: "4600\n", hidden: true }

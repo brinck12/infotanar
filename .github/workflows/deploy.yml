@@ -96,7 +96,7 @@ jobs:
           DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
         run: |
           ssh -i ~/.ssh/deploy_key "$DEPLOY_USER@$DEPLOY_HOST" \
-            "mkdir -p '$DEPLOY_PATH/frontend' '$DEPLOY_PATH/backend'"
+            "mkdir -p '$DEPLOY_PATH/frontend' '$DEPLOY_PATH/backend' '$DEPLOY_PATH/content'"
 
       - name: Frontend feltöltése
         env:
@@ -125,12 +125,25 @@ jobs:
             -e "ssh -i ~/.ssh/deploy_key" \
             backend/ "$DEPLOY_USER@$DEPLOY_HOST:$DEPLOY_PATH/backend/"
 
+      - name: Tartalmi fájlok feltöltése
+        env:
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+          DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+          DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
+        run: |
+          rsync -az --delete \
+            -e "ssh -i ~/.ssh/deploy_key" \
+            content/ "$DEPLOY_USER@$DEPLOY_HOST:$DEPLOY_PATH/content/"
+
       - name: Migráció és cache-ek frissítése
         env:
           DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
           DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
           DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
           STRICT_CONFIG_FLAG: ${{ vars.DEPLOY_STRICT_CONFIG == 'true' && '--strict' || '' }}
+          # Alapértelmezés: kikapcsolva, hogy az első deploy ne írja felül az admin
+          # felületen készült tartalmat (előbb catalog:export, git-commit, majd bekapcsolás).
+          CATALOG_IMPORT: ${{ vars.CATALOG_IMPORT_ON_DEPLOY == 'true' && 'yes' || '' }}
         run: |
           ssh -i ~/.ssh/deploy_key "$DEPLOY_USER@$DEPLOY_HOST" bash -se <<EOSSH
           set -euo pipefail
@@ -157,6 +170,10 @@ jobs:
           php artisan db:snapshot-before-migrate
 
           php artisan migrate --force
+
+          if [ -n "$CATALOG_IMPORT" ]; then
+            php artisan catalog:import
+          fi
 
           # Csak akkor seedel, ha meg egyetlen feladat sincs - igy az elso
           # deploy feltolti a mintaadatokat, a tobbi deploy nem nyul hozzajuk.

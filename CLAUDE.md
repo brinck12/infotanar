@@ -37,7 +37,7 @@ There is **no PHPUnit/Pest suite** in `backend/` (no `tests/` dir, no `test` scr
 
 Code execution needs Judge0, which is only reachable on the server's localhost. For real runs locally, open a tunnel first and leave it open: `ssh -N -L 2358:localhost:2358 <user>@<server>`, and set `JUDGE0_AUTH_TOKEN` in `.env`. Billing/invoicing need `BARION_*` and `SZAMLAZZ_*` keys; both have `*_BASE_URL` overrides for pointing at a local stub.
 
-Custom artisan commands: `db:seed-once` (deploy-only: seeds iff there are zero exercises), `test:prepare-api-fixtures` (fresh `database/testing.sqlite` + `ApiTestSeeder`; used by the Playwright backend server), `user:role {email} {student|admin}` (bootstrap the first admin; admins can otherwise change roles through the API), `docs:endpoints` (regenerates `docs/api-endpoints.md`; `--check` only verifies it), `app:check-config` (is the configuration fit for production), `db:snapshot-before-migrate` (deploy-only: backs up the database when a migration is pending).
+Custom artisan commands: `db:seed-once` (deploy-only: seeds iff there are zero exercises), `test:prepare-api-fixtures` (fresh `database/testing.sqlite` + `ApiTestSeeder`; used by the Playwright backend server), `user:role {email} {student|admin}` (bootstrap the first admin; admins can otherwise change roles through the API), `docs:endpoints` (regenerates `docs/api-endpoints.md`; `--check` only verifies it), `app:check-config` (is the configuration fit for production), `db:snapshot-before-migrate` (deploy-only: backs up the database when a migration is pending), `catalog:import [--dry-run] [--path] [--only]` (loads `content/catalog/` into the database; `--dry-run` only validates and needs no admin), `catalog:export` (writes the database catalog back to files), `catalog:verify --drafts --negative` (runs sample solutions, and wrong ones that must fail, on real Judge0; needs the SSH tunnel).
 
 Background work needs two long-running processes in production (units in `deploy/systemd/`): `queue:work` and `schedule:work`. Locally, `composer dev` starts server, queue listener, pail and `backend/`'s own Vite (unused Laravel-skeleton asset pipeline; the real frontend is `frontend/`), so you may prefer running `php artisan serve` and `php artisan queue:listen` yourself.
 
@@ -91,6 +91,10 @@ The browser never talks to Judge0. `POST /run` (visible test cases only, nothing
 - **SQL exercises** run in Judge0's sqlite sandbox: the test case `stdin` is the dataset script, and `SqlResultComparator` compares CSV output (row order only matters when `sql_order_sensitive`).
 - **Hidden test cases must never leak.** `HiddenResultRedactor` is an allow-list: hidden results expose only pass/fail and verdict, with no stdout, stderr, compile output, time or expected value. When adding a field to a result, it stays hidden by default; do not add it to `ALLOWED` without thinking about what it reveals.
 - A whole evaluation has a wall-clock budget (`judge0.evaluation_deadline`, 45 s) that must stay below the frontend's 60 s Axios timeout. Judge0 outages stop the loop and return `system_error`, not a 500.
+
+### Lesson content (files)
+
+The lesson texts and exercises live as Markdown/YAML under `content/catalog/` (format and author guide: `content/README.md`). Exercise identity is `(lesson, title)` and its `slug` must equal `Str::slug(title)`; Python and C# code blocks written directly after each other (fences `python` / `csharp`) render as language tabs; new content is `published: false`. Workflow: `catalog:import --dry-run` → `catalog:import` → `catalog:verify --drafts --negative` → publish. CI runs the dry-run on every push; deploy rsyncs `content/` and imports only when the repo variable `CATALOG_IMPORT_ON_DEPLOY` is `true` (default off, so the first deploy does not overwrite content made in the admin UI).
 
 ### Content access (freemium)
 

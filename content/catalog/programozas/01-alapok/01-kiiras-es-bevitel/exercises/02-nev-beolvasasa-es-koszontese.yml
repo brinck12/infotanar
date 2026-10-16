@@ -1,0 +1,32 @@
+slug: nev-beolvasasa-es-koszontese
+title: Név beolvasása és köszöntése
+position: 1
+kind: code
+level: kozep
+difficulty: 1
+published: false
+allowed_languages: [python, csharp]
+description: |
+  Olvass be egy nevet, majd köszönj neki: írd ki, hogy `Szia, <név>!`.
+
+  Példa: ha a bemenet `Anna`, a kimenet `Szia, Anna!`.
+
+  Tipp: Pythonban a szövegeket a `+` fűzi össze, C#-ban használhatod a `$"Szia, {nev}!"` alakot.
+starter_code:
+  python: |
+    nev = input()
+    # innen folytasd
+  csharp: |
+    var nev = Console.ReadLine();
+    // innen folytasd
+sample_solutions:
+  python: |
+    nev = input()
+    print("Szia, " + nev + "!")
+  csharp: |
+    var nev = Console.ReadLine();
+    Console.WriteLine($"Szia, {nev}!");
+tests:
+  - { stdin: "Anna\n", expected: "Szia, Anna!\n", hidden: false }
+  - { stdin: "Béla\n", expected: "Szia, Béla!\n", hidden: true }
+  - { stdin: "Kovács Zoltán\n", expected: "Szia, Kovács Zoltán!\n", hidden: true }
