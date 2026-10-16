@@ -22,7 +22,7 @@ jobs:
       github.event.workflow_run.conclusion == 'success'
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           # workflow_run esetén azt a commitot deployoljuk, amire a CI lefutott.
           ref: ${{ github.event.workflow_run.head_sha || github.ref }}
