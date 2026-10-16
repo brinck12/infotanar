@@ -28,7 +28,7 @@
     "eslint-plugin-playwright": "^2.12.0",
     "tsx": "^4.23.15",
     "typescript": "^6.0.3",
-    "typescript-eslint": "^8.71.0",
+    "typescript-eslint": "^8.71.2",
     "zod": "^4.6.5"
   },
   "description": "Playwright + TypeScript tesztkeretrendszer (E2E mockolt API-val es API tesztek valodi backend ellen).",
