@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
+import { useDocumentMeta } from '../../../shared/hooks/useDocumentMeta'
 import { Banner } from '../../../shared/ui/Banner'
 import { Breadcrumb } from '../../../shared/ui/Breadcrumb'
 import { Button } from '../../../shared/ui/Button'
@@ -29,6 +30,7 @@ export function OralTopic() {
 }
 
 function Practice({ topic }: { topic: Topic }) {
+  useDocumentMeta({ title: topic.title, description: `Szóbeli tétel gyakorlása: ${topic.title}` })
   const { preferences, loading: preferencesLoading, loadError: preferencesError, retry: retryPreferences } = useStudyPreferences()
   const { loading: practiceLoading, loadError: practiceError, retry: retryPractice, practice, storedOnServer, update, recordAttempt } = useOralTopicPractice(topic.slug)
   const [phase, setPhase] = useState<Phase>('idle')

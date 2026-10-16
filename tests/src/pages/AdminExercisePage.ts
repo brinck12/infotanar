@@ -62,6 +62,41 @@ export class AdminExercisePage extends BasePage {
     this.rubricUnavailable = page.getByText('Az értékelőlap a szerveren még nincs bekapcsolva')
   }
 
+  /** A mintamegoldas fulon az elso (egyetlen nyelvnel az egyetlen) szerkeszto. */
+  get sampleEditor(): Locator {
+    return this.page.getByRole('tabpanel', { name: 'Mintamegoldás' }).locator('.monaco-editor').first()
+  }
+
+  get verifyButton(): Locator {
+    return this.page.getByRole('button', { name: 'Ellenőrzés (minden teszteset)' })
+  }
+
+  get verifyResult(): Locator {
+    return this.page.getByTestId('verify-result')
+  }
+
+  get publishError(): Locator {
+    return this.page.getByTestId('publish-error')
+  }
+
+  get unsavedWarning(): Locator {
+    return this.page.getByText('Mentetlen változtatás')
+  }
+
+  get openSampleTab(): Locator {
+    return this.page.getByRole('button', { name: 'Mintamegoldás megnyitása' })
+  }
+
+  /** Egy teszteset sora az ellenorzes eredmenyeben (pl. "1. teszteset"). */
+  verifyRow(name: string): Locator {
+    return this.verifyResult.getByRole('listitem').filter({ hasText: name })
+  }
+
+  async typeSample(code: string): Promise<void> {
+    await this.sampleEditor.click()
+    await this.page.keyboard.type(code)
+  }
+
   async gotoNew(lessonId: number): Promise<void> {
     await this.navigate(`/admin/tananyag/leckek/${lessonId}/uj-feladat`)
   }

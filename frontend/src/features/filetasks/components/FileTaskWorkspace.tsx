@@ -1,6 +1,7 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { useState, type ReactNode } from 'react'
-import { hibaUzenet, zarolasOka } from '../../../shared/api/errors'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
+import type { ReactNode } from 'react'
+import { zarolasOka } from '../../../shared/api/errors'
+import { useFileUpload } from '../../../shared/hooks/useFileUpload'
 import { Badge, LevelBadge } from '../../../shared/ui/Badge'
 import { Dropzone, FileChip, type DropzoneState } from '../../../shared/ui/Dropzone'
 import { formatBytes } from '../../../shared/ui/format'
@@ -9,8 +10,8 @@ import { Prose } from '../../../shared/ui/Prose'
 import { CardTitle } from '../../../shared/ui/Text'
 import type { UnlockedTaskDetail } from '../../../types'
 import { catalogKeys } from '../../catalog/api'
-import { progressKeys } from '../../progress/api'
-import { fileTaskKeys, submissionsQuery, uploadSubmission } from '../api'
+import { invalidateSolveState } from '../../catalog/invalidate'
+import { fileTaskKeys, submissionsQuery, uploadSubmission, type FileSubmission } from '../api'
 import { SubmissionResult } from './SubmissionResult'
 
 const timeOfDay = new Intl.DateTimeFormat('hu-HU', { hour: '2-digit', minute: '2-digit' })
@@ -24,24 +25,28 @@ export function FileTaskWorkspace({ task }: { task: UnlockedTaskDetail }) {
   const queryClient = useQueryClient()
   const info = task.file_task
   const attempts = useQuery(submissionsQuery(task.id))
-  const [progress, setProgress] = useState<{ name: string; percent: number } | null>(null)
 
-  const upload = useMutation({
-    mutationFn: (file: File) => uploadSubmission(task.id, file, (percent) => setProgress({ name: file.name, percent })),
-    onMutate: (file) => setProgress({ name: file.name, percent: 0 }),
+  const upload = useFileUpload({
+    send: (file, onProgress, signal) => uploadSubmission(task.id, file, onProgress, signal),
     onSuccess: (submission) => {
       queryClient.setQueryData(fileTaskKeys.one(submission.id), submission)
+      // A lista a forrás: a legutóbbi eredmény mindig innen jön, így a kézi pontozás után sem marad elavult.
+      queryClient.setQueryData<FileSubmission[]>(fileTaskKeys.forExercise(task.id), (list = []) => [
+        submission,
+        ...list.filter((item) => item.id !== submission.id),
+      ])
       void queryClient.invalidateQueries({ queryKey: fileTaskKeys.forExercise(task.id) })
-      void queryClient.invalidateQueries({ queryKey: progressKeys.all })
+      invalidateSolveState(queryClient, task.id)
     },
     // Menet közben megszűnt a hozzáférés: a feladat újratöltve a zárolt nézetre vált.
     onError: (error) => {
       if (zarolasOka(error)) void queryClient.invalidateQueries({ queryKey: catalogKeys.task(task.id) })
     },
-    onSettled: () => setProgress(null),
+    hideError: (error) => zarolasOka(error) !== null,
   })
+  const progress = upload.progress
 
-  const latest = upload.data ?? attempts.data?.[0] ?? null
+  const latest = attempts.data?.[0] ?? null
   const accepted = info?.accepted_extensions ?? []
   const software = info?.software ?? []
 
@@ -120,8 +125,10 @@ export function FileTaskWorkspace({ task }: { task: UnlockedTaskDetail }) {
                 <Dropzone
                   state={state}
                   accept={accepted}
-                  onFile={(file) => upload.mutate(file)}
-                  error={upload.isError && !zarolasOka(upload.error) ? hibaUzenet(upload.error) : null}
+                  onFile={upload.start}
+                  error={upload.error}
+                  onRetry={upload.offline ? upload.retry : undefined}
+                  onDismiss={upload.offline ? upload.dismiss : undefined}
                 />
               </div>
             </Step>

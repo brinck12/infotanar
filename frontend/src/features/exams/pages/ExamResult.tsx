@@ -1,7 +1,8 @@
 import { useQuery } from '@tanstack/react-query'
-import { Link, Navigate, useParams, useSearchParams } from 'react-router-dom'
+import { Link, Navigate, useLocation, useParams, useSearchParams } from 'react-router-dom'
 import { EXAM_PARTS } from '../../../shared/domain/exam'
 import { LEVEL_LABEL } from '../../../shared/domain/labels'
+import { solvedVerdict } from '../../../shared/domain/solved'
 import { Banner } from '../../../shared/ui/Banner'
 import { Breadcrumb } from '../../../shared/ui/Breadcrumb'
 import { ButtonLink } from '../../../shared/ui/Button'
@@ -11,7 +12,7 @@ import { Panel } from '../../../shared/ui/Panel'
 import { Bar } from '../../../shared/ui/Progress'
 import { LoadError } from '../../../shared/ui/States'
 import { CardTitle, PageTitle, SectionTitle } from '../../../shared/ui/Text'
-import { resultQuery, type ExamResult as Result } from '../api'
+import { attemptQuery, resultQuery, type ExamAttempt, type ExamResult as Result, type ResultNavigationState } from '../api'
 
 /**
  * A vizsga eredménye: összpontszám és százalék, részenként a fő hibaokkal.
@@ -35,11 +36,26 @@ export function ExamResult() {
     )
   }
 
-  return <ResultView result={result.data} />
+  return <ResultLoaded examId={examId} attemptId={attemptId} result={result.data} />
 }
 
-function ResultView({ result }: { result: Result }) {
+/** Az eredmény mellé a próbálkozás módját is lekérjük; ha az nem jön meg, az eredmény enélkül is látszik. */
+function ResultLoaded({ examId, attemptId, result }: { examId: number; attemptId: number; result: Result }) {
+  const attempt = useQuery(attemptQuery(attemptId))
+  return <ResultView examId={examId} attemptId={attemptId} result={result} attempt={attempt.data ?? null} />
+}
+
+interface ResultViewProps {
+  examId: number
+  attemptId: number
+  result: Result
+  attempt: ExamAttempt | null
+}
+
+function ResultView({ examId, attemptId, result, attempt }: ResultViewProps) {
   const { exam } = result
+  const verdict = solvedVerdict(result.score, result.max_score, 'A feladatsor')
+  const navigationState = useLocation().state as ResultNavigationState | null
   const name = `${exam.title}, ${LEVEL_LABEL[exam.level].toLowerCase()}`
   const percent = result.max_score > 0 ? Math.floor((result.score / result.max_score) * 100) : 0
 
@@ -47,6 +63,12 @@ function ResultView({ result }: { result: Result }) {
     <main className="mx-auto w-full max-w-page flex-1 px-4 pt-8 pb-24 md:px-6">
       <Breadcrumb items={[{ label: 'Gyakorló vizsgák', to: '/vizsgak' }, { label: name }]} />
       <PageTitle className="mt-4">Az eredményed</PageTitle>
+
+      {navigationState?.notice === 'conflict' && (
+        <Banner kind="warn" title="A vizsga már le van zárva" className="mt-6">
+          Az időd lejárt, vagy a vizsgát egy másik lapon már beadtad, ezért a most feltöltött fájl nem került be. Az eredményedet alább látod.
+        </Banner>
+      )}
 
       <div className="mt-8 flex flex-wrap items-start gap-8">
         <div className="min-w-0 flex-1 basis-120">
@@ -56,7 +78,19 @@ function ResultView({ result }: { result: Result }) {
               {result.score} / {result.max_score} pont
             </p>
             <p className="mt-1 text-18 text-ink-soft">{percent} százalék</p>
+            {attempt && (
+              <p className="mt-3 text-15 text-ink-soft" data-testid="attempt-mode">
+                {attempt.mode === 'exam'
+                  ? `Vizsgahelyzetben oldottad meg, ${exam.minutes} perces időkerettel.`
+                  : 'Gyakorló módban oldottad meg, időkorlát nélkül.'}
+              </p>
+            )}
           </Panel>
+
+          <Banner kind={verdict.solved ? 'success' : 'info'} className="mt-6" data-testid="solved-verdict">
+            {verdict.sentence}
+            {result.pending_manual_points > 0 && ' A kézi pontok jelölése után ez még változhat.'}
+          </Banner>
 
           {result.pending_manual_points > 0 && (
             <Banner kind="info" title={`${result.pending_manual_points} pont kézi ellenőrzésre vár`} className="mt-6">
@@ -83,7 +117,7 @@ function ResultView({ result }: { result: Result }) {
                   {part.summary && <p className="mt-3 text-16 leading-relaxed">{part.summary}</p>}
                   {part.file_submission_id !== null && (
                     <p className="mt-1">
-                      <Link to={`/beadasok/${part.file_submission_id}`} className="inline-flex min-h-11 items-center text-15">
+                      <Link to={`/beadasok/${part.file_submission_id}?vizsga=${examId}&proba=${attemptId}`} className="inline-flex min-h-11 items-center text-15">
                         Értékelőlap megnyitása
                       </Link>
                     </p>

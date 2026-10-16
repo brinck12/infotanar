@@ -1,4 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
+import { useDocumentMeta } from '../../../shared/hooks/useDocumentMeta'
 import { Link, Navigate, useParams } from 'react-router-dom'
 import { httpStatus } from '../../../shared/api/errors'
 import { LANGUAGE_LABEL } from '../../../shared/domain/labels'
@@ -69,10 +70,10 @@ export function LessonPage() {
 function Lesson({ lesson }: { lesson: LessonDetail }) {
   const firstExercise = lesson.exercises[0]
   const trackPath = `/tanulasi-ut/${encodeURIComponent(lesson.track.slug)}`
+  useDocumentMeta({ title: lesson.title, description: `${lesson.title}: videós lecke és gyakorlófeladatok a(z) ${lesson.track.title} sávban.` })
 
   return (
     <main className="mx-auto w-full max-w-page flex-1 px-4 pt-8 pb-24 md:px-6">
-      <title>{`${lesson.title} – InfoTanár`}</title>
       <Breadcrumb items={[{ label: 'Tanulási út', to: '/tanulasi-ut' }, { label: lesson.track.title, to: trackPath }, { label: lesson.title }]} />
       <PageTitle size="compact" className="mt-4">
         {lesson.title}

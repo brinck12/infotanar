@@ -11,6 +11,7 @@ const MENU: ReadonlyArray<SideMenuItem> = [
   { to: '/admin/vizsgak', label: 'Gyakorló vizsgák', icon: 'flag' },
   { to: '/admin/felhasznalok', label: 'Felhasználók', icon: 'user' },
   { to: '/admin/szamlak', label: 'Számlák', icon: 'file' },
+  { to: '/admin/meghivokodok', label: 'Meghívókódok', icon: 'mail' },
 ]
 
 export function AdminShell() {

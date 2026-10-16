@@ -45,6 +45,12 @@ jobs:
       - name: Build
         run: npm run build
 
+      # Ismert sebezhetőségek a futásidejű függőségekben (REL-9). Egyelőre nem blokkol:
+      # a találatokat a dependabot PR-jai és a kézi átnézés viszi tovább.
+      - name: Függőségek auditja (npm audit)
+        continue-on-error: true
+        run: npm audit --omit=dev --audit-level=high
+
   backend:
     name: Backend (Pint, Larastan)
     runs-on: ubuntu-latest
@@ -72,6 +78,11 @@ jobs:
 
       - name: Függőségek telepítése
         run: composer install --prefer-dist --no-interaction --no-progress
+
+      # Blokkol: a jelenlegi composer.lock tiszta (REL-9). Új advisory esetén a dependabot
+      # frissítése vagy egy indokolt, dokumentált kivétel (config.audit.ignore) a teendő.
+      - name: Függőségek auditja (composer audit)
+        run: composer audit --no-interaction
 
       - name: Kódstílus (Pint)
         run: composer lint
@@ -291,6 +302,10 @@ jobs:
 
       - name: Típusellenőrzés és lint
         run: npm run check
+
+      - name: Függőségek auditja (npm audit)
+        continue-on-error: true
+        run: npm audit --omit=dev --audit-level=high
 
   # Egyetlen konfiguráció (tests/playwright.config.ts), három projekt:
   #   e2e-mocked      - buildelt frontend, route interceptionnel mockolt API

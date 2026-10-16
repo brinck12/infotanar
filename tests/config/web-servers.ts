@@ -84,6 +84,14 @@ const backend: WebServer = {
     FILETASKS_RATE_PER_DAY: '100000',
     FILETASKS_ADMIN_UPLOAD_PER_MINUTE: '10000',
     EXAMS_WRITE_PER_MINUTE: '10000',
+    // Az IP-nkenti belepes/jelszo-visszaallitas keret ne fogja a sok sajat fiokot letrehozo teszteket.
+    AUTH_LOGIN_IP_PER_MINUTE: '10000',
+    AUTH_RESET_IP_PER_MINUTE: '10000',
+    // A regisztracios limit (B03) ne fogja vissza a sok fiokot letrehozo spekeket;
+    // a varolista szuk limitjet az api-rate-limit projekt teszteli.
+    REGISTRATION_RATE_REGISTER_PER_MINUTE: '10000',
+    REGISTRATION_RATE_WAITLIST_PER_MINUTE: '20',
+    REGISTRATION_MODE: 'open',
   },
 }
 

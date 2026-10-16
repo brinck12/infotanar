@@ -7,6 +7,7 @@ namespace App\Actions\Account;
 use App\Actions\Audit\RecordAuditEvent;
 use App\Enums\AuditAction;
 use App\Models\User;
+use App\Notifications\PasswordChangedNotification;
 use Illuminate\Support\Facades\DB;
 
 /**
@@ -27,5 +28,8 @@ final readonly class ChangePassword
 
             $this->audit->handle(AuditAction::AccountPasswordChanged, $user, $user);
         });
+
+        // Ertesites a csere utan: ha nem a tulajdonos volt, igy szerez rola tudomast.
+        $user->notify(new PasswordChangedNotification);
     }
 }

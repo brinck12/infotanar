@@ -9,15 +9,19 @@
 
 [Unit]
 Description=InfoTanar queue worker
-After=network.target mysql.service
+After=network.target mysql.service redis-server.service
+StartLimitIntervalSec=300
+StartLimitBurst=5
+OnFailure=infotanar-alert@%n.service
 
 [Service]
 User=www-data
 Group=www-data
 WorkingDirectory=/var/www/infotanar/backend
-ExecStart=/usr/bin/php artisan queue:work --sleep=3 --tries=3 --backoff=10 --max-time=3600
+ExecStart=/usr/bin/php artisan queue:work --timeout=60 --sleep=3 --tries=3 --backoff=10 --max-time=3600 --memory=256 --max-jobs=500
 Restart=always
 RestartSec=5
+TimeoutStopSec=120
 
 [Install]
 WantedBy=multi-user.target

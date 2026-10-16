@@ -7,7 +7,22 @@ return [
     'throttle' => 'Túl sok próbálkozás, próbáld újra később.',
 
     'register' => [
+        'accepted' => 'Elküldtük a további teendőket az e-mail-címedre. Nézd meg a leveleidet (a spam mappát is).',
+        'exists_mail' => [
+            'subject' => 'Már van fiókod az InfoTanáron',
+            'greeting' => 'Szia :name!',
+            'intro' => 'Valaki ezzel az e-mail-címmel próbált regisztrálni, de már van hozzá fiók.',
+            'action' => 'Belépés',
+            'forgot' => 'Ha elfelejtetted a jelszavad, a belépő oldalon kérhetsz új jelszót.',
+            'outro' => 'Ha nem te voltál, nincs teendőd: a fiókodhoz senki nem fért hozzá.',
+        ],
         'accept_terms' => 'A regisztrációhoz el kell fogadnod az Általános Szerződési Feltételeket és az Adatkezelési tájékoztatót.',
+    ],
+
+    'invite' => [
+        'required' => 'A regisztrációhoz meghívókód kell.',
+        'invalid' => 'Ez a meghívókód nem érvényes, lejárt, vagy már elfogyott.',
+        'waitlist_joined' => 'Feliratkoztál a várólistára. Ha felvesszük a bétába, a megadott címen értesítünk.',
     ],
 
     'verification' => [
@@ -27,6 +42,12 @@ return [
 
     'password_change' => [
         'done' => 'A jelszavad megváltozott. A többi eszközön kijelentkeztettünk.',
+        'mail' => [
+            'subject' => 'A jelszavad megváltozott',
+            'greeting' => 'Szia :name!',
+            'intro' => 'Az InfoTanár-fiókod jelszava éppen most megváltozott.',
+            'outro' => 'Ha nem te voltál, azonnal kérj új jelszót a „Elfelejtett jelszó” oldalon, és írj nekünk.',
+        ],
     ],
 
     'email_change' => [

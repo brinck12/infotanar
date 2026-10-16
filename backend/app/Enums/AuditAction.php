@@ -11,6 +11,13 @@ enum AuditAction: string
     case AccountPasswordChanged = 'account.password_changed';
     case AccountEmailChanged = 'account.email_changed';
 
+    // Hitelesites: csak azonositok kerulnek a naplora (e-mail-cim, jelszo soha).
+    case AuthLoginSucceeded = 'auth.login_succeeded';
+    case AuthLoginFailed = 'auth.login_failed';
+    case AuthPasswordReset = 'auth.password_reset';
+
+    case FileSubmissionManuallyMarked = 'file_submission.manually_marked';
+
     case CatalogCreated = 'catalog.created';
     case CatalogUpdated = 'catalog.updated';
     case CatalogDeleted = 'catalog.deleted';
@@ -39,4 +46,10 @@ enum AuditAction: string
     case UserEmailVerified = 'user.email_verified';
     case UserTokensRevoked = 'user.tokens_revoked';
     case UserPasswordResetSent = 'user.password_reset_sent';
+
+    // Zart beta regisztracios kapu (LAUNCH-2); a hasznalat alanya a meghivokod.
+    case InviteCodeCreated = 'invite_code.created';
+    case InviteCodeDisabled = 'invite_code.disabled';
+    case InviteCodeUsed = 'invite_code.used';
+    case RegistrationModeChanged = 'registration.mode_changed';
 }

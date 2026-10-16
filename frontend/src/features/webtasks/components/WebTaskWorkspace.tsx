@@ -1,4 +1,6 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
+import { userKeyOf } from '../../../shared/domain/lastTask'
+import { usePersistentState } from '../../../shared/hooks/usePersistentState'
 import { Badge, LevelBadge } from '../../../shared/ui/Badge'
 import { Button } from '../../../shared/ui/Button'
 import { cx } from '../../../shared/ui/cx'
@@ -9,6 +11,7 @@ import { Prose } from '../../../shared/ui/Prose'
 import { RubricItem } from '../../../shared/ui/RubricItem'
 import { CardTitle } from '../../../shared/ui/Text'
 import type { UnlockedTaskDetail, WebTaskInfo } from '../../../types'
+import { useAuth } from '../../auth/context'
 import { CodeEditor } from '../../workspace/components/CodeEditor'
 import { previewDocument, runWebChecks } from '../checks'
 
@@ -17,8 +20,18 @@ import { previewDocument, runWebChecks } from '../checks'
  * böngészőkeretben az előnézet, alatta az ellenőrzőlista. Minden a böngészőben
  * történik; az előnézet homokozóban fut, szkript nélkül.
  */
+function isFileDrafts(value: unknown): value is Record<string, string> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value) && Object.values(value).every((item) => typeof item === 'string')
+}
+
 export function WebTaskWorkspace({ task, info }: { task: UnlockedTaskDetail; info: WebTaskInfo }) {
-  const [files, setFiles] = useState<ReadonlyMap<string, string>>(() => new Map(info.files.map((file) => [file.name, file.content])))
+  const { user } = useAuth()
+  // A kód a böngészőben megmarad (felhasználónként és feladatonként), újratöltés után is.
+  const [stored, storeFiles] = usePersistentState<Record<string, string>>(`infotanar.practice.v1.${userKeyOf(user)}.web.${task.id}`, {}, isFileDrafts)
+  const [files, setFiles] = useState<ReadonlyMap<string, string>>(() => new Map(info.files.map((file) => [file.name, stored[file.name] ?? file.content])))
+  useEffect(() => {
+    storeFiles(Object.fromEntries(files))
+  }, [files, storeFiles])
   const [active, setActive] = useState(info.files[0]?.name ?? '')
   // Az előnézet és az ellenőrzés a mentett állapotból dolgozik, nem minden leütésre frissül.
   const [saved, setSaved] = useState(files)
@@ -31,6 +44,19 @@ export function WebTaskWorkspace({ task, info }: { task: UnlockedTaskDetail; inf
   const earned = results.reduce((sum, result) => sum + (result.state === 'ok' ? result.check.points : 0), 0)
   const total = info.checks.reduce((sum, check) => sum + check.points, 0)
   const dirty = files !== saved
+  // Mentés után a pontszám a gomb mellett is megjelenik (keskeny kijelzőn az ellenőrzőlista messze van).
+  const [justSaved, setJustSaved] = useState(false)
+
+  function save() {
+    setSaved(files)
+    setJustSaved(true)
+  }
+
+  function showPreview() {
+    const target = document.getElementById('web-elonezet')
+    target?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    target?.focus()
+  }
 
   return (
     <main className="mx-auto flex w-full max-w-work flex-wrap items-start gap-6 px-4 py-6 md:px-6">
@@ -105,16 +131,25 @@ export function WebTaskWorkspace({ task, info }: { task: UnlockedTaskDetail; inf
             )}
           </div>
           <div className="on-dark flex flex-wrap items-center gap-3 border-t border-code-line bg-code px-5 py-3">
-            <Button icon="play" onClick={() => setSaved(files)}>
+            <Button icon="play" onClick={save}>
               Mentés és előnézet
             </Button>
-            <span className="text-14 text-code-soft" aria-live="polite">
-              {dirty ? 'Vannak nem mentett módosításaid.' : 'Az előnézet a mentett kódodat mutatja.'}
+            <span className="text-14 text-code-soft" role="status" data-testid="web-save-status">
+              {dirty
+                ? 'Vannak nem mentett módosításaid.'
+                : justSaved
+                  ? `Mentve. Az ellenőrzés: ${pointsLabel(earned, total)}.`
+                  : 'Az előnézet a mentett kódodat mutatja.'}
             </span>
+            {justSaved && !dirty && (
+              <Button variant="dark" onClick={showPreview} className="lg:hidden">
+                Előnézet megnézése
+              </Button>
+            )}
           </div>
         </Panel>
 
-        <Panel pad="none" as="section" aria-label="Előnézet" className="overflow-hidden">
+        <Panel pad="none" as="section" aria-label="Előnézet" id="web-elonezet" tabIndex={-1} className="overflow-hidden">
           <div className="flex items-center gap-3 border-b border-line bg-headrow px-4 py-2.5">
             <span aria-hidden="true" className="flex gap-1.5">
               <span className="size-2.5 rounded-full bg-muted" />

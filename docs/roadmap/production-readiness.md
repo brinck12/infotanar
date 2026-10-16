@@ -8,6 +8,28 @@ Jelölések: **blokkoló** = nélküle nem indulhat a zárt béta; **fontos** = 
 
 ---
 
+## Állapot (2026-10-15)
+
+Az `fullstack/backend-platform` ágon elkészült és összefésülve (a teljes kapu zöld: API + rate-limit + e2e-mocked 431 teszt):
+- **Kapacitás:** OPS-4 párhuzamossági korlát és `deploy/judge0/`, fpm pool, readiness sorhossz; L07 üzenet.
+- **Láthatóság:** OPS-3 5xx riasztás, kliens-hiba napi összefoglaló, OPS-12 systemd keményítés, `check-config` bővítés (PRIV-5), mail márka (InfoTanár), nevesített limiterek (B02).
+- **Zárt béta:** LAUNCH-2 meghívókódok, várólista, admin oldal, `register` limiter (B03).
+- **Tartalom-kapu:** LAUNCH-3 `catalog:verify`, közzétételi őrök, `sample_solutions`, admin "Mintamegoldás" fül, seedelt megoldások.
+- **Megbízhatóság:** B01, B07, B10/B11, B04, B09, S01, PRIV-3, PRIV-4, PRIV-10 (audit események, jelszócsere-értesítő), frontend F01-F04, F06-F08, F10-F12, CH4-CH6, PRIV-7.
+- **Tesztek:** REL-1 (SQLite-on), REL-3, REL-5, REL-9, REL-10, PRIV-9 (`docs/privacy/ropa.md`).
+
+**Kész, de még nincs a `main`-ben:** a deploy-ág (`fullstack/ops-deploy-releases`: OPS-1, OPS-2, OPS-5, REL-7, REL-15) szándékosan nincs összefésülve, amíg a szerveren el nem készül az egyszeri átállás (`docs/runbooks/release-layout.md`) és a GitHub `production` Environment + `DEPLOY_KNOWN_HOSTS` secret.
+
+**2. kör (szintén az integrációs ágon):**
+- **SEO és CSP:** oldalankénti cím/meta (`RouteMeta`), `robots.txt` + `sitemap.xml` build-időben (`VITE_SITE_URL` kell a deploy buildhez), kényszerített CSP (`docs/runbooks/csp.md`). Hiányzik: `og-image.png`, track/lecke URL a sitemapben (artisan parancs kell), valódi 404, a Barion pixel böngészős próbája.
+- **B13:** semleges regisztrációs válasz (201 minden esetben, foglalt címnél tájékoztató levél), versenyhelyzet-kezelés.
+- **Runbookok:** `docs/runbooks/redis.md` (OPS-9), `docs/runbooks/uptime-monitor.md` (OPS-11); `app:check-config` figyelmeztet az adatbázis-meghajtókra.
+- **Frontend rések:** F05, F08, F09, F11, F14 (részben), F15/F17/F20 (részben), F18. Az API új mezői: `mode` (próbálkozás-összegző), `locked` (vizsgarészletek), `submitted_at`, `auto_submitted`, `mode` (eredmény); a frontend a `locked`-ot már használja.
+
+**Nyitva:** OPS-9 és OPS-11 tényleges beállítása a szerveren (a runbook kész); F10 egér/Tab/dupla kattintásos cellaszerkesztés, F16/F19/F21/F22; `auto_submitted`/`submitted_at` megjelenítése az eredményoldalon; `lock_reason` mező; a REL-1 versenytesztek MySQL-en még nem futottak (a `backend-mysql` CI job futtatja).
+
+---
+
 ## 1. Döntések (megerősítve)
 
 | Téma | Döntés |

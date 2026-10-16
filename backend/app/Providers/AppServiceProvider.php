@@ -12,6 +12,7 @@ use App\Models\ExamAttempt;
 use App\Models\ExamPart;
 use App\Models\Exercise;
 use App\Models\FileSubmission;
+use App\Models\InviteCode;
 use App\Models\Invoice;
 use App\Models\Lesson;
 use App\Models\Module;
@@ -25,6 +26,7 @@ use App\Services\Exams\NullExamResultRecalculator;
 use App\Services\FileTasks\CheckRegistry;
 use App\Support\Alerts\OperatorAlert;
 use App\Support\RateLimiting\ExecutionRateLimit;
+use App\Support\RateLimiting\WaitTime;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Database\Eloquent\Model;
@@ -69,6 +71,7 @@ final class AppServiceProvider extends ServiceProvider
         // Polimorf kapcsolatokban (pl. audit naplo) stabil alias, ne az osztalynev keruljon az adatbazisba.
         Relation::enforceMorphMap([
             'user' => User::class,
+            'invite_code' => InviteCode::class,
             'track' => Track::class,
             'module' => Module::class,
             'lesson' => Lesson::class,
@@ -84,7 +87,10 @@ final class AppServiceProvider extends ServiceProvider
             'file_submission' => FileSubmission::class,
         ]);
 
-        Password::defaults(static fn () => Password::min(8)->letters()->numbers());
+        // Elesben a kiszivargott jelszavak listaja (HIBP) ellen is ellenorzunk; teszt alatt nincs halozati hivas.
+        Password::defaults(fn () => $this->app->isProduction()
+            ? Password::min(8)->letters()->numbers()->uncompromised()
+            : Password::min(8)->letters()->numbers());
 
         Mail::extend('outbox', static fn () => new OutboxTransport(Config::string('mail.mailers.outbox.path')));
 
@@ -115,17 +121,35 @@ final class AppServiceProvider extends ServiceProvider
 
     private function configureRateLimiting(): void
     {
-        $tooMany = static fn (): JsonResponse => response()->json(['message' => __('auth.throttle')], 429);
+        // A Limit::response() masodik argumentuma a fejlecek (Retry-After): az uzenet kiirja a varakozasi idot.
+        $tooMany = static function (Request $request, array $headers = []): JsonResponse {
+            $retryAfter = $headers['Retry-After'] ?? null;
+
+            return response()->json(['message' => WaitTime::message('auth.throttle', $retryAfter)], 429, $headers);
+        };
         $emailAndIp = static fn (Request $request): string => $request->string('email')->lower()->append('|', (string) $request->ip())->toString();
 
         // Fiokonkent (e-mail + IP), hogy egy tamado ne zarhassa ki a tobbi felhasznalot.
-        RateLimiter::for('login', static fn (Request $request) => Limit::perMinute(5)
-            ->by($emailAndIp($request))
+        // Emellett IP-nkent is korlatos (elosztott, sok cimet probalgato tamadas, levelbomba ellen).
+        RateLimiter::for('login', static fn (Request $request): array => [
+            Limit::perMinute(5)->by('login:account:'.$emailAndIp($request))->response($tooMany),
+            Limit::perMinute(Config::integer('auth.throttle.login_ip_per_minute'))->by('login:ip:'.$request->ip())->response($tooMany),
+        ]);
+
+        // Regisztracio IP-nkent (B03): a fiok-letrehozas draga (jelszo-hash, level) es botoknak vonzo.
+        RateLimiter::for('register', static fn (Request $request) => Limit::perMinute(Config::integer('registration.rate.register_per_minute'))
+            ->by('register:'.$request->ip())
             ->response($tooMany));
 
-        RateLimiter::for('password-reset', static fn (Request $request) => Limit::perMinute(5)
-            ->by($emailAndIp($request))
+        // Varolista: barki hivhatja, ezert IP-nkent szuk.
+        RateLimiter::for('waitlist', static fn (Request $request) => Limit::perMinute(Config::integer('registration.rate.waitlist_per_minute'))
+            ->by('waitlist:'.$request->ip())
             ->response($tooMany));
+
+        RateLimiter::for('password-reset', static fn (Request $request): array => [
+            Limit::perMinute(5)->by('reset:account:'.$emailAndIp($request))->response($tooMany),
+            Limit::perMinute(Config::integer('auth.throttle.reset_ip_per_minute'))->by('reset:ip:'.$request->ip())->response($tooMany),
+        ]);
 
         $userOrIp = static fn (Request $request): string => $request->user() instanceof User
             ? 'user:'.$request->user()->id
@@ -177,6 +201,22 @@ final class AppServiceProvider extends ServiceProvider
         RateLimiter::for('admin-upload', static fn (Request $request) => Limit::perMinute(Config::integer('filetasks.rate.admin_upload_per_minute'))
             ->by($userOrIp($request))
             ->response($tooMany));
+
+        // Korabban nevtelen `throttle:N,M` volt (B02). Mindegyik sajat nevet kap, hogy a
+        // szamlalok ne osztozzanak: bejelentkezve fiokonkent, egyebkent IP-nkent szamol.
+        // A 429-et a bootstrap/app.php egyseges JSON-valasza adja, mint korabban.
+        $perMinute = static function (string $name, int $max) use ($userOrIp): void {
+            RateLimiter::for($name, static fn (Request $request) => Limit::perMinute($max)
+                ->by($name.':'.$userOrIp($request)));
+        };
+        $perMinute('health-ready', 30);
+        $perMinute('client-errors', 10);
+        $perMinute('lesson-complete', 30);
+        $perMinute('profile-update', 10);
+        $perMinute('billing-profile-update', 10);
+        $perMinute('invoice-download', 30);
+        $perMinute('admin-invoice-download', 30);
+        $perMinute('barion-webhook', 60);
 
         // Jelszot ellenorzo, visszafordithatatlan muveletek: a jelszo ne legyen talalgathato.
         RateLimiter::for('sensitive', static fn (Request $request) => Limit::perMinute(5)

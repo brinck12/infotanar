@@ -1,4 +1,5 @@
 import type { APIRequestContext, APIResponse } from '@playwright/test'
+import { recordEndpointHit } from '../support/endpointHits'
 import type {
   AdminUserRole,
   DataEnvelope,
@@ -87,6 +88,11 @@ export class ApiClient {
     return this.get('health')
   }
 
+  /** A frontend nem kezelt hibajanak bejelentese (naplozas, nincs tartalom a valaszban). */
+  reportClientError(payload: { message: string; url: string; stack?: string }): Promise<ApiResult<unknown>> {
+    return this.post('client-errors', payload)
+  }
+
   topics(): Promise<ApiResult<DataEnvelope<Topic[]>>> {
     return this.get('topics')
   }
@@ -108,7 +114,7 @@ export class ApiClient {
     return this.post('submissions', payload)
   }
 
-  register(payload: Partial<RegisterRequest>): Promise<ApiResult<DataEnvelope<User>>> {
+  register(payload: Partial<RegisterRequest>): Promise<ApiResult<MessageResponse>> {
     return this.post('auth/register', payload)
   }
 
@@ -231,6 +237,7 @@ export class ApiClient {
    * kapott teljes URL; a token (ha van) ilyenkor is megy.
    */
   async getBinary(path: string): Promise<BinaryResult> {
+    recordEndpointHit('GET', path)
     const response = await this.request.fetch(path, { method: 'GET', headers: this.authorization() })
     return { status: response.status(), ok: response.ok(), headers: response.headers(), body: await response.body() }
   }
@@ -240,6 +247,7 @@ export class ApiClient {
     path: string,
     options: { params?: Record<string, string>; data?: unknown; multipart?: Record<string, string | number | boolean | UploadFile> }
   ): Promise<ApiResult<T>> {
+    recordEndpointHit(method, path)
     return this.toResult<T>(await this.request.fetch(path, { method, headers: this.authorization(), ...options }))
   }
 

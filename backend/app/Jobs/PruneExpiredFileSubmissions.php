@@ -6,6 +6,8 @@ namespace App\Jobs;
 
 use App\Events\AccountDeleted;
 use App\Jobs\Concerns\AlertsOperatorOnFailure;
+use App\Listeners\PurgeAccessGrantsOnAccountDeletion;
+use App\Listeners\PurgeLearningProgressOnAccountDeletion;
 use App\Listeners\PurgeOralPracticeOnAccountDeletion;
 use App\Listeners\PurgeSubmittedFilesOnAccountDeletion;
 use App\Models\ExamAttempt;
@@ -43,7 +45,7 @@ final class PruneExpiredFileSubmissions implements ShouldBeUnique, ShouldQueue
 
         $cutoff = now()->subDays(max(1, Config::integer('filetasks.retention_days')));
 
-        $this->purge($files, FileSubmission::query()->practice()->where('created_at', '<', $cutoff));
+        $this->purge($files, FileSubmission::query()->prunable()->where('created_at', '<', $cutoff));
 
         ExamAttempt::query()
             ->where('created_at', '<', $cutoff)
@@ -59,13 +61,14 @@ final class PruneExpiredFileSubmissions implements ShouldBeUnique, ShouldQueue
     /** @param Builder<FileSubmission> $query */
     private function purge(PrivateFileStore $files, Builder $query): void
     {
+        // Chunkonkent torlunk id szerint: a "legjobb sikeres beadas" alkerdezes torles kozben nem valtozhat.
         $query->clone()->select(['id', 'path'])->chunkById(self::CHUNK, function (Collection $chunk) use ($files): void {
             foreach ($chunk as $submission) {
                 $files->deletePath(FileDisk::SubmissionFiles, $submission->path);
             }
-        });
 
-        $query->delete();
+            FileSubmission::query()->whereKey($chunk->modelKeys())->delete();
+        });
     }
 
     /** A hibas fiok nem allitja meg a tobbit; a hiba jelentesre kerul, es a kovetkezo futas ujraprobalja. */
@@ -73,7 +76,8 @@ final class PruneExpiredFileSubmissions implements ShouldBeUnique, ShouldQueue
     {
         User::onlyTrashed()
             ->where(static function (Builder $leftovers): void {
-                $leftovers->whereHas('fileSubmissions')->orWhereHas('examAttempts')->orWhereHas('oralPractices');
+                $leftovers->whereHas('fileSubmissions')->orWhereHas('examAttempts')->orWhereHas('oralPractices')
+                    ->orWhereHas('lessonCompletions')->orWhereHas('accessGrants');
             })
             ->chunkById(self::CHUNK, function (Collection $users): void {
                 foreach ($users as $user) {
@@ -81,6 +85,8 @@ final class PruneExpiredFileSubmissions implements ShouldBeUnique, ShouldQueue
                         $event = new AccountDeleted($user);
                         app(PurgeSubmittedFilesOnAccountDeletion::class)->handle($event);
                         app(PurgeOralPracticeOnAccountDeletion::class)->handle($event);
+                        app(PurgeLearningProgressOnAccountDeletion::class)->handle($event);
+                        app(PurgeAccessGrantsOnAccountDeletion::class)->handle($event);
                     } catch (Throwable $exception) {
                         report($exception);
                     }

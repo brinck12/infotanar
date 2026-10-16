@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Listeners;
 
 use App\Events\AccountDeleted;
+use App\Listeners\Concerns\GuardsAccountDeletion;
 use App\Models\ExamAttempt;
 use App\Models\FileSubmission;
 use App\Services\Files\FileDisk;
@@ -22,11 +23,18 @@ use Illuminate\Database\Eloquent\Collection;
  */
 final readonly class PurgeSubmittedFilesOnAccountDeletion
 {
+    use GuardsAccountDeletion;
+
     private const CHUNK = 200;
 
     public function __construct(private PrivateFileStore $files) {}
 
     public function handle(AccountDeleted $event): void
+    {
+        $this->guarded($event, fn () => $this->purge($event));
+    }
+
+    private function purge(AccountDeleted $event): void
     {
         $userId = $event->user->id;
 

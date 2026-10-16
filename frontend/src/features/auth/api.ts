@@ -14,7 +14,12 @@ export interface RegisterPayload {
   accept_terms: boolean
   terms_version: string
   privacy_version: string
+  /** Csak zárt béta (invite) módban kötelező: a szerver ellenőrzi és felhasználja. */
+  invite_code?: string
 }
+
+/** A regisztráció módja: nyitott, vagy csak meghívókóddal (zárt béta). */
+export type RegistrationMode = 'open' | 'invite'
 
 export interface ResetPasswordPayload {
   token: string
@@ -25,6 +30,17 @@ export interface ResetPasswordPayload {
 
 export const authKeys = {
   me: ['auth', 'me'] as const,
+  registration: ['auth', 'registration'] as const,
+}
+
+export async function registrationMode(signal?: AbortSignal): Promise<RegistrationMode> {
+  const { data } = await http.get<Envelope<{ mode?: unknown }>>('/registration', { signal })
+  return data.data.mode === 'invite' ? 'invite' : 'open'
+}
+
+/** A válasz mindig ugyanaz, akár szerepel már a cím, akár nem: nem derül ki belőle semmi. */
+export async function joinWaitlist(email: string): Promise<string> {
+  return (await http.post<Message>('/waitlist', { email })).data.message
 }
 
 export async function register(payload: RegisterPayload): Promise<AuthUser> {

@@ -44,6 +44,8 @@ export interface AdminExercise {
   difficulty: number
   allowed_languages: string[]
   starter_code: Record<string, string>
+  /** Nyelvenkenti mintamegoldas (csak az admin API adja ki). */
+  sample_solutions: Record<string, string>
   /** A fajtahoz tartozo adatok teljes alakban (a diaknak ki nem adott `raw_points`-szal egyutt). */
   spec: Record<string, unknown> | null
   comparison: OutputComparison | null
@@ -65,6 +67,7 @@ export interface AdminExercisePayload {
   difficulty?: number
   allowed_languages?: string[]
   starter_code?: Record<string, string>
+  sample_solutions?: Record<string, string>
   spec?: Record<string, unknown> | null
   comparison?: Record<string, unknown> | null
   is_published?: boolean

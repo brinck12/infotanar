@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom'
 import { onSessionExpired } from '../../shared/api/client'
 import { httpStatus } from '../../shared/api/errors'
 import { tokenStore } from '../../shared/api/tokenStore'
+import { clearUserStorage } from '../../shared/domain/userStorage'
 import * as authApi from './api'
 import { AuthContext, type AuthState } from './context'
 
@@ -96,6 +97,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       async logout() {
         // A szerver hibája (pl. már lejárt token) sem tarthatja bejelentkezve a klienst.
         await authApi.logout().catch(() => undefined)
+        if (user) clearUserStorage(user.id)
         await forgetSession()
       },
 

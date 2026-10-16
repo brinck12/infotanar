@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Listeners;
 
 use App\Events\AccountDeleted;
+use App\Listeners\Concerns\GuardsAccountDeletion;
 
 /**
  * A kezi hozzaferes indoklasa (pl. "osztondij, X iskola") szemelyes adat:
@@ -12,8 +13,12 @@ use App\Events\AccountDeleted;
  */
 final class PurgeAccessGrantsOnAccountDeletion
 {
+    use GuardsAccountDeletion;
+
     public function handle(AccountDeleted $event): void
     {
-        $event->user->accessGrants()->delete();
+        $this->guarded($event, static function () use ($event): void {
+            $event->user->accessGrants()->delete();
+        });
     }
 }

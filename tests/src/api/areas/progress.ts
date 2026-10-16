@@ -6,6 +6,7 @@
  */
 import type { APIRequestContext } from '@playwright/test'
 import type { ApiClient, ApiResult } from '../ApiClient'
+import { recordEndpointHit } from '../../support/endpointHits'
 import type { AccountExportPrivacy, DataEnvelope, ProgressReport, TaskStatusDetail } from '../types'
 
 export function progress(client: ApiClient): Promise<ApiResult<DataEnvelope<ProgressReport>>> {
@@ -37,6 +38,7 @@ export function accountExport(client: ApiClient): Promise<ApiResult<AccountExpor
  * ezert a nyers `request` kontextuson megy; a valasz statuszat adja vissza.
  */
 export async function deleteAccount(request: APIRequestContext, token: string, password: string): Promise<number> {
+  recordEndpointHit('DELETE', 'account')
   const response = await request.delete('account', { headers: { Authorization: `Bearer ${token}` }, data: { password } })
 
   return response.status()

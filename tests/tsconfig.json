@@ -20,5 +20,5 @@
     "skipLibCheck": true,
     "noEmit": true
   },
-  "include": ["playwright.config.ts", "config/**/*.ts", "src/**/*.ts", "specs/**/*.ts", "fixtures/**/*.ts"]
+  "include": ["playwright.config.ts", "config/**/*.ts", "src/**/*.ts", "specs/**/*.ts", "fixtures/**/*.ts", "scripts/**/*.ts"]
 }

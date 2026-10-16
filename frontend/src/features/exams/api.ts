@@ -23,6 +23,7 @@ export interface ExamPartInfo {
 
 export interface ExamAttemptSummary {
   id: number
+  mode?: ExamMode
   state: AttemptState
   score: number | null
   max_score: number
@@ -66,6 +67,8 @@ export interface ExamPartDetail extends ExamPartInfo {
 export interface ExamDetail extends Omit<ExamSummary, 'parts'> {
   parts: ExamPartDetail[]
   source_zip: ExamFile | null
+  /** A szerver szerint a tartalom zárolt (nincs hozzáférése a nézőnek). */
+  locked?: boolean
 }
 
 export interface PartSubmission {
@@ -100,12 +103,21 @@ export interface PartResult {
 export interface ExamResult {
   attempt_id: number
   exam: ExamSummary
+  mode?: ExamMode
+  submitted_at?: string | null
+  /** Az idő lejárta zárta le a próbálkozást. */
+  auto_submitted?: boolean
   /** Vizsgapont (az átváltás után, lefelé kerekítve). */
   score: number
   max_score: number
   pending_manual_points: number
   parts: PartResult[]
   review: Array<{ lesson_id: number; title: string; track: string }>
+}
+
+/** Az eredményoldal értesítője: miért kerültünk ide a futó vizsgáról. */
+export interface ResultNavigationState {
+  notice?: 'conflict'
 }
 
 export const examKeys = {
@@ -153,10 +165,12 @@ export async function uploadPartFile(
   partId: number,
   file: File,
   onProgress: (percent: number) => void,
+  signal?: AbortSignal,
 ): Promise<ExamAttempt> {
   const body = new FormData()
   body.append('file', file)
   const response = await http.post<Envelope<ExamAttempt>>(`/exam-attempts/${attemptId}/parts/${partId}/file`, body, {
+    signal,
     onUploadProgress: (event) => onProgress(event.total ? (event.loaded / event.total) * 100 : 0),
   })
   return response.data.data

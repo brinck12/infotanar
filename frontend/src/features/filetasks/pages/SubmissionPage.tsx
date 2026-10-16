@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
-import { useParams } from 'react-router-dom'
+import { useParams, useSearchParams } from 'react-router-dom'
 import { httpStatus } from '../../../shared/api/errors'
 import { Breadcrumb } from '../../../shared/ui/Breadcrumb'
 import { ButtonLink } from '../../../shared/ui/Button'
@@ -14,6 +14,11 @@ import { SubmissionResult } from '../components/SubmissionResult'
 /** Egy korábbi fájlbeadás értékelőlapja (pl. a vizsgaeredményből megnyitva). */
 export function SubmissionPage() {
   const id = Number(useParams<{ id: string }>().id)
+  const [params] = useSearchParams()
+  const examId = Number(params.get('vizsga'))
+  const attemptId = Number(params.get('proba'))
+  // A vizsgaeredményből nyitva visszaviszünk oda.
+  const fromExam = Number.isInteger(examId) && examId > 0 && Number.isInteger(attemptId) && attemptId > 0
   const submission = useQuery({ ...submissionQuery(id), enabled: Number.isInteger(id) && id > 0 })
 
   if (submission.isPending) return <PageLoader label="Értékelőlap betöltése…" />
@@ -35,9 +40,16 @@ export function SubmissionPage() {
       <Panel pad="xl" className="mt-6">
         <SubmissionResult submission={submission.data} />
       </Panel>
-      <ButtonLink to={`/feladatok/${submission.data.exercise_id}`} variant="secondary" className="mt-6">
-        Javított fájl feltöltése
-      </ButtonLink>
+      <div className="mt-6 flex flex-wrap gap-3">
+        {fromExam && (
+          <ButtonLink to={`/vizsgak/${examId}/eredmeny?proba=${attemptId}`} icon="chevron-left">
+            Vissza az eredményhez
+          </ButtonLink>
+        )}
+        <ButtonLink to={`/feladatok/${submission.data.exercise_id}`} variant="secondary">
+          Javított fájl feltöltése
+        </ButtonLink>
+      </div>
     </main>
   )
 }

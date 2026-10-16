@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Support\Config;
 
 use App\Services\Files\FileDisk;
+use Illuminate\Support\Env;
 use Illuminate\Support\Facades\Config;
 
 /**
@@ -28,8 +29,75 @@ final class ProductionConfigAudit
             ...$this->mail(),
             ...$this->billing(),
             ...$this->queue(),
+            ...$this->redis(),
             ...$this->fileStorage(),
+            ...$this->operations(),
+            ...$this->documentedKeys(),
         ]));
+    }
+
+    /**
+     * Uzemeltetesi alapok (OPS-3, OPS-11, OPS-12): arculat, naplozasi szint, a
+     * "database" meghajto (a sor, a cache es a munkamenet is az adatbazist terheli),
+     * futtato- es health-token, tokenlejarat.
+     *
+     * @return list<ConfigProblem|null>
+     */
+    private function operations(): array
+    {
+        $name = $this->text('app.name');
+        $database = array_filter([
+            'CACHE_STORE' => $this->text('cache.default'),
+            'QUEUE_CONNECTION' => $this->text('queue.default'),
+            'SESSION_DRIVER' => $this->text('session.driver'),
+        ], static fn (string $driver): bool => $driver === 'database');
+
+        return [
+            $name === '' || $name === 'Laravel'
+                ? new ConfigProblem('APP_NAME', 'Nincs megadva, vagy az alapértelmezett "Laravel": a levelek feladója és aláírása rossz nevet mutat.')
+                : null,
+            $this->text('logging.channels.daily.level') === 'debug'
+                ? new ConfigProblem('LOG_LEVEL', '"debug" szint mellett a napló gyorsan megtelik, és személyes adat is kerülhet bele; éles üzemben "warning" vagy "info" elég.')
+                : null,
+            ...array_map(
+                static fn (string $variable): ConfigProblem => new ConfigProblem($variable, 'Az adatbázis hajtja meg: terheli a fő adatbázist. Éles üzemben Redis ajánlott.'),
+                array_keys($database),
+            ),
+            $this->required('judge0.auth_token', 'JUDGE0_AUTH_TOKEN', 'Nélküle a kódfuttató védtelen, vagy a futtatás elutasítja a kéréseket.'),
+            Config::get('sanctum.expiration') === null
+                ? new ConfigProblem('SANCTUM_EXPIRATION', 'Nincs megadva: az elveszett bejelentkezési token soha nem jár le.')
+                : null,
+            $this->required('health.token', 'HEALTH_TOKEN', 'Nélküle a részletes állapotjelentés csak adminként érhető el, a külső figyelő nem tud belépni.'),
+        ];
+    }
+
+    /**
+     * A .env.example "Eles kornyezet" blokkjaban felsorolt kulcsok mindegyikenek
+     * szerepelnie kell a kornyezetben: a hianyzo kulcsrol kulonben csak a hasznalatakor derulne ki.
+     *
+     * @return list<ConfigProblem>
+     */
+    private function documentedKeys(): array
+    {
+        $path = base_path('.env.example');
+        $content = is_file($path) ? file_get_contents($path) : false;
+        $marker = '# Eles kornyezet';
+
+        if ($content === false || ! str_contains($content, $marker)) {
+            return [];
+        }
+
+        $block = substr($content, (int) strrpos($content, $marker));
+        preg_match_all('/^#\s+\*?\s*([A-Z][A-Z0-9_]+)=/m', $block, $matches);
+
+        $problems = [];
+        foreach (array_unique($matches[1]) as $key) {
+            if (Env::get($key) === null) {
+                $problems[] = new ConfigProblem($key, 'Hiányzik a környezetből, pedig a .env.example éles blokkja felsorolja.');
+            }
+        }
+
+        return $problems;
     }
 
     /**
@@ -134,6 +202,36 @@ final class ProductionConfigAudit
                 ? new ConfigProblem('QUEUE_CONNECTION', 'A "sync" sor a kérésen belül futtat mindent: a Barion callback kifuthat a határidejéből.')
                 : null,
         ];
+    }
+
+    /**
+     * OPS-9: eles terhelesnel a cache, a sor es a munkamenet Redisben van
+     * (docs/runbooks/redis.md); az adatbazis-alapu valtozat csak figyelmeztetes.
+     *
+     * @return list<ConfigProblem|null>
+     */
+    private function redis(): array
+    {
+        $onDatabase = [
+            'CACHE_STORE' => $this->text('cache.default'),
+            'QUEUE_CONNECTION' => $this->text('queue.default'),
+            'SESSION_DRIVER' => $this->text('session.driver'),
+        ];
+        $problems = [];
+
+        foreach ($onDatabase as $variable => $value) {
+            if ($value === 'database') {
+                $problems[] = new ConfigProblem($variable, 'Adatbázis-alapú: terhelés alatt a cache-zárak és a sor sorai versenyeznek a MySQL-lel. Éles környezetben "redis" kell (docs/runbooks/redis.md).');
+            }
+        }
+
+        $usesRedis = in_array('redis', $onDatabase, true);
+
+        if ($usesRedis && $this->text('database.redis.default.password') === '') {
+            $problems[] = new ConfigProblem('REDIS_PASSWORD', 'A Redis jelszó nélkül fut: a requirepass értékét kell megadni (docs/runbooks/redis.md).');
+        }
+
+        return $problems;
     }
 
     private function required(string $key, string $variable, string $consequence, bool $blocking = false): ?ConfigProblem

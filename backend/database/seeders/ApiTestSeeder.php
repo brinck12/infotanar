@@ -46,6 +46,11 @@ final class ApiTestSeeder extends Seeder
     /** 1x1 keppontos PNG, base64-ben. */
     private const PNG_1X1 = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==';
 
+    /** Mintamegoldas a fixture-feladatokhoz, amelyek a bemenetet kiirjak (a tesztesetek mind "x" -> "x"). */
+    private const ECHO_PYTHON = "print(input())\n";
+
+    private const ECHO_CSHARP = "using System;\n\nclass Program\n{\n    static void Main()\n    {\n        Console.WriteLine(Console.ReadLine());\n    }\n}\n";
+
     private Module $module;
 
     private int $position = 0;
@@ -73,6 +78,7 @@ final class ApiTestSeeder extends Seeder
             'difficulty' => 1,
             'allowed_languages' => ['python', 'csharp'],
             'starter_code' => ['python' => "print()\n"],
+            'sample_solutions' => ['python' => self::ECHO_PYTHON, 'csharp' => self::ECHO_CSHARP],
         ]);
         $main->testCases()->createMany([
             ['stdin' => "1\n", 'expected_stdout' => "1\n", 'is_hidden' => false, 'order' => 0],
@@ -87,6 +93,7 @@ final class ApiTestSeeder extends Seeder
             'difficulty' => 1,
             'allowed_languages' => ['python'],
             'starter_code' => ['python' => "print()\n"],
+            'sample_solutions' => ['python' => self::ECHO_PYTHON],
         ], published: false);
 
         // id 3 — csak C#-on oldhato meg: nyelv-validacios szcenariohoz.
@@ -95,6 +102,7 @@ final class ApiTestSeeder extends Seeder
             'difficulty' => 2,
             'allowed_languages' => ['csharp'],
             'starter_code' => ['csharp' => "// TODO\n"],
+            'sample_solutions' => ['csharp' => self::ECHO_CSHARP],
         ])->testCases()->create(['stdin' => "1\n", 'expected_stdout' => "1\n", 'is_hidden' => false, 'order' => 0]);
 
         // id 4 — emelt szint: szint-szures szcenariohoz.
@@ -103,6 +111,7 @@ final class ApiTestSeeder extends Seeder
             'difficulty' => 3,
             'allowed_languages' => ['python'],
             'starter_code' => ['python' => "print()\n"],
+            'sample_solutions' => ['python' => self::ECHO_PYTHON],
         ])->testCases()->create(['stdin' => "1\n", 'expected_stdout' => "1\n", 'is_hidden' => false, 'order' => 0]);
 
         // Freemium: az 1-2. lecke (id 1, 2) ingyenes, a 3-4. (id 3, 4) fizetos.
@@ -123,6 +132,26 @@ final class ApiTestSeeder extends Seeder
         // igy a regi azonositok, a temakor feladatszama es a freemium-kiosztas valtozatlan.
         $typed = $this->typedTasks($track);
         $this->exams($typed['sheet'], $typed['subtasks']);
+
+        // Utolso, hogy a korabbi azonositok ne csusszanak el: piszkozat track publikalt leckevel es feladattal.
+        $this->draftTrack();
+    }
+
+    /** Nem publikalt track, amelynek leckeje es feladata onmagaban publikalt: diaknak sehol sem lathato (B10). */
+    private function draftTrack(): void
+    {
+        $track = Track::create(['slug' => 'pw-piszkozat-track', 'title' => 'PW piszkozat track', 'position' => 9, 'is_published' => false]);
+        $this->module = Module::create(['track_id' => $track->id, 'slug' => 'pw-piszkozat-temakor', 'title' => 'PW piszkozat témakör', 'position' => 0]);
+
+        $exercise = $this->exercise('PW teszt: Piszkozat track feladata', [
+            'level' => 'kozep',
+            'difficulty' => 1,
+            'allowed_languages' => ['python'],
+            'starter_code' => ['python' => "print()\n"],
+            'sample_solutions' => ['python' => self::ECHO_PYTHON],
+        ]);
+        $exercise->lesson->forceFill(['is_free' => true])->save();
+        $exercise->testCases()->create(['stdin' => "1\n", 'expected_stdout' => "1\n", 'is_hidden' => false, 'order' => 0]);
     }
 
     /**
@@ -215,6 +244,8 @@ final class ApiTestSeeder extends Seeder
         $subtasks = $this->typedExercise('PW teszt: Részfeladatok', ExerciseKind::Code, free: true, attributes: [
             'allowed_languages' => ['python'],
             'starter_code' => ['python' => "print()\n"],
+            // Beolvassa az adatok.txt forrasfajlt (egy szam soronkent): darabszam es osszeg.
+            'sample_solutions' => ['python' => "with open('adatok.txt') as f:\n    szamok = [int(sor) for sor in f if sor.strip()]\nprint('1. feladat')\nprint(len(szamok))\nprint('2. feladat')\nprint(sum(szamok))\n"],
             'spec' => [
                 'subtasks' => [
                     ['number' => 1, 'label' => 'Darabszám', 'points' => 2],

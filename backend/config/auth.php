@@ -114,4 +114,14 @@ return [
 
     'password_timeout' => env('AUTH_PASSWORD_TIMEOUT', 10800),
 
+    /*
+    | Belepes es jelszo-visszaallitas: az e-mail+IP szerinti (5/perc) limit mellett IP-nkenti keret
+    | is van, hogy elosztott, sok fiokot probalgato tamadas vagy levelbomba se menjen at.
+    | Iskolai kozos IP mogott megfelelo felso keret kell, ezert allithato.
+    */
+    'throttle' => [
+        'login_ip_per_minute' => (int) env('AUTH_LOGIN_IP_PER_MINUTE', 20),
+        'reset_ip_per_minute' => (int) env('AUTH_RESET_IP_PER_MINUTE', 10),
+    ],
+
 ];
