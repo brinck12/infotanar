@@ -43,6 +43,8 @@ return [
     'export_conflict' => 'A következő fájlok már léteznek, semmi nem íródott (felülírás: --force):',
     'export_unwritable' => 'A(z) :path nem írható.',
     'export_lossy' => 'A(z) :path tartalma nem írható ki veszteség nélkül, semmi nem íródott.',
+    'export_collision' => 'Ütköző vagy üres feladat-slug (azonos cím egy leckében), semmi nem íródott. Nevezd át a feladatot:',
+    'export_stamps_lost' => 'Figyelem: a(z) :path fejléce nem olvasható, a reviewed_by/reviewed_at nem őrizhető meg.',
     'export_skipped' => 'Kihagyva (nem szerkesztős feladat, :kind): :path',
     'export_nothing' => 'Nincs exportálható tartalom (nincs track, vagy az --only szűrőre nincs találat).',
     'export_done' => ':count fájl kiírva ide: :root',

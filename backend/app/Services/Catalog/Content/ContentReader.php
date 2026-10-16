@@ -61,14 +61,14 @@ final class ContentReader
     /**
      * Egy meglévő lecke-mappa fejlécéből a felülvizsgálati jelölések (az export ezeket megőrzi).
      *
-     * @return array{by: ?string, at: ?string}
+     * @return array{by: ?string, at: ?string}|null null, ha a fejléc nem olvasható
      */
-    public function reviewStamps(string $lessonDir): array
+    public function reviewStamps(string $lessonDir): ?array
     {
         $this->problems = [];
         $lesson = $this->readLesson(rtrim($lessonDir, '/\\'), 'lesson');
 
-        return ['by' => $lesson?->reviewedBy, 'at' => $lesson?->reviewedAt];
+        return $lesson === null ? null : ['by' => $lesson->reviewedBy, 'at' => $lesson->reviewedAt];
     }
 
     private function hasProblems(): bool

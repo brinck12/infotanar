@@ -17,12 +17,19 @@ use Symfony\Component\Yaml\Yaml;
  * Mappanevek: track = slug, modul és lecke = `NN-slug`, ahol NN = position + 1 (a szerzői fixture-ök szerint 1-től; a testvérek közül a legnagyobb
  * sorszám jegyszámához igazítva, legalább 2 jegyű), feladat = `NN-<Str::slug(cím)>.yml`.
  * Csak szerkesztős (`code`, `sql`) feladatot ír; a többit kihagyja és jelzi (`skipped()`).
- * Ír előtt minden fájlról ellenőrzi, hogy a beolvasás szó szerint ugyanazt adja vissza.
+ * Ír előtt, memóriában minden fájlról ellenőrzi, hogy a beolvasás szó szerint ugyanazt adja vissza
+ * (YAML-adat, CR nélküli Markdown-törzs), és hogy a feladat-fájlnevek és slugok egyediek; hiba esetén semmi nem íródik.
  */
 final class ContentExporter
 {
     /** @var list<string> */
     private array $skipped = [];
+
+    /** @var list<string> */
+    private array $warnings = [];
+
+    /** @var list<string> */
+    private array $collisions = [];
 
     public function __construct(private readonly ContentReader $reader) {}
 
@@ -35,6 +42,8 @@ final class ContentExporter
     public function export(string $root, bool $force, array $only = []): array
     {
         $this->skipped = [];
+        $this->warnings = [];
+        $this->collisions = [];
         $root = rtrim($root, '/\\');
 
         $files = $this->collect($root, $force, $only);
@@ -58,6 +67,16 @@ final class ContentExporter
         }
 
         return array_keys($files);
+    }
+
+    /**
+     * Az utolsó `export()` figyelmeztetései (pl. nem megőrizhető felülvizsgálati jelölések).
+     *
+     * @return list<string>
+     */
+    public function warnings(): array
+    {
+        return $this->warnings;
     }
 
     /**
@@ -103,6 +122,10 @@ final class ContentExporter
             }
         }
 
+        if ($this->collisions !== []) {
+            throw new ContentExportException((string) __('catalog_import.export_collision'), array_values(array_unique($this->collisions)));
+        }
+
         return $files;
     }
 
@@ -137,6 +160,7 @@ final class ContentExporter
         $files = [$dir.'/lesson.md' => $this->lessonFile($root, $force, $dir, $lesson)];
 
         $exerciseWidth = $this->width($lesson->exercises->pluck('position')->all());
+        $seen = [];
         foreach ($lesson->exercises as $exercise) {
             $slug = Str::slug($exercise->title);
             if (! $exercise->kind->isEditorBased()) {
@@ -147,7 +171,17 @@ final class ContentExporter
 
                 continue;
             }
+            $label = $slugPath.'/'.$lesson->slug.' – '.$exercise->title;
             $rel = $dir.'/exercises/'.$this->numbered($exercise->position, $exerciseWidth, $slug).'.yml';
+            if ($slug === '' || isset($seen[$slug]) || isset($files[$rel])) {
+                $this->collisions[] = $label;
+                if (isset($seen[$slug])) {
+                    $this->collisions[] = $seen[$slug];
+                }
+
+                continue;
+            }
+            $seen[$slug] = $label;
             $files[$rel] = $this->yaml($rel, $this->exerciseData($exercise, $slug));
         }
 
@@ -156,9 +190,18 @@ final class ContentExporter
 
     private function lessonFile(string $root, bool $force, string $dir, Lesson $lesson): string
     {
+        if (str_contains((string) $lesson->content, chr(13))) {
+            throw new ContentExportException((string) __('catalog_import.export_lossy', ['path' => $dir.'/lesson.md']));
+        }
+
         $stamps = ['by' => null, 'at' => null];
         if ($force && is_file($root.'/'.$dir.'/lesson.md')) {
-            $stamps = $this->reader->reviewStamps($root.'/'.$dir);
+            $read = $this->reader->reviewStamps($root.'/'.$dir);
+            if ($read === null) {
+                $this->warnings[] = (string) __('catalog_import.export_stamps_lost', ['path' => $dir.'/lesson.md']);
+            } else {
+                $stamps = $read;
+            }
         }
 
         $header = $this->yaml($dir.'/lesson.md', [

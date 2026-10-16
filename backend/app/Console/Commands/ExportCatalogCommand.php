@@ -35,7 +35,7 @@ class ExportCatalogCommand extends Command
             return self::FAILURE;
         }
 
-        foreach ($exporter->skipped() as $notice) {
+        foreach ([...$exporter->warnings(), ...$exporter->skipped()] as $notice) {
             $this->line($notice);
         }
 

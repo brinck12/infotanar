@@ -624,4 +624,46 @@ test.describe('catalog:export @regression', () => {
     const check = dryRun(out)
     expect(check.status, check.stdout + check.stderr).toBe(0)
   })
+
+  test('a CR-t tartalmazo leckeszoveg hibaval all le, es semmit nem ir', () => {
+    expect(importLive(VALID).status).toBe(0)
+    tinkerJson("App\\Models\\Lesson::query()->where('slug', 'pw-import-lecke')->update(['content' => 'a' . chr(13) . chr(10) . 'b']); return true;")
+
+    const result = exportTo(out)
+
+    expect(result.status).toBe(1)
+    expect(result.stdout + result.stderr).toContain('nem írható ki veszteség nélkül')
+    expect(listFiles(out)).toEqual([])
+  })
+
+  test('ket azonos cimu feladat egy leckeben hibaval all le, es semmit nem ir', () => {
+    expect(importLive(VALID).status).toBe(0)
+    tinkerJson(`
+      $lesson = App\\Models\\Lesson::query()->where('slug', 'pw-import-lecke')->firstOrFail();
+      foreach ([5, 6] as $position) {
+        $lesson->exercises()->create(['title' => 'PW import dupla', 'kind' => 'code', 'allowed_languages' => ['python'], 'description' => 'x', 'level' => 'kozep', 'difficulty' => 1, 'position' => $position]);
+      }
+      return true;
+    `)
+
+    const result = exportTo(out)
+
+    expect(result.status).toBe(1)
+    expect(result.stdout + result.stderr).toContain('Ütköző')
+    expect(result.stdout + result.stderr).toContain('PW import dupla')
+    expect(listFiles(out)).toEqual([])
+  })
+
+  test('--force-szal a nem olvashato lesson.md-hez figyelmeztetes jar, a kilepesi kod 0', () => {
+    expect(importLive(VALID).status).toBe(0)
+    expect(exportTo(out).status).toBe(0)
+    const lesson = path.join(out, LESSON_DIR, 'lesson.md')
+    fs.writeFileSync(lesson, 'nincs fejlec\n')
+
+    const result = exportTo(out, ['--force'])
+
+    expect(result.status, result.stdout + result.stderr).toBe(0)
+    expect(result.stdout).toContain('nem őrizhető meg')
+    expect(fs.readFileSync(lesson, 'utf8').startsWith('---\n')).toBe(true)
+  })
 })
