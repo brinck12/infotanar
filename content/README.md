@@ -40,11 +40,13 @@ A leckeszövegben a Python és C# példát **közvetlenül egymás után** áll�
 
 Más jelölővel (pl. `py`, `cs`, `c#`) a blokk nem lesz fül.
 
+A tesztekben szereplő ékezetes szöveget mindig ellenőrizd valódi Judge0-n (`catalog:verify --drafts --negative`): a Mono `Console` kódolása a konténer nyelvi beállításától (locale) függ, ezért C#-ban az ékezetes kimenet a helyi futtatástól eltérhet.
+
 ## Munkafolyamat
 
 Minden parancs a `backend/` mappából fut.
 
-1. `php artisan catalog:import --dry-run`: beolvas és ellenőriz, nem ír az adatbázisba (a CI is ezt futtatja minden pushnál).
+1. `php artisan catalog:import --dry-run`: beolvas és ellenőriz, nem ír az adatbázisba (a CI is ezt futtatja minden pushnál). Ellenőrzi a mezőket, a nyelveket, a `constraints` szabályait (ugyanazzal a logikával, mint az admin űrlap), és azt, hogy az `sql` fajtájú feladat egyetlen nyelve az `sql` (és a csak `sql` nyelvű feladat fajtája `sql`).
 2. `php artisan catalog:import`: betölti a tartalmat (a hiányzó adatot létrehozza, a változást frissíti; a `--only=<track>[/<modul>[/<lecke>]]` szűkít).
 3. `php artisan catalog:verify --drafts --negative`: a mintamegoldásokat valódi Judge0-n futtatja, a `--negative` a hibás megoldásoknak a bukását is ellenőrzi.
 4. Ha minden zöld és átnézted: `published: true`, majd újra `catalog:import`.
