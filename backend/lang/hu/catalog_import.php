@@ -28,4 +28,12 @@ return [
     'problems_header' => ':count hiba található, semmi nem íródott.',
     'summary' => ':lessons új lecke, :exercises új feladat',
     'body_length' => ':path: törzs: :length karakter',
+    'kind_track' => 'track',
+    'kind_module' => 'modul',
+    'kind_lesson' => 'lecke',
+    'kind_exercise' => 'feladat',
+    'plan_create' => '+ új :kind :path',
+    'plan_update' => '~ módosít :kind :path (:fields)',
+    'plan_unchanged' => '= változatlan :kind :path',
+    'plan_unpublish' => '- elrejt :kind :path (nem publikált lesz)',
 ];

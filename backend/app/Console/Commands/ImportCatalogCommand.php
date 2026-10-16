@@ -4,12 +4,14 @@ declare(strict_types=1);
 
 namespace App\Console\Commands;
 
+use App\Services\Catalog\Content\ContentPlanner;
 use App\Services\Catalog\Content\ContentProblem;
 use App\Services\Catalog\Content\ContentReader;
 use App\Services\Catalog\Content\ContentSet;
 use App\Services\Catalog\Content\ContentValidator;
 use App\Services\Catalog\Content\LessonNode;
 use App\Services\Catalog\Content\ModuleNode;
+use App\Services\Catalog\Content\PlanEntry;
 use App\Services\Catalog\Content\TrackNode;
 use Illuminate\Console\Command;
 
@@ -22,7 +24,7 @@ class ImportCatalogCommand extends Command
 
     protected $description = 'A tartalmi fájlok (Markdown/YAML) beolvasása és ellenőrzése a katalógushoz';
 
-    public function handle(ContentReader $reader, ContentValidator $validator): int
+    public function handle(ContentReader $reader, ContentValidator $validator, ContentPlanner $planner): int
     {
         if (! $this->option('dry-run')) {
             $this->error((string) __('catalog_import.live_not_available'));
@@ -46,14 +48,23 @@ class ImportCatalogCommand extends Command
             return self::FAILURE;
         }
 
-        $lessons = $this->lessons($set);
-        $exercises = array_sum(array_map(static fn (LessonNode $lesson): int => count($lesson->exercises), $lessons));
+        $plan = $planner->plan($set, $only);
 
-        $this->info((string) __('catalog_import.summary', ['lessons' => count($lessons), 'exercises' => $exercises]));
-        foreach ($lessons as $lesson) {
+        $this->info((string) __('catalog_import.summary', [
+            'lessons' => $plan->count('lesson', PlanEntry::CREATE),
+            'exercises' => $plan->count('exercise', PlanEntry::CREATE),
+        ]));
+        foreach ($this->lessons($set) as $lesson) {
             $this->line((string) __('catalog_import.body_length', [
                 'path' => dirname($lesson->path),
                 'length' => mb_strlen($lesson->content),
+            ]));
+        }
+        foreach ([...$plan->entries, ...$plan->unpublish] as $entry) {
+            $this->line((string) __('catalog_import.plan_'.$entry->action, [
+                'kind' => __('catalog_import.kind_'.$entry->kind),
+                'path' => $entry->path,
+                'fields' => implode(', ', $entry->changedFields),
             ]));
         }
 
