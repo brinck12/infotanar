@@ -22,6 +22,7 @@ use App\Services\Catalog\Content\ModuleNode;
 use App\Services\Catalog\Content\PlanEntry;
 use App\Services\Catalog\Content\TrackNode;
 use Illuminate\Console\Command;
+use Throwable;
 
 class ImportCatalogCommand extends Command
 {
@@ -105,6 +106,10 @@ class ImportCatalogCommand extends Command
         try {
             $summary = $importer->apply($set, $plan, $actor);
         } catch (DomainException $e) {
+            $this->error((string) __('catalog_import.import_failed', ['message' => $e->getMessage()]));
+
+            return self::FAILURE;
+        } catch (Throwable $e) {
             $this->error((string) __('catalog_import.import_failed', ['message' => $e->getMessage()]));
 
             return self::FAILURE;

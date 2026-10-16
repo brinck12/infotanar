@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace App\Services\Catalog\Content;
 
+use App\Services\Constraints\ConstraintSet;
 use Illuminate\Support\Str;
+use InvalidArgumentException;
 
 /**
  * A beolvasott tartalmi fa szabályellenőrzése. Az értékhatárok megegyeznek az admin űrlapéval
@@ -170,11 +172,59 @@ final class ContentValidator
         }
 
         $allowed = $this->checkLanguages($file, $a);
+        $this->checkKindLanguages($file, $a, $allowed);
+        $this->checkConstraints($file, $a);
         $this->checkCodeMap($file, $a, 'starter_code', $allowed, self::STARTER_MAX);
         $this->checkCodeMap($file, $a, 'sample_solutions', $allowed, self::SOLUTION_MAX);
 
         if ($exercise->testCases === []) {
             $this->add($file, 'no_tests');
+        }
+    }
+
+    /**
+     * Az admin űrlap szabálya: SQL feladat egyetlen nyelve az SQL; a csak SQL-t engedő feladat fajtája pedig `sql`.
+     *
+     * @param  array<string, mixed>  $attributes
+     * @param  list<string>  $allowed
+     */
+    private function checkKindLanguages(string $file, array $attributes, array $allowed): void
+    {
+        $kind = $attributes['kind'] ?? null;
+        $rawLanguages = $attributes['allowed_languages'] ?? null;
+        if (! in_array($kind, self::KINDS, true) || ! is_array($rawLanguages) || count($allowed) !== count($rawLanguages)) {
+            return;
+        }
+
+        $onlySql = $allowed === ['sql'];
+        if ($kind === 'sql' && ! $onlySql) {
+            $this->add($file, 'sql_languages');
+        } elseif ($kind === 'code' && $onlySql) {
+            $this->add($file, 'code_sql_only');
+        }
+    }
+
+    /**
+     * Az admin űrlap szabálya (`ValidConstraintSet`): ugyanaz a `ConstraintSet::fromArray` ellenőrzés.
+     *
+     * @param  array<string, mixed>  $attributes
+     */
+    private function checkConstraints(string $file, array $attributes): void
+    {
+        $constraints = $attributes['constraints'] ?? null;
+        if ($constraints === null) {
+            return;
+        }
+        if (! is_array($constraints)) {
+            $this->add($file, 'constraints_invalid', ['reason' => (string) __('constraints.invalid_shape')]);
+
+            return;
+        }
+
+        try {
+            ConstraintSet::fromArray($constraints);
+        } catch (InvalidArgumentException $e) {
+            $this->add($file, 'constraints_invalid', ['reason' => $e->getMessage()]);
         }
     }
 

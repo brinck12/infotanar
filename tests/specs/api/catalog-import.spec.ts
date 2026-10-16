@@ -273,6 +273,49 @@ test.describe('catalog:import --dry-run @regression', () => {
     expect(result.stdout + result.stderr).toContain('nincs találat')
   })
 
+  test('ervenytelen constraints a fajlt es a constraints mezot nevezi meg', () => {
+    withTmpCopy(
+      (root) => {
+        editSqlExercise(root, (text) => text.replace('sql_order_sensitive: false', 'sql_order_sensitive: false\nconstraints:\n  ismeretlen_kulcs: [x]'))
+      },
+      (root) => {
+        const result = dryRun(root)
+        const output = result.stdout + result.stderr
+
+        expect(result.status, output).toBe(1)
+        expect(output).toContain(`${LESSON_DIR}/exercises/02-pw-import-lekerdezes.yml`)
+        expect(output).toContain('constraints')
+      },
+    )
+  })
+
+  test('az sql fajta csak az [sql] nyelvvel ervenyes, es forditva', () => {
+    withTmpCopy(
+      (root) => {
+        editSqlExercise(root, (text) => text.replace('allowed_languages: [sql]', 'allowed_languages: [python]').replace('  sql: SELECT 1;', '  python: print(1)'))
+      },
+      (root) => {
+        const result = dryRun(root)
+
+        expect(result.status, result.stdout + result.stderr).toBe(1)
+        expect(result.stdout + result.stderr).toContain('02-pw-import-lekerdezes.yml')
+        expect(result.stdout + result.stderr).toContain('egyetlen eleme az „sql”')
+      },
+    )
+
+    withTmpCopy(
+      (root) => {
+        editSqlExercise(root, (text) => text.replace('kind: sql', 'kind: code'))
+      },
+      (root) => {
+        const result = dryRun(root)
+
+        expect(result.status, result.stdout + result.stderr).toBe(1)
+        expect(result.stdout + result.stderr).toContain('fajtája „sql” kell legyen')
+      },
+    )
+  })
+
   test('a terv lekerdezese utan semmi nem valtozik az adatbazisban', () => {
     seedFrom(VALID)
     const before = tinkerJson(`return App\\Models\\Lesson::query()->where('slug', 'pw-import-lecke')->value('updated_at');`)
@@ -370,6 +413,24 @@ test.describe('catalog:import eles import @regression', () => {
 
     expect(result.status).toBe(1)
     expect(snapshot()).toEqual(EMPTY_STATE)
+  })
+
+  test('nem domain kivetel eseten magyar hibaval all le, es semmi nem irodik', () => {
+    tinkerJson(`
+      DB::unprepared("CREATE TRIGGER pw_import_boom BEFORE INSERT ON exercises BEGIN SELECT RAISE(ABORT, 'pw-import boom'); END;");
+      return true;
+    `)
+    try {
+      const result = importLive(VALID)
+      const output = result.stdout + result.stderr
+
+      expect(result.status, output).toBe(1)
+      expect(output).toContain('Az import elutasítva, semmi nem íródott')
+      expect(output).toContain('pw-import boom')
+      expect(snapshot()).toEqual(EMPTY_STATE)
+    } finally {
+      tinkerJson('DB::unprepared("DROP TRIGGER IF EXISTS pw_import_boom"); return true;')
+    }
   })
 
   test('nyilvanos teszteset nelkuli, publikalt feladat az egesz importot elutasitja', () => {
