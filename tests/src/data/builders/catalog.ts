@@ -81,8 +81,10 @@ export function toTrackSummary(track: TrackDetail): TrackSummary {
   return { id, slug, title, description, module_count: modules.length, lesson_count: lessonCount, free_lesson_count: lessonCount, progress: null }
 }
 
+const DEFAULT_LESSON_CONTENT = '## Jegyzet\n\nA lecke rövid összefoglalója.'
+
 /** A lecke oldala az ag szerkezetebol, ahogy a vendeg latja; `undefined`, ha nincs ilyen lecke. */
-export function toLessonDetail(track: TrackDetail, lessonSlug: string): LessonDetail | undefined {
+export function toLessonDetail(track: TrackDetail, lessonSlug: string, content = DEFAULT_LESSON_CONTENT): LessonDetail | undefined {
   const ordered = track.modules.flatMap((module) => module.lessons.map((lesson) => ({ module, lesson })))
   const index = ordered.findIndex(({ lesson }) => lesson.slug === lessonSlug)
   const found = ordered[index]
@@ -104,6 +106,6 @@ export function toLessonDetail(track: TrackDetail, lessonSlug: string): LessonDe
     previous: link(ordered[index - 1]),
     next: link(ordered[index + 1]),
     locked: false,
-    content: '## Jegyzet\n\nA lecke rövid összefoglalója.',
+    content,
   }
 }
