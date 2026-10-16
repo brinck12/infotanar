@@ -43,7 +43,7 @@ content/catalog/
 ```
 
 - A **slug** a név ASCII, kisbetűs, kötőjeles változata (`alpha_dash:ascii`, mint az admin űrlapon). A mappa sorszám-előtagja (`01-`) csak rendezést segít; a **sorrendet a fejléc `position` mezője** adja, nem a mappanév.
-- Egy lecke azonosítója az **útvonal** (`track/modul/lecke`), egy feladaté az útvonal + a fájl slugja. Az import ezzel egyezteti az adatbázis soraival (a `lessons` táblán már van egyedi kulcs `(module_id, slug)`).
+- Egy lecke azonosítója az **útvonal** (`track/modul/lecke`; a `lessons` táblán van egyedi kulcs `(module_id, slug)`). Az `exercises` táblának **nincs slug oszlopa** (és új migrációt nem adunk), ezért egy feladat azonosítója az adatbázisban `(lesson_id, title)`: az import a feladat `title`-jéből képzett `Str::slug` értéket egyezteti (ahogy a `CatalogSeeder` is). A fájl `slug` mezője ellenőrzés: egyeznie kell a `title` slugjával. Egy feladat átnevezése tehát új feladatot jelent (a régi nem publikált lesz).
 
 ### 4.1 `_track.yml` és `_module.yml`
 
@@ -150,7 +150,7 @@ Az adatbázis jelenlegi tartalmát a 4. fejezet szerinti fájlokba írja. Első 
 
 ### 5.3 `php artisan catalog:verify` (meglévő, bővítés)
 
-- A kapu eddig a **publikált** feladatokat futtatta; új kapcsoló: `--source=files` az importálandó fájlok feladataira is (piszkozat is), publikálás előtt.
+- A kapu eddig a **publikált** feladatokat futtatta; új kapcsoló: `--drafts` a nem publikált (piszkozat) feladatokra is. Munkamenet: `catalog:import` (piszkozatként) → `catalog:verify --track=… --drafts` → `published: true` és újraimport. Külön fájl-alapú ellenőrző nincs.
 - Bővítés: **minden `allowed_languages`-beli nyelvhez kell mintamegoldás**, különben hiba (ma elég egy engedélyezett nyelven).
 - Új: `catalog:verify --negative`: a mintamegoldás **elrontott változata** (üres program) nem mehet át minden teszten. Ez egy tesztkészlet-gyengeség ellen véd (túl megengedő elvárt kimenet). Egyszerű: üres kód futtatása, és ha az átmegy, a feladat hibás.
 
