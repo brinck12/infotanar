@@ -455,3 +455,173 @@ test.describe('catalog:import eles import @regression', () => {
     expect(metadata).toEqual({ created: 5, updated: 0, unpublished: 0 })
   })
 })
+
+function exportTo(root: string, extra: string[] = []): ReturnType<typeof artisanResult> {
+  return artisanResult(['catalog:export', `--path=${root}`, '--only=pw-import-track', ...extra])
+}
+
+/** Egy kiexportalt fa fajljai (relativ utvonal, `/` elvalasztoval), rendezve. */
+function listFiles(root: string): string[] {
+  return fs
+    .readdirSync(root, { recursive: true, encoding: 'utf8' })
+    .map((entry) => entry.replaceAll(path.sep, '/'))
+    .filter((entry) => fs.statSync(path.join(root, entry)).isFile())
+    .sort()
+}
+
+/** A pw-import- tartalom nyers allapota: a koruton atmeno egyezes ellenorzesehez. */
+function contentState(): unknown {
+  return tinkerJson(`
+    $lesson = App\\Models\\Lesson::query()->where('slug', 'pw-import-lecke')->firstOrFail();
+    return [
+      $lesson->content,
+      $lesson->is_free,
+      $lesson->exercises()->orderBy('position')->get()->map(fn ($e) => [
+        $e->title, $e->position, $e->kind->value, $e->description, $e->starter_code, $e->sample_solutions,
+        $e->allowed_languages, $e->sql_order_sensitive, $e->time_limit_ms,
+        $e->testCases()->orderBy('order')->get()->map(fn ($c) => [$c->stdin, $c->expected_stdout, $c->is_hidden])->all(),
+      ])->all(),
+    ];
+  `)
+}
+
+test.describe('catalog:export @regression', () => {
+  let out: string
+
+  test.beforeEach(() => {
+    cleanup()
+    out = fs.mkdtempSync(path.join(os.tmpdir(), 'pw-import-export-'))
+  })
+
+  test.afterEach(() => {
+    fs.rmSync(out, { recursive: true, force: true })
+    cleanup()
+  })
+
+  test('korut: import -> export -> ujraimport nulla valtozas, a fajlok ervenyesek', () => {
+    expect(importLive(VALID).status).toBe(0)
+    const before = snapshot()
+
+    const exported = exportTo(out)
+    expect(exported.status, exported.stdout + exported.stderr).toBe(0)
+    expect(listFiles(out)).toEqual([
+      'pw-import-track/01-pw-import-modul/01-pw-import-lecke/exercises/01-pw-import-osszeg.yml',
+      'pw-import-track/01-pw-import-modul/01-pw-import-lecke/exercises/02-pw-import-lekerdezes.yml',
+      'pw-import-track/01-pw-import-modul/01-pw-import-lecke/lesson.md',
+      'pw-import-track/01-pw-import-modul/_module.yml',
+      'pw-import-track/_track.yml',
+    ])
+
+    const check = dryRun(out)
+    expect(check.status, check.stdout + check.stderr).toBe(0)
+
+    const again = importLive(out)
+    expect(again.status, again.stdout + again.stderr).toBe(0)
+    expect(again.stdout).toContain('0 létrehozva, 0 módosítva, 0 elrejtve')
+    expect(snapshot()).toEqual(before)
+  })
+
+  test('a lesson.md torzse szo szerint egyezik a forrassal', () => {
+    expect(importLive(VALID).status).toBe(0)
+    expect(exportTo(out).status).toBe(0)
+
+    const original = fs.readFileSync(path.join(VALID, LESSON_DIR, 'lesson.md'), 'utf8')
+    const exported = fs.readFileSync(path.join(out, LESSON_DIR, 'lesson.md'), 'utf8')
+    expect(exported.slice(exported.indexOf('\n---\n', 3))).toBe(original.slice(original.indexOf('\n---\n', 3)))
+  })
+
+  test('nehez szovegek (ekezet, emoji, sorveg nelkuli stdin, --- sor, szokoz, CR) vesztesegmentesen korbeernek', () => {
+    withTmpCopy(
+      (root) => {
+        const lesson = path.join(root, LESSON_DIR, 'lesson.md')
+        fs.writeFileSync(lesson, fs.readFileSync(lesson, 'utf8') + '\nEmoji: 😀 ékezet\n---\nutolsó sor záró sortörés nélkül')
+        const sum = path.join(root, LESSON_DIR, 'exercises', '01-pw-import-osszeg.yml')
+        const edited = fs
+          .readFileSync(sum, 'utf8')
+          .replace(/description: \|\n.*\n/, 'description: "Első sor 😀  \\n---\\n  behúzott sor  \\n\\nutolsó"\n')
+          .replace(
+            /tests:\n[\s\S]*$/,
+            'tests:\n  - { stdin: "3", expected: "9", hidden: false }\n  - { stdin: "---\\n  szóköz  \\n", expected: "a\\r\\nb\\rc\\n\\n", hidden: true }\n  - { stdin: "", expected: "😀\\n", hidden: false }\n',
+          )
+        fs.writeFileSync(sum, edited)
+      },
+      (root) => {
+        expect(importLive(root).status).toBe(0)
+        const state = contentState()
+
+        expect(exportTo(out).status).toBe(0)
+        cleanup()
+        const again = importLive(out)
+        expect(again.status, again.stdout + again.stderr).toBe(0)
+
+        expect(contentState()).toEqual(state)
+      },
+    )
+  })
+
+  test('meglevo fajl --force nelkul hibaval all le, es semmit nem ir', () => {
+    expect(importLive(VALID).status).toBe(0)
+    const moduleFile = path.join(out, MODULE_DIR, '_module.yml')
+    fs.mkdirSync(path.dirname(moduleFile), { recursive: true })
+    fs.writeFileSync(moduleFile, 'kezi: tartalom\n')
+
+    const result = exportTo(out)
+
+    expect(result.status).toBe(1)
+    expect(result.stdout + result.stderr).toContain('már léteznek')
+    expect(result.stdout + result.stderr).toContain(`${MODULE_DIR}/_module.yml`)
+    expect(listFiles(out)).toEqual([`${MODULE_DIR}/_module.yml`])
+    expect(fs.readFileSync(moduleFile, 'utf8')).toBe('kezi: tartalom\n')
+  })
+
+  test('--force felulirja a fajlt, de a lesson.md reviewed_by/reviewed_at mezoit megorzi', () => {
+    expect(importLive(VALID).status).toBe(0)
+    expect(exportTo(out).status).toBe(0)
+
+    const lesson = path.join(out, LESSON_DIR, 'lesson.md')
+    const stamped = fs
+      .readFileSync(lesson, 'utf8')
+      .replace('reviewed_by:\n', 'reviewed_by: Teszt Elek\n')
+      .replace('reviewed_at:\n', 'reviewed_at: 2026-10-01\n')
+    expect(stamped).toContain('reviewed_by: Teszt Elek')
+    fs.writeFileSync(lesson, stamped)
+    fs.writeFileSync(path.join(out, MODULE_DIR, '_module.yml'), 'kezi: tartalom\n')
+
+    const result = exportTo(out, ['--force'])
+
+    expect(result.status, result.stdout + result.stderr).toBe(0)
+    expect(fs.readFileSync(path.join(out, MODULE_DIR, '_module.yml'), 'utf8')).toContain('slug: pw-import-modul')
+    const rewritten = fs.readFileSync(lesson, 'utf8')
+    expect(rewritten).toMatch(/reviewed_by: '?Teszt Elek'?$/m)
+    expect(rewritten).toMatch(/reviewed_at: '?2026-10-01'?/)
+    const check = dryRun(out)
+    expect(check.status, check.stdout + check.stderr).toBe(0)
+  })
+
+  test('a nem szerkesztos feladatot kihagyja, egysoros jelzessel', () => {
+    expect(importLive(VALID).status).toBe(0)
+    tinkerJson(`
+      $lesson = App\\Models\\Lesson::query()->where('slug', 'pw-import-lecke')->firstOrFail();
+      $lesson->exercises()->create(['title' => 'PW import tablazat', 'kind' => 'sheet_upload', 'allowed_languages' => [], 'description' => 'x', 'level' => 'kozep', 'difficulty' => 1, 'position' => 5]);
+      return true;
+    `)
+
+    const result = exportTo(out)
+
+    expect(result.status, result.stdout + result.stderr).toBe(0)
+    expect(result.stdout).toContain('Kihagyva')
+    expect(result.stdout).toContain('pw-import-tablazat')
+    expect(listFiles(out).filter((file) => file.includes('tablazat'))).toEqual([])
+  })
+
+  test('a 100. sorszam harom jegyu mappanevet kap, es a fa ervenyes marad', () => {
+    expect(importLive(VALID).status).toBe(0)
+    tinkerJson("App\\Models\\Lesson::query()->where('slug', 'pw-import-lecke')->update(['position' => 99]); return true;")
+
+    expect(exportTo(out).status).toBe(0)
+
+    expect(listFiles(out)).toContain('pw-import-track/01-pw-import-modul/100-pw-import-lecke/lesson.md')
+    const check = dryRun(out)
+    expect(check.status, check.stdout + check.stderr).toBe(0)
+  })
+})

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Console\Commands;
 
 use App\Actions\Audit\RecordAuditEvent;
+use App\Console\Commands\Concerns\ResolvesContentPath;
 use App\Enums\AuditAction;
 use App\Enums\Role;
 use App\Exceptions\DomainException;
@@ -24,6 +25,8 @@ use Illuminate\Console\Command;
 
 class ImportCatalogCommand extends Command
 {
+    use ResolvesContentPath;
+
     protected $signature = 'catalog:import
         {--dry-run : Csak beolvas és ellenőriz, nem ír az adatbázisba}
         {--path=content/catalog : A tartalmi könyvtár (a repó gyökeréhez képest, vagy abszolút)}
@@ -140,26 +143,6 @@ class ImportCatalogCommand extends Command
         }
 
         return $count;
-    }
-
-    private function resolveRoot(): string
-    {
-        $path = (string) $this->option('path');
-        if (preg_match('#^([A-Za-z]:[\\\\/]|[\\\\/])#', $path) === 1) {
-            return $path;
-        }
-
-        return base_path('..').'/'.$path;
-    }
-
-    /**
-     * @return list<string>
-     */
-    private function only(): array
-    {
-        $only = trim((string) $this->option('only'), '/');
-
-        return $only === '' ? [] : explode('/', $only);
     }
 
     /**

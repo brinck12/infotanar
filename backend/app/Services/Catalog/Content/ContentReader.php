@@ -58,6 +58,19 @@ final class ContentReader
         return new ContentSet($tracks, $this->problems);
     }
 
+    /**
+     * Egy meglévő lecke-mappa fejlécéből a felülvizsgálati jelölések (az export ezeket megőrzi).
+     *
+     * @return array{by: ?string, at: ?string}
+     */
+    public function reviewStamps(string $lessonDir): array
+    {
+        $this->problems = [];
+        $lesson = $this->readLesson(rtrim($lessonDir, '/\\'), 'lesson');
+
+        return ['by' => $lesson?->reviewedBy, 'at' => $lesson?->reviewedAt];
+    }
+
     private function hasProblems(): bool
     {
         return $this->problems !== [];
