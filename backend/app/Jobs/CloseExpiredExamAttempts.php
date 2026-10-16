@@ -109,7 +109,8 @@ final class CloseExpiredExamAttempts implements ShouldBeUnique, ShouldQueue
     {
         $key = self::retryKey($attempt->id);
         $count = Cache::get($key);
-        $count = (is_int($count) ? $count : 0) + 1;
+        // A Redis cache a szamokat szamjegy-szovegkent adja vissza, ezert is_numeric, nem is_int.
+        $count = (is_numeric($count) ? (int) $count : 0) + 1;
         Cache::forever($key, $count);
 
         if ($count >= self::MAX_FAILURES) {

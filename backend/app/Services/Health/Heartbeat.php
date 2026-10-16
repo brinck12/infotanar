@@ -28,6 +28,7 @@ final class Heartbeat
     {
         $last = Cache::get($key);
 
-        return is_int($last) ? max(0, now()->getTimestamp() - $last) : null;
+        // A Redis cache a szamokat szamjegy-szovegkent adja vissza, ezert is_numeric, nem is_int.
+        return is_numeric($last) ? max(0, now()->getTimestamp() - (int) $last) : null;
     }
 }
