@@ -17,7 +17,7 @@ function dryRun(root: string): ReturnType<typeof artisanResult> {
 
 /** A torzs hossza: a fejlec lezaro `---` sora utani szoveg, szo szerint. */
 function bodyLength(markdown: string): number {
-  const normalized = markdown.replace(/^﻿/, '').replace(/\r\n/g, '\n')
+  const normalized = (markdown.startsWith('﻿') ? markdown.slice(1) : markdown).replace(/\r\n/g, '\n')
   const end = normalized.indexOf('\n---\n', 3)
   return normalized.slice(end + 5).length
 }
