@@ -17,17 +17,33 @@ starter_code:
     a = int(input())
     # innen folytasd
   csharp: |
-    var a = int.Parse(Console.ReadLine()!);
-    // innen folytasd
+    using System;
+
+    class Program
+    {
+        static void Main()
+        {
+            var a = int.Parse(Console.ReadLine());
+            // innen folytasd
+        }
+    }
 sample_solutions:
   python: |
     a = int(input())
     b = int(input())
     print(a + b)
   csharp: |
-    var a = int.Parse(Console.ReadLine()!);
-    var b = int.Parse(Console.ReadLine()!);
-    Console.WriteLine(a + b);
+    using System;
+
+    class Program
+    {
+        static void Main()
+        {
+            var a = int.Parse(Console.ReadLine());
+            var b = int.Parse(Console.ReadLine());
+            Console.WriteLine(a + b);
+        }
+    }
 tests:
   - { stdin: "3\n5\n", expected: "8\n", hidden: false }
   - { stdin: "-4\n10\n", expected: "6\n", hidden: true }

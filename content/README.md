@@ -36,7 +36,9 @@ A feladat leírásába a segítséget záró `Tipp:` bekezdésként írd.
 
 ## Kódblokkok és nyelvi fülek
 
-A leckeszövegben a Python és C# példát **közvetlenül egymás után** álló kódblokkokként írd, a nyelvjelölő pontosan kisbetűs `python` és `csharp`. A leckeoldal ezeket egy lapfüles blokkba vonja össze, a diák a választott nyelvét látja. Más jelölővel (pl. `py`, `cs`, `c#`) a blokk nem lesz fül.
+A leckeszövegben a Python és C# példát **közvetlenül egymás után** álló kódblokkokként írd, a nyelvjelölő pontosan kisbetűs `python` és `csharp`. A leckeoldal ezeket egy lapfüles blokkba vonja össze, a diák a választott nyelvét látja. C# feladatban a kód **teljes program** legyen (`using System;`, `class Program`, `static void Main()`), mert a Judge0 Mono fordítóval fordít: nincs top-level utasítás és nincs `!` (null-forgiving), C# 7 szintaxist használj.
+
+Más jelölővel (pl. `py`, `cs`, `c#`) a blokk nem lesz fül.
 
 ## Munkafolyamat
 
@@ -50,3 +52,7 @@ Minden parancs a `backend/` mappából fut.
 Az adatbázisban (admin felületen) készült tartalom `php artisan catalog:export` paranccsal fájlba menthető.
 
 A 3. lépéshez Judge0 kell, ami csak a szerver localhostján érhető el: nyiss SSH-alagutat, és állítsd be a `JUDGE0_AUTH_TOKEN`-t. Részletek: [docs/runbooks/katalogus-ellenorzes.md](../docs/runbooks/katalogus-ellenorzes.md).
+
+## Éles import a deploykor
+
+A deploy csak a `CATALOG_IMPORT_ON_DEPLOY=true` repó-változóval importál (alapból ki van kapcsolva). Az éles importhoz kell egy létező admin felhasználó (`php artisan user:role <email> admin`). Az import a deploy végén fut, a cache-ek újraépítése és a queue újraindítása után: ha elbukik, a deploy hibás, **de az új kód már él**. Javítsd a tartalmat, majd futtasd kézzel a szerveren: `php artisan catalog:import`.

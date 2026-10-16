@@ -24,6 +24,8 @@ print("Helló, világ!")
 Console.WriteLine("Helló, világ!");
 ```
 
+A C# példák ebben a leckében sokszor csak egy-egy utasítást mutatnak; egy teljes C# programhoz kell a `using System;` sor, egy osztály (`class Program`) és a `static void Main()` metódus, ahogy a lenti példában is látod. A feladatoknál mindig teljes programot írj.
+
 Mindkét utasítás a kiírás végén új sort kezd, tehát a következő kiírás a következő sorba kerül.
 
 ## Bevitel
@@ -37,14 +39,14 @@ szam = int(input())
 
 ```csharp
 var nev = Console.ReadLine();
-var szam = int.Parse(Console.ReadLine()!);
+var szam = int.Parse(Console.ReadLine());
 ```
 
 A `nev` és a `szam` **változó**: egy névvel ellátott hely, ahol a program egy értéket tárol.
 
 ## Bevitel és kiírás együtt
 
-Az alábbi program beolvassa a nevedet, és köszön neked. Pythonban a `+` összefűzi a szövegeket, C#-ban ugyanezt a `$"..."` szöveg végzi, ahol a `{}` közé írt változó értéke behelyettesítődik.
+Az alábbi teljes program beolvassa a nevedet, és köszön neked. Pythonban a `+` összefűzi a szövegeket, C#-ban ugyanezt a `$"..."` szöveg végzi, ahol a `{}` közé írt változó értéke behelyettesítődik.
 
 ```python
 nev = input()
@@ -52,8 +54,16 @@ print("Szia, " + nev + "!")
 ```
 
 ```csharp
-var nev = Console.ReadLine();
-Console.WriteLine($"Szia, {nev}!");
+using System;
+
+class Program
+{
+    static void Main()
+    {
+        var nev = Console.ReadLine();
+        Console.WriteLine($"Szia, {nev}!");
+    }
+}
 ```
 
 Ha a bemenet `Anna`, a kimenet `Szia, Anna!` lesz.

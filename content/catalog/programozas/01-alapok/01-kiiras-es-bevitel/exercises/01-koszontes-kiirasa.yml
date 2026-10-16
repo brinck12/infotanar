@@ -18,12 +18,28 @@ starter_code:
   python: |
     # ide írd a megoldást
   csharp: |
-    // ide írd a megoldást
+    using System;
+
+    class Program
+    {
+        static void Main()
+        {
+            // ide írd a megoldást
+        }
+    }
 sample_solutions:
   python: |
     print("Üdv az InfoTanár oldalán!")
   csharp: |
-    Console.WriteLine("Üdv az InfoTanár oldalán!");
+    using System;
+
+    class Program
+    {
+        static void Main()
+        {
+            Console.WriteLine("Üdv az InfoTanár oldalán!");
+        }
+    }
 tests:
   - { stdin: "", expected: "Üdv az InfoTanár oldalán!\n", hidden: false }
   - { stdin: "\n", expected: "Üdv az InfoTanár oldalán!\n", hidden: true }

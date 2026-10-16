@@ -17,16 +17,33 @@ starter_code:
     nev = input()
     # innen folytasd
   csharp: |
-    var nev = Console.ReadLine();
-    // innen folytasd
+    using System;
+
+    class Program
+    {
+        static void Main()
+        {
+            var nev = Console.ReadLine();
+            // innen folytasd
+        }
+    }
 sample_solutions:
   python: |
     nev = input()
     print("Szia, " + nev + "!")
   csharp: |
-    var nev = Console.ReadLine();
-    Console.WriteLine($"Szia, {nev}!");
+    using System;
+
+    class Program
+    {
+        static void Main()
+        {
+            var nev = Console.ReadLine();
+            Console.WriteLine($"Szia, {nev}!");
+        }
+    }
 tests:
   - { stdin: "Anna\n", expected: "Szia, Anna!\n", hidden: false }
   - { stdin: "Béla\n", expected: "Szia, Béla!\n", hidden: true }
+  - { stdin: "Éva-Mária\n", expected: "Szia, Éva-Mária!\n", hidden: true }
   - { stdin: "Kovács Zoltán\n", expected: "Szia, Kovács Zoltán!\n", hidden: true }

@@ -171,10 +171,6 @@ jobs:
 
           php artisan migrate --force
 
-          if [ -n "$CATALOG_IMPORT" ]; then
-            php artisan catalog:import
-          fi
-
           # Csak akkor seedel, ha meg egyetlen feladat sincs - igy az elso
           # deploy feltolti a mintaadatokat, a tobbi deploy nem nyul hozzajuk.
           php artisan db:seed-once
@@ -189,6 +185,12 @@ jobs:
 
           # OPcache miatt a php-fpm-nek ujra kell olvasnia a fajlokat.
           sudo -n systemctl reload php8.3-fpm
+
+          # Opcionalis tartalom-import (CATALOG_IMPORT_ON_DEPLOY); a vegen fut, hogy egy
+          # hibas import ne hagyja felig kesz allapotban a cache-eket. Admin felhasznalo kell.
+          if [ -n "$CATALOG_IMPORT" ]; then
+            php artisan catalog:import
+          fi
           EOSSH
 
       # A DEPLOY_URL a nyilvanos, HTTPS-es cim (pl. https://infotanar.hu). A curl
