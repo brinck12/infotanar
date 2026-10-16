@@ -347,7 +347,7 @@ test.describe('catalog:import eles import @regression', () => {
             $exercises[0]->is_published,
           ];
         `) as unknown[]
-        expect(state).toEqual([body, 2, 2, ['CREATE TABLE t(a); -- 😀 ékezet'], ['1\n']])
+        expect(state).toEqual([body, 2, 2, ['CREATE TABLE t(a); -- 😀 ékezet'], ['1\n'], true])
       },
     )
   })
