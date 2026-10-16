@@ -43,6 +43,7 @@ function cleanup(): void {
       }
       $t->delete();
     }
+    App\\Models\\AuditLog::query()->where('action', 'catalog_imported')->delete();
     return true;
   `)
 }
@@ -213,6 +214,65 @@ test.describe('catalog:import --dry-run @regression', () => {
     )
   })
 
+  test('az --only a testverlecket nem rejti el', () => {
+    seedFrom(VALID, true)
+
+    withTmpCopy(
+      (root) => {
+        const moduleDir = path.join(root, MODULE_DIR)
+        const dirA = path.join(moduleDir, '01-pw-import-lecke')
+        const dirB = path.join(moduleDir, '02-pw-import-lecke-b')
+        fs.cpSync(dirA, dirB, { recursive: true })
+        fs.rmSync(dirA, { recursive: true, force: true })
+        const file = path.join(dirB, 'lesson.md')
+        fs.writeFileSync(file, fs.readFileSync(file, 'utf8').replace('slug: pw-import-lecke', 'slug: pw-import-lecke-b').replace('position: 0', 'position: 1'))
+      },
+      (root) => {
+        const scoped = artisanResult(['catalog:import', '--dry-run', `--path=${root}`, '--only=pw-import-track/pw-import-modul/pw-import-lecke-b'])
+        expect(scoped.status, scoped.stdout + scoped.stderr).toBe(0)
+        expect(scoped.stdout).not.toContain('- elrejt')
+
+        const full = dryRun(root)
+        expect(full.stdout).toContain(`- elrejt lecke ${LESSON_PATH} (nem publikált lesz)`)
+      },
+    )
+  })
+
+  test('a mar nem publikalt, eltunt lecke nem kerul az elrejtendok koze', () => {
+    seedFrom(VALID)
+
+    withTmpCopy(
+      (root) => { fs.rmSync(path.join(root, LESSON_DIR), { recursive: true, force: true }); },
+      (root) => {
+        const result = dryRun(root)
+        expect(result.status, result.stdout + result.stderr).toBe(0)
+        expect(result.stdout).not.toContain('- elrejt')
+      },
+    )
+  })
+
+  test('a fajlokbol eltunt, publikalt feladat elrejtesre kerul', () => {
+    seedFrom(VALID)
+    tinkerJson("App\\Models\\Exercise::query()->update(['is_published' => true]); return true;")
+
+    withTmpCopy(
+      (root) => { fs.rmSync(path.join(root, LESSON_DIR, 'exercises', '02-pw-import-lekerdezes.yml')); },
+      (root) => {
+        const result = dryRun(root)
+        expect(result.status, result.stdout + result.stderr).toBe(0)
+        expect(result.stdout).toContain(`- elrejt feladat ${LESSON_PATH}/pw-import-lekerdezes (nem publikált lesz)`)
+        expect(result.stdout).not.toContain(`- elrejt feladat ${LESSON_PATH}/pw-import-osszeg`)
+      },
+    )
+  })
+
+  test('az --only, ami semmire nem illik, hibaval all le', () => {
+    const result = artisanResult(['catalog:import', '--dry-run', `--path=${VALID}`, '--only=pw-import-track/nincs-ilyen'])
+
+    expect(result.status).toBe(1)
+    expect(result.stdout + result.stderr).toContain('nincs találat')
+  })
+
   test('a terv lekerdezese utan semmi nem valtozik az adatbazisban', () => {
     seedFrom(VALID)
     const before = tinkerJson(`return App\\Models\\Lesson::query()->where('slug', 'pw-import-lecke')->value('updated_at');`)
@@ -221,5 +281,177 @@ test.describe('catalog:import --dry-run @regression', () => {
 
     const after = tinkerJson(`return App\\Models\\Lesson::query()->where('slug', 'pw-import-lecke')->value('updated_at');`)
     expect(after).toBe(before)
+  })
+})
+
+function importLive(root: string, extra: string[] = []): ReturnType<typeof artisanResult> {
+  return artisanResult(['catalog:import', `--path=${root}`, ...extra])
+}
+
+const EMPTY_STATE = [0, [], [], []]
+
+/** A pw-import- elotagu sorok darabszama es a lecke/feladat/teszteset updated_at-jei. */
+function snapshot(): unknown {
+  return tinkerJson(`
+    $lessons = App\\Models\\Lesson::query()->where('slug', 'like', 'pw-import-%')->orderBy('id');
+    $exercises = App\\Models\\Exercise::query()->whereIn('lesson_id', (clone $lessons)->pluck('id'))->orderBy('id');
+    $cases = App\\Models\\TestCase::query()->whereIn('exercise_id', (clone $exercises)->pluck('id'))->orderBy('id');
+    return [
+      App\\Models\\Track::query()->where('slug', 'like', 'pw-import-%')->count(),
+      $lessons->pluck('updated_at')->all(),
+      $exercises->pluck('updated_at')->all(),
+      $cases->pluck('updated_at')->all(),
+    ];
+  `)
+}
+
+/** A lekerdezes-feladat fajljat modositja egy tmp masolaton. */
+function editSqlExercise(root: string, edit: (text: string) => string): void {
+  const file = path.join(root, LESSON_DIR, 'exercises', '02-pw-import-lekerdezes.yml')
+  fs.writeFileSync(file, edit(fs.readFileSync(file, 'utf8')))
+}
+
+test.describe('catalog:import eles import @regression', () => {
+  test.beforeEach(() => {
+    cleanup()
+  })
+
+  test.afterEach(() => {
+    cleanup()
+  })
+
+  test('a valid fa letrejon, a tartalom szo szerint egyezik', () => {
+    withTmpCopy(
+      (root) => {
+        const lesson = path.join(root, LESSON_DIR, 'lesson.md')
+        fs.writeFileSync(lesson, fs.readFileSync(lesson, 'utf8') + '\nEmoji: 😀 és CRLF\r\nsor.\r\n')
+        editSqlExercise(root, (text) => text.replace('CREATE TABLE t(a);', 'CREATE TABLE t(a); -- 😀 ékezet'))
+        const sum = path.join(root, LESSON_DIR, 'exercises', '01-pw-import-osszeg.yml')
+        fs.writeFileSync(sum, fs.readFileSync(sum, 'utf8').replace('published: false', 'published: true'))
+      },
+      (root) => {
+        const result = importLive(root)
+        expect(result.status, result.stdout + result.stderr).toBe(0)
+
+        const lf = fs.readFileSync(path.join(root, LESSON_DIR, 'lesson.md'), 'utf8').replace(/\r\n/g, '\n')
+        const body = lf.slice(lf.indexOf('\n---\n', 3) + 5)
+        const state = tinkerJson(`
+          $lesson = App\\Models\\Lesson::query()->where('slug', 'pw-import-lecke')->firstOrFail();
+          $exercises = $lesson->exercises()->orderBy('position')->get();
+          return [
+            $lesson->content,
+            $exercises->count(),
+            $exercises[0]->testCases()->count(),
+            $exercises[1]->testCases()->pluck('stdin')->all(),
+            $exercises[1]->testCases()->pluck('expected_stdout')->all(),
+            $exercises[0]->is_published,
+          ];
+        `) as unknown[]
+        expect(state).toEqual([body, 2, 2, ['CREATE TABLE t(a); -- 😀 ékezet'], ['1\n']])
+      },
+    )
+  })
+
+  test('a masodik futtatas nulla valtoztatas, az updated_at sem mozdul', () => {
+    const first = importLive(VALID)
+    expect(first.status, first.stdout + first.stderr).toBe(0)
+    expect(first.stdout).toContain('5 létrehozva, 0 módosítva, 0 elrejtve')
+    const before = snapshot()
+
+    const second = importLive(VALID)
+
+    expect(second.status, second.stdout + second.stderr).toBe(0)
+    expect(second.stdout).toContain('0 létrehozva, 0 módosítva, 0 elrejtve')
+    expect(snapshot()).toEqual(before)
+  })
+
+  test('hibas fa eseten semmi nem irodik', () => {
+    const result = importLive(INVALID)
+
+    expect(result.status).toBe(1)
+    expect(snapshot()).toEqual(EMPTY_STATE)
+  })
+
+  test('nyilvanos teszteset nelkuli, publikalt feladat az egesz importot elutasitja', () => {
+    withTmpCopy(
+      (root) => {
+        editSqlExercise(root, (text) => text.replace('allowed_languages: [sql]', 'published: true\nallowed_languages: [sql]').replace('hidden: false', 'hidden: true'))
+      },
+      (root) => {
+        const result = importLive(root)
+
+        expect(result.status).toBe(1)
+        expect(result.stdout + result.stderr).toContain('Publikált feladatnak legalább egy nyilvános tesztesettel kell rendelkeznie')
+        expect(snapshot()).toEqual(EMPTY_STATE)
+      },
+    )
+  })
+
+  test('mintamegoldas nelkuli, publikalt feladat az egesz importot elutasitja', () => {
+    withTmpCopy(
+      (root) => {
+        editSqlExercise(root, (text) => text.replace('allowed_languages: [sql]', 'published: true\nallowed_languages: [sql]').replace('sample_solutions:\n  sql: SELECT 1;\n', ''))
+      },
+      (root) => {
+        const result = importLive(root)
+
+        expect(result.status, result.stdout + result.stderr).toBe(1)
+        expect(snapshot()).toEqual(EMPTY_STATE)
+      },
+    )
+  })
+
+  test('az eltunt lecke nem publikalt lesz, nem torlodik', () => {
+    withTmpCopy(
+      (root) => {
+        const file = path.join(root, LESSON_DIR, 'lesson.md')
+        fs.writeFileSync(file, fs.readFileSync(file, 'utf8').replace('published: false', 'published: true'))
+      },
+      (root) => {
+        expect(importLive(root).status).toBe(0)
+        expect(tinkerJson("return App\\Models\\Lesson::query()->where('slug', 'pw-import-lecke')->value('is_published');")).toBe(true)
+
+        fs.rmSync(path.join(root, LESSON_DIR), { recursive: true, force: true })
+        const result = importLive(root)
+
+        expect(result.status, result.stdout + result.stderr).toBe(0)
+        expect(result.stdout).toContain('0 létrehozva, 0 módosítva, 1 elrejtve')
+        expect(tinkerJson("return App\\Models\\Lesson::query()->where('slug', 'pw-import-lecke')->pluck('is_published')->all();")).toEqual([false])
+      },
+    )
+  })
+
+  test('a tesztesetek a fajl sorrendjeben irodnak felul, a kivett teszt eltunik', () => {
+    expect(importLive(VALID).status).toBe(0)
+
+    withTmpCopy(
+      (root) => {
+        const file = path.join(root, LESSON_DIR, 'exercises', '01-pw-import-osszeg.yml')
+        const text = fs.readFileSync(file, 'utf8')
+        const edited = text.replace('  - { stdin: "3\\n", expected: "9\\n", hidden: false }\n', '  - { stdin: "5\\n", expected: "25\\n", hidden: false }\n').replace('  - { stdin: "0\\n", expected: "0\\n", hidden: true }\n', '')
+        expect(edited).not.toBe(text)
+        fs.writeFileSync(file, edited)
+      },
+      (root) => {
+        const result = importLive(root)
+        expect(result.status, result.stdout + result.stderr).toBe(0)
+        expect(result.stdout).toContain('0 létrehozva, 1 módosítva, 0 elrejtve')
+
+        const cases = tinkerJson(`
+          $e = App\\Models\\Exercise::query()->where('title', 'like', 'PW import %sszeg')->firstOrFail();
+          return $e->testCases()->orderBy('order')->get()->map(fn ($c) => [$c->stdin, $c->order])->all();
+        `)
+        expect(cases).toEqual([['5\n', 0]])
+      },
+    )
+  })
+
+  test('a catalog_imported audit esemeny csak darabszamokat tartalmaz', () => {
+    expect(importLive(VALID).status).toBe(0)
+
+    const metadata = tinkerJson(`
+      return App\\Models\\AuditLog::query()->where('action', 'catalog_imported')->firstOrFail()->metadata;
+    `)
+    expect(metadata).toEqual({ created: 5, updated: 0, unpublished: 0 })
   })
 })

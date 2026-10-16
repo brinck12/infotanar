@@ -16,6 +16,8 @@ use Throwable;
  * Összeveti a beolvasott fát az adatbázissal; nem ír semmit.
  * Azonosítás: track/modul/lecke a (szülő, slug) párral; a feladatnak nincs slug oszlopa,
  * ezért a (lecke, Str::slug(cím)) párral.
+ * Ha egy track vagy modul hiányzik a fájlokból, a leckéihez nem nyúl: az elrejtés csak a fájlokban szereplő
+ * modul alatt hiányzó leckékre és a fájlban szereplő leckék alatt hiányzó feladatokra vonatkozik.
  */
 final class ContentPlanner
 {

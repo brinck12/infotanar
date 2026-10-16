@@ -4,11 +4,18 @@ declare(strict_types=1);
 
 namespace App\Console\Commands;
 
+use App\Actions\Audit\RecordAuditEvent;
+use App\Enums\AuditAction;
+use App\Enums\Role;
+use App\Exceptions\DomainException;
+use App\Models\User;
+use App\Services\Catalog\Content\ContentImporter;
 use App\Services\Catalog\Content\ContentPlanner;
 use App\Services\Catalog\Content\ContentProblem;
 use App\Services\Catalog\Content\ContentReader;
 use App\Services\Catalog\Content\ContentSet;
 use App\Services\Catalog\Content\ContentValidator;
+use App\Services\Catalog\Content\ImportPlan;
 use App\Services\Catalog\Content\LessonNode;
 use App\Services\Catalog\Content\ModuleNode;
 use App\Services\Catalog\Content\PlanEntry;
@@ -22,20 +29,35 @@ class ImportCatalogCommand extends Command
         {--path=content/catalog : A tartalmi könyvtár (a repó gyökeréhez képest, vagy abszolút)}
         {--only= : Útvonal-előtag: <track>[/<modul>[/<lecke>]] (slugok)}';
 
-    protected $description = 'A tartalmi fájlok (Markdown/YAML) beolvasása és ellenőrzése a katalógushoz';
+    protected $description = 'A tartalmi fájlok (Markdown/YAML) beolvasása, ellenőrzése és importálása a katalógusba';
 
-    public function handle(ContentReader $reader, ContentValidator $validator, ContentPlanner $planner): int
-    {
+    public function handle(
+        ContentReader $reader,
+        ContentValidator $validator,
+        ContentPlanner $planner,
+        ContentImporter $importer,
+        RecordAuditEvent $audit,
+    ): int {
+        $actor = null;
         if (! $this->option('dry-run')) {
-            $this->error((string) __('catalog_import.live_not_available'));
+            $actor = User::query()->where('role', Role::Admin)->orderBy('id')->first();
+            if (! $actor instanceof User) {
+                $this->error((string) __('catalog_import.no_admin'));
 
-            return self::FAILURE;
+                return self::FAILURE;
+            }
         }
 
         $set = $reader->read($this->resolveRoot());
         $only = $this->only();
         if ($only !== []) {
             $set = $this->filter($set, $only);
+        }
+
+        if ($only !== [] && $this->matchCount($set, count($only)) === 0 && $set->problems === []) {
+            $this->error((string) __('catalog_import.no_match', ['only' => implode('/', $only)]));
+
+            return self::FAILURE;
         }
 
         $problems = $validator->problems($set);
@@ -49,6 +71,10 @@ class ImportCatalogCommand extends Command
         }
 
         $plan = $planner->plan($set, $only);
+
+        if ($actor instanceof User) {
+            return $this->import($importer, $audit, $set, $plan, $actor);
+        }
 
         $this->info((string) __('catalog_import.summary', [
             'lessons' => $plan->count('lesson', PlanEntry::CREATE),
@@ -69,6 +95,51 @@ class ImportCatalogCommand extends Command
         }
 
         return self::SUCCESS;
+    }
+
+    private function import(ContentImporter $importer, RecordAuditEvent $audit, ContentSet $set, ImportPlan $plan, User $actor): int
+    {
+        try {
+            $summary = $importer->apply($set, $plan, $actor);
+        } catch (DomainException $e) {
+            $this->error((string) __('catalog_import.import_failed', ['message' => $e->getMessage()]));
+
+            return self::FAILURE;
+        }
+
+        if ($summary->total() > 0) {
+            $audit->handle(AuditAction::CatalogImported, $actor, null, [
+                'created' => $summary->created,
+                'updated' => $summary->updated,
+                'unpublished' => $summary->unpublished,
+            ]);
+        }
+
+        $this->info((string) __('catalog_import.applied', [
+            'created' => $summary->created,
+            'updated' => $summary->updated,
+            'unpublished' => $summary->unpublished,
+        ]));
+
+        return self::SUCCESS;
+    }
+
+    /** Hány track (1), modul (2) vagy lecke (3) maradt az `--only` szűrő után. */
+    private function matchCount(ContentSet $set, int $depth): int
+    {
+        $count = 0;
+        foreach ($set->tracks as $track) {
+            if ($depth === 1) {
+                $count++;
+
+                continue;
+            }
+            foreach ($track->modules as $module) {
+                $count += $depth === 2 ? 1 : count($module->lessons);
+            }
+        }
+
+        return $count;
     }
 
     private function resolveRoot(): string

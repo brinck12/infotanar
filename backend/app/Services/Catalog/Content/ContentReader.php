@@ -169,7 +169,7 @@ final class ContentReader
     private function testCases(mixed $tests, string $file): array
     {
         if (! is_array($tests) || ! array_is_list($tests)) {
-            $this->problems[] = ContentProblem::of($file, 'invalid_type', ['field' => 'tests', 'expected' => 'lista']);
+            $this->problems[] = ContentProblem::of($file, 'invalid_type', ['field' => 'tests', 'expected' => (string) __('catalog_import.type_list')]);
 
             return [];
         }
@@ -178,7 +178,7 @@ final class ContentReader
         foreach ($tests as $index => $entry) {
             $number = $index + 1;
             if (! is_array($entry)) {
-                $this->problems[] = ContentProblem::of($file, 'test_invalid', ['number' => $number, 'detail' => 'nem kulcs-érték lista']);
+                $this->problems[] = ContentProblem::of($file, 'test_invalid', ['number' => $number, 'detail' => (string) __('catalog_import.type_map')]);
 
                 continue;
             }
@@ -200,7 +200,7 @@ final class ContentReader
             if (! is_string($stdin) || ! is_string($expected) || ! is_bool($hidden)) {
                 $this->problems[] = ContentProblem::of($file, 'test_invalid', [
                     'number' => $number,
-                    'detail' => 'a „stdin” és „expected” szöveg, a „hidden” igaz/hamis érték legyen (az „expected” kötelező)',
+                    'detail' => (string) __('catalog_import.test_types'),
                 ]);
                 $valid = false;
             }

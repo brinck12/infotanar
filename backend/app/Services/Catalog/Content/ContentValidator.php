@@ -103,7 +103,7 @@ final class ContentValidator
         if ($title === null) {
             $this->add($file, 'required', ['field' => 'title']);
         } elseif (! is_string($title) || trim($title) === '') {
-            $this->add($file, 'invalid_type', ['field' => 'title', 'expected' => 'nem üres szöveg']);
+            $this->add($file, 'invalid_type', ['field' => 'title', 'expected' => (string) __('catalog_import.type_nonempty_text')]);
         } elseif (mb_strlen($title) > 255) {
             $this->add($file, 'too_long', ['field' => 'title', 'max' => 255]);
         }
@@ -112,7 +112,7 @@ final class ContentValidator
         if ($position === null) {
             $this->add($file, 'required', ['field' => 'position']);
         } elseif (! is_int($position) || $position < 0) {
-            $this->add($file, 'invalid_type', ['field' => 'position', 'expected' => 'nem negatív egész szám']);
+            $this->add($file, 'invalid_type', ['field' => 'position', 'expected' => (string) __('catalog_import.type_nonneg_int')]);
         }
     }
 
@@ -122,7 +122,7 @@ final class ContentValidator
     private function checkBool(string $file, array $attributes, string $field): void
     {
         if (array_key_exists($field, $attributes) && ! is_bool($attributes[$field])) {
-            $this->add($file, 'invalid_type', ['field' => $field, 'expected' => 'igaz/hamis érték']);
+            $this->add($file, 'invalid_type', ['field' => $field, 'expected' => (string) __('catalog_import.type_bool')]);
         }
     }
 
@@ -133,7 +133,7 @@ final class ContentValidator
     {
         $value = $attributes[$field] ?? null;
         if ($value !== null && ! is_string($value)) {
-            $this->add($file, 'invalid_type', ['field' => $field, 'expected' => 'szöveg']);
+            $this->add($file, 'invalid_type', ['field' => $field, 'expected' => (string) __('catalog_import.type_text')]);
         }
     }
 
@@ -166,7 +166,7 @@ final class ContentValidator
         if ($description === null) {
             $this->add($file, 'required', ['field' => 'description']);
         } elseif (! is_string($description) || trim($description) === '') {
-            $this->add($file, 'invalid_type', ['field' => 'description', 'expected' => 'nem üres szöveg']);
+            $this->add($file, 'invalid_type', ['field' => 'description', 'expected' => (string) __('catalog_import.type_nonempty_text')]);
         }
 
         $allowed = $this->checkLanguages($file, $a);
@@ -209,7 +209,7 @@ final class ContentValidator
             return [];
         }
         if (! is_array($languages) || ! array_is_list($languages) || $languages === []) {
-            $this->add($file, 'invalid_type', ['field' => 'allowed_languages', 'expected' => 'nem üres nyelvlista']);
+            $this->add($file, 'invalid_type', ['field' => 'allowed_languages', 'expected' => (string) __('catalog_import.type_language_list')]);
 
             return [];
         }
@@ -243,7 +243,7 @@ final class ContentValidator
             return;
         }
         if (! is_array($map) || ($map !== [] && array_is_list($map))) {
-            $this->add($file, 'invalid_type', ['field' => $field, 'expected' => 'nyelv-kód párok']);
+            $this->add($file, 'invalid_type', ['field' => $field, 'expected' => (string) __('catalog_import.type_language_pairs')]);
 
             return;
         }
@@ -253,7 +253,7 @@ final class ContentValidator
                 $this->add($file, 'language_not_allowed', ['field' => $field, 'language' => (string) $language]);
             }
             if (! is_string($code)) {
-                $this->add($file, 'invalid_type', ['field' => $field.'.'.$language, 'expected' => 'szöveg']);
+                $this->add($file, 'invalid_type', ['field' => $field.'.'.$language, 'expected' => (string) __('catalog_import.type_text')]);
             } elseif (mb_strlen($code) > $max) {
                 $this->add($file, 'too_long', ['field' => $field.'.'.$language, 'max' => $max]);
             }
