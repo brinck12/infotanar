@@ -8,6 +8,7 @@
 // (lasd JUDGE0_CONTROL a src/data/seed.ts-ben):
 //   - PW_JUDGE0_FORCE_WRONG       -> ervenyes, de rossz kimenet
 //   - PW_JUDGE0_FORCE_UNAVAILABLE -> HTTP 503 (a szolgaltatas elerhetetlen)
+// Ures (csak szokoz) forraskodra a mock ures kimenetet ad, nem echozik.
 // Ketto pedig a reszfeladatos, adatfajlos fixture feladat megoldasait jatssza
 // (lasd JUDGE0_EXECUTION_CONTROL a controls.ts-ben):
 //   - PW_JUDGE0_SUBTASKS          -> az 1. resz jo, a 2. resz hibas
@@ -135,7 +136,8 @@ async function handle(req: IncomingMessage, res: ServerResponse): Promise<void> 
       return
     }
 
-    send(res, 200, acceptedWithStdout(stdin))
+    // Az ures program nem ir ki semmit (a `catalog:verify --negative` ezt probalja ki).
+    send(res, 200, acceptedWithStdout(sourceCode.trim() === '' ? '' : stdin))
     return
   }
 

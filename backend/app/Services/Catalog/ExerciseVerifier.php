@@ -8,10 +8,12 @@ use App\Enums\AttachmentRole;
 use App\Enums\Verdict;
 use App\Exceptions\FileTasks\EvaluatorBusy;
 use App\Models\Exercise;
+use App\Models\TestCase;
 use App\Services\Execution\EvaluationResult;
 use App\Services\FileTasks\EvaluationGate;
 use App\Services\FileTasks\FileEvaluator;
 use App\Services\SolutionEvaluator;
+use Illuminate\Support\Collection;
 
 /**
  * Egy feladat lefuttatasa a sajat mintamegoldasan: a tartalom-ellenorzes
@@ -32,10 +34,13 @@ final readonly class ExerciseVerifier
         private EvaluationGate $gate,
     ) {}
 
-    public function verify(Exercise $exercise): ExerciseVerification
+    /**
+     * @param  bool  $negative  szerkesztos feladatnal az ures programnak is el kell buknia (tul engedekeny elvart kimenet ellen)
+     */
+    public function verify(Exercise $exercise, bool $negative = false): ExerciseVerification
     {
         if ($exercise->kind->isEditorBased()) {
-            return $this->verifyEditor($exercise);
+            return $this->verifyEditor($exercise, $negative);
         }
 
         if ($exercise->kind->isUpload()) {
@@ -65,12 +70,19 @@ final readonly class ExerciseVerifier
         return $solutions;
     }
 
-    private function verifyEditor(Exercise $exercise): ExerciseVerification
+    private function verifyEditor(Exercise $exercise, bool $negative): ExerciseVerification
     {
         $solutions = self::solutionsOf($exercise);
 
         if ($solutions === []) {
             return new ExerciseVerification($exercise, ExerciseVerification::FAILED, __('catalog.verify.sample_missing'));
+        }
+
+        // Minden engedelyezett nyelvhez kell mintamegoldas, kulonben a hianyzo nyelv ellenorizetlen maradna.
+        $missing = array_values(array_diff($exercise->allowed_languages ?? [], array_keys($solutions)));
+
+        if ($missing !== []) {
+            return new ExerciseVerification($exercise, ExerciseVerification::FAILED, __('catalog.verify.sample_language_missing', ['languages' => implode(', ', $missing)]));
         }
 
         $testCases = $exercise->testCases()->get();
@@ -89,7 +101,35 @@ final readonly class ExerciseVerifier
             $runs[] = $run;
         }
 
+        if ($passed && $negative) {
+            $lenient = $this->lenientLanguages($exercise, array_keys($solutions), $testCases);
+
+            if ($lenient !== []) {
+                return new ExerciseVerification($exercise, ExerciseVerification::FAILED, __('catalog.verify.negative_passed', ['languages' => implode(', ', $lenient)]), $runs);
+            }
+        }
+
         return new ExerciseVerification($exercise, $passed ? ExerciseVerification::PASSED : ExerciseVerification::FAILED, runs: $runs);
+    }
+
+    /**
+     * Azok a nyelvek, amelyeken az ures program is minden tesztesetet teljesit.
+     *
+     * @param  list<string>  $languages
+     * @param  Collection<int, TestCase>  $testCases
+     * @return list<string>
+     */
+    private function lenientLanguages(Exercise $exercise, array $languages, Collection $testCases): array
+    {
+        $lenient = [];
+
+        foreach ($languages as $language) {
+            if ($this->run($language, $this->solutions->evaluate($exercise, $language, '', $testCases))['passed']) {
+                $lenient[] = $language;
+            }
+        }
+
+        return $lenient;
     }
 
     private function verifyUpload(Exercise $exercise): ExerciseVerification
