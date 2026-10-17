@@ -15,29 +15,29 @@ description: |
 
   | oszlop | típus |
   |---|---|
-  | `id` | egész, elsődleges kulcs |
-  | `nev` | szöveg |
-  | `helyszin` | szöveg (város) |
-  | `datum` | szöveg (ÉÉÉÉ-HH-NN) |
-  | `kapacitas` | egész, a férőhelyek száma |
+  | `id` | `INT`, elsődleges kulcs |
+  | `nev` | `VARCHAR(50)` |
+  | `helyszin` | `VARCHAR(30)` (város) |
+  | `datum` | `DATE` |
+  | `kapacitas` | `INT`, a férőhelyek száma |
 
   A `jegy` tábla az eladott jegyeket:
 
   | oszlop | típus |
   |---|---|
-  | `id` | egész, elsődleges kulcs |
-  | `rendezveny_id` | egész, a `rendezveny` tábla `id` oszlopára mutat |
-  | `vevo` | szöveg, a vásárló neve |
-  | `kategoria` | szöveg: `allo`, `ules` vagy `vip` |
-  | `ar` | egész, a jegy ára forintban |
-  | `vasarlas` | szöveg, a vásárlás napja (ÉÉÉÉ-HH-NN) |
+  | `id` | `INT`, elsődleges kulcs |
+  | `rendezveny_id` | `INT`, a `rendezveny` tábla `id` oszlopára mutat |
+  | `vevo` | `VARCHAR(50)`, a vásárló neve |
+  | `kategoria` | `VARCHAR(20)`: `allo`, `ules` vagy `vip` |
+  | `ar` | `INT`, a jegy ára forintban |
+  | `vasarlas` | `DATE`, a vásárlás napja |
 
   **9. feladat.** Adja meg lekérdezéssel rendezvényenként a **kihasználtságot**, vagyis az eladott jegyek számát a kapacitás százalékában, **egész százalékra kerekítve** (**nev, szazalek**)! Csak azok a rendezvények szerepeljenek, amelyekre eladtak legalább egy jegyet. A találatokat rendezze **kihasználtság szerint csökkenően**, azonos értéknél név szerint ábécérendbe!
 starter_code:
-  sql: "SELECT rendezveny.nev, CAST(ROUND(100.0 * COUNT(jegy.id) / rendezveny.kapacitas) AS INTEGER) AS szazalek\nFROM rendezveny INNER JOIN jegy ON \nGROUP BY \nORDER BY ;\n"
+  sql: "SELECT rendezveny.nev, ROUND(100 * COUNT(jegy.id) / rendezveny.kapacitas) AS szazalek\nFROM rendezveny INNER JOIN jegy ON \nGROUP BY \nORDER BY ;\n"
 sample_solutions:
   sql: |
-    SELECT rendezveny.nev, CAST(ROUND(100.0 * COUNT(jegy.id) / rendezveny.kapacitas) AS INTEGER) AS szazalek
+    SELECT rendezveny.nev, ROUND(100 * COUNT(jegy.id) / rendezveny.kapacitas) AS szazalek
     FROM rendezveny INNER JOIN jegy ON jegy.rendezveny_id = rendezveny.id
     GROUP BY rendezveny.id, rendezveny.nev, rendezveny.kapacitas
     ORDER BY szazalek DESC, rendezveny.nev;

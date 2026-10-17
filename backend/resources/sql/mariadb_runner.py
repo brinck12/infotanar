@@ -393,7 +393,7 @@ def register(conn):
         ("PI", 0, lambda: math.pi),
         ("GREATEST", -1, f_greatest), ("LEAST", -1, f_least),
         ("IF", 3, f_if),
-        ("ISNULL", 1, f_isnull),
+        ("FN_ISNULL", 1, f_isnull),
         ("YEAR", 1, part("year")), ("MONTH", 1, part("month")), ("DAY", 1, part("day")),
         ("DAYOFMONTH", 1, part("day")),
         ("HOUR", 1, part("hour")), ("MINUTE", 1, part("minute")), ("SECOND", 1, part("second")),
@@ -456,7 +456,7 @@ def rewrite(sql):
                 j += 1
             word = sql[i:j]
             # A LEFT es RIGHT az SQLite-ban kulcsszo (JOIN): fuggvenykent atnevezzuk.
-            if word.upper() in ("LEFT", "RIGHT") and sql[j:].lstrip().startswith("("):
+            if word.upper() in ("LEFT", "RIGHT", "ISNULL") and sql[j:].lstrip().startswith("("):
                 word = "FN_" + word.upper()
             out.append(word)
             i = j
@@ -464,6 +464,26 @@ def rewrite(sql):
             out.append(ch)
             i += 1
     return "".join(out)
+
+
+DDL_RULES = [
+    # id INT AUTO_INCREMENT [PRIMARY KEY] -> az SQLite sorszam-oszlopa: INTEGER PRIMARY KEY
+    (re.compile(r"\b(?:TINY|SMALL|MEDIUM|BIG)?INT(?:EGER)?(?:\s*\(\s*\d+\s*\))?((?:\s+(?:UNSIGNED|NOT\s+NULL|NULL))*)\s+AUTO_INCREMENT\b", re.IGNORECASE), r"INTEGER\1"),
+    # id INT PRIMARY KEY AUTO_INCREMENT (a masik sorrend)
+    (re.compile(r"\b(?:TINY|SMALL|MEDIUM|BIG)?INT(?:EGER)?(?:\s*\(\s*\d+\s*\))?((?:\s+(?:UNSIGNED|NOT\s+NULL|NULL))*)\s+PRIMARY\s+KEY\s+AUTO_INCREMENT\b", re.IGNORECASE), r"INTEGER\1 PRIMARY KEY"),
+    (re.compile(r"\bAUTO_INCREMENT\b", re.IGNORECASE), ""),
+    (re.compile(r"\bENGINE\s*=\s*\w+", re.IGNORECASE), ""),
+    (re.compile(r"\b(?:DEFAULT\s+)?(?:CHARSET|CHARACTER\s+SET)\s*=?\s*\w+", re.IGNORECASE), ""),
+    (re.compile(r"\bCOLLATE\s*=?\s*\w+", re.IGNORECASE), ""),
+    (re.compile(r"\bTRUNCATE\s+TABLE\s+", re.IGNORECASE), "DELETE FROM "),
+]
+
+
+def ddl(sql):
+    """A MariaDB tablalétrehozás tipikus kiegészítői (AUTO_INCREMENT, ENGINE, ...)."""
+    for pattern, replacement in DDL_RULES:
+        sql = pattern.sub(replacement, sql)
+    return sql
 
 
 SKIPPED = re.compile(r"^\s*(?:CREATE\s+DATABASE|DROP\s+DATABASE|USE)\b", re.IGNORECASE)
@@ -517,7 +537,7 @@ def main():
     writer_buffer = io.StringIO()
     writer = csv.writer(writer_buffer, lineterminator="\n")
 
-    for statement in statements(rewrite(QUERY)):
+    for statement in statements(ddl(rewrite(QUERY))):
         if not statement.strip(" \t\r\n;") or SKIPPED.match(statement):
             continue
         try:

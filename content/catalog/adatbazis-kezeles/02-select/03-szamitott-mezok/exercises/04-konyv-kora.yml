@@ -23,14 +23,14 @@ description: |
 
   Listázd ki a könyvek **címét** és a kiadás óta eltelt éveket `kor` néven, ahol a kor `2025 - ev`! Ezután még egy oszlop következzen: `cimke` néven az `szerzo`, egy kettőspont és szóköz (`: `) és a cím összefűzve, például `Nagy Peter: Aranykor`. Az oszlopok sorrendje: `cim`, `kor`, `cimke`. A sorok sorrendje nem számít.
 
-  Tipp: három oszlop: `cim`, `2025 - ev AS kor`, és `szerzo || ': ' || cim AS cimke`.
+  Tipp: három oszlop: `cim`, `2025 - ev AS kor`, és `CONCAT(szerzo, ': ', cim) AS cimke`.
 starter_code:
   sql: |
     SELECT
     FROM konyv;
 sample_solutions:
   sql: |
-    SELECT cim, 2025 - ev AS kor, szerzo || ': ' || cim AS cimke
+    SELECT cim, 2025 - ev AS kor, CONCAT(szerzo, ': ', cim) AS cimke
     FROM konyv;
 tests:
   - stdin: "CREATE TABLE konyv (id INTEGER PRIMARY KEY, cim TEXT, szerzo TEXT, ev INTEGER, oldal INTEGER, ar INTEGER, mufaj TEXT);\nINSERT INTO konyv VALUES\n(1, 'Tavoli partok', 'Varga Dora', 2017, 639, 2300, 'vers'),\n(2, 'Szeleso ter', 'Szabo Reka', 2010, 486, 4000, 'tortenelem'),\n(3, 'Csendes folyo', 'Szabo Reka', 1998, 429, 4300, 'mese'),\n(4, 'Kis kert', 'Szabo Reka', 2018, 290, 5100, 'mese'),\n(5, 'Hazak kozott', 'Toth Gabor', 1975, 420, 5500, 'regeny');\n"

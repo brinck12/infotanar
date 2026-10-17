@@ -21,16 +21,16 @@ description: |
 
   Add meg a **napi bevételek átlagát** forintra kerekítve, egész számként (**atlag**)! Egy nap bevétele az aznapi eladások értékének összege. Előbb számold ki a napi összegeket (`GROUP BY datum`), majd ezekből az összegekből vegyél átlagot: a `FROM` után álló allekérdezés (származtatott tábla) legyen a külső lekérdezés forrása.
 
-  Tipp: `CAST(ROUND(AVG(napi)) AS INTEGER) AS atlag` – az allekérdezésnek adj nevet, például `FROM (...) AS n`.
+  Tipp: `ROUND(AVG(napi)) AS atlag` – az allekérdezésnek adj nevet, például `FROM (...) AS n`.
 starter_code:
   sql: |
-    SELECT CAST(ROUND(AVG(napi)) AS INTEGER) AS atlag
+    SELECT ROUND(AVG(napi)) AS atlag
     FROM (SELECT datum, SUM(db * egysegar) AS napi
           FROM eladas
           GROUP BY datum) AS n;
 sample_solutions:
   sql: |
-    SELECT CAST(ROUND(AVG(napi)) AS INTEGER) AS atlag
+    SELECT ROUND(AVG(napi)) AS atlag
     FROM (SELECT datum, SUM(db * egysegar) AS napi
           FROM eladas
           GROUP BY datum) AS n;

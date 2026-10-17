@@ -1,6 +1,6 @@
 ---
 slug: szoveg-es-szam-fuggvenyek
-title: Szöveg- és számfüggvények
+title: Szövegfüggvények
 position: 0
 free: false
 published: false
@@ -8,156 +8,188 @@ reviewed_by:
 reviewed_at:
 ---
 
-## Mi az a függvény az SQL-ben?
+## Mi az a függvény?
 
-Eddig a lekérdezéseid az oszlopok értékét úgy hozták vissza, ahogy a táblában áll. Sokszor viszont nem a nyers értékre van szükség: nagybetűs névre, kerekített számra, a cím első néhány betűjére. Erre valók a **függvények**.
-
-A függvény olyan kis gép: bemenetként kap egy vagy több értéket, és egy újat ad vissza. A neve után zárójelben adod meg a bemenetet: `UPPER(szerzo)`. A lekérdezés a `SELECT` után bárhol használhatja, ahol eddig oszlopnevet írtál, és érdemes `AS` aliast adni az eredménynek.
-
-Ebben a leckében ezt a kis táblát használjuk:
-
-A `konyv` tábla:
-
-| `id` | `cim` | `szerzo` | `ar` | `ertekeles` |
-|---|---|---|---|---|
-| 1 | Egri csillagok | Gardonyi Geza | 3490 | 4.667 |
-| 2 | Tuskevar | Fekete Istvan | 2990 | 4.253 |
-| 3 | Pomade | Szabo Magda | 3190 | 3.912 |
-
-## LENGTH: hány karakter?
-
-A `LENGTH(szöveg)` a szöveg karaktereinek számát adja, a szóközöket és írásjeleket is beleértve.
+A függvény egy kis gép: beteszel valamit, és kijön belőle valami más. Az SQL-ben a függvénynek **neve** van, utána **zárójel**, a zárójelben pedig az, amit beteszel. Például:
 
 ```sql
-SELECT cim, LENGTH(cim) AS hossz
-FROM konyv;
+UCASE(vezeteknev)
 ```
 
-Eredmény:
+Ez azt jelenti: "vedd a `vezeteknev` értékét, és alakítsd csupa nagybetűssé".
 
-| `cim` | `hossz` |
+Két fontos dolog:
+
+- A függvény **nem változtatja meg a táblát**. Csak az eredményben jelenik meg az új érték.
+- A függvényt oda írod, ahová eddig oszlopnevet írtál: a `SELECT` után, de a `WHERE`-be is mehet.
+
+Ebben a leckében a **szöveggel** dolgozó függvényeket tanuljuk meg. Ezek pontosan úgy működnek az érettségi MariaDB-jében is, és a gyakorlófelület is ugyanígy érti őket.
+
+A példákban ez a `tanulo` tábla szerepel:
+
+| `id` | `vezeteknev` | `keresztnev` | `osztaly` |
+|---|---|---|---|
+| 1 | Kiss | Anna | 10.A |
+| 2 | Nagy | Béla | 10.B |
+| 3 | Tóth | Csaba | 10.A |
+| 4 | Szentpéteri | Zsombor | 11.B |
+
+## UCASE és LCASE: nagy- és kisbetű
+
+Az `UCASE` a szöveget csupa **nagybetűssé**, az `LCASE` csupa **kisbetűssé** alakítja.
+
+```sql
+SELECT vezeteknev, UCASE(vezeteknev)
+FROM tanulo;
+```
+
+Mit csinál ez a lekérdezés? Minden sorhoz kiírja a vezetéknevet, mellé pedig ugyanazt nagybetűvel. Az eredmény:
+
+| `vezeteknev` | `UCASE(vezeteknev)` |
 |---|---|
-| Egri csillagok | 14 |
-| Tuskevar | 8 |
-| Pomade | 6 |
+| Kiss | KISS |
+| Nagy | NAGY |
+| Tóth | TÓTH |
+| Szentpéteri | SZENTPÉTERI |
 
-**Próbáld ki:** írd ki a szerzők nevének hosszát!
+Az `LCASE` ugyanígy működik, csak kisbetűt ad: az `LCASE('Kiss')` eredménye `kiss`.
 
-## UPPER és LOWER: nagy- és kisbetű
+(Az `UPPER` és a `LOWER` ugyanezt tudja, az érettségin ezek is előfordulnak.)
 
-Az `UPPER` csupa nagybetűssé, a `LOWER` csupa kisbetűssé alakítja a szöveget. Ez akkor hasznos, ha a tárolt szöveg vegyes írású, de egységesen akarod látni.
+**Próbáld ki:** írd ki a keresztneveket csupa kisbetűvel.
+
+## Az új oszlop neve: AS
+
+Láttad, hogy az oszlop fejléce `UCASE(vezeteknev)` lett. Ez csúnya, és hosszú. Az `AS` ("mint") szóval **saját nevet** adhatsz az oszlopnak:
 
 ```sql
-SELECT UPPER(szerzo) AS nagy, LOWER(szerzo) AS kicsi
-FROM konyv;
+SELECT vezeteknev, UCASE(vezeteknev) AS nagybetus
+FROM tanulo;
 ```
 
-Eredmény:
-
-| `nagy` | `kicsi` |
+| `vezeteknev` | `nagybetus` |
 |---|---|
-| GARDONYI GEZA | gardonyi geza |
-| FEKETE ISTVAN | fekete istvan |
-| SZABO MAGDA | szabo magda |
+| Kiss | KISS |
+| Nagy | NAGY |
+| Tóth | TÓTH |
+| Szentpéteri | SZENTPÉTERI |
 
-## SUBSTR: részlet kivágása
+A feladatok általában megmondják, milyen nevű oszlopot várnak. Azt a nevet írd az `AS` után.
 
-A `SUBSTR(szöveg, kezdet, hossz)` a szöveg egy darabját adja. A kezdőpozíció **1-től** számít: az első karakter az 1. Ha a hosszat elhagyod, a szöveg végéig tart.
+## CHAR_LENGTH: hány karakter?
 
-```sql
-SELECT szerzo, SUBSTR(szerzo, 1, 5) AS eleje, SUBSTR(szerzo, 7) AS vege
-FROM konyv;
-```
-
-Eredmény:
-
-| `szerzo` | `eleje` | `vege` |
-|---|---|---|
-| Gardonyi Geza | Gardo | yi Geza |
-| Fekete Istvan | Feket |  Istvan |
-| Szabo Magda | Szabo | Magda |
-
-**Próbáld ki:** add meg minden cím első három betűjét nagybetűvel! Itt két függvény áll egymásba ágyazva: `UPPER(SUBSTR(...))`. Belülről kifelé értékelődik ki.
-
-## Szövegek összefűzése
-
-Két szöveget a `||` jellel fűzhetsz össze:
+A `CHAR_LENGTH` megszámolja, hány **karakterből** áll a szöveg. A szóköz is karakter.
 
 ```sql
-SELECT szerzo || ': ' || cim AS teljes
-FROM konyv;
+SELECT vezeteknev, CHAR_LENGTH(vezeteknev) AS hossz
+FROM tanulo;
 ```
 
-Eredmény:
+Ez minden vezetéknév mellé kiírja a hosszát:
 
-| `teljes` |
+| `vezeteknev` | `hossz` |
+|---|---|
+| Kiss | 4 |
+| Nagy | 4 |
+| Tóth | 4 |
+| Szentpéteri | 11 |
+
+Az `LENGTH` függvény neve hasonló, de a MariaDB-ben az **bájtot** számol: az ékezetes betű (például `ó`) két bájt, ezért a `LENGTH('Tóth')` 5 lenne. Karakterszámra mindig a `CHAR_LENGTH`-et használd.
+
+**Próbáld ki:** írd ki a keresztnevek hosszát `hossz` néven.
+
+## Függvény a WHERE-ben
+
+A függvény a `WHERE` feltételben is használható. Keressük azokat, akiknek a vezetékneve **hosszabb 5 karakternél**:
+
+```sql
+SELECT vezeteknev
+FROM tanulo
+WHERE CHAR_LENGTH(vezeteknev) > 5;
+```
+
+A `WHERE` soronként kiszámolja a hosszt, és csak ott engedi át a sort, ahol a feltétel igaz:
+
+| `vezeteknev` |
 |---|
-| Gardonyi Geza: Egri csillagok |
-| Fekete Istvan: Tuskevar |
-| Szabo Magda: Pomade |
+| Szentpéteri |
 
-## REPLACE: csere a szövegben
+Ha egyetlen sor sem felel meg, az eredmény **üres**: nem lesz sem sor, sem fejléc. Ez nem hiba.
 
-A `REPLACE(szöveg, mit, mire)` a szövegben minden `mit` részletet kicserél `mire`-re. A keresés kis- és nagybetű-érzékeny.
+## CONCAT: szövegek összefűzése
+
+A `CONCAT` több szöveget **egymás után fűz**. A zárójelbe vesszővel elválasztva írod a darabokat. A darab lehet oszlop vagy szó aposztrófok között.
+
+Teljes név: vezetéknév, szóköz, keresztnév.
 
 ```sql
-SELECT cim, REPLACE(cim, ' ', '_') AS azonosito
-FROM konyv;
+SELECT CONCAT(vezeteknev, ' ', keresztnev) AS nev
+FROM tanulo;
 ```
 
-Eredmény:
+A `' '` egy szóköz egy aposztrófpárban. Ezt is te írod bele, a `CONCAT` magától nem tesz semmit a darabok közé.
 
-| `cim` | `azonosito` |
+| `nev` |
+|---|
+| Kiss Anna |
+| Nagy Béla |
+| Tóth Csaba |
+| Szentpéteri Zsombor |
+
+Függvényt függvénybe is tehetsz: belülről kifelé értékelődik ki. Kisbetűs felhasználónév:
+
+```sql
+SELECT LCASE(CONCAT(vezeteknev, '.', keresztnev)) AS felhasznalo
+FROM tanulo;
+```
+
+Előbb a `CONCAT` összerakja, hogy `Kiss.Anna`, aztán az `LCASE` kisbetűssé teszi:
+
+| `felhasznalo` |
+|---|
+| kiss.anna |
+| nagy.béla |
+| tóth.csaba |
+| szentpéteri.zsombor |
+
+**Próbáld ki:** írd ki az osztályt és a vezetéknevet egy oszlopban így: `10.A - Kiss`.
+
+## A NULL mindent elront
+
+A `NULL` azt jelenti: "nincs érték". Ha a `CONCAT` egyik darabja `NULL`, az **egész** eredmény `NULL` lesz. Tegyük fel, hogy van egy `becenev` oszlop, és Béla becenevét nem töltötték ki:
+
+| `vezeteknev` | `becenev` |
 |---|---|
-| Egri csillagok | Egri_csillagok |
-| Tuskevar | Tuskevar |
-| Pomade | Pomade |
-
-## ROUND és ABS: számok
-
-A `ROUND(szám, tizedesek)` kerekít. Ha a második értéket elhagyod, egészre kerekít. Az `ABS(szám)` az abszolút értéket adja, vagyis az előjelet elhagyja. Az alábbi példában a `3000` Ft-tól való eltérést számoljuk, irány nélkül.
+| Kiss | Panni |
+| Nagy | NULL |
 
 ```sql
-SELECT cim, ROUND(ertekeles, 1) AS kerekitett, ABS(ar - 3000) AS elteres
-FROM konyv;
+SELECT CONCAT(vezeteknev, ' - ', becenev) AS felirat
+FROM tanulo;
 ```
 
-Eredmény:
+| `felirat` |
+|---|
+| Kiss - Panni |
+| NULL |
 
-| `cim` | `kerekitett` | `elteres` |
-|---|---|---|
-| Egri csillagok | 4.7 | 490 |
-| Tuskevar | 4.3 | 10 |
-| Pomade | 3.9 | 190 |
-
-Vedd észre, hogy a kerekített érték is tizedes alakban jelenik meg (`4.3`). A `ROUND(x, 0)` eredménye is valós szám, például `4.0`.
-
-## És az érettségi MariaDB-je?
-
-Az érettségin MariaDB-t használsz, itt pedig SQLite fut. A függvények nagy része ugyanaz, néhány neve vagy működése eltér:
-
-| Mit csinál | SQLite (itt) | MariaDB (érettségi) |
-|---|---|---|
-| Karakterek száma | `LENGTH(sz)` | `CHAR_LENGTH(sz)` (a MariaDB `LENGTH` a bájtokat számolja, ékezetes betűnél több) |
-| Részlet | `SUBSTR(sz, 1, 3)` | `SUBSTRING(sz, 1, 3)` (a `SUBSTR` is működik) |
-| Összefűzés | `a \|\| b` | `CONCAT(a, b)` (a MariaDB-ben a `\|\|` alapból logikai VAGY!) |
-| Nagy-/kisbetű | `UPPER`, `LOWER` | ugyanaz |
-| Csere | `REPLACE` | ugyanaz |
-| Kerekítés, abszolút érték | `ROUND`, `ABS` | ugyanaz |
-
-A lényeg a gondolkodásmód, a függvény neve egy pillantás a feladatlapon. Az itteni feladatokat SQLite-ban kell megoldani, de tudd, hogyan írnád át MariaDB-re.
+Ez nem hiba, így működik a `NULL`. Fontos, hogy ne lepjen meg. (Hogyan lehet a hiányzó értéket kezelni, azt a feltételes kifejezésnél tanuljuk.)
 
 ## Gyakori hibák
 
-- A `SUBSTR` kezdőpozíciója 1-től indul, nem 0-tól. A `SUBSTR(szerzo, 0, 3)` ezért nem azt adja, amit vársz.
-- Az aposztróf a szöveg határa: `REPLACE(cim, ' ', '_')`. Idézőjel (`"`) nem szöveg-, hanem névjelölő.
-- Elfelejtett alias: a `SELECT UPPER(szerzo)` oszlopneve maga a kifejezés lesz. Adj neki nevet az `AS`-szal.
-- A `REPLACE` kis- és nagybetű-érzékeny: ha az adat vegyes, előbb alakítsd át `LOWER`-rel.
+- **Aposztróf nélküli szöveg.** `CONCAT(vezeteknev, ' ', keresztnev)` a helyes. Ha a szóköz vagy a pont kimarad az aposztrófból, az adatbázis oszlopnevet keres.
+- **Elfelejtett szóköz a `CONCAT`-ban.** A `CONCAT(vezeteknev, keresztnev)` eredménye `KissAnna`.
+- **`LENGTH` a `CHAR_LENGTH` helyett.** Ékezetes szövegnél eltérő számot kapsz.
+- **Hiányzó zárójel.** Minden megnyitott `(`-hez kell egy `)`. Egymásba tett függvénynél különösen figyelj.
+- **Idézőjel az aposztróf helyett.** Szöveghez az aposztróf (`'`) való.
 
 ## Összefoglalás
 
-- A függvény egy értékből újat készít: `függvény(érték)`.
-- Szöveghez: `LENGTH`, `UPPER`, `LOWER`, `SUBSTR`, `REPLACE`, az összefűzéshez `||`.
-- Számhoz: `ROUND(szám, tizedes)`, `ABS(szám)`.
-- A függvények egymásba ágyazhatók, belülről kifelé értékelődnek ki.
-- MariaDB-ben: `CHAR_LENGTH`, `SUBSTRING`, `CONCAT`.
+| Függvény | Mit csinál | Példa | Eredmény |
+|---|---|---|---|
+| `UCASE(s)` | nagybetűssé alakít | `UCASE('Kiss')` | `KISS` |
+| `LCASE(s)` | kisbetűssé alakít | `LCASE('Kiss')` | `kiss` |
+| `CHAR_LENGTH(s)` | a karakterek száma | `CHAR_LENGTH('Kiss')` | `4` |
+| `CONCAT(a, b, ...)` | összefűz | `CONCAT('Ki', 'ss')` | `Kiss` |
+
+Egy függvény bárhol állhat, ahol oszlopnevet írhatnál: a `SELECT` után és a `WHERE`-ben. Az `AS` ad az új oszlopnak nevet. Ha bármelyik `CONCAT`-darab `NULL`, az egész eredmény `NULL`.

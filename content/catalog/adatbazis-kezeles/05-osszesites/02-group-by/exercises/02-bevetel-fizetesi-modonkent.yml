@@ -26,10 +26,10 @@ description: |
 
     | `fizetes` | `osszeg` | `atlag_dij` |
     |---|---|---|
-    | kartya | 21500 | 4300.0 |
-    | keszpenz | 8100 | 2700.0 |
+    | kartya | 21500 | 4300 |
+    | keszpenz | 8100 | 2700 |
 
-    Tipp: a csoportonként számolt értékeket az összesítő függvények adják; a `ROUND(x, 0)` egészre kerekít (de az eredmény még tizedes alakú, pl. `2500.0`).
+    Tipp: a csoportonként számolt értékeket az összesítő függvények adják; a `ROUND(x)` egészre kerekít.
 starter_code:
   sql: |
     SELECT fizetes,
@@ -39,7 +39,7 @@ starter_code:
     GROUP BY fizetes;
 sample_solutions:
   sql: |
-    SELECT fizetes, SUM(dij) AS osszeg, ROUND(AVG(dij), 0) AS atlag_dij
+    SELECT fizetes, SUM(dij) AS osszeg, ROUND(AVG(dij)) AS atlag_dij
     FROM fuvar
     GROUP BY fizetes;
 tests:
@@ -55,8 +55,8 @@ tests:
       INSERT INTO fuvar VALUES (8, 'DEF-456', '2025-01-30 10:20:00', 7, 2800, 'keszpenz', 2);
     expected: |
       fizetes,osszeg,atlag_dij
-      kartya,21500,4300.0
-      keszpenz,8100,2700.0
+      kartya,21500,4300
+      keszpenz,8100,2700
     hidden: false
   - stdin: |
       CREATE TABLE fuvar (id INTEGER PRIMARY KEY, rendszam TEXT, indulas TEXT, km INTEGER, dij INTEGER, fizetes TEXT, ertekeles INTEGER);
@@ -74,8 +74,8 @@ tests:
       INSERT INTO fuvar VALUES (12, 'NOP-222', '2025-04-01 19:59:59', 2, 1300, 'keszpenz', NULL);
     expected: |
       fizetes,osszeg,atlag_dij
-      kartya,23300,4660.0
-      keszpenz,35200,5029.0
+      kartya,23300,4660
+      keszpenz,35200,5029
     hidden: true
   - stdin: |
       CREATE TABLE fuvar (id INTEGER PRIMARY KEY, rendszam TEXT, indulas TEXT, km INTEGER, dij INTEGER, fizetes TEXT, ertekeles INTEGER);
@@ -102,8 +102,8 @@ tests:
       INSERT INTO fuvar VALUES (21, 'CDE-777', '2025-06-02 09:00:00', 3, 1600, 'kartya', 5);
     expected: |
       fizetes,osszeg,atlag_dij
-      kartya,43700,3121.0
-      keszpenz,32200,4600.0
+      kartya,43700,3121
+      keszpenz,32200,4600
     hidden: true
   - stdin: |
       CREATE TABLE fuvar (id INTEGER PRIMARY KEY, rendszam TEXT, indulas TEXT, km INTEGER, dij INTEGER, fizetes TEXT, ertekeles INTEGER);
@@ -120,6 +120,6 @@ tests:
       INSERT INTO fuvar VALUES (11, 'FGH-888', '2025-09-02 10:00:00', 6, 2500, 'keszpenz', 5);
     expected: |
       fizetes,osszeg,atlag_dij
-      kartya,36000,6000.0
-      keszpenz,27200,5440.0
+      kartya,36000,6000
+      keszpenz,27200,5440
     hidden: true

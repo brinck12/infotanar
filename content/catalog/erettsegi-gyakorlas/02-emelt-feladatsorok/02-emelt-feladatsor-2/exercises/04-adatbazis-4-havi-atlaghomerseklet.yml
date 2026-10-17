@@ -15,32 +15,32 @@ description: |-
 
   | oszlop | típus |
   |---|---|
-  | `id` | egész, elsődleges kulcs |
-  | `nev` | szöveg, az állomás neve |
-  | `telepules` | szöveg, a település neve |
-  | `magassag` | egész, a tengerszint feletti magasság méterben |
+  | `id` | `INT`, elsődleges kulcs |
+  | `nev` | `VARCHAR(50)`, az állomás neve |
+  | `telepules` | `VARCHAR(50)`, a település neve |
+  | `magassag` | `INT`, a tengerszint feletti magasság méterben |
 
   A `meres` tábla a napi méréseket tartalmazza:
 
   | oszlop | típus |
   |---|---|
-  | `id` | egész, elsődleges kulcs |
-  | `allomas_id` | egész, az `allomas` tábla `id` oszlopára mutat |
-  | `datum` | szöveg, `ÉÉÉÉ-HH-NN` alakban (pl. `2026-04-14`) |
-  | `homerseklet` | valós szám, a napi középhőmérséklet °C-ban |
-  | `csapadek` | valós szám, a napi csapadék mm-ben (0, ha nem esett) |
-  | `szel` | egész, a legerősebb széllökés km/h-ban |
+  | `id` | `INT`, elsődleges kulcs |
+  | `allomas_id` | `INT`, az `allomas` tábla `id` oszlopára mutat |
+  | `datum` | `DATE` (pl. `2026-04-14`) |
+  | `homerseklet` | `DOUBLE`, a napi középhőmérséklet °C-ban |
+  | `csapadek` | `DOUBLE`, a napi csapadék mm-ben (0, ha nem esett) |
+  | `szel` | `INT`, a legerősebb széllökés km/h-ban |
 
   **4. feladat.** Adja meg hónaponként az összes mérés átlagos hőmérsékletét, egy tizedesjegyre kerekítve! A lekérdezés a hónap `ÉÉÉÉ-HH` alakját (`honap`) és az átlagot (`atlag`) adja, hónap szerint növekvő sorrendben! (4 pont)
 
-  Tipp: a dátum első hét karaktere a hónap: `SUBSTR(datum, 1, 7)`; a kerekítés `ROUND(érték, 1)`. A MariaDB-ben ugyanez `LEFT(datum, 7)` is lehetne.
+  Tipp: a dátum első hét karaktere a hónap: `LEFT(datum, 7)` (például `2026-04-14` esetén `2026-04`); a kerekítés `ROUND(érték, 1)`. Ugyanezt adja a `DATE_FORMAT(datum, '%Y-%m')` is.
 starter_code:
-  sql: "SELECT SUBSTR(datum, 1, 7) AS honap, ROUND(, 1) AS atlag\nFROM meres\nGROUP BY \nORDER BY ;\n"
+  sql: "SELECT LEFT(datum, 7) AS honap, ROUND(, 1) AS atlag\nFROM meres\nGROUP BY \nORDER BY ;\n"
 sample_solutions:
   sql: |
-    SELECT SUBSTR(datum, 1, 7) AS honap, ROUND(AVG(homerseklet), 1) AS atlag
+    SELECT LEFT(datum, 7) AS honap, ROUND(AVG(homerseklet), 1) AS atlag
     FROM meres
-    GROUP BY SUBSTR(datum, 1, 7)
+    GROUP BY LEFT(datum, 7)
     ORDER BY honap;
 tests:
 - stdin: |

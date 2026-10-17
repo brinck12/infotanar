@@ -15,24 +15,24 @@ description: |
 
   | oszlop | típus |
   |---|---|
-  | `id` | egész, elsődleges kulcs |
-  | `nev` | szöveg |
-  | `szuletes` | egész, a születési év |
-  | `angol` | egész: 1, ha beszél angolul, különben 0 |
-  | `nemet` | egész: 1, ha beszél németül, különben 0 |
-  | `engedely_ev` | egész, a taxis engedély megszerzésének éve |
+  | `id` | `INT`, elsődleges kulcs |
+  | `nev` | `VARCHAR(50)` |
+  | `szuletes` | `INT`, a születési év |
+  | `angol` | `INT`: 1, ha beszél angolul, különben 0 |
+  | `nemet` | `INT`: 1, ha beszél németül, különben 0 |
+  | `engedely_ev` | `INT`, a taxis engedély megszerzésének éve |
 
   A `fuvar` tábla a megtett fuvarokat:
 
   | oszlop | típus |
   |---|---|
-  | `id` | egész, elsődleges kulcs |
-  | `sofor_id` | egész, a `sofor` tábla `id` oszlopára mutat |
-  | `rendszam` | szöveg, az autó rendszáma (pl. `KMB-217`) |
-  | `datum` | szöveg (ÉÉÉÉ-HH-NN) |
-  | `km` | egész, a megtett út kilométerben |
-  | `ar` | egész, a fuvar ára forintban |
-  | `fizetes` | szöveg: `kartya` vagy `keszpenz` |
+  | `id` | `INT`, elsődleges kulcs |
+  | `sofor_id` | `INT`, a `sofor` tábla `id` oszlopára mutat |
+  | `rendszam` | `VARCHAR(10)`, az autó rendszáma (pl. `KMB-217`) |
+  | `datum` | `DATE` |
+  | `km` | `INT`, a megtett út kilométerben |
+  | `ar` | `INT`, a fuvar ára forintban |
+  | `fizetes` | `VARCHAR(10)`: `kartya` vagy `keszpenz` |
 
   **7. feladat.** Adja meg lekérdezéssel sofőrönként az összes bevételt (**nev, bevetel**)! A `bevetel` a sofőr fuvarainak árösszege legyen. A találatokat rendezze **bevétel szerint csökkenően**, azonos bevételnél a név szerint ábécérendbe!
 starter_code:

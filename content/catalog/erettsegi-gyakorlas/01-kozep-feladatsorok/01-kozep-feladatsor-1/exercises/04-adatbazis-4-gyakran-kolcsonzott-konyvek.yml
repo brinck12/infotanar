@@ -15,22 +15,22 @@ description: |-
 
   | oszlop | típus |
   |---|---|
-  | `id` | egész, elsődleges kulcs |
-  | `cim` | szöveg, a könyv címe |
-  | `szerzo` | szöveg |
-  | `ev` | egész, a kiadás éve |
-  | `oldal` | egész, az oldalszám |
-  | `mufaj` | szöveg (`regeny`, `ifjusagi`, `ismeretterjeszto`, `mese`, `vers`) |
+  | `id` | `INT`, elsődleges kulcs |
+  | `cim` | `VARCHAR(50)`, a könyv címe |
+  | `szerzo` | `VARCHAR(50)` |
+  | `ev` | `INT`, a kiadás éve |
+  | `oldal` | `INT`, az oldalszám |
+  | `mufaj` | `VARCHAR(20)` (`regeny`, `ifjusagi`, `ismeretterjeszto`, `mese`, `vers`) |
 
   A `kolcsonzes` tábla:
 
   | oszlop | típus |
   |---|---|
-  | `id` | egész, elsődleges kulcs |
-  | `konyv_id` | egész, a `konyv` tábla `id` oszlopára mutat |
-  | `olvaso` | szöveg, az olvasó neve |
-  | `datum` | szöveg, `ÉÉÉÉ-HH-NN` alakban (pl. `2025-10-14`) |
-  | `napok` | egész, a kölcsönzési idő napokban |
+  | `id` | `INT`, elsődleges kulcs |
+  | `konyv_id` | `INT`, a `konyv` tábla `id` oszlopára mutat |
+  | `olvaso` | `VARCHAR(50)`, az olvasó neve |
+  | `datum` | `DATE` (pl. `2025-10-14`) |
+  | `napok` | `INT`, a kölcsönzési idő napokban |
 
   **4. feladat.** Adja meg azokat a könyveket, amelyeket **legalább háromszor** kölcsönöztek ki! Az eredmény két oszlopa: a könyv címe `cim` néven és a kölcsönzések száma `alkalom` néven. A sorrend: alkalom szerint csökkenően, azonos számnál cím szerint növekvően.
 

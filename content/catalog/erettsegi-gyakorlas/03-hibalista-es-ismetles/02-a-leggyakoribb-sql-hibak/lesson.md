@@ -26,9 +26,9 @@ Az SQL-lekérdezések hibái kétfélék lehetnek. Az egyik **hibaüzenetet** ad
 
 **Rendezés rossz irányban.** Az `ORDER BY` alapértelmezetten **növekvő**. A legnagyobbakat a `DESC` kulcsszóval kapod: `ORDER BY pont DESC LIMIT 3`.
 
-## Az érettségi MariaDB-je és a platform SQLite-ja
+## Hasznos MariaDB-függvények
 
-Ezek a hibák mindkét rendszerben ugyanúgy jelentkeznek. A különbség a függvényekben van: az érettségin használt MariaDB-ben például van `IF(...)`, `CONCAT(...)` és `YEAR(...)`. A platform kódfuttatója SQLite, ezért itt a feladatok alap SQL-ben íródtak. Az érettségin azt használd, amit a feladat megad.
+A fenti hibák minden SQL-ben ugyanúgy jelentkeznek. A MariaDB néhány hasznos függvénye: `IF(feltétel, igen, nem)`, `CONCAT(a, b)` az összefűzésre és `YEAR(datum)` az évszámra. Például a `YEAR('2026-03-05')` értéke `2026`, a `CONCAT('Kiss', ' ', 'Anna')` értéke `Kiss Anna`. Az érettségin azt használd, amit a feladat megad.
 
 ## Hogyan dolgozz a feladatokkal?
 

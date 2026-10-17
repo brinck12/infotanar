@@ -13,11 +13,11 @@ description: |
 
   | oszlop | típus |
   |---|---|
-  | `id` | egész, elsődleges kulcs |
-  | `nev` | szöveg |
-  | `kategoria` | szöveg |
-  | `ar` | egész (Ft) |
-  | `keszlet` | egész (darab) |
+  | `id` | `INT`, elsődleges kulcs |
+  | `nev` | `VARCHAR(50)` |
+  | `kategoria` | `VARCHAR(20)` |
+  | `ar` | `INT` (Ft) |
+  | `keszlet` | `INT` (darab) |
 
   Töröld a táblából azokat a termékeket, amelyekből **elfogyott a készlet** (a `keszlet` értéke 0)! A többi sor maradjon érintetlen.
 

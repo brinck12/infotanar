@@ -2,7 +2,7 @@
 slug: formazas-es-szerkezet
 title: Formázás és szerkezet
 position: 1
-free: false
+free: true
 published: false
 reviewed_by:
 reviewed_at:

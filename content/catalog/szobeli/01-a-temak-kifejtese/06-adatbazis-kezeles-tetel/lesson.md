@@ -14,7 +14,7 @@ Az adatbázis-kezelés tételben a relációs modellt, a kulcsokat, a táblák k
 
 ## Kulcsfogalmak és pontos definíciók
 
-- **Adatbázis**: logikailag összetartozó adatok rendezett, tartós tárolása. **Adatbázis-kezelő rendszer (DBMS)**: a tárolást, lekérdezést, hozzáférés-védelmet végző szoftver (MariaDB, MySQL, SQLite).
+- **Adatbázis**: logikailag összetartozó adatok rendezett, tartós tárolása. **Adatbázis-kezelő rendszer (DBMS)**: a tárolást, lekérdezést, hozzáférés-védelmet végző szoftver (például MariaDB, MySQL, PostgreSQL).
 - **Relációs modell**: az adatokat táblák (relációk) tárolják. A **tábla** sorai a **rekordok** (egy entitás példányai), oszlopai a **mezők** (attribútumok).
 - **Elsődleges kulcs (PK)**: olyan mező vagy mezőcsoport, amely a tábla minden sorát egyértelműen azonosítja; nem lehet üres és nem ismétlődhet.
 - **Idegen kulcs (FK)**: egy másik tábla elsődleges kulcsára hivatkozó mező; ez hozza létre a kapcsolatot.
@@ -36,9 +36,32 @@ UPDATE tanulo SET pont = 80 WHERE id = 3;
 DELETE FROM tanulo WHERE id = 3;
 ```
 
+A tábla szerkezetét az adatdefiníciós utasítások hozzák létre. MariaDB-ben:
+
+```text
+CREATE DATABASE iskola;
+USE iskola;
+CREATE TABLE osztaly (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  nev VARCHAR(10) NOT NULL
+) ENGINE=InnoDB;
+CREATE TABLE tanulo (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  nev VARCHAR(50) NOT NULL,
+  szuletes DATE,
+  osztaly_id INT NOT NULL,
+  FOREIGN KEY (osztaly_id) REFERENCES osztaly(id)
+) ENGINE=InnoDB;
+ALTER TABLE tanulo ADD email VARCHAR(60);
+TRUNCATE TABLE tanulo;
+DROP TABLE tanulo;
+```
+
+Az `INT AUTO_INCREMENT PRIMARY KEY` automatikusan számozott kulcs, a `VARCHAR(n)` legfeljebb `n` karakteres szöveg, a `DATE` dátum (`'2008-05-17'` alakban). Az `ENGINE=InnoDB` motor ismeri az idegen kulcsot. A `TRUNCATE TABLE` az összes sort törli, a `DROP TABLE` magát a táblát is.
+
 A `WHERE` a sorokat szűri csoportosítás előtt, a `HAVING` a csoportokat utána. Az összesítő függvények: `COUNT`, `SUM`, `AVG`, `MIN`, `MAX`. A `JOIN` a kulcsok mentén kapcsolja össze a táblákat. A `DELETE` és az `UPDATE` `WHERE` nélkül az egész táblára hat, ezért veszélyes.
 
-Az SQL nyelvjárásai kismértékben eltérnek (az érettségi MariaDB-t használ, például `CONCAT`, `YEAR`, `IF`). A lényeg, a szerkezet, azonos.
+Az érettségi MariaDB-t használ, ennek hasznos függvényei például a `CONCAT`, a `YEAR`, az `IF` és a `ROUND`. A `/` osztás tört eredményt ad: `7 / 2` értéke `3.5`.
 
 ## A kifejtés javasolt sorrendje
 
@@ -47,7 +70,7 @@ Az SQL nyelvjárásai kismértékben eltérnek (az érettségi MariaDB-t haszná
 3. **Kulcsok**: elsődleges és idegen kulcs.
 4. **Kapcsolatok**: 1:N, N:M és ábrázolásuk (egyedkapcsolati ábra).
 5. **Tervezés és normalizálás röviden**: első, második, harmadik normálforma lényege egy példán.
-6. **SQL**: lekérdezés (SELECT), módosítás (INSERT, UPDATE, DELETE), JOIN, csoportosítás.
+6. **SQL**: szerkezet (CREATE TABLE), lekérdezés (SELECT), módosítás (INSERT, UPDATE, DELETE), JOIN, csoportosítás.
 7. **Adatbiztonság**: jogosultságok, mentés, tranzakció (röviden).
 8. **Összegzés**: az űrlap, lekérdezés, jelentés mint felhasználói felület.
 

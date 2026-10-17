@@ -15,39 +15,39 @@ description: |
 
   | oszlop | típus |
   |---|---|
-  | `id` | egész, elsődleges kulcs |
-  | `nev` | szöveg, a légitársaság neve |
-  | `orszag` | szöveg, a székhely országa |
+  | `id` | `INT`, elsődleges kulcs |
+  | `nev` | `VARCHAR(50)`, a légitársaság neve |
+  | `orszag` | `VARCHAR(50)`, a székhely országa |
 
   A `gep` tábla (a repülőgéptípusok):
 
   | oszlop | típus |
   |---|---|
-  | `id` | egész, elsődleges kulcs |
-  | `tipus` | szöveg, a gép típusa |
-  | `ferohely` | egész, az ülőhelyek száma |
+  | `id` | `INT`, elsődleges kulcs |
+  | `tipus` | `VARCHAR(20)`, a gép típusa |
+  | `ferohely` | `INT`, az ülőhelyek száma |
 
   A `jarat` tábla:
 
   | oszlop | típus |
   |---|---|
-  | `id` | egész, elsődleges kulcs |
-  | `szam` | szöveg, a járatszám (pl. `MA1017`) |
-  | `legitarsasag_id` | egész, a `legitarsasag` tábla `id` oszlopára mutat |
-  | `cel` | szöveg, a célállomás neve |
-  | `tav` | egész, a távolság kilométerben |
+  | `id` | `INT`, elsődleges kulcs |
+  | `szam` | `VARCHAR(10)`, a járatszám (pl. `MA1017`) |
+  | `legitarsasag_id` | `INT`, a `legitarsasag` tábla `id` oszlopára mutat |
+  | `cel` | `VARCHAR(50)`, a célállomás neve |
+  | `tav` | `INT`, a távolság kilométerben |
 
   Az `indulas` tábla (egy hónap tényleges indulásai):
 
   | oszlop | típus |
   |---|---|
-  | `id` | egész, elsődleges kulcs |
-  | `jarat_id` | egész, a `jarat` tábla `id` oszlopára mutat |
-  | `gep_id` | egész, a `gep` tábla `id` oszlopára mutat |
-  | `nap` | egész, a hónap napja (1–30) |
-  | `ido` | szöveg, az indulás `ÓÓ:PP` alakban |
-  | `utas` | egész, a felszálló utasok száma |
-  | `keses` | egész, a késés percben (0, ha pontosan indult) |
+  | `id` | `INT`, elsődleges kulcs |
+  | `jarat_id` | `INT`, a `jarat` tábla `id` oszlopára mutat |
+  | `gep_id` | `INT`, a `gep` tábla `id` oszlopára mutat |
+  | `nap` | `INT`, a hónap napja (1–30) |
+  | `ido` | `VARCHAR(5)`, az indulás `ÓÓ:PP` alakban |
+  | `utas` | `INT`, a felszálló utasok száma |
+  | `keses` | `INT`, a késés percben (0, ha pontosan indult) |
 
   **7. feladat.** Adja meg azokat a célállomásokat, ahová a hónapban **legalább két különböző légitársaság** indított járatot (tényleges indulás alapján)! A lekérdezés három oszlopot adjon `cel`, `tarsasagok` és `indulasok` néven (a különböző társaságok és az összes indulás száma), a sorok társaságok száma szerint csökkenő, azonos értéknél célállomás szerint növekvő sorrendben jöjjenek!
 

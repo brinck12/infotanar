@@ -14,26 +14,26 @@ description: |
 
   | oszlop | típus |
   |---|---|
-  | `id` | egész, elsődleges kulcs |
-  | `nev` | szöveg (pl. `vigjatek`, `drama`, `akcio`, `scifi`, `animacio`) |
+  | `id` | `INT`, elsődleges kulcs |
+  | `nev` | `VARCHAR(50)` (pl. `vigjatek`, `drama`, `akcio`, `scifi`, `animacio`) |
 
   A `film` tábla:
 
   | oszlop | típus |
   |---|---|
-  | `id` | egész, elsődleges kulcs |
-  | `cim` | szöveg |
-  | `ev` | egész, a bemutató éve |
-  | `hossz` | egész, a játékidő percben |
-  | `mufaj_id` | egész, a `mufaj` tábla `id` oszlopára mutat |
-  | `ertekeles` | egész, 1 és 10 között |
+  | `id` | `INT`, elsődleges kulcs |
+  | `cim` | `VARCHAR(50)` |
+  | `ev` | `INT`, a bemutató éve |
+  | `hossz` | `INT`, a játékidő percben |
+  | `mufaj_id` | `INT`, a `mufaj` tábla `id` oszlopára mutat |
+  | `ertekeles` | `INT`, 1 és 10 között |
 
   **4. feladat.** Adja meg lekérdezéssel a **vígjátékok** (`vigjatek` műfajú filmek) átlagos játékidejét percben, **egész számra kerekítve**! A lekérdezés egyetlen oszlopot adjon, amelynek neve `atlag`. A műfaj nevét a `mufaj` táblából kell kiolvasni, ezért kapcsolja össze a két táblát!
 starter_code:
-  sql: "SELECT CAST(ROUND(AVG(film.hossz)) AS INTEGER) AS atlag\nFROM film INNER JOIN mufaj ON \nWHERE ;\n"
+  sql: "SELECT ROUND(AVG(film.hossz)) AS atlag\nFROM film INNER JOIN mufaj ON \nWHERE ;\n"
 sample_solutions:
   sql: |
-    SELECT CAST(ROUND(AVG(film.hossz)) AS INTEGER) AS atlag
+    SELECT ROUND(AVG(film.hossz)) AS atlag
     FROM film INNER JOIN mufaj ON film.mufaj_id = mufaj.id
     WHERE mufaj.nev = 'vigjatek';
 tests:

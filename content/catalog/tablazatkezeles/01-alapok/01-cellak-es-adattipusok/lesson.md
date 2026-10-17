@@ -2,7 +2,7 @@
 slug: cellak-es-adattipusok
 title: Cellák és adattípusok
 position: 0
-free: false
+free: true
 published: false
 reviewed_by:
 reviewed_at:

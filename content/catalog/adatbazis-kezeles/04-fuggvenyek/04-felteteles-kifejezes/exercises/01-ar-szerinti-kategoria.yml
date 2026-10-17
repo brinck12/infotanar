@@ -1,0 +1,81 @@
+slug: ar-szerinti-kategoria
+title: Ár szerinti kategória
+position: 1
+kind: sql
+level: kozep
+difficulty: 2
+published: false
+allowed_languages: [sql]
+description: |
+    Sorold kategóriába a termékeket: 500 Ft alatt `olcso`, 500 Ft-tól 5000 Ft alatt `kozepes`, 5000 Ft-tól `draga`. Listázd a nevet (`nev`), az árat (`ar`) és a kategóriát (`kategoria`).
+
+    A `termek` tábla:
+
+    | `id` | `nev` | `ar` |
+    |---|---|---|
+    | 1 | Fuzet | 390 |
+    | 2 | Tolltarto | 1290 |
+    | 3 | Iskolataska | 8990 |
+
+    Az eredmény ezekre az adatokra:
+
+    | `nev` | `ar` | `kategoria` |
+    |---|---|---|
+    | Fuzet | 390 | olcso |
+    | Tolltarto | 1290 | kozepes |
+    | Iskolataska | 8990 | draga |
+
+    Tipp: két `IF` kell egymásba ágyazva: a külső a hamis ágában tartalmazza a másikat.
+starter_code:
+  sql: |
+    SELECT nev, ar, IF(ar < 500, 'olcso', IF(..., ..., ...)) AS kategoria
+    FROM termek;
+sample_solutions:
+  sql: |
+    SELECT nev, ar, IF(ar < 500, 'olcso', IF(ar < 5000, 'kozepes', 'draga')) AS kategoria
+    FROM termek;
+tests:
+  - stdin: |
+      CREATE TABLE termek (id INT, nev VARCHAR(30), ar INT);
+      INSERT INTO termek VALUES (1, 'Fuzet', 390);
+      INSERT INTO termek VALUES (2, 'Tolltarto', 1290);
+      INSERT INTO termek VALUES (3, 'Iskolataska', 8990);
+    expected: |
+      nev,ar,kategoria
+      Fuzet,390,olcso
+      Tolltarto,1290,kozepes
+      Iskolataska,8990,draga
+    hidden: false
+  - stdin: |
+      CREATE TABLE termek (id INT, nev VARCHAR(30), ar INT);
+      INSERT INTO termek VALUES (4, 'Ceruza', 499);
+      INSERT INTO termek VALUES (5, 'Szotar', 500);
+      INSERT INTO termek VALUES (6, 'Hatizsak', 4999);
+      INSERT INTO termek VALUES (7, 'Tablet', 5000);
+    expected: |
+      nev,ar,kategoria
+      Ceruza,499,olcso
+      Szotar,500,kozepes
+      Hatizsak,4999,kozepes
+      Tablet,5000,draga
+    hidden: true
+  - stdin: |
+      CREATE TABLE termek (id INT, nev VARCHAR(30), ar INT);
+      INSERT INTO termek VALUES (1, 'Fuzet', 390);
+      INSERT INTO termek VALUES (8, 'Laptop', 189900);
+    expected: |
+      nev,ar,kategoria
+      Fuzet,390,olcso
+      Laptop,189900,draga
+    hidden: true
+  - stdin: |
+      CREATE TABLE termek (id INT, nev VARCHAR(30), ar INT);
+      INSERT INTO termek VALUES (4, 'Ceruza', 499);
+      INSERT INTO termek VALUES (5, 'Szotar', 500);
+      INSERT INTO termek VALUES (7, 'Tablet', 5000);
+    expected: |
+      nev,ar,kategoria
+      Ceruza,499,olcso
+      Szotar,500,kozepes
+      Tablet,5000,draga
+    hidden: true

@@ -39,7 +39,7 @@ SET ar = ar * 110 / 100
 WHERE kategoria = 'tej';
 ```
 
-A `tej` kategória minden termékének ára 10%-kal nő (330-ból 363, 1900-ból 2090). A jobb oldali `ar` a **régi** értéket jelenti. A szorzás előbb, az osztás utána fut, így egész árak esetén nincs tizedes bonyodalom.
+A `tej` kategória minden termékének ára 10%-kal nő (330-ból 363, 1900-ból 2090). A jobb oldali `ar` a **régi** értéket jelenti. A MariaDB-ben a `/` osztás tizedes eredményt ad (például `7 / 2` értéke `3.5`), ezért a számítás eredménye itt `363.0000` alakú szám. Az `ar` oszlop `INT` típusú, így az érték egész számra kerekítve kerül vissza; ebben a példában az eredmény pontosan egész.
 
 **Próbáld ki:** csökkentsd 50 Ft-tal a pékáruk árát (`ar = ar - 50`)!
 

@@ -13,9 +13,9 @@ description: |
 
   | oszlop | típus |
   |---|---|
-  | `id` | egész, elsődleges kulcs |
-  | `olvaso` | szöveg (az olvasó neve) |
-  | `konyv_id` | egész |
+  | `id` | `INT`, elsődleges kulcs |
+  | `olvaso` | `VARCHAR(50)` (az olvasó neve) |
+  | `konyv_id` | `INT` |
 
   Add meg az olvasó nevét (`olvaso`) és a kölcsönzései számát (`db`)! A sorok sorrendje nem számít.
 

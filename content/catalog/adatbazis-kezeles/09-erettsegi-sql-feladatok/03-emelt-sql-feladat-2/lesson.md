@@ -54,7 +54,7 @@ WHERE (SELECT COUNT(*) FROM jegy WHERE jegy.rendezveny_id = rendezveny.id) * 2 <
 
 Az allekérdezés a külső sor `rendezveny.id` értékére hivatkozik (korreláció), ezért a nulla jegyű rendezvény is megjelenik: számára a `COUNT(*)` értéke 0. Ezt `INNER JOIN`-nal nem lehetne ilyen egyszerűen megoldani: ott a rendezvény sora a jegyek hiányában elveszne.
 
-Az eladott jegyek számának és a kapacitás felének összevetésekor az egész osztás elkerülésére szorozunk: `db * 2 < kapacitas`, nem `db < kapacitas / 2`.
+Az eladott jegyek számának és a kapacitás felének összevetése kétféleképpen írható: `db * 2 < kapacitas` vagy `db < kapacitas / 2`. A MariaDB-ben a `/` tört eredményt ad (`15 / 2` értéke `7.5`), ezért a két forma ugyanazt az eredményt adja.
 
 ### Százalék csoportonként
 
@@ -62,13 +62,13 @@ A kihasználtság százalékban egy csoportonkénti hányados:
 
 ```sql
 SELECT rendezveny.nev,
-       CAST(ROUND(100.0 * COUNT(jegy.id) / rendezveny.kapacitas) AS INTEGER) AS szazalek
+       ROUND(100 * COUNT(jegy.id) / rendezveny.kapacitas) AS szazalek
 FROM rendezveny INNER JOIN jegy ON jegy.rendezveny_id = rendezveny.id
 GROUP BY rendezveny.id, rendezveny.nev, rendezveny.kapacitas
 ORDER BY szazalek DESC, rendezveny.nev;
 ```
 
-Figyeld meg, hogy a `kapacitas` is szerepel a `GROUP BY` után: az összesítő mellé kitett, nem összesített oszlopnak a csoportosításban kell lennie (a MariaDB a szigorú módban ezt megköveteli).
+Figyeld meg, hogy a `kapacitas` is szerepel a `GROUP BY` után: az összesítő mellé kitett, nem összesített oszlopnak a csoportosításban kell lennie (a szigorú, `ONLY_FULL_GROUP_BY` módban a MariaDB ezt meg is követeli).
 
 ## Munkamenet az érettségin
 
@@ -81,7 +81,7 @@ Figyeld meg, hogy a `kapacitas` is szerepel a `GROUP BY` után: az összesítő 
 ## Gyakori hibák
 
 - **`INNER JOIN` a nulla jegyű rendezvényre:** a "bármelyik rendezvény" kérdéshez allekérdezés vagy `LEFT JOIN` kell.
-- **Egész osztás:** a százalékhoz mindig `100.0 *`.
+- **Kerekítés elhagyása:** a százalék `100 * rész / összes`, és ha a feladat egész százalékot kér, tedd `ROUND(...)`-ba.
 - **Határok:** a `BETWEEN` mindkét végpontot tartalmazza; a dátumot `'2026-04-01'` alakban add meg.
 - **`DISTINCT` hiánya:** ha egy vevő több jegyet vett, a neve többször szerepel.
 - **Csökkenő sorrend egyenlőség esetén:** a feladat másodlagos kulcsot kér, ezt ne hagyd el.
@@ -92,4 +92,4 @@ Figyeld meg, hogy a `kapacitas` is szerepel a `GROUP BY` után: az összesítő 
 - A második emelt feladatsor ugyanazt a 8 típust gyakoroltatja új adatbázison: a felismerés a lényeg.
 - A feltételes számlálás `SUM(CASE WHEN ... THEN 1 ELSE 0 END)`.
 - A számított összehasonlításhoz (eladott jegyek a kapacitáshoz) korrelált allekérdezés kell; így a nulla jegyű rendezvény is szerepel.
-- A százalékhoz `100.0 *`, a csoportonkénti hányadosnál a csoportosításban minden nem összesített oszlop szerepeljen.
+- A százalék `ROUND(100 * rész / összes)`, a csoportonkénti hányadosnál a csoportosításban minden nem összesített oszlop szerepeljen.

@@ -14,22 +14,22 @@ description: |
 
   | oszlop | típus |
   |---|---|
-  | `id` | egész, elsődleges kulcs |
-  | `nev` | szöveg |
-  | `helyszin` | szöveg (város) |
-  | `datum` | szöveg (ÉÉÉÉ-HH-NN) |
-  | `kapacitas` | egész, a férőhelyek száma |
+  | `id` | `INT`, elsődleges kulcs |
+  | `nev` | `VARCHAR(50)` |
+  | `helyszin` | `VARCHAR(30)` (város) |
+  | `datum` | `DATE` |
+  | `kapacitas` | `INT`, a férőhelyek száma |
 
   A `jegy` tábla az eladott jegyeket:
 
   | oszlop | típus |
   |---|---|
-  | `id` | egész, elsődleges kulcs |
-  | `rendezveny_id` | egész, a `rendezveny` tábla `id` oszlopára mutat |
-  | `vevo` | szöveg, a vásárló neve |
-  | `kategoria` | szöveg: `allo`, `ules` vagy `vip` |
-  | `ar` | egész, a jegy ára forintban |
-  | `vasarlas` | szöveg, a vásárlás napja (ÉÉÉÉ-HH-NN) |
+  | `id` | `INT`, elsődleges kulcs |
+  | `rendezveny_id` | `INT`, a `rendezveny` tábla `id` oszlopára mutat |
+  | `vevo` | `VARCHAR(50)`, a vásárló neve |
+  | `kategoria` | `VARCHAR(20)`: `allo`, `ules` vagy `vip` |
+  | `ar` | `INT`, a jegy ára forintban |
+  | `vasarlas` | `DATE`, a vásárlás napja |
 
   **5. feladat.** Adja meg lekérdezéssel, hogy hány jegyet vásároltak **2026. április 1. és április 30. között** (a határnapokat is beleértve), **5000 és 10 000 Ft közötti áron** (a határokat is beleértve)! Az eredmény egyetlen oszlop legyen, `darab` néven.
 starter_code:

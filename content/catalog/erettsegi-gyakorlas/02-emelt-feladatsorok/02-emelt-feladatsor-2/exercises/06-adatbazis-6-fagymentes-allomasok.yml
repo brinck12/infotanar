@@ -15,21 +15,21 @@ description: |-
 
   | oszlop | típus |
   |---|---|
-  | `id` | egész, elsődleges kulcs |
-  | `nev` | szöveg, az állomás neve |
-  | `telepules` | szöveg, a település neve |
-  | `magassag` | egész, a tengerszint feletti magasság méterben |
+  | `id` | `INT`, elsődleges kulcs |
+  | `nev` | `VARCHAR(50)`, az állomás neve |
+  | `telepules` | `VARCHAR(50)`, a település neve |
+  | `magassag` | `INT`, a tengerszint feletti magasság méterben |
 
   A `meres` tábla a napi méréseket tartalmazza:
 
   | oszlop | típus |
   |---|---|
-  | `id` | egész, elsődleges kulcs |
-  | `allomas_id` | egész, az `allomas` tábla `id` oszlopára mutat |
-  | `datum` | szöveg, `ÉÉÉÉ-HH-NN` alakban (pl. `2026-04-14`) |
-  | `homerseklet` | valós szám, a napi középhőmérséklet °C-ban |
-  | `csapadek` | valós szám, a napi csapadék mm-ben (0, ha nem esett) |
-  | `szel` | egész, a legerősebb széllökés km/h-ban |
+  | `id` | `INT`, elsődleges kulcs |
+  | `allomas_id` | `INT`, az `allomas` tábla `id` oszlopára mutat |
+  | `datum` | `DATE` (pl. `2026-04-14`) |
+  | `homerseklet` | `DOUBLE`, a napi középhőmérséklet °C-ban |
+  | `csapadek` | `DOUBLE`, a napi csapadék mm-ben (0, ha nem esett) |
+  | `szel` | `INT`, a legerősebb széllökés km/h-ban |
 
   **6. feladat.** Adja meg azoknak az állomásoknak a nevét (`nev`), amelyeknél **nincs olyan mérés, amelyen a hőmérséklet 0 °C alatti**. Az olyan állomás is szerepeljen, amelynek még egyáltalán nincs mérése. A sorok név szerint növekvő sorrendben jöjjenek! (5 pont)
 

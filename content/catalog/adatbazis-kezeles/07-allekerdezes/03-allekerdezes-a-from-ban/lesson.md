@@ -53,7 +53,7 @@ FROM (SELECT datum, SUM(db * egysegar) AS napi
 |---|
 | 800 |
 
-A belső lekérdezés egy ideiglenes táblát hoz létre `datum` és `napi` oszlopokkal, a külső ebből keresi a legkisebb értéket. A zárójel utáni `AS n` a származtatott tábla **neve**: a MariaDB megköveteli (nélküle hibaüzenetet kapsz), az SQLite nem, de szokjuk meg mindig kiírni. Az `AS` szó elhagyható, de a név nem.
+A belső lekérdezés egy ideiglenes táblát hoz létre `datum` és `napi` oszlopokkal, a külső ebből keresi a legkisebb értéket. A zárójel utáni `AS n` a származtatott tábla **neve**: a MariaDB megköveteli, nélküle hibaüzenetet kapsz, ezért mindig írd ki. Az `AS` szó elhagyható, de a név nem.
 
 **Próbáld ki:** cseréld a `MIN`-t `MAX`-ra, és nézd meg, melyik volt a legerősebb nap összege!
 
@@ -68,7 +68,7 @@ FROM (SELECT datum, SUM(db * egysegar) AS napi
 
 A napi összegek átlaga `(1300 + 800 + 1200) / 3 = 1100`. Fontos a különbség: az `AVG(db * egysegar)` a **tételek** átlagát adná, nem a napokét. A származtatott tábla azért kell, hogy az átlag a napi összegekből készüljön.
 
-A `ROUND` az SQLite-ban lebegőpontos számot ad (`1100.0`). Ha egész szám kell, tedd köré a `CAST(... AS INTEGER)` átalakítást: `CAST(ROUND(AVG(napi)) AS INTEGER)`.
+Az egy paraméteres `ROUND` egész számra kerekít, ezért az eredmény `1100`.
 
 ## Melyik nap volt a legkisebb?
 

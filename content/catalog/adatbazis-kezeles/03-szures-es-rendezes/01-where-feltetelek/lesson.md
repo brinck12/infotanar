@@ -70,7 +70,7 @@ WHERE osztaly = '10.A';
 
 Aposztróf nélkül az adatbázis a `10.A`-t mezőnévnek venné, és hibát jelezne. A számot viszont **nem** tesszük aposztrófba: `pont >= 50`.
 
-A szöveg összehasonlítása az SQLite-ban nagybetű-érzékeny (`'10.a'` nem egyenlő a `'10.A'`-val), a MariaDB-ben alapból nem az. A biztonság kedvéért a szöveget úgy írd, ahogy az adatban szerepel.
+A biztonság kedvéért a szöveget pontosan úgy írd, ahogy az adatban szerepel (`'10.A'`, nem `'10.a'`).
 
 ## Szűrés olyan mezőre, amit nem kérdezel le
 

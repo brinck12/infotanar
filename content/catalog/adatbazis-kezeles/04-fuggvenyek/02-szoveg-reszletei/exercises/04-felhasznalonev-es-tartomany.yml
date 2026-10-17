@@ -1,0 +1,83 @@
+slug: felhasznalonev-es-tartomany
+title: Felhasználónév és tartomány
+position: 4
+kind: sql
+level: kozep
+difficulty: 4
+published: false
+allowed_languages: [sql]
+description: |
+    Az e-mail-cím a `@` jelnél két részre bontható. Listázd az ügyfél nevét (`nev`), a `@` előtti részt (`felhasznalo`) és a `@` utáni részt (`tartomany`).
+
+    A `ugyfel` tábla:
+
+    | `id` | `nev` | `email` |
+    |---|---|---|
+    | 1 | Kiss Anna | kiss.anna@suli.hu |
+    | 2 | Nagy Bela | nb@gmail.com |
+    | 3 | Toth Csaba | csaba.toth@freemail.hu |
+
+    Az eredmény ezekre az adatokra:
+
+    | `nev` | `felhasznalo` | `tartomany` |
+    |---|---|---|
+    | Kiss Anna | kiss.anna | suli.hu |
+    | Nagy Bela | nb | gmail.com |
+    | Toth Csaba | csaba.toth | freemail.hu |
+
+    Tipp: a `LOCATE('@', email)` megadja a `@` helyét. Az előtte lévő rész hossza ennél eggyel kisebb; a utána lévő rész a hely + 1-től a végéig tart (a hossz elhagyható).
+starter_code:
+  sql: |
+    SELECT nev,
+      ... AS felhasznalo,
+      ... AS tartomany
+    FROM ugyfel;
+sample_solutions:
+  sql: |
+    SELECT nev,
+      SUBSTRING(email, 1, LOCATE('@', email) - 1) AS felhasznalo,
+      SUBSTRING(email, LOCATE('@', email) + 1) AS tartomany
+    FROM ugyfel;
+tests:
+  - stdin: |
+      CREATE TABLE ugyfel (id INT, nev VARCHAR(30), email VARCHAR(50));
+      INSERT INTO ugyfel VALUES (1, 'Kiss Anna', 'kiss.anna@suli.hu');
+      INSERT INTO ugyfel VALUES (2, 'Nagy Bela', 'nb@gmail.com');
+      INSERT INTO ugyfel VALUES (3, 'Toth Csaba', 'csaba.toth@freemail.hu');
+    expected: |
+      nev,felhasznalo,tartomany
+      Kiss Anna,kiss.anna,suli.hu
+      Nagy Bela,nb,gmail.com
+      Toth Csaba,csaba.toth,freemail.hu
+    hidden: false
+  - stdin: |
+      CREATE TABLE ugyfel (id INT, nev VARCHAR(30), email VARCHAR(50));
+      INSERT INTO ugyfel VALUES (4, 'Szabo Dora', 'dora@suli.hu');
+      INSERT INTO ugyfel VALUES (5, 'Varga Fanni', 'fanni.varga.10b@suli.hu');
+      INSERT INTO ugyfel VALUES (6, 'Ho Eva', 'eva@x.hu');
+    expected: |
+      nev,felhasznalo,tartomany
+      Szabo Dora,dora,suli.hu
+      Varga Fanni,fanni.varga.10b,suli.hu
+      Ho Eva,eva,x.hu
+    hidden: true
+  - stdin: |
+      CREATE TABLE ugyfel (id INT, nev VARCHAR(30), email VARCHAR(50));
+      INSERT INTO ugyfel VALUES (2, 'Nagy Bela', 'nb@gmail.com');
+      INSERT INTO ugyfel VALUES (4, 'Szabo Dora', 'dora@suli.hu');
+    expected: |
+      nev,felhasznalo,tartomany
+      Nagy Bela,nb,gmail.com
+      Szabo Dora,dora,suli.hu
+    hidden: true
+  - stdin: |
+      CREATE TABLE ugyfel (id INT, nev VARCHAR(30), email VARCHAR(50));
+      INSERT INTO ugyfel VALUES (1, 'Kiss Anna', 'kiss.anna@suli.hu');
+      INSERT INTO ugyfel VALUES (5, 'Varga Fanni', 'fanni.varga.10b@suli.hu');
+      INSERT INTO ugyfel VALUES (6, 'Ho Eva', 'eva@x.hu');
+    expected: |
+      nev,felhasznalo,tartomany
+      Kiss Anna,kiss.anna,suli.hu
+      Varga Fanni,fanni.varga.10b,suli.hu
+      Ho Eva,eva,x.hu
+    hidden: true

@@ -2,7 +2,7 @@
 slug: dokumentumegysegek-es-tipografia
 title: "Dokumentumegységek és tipográfia"
 position: 0
-free: false
+free: true
 published: false
 reviewed_by:
 reviewed_at:

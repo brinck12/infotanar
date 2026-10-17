@@ -12,13 +12,13 @@ description: |
 
   | oszlop | típus |
   |---|---|
-  | `id` | egész, elsődleges kulcs |
-  | `nev` | szöveg |
-  | `kategoria` | szöveg |
-  | `ar` | egész (Ft) |
-  | `keszlet` | egész (darab) |
+  | `id` | `INT`, elsődleges kulcs |
+  | `nev` | `VARCHAR(50)` |
+  | `kategoria` | `VARCHAR(20)` |
+  | `ar` | `INT` (Ft) |
+  | `keszlet` | `INT` (darab) |
 
-  A `tej` kategóriájú termékek ára **10%-kal nő**. Írj `UPDATE` utasítást, amely csak ezeknek a soroknak az árát módosítja! Az árak mind tízzel oszthatók, ezért az `ar * 110 / 100` egész számot ad.
+  A `tej` kategóriájú termékek ára **10%-kal nő**. Írj `UPDATE` utasítást, amely csak ezeknek a soroknak az árát módosítja! Az árak mind tízzel oszthatók, ezért az `ar * 110 / 100` pontosan egész szám (a `/` osztás tizedes eredményt adhat, de itt nincs maradék).
 
   A kód végén álló `SELECT` sort **ne töröld és ne módosítsd**: az mutatja meg a tábla állapotát módosítás után, és a rendszer ezt az eredményt hasonlítja az elvárthoz. A saját utasításodat a `SELECT` **elé** írd, pontosvesszővel lezárva.
 

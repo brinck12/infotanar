@@ -7,7 +7,7 @@ difficulty: 2
 published: false
 allowed_languages: [sql]
 description: |
-  A szövegeket a `||` operátorral fűzhetjük össze (SQLite). A szövegrészeket aposztróf közé írjuk. A MariaDB-ben, az érettségin ugyanezt a `CONCAT(a, b, c)` függvény végzi.
+  A szövegeket a `CONCAT(a, b, c)` függvénnyel fűzhetjük össze. A szövegrészeket aposztróf közé írjuk.
 
   A `diak` tábla:
 
@@ -21,14 +21,14 @@ description: |
 
   Állíts elő minden diákhoz egy `cimke` nevű szöveget `Név (osztály)` alakban, például `Anna (10.A)`! Az eredmény egyetlen oszlop legyen. A sorok sorrendje nem számít.
 
-  Tipp: `nev || ' (' || osztaly || ')'`
+  Tipp: `CONCAT(nev, ' (', osztaly, ')')`
 starter_code:
   sql: |
     SELECT
     FROM diak;
 sample_solutions:
   sql: |
-    SELECT nev || ' (' || osztaly || ')' AS cimke
+    SELECT CONCAT(nev, ' (', osztaly, ')') AS cimke
     FROM diak;
 tests:
   - stdin: "CREATE TABLE diak (id INTEGER PRIMARY KEY, nev TEXT, osztaly TEXT, pont INTEGER, szuletes TEXT);\nINSERT INTO diak VALUES\n(1, 'Domonkos', '10.B', 34, '2006-05-15'),\n(2, 'Reka', '11.A', 60, '2005-07-21'),\n(3, 'Gabor', '9.A', 99, '2005-08-10'),\n(4, 'Dora', '9.A', 58, '2008-11-10'),\n(5, 'Endre', '10.B', 39, '2008-10-18');\n"

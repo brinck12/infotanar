@@ -52,16 +52,29 @@ FROM termek;
 
 **Próbáld ki:** számold ki egy taxis fuvar hasznát: a díjból vond le a kilométerenkénti költséget.
 
-## Az osztás figyelmeztetése
+## Osztás
 
-A `/` az SQLite-ban két egész számnál **egész osztást** végez (`7 / 2` eredménye `3`), a MariaDB-ben viszont tizedes törtet ad (`3.5000`). Hogy ne okozzon meglepetést, ebben a modulban nem osztunk egész számokkal; a kerekítéssel és a pontos osztással a függvényes modulban foglalkozunk.
+A `/` jel osztást végez, és az eredmény tizedes tört is lehet, ahogy az érettségin használt MariaDB-ben is. Az InfoTanár gyakorló szerkesztője ugyanígy viselkedik, mint az érettségi.
+
+```sql
+SELECT nev, ar / 2 AS fele
+FROM termek;
+```
+
+| nev | fele |
+|---|---|
+| Tej | 165.0 |
+| Kenyer | 240.0 |
+| Alma | 145.0 |
+
+A `7 / 2` eredménye tehát `3.5`, nem `3`. Ha egész értékre van szükséged, kerekíts: a `ROUND(ar / 7)` kerekít, a `FLOOR(ar / 7)` lefelé kerekít egészre.
 
 ## Szövegek összefűzése
 
-A szövegeket is lehet számított mezővé alakítani. Az SQL szabványos jele a `||`:
+A szövegeket is lehet számított mezővé alakítani. A `CONCAT` függvény a részeit vesszővel elválasztva fűzi össze:
 
 ```sql
-SELECT nev || ' (' || kategoria || ')' AS cimke
+SELECT CONCAT(nev, ' (', kategoria, ')') AS cimke
 FROM termek;
 ```
 
@@ -71,25 +84,14 @@ FROM termek;
 | Kenyer (pek) |
 | Alma (zold) |
 
-Az állandó szövegeket aposztróf közé tesszük, és a `||` köti össze őket a mezőkkel. A szóközöket és a zárójeleket magunknak kell beírni, mert az összefűzés semmit sem tesz hozzá.
-
-### Eltérés a MariaDB-ben
-
-A **MariaDB-ben a `||` nem szövegösszefűzés** (alap beállításban logikai VAGY). Ott a `CONCAT` függvényt használjuk, amelynek a részeit vesszővel soroljuk fel:
-
-```sql
-SELECT CONCAT(nev, ' (', kategoria, ')') AS cimke
-FROM termek;
-```
-
-Az eredmény ugyanaz. Az érettségin a MariaDB `CONCAT`-ot kell használnod; az InfoTanár szerkesztője SQLite-ot futtat, ezért itt a `||` a működő megoldás. A két jelölés gondolata azonos: szövegrészeket sorba fűzünk.
+Az állandó szövegeket aposztróf közé tesszük, a mezőket változatlanul írjuk be. A szóközöket és a zárójeleket magunknak kell beírni, mert az összefűzés semmit sem tesz hozzá.
 
 ## Szám és szöveg keverése
 
-Ha számot fűzöl szöveghez, az SQLite magától szöveggé alakítja:
+Ha számot fűzöl szöveghez, a `CONCAT` magától szöveggé alakítja:
 
 ```sql
-SELECT nev || ': ' || ar || ' Ft' AS sor
+SELECT CONCAT(nev, ': ', ar, ' Ft') AS sor
 FROM termek;
 ```
 
@@ -102,13 +104,13 @@ FROM termek;
 ## Gyakori hibák
 
 1. **Hiányzó alias.** A kiszámított oszlop neve a kifejezés lesz, és a feladat más nevet vár.
-2. **Szöveg `+` jellel összefűzése.** SQL-ben a `'a' + 'b'` nem szöveg, hanem számolás (az SQLite 0-t ad). Összefűzni `||`-lel vagy `CONCAT`-tal kell.
-3. **Hiányzó szóköz.** A `nev || kategoria` eredménye `Tejtej`; a szóközt be kell írni: `nev || ' ' || kategoria`.
+2. **Szöveg `+` jellel összefűzése.** SQL-ben a `'a' + 'b'` nem szöveg, hanem számolás (az eredmény 0). Összefűzni a `CONCAT` függvénnyel kell.
+3. **Hiányzó szóköz.** A `CONCAT(nev, kategoria)` eredménye `Tejtej`; a szóközt be kell írni: `CONCAT(nev, ' ', kategoria)`.
 4. **Zárójel kifelejtése.** `ar - 30 * 2` mást ad, mint `(ar - 30) * 2`.
 
 ## Összefoglalás
 
 - A `SELECT` után kifejezés is állhat: `ar * keszlet AS ertek`.
 - A kifejezés minden soron kiértékelődik; a számított oszlopnak adj aliast.
-- Szövegösszefűzés: `||` (SQLite), `CONCAT(...)` (MariaDB).
-- Egész számok osztása SQLite és MariaDB között eltér; kerüld, amíg nem tanulod meg a kerekítést.
+- Szövegösszefűzés: `CONCAT(...)`.
+- A `/` tört eredményt is adhat (`7 / 2` = `3.5`); egészre `ROUND` vagy `FLOOR` kerekít.

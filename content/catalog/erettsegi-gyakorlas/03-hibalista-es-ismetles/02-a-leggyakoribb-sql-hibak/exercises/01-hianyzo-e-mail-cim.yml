@@ -13,11 +13,11 @@ description: |
 
   | oszlop | típus |
   |---|---|
-  | `id` | egész, elsődleges kulcs |
-  | `nev` | szöveg |
-  | `osztaly` | szöveg |
-  | `pont` | egész |
-  | `email` | szöveg, lehet `NULL` |
+  | `id` | `INT`, elsődleges kulcs |
+  | `nev` | `VARCHAR(50)` |
+  | `osztaly` | `VARCHAR(5)` |
+  | `pont` | `INT` |
+  | `email` | `VARCHAR(50)`, lehet `NULL` |
 
   Add meg azoknak a diákoknak a nevét (`nev` oszlop), akiknek **nincs** e-mail címük! A sorok sorrendje nem számít.
 

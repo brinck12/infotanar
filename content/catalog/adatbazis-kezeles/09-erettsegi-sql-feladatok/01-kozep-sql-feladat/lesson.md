@@ -77,7 +77,20 @@ A `JOIN` feltétele mindig `idegen kulcs = elsődleges kulcs`. A `WHERE` ugyanú
 
 ## Kerekítés és egész számok
 
-Az átlag gyakran tört. Ha a feladat "egész számra kerekítve" kéri, az SQLite-ban `CAST(ROUND(...) AS INTEGER)` adja az egész számot (a `ROUND` önmagában `85.0` alakú, tizedes jeggyel írja ki). A MariaDB `ROUND(AVG(hossz))` egész számot ad, ott a `CAST` nem szükséges, de elfogadott.
+Az átlag gyakran tört. Ha a feladat "egész számra kerekítve" kéri, a `ROUND(érték)` függvény egészre kerekít (a .5 felfelé). Ha egy tizedesjegyet kér, a `ROUND(érték, 1)` való.
+
+Példa: három film hossza 120, 95 és 101 perc.
+
+```sql
+SELECT AVG(hossz) AS atlag, ROUND(AVG(hossz)) AS kerekitett
+FROM film;
+```
+
+| atlag | kerekitett |
+|---|---|
+| 105.3333 | 105 |
+
+Az `AVG` tört eredményt ad, a `ROUND` egész számot.
 
 ## Az érettségi szokásos szövegei
 
@@ -98,11 +111,11 @@ A következő öt feladat ugyanarra a filmadatbázisra épül, de **mindegyik te
 - **Hiányzó `JOIN` feltétel:** `FROM film, mufaj` feltétel nélkül minden filmet minden műfajjal párosít.
 - **`GROUP BY` hiánya:** az összesítő mellé kitett oszlop csoportosítás nélkül értelmetlen.
 - **Rendezés hiánya, ha kérik:** ha a szöveg sorrendet ír elő, az `ORDER BY` kötelező; az egyenlő értékek között a szöveg másodlagos kulcsot is kérhet.
-- **`LIKE` nagybetű:** az `A%` a kis- és nagybetűt az SQLite-ban nem különbözteti meg (az érettségi MariaDB-je általában szintén nem).
+- **`LIKE` nagybetű:** az `A%` a MariaDB-ben alapesetben a kis- és nagybetűt nem különbözteti meg, tehát az `a`-val kezdődő címet is megtalálja.
 
 ## Összefoglalás
 
 - A feladat négy kérdése: *melyik táblák, mely sorok, mit kell kiírni, milyen sorrendben*.
 - A szöveg határait és oszlopneveit pontosan kövesd.
 - Összesítés és "-onként" kérdés esetén `GROUP BY`; két tábla esetén `JOIN`.
-- Egész számra kerekített átlag: `CAST(ROUND(AVG(...)) AS INTEGER)`.
+- Egész számra kerekített átlag: `ROUND(AVG(...))`.

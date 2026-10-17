@@ -142,7 +142,7 @@ WHERE nev LIKE 'K%';
 | Kenyer |
 | Kifli |
 
-A `LIKE` a nagy- és kisbetűt (angol betűknél) nem különbözteti meg az SQLite-ban és alapesetben a MariaDB-ben sem. A tagadása a `NOT LIKE`.
+A `LIKE` a nagy- és kisbetűt (angol betűknél) alapesetben nem különbözteti meg. A tagadása a `NOT LIKE`.
 
 ## Hogyan válaszd ki a megfelelőt?
 

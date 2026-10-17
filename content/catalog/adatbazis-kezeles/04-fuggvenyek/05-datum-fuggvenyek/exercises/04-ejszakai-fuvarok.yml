@@ -1,0 +1,83 @@
+slug: ejszakai-fuvarok
+title: Éjszakai fuvarok
+position: 4
+kind: sql
+level: kozep
+difficulty: 3
+published: false
+allowed_languages: [sql]
+description: |
+    Éjszakainak számít az a fuvar, amely 22:00 után vagy 06:00 előtt indult (a 22:00 és a 05:59 is az). Listázd az azonosítóját (`id`), az indulás óráját (`ora`) és percét (`perc`).
+
+    A `fuvar` tábla:
+
+    | `id` | `rendszam` | `indulas` |
+    |---|---|---|
+    | 1 | ABC-123 | 2025-03-02 07:45:00 |
+    | 2 | DEF-456 | 2025-03-02 22:10:00 |
+    | 4 | ABC-123 | 2025-04-01 23:50:00 |
+    | 5 | DEF-456 | 2025-04-03 09:05:00 |
+    | 7 | GHI-789 | 2025-04-08 00:30:00 |
+
+    Az eredmény ezekre az adatokra:
+
+    | `id` | `ora` | `perc` |
+    |---|---|---|
+    | 2 | 22 | 10 |
+    | 4 | 23 | 50 |
+    | 7 | 0 | 30 |
+
+    Tipp: két feltétel kell `OR`-ral összekötve: `HOUR(indulas) < 6 OR HOUR(indulas) >= 22`.
+starter_code:
+  sql: |
+    SELECT id, HOUR(indulas) AS ora, MINUTE(indulas) AS perc
+    FROM fuvar
+    WHERE ...;
+sample_solutions:
+  sql: |
+    SELECT id, HOUR(indulas) AS ora, MINUTE(indulas) AS perc
+    FROM fuvar
+    WHERE HOUR(indulas) < 6 OR HOUR(indulas) >= 22;
+tests:
+  - stdin: |
+      CREATE TABLE fuvar (id INT, rendszam VARCHAR(10), indulas DATETIME);
+      INSERT INTO fuvar VALUES (1, 'ABC-123', '2025-03-02 07:45:00');
+      INSERT INTO fuvar VALUES (2, 'DEF-456', '2025-03-02 22:10:00');
+      INSERT INTO fuvar VALUES (4, 'ABC-123', '2025-04-01 23:50:00');
+      INSERT INTO fuvar VALUES (5, 'DEF-456', '2025-04-03 09:05:00');
+      INSERT INTO fuvar VALUES (7, 'GHI-789', '2025-04-08 00:30:00');
+    expected: |
+      id,ora,perc
+      2,22,10
+      4,23,50
+      7,0,30
+    hidden: false
+  - stdin: |
+      CREATE TABLE fuvar (id INT, rendszam VARCHAR(10), indulas DATETIME);
+      INSERT INTO fuvar VALUES (1, 'ABC-123', '2025-03-02 07:45:00');
+      INSERT INTO fuvar VALUES (5, 'DEF-456', '2025-04-03 09:05:00');
+      INSERT INTO fuvar VALUES (6, 'GHI-789', '2025-04-07 12:00:00');
+      INSERT INTO fuvar VALUES (9, 'ABC-123', '2025-04-09 06:00:00');
+      INSERT INTO fuvar VALUES (10, 'ABC-123', '2025-04-10 17:59:00');
+    expected: ""
+    hidden: true
+  - stdin: |
+      CREATE TABLE fuvar (id INT, rendszam VARCHAR(10), indulas DATETIME);
+      INSERT INTO fuvar VALUES (7, 'GHI-789', '2025-04-08 00:30:00');
+      INSERT INTO fuvar VALUES (8, 'DEF-456', '2025-04-09 05:59:00');
+      INSERT INTO fuvar VALUES (9, 'ABC-123', '2025-04-09 06:00:00');
+    expected: |
+      id,ora,perc
+      7,0,30
+      8,5,59
+    hidden: true
+  - stdin: |
+      CREATE TABLE fuvar (id INT, rendszam VARCHAR(10), indulas DATETIME);
+      INSERT INTO fuvar VALUES (2, 'DEF-456', '2025-03-02 22:10:00');
+      INSERT INTO fuvar VALUES (3, 'ABC-123', '2025-03-09 18:00:00');
+      INSERT INTO fuvar VALUES (4, 'ABC-123', '2025-04-01 23:50:00');
+    expected: |
+      id,ora,perc
+      2,22,10
+      4,23,50
+    hidden: true

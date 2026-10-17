@@ -2,7 +2,7 @@
 slug: kozep-feladatsor-1
 title: "Középszintű feladatsor 1: könyvtár"
 position: 0
-free: false
+free: true
 published: false
 reviewed_by:
 reviewed_at:

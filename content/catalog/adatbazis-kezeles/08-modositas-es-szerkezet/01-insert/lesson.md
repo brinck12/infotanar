@@ -19,7 +19,7 @@ A példákban ez a `diak` tábla szerepel:
 | 1 | Anna | 9.A | 60 |
 | 2 | Bela | 9.B | 90 |
 
-Az `id` oszlop `INTEGER PRIMARY KEY`: egyedi azonosító, amelyet az adatbázis is ki tud osztani.
+Az `id` oszlop `INT AUTO_INCREMENT PRIMARY KEY`: egyedi azonosító, amelyet az adatbázis magától kioszt.
 
 ## INSERT minden oszlop megadásával
 
@@ -50,7 +50,7 @@ Itt csak a felsorolt oszlopok kapnak értéket, a többi automatikusan:
 - az `id` (egész elsődleges kulcs) **a következő szabad szám** lesz, vagyis 4;
 - a `pont` oszlop, amelynek nincs megadva érték, `NULL` marad, ha nincs alapértelmezett értéke.
 
-A MariaDB-ben az automatikus számozáshoz az oszlopot `AUTO_INCREMENT`-tel kell definiálni; az SQLite-ban az `INTEGER PRIMARY KEY` ezt magától tudja. A felvételi utasítás mindkettőben ugyanaz.
+Az automatikus számozást az oszlop `AUTO_INCREMENT` tulajdonsága adja; ezt a táblát létrehozó `CREATE TABLE` állítja be (a következő leckében látod). Ha az `id`-t kihagyod az oszloplistából, a MariaDB a legnagyobb eddigi érték után a következő számot adja.
 
 Az oszloplistás forma előnye, hogy nem függ az oszlopok sorrendjétől, és ha később új oszlop kerül a táblába, a régi utasítás is működik.
 

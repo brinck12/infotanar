@@ -1,0 +1,81 @@
+slug: teljes-nev
+title: Teljes név
+position: 1
+kind: sql
+level: kozep
+difficulty: 1
+published: false
+allowed_languages: [sql]
+description: |
+    Írd ki a tanulók teljes nevét egyetlen oszlopban (`nev`): előbb a vezetéknév, egy szóköz, aztán a keresztnév. Mellé jöjjön az osztály (`osztaly`).
+
+    A `tanulo` tábla:
+
+    | `id` | `vezeteknev` | `keresztnev` | `osztaly` |
+    |---|---|---|---|
+    | 1 | Kiss | Anna | 10.A |
+    | 2 | Nagy | Bela | 10.B |
+    | 3 | Toth | Csaba | 10.A |
+
+    Az eredmény ezekre az adatokra:
+
+    | `nev` | `osztaly` |
+    |---|---|
+    | Kiss Anna | 10.A |
+    | Nagy Bela | 10.B |
+    | Toth Csaba | 10.A |
+
+    Tipp: a `CONCAT` több értéket fűz össze. A szóközt is érték: `' '`.
+starter_code:
+  sql: |
+    SELECT CONCAT(...) AS nev, osztaly
+    FROM tanulo;
+sample_solutions:
+  sql: |
+    SELECT CONCAT(vezeteknev, ' ', keresztnev) AS nev, osztaly
+    FROM tanulo;
+tests:
+  - stdin: |
+      CREATE TABLE tanulo (id INT, vezeteknev VARCHAR(30), keresztnev VARCHAR(30), osztaly VARCHAR(5));
+      INSERT INTO tanulo VALUES (1, 'Kiss', 'Anna', '10.A');
+      INSERT INTO tanulo VALUES (2, 'Nagy', 'Bela', '10.B');
+      INSERT INTO tanulo VALUES (3, 'Toth', 'Csaba', '10.A');
+    expected: |
+      nev,osztaly
+      Kiss Anna,10.A
+      Nagy Bela,10.B
+      Toth Csaba,10.A
+    hidden: false
+  - stdin: |
+      CREATE TABLE tanulo (id INT, vezeteknev VARCHAR(30), keresztnev VARCHAR(30), osztaly VARCHAR(5));
+      INSERT INTO tanulo VALUES (4, 'Szabo', 'Dora', '11.A');
+      INSERT INTO tanulo VALUES (5, 'Varga', 'Fanni', '10.B');
+      INSERT INTO tanulo VALUES (6, 'Horvath', 'Erik', '11.A');
+      INSERT INTO tanulo VALUES (7, 'Szilagyi', 'Nora', '10.A');
+    expected: |
+      nev,osztaly
+      Szabo Dora,11.A
+      Varga Fanni,10.B
+      Horvath Erik,11.A
+      Szilagyi Nora,10.A
+    hidden: true
+  - stdin: |
+      CREATE TABLE tanulo (id INT, vezeteknev VARCHAR(30), keresztnev VARCHAR(30), osztaly VARCHAR(5));
+      INSERT INTO tanulo VALUES (8, 'Ho', 'Eva', '11.B');
+      INSERT INTO tanulo VALUES (11, 'Bo', 'Li', '10.A');
+    expected: |
+      nev,osztaly
+      Ho Eva,11.B
+      Bo Li,10.A
+    hidden: true
+  - stdin: |
+      CREATE TABLE tanulo (id INT, vezeteknev VARCHAR(30), keresztnev VARCHAR(30), osztaly VARCHAR(5));
+      INSERT INTO tanulo VALUES (9, 'Kovacs', 'Gabor', '10.B');
+      INSERT INTO tanulo VALUES (10, 'Meszaros', 'Lilla', '11.A');
+      INSERT INTO tanulo VALUES (12, 'Szentpeteri', 'Zsombor', '11.B');
+    expected: |
+      nev,osztaly
+      Kovacs Gabor,10.B
+      Meszaros Lilla,11.A
+      Szentpeteri Zsombor,11.B
+    hidden: true

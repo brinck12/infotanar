@@ -13,11 +13,11 @@ description: |
 
   | oszlop | típus |
   |---|---|
-  | `id` | egész, elsődleges kulcs |
-  | `nev` | szöveg |
-  | `kategoria` | szöveg |
-  | `ar` | egész (Ft) |
-  | `keszlet` | egész (darab) |
+  | `id` | `INT`, elsődleges kulcs |
+  | `nev` | `VARCHAR(50)` |
+  | `kategoria` | `VARCHAR(20)` |
+  | `ar` | `INT` (Ft) |
+  | `keszlet` | `INT` (darab) |
 
   Töröld azokat a `pek` kategóriájú termékeket, amelyek ára **kisebb az összes termék átlagos áránál**! A többi `pek` termék és a többi kategória maradjon. Az átlagot a `DELETE` feltételében, allekérdezéssel add meg.
 

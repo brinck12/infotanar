@@ -15,21 +15,21 @@ description: |-
 
   | oszlop | típus |
   |---|---|
-  | `id` | egész, elsődleges kulcs |
-  | `nev` | szöveg, az állomás neve |
-  | `telepules` | szöveg, a település neve |
-  | `magassag` | egész, a tengerszint feletti magasság méterben |
+  | `id` | `INT`, elsődleges kulcs |
+  | `nev` | `VARCHAR(50)`, az állomás neve |
+  | `telepules` | `VARCHAR(50)`, a település neve |
+  | `magassag` | `INT`, a tengerszint feletti magasság méterben |
 
   A `meres` tábla a napi méréseket tartalmazza:
 
   | oszlop | típus |
   |---|---|
-  | `id` | egész, elsődleges kulcs |
-  | `allomas_id` | egész, az `allomas` tábla `id` oszlopára mutat |
-  | `datum` | szöveg, `ÉÉÉÉ-HH-NN` alakban (pl. `2026-04-14`) |
-  | `homerseklet` | valós szám, a napi középhőmérséklet °C-ban |
-  | `csapadek` | valós szám, a napi csapadék mm-ben (0, ha nem esett) |
-  | `szel` | egész, a legerősebb széllökés km/h-ban |
+  | `id` | `INT`, elsődleges kulcs |
+  | `allomas_id` | `INT`, az `allomas` tábla `id` oszlopára mutat |
+  | `datum` | `DATE` (pl. `2026-04-14`) |
+  | `homerseklet` | `DOUBLE`, a napi középhőmérséklet °C-ban |
+  | `csapadek` | `DOUBLE`, a napi csapadék mm-ben (0, ha nem esett) |
+  | `szel` | `INT`, a legerősebb széllökés km/h-ban |
 
   **8. feladat.** Osztályozza a méréseket a szél erőssége szerint: 20 km/h alatt `gyenge`, 20 és 49 km/h között `mersekelt`, 50 km/h vagy afelett `eros`. A lekérdezés a kategória nevét (`kategoria`) és a hozzá tartozó mérések számát (`db`) adja, darabszám szerint csökkenő, azonos darabszámnál kategórianév szerint növekvő sorrendben! Csak a ténylegesen előforduló kategóriák jelenjenek meg. (5 pont)
 

@@ -102,14 +102,14 @@ Itt előbb kiszűrtük az 5 kilométernél rövidebb fuvarokat, a maradékot cso
 
 ## Csoportosítás kifejezés szerint
 
-Nemcsak oszlop, hanem kifejezés szerint is csoportosíthatsz. Például **hónaponként**: a dátumból a `strftime` kiveszi az évet és a hónapot, és ezt használjuk csoportosító értékként. A `SELECT`-ben és a `GROUP BY`-ban ugyanazt a kifejezést írd.
+Nemcsak oszlop, hanem kifejezés szerint is csoportosíthatsz. Például **hónaponként**: a dátumból a `DATE_FORMAT` kiveszi az évet és a hónapot (a `'%Y-%m'` minta `2025-03` alakot ad), és ezt használjuk csoportosító értékként. A `SELECT`-ben és a `GROUP BY`-ban ugyanazt a kifejezést írd.
 
 ```sql
-SELECT strftime('%Y-%m', indulas) AS honap,
+SELECT DATE_FORMAT(indulas, '%Y-%m') AS honap,
        COUNT(*) AS darab,
        SUM(dij) AS bevetel
 FROM fuvar
-GROUP BY strftime('%Y-%m', indulas)
+GROUP BY DATE_FORMAT(indulas, '%Y-%m')
 ORDER BY honap;
 ```
 
@@ -120,7 +120,7 @@ Eredmény:
 | 2025-03 | 3 | 10800 |
 | 2025-04 | 3 | 12300 |
 
-MariaDB-ben a hónap kinyerése `DATE_FORMAT(indulas, '%Y-%m')`, vagy külön `YEAR(indulas)` és `MONTH(indulas)`. A csoportosítás működése ugyanaz.
+A hónapot külön is kinyerheted: `YEAR(indulas)` az évet, `MONTH(indulas)` a hónap sorszámát adja, és ezekre is lehet csoportosítani.
 
 ## Mi a helyzet a NULL-lal?
 
@@ -143,7 +143,7 @@ Eredmény:
 
 ## Gyakori hibák
 
-- A `SELECT`-ben szerepel olyan oszlop, amely nincs a `GROUP BY`-ban és nem összesítő. Az SQLite elfogadná, de értelmetlen értéket ad, a MariaDB és más rendszerek hibát jeleznek. Tartsd be: csak a csoportosító oszlop és összesítők.
+- A `SELECT`-ben szerepel olyan oszlop, amely nincs a `GROUP BY`-ban és nem összesítő. Ez értelmetlen értéket ad, vagy hibát jelez (a MariaDB szigorú beállításban hibát ad). Tartsd be: csak a csoportosító oszlop és összesítők.
 - A `WHERE`-be írt összesítő (`WHERE COUNT(*) > 2`): az összesített értékre a következő lecke `HAVING`-je szűr.
 - Elfelejtett `GROUP BY`: a `SELECT rendszam, COUNT(*) FROM fuvar` nem csoportosít, ezért értelmetlen.
 - Rossz záradék-sorrend: az `ORDER BY` a `GROUP BY` után áll, nem elé.
@@ -154,5 +154,5 @@ Eredmény:
 - A `GROUP BY oszlop` csoportokba rendezi az azonos értékű sorokat, az összesítők csoportonként számolnak.
 - A `SELECT` után csak a csoportosító oszlop és összesítő függvények állhatnak.
 - A záradékok sorrendje: `SELECT`, `FROM`, `WHERE`, `GROUP BY`, `ORDER BY`.
-- Kifejezés szerint is csoportosíthatsz, például `strftime('%Y-%m', dátum)` szerint havonta.
+- Kifejezés szerint is csoportosíthatsz, például `DATE_FORMAT(dátum, '%Y-%m')` szerint havonta.
 - A `NULL` értékek közös csoportot alkotnak.

@@ -77,12 +77,19 @@ FROM (SELECT datum, SUM(ar) AS napi
 
 ### Százalék és feltételes számlálás
 
-A feltételes számláláshoz a `CASE` kifejezés kell: `SUM(CASE WHEN fizetes = 'kartya' THEN 1 ELSE 0 END)` annyit ad, ahány sorra a feltétel igaz. A százalékot `100.0`-val szorozd, hogy tizedes osztást kapj (az egész osztás `3 / 8` eredménye 0 volna):
+A feltételes számláláshoz a `CASE` kifejezés kell: `SUM(CASE WHEN fizetes = 'kartya' THEN 1 ELSE 0 END)` annyit ad, ahány sorra a feltétel igaz. A `/` osztás a MariaDB-ben tört eredményt ad (`3 / 8` értéke `0.375`), így a százalék egyszerűen `100 * rész / összes`. Példa: 8 fuvarból 3 kártyás, ez `100 * 3 / 8 = 37.5`, a `ROUND` kerekítése 38:
 
 ```sql
-SELECT CAST(ROUND(100.0 * SUM(CASE WHEN fizetes = 'kartya' THEN 1 ELSE 0 END) / COUNT(*)) AS INTEGER) AS szazalek
+SELECT SUM(CASE WHEN fizetes = 'kartya' THEN 1 ELSE 0 END) AS kartyas,
+       ROUND(100 * SUM(CASE WHEN fizetes = 'kartya' THEN 1 ELSE 0 END) / COUNT(*)) AS szazalek
 FROM fuvar;
 ```
+
+Az eredmény a példa 8 fuvarjára:
+
+| kartyas | szazalek |
+|---|---|
+| 3 | 38 |
 
 ## Hogyan lásd át a feladatot?
 
@@ -93,11 +100,11 @@ FROM fuvar;
 
 ## MariaDB eltérések
 
-Az érettségi MariaDB-t használ. A fenti SQL nagy része változtatás nélkül fut, de eltér: a `CAST(... AS INTEGER)` helyett MariaDB-ben `CAST(... AS SIGNED)` vagy egyszerűen `ROUND(...)`, az összefűzés `CONCAT(...)`, a dátum részei `YEAR(datum)`, `MONTH(datum)`. A feladatrendszerünk SQLite-ban fut, ezért itt az SQLite-forma kell.
+Az érettségin is MariaDB-t használsz, a fenti lekérdezések változtatás nélkül megfelelnek. Hasznos MariaDB-függvények: az összefűzés `CONCAT(...)`, a dátum részei `YEAR(datum)`, `MONTH(datum)`, `DAY(datum)`, a feltétel `IF(feltétel, igen, nem)`, a kerekítés `ROUND(érték, tizedesek)`.
 
 ## Gyakori hibák
 
-- **Egész osztás:** a `COUNT(*) / COUNT(*)` típusú osztás egész eredményt ad. Szorozz `100.0`-val.
+- **Kerekítés elhagyása:** a `/` tört eredményt ad (`3 / 8` értéke `0.375`). Ha a feladat egész százalékot kér, tedd a kifejezést a `ROUND(...)` függvénybe.
 - **DISTINCT hiánya:** `JOIN` után ugyanaz a név többször jelenik meg.
 - **Rossz `GROUP BY`:** csak az összesítetlen oszlopokat sorold fel a `SELECT` listából.
 - **Határnap kihagyása:** a `BETWEEN` a határokat is beleérti, a `<`/`>` nem.
@@ -107,6 +114,6 @@ Az érettségi MariaDB-t használ. A fenti SQL nagy része változtatás nélkü
 ## Összefoglalás
 
 - Az emelt feladat 8 típusa: szűrés, összesítés, `DISTINCT`, `BETWEEN`, `LIKE`, `JOIN`+`GROUP BY`+`ORDER BY`, származtatott tábla, százalék `CASE`-zel.
-- A százalék kiszámításakor `100.0 *` a tizedes osztáshoz kell.
+- A százalék: `ROUND(100 * rész / összes)`; a `/` tört eredményt ad.
 - A "legkisebb napi összeg" típushoz allekérdezés kell a `FROM`-ban.
 - Mindig a kért oszlopnevekkel és sorrenddel dolgozz.

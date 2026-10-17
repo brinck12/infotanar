@@ -38,7 +38,7 @@ A kerékpárkölcsönző nyilvántartása négy táblából áll: `allomas`, `bi
 
 A feladatok az emelt szint tipikus eszközeit kérik: csoportosítás és `HAVING`, `JOIN` két vagy három táblán (egy tábla kétszeri csatolása is), allekérdezés, `LEFT JOIN` a hiányzó kapcsolatok megtalálására, `COUNT(DISTINCT ...)`, szövegfüggvény és `CASE`.
 
-Az érettségin a lekérdezésekhez MariaDB-t (phpMyAdmin) kapsz; itt SQLite fut. Az alap SQL ugyanaz, eltérés a dátum- és szövegfüggvényekben van (például MariaDB-ben `HOUR(kezdet)`, itt `SUBSTR`). A 8. feladat leírása jelzi ezt. Az érettségin a vizsgaleírás megadja, hogyan kell elmenteni a lekérdezéseket; itt a beküldés elég.
+A lekérdezéseket az érettségin is MariaDB-ben (phpMyAdmin) írod. A dátum- és időfüggvényekből a 8. feladat a `HOUR(kezdet)` függvényt használja: a `2025-06-14 08:15` időpontból a `8` órát adja. Az érettségin a vizsgaleírás megadja, hogyan kell elmenteni a lekérdezéseket; itt a beküldés elég.
 
 ## 3. Algoritmizálás és programozás (50 pont)
 

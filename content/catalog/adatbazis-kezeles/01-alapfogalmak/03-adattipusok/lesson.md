@@ -14,13 +14,16 @@ Minden mező meghatározott fajtájú adatot tárol. Egy telefonszámmal nem sz�
 
 ## A leggyakoribb típusok
 
-| Fajta | Mit tárol | Példa érték | MariaDB (érettségi) | SQLite (InfoTanár) |
-|---|---|---|---|---|
-| szöveg | betűk, szavak | `'Anna'` | `VARCHAR(50)`, `TEXT` | `TEXT` |
-| egész szám | darabszám, év, pont | `42` | `INT` | `INTEGER` |
-| valós szám | tört érték | `3.14` | `DOUBLE`, `DECIMAL(10,2)` | `REAL` |
-| dátum/idő | nap és időpont | `'2025-03-14'` | `DATE`, `DATETIME` | szövegként |
-| logikai | igaz vagy hamis | `1` vagy `0` | `BOOLEAN` | egész (0 vagy 1) |
+| Fajta | Mit tárol | Példa érték | Típus (MariaDB) |
+|---|---|---|---|
+| szöveg | betűk, szavak | `'Anna'` | `VARCHAR(50)`, `TEXT` |
+| egész szám | darabszám, év, pont | `42` | `INT` |
+| tizedes tört | tört érték, pénzösszeg | `3.14` | `DECIMAL(10,2)`, `DOUBLE` |
+| dátum | egy nap | `'2025-03-14'` | `DATE` |
+| dátum és idő | nap és időpont | `'2025-03-14 14:30:00'` | `DATETIME` |
+| logikai | igaz vagy hamis | `1` vagy `0` | `BOOLEAN` |
+
+Az InfoTanár gyakorló szerkesztője úgy viselkedik, mint az érettségin használt MariaDB, ezért itt ugyanazokat a típusneveket és függvényeket tanulod.
 
 ### Szöveg
 
@@ -32,11 +35,11 @@ Az egész szám (`INT`) törtrész nélküli érték: darabszám, életkor, ár 
 
 ### Dátum és idő
 
-A **dátumot** `ÉÉÉÉ-HH-NN` alakban adjuk meg: `'2025-03-14'`. Az **idő** `ÓÓ:PP:MM` (például `'14:30:00'`), a kettő együtt a `DATETIME`. Az év-hónap-nap sorrend azért jó, mert a szövegesen rendezett dátumok így időrendben követik egymást. A dátumokkal számoló függvényeket (`YEAR`, `MONTH`) egy későbbi modulban ismerjük meg.
+A **dátumot** `ÉÉÉÉ-HH-NN` alakban adjuk meg: `'2025-03-14'`. Az **idő** `ÓÓ:PP:MM` (például `'14:30:00'`), a kettő együtt a `DATETIME`: `'2025-03-14 14:30:00'`. Az év-hónap-nap sorrend azért jó, mert a szövegesen rendezett dátumok így időrendben követik egymást. A dátumokkal számoló függvényeket (`YEAR`, `MONTH`) egy későbbi modulban ismerjük meg. A gyakorló feladatok táblái a dátumot egyszerű szövegként tárolják, de ugyanebben az alakban, ezért a lekérdezés ugyanúgy működik.
 
 ### Logikai érték
 
-Az igaz/hamis mezőt MariaDB-ben `BOOLEAN`-nek hívjuk, ami valójában egy kis egész: a `0` a hamis, az `1` az igaz. Az SQLite sem ismer külön logikai típust, ott is `0` és `1` áll. Például egy `visszahozva` mező 1 értéke azt jelentheti, hogy a könyv visszakerült.
+Az igaz/hamis mezőt MariaDB-ben `BOOLEAN`-nek hívjuk, ami valójában egy kis egész: a `0` a hamis, az `1` az igaz. Például egy `visszahozva` mező 1 értéke azt jelentheti, hogy a könyv visszakerült.
 
 ## Az üres érték, a NULL
 
@@ -83,4 +86,4 @@ A típus befolyásolja a rendezést és az összehasonlítást is: a szöveges `
 - Szöveget és dátumot aposztróf közé írunk, számot nem.
 - Valós számban tizedespont áll.
 - A logikai érték 0 vagy 1; az üres érték a NULL.
-- A MariaDB és az SQLite típusnevei kicsit eltérnek, a gondolat ugyanaz.
+- A MariaDB típusai: `INT`, `VARCHAR`, `TEXT`, `DECIMAL`, `DATE`, `DATETIME`, `BOOLEAN`.

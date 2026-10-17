@@ -32,7 +32,7 @@ description: |
     Tipp: a záradékok sorrendje mindig `WHERE`, `GROUP BY`, `HAVING`, `ORDER BY`.
 starter_code:
   sql: |
-    SELECT strftime('%Y-%m', indulas) AS honap,
+    SELECT DATE_FORMAT(indulas, '%Y-%m') AS honap,
       COUNT(*) AS darab,
       ROUND(AVG(km), 1) AS atlag_km
     FROM fuvar
@@ -41,9 +41,9 @@ starter_code:
     ORDER BY honap;
 sample_solutions:
   sql: |
-    SELECT strftime('%Y-%m', indulas) AS honap, COUNT(*) AS darab, ROUND(AVG(km), 1) AS atlag_km
+    SELECT DATE_FORMAT(indulas, '%Y-%m') AS honap, COUNT(*) AS darab, ROUND(AVG(km), 1) AS atlag_km
     FROM fuvar
-    GROUP BY strftime('%Y-%m', indulas)
+    GROUP BY DATE_FORMAT(indulas, '%Y-%m')
     HAVING COUNT(*) >= 4
     ORDER BY honap;
 tests:

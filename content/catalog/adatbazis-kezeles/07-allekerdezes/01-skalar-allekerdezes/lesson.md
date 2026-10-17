@@ -94,7 +94,7 @@ Az allekérdezés eredménye minden sorra ugyanaz (a legkisebb pont: 40), ezért
 
 ## Mire figyelj
 
-- A skaláris allekérdezésnek **egy értéket** kell adnia. Ha több sort ad (például `SELECT pont FROM diak` összesítő nélkül), a feltétel értelmetlen. Az SQLite ilyenkor az első sort használja, a MariaDB hibát jelez, ezért mindig összesítő függvényt vagy olyan szűrést használj, amely biztosan egy sort ad.
+- A skaláris allekérdezésnek **egy értéket** kell adnia. Ha több sort ad (például `SELECT pont FROM diak` összesítő nélkül), a feltétel értelmetlen. Az érettségi MariaDB-je ilyenkor hibát jelez, ezért mindig összesítő függvényt vagy olyan szűrést használj, amely biztosan egy sort ad.
 - Az allekérdezés mindig **zárójelben** áll.
 - Ha az allekérdezés üres eredményt ad (például nincs ilyen osztály), az érték `NULL`, és az összehasonlítás nem lesz igaz egyetlen sorra sem.
 

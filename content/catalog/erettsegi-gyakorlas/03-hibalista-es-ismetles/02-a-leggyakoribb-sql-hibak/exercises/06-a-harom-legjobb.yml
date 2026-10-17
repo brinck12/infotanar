@@ -14,9 +14,9 @@ description: |
 
   | oszlop | típus |
   |---|---|
-  | `id` | egész, elsődleges kulcs |
-  | `nev` | szöveg |
-  | `pont` | egész |
+  | `id` | `INT`, elsődleges kulcs |
+  | `nev` | `VARCHAR(50)` |
+  | `pont` | `INT` |
 
   Add meg a `nev` és `pont` oszlopot, a legtöbb ponttal rendelkező diákkal kezdve! A sorrend most számít. A pontszámok a legjobb három között nem egyeznek meg.
 

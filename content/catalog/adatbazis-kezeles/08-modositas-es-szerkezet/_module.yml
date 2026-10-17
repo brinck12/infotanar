@@ -1,4 +1,4 @@
 slug: modositas-es-szerkezet
 title: Módosítás és szerkezet
-description: Adatok felvétele, módosítása és törlése (INSERT, UPDATE, DELETE), táblák létrehozása és törlése (CREATE TABLE, DROP).
+description: Adatok felvétele, módosítása és törlése (INSERT, UPDATE, DELETE), adatbázis és táblák létrehozása MariaDB-ben (CREATE DATABASE, CREATE TABLE), új oszlop (ALTER TABLE), tábla ürítése és törlése (TRUNCATE, DROP).
 position: 7

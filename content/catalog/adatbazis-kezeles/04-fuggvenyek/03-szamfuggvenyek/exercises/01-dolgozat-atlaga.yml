@@ -1,0 +1,79 @@
+slug: dolgozat-atlaga
+title: Dolgozat átlaga
+position: 1
+kind: sql
+level: kozep
+difficulty: 2
+published: false
+allowed_languages: [sql]
+description: |
+    Minden diák két dolgozatot írt. Listázd a nevét (`nev`) és a két pontszám átlagát egy tizedesjegyre kerekítve (`atlag`).
+
+    A `dolgozat` tábla:
+
+    | `id` | `nev` | `pont1` | `pont2` |
+    |---|---|---|---|
+    | 1 | Kiss Anna | 62 | 75 |
+    | 2 | Nagy Bela | 70 | 66 |
+    | 3 | Toth Csaba | 55 | 41 |
+
+    Az eredmény ezekre az adatokra:
+
+    | `nev` | `atlag` |
+    |---|---|
+    | Kiss Anna | 68.5 |
+    | Nagy Bela | 68.0 |
+    | Toth Csaba | 48.0 |
+
+    Tipp: az átlag a két szám összege osztva kettővel; az összeget zárójelbe kell tenni. `ROUND(szám, 1)` egy tizedesre kerekít.
+starter_code:
+  sql: |
+    SELECT nev, ... AS atlag
+    FROM dolgozat;
+sample_solutions:
+  sql: |
+    SELECT nev, ROUND((pont1 + pont2) / 2, 1) AS atlag
+    FROM dolgozat;
+tests:
+  - stdin: |
+      CREATE TABLE dolgozat (id INT, nev VARCHAR(30), pont1 INT, pont2 INT);
+      INSERT INTO dolgozat VALUES (1, 'Kiss Anna', 62, 75);
+      INSERT INTO dolgozat VALUES (2, 'Nagy Bela', 70, 66);
+      INSERT INTO dolgozat VALUES (3, 'Toth Csaba', 55, 41);
+    expected: |
+      nev,atlag
+      Kiss Anna,68.5
+      Nagy Bela,68.0
+      Toth Csaba,48.0
+    hidden: false
+  - stdin: |
+      CREATE TABLE dolgozat (id INT, nev VARCHAR(30), pont1 INT, pont2 INT);
+      INSERT INTO dolgozat VALUES (4, 'Szabo Dora', 80, 92);
+      INSERT INTO dolgozat VALUES (5, 'Varga Fanni', 0, 0);
+      INSERT INTO dolgozat VALUES (6, 'Ho Eva', 100, 99);
+    expected: |
+      nev,atlag
+      Szabo Dora,86.0
+      Varga Fanni,0.0
+      Ho Eva,99.5
+    hidden: true
+  - stdin: |
+      CREATE TABLE dolgozat (id INT, nev VARCHAR(30), pont1 INT, pont2 INT);
+      INSERT INTO dolgozat VALUES (5, 'Varga Fanni', 0, 0);
+      INSERT INTO dolgozat VALUES (7, 'Bo Li', 33, 34);
+    expected: |
+      nev,atlag
+      Varga Fanni,0.0
+      Bo Li,33.5
+    hidden: true
+  - stdin: |
+      CREATE TABLE dolgozat (id INT, nev VARCHAR(30), pont1 INT, pont2 INT);
+      INSERT INTO dolgozat VALUES (2, 'Nagy Bela', 70, 66);
+      INSERT INTO dolgozat VALUES (3, 'Toth Csaba', 55, 41);
+      INSERT INTO dolgozat VALUES (6, 'Ho Eva', 100, 99);
+    expected: |
+      nev,atlag
+      Nagy Bela,68.0
+      Toth Csaba,48.0
+      Ho Eva,99.5
+    hidden: true

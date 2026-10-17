@@ -14,19 +14,19 @@ description: |
 
   | oszlop | típus |
   |---|---|
-  | `id` | egész, elsődleges kulcs |
-  | `nev` | szöveg (pl. `vigjatek`, `drama`, `akcio`, `scifi`, `animacio`) |
+  | `id` | `INT`, elsődleges kulcs |
+  | `nev` | `VARCHAR(50)` (pl. `vigjatek`, `drama`, `akcio`, `scifi`, `animacio`) |
 
   A `film` tábla:
 
   | oszlop | típus |
   |---|---|
-  | `id` | egész, elsődleges kulcs |
-  | `cim` | szöveg |
-  | `ev` | egész, a bemutató éve |
-  | `hossz` | egész, a játékidő percben |
-  | `mufaj_id` | egész, a `mufaj` tábla `id` oszlopára mutat |
-  | `ertekeles` | egész, 1 és 10 között |
+  | `id` | `INT`, elsődleges kulcs |
+  | `cim` | `VARCHAR(50)` |
+  | `ev` | `INT`, a bemutató éve |
+  | `hossz` | `INT`, a játékidő percben |
+  | `mufaj_id` | `INT`, a `mufaj` tábla `id` oszlopára mutat |
+  | `ertekeles` | `INT`, 1 és 10 között |
 
   **3. feladat.** Adja meg lekérdezéssel azoknak a filmeknek a címét és értékelését (**cim, ertekeles**), amelyek címe **A betűvel kezdődik**, és az értékelésük **legalább 6**!
 starter_code:

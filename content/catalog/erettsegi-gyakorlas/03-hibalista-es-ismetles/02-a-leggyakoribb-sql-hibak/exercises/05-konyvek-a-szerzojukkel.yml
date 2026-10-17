@@ -13,16 +13,16 @@ description: |
 
   | oszlop | típus |
   |---|---|
-  | `id` | egész, elsődleges kulcs |
-  | `nev` | szöveg |
+  | `id` | `INT`, elsődleges kulcs |
+  | `nev` | `VARCHAR(50)` |
 
   A `konyv` tábla:
 
   | oszlop | típus |
   |---|---|
-  | `id` | egész, elsődleges kulcs |
-  | `cim` | szöveg |
-  | `szerzo_id` | egész, a `szerzo` tábla `id` oszlopára mutat |
+  | `id` | `INT`, elsődleges kulcs |
+  | `cim` | `VARCHAR(50)` |
+  | `szerzo_id` | `INT`, a `szerzo` tábla `id` oszlopára mutat |
 
   Add meg a könyv címét (`cim`) és a szerző nevét (`nev`)! A sorok sorrendje nem számít.
 

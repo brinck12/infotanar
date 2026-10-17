@@ -132,7 +132,7 @@ WHERE visszahozas IS NULL;
 
 A párja az `IS NOT NULL`: azokat a sorokat adja, ahol van érték.
 
-A rendezésnél az SQLite a NULL értéket a legkisebbnek veszi (növekvő rendezésnél elöl áll). A MariaDB is így tesz, de ne építs rá: ha fontos, szűrd ki a NULL értékeket.
+A rendezésnél a NULL értéket a legkisebbnek veszi (növekvő rendezésnél elöl áll), de ne építs rá: ha fontos, szűrd ki a NULL értékeket.
 
 ## Szűrés, rendezés, korlátozás együtt
 

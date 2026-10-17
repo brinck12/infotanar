@@ -9,24 +9,40 @@ allowed_languages:
 - sql
 sql_order_sensitive: true
 description: |
-  Az adatbázisban négy tábla van: `diak`, `naplo`, `tmp_import` és `tmp_regi`. A két `tmp_` kezdetű tábla ideiglenes volt, már nincs rájuk szükség. Töröld őket **teljesen** (a szerkezetükkel együtt, nem csak a soraikat), a másik kettőt pedig hagyd meg!
+  Az adatbázisban négy tábla van: `diak`, `naplo`, `tmp_import` és `tmp_regi`. Takarítsd ki az adatbázist ebben a sorrendben:
 
-  Az ellenőrző lekérdezés az adatbázis táblaneveit listázza.
+  1. Töröld a `tmp_regi` táblát **teljesen**, a szerkezetével együtt (`DROP TABLE`).
+  2. Töröld a `tmp_import` táblát is, majd hozz létre egy új, üres `tmp_import` táblát `id INT AUTO_INCREMENT PRIMARY KEY` és `adat VARCHAR(50)` oszlopokkal, `ENGINE=InnoDB` motorral. (A `CREATE TABLE` csak akkor sikerül, ha a régi már nincs meg: így derül ki, hogy tényleg eldobtad.)
+  3. Ürítsd ki a `naplo` táblát úgy, hogy a tábla megmaradjon (`TRUNCATE TABLE`).
+  4. A `diak` táblához ne nyúlj.
+
+  Az ellenőrző lekérdezés a három tábla sorainak számát mutatja.
 
   A kód végén álló `SELECT` sort **ne töröld és ne módosítsd**: az mutatja meg a tábla állapotát módosítás után, és a rendszer ezt az eredményt hasonlítja az elvárthoz. A saját utasításodat a `SELECT` **elé** írd, pontosvesszővel lezárva.
 
-  Tipp: `DROP TABLE tabla_neve;` – a tábla és minden adata végleg eltűnik.
+  Tipp: `DROP TABLE tabla_neve;` – a tábla és minden adata végleg eltűnik. A `TRUNCATE TABLE tabla_neve;` csak a sorokat törli, a tábla marad.
 starter_code:
   sql: |
-    -- Ide írd a DROP TABLE utasításokat.
+    -- Ide írd a DROP TABLE, CREATE TABLE és TRUNCATE TABLE utasításokat.
 
-    SELECT name FROM sqlite_master WHERE type = 'table' ORDER BY name;
+    SELECT (SELECT COUNT(*) FROM diak) AS diakok,
+           (SELECT COUNT(*) FROM naplo) AS naplo_sorok,
+           (SELECT COUNT(*) FROM tmp_import) AS import_sorok;
 sample_solutions:
   sql: |
-    DROP TABLE tmp_import;
     DROP TABLE tmp_regi;
+    DROP TABLE tmp_import;
 
-    SELECT name FROM sqlite_master WHERE type = 'table' ORDER BY name;
+    CREATE TABLE tmp_import (
+      id INT AUTO_INCREMENT PRIMARY KEY,
+      adat VARCHAR(50)
+    ) ENGINE=InnoDB;
+
+    TRUNCATE TABLE naplo;
+
+    SELECT (SELECT COUNT(*) FROM diak) AS diakok,
+           (SELECT COUNT(*) FROM naplo) AS naplo_sorok,
+           (SELECT COUNT(*) FROM tmp_import) AS import_sorok;
 tests:
 - stdin: |
     CREATE TABLE diak (id INTEGER PRIMARY KEY, nev TEXT, osztaly TEXT, pont INTEGER);
@@ -47,9 +63,8 @@ tests:
     (4, 'sor4');
     CREATE TABLE tmp_regi (id INTEGER PRIMARY KEY, adat TEXT);
   expected: |
-    name
-    diak
-    naplo
+    diakok,naplo_sorok,import_sorok
+    4,0,0
   hidden: false
 - stdin: |
     CREATE TABLE diak (id INTEGER PRIMARY KEY, nev TEXT, osztaly TEXT, pont INTEGER);
@@ -72,9 +87,8 @@ tests:
     (5, 'sor5');
     CREATE TABLE tmp_regi (id INTEGER PRIMARY KEY, adat TEXT);
   expected: |
-    name
-    diak
-    naplo
+    diakok,naplo_sorok,import_sorok
+    5,0,0
   hidden: true
 - stdin: |
     CREATE TABLE diak (id INTEGER PRIMARY KEY, nev TEXT, osztaly TEXT, pont INTEGER);
@@ -99,9 +113,8 @@ tests:
     (6, 'sor6');
     CREATE TABLE tmp_regi (id INTEGER PRIMARY KEY, adat TEXT);
   expected: |
-    name
-    diak
-    naplo
+    diakok,naplo_sorok,import_sorok
+    6,0,0
   hidden: true
 - stdin: |
     CREATE TABLE diak (id INTEGER PRIMARY KEY, nev TEXT, osztaly TEXT, pont INTEGER);
@@ -128,7 +141,6 @@ tests:
     (7, 'sor7');
     CREATE TABLE tmp_regi (id INTEGER PRIMARY KEY, adat TEXT);
   expected: |
-    name
-    diak
-    naplo
+    diakok,naplo_sorok,import_sorok
+    7,0,0
   hidden: true

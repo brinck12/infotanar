@@ -12,16 +12,16 @@ description: |
 
   | oszlop | típus |
   |---|---|
-  | `id` | egész, elsődleges kulcs |
-  | `nev` | szöveg |
-  | `osztaly` | szöveg |
-  | `pont` | egész |
+  | `id` | `INT`, elsődleges kulcs |
+  | `nev` | `VARCHAR(50)` |
+  | `osztaly` | `VARCHAR(5)` |
+  | `pont` | `INT` |
 
   Vedd fel Nagy Béla nevű diákot a `10.B` osztályba **oszloplistával**, csak a `nev` és `osztaly` mezőt megadva! Az `id` kulcsot az adatbázis osztja ki, a `pont` pedig üres (NULL) marad.
 
   A kód végén álló `SELECT` sort **ne töröld és ne módosítsd**: az mutatja meg a tábla állapotát módosítás után, és a rendszer ezt az eredményt hasonlítja az elvárthoz. A saját utasításodat a `SELECT` **elé** írd, pontosvesszővel lezárva.
 
-  Tipp: `INSERT INTO diak (nev, osztaly) VALUES (...);` – az `INTEGER PRIMARY KEY` oszlop magától a következő szabad számot kapja.
+  Tipp: `INSERT INTO diak (nev, osztaly) VALUES (...);` – az `INT AUTO_INCREMENT PRIMARY KEY` oszlop magától a következő szabad számot kapja.
 starter_code:
   sql: |
     -- Ide írd az INSERT utasítást.

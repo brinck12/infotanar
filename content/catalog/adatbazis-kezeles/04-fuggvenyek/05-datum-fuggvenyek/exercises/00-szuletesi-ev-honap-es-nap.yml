@@ -1,0 +1,82 @@
+slug: szuletesi-ev-honap-es-nap
+title: Születési év, hónap és nap
+position: 0
+kind: sql
+level: kozep
+difficulty: 1
+published: false
+allowed_languages: [sql]
+description: |
+    Listázd a tanulók nevét (`nev`), és a születési dátum három részét külön oszlopban: `ev`, `honap`, `nap`.
+
+    A `tanulo` tábla:
+
+    | `id` | `nev` | `szuletes` |
+    |---|---|---|
+    | 1 | Kiss Anna | 2008-05-14 |
+    | 2 | Nagy Bela | 2009-11-02 |
+    | 3 | Toth Csaba | 2008-05-30 |
+
+    Az eredmény ezekre az adatokra:
+
+    | `nev` | `ev` | `honap` | `nap` |
+    |---|---|---|---|
+    | Kiss Anna | 2008 | 5 | 14 |
+    | Nagy Bela | 2009 | 11 | 2 |
+    | Toth Csaba | 2008 | 5 | 30 |
+
+    Tipp: `YEAR(dátum)`, `MONTH(dátum)` és `DAY(dátum)`.
+starter_code:
+  sql: |
+    SELECT nev,
+      ... AS ev,
+      ... AS honap,
+      ... AS nap
+    FROM tanulo;
+sample_solutions:
+  sql: |
+    SELECT nev, YEAR(szuletes) AS ev, MONTH(szuletes) AS honap, DAY(szuletes) AS nap
+    FROM tanulo;
+tests:
+  - stdin: |
+      CREATE TABLE tanulo (id INT, nev VARCHAR(30), szuletes DATE);
+      INSERT INTO tanulo VALUES (1, 'Kiss Anna', '2008-05-14');
+      INSERT INTO tanulo VALUES (2, 'Nagy Bela', '2009-11-02');
+      INSERT INTO tanulo VALUES (3, 'Toth Csaba', '2008-05-30');
+    expected: |
+      nev,ev,honap,nap
+      Kiss Anna,2008,5,14
+      Nagy Bela,2009,11,2
+      Toth Csaba,2008,5,30
+    hidden: false
+  - stdin: |
+      CREATE TABLE tanulo (id INT, nev VARCHAR(30), szuletes DATE);
+      INSERT INTO tanulo VALUES (6, 'Ho Eva', '2007-12-31');
+      INSERT INTO tanulo VALUES (7, 'Bo Li', '2008-01-01');
+      INSERT INTO tanulo VALUES (8, 'Papp Jozsef', '2009-09-09');
+    expected: |
+      nev,ev,honap,nap
+      Ho Eva,2007,12,31
+      Bo Li,2008,1,1
+      Papp Jozsef,2009,9,9
+    hidden: true
+  - stdin: |
+      CREATE TABLE tanulo (id INT, nev VARCHAR(30), szuletes DATE);
+      INSERT INTO tanulo VALUES (4, 'Szabo Dora', '2009-02-27');
+      INSERT INTO tanulo VALUES (5, 'Varga Fanni', '2010-05-01');
+    expected: |
+      nev,ev,honap,nap
+      Szabo Dora,2009,2,27
+      Varga Fanni,2010,5,1
+    hidden: true
+  - stdin: |
+      CREATE TABLE tanulo (id INT, nev VARCHAR(30), szuletes DATE);
+      INSERT INTO tanulo VALUES (2, 'Nagy Bela', '2009-11-02');
+      INSERT INTO tanulo VALUES (6, 'Ho Eva', '2007-12-31');
+      INSERT INTO tanulo VALUES (7, 'Bo Li', '2008-01-01');
+    expected: |
+      nev,ev,honap,nap
+      Nagy Bela,2009,11,2
+      Ho Eva,2007,12,31
+      Bo Li,2008,1,1
+    hidden: true

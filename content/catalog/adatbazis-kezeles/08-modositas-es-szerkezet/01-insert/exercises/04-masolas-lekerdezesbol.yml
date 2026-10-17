@@ -13,12 +13,12 @@ description: |
 
   | oszlop | típus |
   |---|---|
-  | `id` | egész, elsődleges kulcs |
-  | `nev` | szöveg |
-  | `osztaly` | szöveg |
-  | `pont` | egész |
+  | `id` | `INT`, elsődleges kulcs |
+  | `nev` | `VARCHAR(50)` |
+  | `osztaly` | `VARCHAR(5)` |
+  | `pont` | `INT` |
 
-  A `kiemelt` táblában (`id` egész elsődleges kulcs, `nev` szöveg, `pont` egész) a legjobb diákokat gyűjtjük, kezdetben üres. Másold bele az `INSERT INTO ... SELECT ...` formával a `diak` tábla azon sorait (**nev, pont**), ahol a pontszám **legalább 80**! Az `id`-t az adatbázis adja.
+  A `kiemelt` táblában (`id` `INT AUTO_INCREMENT PRIMARY KEY`, `nev` `VARCHAR(50)`, `pont` `INT`) a legjobb diákokat gyűjtjük, kezdetben üres. Másold bele az `INSERT INTO ... SELECT ...` formával a `diak` tábla azon sorait (**nev, pont**), ahol a pontszám **legalább 80**! Az `id`-t az adatbázis adja.
 
   A kód végén álló `SELECT` sort **ne töröld és ne módosítsd**: az mutatja meg a tábla állapotát módosítás után, és a rendszer ezt az eredményt hasonlítja az elvárthoz. A saját utasításodat a `SELECT` **elé** írd, pontosvesszővel lezárva.
 

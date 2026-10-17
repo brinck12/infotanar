@@ -14,22 +14,22 @@ description: |
 
   | oszlop | típus |
   |---|---|
-  | `id` | egész, elsődleges kulcs |
-  | `nev` | szöveg |
-  | `helyszin` | szöveg (város) |
-  | `datum` | szöveg (ÉÉÉÉ-HH-NN) |
-  | `kapacitas` | egész, a férőhelyek száma |
+  | `id` | `INT`, elsődleges kulcs |
+  | `nev` | `VARCHAR(50)` |
+  | `helyszin` | `VARCHAR(30)` (város) |
+  | `datum` | `DATE` |
+  | `kapacitas` | `INT`, a férőhelyek száma |
 
   A `jegy` tábla az eladott jegyeket:
 
   | oszlop | típus |
   |---|---|
-  | `id` | egész, elsődleges kulcs |
-  | `rendezveny_id` | egész, a `rendezveny` tábla `id` oszlopára mutat |
-  | `vevo` | szöveg, a vásárló neve |
-  | `kategoria` | szöveg: `allo`, `ules` vagy `vip` |
-  | `ar` | egész, a jegy ára forintban |
-  | `vasarlas` | szöveg, a vásárlás napja (ÉÉÉÉ-HH-NN) |
+  | `id` | `INT`, elsődleges kulcs |
+  | `rendezveny_id` | `INT`, a `rendezveny` tábla `id` oszlopára mutat |
+  | `vevo` | `VARCHAR(50)`, a vásárló neve |
+  | `kategoria` | `VARCHAR(20)`: `allo`, `ules` vagy `vip` |
+  | `ar` | `INT`, a jegy ára forintban |
+  | `vasarlas` | `DATE`, a vásárlás napja |
 
   **6. feladat.** Adja meg lekérdezéssel azoknak a rendezvényeknek a nevét és helyszínét (**nev, helyszin**), amelyek **nevében szerepel a `fesztival` szó** (bárhol a névben), és **nem szegedi** rendezvények!
 starter_code:

@@ -38,7 +38,7 @@ A repülőtér nyilvántartása négy táblából áll: `legitarsasag`, `gep`, `
 
 A feladatok az emelt szint tipikus eszközeit kérik: csoportosítás és `HAVING`, `JOIN` két vagy három táblán, `LEFT JOIN` a hiányzó kapcsolatok kezelésére, allekérdezés (`NOT IN`, átlag feletti érték), `COUNT(DISTINCT ...)` és `CASE`.
 
-Az érettségin a lekérdezésekhez MariaDB-t (phpMyAdmin) kapsz; itt SQLite fut. Az alap SQL ugyanaz, eltérés a dátum- és szövegfüggvényekben van (például MariaDB-ben `HOUR(ido)`, itt a szöveges összehasonlítás). A 8. feladat leírása jelzi ezt.
+A lekérdezéseket az érettségin is MariaDB-ben (phpMyAdmin) írod. A 8. feladat a `HOUR(ido)` függvényt használja: a `14:35` időpontból a `14` órát adja.
 
 ## 3. Algoritmizálás és programozás (50 pont)
 

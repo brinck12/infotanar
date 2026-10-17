@@ -1,0 +1,81 @@
+slug: gyartasi-ev-a-kodbol
+title: Gyártási év a kódból
+position: 1
+kind: sql
+level: kozep
+difficulty: 2
+published: false
+allowed_languages: [sql]
+description: |
+    A termékkód alakja `ABC-2024-017`: a gyártási év a kód 5. karakterétől kezdődő négy karakter. Listázd a termék nevét (`nev`) és a gyártási évet (`ev`).
+
+    A `termek` tábla:
+
+    | `id` | `kod` | `nev` |
+    |---|---|---|
+    | 1 | LAP-2023-001 | Laptop |
+    | 2 | EGE-2024-014 | Vezetek nelkuli eger |
+    | 3 | MON-2022-007 | Monitor |
+
+    Az eredmény ezekre az adatokra:
+
+    | `nev` | `ev` |
+    |---|---|
+    | Laptop | 2023 |
+    | Vezetek nelkuli eger | 2024 |
+    | Monitor | 2022 |
+
+    Tipp: `SUBSTRING(szöveg, kezdet, hossz)`: a kezdet az első karakternél 1, nem 0.
+starter_code:
+  sql: |
+    SELECT nev, ... AS ev
+    FROM termek;
+sample_solutions:
+  sql: |
+    SELECT nev, SUBSTRING(kod, 5, 4) AS ev
+    FROM termek;
+tests:
+  - stdin: |
+      CREATE TABLE termek (id INT, kod VARCHAR(12), nev VARCHAR(30));
+      INSERT INTO termek VALUES (1, 'LAP-2023-001', 'Laptop');
+      INSERT INTO termek VALUES (2, 'EGE-2024-014', 'Vezetek nelkuli eger');
+      INSERT INTO termek VALUES (3, 'MON-2022-007', 'Monitor');
+    expected: |
+      nev,ev
+      Laptop,2023
+      Vezetek nelkuli eger,2024
+      Monitor,2022
+    hidden: false
+  - stdin: |
+      CREATE TABLE termek (id INT, kod VARCHAR(12), nev VARCHAR(30));
+      INSERT INTO termek VALUES (4, 'LAP-2024-102', 'Jatek laptop');
+      INSERT INTO termek VALUES (5, 'BIL-2021-033', 'Billentyuzet');
+      INSERT INTO termek VALUES (6, 'MON-2024-250', 'Ivelt monitor');
+    expected: |
+      nev,ev
+      Jatek laptop,2024
+      Billentyuzet,2021
+      Ivelt monitor,2024
+    hidden: true
+  - stdin: |
+      CREATE TABLE termek (id INT, kod VARCHAR(12), nev VARCHAR(30));
+      INSERT INTO termek VALUES (7, 'EGE-2023-009', 'Eger');
+      INSERT INTO termek VALUES (8, 'NYO-2022-120', 'Nyomtato');
+    expected: |
+      nev,ev
+      Eger,2023
+      Nyomtato,2022
+    hidden: true
+  - stdin: |
+      CREATE TABLE termek (id INT, kod VARCHAR(12), nev VARCHAR(30));
+      INSERT INTO termek VALUES (2, 'EGE-2024-014', 'Vezetek nelkuli eger');
+      INSERT INTO termek VALUES (4, 'LAP-2024-102', 'Jatek laptop');
+      INSERT INTO termek VALUES (6, 'MON-2024-250', 'Ivelt monitor');
+      INSERT INTO termek VALUES (8, 'NYO-2022-120', 'Nyomtato');
+    expected: |
+      nev,ev
+      Vezetek nelkuli eger,2024
+      Jatek laptop,2024
+      Ivelt monitor,2024
+      Nyomtato,2022
+    hidden: true

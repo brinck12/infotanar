@@ -2,7 +2,7 @@
 slug: karakter-es-bekezdesformazas
 title: "Karakter- és bekezdésformázás"
 position: 1
-free: false
+free: true
 published: false
 reviewed_by:
 reviewed_at:

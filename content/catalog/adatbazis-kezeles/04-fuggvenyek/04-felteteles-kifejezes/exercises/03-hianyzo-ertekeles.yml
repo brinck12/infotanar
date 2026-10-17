@@ -1,0 +1,81 @@
+slug: hianyzo-ertekeles
+title: Hiányzó értékelés
+position: 3
+kind: sql
+level: kozep
+difficulty: 2
+published: false
+allowed_languages: [sql]
+description: |
+    Néhány fuvart még nem értékeltek (az `ertekeles` értéke `NULL`). Listázd a fuvar azonosítóját (`id`) és az értékelését (`ertekeles`) úgy, hogy a hiányzó értékelés helyén a `nincs` szó álljon.
+
+    A `fuvar` tábla:
+
+    | `id` | `rendszam` | `ertekeles` |
+    |---|---|---|
+    | 1 | ABC-123 | 5 |
+    | 2 | DEF-456 | NULL |
+    | 3 | ABC-123 | 4 |
+
+    Az eredmény ezekre az adatokra:
+
+    | `id` | `ertekeles` |
+    |---|---|
+    | 1 | 5 |
+    | 2 | nincs |
+    | 3 | 4 |
+
+    Tipp: a `NULL` vizsgálata: `oszlop IS NULL` igaz, ha az érték hiányzik. Ezt tedd az `IF` feltételébe.
+starter_code:
+  sql: |
+    SELECT id, IF(..., ..., ertekeles) AS ertekeles
+    FROM fuvar;
+sample_solutions:
+  sql: |
+    SELECT id, IF(ertekeles IS NULL, 'nincs', ertekeles) AS ertekeles
+    FROM fuvar;
+tests:
+  - stdin: |
+      CREATE TABLE fuvar (id INT, rendszam VARCHAR(10), ertekeles INT);
+      INSERT INTO fuvar VALUES (1, 'ABC-123', 5);
+      INSERT INTO fuvar VALUES (2, 'DEF-456', NULL);
+      INSERT INTO fuvar VALUES (3, 'ABC-123', 4);
+    expected: |
+      id,ertekeles
+      1,5
+      2,nincs
+      3,4
+    hidden: false
+  - stdin: |
+      CREATE TABLE fuvar (id INT, rendszam VARCHAR(10), ertekeles INT);
+      INSERT INTO fuvar VALUES (2, 'DEF-456', NULL);
+      INSERT INTO fuvar VALUES (4, 'GHI-789', NULL);
+    expected: |
+      id,ertekeles
+      2,nincs
+      4,nincs
+    hidden: true
+  - stdin: |
+      CREATE TABLE fuvar (id INT, rendszam VARCHAR(10), ertekeles INT);
+      INSERT INTO fuvar VALUES (1, 'ABC-123', 5);
+      INSERT INTO fuvar VALUES (3, 'ABC-123', 4);
+      INSERT INTO fuvar VALUES (5, 'DEF-456', 3);
+      INSERT INTO fuvar VALUES (6, 'ABC-123', 1);
+    expected: |
+      id,ertekeles
+      1,5
+      3,4
+      5,3
+      6,1
+    hidden: true
+  - stdin: |
+      CREATE TABLE fuvar (id INT, rendszam VARCHAR(10), ertekeles INT);
+      INSERT INTO fuvar VALUES (1, 'ABC-123', 5);
+      INSERT INTO fuvar VALUES (2, 'DEF-456', NULL);
+      INSERT INTO fuvar VALUES (6, 'ABC-123', 1);
+    expected: |
+      id,ertekeles
+      1,5
+      2,nincs
+      6,1
+    hidden: true

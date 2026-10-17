@@ -15,24 +15,24 @@ description: |
 
   | oszlop | típus |
   |---|---|
-  | `id` | egész, elsődleges kulcs |
-  | `cim` | szöveg, a film címe |
-  | `rendezo` | szöveg |
-  | `ev` | egész, a bemutató éve |
-  | `hossz` | egész, a játékidő percben |
-  | `mufaj` | szöveg (`akcio`, `vigjatek`, `drama`, `animacio`, `scifi`) |
+  | `id` | `INT`, elsődleges kulcs |
+  | `cim` | `VARCHAR(50)`, a film címe |
+  | `rendezo` | `VARCHAR(50)` |
+  | `ev` | `INT`, a bemutató éve |
+  | `hossz` | `INT`, a játékidő percben |
+  | `mufaj` | `VARCHAR(20)` (`akcio`, `vigjatek`, `drama`, `animacio`, `scifi`) |
 
   A `vetites` tábla:
 
   | oszlop | típus |
   |---|---|
-  | `id` | egész, elsődleges kulcs |
-  | `film_id` | egész, a `film` tábla `id` oszlopára mutat |
-  | `datum` | szöveg, `ÉÉÉÉ-HH-NN` alakban (pl. `2025-10-14`) |
-  | `ido` | szöveg, a kezdés `ÓÓ:PP` alakban |
-  | `terem` | egész, a terem száma |
-  | `eladott` | egész, az eladott jegyek száma |
-  | `jegyar` | egész, egy jegy ára forintban |
+  | `id` | `INT`, elsődleges kulcs |
+  | `film_id` | `INT`, a `film` tábla `id` oszlopára mutat |
+  | `datum` | `DATE` (pl. `2025-10-14`) |
+  | `ido` | `VARCHAR(5)`, a kezdés `ÓÓ:PP` alakban |
+  | `terem` | `INT`, a terem száma |
+  | `eladott` | `INT`, az eladott jegyek száma |
+  | `jegyar` | `INT`, egy jegy ára forintban |
 
   **2. feladat.** Készítsen összesítést műfajonként: hány film tartozik az egyes műfajokhoz? A lekérdezés két oszlopot adjon `mufaj` és `db` néven, a sorok darabszám szerint csökkenő, azonos darabszámnál műfaj szerint növekvő sorrendben jöjjenek!
 

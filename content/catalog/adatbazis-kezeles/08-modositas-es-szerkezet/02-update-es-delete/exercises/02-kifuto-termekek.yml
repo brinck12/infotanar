@@ -12,11 +12,11 @@ description: |
 
   | oszlop | típus |
   |---|---|
-  | `id` | egész, elsődleges kulcs |
-  | `nev` | szöveg |
-  | `kategoria` | szöveg |
-  | `ar` | egész (Ft) |
-  | `keszlet` | egész (darab) |
+  | `id` | `INT`, elsődleges kulcs |
+  | `nev` | `VARCHAR(50)` |
+  | `kategoria` | `VARCHAR(20)` |
+  | `ar` | `INT` (Ft) |
+  | `keszlet` | `INT` (darab) |
 
   Azokat a termékeket, amelyekből **legfeljebb 5 darab** van készleten, sorold át a `kifuto` kategóriába, és az áruk **csökkenjen 100 Ft-tal**. Egyetlen `UPDATE` utasítással, két oszlopot módosítva oldd meg!
 

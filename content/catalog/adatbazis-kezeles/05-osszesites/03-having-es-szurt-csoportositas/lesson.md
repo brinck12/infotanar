@@ -90,11 +90,11 @@ A leírt sorrend egyben a kódban a záradékok sorrendje is, kivéve, hogy a `S
 Az `ORDER BY` a legvégén áll, és hivatkozhat az aliasra:
 
 ```sql
-SELECT strftime('%Y-%m', indulas) AS honap,
+SELECT DATE_FORMAT(indulas, '%Y-%m') AS honap,
        COUNT(*) AS darab,
        ROUND(AVG(km), 1) AS atlag_km
 FROM fuvar
-GROUP BY strftime('%Y-%m', indulas)
+GROUP BY DATE_FORMAT(indulas, '%Y-%m')
 HAVING COUNT(*) >= 3
 ORDER BY honap;
 ```
@@ -129,7 +129,7 @@ A `DEF-456` mindkét fuvara értékeletlen (`NULL`), ezért az átlaga is `NULL`
 
 ## Mit írjak a HAVING-be: aliast vagy összesítőt?
 
-A `HAVING`-ben a szabványos mód, ha az összesítő függvényt írod ki (`HAVING COUNT(*) >= 3`). Az SQLite és a MariaDB is elfogad aliast (`HAVING darab >= 3`), de más rendszerek nem, ezért a függvény megadása a biztosabb szokás.
+A `HAVING`-ben a szabványos mód, ha az összesítő függvényt írod ki (`HAVING COUNT(*) >= 3`). A MariaDB is elfogad aliast (`HAVING darab >= 3`), de más rendszerek nem, ezért a függvény megadása a biztosabb szokás.
 
 MariaDB-ben a `HAVING` és a `GROUP BY` pontosan úgy működik, mint itt.
 

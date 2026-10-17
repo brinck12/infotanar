@@ -13,10 +13,10 @@ description: |
 
   | oszlop | típus |
   |---|---|
-  | `id` | egész, elsődleges kulcs |
-  | `nev` | szöveg |
-  | `osztaly` | szöveg |
-  | `pont` | egész |
+  | `id` | `INT`, elsődleges kulcs |
+  | `nev` | `VARCHAR(50)` |
+  | `osztaly` | `VARCHAR(5)` |
+  | `pont` | `INT` |
 
   Add meg a `nev`, `osztaly` és `pont` oszlopot! A sorok sorrendje nem számít.
 

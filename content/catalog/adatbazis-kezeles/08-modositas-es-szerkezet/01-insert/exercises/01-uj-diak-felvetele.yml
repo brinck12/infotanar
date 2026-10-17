@@ -12,10 +12,10 @@ description: |
 
   | oszlop | típus |
   |---|---|
-  | `id` | egész, elsődleges kulcs |
-  | `nev` | szöveg |
-  | `osztaly` | szöveg |
-  | `pont` | egész |
+  | `id` | `INT`, elsődleges kulcs |
+  | `nev` | `VARCHAR(50)` |
+  | `osztaly` | `VARCHAR(5)` |
+  | `pont` | `INT` |
 
   Vedd fel a táblába az alábbi diákot **minden oszlop értékét megadva**: `id` = 50, `nev` = Kiss Anna, `osztaly` = 9.A, `pont` = 77.
 

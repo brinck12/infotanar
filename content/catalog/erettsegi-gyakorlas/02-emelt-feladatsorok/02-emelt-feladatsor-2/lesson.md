@@ -1,6 +1,6 @@
 ---
 slug: emelt-feladatsor-2
-title: "Emelt feladatsor 2: időjárás-állomás"
+title: "Emelt szintű feladatsor 2: időjárás-állomás"
 position: 1
 free: false
 published: false
@@ -43,11 +43,11 @@ A **programozási feladathoz** egy állomás egy hónapos napi adatai az `idojar
 
 A nyolc lekérdezés a lecke **Adatbázis 1-8** feladata. A pontok: 4 + 4 + 5 + 4 + 4 + 5 + 4 + 5. A nehézség fokozatosan nő: az elején egyszerű szűrés és rendezés, a végén korrelált allekérdezés és osztályozás `CASE`-zel.
 
-Az érettségin a lekérdezésekhez MariaDB-t (phpMyAdmin) kapsz; itt a futtató rendszer SQLite-ot használ, ezért a megoldásban az alap SQL-t használd. Eltérések, amelyekre figyelj:
+A lekérdezéseket az érettségin is MariaDB-ben (phpMyAdmin) írod. A hasznos függvények, amelyekre figyelj:
 
-- A MariaDB-ben a `LEFT(datum, 7)` és a `SUBSTR(datum, 1, 7)` is működik, SQLite-ban csak a `SUBSTR`.
-- A MariaDB-ben van `IF(feltétel, igen, nem)`, SQLite-ban a `CASE WHEN ... END` az általános megoldás; az utóbbi mindkét rendszerben működik.
-- Az `AVG` és a `ROUND` mindkét rendszerben ugyanúgy használható.
+- A `LEFT(datum, 7)` a dátum első hét karakterét adja: a `2026-04-14` dátumból `2026-04` lesz. Ugyanezt adja a `DATE_FORMAT(datum, '%Y-%m')`.
+- Az `IF(feltétel, igen, nem)` két ágú döntésre jó (`IF(szel < 20, 'gyenge', 'eros')`); több ágnál a `CASE WHEN ... END` kényelmesebb.
+- Az `ROUND(AVG(homerseklet), 1)` az átlagot egy tizedesjegyre kerekíti.
 
 Gyakori hiba: `LEFT JOIN` helyett `JOIN` (a mérés nélküli sor eltűnik), `WHERE` helyett `HAVING` (és fordítva), az allekérdezés korreláló feltételének elhagyása (ekkor az egész tábla átlagához hasonlítasz).
 

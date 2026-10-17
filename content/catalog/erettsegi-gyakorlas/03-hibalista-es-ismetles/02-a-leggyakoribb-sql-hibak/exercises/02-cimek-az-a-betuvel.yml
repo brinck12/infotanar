@@ -13,10 +13,10 @@ description: |
 
   | oszlop | típus |
   |---|---|
-  | `id` | egész, elsődleges kulcs |
-  | `cim` | szöveg |
-  | `szerzo` | szöveg |
-  | `ev` | egész (a kiadás éve) |
+  | `id` | `INT`, elsődleges kulcs |
+  | `cim` | `VARCHAR(50)` |
+  | `szerzo` | `VARCHAR(50)` |
+  | `ev` | `INT` (a kiadás éve) |
 
   Add meg a címeket (`cim` oszlop), amelyek `A` betűvel kezdődnek! A sorok sorrendje nem számít.
 

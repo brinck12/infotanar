@@ -12,10 +12,10 @@ description: |
 
   | oszlop | típus |
   |---|---|
-  | `id` | egész, elsődleges kulcs |
-  | `nev` | szöveg |
-  | `osztaly` | szöveg |
-  | `pont` | egész |
+  | `id` | `INT`, elsődleges kulcs |
+  | `nev` | `VARCHAR(50)` |
+  | `osztaly` | `VARCHAR(5)` |
+  | `pont` | `INT` |
 
   Egyetlen `INSERT` utasítással vedd fel az alábbi három diákot (az `id`-t hagyd az adatbázisra): Toth Csaba (`9.B`, 55 pont), Szabo Dora (`9.B`, 91 pont), Varga Emil (`10.A`, 68 pont).
 

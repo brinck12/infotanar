@@ -15,46 +15,46 @@ description: |-
 
   | oszlop | típus |
   |---|---|
-  | `id` | egész, elsődleges kulcs |
-  | `nev` | szöveg, az állomás neve |
-  | `varos_resz` | szöveg, a városrész neve |
-  | `ferohely` | egész, az állomás férőhelyeinek száma |
+  | `id` | `INT`, elsődleges kulcs |
+  | `nev` | `VARCHAR(50)`, az állomás neve |
+  | `varos_resz` | `VARCHAR(50)`, a városrész neve |
+  | `ferohely` | `INT`, az állomás férőhelyeinek száma |
 
   A `bicikli` tábla:
 
   | oszlop | típus |
   |---|---|
-  | `id` | egész, elsődleges kulcs |
-  | `tipus` | szöveg (`varosi`, `trekking`, `hegyi`, `elektromos`) |
-  | `vasarlas_ev` | egész, a vásárlás éve |
+  | `id` | `INT`, elsődleges kulcs |
+  | `tipus` | `VARCHAR(20)` (`varosi`, `trekking`, `hegyi`, `elektromos`) |
+  | `vasarlas_ev` | `INT`, a vásárlás éve |
 
   A `berlo` tábla:
 
   | oszlop | típus |
   |---|---|
-  | `id` | egész, elsődleges kulcs |
-  | `nev` | szöveg, a bérlő neve |
+  | `id` | `INT`, elsődleges kulcs |
+  | `nev` | `VARCHAR(50)`, a bérlő neve |
 
   A `berles` tábla (egy sor egy bérlés; a bicikli az indulási állomásról indul, az érkezési állomáson adják le):
 
   | oszlop | típus |
   |---|---|
-  | `id` | egész, elsődleges kulcs |
-  | `bicikli_id` | egész, a `bicikli` tábla `id` oszlopára mutat |
-  | `berlo_id` | egész, a `berlo` tábla `id` oszlopára mutat |
-  | `indulo_allomas_id` | egész, az `allomas` tábla `id` oszlopára mutat |
-  | `erkezo_allomas_id` | egész, az `allomas` tábla `id` oszlopára mutat |
-  | `kezdet` | szöveg, `ÉÉÉÉ-HH-NN ÓÓ:PP` alakban (pl. `2025-06-14 08:15`) |
-  | `km` | egész, a megtett út kilométerben |
-  | `perc` | egész, a bérlés hossza percben |
+  | `id` | `INT`, elsődleges kulcs |
+  | `bicikli_id` | `INT`, a `bicikli` tábla `id` oszlopára mutat |
+  | `berlo_id` | `INT`, a `berlo` tábla `id` oszlopára mutat |
+  | `indulo_allomas_id` | `INT`, az `allomas` tábla `id` oszlopára mutat |
+  | `erkezo_allomas_id` | `INT`, az `allomas` tábla `id` oszlopára mutat |
+  | `kezdet` | `DATETIME`, `ÉÉÉÉ-HH-NN ÓÓ:PP` alakban (pl. `2025-06-14 08:15`) |
+  | `km` | `INT`, a megtett út kilométerben |
+  | `perc` | `INT`, a bérlés hossza percben |
 
   **8. feladat.** Osztályozza a bérléseket a `kezdet` időpont **órája** szerint: 12 óra előtt `delelott`, 12 és 17 óra között (a 17:59-ig) `delutan`, 18 órától `este`. Adja meg napszakonként a bérlések számát és a megtett kilométerek összegét! Az eredmény három oszlopa: `napszak`, `berlesek` és `osszes_km`. A sorrend: bérlések száma szerint csökkenően, azonos számnál napszak szerint növekvően.
 
-  Tipp: az óra a `kezdet` szöveg 12-13. karaktere: `CAST(SUBSTR(kezdet, 12, 2) AS INTEGER)`; az osztályozást `CASE WHEN ... THEN ... END` adja. MariaDB-ben az órát a `HOUR(kezdet)` adná, a `CASE` ugyanúgy működik.
+  Tipp: az órát a `HOUR(kezdet)` függvény adja (például `2025-06-14 08:15` esetén 8); az osztályozást `CASE WHEN ... THEN ... END` adja.
 starter_code:
   sql: |
     SELECT CASE
-             WHEN CAST(SUBSTR(kezdet, 12, 2) AS INTEGER) < 12 THEN 'delelott'
+             WHEN HOUR(kezdet) < 12 THEN 'delelott'
              WHEN  THEN 'delutan'
              ELSE 'este'
            END AS napszak,
@@ -65,8 +65,8 @@ starter_code:
 sample_solutions:
   sql: |
     SELECT CASE
-             WHEN CAST(SUBSTR(kezdet, 12, 2) AS INTEGER) < 12 THEN 'delelott'
-             WHEN CAST(SUBSTR(kezdet, 12, 2) AS INTEGER) < 18 THEN 'delutan'
+             WHEN HOUR(kezdet) < 12 THEN 'delelott'
+             WHEN HOUR(kezdet) < 18 THEN 'delutan'
              ELSE 'este'
            END AS napszak,
            COUNT(*) AS berlesek, SUM(km) AS osszes_km

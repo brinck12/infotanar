@@ -13,24 +13,24 @@ description: |
 
   | oszlop | típus |
   |---|---|
-  | `id` | egész, elsődleges kulcs |
-  | `nev` | szöveg |
-  | `varos` | szöveg |
+  | `id` | `INT`, elsődleges kulcs |
+  | `nev` | `VARCHAR(50)` |
+  | `varos` | `VARCHAR(30)` |
 
 
   A `rendeles` tábla még nem létezik. Hozd létre ezzel a szerkezettel:
 
   | oszlop | típus | megkötés |
   |---|---|---|
-  | `id` | egész | elsődleges kulcs |
-  | `vevo_id` | egész | NOT NULL, idegen kulcs a `vevo(id)` oszlopra |
-  | `osszeg` | egész | |
+  | `id` | `INT` | elsődleges kulcs, `AUTO_INCREMENT` |
+  | `vevo_id` | `INT` | `NOT NULL`, idegen kulcs a `vevo(id)` oszlopra |
+  | `osszeg` | `INT` | |
 
-  Majd vigyél fel három rendelést: (1, 1, 5000), (2, 1, 7000), (3, 2, 3000) – az `id`, a `vevo_id` és az `osszeg` sorrendjében. Az ellenőrző lekérdezés vevőnként összegzi a rendelések értékét.
+  A tábla `ENGINE=InnoDB` motorral készüljön. Majd vigyél fel három rendelést az `id` megadása nélkül, a `vevo_id` és az `osszeg` sorrendjében: (1, 5000), (1, 7000), (2, 3000). Az ellenőrző lekérdezés vevőnként összegzi a rendelések értékét.
 
   A kód végén álló `SELECT` sort **ne töröld és ne módosítsd**: az mutatja meg a tábla állapotát módosítás után, és a rendszer ezt az eredményt hasonlítja az elvárthoz. A saját utasításodat a `SELECT` **elé** írd, pontosvesszővel lezárva.
 
-  Tipp: az idegen kulcs a tábla definíciójában adható meg: `FOREIGN KEY (vevo_id) REFERENCES vevo(id)`.
+  Tipp: az idegen kulcs a tábla definíciójában adható meg: `FOREIGN KEY (vevo_id) REFERENCES vevo(id)`. A záró zárójel után jön az `ENGINE=InnoDB`.
 starter_code:
   sql: |
     -- Ide írd a CREATE TABLE és az INSERT utasítást.
@@ -42,13 +42,13 @@ starter_code:
 sample_solutions:
   sql: |
     CREATE TABLE rendeles (
-      id INTEGER PRIMARY KEY,
-      vevo_id INTEGER NOT NULL,
-      osszeg INTEGER,
+      id INT AUTO_INCREMENT PRIMARY KEY,
+      vevo_id INT NOT NULL,
+      osszeg INT,
       FOREIGN KEY (vevo_id) REFERENCES vevo(id)
-    );
+    ) ENGINE=InnoDB;
 
-    INSERT INTO rendeles VALUES (1, 1, 5000), (2, 1, 7000), (3, 2, 3000);
+    INSERT INTO rendeles (vevo_id, osszeg) VALUES (1, 5000), (1, 7000), (2, 3000);
 
     SELECT vevo.nev, SUM(rendeles.osszeg) AS osszesen
     FROM vevo INNER JOIN rendeles ON rendeles.vevo_id = vevo.id

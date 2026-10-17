@@ -2,7 +2,7 @@
 slug: kozep-feladatsor-2
 title: "Középszintű feladatsor 2: mozi"
 position: 1
-free: false
+free: true
 published: false
 reviewed_by:
 reviewed_at:
@@ -109,7 +109,7 @@ Június;640;510;390;160
 
 A mozi nyilvántartása két táblából áll: `film` és `vetites`. A táblák oszlopait és a négy lekérdezés pontos kimenetét minden feladat leírása megadja. A négy lekérdezés a lecke **Adatbázis 1–4** feladata; a pontok megoszlása: 3, 3, 4 és 5 pont.
 
-Az érettségin a lekérdezésekhez MariaDB-t (phpMyAdmin) kapsz; itt SQLite fut. Az alap SQL (`WHERE`, `GROUP BY`, `HAVING`, `ORDER BY`, `JOIN`) ugyanaz.
+A lekérdezéseket az érettségin is MariaDB-ben (phpMyAdmin) írod. Az alap SQL (`WHERE`, `GROUP BY`, `HAVING`, `ORDER BY`, `JOIN`) itt is ugyanaz.
 
 ## V. Algoritmizálás és programozás (15 pont)
 
