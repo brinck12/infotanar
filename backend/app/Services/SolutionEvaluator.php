@@ -102,7 +102,7 @@ final readonly class SolutionEvaluator
 
                 // SQL-nel a teszteset bemenete az adatkeszlet-szkript, ami a programba kerul.
                 $run = $attachments === null
-                    ? $this->judge0->run($language, SqlProgram::build((string) $testCase->stdin, $sourceCode), null, $limits, $timeout)
+                    ? $this->judge0->run(SqlProgram::RUNNER_LANGUAGE, SqlProgram::build((string) $testCase->stdin, $sourceCode), null, $limits, $timeout)
                     : $this->judge0->run($language, $sourceCode, $testCase->stdin, $limits, $timeout, $this->files->for($attachments, $testCase));
             } catch (Judge0Exception $e) {
                 $verdicts[] = Verdict::SystemError;

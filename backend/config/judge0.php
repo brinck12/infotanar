@@ -136,9 +136,11 @@ return [
             'fallback_id' => 51,
             'monaco' => 'csharp',
         ],
-        // Adatbazis-track: a Judge0 SQLite (sqlite3 CLI) sandboxaban fut, a
-        // teszteset bemenete az adatkeszlet-szkript, az eredmenyt CSV-kent
-        // vetjuk ossze (SqlProgram, SqlResultComparator).
+        // Adatbazis-track: a diak SQL-je a Judge0 Python futtatokornyezeteben, SQLite-on
+        // fut, MariaDB-fuggvenyekkel kiegeszitve (SqlProgram, resources/sql/mariadb_runner.py).
+        // A teszteset bemenete az adatkeszlet-szkript, az eredmenyt CSV-kent vetjuk ossze
+        // (SqlResultComparator). A `match` / `fallback_id` csak a feliratot es a szerkesztot
+        // szolgalja: maga a futtatas a `python` nyelven megy.
         'sql' => [
             'label' => 'SQL',
             'match' => 'sql (sqlite',
