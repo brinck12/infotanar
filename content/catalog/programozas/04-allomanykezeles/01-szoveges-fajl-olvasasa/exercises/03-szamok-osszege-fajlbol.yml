@@ -1,0 +1,120 @@
+slug: szamok-osszege-fajlbol
+title: Számok összege fájlból
+position: 2
+kind: code
+level: kozep
+difficulty: 2
+published: false
+allowed_languages:
+- python
+- csharp
+description: |
+  A `szamok.txt` fájl soronként egy egész számot tartalmaz (lehet negatív is). Írd ki a számok összegét és a pozitív számok darabszámát két sorban:
+
+  ```
+  Osszeg: 14
+  Pozitiv: 3
+  ```
+
+  Tipp: a fájlból szövegként érkező sort `int(...)` (C#-ban `int.Parse(...)`) alakítja számmá.
+starter_code:
+  python: |
+    osszeg = 0
+    pozitiv = 0
+    with open("szamok.txt", encoding="utf-8") as f:
+        for sor in f:
+            szam = int(sor)
+            # ide írd a megoldást
+    print("Osszeg:", osszeg)
+    print("Pozitiv:", pozitiv)
+  csharp: |
+    using System;
+    using System.IO;
+
+    class Program
+    {
+        static void Main()
+        {
+            int osszeg = 0;
+            int pozitiv = 0;
+            foreach (string sor in File.ReadAllLines("szamok.txt"))
+            {
+                int szam = int.Parse(sor);
+                // ide írd a megoldást
+            }
+            Console.WriteLine("Osszeg: " + osszeg);
+            Console.WriteLine("Pozitiv: " + pozitiv);
+        }
+    }
+sample_solutions:
+  python: |
+    osszeg = 0
+    pozitiv = 0
+    with open("szamok.txt", encoding="utf-8") as f:
+        for sor in f:
+            szam = int(sor)
+            osszeg += szam
+            if szam > 0:
+                pozitiv += 1
+    print("Osszeg:", osszeg)
+    print("Pozitiv:", pozitiv)
+  csharp: |
+    using System;
+    using System.IO;
+
+    class Program
+    {
+        static void Main()
+        {
+            int osszeg = 0;
+            int pozitiv = 0;
+            foreach (string sor in File.ReadAllLines("szamok.txt"))
+            {
+                int szam = int.Parse(sor);
+                osszeg += szam;
+                if (szam > 0)
+                {
+                    pozitiv++;
+                }
+            }
+            Console.WriteLine("Osszeg: " + osszeg);
+            Console.WriteLine("Pozitiv: " + pozitiv);
+        }
+    }
+files:
+  szamok.txt: szamok.txt
+tests:
+- stdin: ''
+  expected: 'Osszeg: 14
+
+    Pozitiv: 3
+
+    '
+  hidden: false
+- stdin: ''
+  expected: 'Osszeg: -7
+
+    Pozitiv: 0
+
+    '
+  hidden: true
+  files:
+    szamok.txt: teszt-2/szamok.txt
+- stdin: ''
+  expected: 'Osszeg: 55
+
+    Pozitiv: 10
+
+    '
+  hidden: true
+  files:
+    szamok.txt: teszt-3/szamok.txt
+- stdin: ''
+  expected: 'Osszeg: -16
+
+    Pozitiv: 0
+
+    '
+  hidden: true
+  files:
+    szamok.txt: teszt-4/szamok.txt

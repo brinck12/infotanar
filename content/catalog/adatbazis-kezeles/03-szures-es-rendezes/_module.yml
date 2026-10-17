@@ -1,0 +1,4 @@
+slug: szures-es-rendezes
+title: Szűrés és rendezés
+description: WHERE feltételek, BETWEEN, IN, LIKE, ORDER BY, LIMIT és a NULL kezelése.
+position: 2

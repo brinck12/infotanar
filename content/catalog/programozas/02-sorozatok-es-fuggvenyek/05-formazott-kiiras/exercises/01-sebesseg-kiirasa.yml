@@ -1,0 +1,60 @@
+slug: sebesseg-kiirasa
+title: Sebesség kiírása
+position: 0
+kind: code
+level: kozep
+difficulty: 1
+published: false
+allowed_languages: [python, csharp]
+description: |
+  Két sorban kapsz egy-egy valós számot (a tizedeselválasztó pont): először a megtett utat méterben, aztán az időt másodpercben (az idő pozitív). Számold ki a sebességet (út osztva idővel), és írd ki **egy tizedesjegyre kerekítve**, pontosan ebben a formában:
+
+  `Sebesseg: 13.4 m/s`
+
+  Példa: a `67` és az `5` bemenetre a kimenet `Sebesseg: 13.4 m/s`.
+
+  Tipp: a kerekítés a formázásban történik: Pythonban `{x:.1f}`, C#-ban `F1` és `CultureInfo.InvariantCulture`.
+starter_code:
+  python: |
+    ut = float(input())
+    ido = float(input())
+    # innen folytasd
+  csharp: |
+    using System;
+    using System.Globalization;
+
+    class Program
+    {
+        static void Main()
+        {
+            double ut = double.Parse(Console.ReadLine(), CultureInfo.InvariantCulture);
+            double ido = double.Parse(Console.ReadLine(), CultureInfo.InvariantCulture);
+            // innen folytasd
+        }
+    }
+sample_solutions:
+  python: |
+    ut = float(input())
+    ido = float(input())
+    sebesseg = ut / ido
+    print(f"Sebesseg: {sebesseg:.1f} m/s")
+  csharp: |
+    using System;
+    using System.Globalization;
+
+    class Program
+    {
+        static void Main()
+        {
+            double ut = double.Parse(Console.ReadLine(), CultureInfo.InvariantCulture);
+            double ido = double.Parse(Console.ReadLine(), CultureInfo.InvariantCulture);
+            double sebesseg = ut / ido;
+            Console.WriteLine(string.Format(CultureInfo.InvariantCulture, "Sebesseg: {0:F1} m/s", sebesseg));
+        }
+    }
+tests:
+  - { stdin: "67\n5\n", expected: "Sebesseg: 13.4 m/s\n", hidden: false }
+  - { stdin: "100\n8\n", expected: "Sebesseg: 12.5 m/s\n", hidden: true }
+  - { stdin: "50\n3\n", expected: "Sebesseg: 16.7 m/s\n", hidden: true }
+  - { stdin: "0\n4\n", expected: "Sebesseg: 0.0 m/s\n", hidden: true }
+  - { stdin: "1000\n3.5\n", expected: "Sebesseg: 285.7 m/s\n", hidden: true }

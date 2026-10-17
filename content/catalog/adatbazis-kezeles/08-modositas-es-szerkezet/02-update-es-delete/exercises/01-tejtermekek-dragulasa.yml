@@ -1,0 +1,134 @@
+slug: tejtermekek-dragulasa
+title: Tejtermékek drágulása
+position: 0
+kind: sql
+level: kozep
+difficulty: 2
+published: false
+allowed_languages:
+- sql
+description: |
+  A `termek` tábla:
+
+  | oszlop | típus |
+  |---|---|
+  | `id` | egész, elsődleges kulcs |
+  | `nev` | szöveg |
+  | `kategoria` | szöveg |
+  | `ar` | egész (Ft) |
+  | `keszlet` | egész (darab) |
+
+  A `tej` kategóriájú termékek ára **10%-kal nő**. Írj `UPDATE` utasítást, amely csak ezeknek a soroknak az árát módosítja! Az árak mind tízzel oszthatók, ezért az `ar * 110 / 100` egész számot ad.
+
+  A kód végén álló `SELECT` sort **ne töröld és ne módosítsd**: az mutatja meg a tábla állapotát módosítás után, és a rendszer ezt az eredményt hasonlítja az elvárthoz. A saját utasításodat a `SELECT` **elé** írd, pontosvesszővel lezárva.
+
+  Tipp: `UPDATE termek SET ar = ar * 110 / 100 WHERE ...;` – ha elhagyod a `WHERE`-t, minden sor megváltozik!
+starter_code:
+  sql: |
+    -- Ide írd az UPDATE utasítást.
+
+    SELECT id, nev, kategoria, ar, keszlet FROM termek ORDER BY id;
+sample_solutions:
+  sql: |
+    UPDATE termek SET ar = ar * 110 / 100 WHERE kategoria = 'tej';
+
+    SELECT id, nev, kategoria, ar, keszlet FROM termek ORDER BY id;
+tests:
+- stdin: |
+    CREATE TABLE termek (id INTEGER PRIMARY KEY, nev TEXT, kategoria TEXT, ar INTEGER, keszlet INTEGER);
+    INSERT INTO termek VALUES
+    (1, 'Paprika', 'zold', 430, 28),
+    (2, 'Joghurt', 'tej', 710, 0),
+    (3, 'Paradicsom', 'zold', 610, 32),
+    (4, 'Kenyer', 'pek', 680, 24),
+    (5, 'Kefir', 'tej', 200, 12),
+    (6, 'Zsemle', 'pek', 460, 32),
+    (7, 'Sajt', 'tej', 1870, 27),
+    (8, 'Pogacsa', 'pek', 2050, 2);
+  expected: |
+    id,nev,kategoria,ar,keszlet
+    1,Paprika,zold,430,28
+    2,Joghurt,tej,781,0
+    3,Paradicsom,zold,610,32
+    4,Kenyer,pek,680,24
+    5,Kefir,tej,220,12
+    6,Zsemle,pek,460,32
+    7,Sajt,tej,2057,27
+    8,Pogacsa,pek,2050,2
+  hidden: false
+- stdin: |
+    CREATE TABLE termek (id INTEGER PRIMARY KEY, nev TEXT, kategoria TEXT, ar INTEGER, keszlet INTEGER);
+    INSERT INTO termek VALUES
+    (1, 'Sonka', 'hus', 580, 0),
+    (2, 'Kefir', 'tej', 1460, 10),
+    (3, 'Szalami', 'hus', 980, 22),
+    (4, 'Paradicsom', 'zold', 620, 2),
+    (5, 'Paprika', 'zold', 1640, 1),
+    (6, 'Parizer', 'hus', 590, 29),
+    (7, 'Vaj', 'tej', 670, 3),
+    (8, 'Sajt', 'tej', 1870, 31),
+    (9, 'Alma', 'zold', 2470, 38),
+    (10, 'Korte', 'zold', 1450, 15);
+  expected: |
+    id,nev,kategoria,ar,keszlet
+    1,Sonka,hus,580,0
+    2,Kefir,tej,1606,10
+    3,Szalami,hus,980,22
+    4,Paradicsom,zold,620,2
+    5,Paprika,zold,1640,1
+    6,Parizer,hus,590,29
+    7,Vaj,tej,737,3
+    8,Sajt,tej,2057,31
+    9,Alma,zold,2470,38
+    10,Korte,zold,1450,15
+  hidden: true
+- stdin: |
+    CREATE TABLE termek (id INTEGER PRIMARY KEY, nev TEXT, kategoria TEXT, ar INTEGER, keszlet INTEGER);
+    INSERT INTO termek VALUES
+    (1, 'Vaj', 'tej', 1820, 0),
+    (2, 'Alma', 'zold', 660, 20),
+    (3, 'Sajt', 'tej', 1830, 0),
+    (4, 'Parizer', 'hus', 640, 0),
+    (5, 'Banan', 'zold', 900, 33),
+    (6, 'Korte', 'zold', 1170, 28),
+    (7, 'Sonka', 'hus', 1030, 36);
+  expected: |
+    id,nev,kategoria,ar,keszlet
+    1,Vaj,tej,2002,0
+    2,Alma,zold,660,20
+    3,Sajt,tej,2013,0
+    4,Parizer,hus,640,0
+    5,Banan,zold,900,33
+    6,Korte,zold,1170,28
+    7,Sonka,hus,1030,36
+  hidden: true
+- stdin: |
+    CREATE TABLE termek (id INTEGER PRIMARY KEY, nev TEXT, kategoria TEXT, ar INTEGER, keszlet INTEGER);
+    INSERT INTO termek VALUES
+    (1, 'Paprika', 'zold', 980, 0),
+    (2, 'Parizer', 'hus', 310, 21),
+    (3, 'Sonka', 'hus', 1660, 0),
+    (4, 'Banan', 'zold', 990, 33),
+    (5, 'Joghurt', 'tej', 290, 0),
+    (6, 'Pogacsa', 'pek', 1080, 0),
+    (7, 'Szalami', 'hus', 2070, 29),
+    (8, 'Korte', 'zold', 970, 7),
+    (9, 'Zsemle', 'pek', 790, 24),
+    (10, 'Kenyer', 'pek', 450, 24),
+    (11, 'Kifli', 'pek', 2110, 22),
+    (12, 'Paradicsom', 'zold', 850, 35);
+  expected: |
+    id,nev,kategoria,ar,keszlet
+    1,Paprika,zold,980,0
+    2,Parizer,hus,310,21
+    3,Sonka,hus,1660,0
+    4,Banan,zold,990,33
+    5,Joghurt,tej,319,0
+    6,Pogacsa,pek,1080,0
+    7,Szalami,hus,2070,29
+    8,Korte,zold,970,7
+    9,Zsemle,pek,790,24
+    10,Kenyer,pek,450,24
+    11,Kifli,pek,2110,22
+    12,Paradicsom,zold,850,35
+  hidden: true

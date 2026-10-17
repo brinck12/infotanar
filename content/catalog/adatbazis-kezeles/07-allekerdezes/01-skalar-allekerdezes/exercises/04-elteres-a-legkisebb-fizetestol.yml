@@ -1,0 +1,113 @@
+slug: elteres-a-legkisebb-fizetestol
+title: Eltérés a legkisebb fizetéstől
+position: 3
+kind: sql
+level: emelt
+difficulty: 3
+published: false
+allowed_languages:
+- sql
+description: |
+  A `dolgozo` tábla:
+
+  | oszlop | típus |
+  |---|---|
+  | `id` | egész, elsődleges kulcs |
+  | `nev` | szöveg |
+  | `reszleg` | szöveg |
+  | `fizetes` | egész (Ft) |
+
+  Add meg minden dolgozó nevét és azt, hogy mennyivel keres többet a **legkisebb fizetésnél** (**nev, tobblet**)! A legkisebb fizetésű dolgozó tobblete 0. Az allekérdezés itt a `SELECT` listában áll. A sorok sorrendje nem számít.
+
+  Tipp: `fizetes - (SELECT MIN(fizetes) FROM dolgozo) AS tobblet`
+starter_code:
+  sql: |
+    SELECT nev, fizetes - (SELECT ) AS tobblet
+    FROM dolgozo;
+sample_solutions:
+  sql: |
+    SELECT nev, fizetes - (SELECT MIN(fizetes) FROM dolgozo) AS tobblet
+    FROM dolgozo;
+tests:
+- stdin: |
+    CREATE TABLE dolgozo (id INTEGER PRIMARY KEY, nev TEXT, reszleg TEXT, fizetes INTEGER);
+    INSERT INTO dolgozo VALUES
+    (1, 'Varga Orsolya', 'uzlet', 370000),
+    (2, 'Nagy Sandor', 'iroda', 390000),
+    (3, 'Molnar Lilla', 'iroda', 330000),
+    (4, 'Farkas Maria', 'raktar', 290000),
+    (5, 'Molnar Anna', 'raktar', 450000),
+    (6, 'Farkas Bence', 'raktar', 360000);
+  expected: |
+    nev,tobblet
+    Varga Orsolya,80000
+    Nagy Sandor,100000
+    Molnar Lilla,40000
+    Farkas Maria,0
+    Molnar Anna,160000
+    Farkas Bence,70000
+  hidden: false
+- stdin: |
+    CREATE TABLE dolgozo (id INTEGER PRIMARY KEY, nev TEXT, reszleg TEXT, fizetes INTEGER);
+    INSERT INTO dolgozo VALUES
+    (1, 'Varga Maria', 'iroda', 250000),
+    (2, 'Horvath Fanni', 'raktar', 440000),
+    (3, 'Nagy Dalma', 'iroda', 390000),
+    (4, 'Varga Imre', 'iroda', 510000),
+    (5, 'Kovacs Bence', 'uzlet', 290000),
+    (6, 'Balogh Dora', 'uzlet', 310000),
+    (7, 'Toth Gergo', 'iroda', 470000),
+    (8, 'Farkas Ferenc', 'raktar', 430000);
+  expected: |
+    nev,tobblet
+    Varga Maria,0
+    Horvath Fanni,190000
+    Nagy Dalma,140000
+    Varga Imre,260000
+    Kovacs Bence,40000
+    Balogh Dora,60000
+    Toth Gergo,220000
+    Farkas Ferenc,180000
+  hidden: true
+- stdin: |
+    CREATE TABLE dolgozo (id INTEGER PRIMARY KEY, nev TEXT, reszleg TEXT, fizetes INTEGER);
+    INSERT INTO dolgozo VALUES
+    (1, 'Kiss Istvan', 'uzlet', 390000),
+    (2, 'Varga Tamas', 'raktar', 360000),
+    (3, 'Varga Bela', 'raktar', 450000),
+    (4, 'Kiss Imre', 'uzlet', 290000),
+    (5, 'Kiss Eszter', 'uzlet', 430000);
+  expected: |
+    nev,tobblet
+    Kiss Istvan,100000
+    Varga Tamas,70000
+    Varga Bela,160000
+    Kiss Imre,0
+    Kiss Eszter,140000
+  hidden: true
+- stdin: |
+    CREATE TABLE dolgozo (id INTEGER PRIMARY KEY, nev TEXT, reszleg TEXT, fizetes INTEGER);
+    INSERT INTO dolgozo VALUES
+    (1, 'Horvath Tamas', 'iroda', 430000),
+    (2, 'Nagy Aron', 'raktar', 290000),
+    (3, 'Farkas Istvan', 'uzlet', 480000),
+    (4, 'Molnar Maria', 'raktar', 510000),
+    (5, 'Szabo Csaba', 'uzlet', 260000),
+    (6, 'Toth Bence', 'iroda', 230000),
+    (7, 'Horvath Dalma', 'raktar', 250000),
+    (8, 'Varga Ferenc', 'raktar', 420000),
+    (9, 'Kiss Laszlo', 'iroda', 440000),
+    (10, 'Balogh Fanni', 'uzlet', 380000);
+  expected: |
+    nev,tobblet
+    Horvath Tamas,200000
+    Nagy Aron,60000
+    Farkas Istvan,250000
+    Molnar Maria,280000
+    Szabo Csaba,30000
+    Toth Bence,0
+    Horvath Dalma,20000
+    Varga Ferenc,190000
+    Kiss Laszlo,210000
+    Balogh Fanni,150000
+  hidden: true

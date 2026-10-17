@@ -1,0 +1,101 @@
+slug: dobogo
+title: "Dobogó"
+position: 2
+kind: code
+level: emelt
+difficulty: 3
+published: false
+allowed_languages: [python, csharp]
+description: |
+  Egy futóversenyen az első sor a versenyzők száma (N, legalább 1), majd N sor: `nev;ido` (az idő egész szám, századmásodpercben). A legkisebb idő a legjobb. Írd ki a dobogósokat (legfeljebb az első hármat) soronként `helyezes. nev ido` alakban. Egyenlő időnél a bemenetben előbb szereplő versenyző jobb helyezést kap, a helyezések pedig egyesével nőnek (1., 2., 3.). Ha háromnál kevesebb versenyző van, annyit írj ki, amennyi van.
+
+  Példa bemenet:
+
+  ```
+  5
+  Anna;1250
+  Bence;1190
+  Csilla;1301
+  David;1190
+  Emil;1220
+  ```
+
+  Kimenet:
+
+  ```
+  1. Bence 1190
+  2. David 1190
+  3. Emil 1220
+  ```
+
+  Tipp: stabil rendezés idő szerint növekvő sorrendbe, utána az első három elem kiírása (a lista hosszától függően).
+starter_code:
+  python: |
+    n = int(input())
+    versenyzok = []
+    # olvasd be (nev, ido) párokat, rendezz idő szerint, írd ki az elsőket
+  csharp: |
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+
+    class Versenyzo
+    {
+        public string Nev;
+        public int Ido;
+    }
+
+    class Program
+    {
+        static void Main()
+        {
+            int n = int.Parse(Console.ReadLine());
+            var versenyzok = new List<Versenyzo>();
+            // olvasd be, rendezz idő szerint, írd ki az elsőket
+        }
+    }
+sample_solutions:
+  python: |
+    n = int(input())
+    versenyzok = []
+    for _ in range(n):
+        resz = input().split(";")
+        versenyzok.append((resz[0], int(resz[1])))
+    rang = sorted(versenyzok, key=lambda v: v[1])
+    for i in range(min(3, n)):
+        print(str(i + 1) + ". " + rang[i][0] + " " + str(rang[i][1]))
+  csharp: |
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+
+    class Versenyzo
+    {
+        public string Nev;
+        public int Ido;
+    }
+
+    class Program
+    {
+        static void Main()
+        {
+            int n = int.Parse(Console.ReadLine());
+            var versenyzok = new List<Versenyzo>();
+            for (int i = 0; i < n; i++)
+            {
+                string[] resz = Console.ReadLine().Split(';');
+                versenyzok.Add(new Versenyzo { Nev = resz[0], Ido = int.Parse(resz[1]) });
+            }
+            var rang = versenyzok.OrderBy(v => v.Ido).ToList();
+            for (int i = 0; i < Math.Min(3, n); i++)
+            {
+                Console.WriteLine((i + 1) + ". " + rang[i].Nev + " " + rang[i].Ido);
+            }
+        }
+    }
+tests:
+  - { stdin: "5\nAnna;1250\nBence;1190\nCsilla;1301\nDavid;1190\nEmil;1220\n", expected: "1. Bence 1190\n2. David 1190\n3. Emil 1220\n", hidden: false }
+  - { stdin: "1\nFanni;999\n", expected: "1. Fanni 999\n", hidden: true }
+  - { stdin: "2\nGabor;500\nHanna;500\n", expected: "1. Gabor 500\n2. Hanna 500\n", hidden: true }
+  - { stdin: "4\nIvan;3\nJudit;2\nKata;1\nLaci;4\n", expected: "1. Kata 1\n2. Judit 2\n3. Ivan 3\n", hidden: true }
+  - { stdin: "6\nJudit;70\nKata;60\nLaci;80\nMaja;60\nNora;60\nOlga;75\n", expected: "1. Kata 60\n2. Maja 60\n3. Nora 60\n", hidden: true }

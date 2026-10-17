@@ -1,0 +1,85 @@
+slug: maximum-a-leirasbol
+title: "Maximum a leírásból"
+position: 0
+kind: code
+level: kozep
+difficulty: 2
+published: false
+allowed_languages: [python, csharp]
+description: |
+  Kódold le az alábbi algoritmust.
+
+  ```text
+  Algoritmus Maximum
+    Be: N
+    Be: max
+    Ciklus i := 2-től N-ig
+      Be: szam
+      Elágazás
+        szam > max esetén: max := szam
+      Elágazás vége
+    Ciklus vége
+    Ki: max
+  Algoritmus vége
+  ```
+
+  Bemenet: az első sorban `N` (`1 ≤ N ≤ 100`), utána `N` sorban egy-egy egész szám (lehet negatív). Kimenet: a legnagyobb szám.
+
+  Példa: `4`, majd `3`, `9`, `2`, `9` esetén a kimenet `9`.
+
+  Tipp: ne használd a beépített maximumfüggvényt, a feladat a leírás lekódolása.
+starter_code:
+  python: |
+    n = int(input())
+    maxi = int(input())
+    # TODO: a többi szám beolvasása és a maximum frissítése
+    print(maxi)
+  csharp: |
+    using System;
+
+    class Program
+    {
+
+        static void Main()
+        {
+            int n = int.Parse(Console.ReadLine());
+            int max = int.Parse(Console.ReadLine());
+            // TODO: a többi szám beolvasása és a maximum frissítése
+            Console.WriteLine(max);
+        }
+    }
+sample_solutions:
+  python: |
+    n = int(input())
+    maxi = int(input())
+    for i in range(2, n + 1):
+        szam = int(input())
+        if szam > maxi:
+            maxi = szam
+    print(maxi)
+  csharp: |
+    using System;
+
+    class Program
+    {
+
+        static void Main()
+        {
+            int n = int.Parse(Console.ReadLine());
+            int max = int.Parse(Console.ReadLine());
+            for (int i = 2; i <= n; i++)
+            {
+                int szam = int.Parse(Console.ReadLine());
+                if (szam > max)
+                {
+                    max = szam;
+                }
+            }
+            Console.WriteLine(max);
+        }
+    }
+tests:
+  - { stdin: "4\n3\n9\n2\n9\n", expected: "9\n", hidden: false }
+  - { stdin: "1\n-5\n", expected: "-5\n", hidden: true }
+  - { stdin: "3\n-4\n-2\n-9\n", expected: "-2\n", hidden: true }
+  - { stdin: "5\n1\n2\n3\n4\n5\n", expected: "5\n", hidden: true }

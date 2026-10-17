@@ -1,0 +1,93 @@
+slug: lepesek-az-egyig
+title: "Lépések az egyig"
+position: 3
+kind: code
+level: kozep
+difficulty: 3
+published: false
+allowed_languages: [python, csharp]
+description: |
+  Kódold le az alábbi algoritmust.
+
+  ```text
+  Algoritmus Lepesek
+    Be: N
+    db := 0
+    Ciklus amíg N > 1
+      Elágazás
+        N páros esetén: N := N / 2
+        különben: N := 3 * N + 1
+      Elágazás vége
+      db := db + 1
+    Ciklus vége
+    Ki: db
+  Algoritmus vége
+  ```
+
+  Bemenet: egy `N` pozitív egész (`1 ≤ N ≤ 100000`). Kimenet: a `db` értéke.
+
+  Példa: `N = 6` esetén a kimenet `8`; `N = 1` esetén `0`.
+
+  Tipp: a páros számot egész osztással (`//`, illetve C#-ban `/`) oszd el kettővel.
+starter_code:
+  python: |
+    n = int(input())
+    db = 0
+    # TODO: ciklus amíg n > 1
+    print(db)
+  csharp: |
+    using System;
+
+    class Program
+    {
+
+        static void Main()
+        {
+            int n = int.Parse(Console.ReadLine());
+            int db = 0;
+            // TODO: ciklus amíg n > 1
+            Console.WriteLine(db);
+        }
+    }
+sample_solutions:
+  python: |
+    n = int(input())
+    db = 0
+    while n > 1:
+        if n % 2 == 0:
+            n = n // 2
+        else:
+            n = 3 * n + 1
+        db = db + 1
+    print(db)
+  csharp: |
+    using System;
+
+    class Program
+    {
+
+        static void Main()
+        {
+            long n = long.Parse(Console.ReadLine());
+            int db = 0;
+            while (n > 1)
+            {
+                if (n % 2 == 0)
+                {
+                    n = n / 2;
+                }
+                else
+                {
+                    n = 3 * n + 1;
+                }
+                db = db + 1;
+            }
+            Console.WriteLine(db);
+        }
+    }
+tests:
+  - { stdin: "6\n", expected: "8\n", hidden: false }
+  - { stdin: "1\n", expected: "0\n", hidden: true }
+  - { stdin: "27\n", expected: "111\n", hidden: true }
+  - { stdin: "97\n", expected: "118\n", hidden: true }
+  - { stdin: "100000\n", expected: "128\n", hidden: true }

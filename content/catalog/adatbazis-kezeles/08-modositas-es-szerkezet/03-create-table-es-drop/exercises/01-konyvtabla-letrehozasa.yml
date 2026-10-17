@@ -1,0 +1,72 @@
+slug: konyvtabla-letrehozasa
+title: Könyvtábla létrehozása
+position: 0
+kind: sql
+level: kozep
+difficulty: 2
+published: false
+allowed_languages:
+- sql
+sql_order_sensitive: true
+description: |
+  Hozz létre egy `konyv` nevű táblát az alábbi szerkezettel:
+
+  | oszlop | típus | megkötés |
+  |---|---|---|
+  | `id` | egész | elsődleges kulcs |
+  | `cim` | szöveg | nem lehet üres (NOT NULL) |
+  | `szerzo` | szöveg | |
+  | `ev` | egész | |
+
+  Tölts fel két sort: (1, 'A kis herceg', 'Saint-Exupery', 1943) és (2, 'Egri csillagok', 'Gardonyi Geza', 1901). Az adatbázis most üres.
+
+  A kód végén álló `SELECT` sort **ne töröld és ne módosítsd**: az mutatja meg a tábla állapotát módosítás után, és a rendszer ezt az eredményt hasonlítja az elvárthoz. A saját utasításodat a `SELECT` **elé** írd, pontosvesszővel lezárva.
+
+  Tipp: `CREATE TABLE konyv (id INTEGER PRIMARY KEY, cim TEXT NOT NULL, ...);` majd `INSERT INTO konyv VALUES ...;`
+starter_code:
+  sql: |
+    -- Ide írd a CREATE TABLE és az INSERT utasítást.
+
+    SELECT id, cim, szerzo, ev FROM konyv ORDER BY id;
+sample_solutions:
+  sql: |
+    CREATE TABLE konyv (
+      id INTEGER PRIMARY KEY,
+      cim TEXT NOT NULL,
+      szerzo TEXT,
+      ev INTEGER
+    );
+
+    INSERT INTO konyv VALUES (1, 'A kis herceg', 'Saint-Exupery', 1943);
+    INSERT INTO konyv VALUES (2, 'Egri csillagok', 'Gardonyi Geza', 1901);
+
+    SELECT id, cim, szerzo, ev FROM konyv ORDER BY id;
+tests:
+- stdin: |
+    -- ures adatbazis (1)
+  expected: |
+    id,cim,szerzo,ev
+    1,A kis herceg,Saint-Exupery,1943
+    2,Egri csillagok,Gardonyi Geza,1901
+  hidden: false
+- stdin: |
+    -- ures adatbazis (2)
+  expected: |
+    id,cim,szerzo,ev
+    1,A kis herceg,Saint-Exupery,1943
+    2,Egri csillagok,Gardonyi Geza,1901
+  hidden: true
+- stdin: |
+    -- ures adatbazis (3)
+  expected: |
+    id,cim,szerzo,ev
+    1,A kis herceg,Saint-Exupery,1943
+    2,Egri csillagok,Gardonyi Geza,1901
+  hidden: true
+- stdin: |
+    -- ures adatbazis (4)
+  expected: |
+    id,cim,szerzo,ev
+    1,A kis herceg,Saint-Exupery,1943
+    2,Egri csillagok,Gardonyi Geza,1901
+  hidden: true

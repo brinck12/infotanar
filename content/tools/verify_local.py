@@ -11,6 +11,7 @@ Használat:  python content/tools/verify_local.py [útvonal ...]   (mappa vagy .
 
 import csv
 import io
+import shutil
 import sqlite3
 import subprocess
 import sys
@@ -31,16 +32,18 @@ def norm(text: str) -> str:
     return "\n".join(lines).rstrip("\n")
 
 
-def run_python(code: str, tests: list, work: Path):
+def run_python(code: str, tests: list, work: Path, prep=None):
     src = work / "solution.py"
     src.write_text(code, encoding="utf-8")
     for test in tests:
+        if prep:
+            prep(test)
         proc = subprocess.run([sys.executable, "-I", "-X", "utf8", str(src)], input=test.get("stdin", "").encode("utf-8"),
                               capture_output=True, timeout=20, cwd=work)
         yield test, proc.stdout.decode("utf-8", "replace"), proc.stderr.decode("utf-8", "replace")
 
 
-def run_csharp(code: str, tests: list, work: Path):
+def run_csharp(code: str, tests: list, work: Path, prep=None):
     (work / "p.csproj").write_text(CSPROJ, encoding="utf-8")
     (work / "Program.cs").write_text(code, encoding="utf-8")
     build = subprocess.run(["dotnet", "build", "-c", "Release", "-o", "out", "-nologo", "-v", "q"],
@@ -49,10 +52,32 @@ def run_csharp(code: str, tests: list, work: Path):
         yield None, "", "FORDÍTÁSI HIBA:\n" + (build.stdout + build.stderr)[-1500:]
         return
     for test in tests:
+        if prep:
+            prep(test)
         # Windowson a konzol kódlapja dönt a Console kódolásáról: UTF-8-ra állítjuk (chcp 65001).
         cmd = f'chcp 65001 >nul & dotnet "{work / "out" / "p.dll"}"' if sys.platform == "win32" else f'dotnet "{work / "out" / "p.dll"}"'
         proc = subprocess.run(cmd, shell=True, input=test.get("stdin", "").encode("utf-8"), capture_output=True, timeout=20, cwd=work)
         yield test, proc.stdout.decode("utf-8", "replace"), proc.stderr.decode("utf-8", "replace")
+
+
+def make_prep(data: dict, path: Path, work: Path):
+    """Az adatfájlok (`files:` a feladaton és a teszten) a futtatási könyvtárba másolása tesztenként."""
+    shared = data.get("files") or {}
+    if not shared and not any(t.get("files") for t in data["tests"]):
+        return None
+    src_dir = path.parent / (path.stem + ".files")
+    keep = set()
+
+    def prep(test: dict) -> None:
+        if not keep:
+            keep.update(p.name for p in work.iterdir())
+        for item in work.iterdir():
+            if item.name not in keep:
+                shutil.rmtree(item) if item.is_dir() else item.unlink()
+        for name, rel in {**shared, **(test.get("files") or {})}.items():
+            shutil.copyfile(src_dir / rel, work / name)
+
+    return prep
 
 
 def sql_csv(dataset: str, query: str) -> str:
@@ -60,12 +85,25 @@ def sql_csv(dataset: str, query: str) -> str:
     con = sqlite3.connect(":memory:")
     try:
         con.executescript(dataset)
-        cur = con.execute(query)
         out = io.StringIO()
         writer = csv.writer(out, lineterminator=chr(10))
-        writer.writerow([col[0] for col in cur.description])
-        for row in cur.fetchall():
-            writer.writerow(["" if v is None else v for v in row])
+        # Utasításonként fut, mint a sqlite3 CLI: minden sort adó utasítás (SELECT) fejléccel együtt kerül a kimenetre.
+        statement = ""
+        for line in query.splitlines(keepends=True):
+            statement += line
+            if sqlite3.complete_statement(statement):
+                cur = con.execute(statement)
+                if cur.description:
+                    writer.writerow([col[0] for col in cur.description])
+                    for row in cur.fetchall():
+                        writer.writerow(["" if v is None else v for v in row])
+                statement = ""
+        if statement.strip():
+            cur = con.execute(statement)
+            if cur.description:
+                writer.writerow([col[0] for col in cur.description])
+                for row in cur.fetchall():
+                    writer.writerow(["" if v is None else v for v in row])
         return out.getvalue()
     finally:
         con.close()
@@ -102,7 +140,7 @@ def check(path: Path) -> int:
         if runner is None:
             continue
         with tempfile.TemporaryDirectory() as tmp:
-            for test, out, err in runner(code, data["tests"], Path(tmp)):
+            for test, out, err in runner(code, data["tests"], Path(tmp), make_prep(data, path, Path(tmp))):
                 if test is None:
                     print(f"  FAIL {path.name} [{lang}] {err}")
                     failures += 1
@@ -123,7 +161,7 @@ def main() -> int:
     for f in files:
         bad = check(f)
         total += bad
-        print(("OK   " if bad == 0 else "FAIL ") + str(f.relative_to(ROOT)) if f.is_relative_to(ROOT) else str(f))
+        print(("OK   " if bad == 0 else "FAIL ") + (str(f.relative_to(ROOT)) if f.is_relative_to(ROOT) else str(f)))
     print(f"\n{len(files)} feladat, {total} hiba")
     return 1 if total else 0
 

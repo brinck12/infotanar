@@ -1,0 +1,5 @@
+nev	pont
+Geza	50
+Hajni	100
+Imre	0
+Jolan	51

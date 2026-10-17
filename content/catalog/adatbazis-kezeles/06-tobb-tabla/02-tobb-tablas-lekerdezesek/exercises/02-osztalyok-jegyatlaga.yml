@@ -1,0 +1,262 @@
+slug: osztalyok-jegyatlaga
+title: Osztályok jegyátlaga
+position: 1
+kind: sql
+level: kozep
+difficulty: 3
+published: false
+allowed_languages: [sql]
+description: |
+    Add meg osztályonként (`osztaly`) a kapott jegyek átlagát két tizedesre kerekítve (`atlag`). Csak olyan osztály kerül a listába, amelynek van diákja jegyekkel. Az összekapcsolás útja: `osztaly` - `diak` - `jegy`.
+
+    A `osztaly` tábla:
+
+    | `id` | `nev` | `terem` |
+    |---|---|---|
+    | 1 | 10.A | 101 |
+    | 2 | 10.B | 102 |
+    | 3 | 11.A | 101 |
+    | 4 | 11.B | 204 |
+
+    A `diak` tábla:
+
+    | `id` | `nev` | `osztaly_id` |
+    |---|---|---|
+    | 1 | Kiss Anna | 1 |
+    | 2 | Nagy Bela | 1 |
+    | 3 | Toth Csaba | 2 |
+    | 4 | Szabo Dora | 3 |
+    | 5 | Varga Fanni | NULL |
+    | 6 | Horvath Erik | 3 |
+
+    A `targy` tábla:
+
+    | `id` | `nev` |
+    |---|---|
+    | 1 | matematika |
+    | 2 | informatika |
+    | 3 | tortenelem |
+
+    A `jegy` tábla:
+
+    | `id` | `diak_id` | `targy_id` | `jegy` | `datum` |
+    |---|---|---|---|---|
+    | 1 | 1 | 1 | 5 | 2025-02-10 |
+    | 2 | 1 | 2 | 4 | 2025-02-12 |
+    | 3 | 2 | 2 | 5 | 2025-02-12 |
+    | 4 | 3 | 1 | 3 | 2025-02-15 |
+    | 5 | 4 | 2 | 5 | 2025-03-01 |
+    | 6 | 2 | 3 | 2 | 2025-03-03 |
+
+    Az eredmény ezekre az adatokra:
+
+    | `osztaly` | `atlag` |
+    |---|---|
+    | 10.A | 4.0 |
+    | 10.B | 3.0 |
+    | 11.A | 5.0 |
+
+    Tipp: előbb kapcsold össze a táblákat, aztán csoportosíts: a `GROUP BY` már az összekapcsolt sorokon dolgozik.
+starter_code:
+  sql: |
+    SELECT osztaly.nev AS osztaly, ROUND(AVG(jegy.jegy), 2) AS atlag
+    FROM osztaly
+    INNER JOIN diak ON
+    INNER JOIN jegy ON
+    GROUP BY ;
+sample_solutions:
+  sql: |
+    SELECT osztaly.nev AS osztaly, ROUND(AVG(jegy.jegy), 2) AS atlag
+    FROM osztaly
+    INNER JOIN diak ON diak.osztaly_id = osztaly.id
+    INNER JOIN jegy ON jegy.diak_id = diak.id
+    GROUP BY osztaly.nev;
+tests:
+  - stdin: |
+      CREATE TABLE osztaly (id INTEGER PRIMARY KEY, nev TEXT, terem TEXT);
+      CREATE TABLE diak (id INTEGER PRIMARY KEY, nev TEXT, osztaly_id INTEGER);
+      CREATE TABLE targy (id INTEGER PRIMARY KEY, nev TEXT);
+      CREATE TABLE jegy (id INTEGER PRIMARY KEY, diak_id INTEGER, targy_id INTEGER, jegy INTEGER, datum TEXT);
+      INSERT INTO osztaly VALUES (1, '10.A', '101');
+      INSERT INTO osztaly VALUES (2, '10.B', '102');
+      INSERT INTO osztaly VALUES (3, '11.A', '101');
+      INSERT INTO osztaly VALUES (4, '11.B', '204');
+      INSERT INTO diak VALUES (1, 'Kiss Anna', 1);
+      INSERT INTO diak VALUES (2, 'Nagy Bela', 1);
+      INSERT INTO diak VALUES (3, 'Toth Csaba', 2);
+      INSERT INTO diak VALUES (4, 'Szabo Dora', 3);
+      INSERT INTO diak VALUES (5, 'Varga Fanni', NULL);
+      INSERT INTO diak VALUES (6, 'Horvath Erik', 3);
+      INSERT INTO targy VALUES (1, 'matematika');
+      INSERT INTO targy VALUES (2, 'informatika');
+      INSERT INTO targy VALUES (3, 'tortenelem');
+      INSERT INTO jegy VALUES (1, 1, 1, 5, '2025-02-10');
+      INSERT INTO jegy VALUES (2, 1, 2, 4, '2025-02-12');
+      INSERT INTO jegy VALUES (3, 2, 2, 5, '2025-02-12');
+      INSERT INTO jegy VALUES (4, 3, 1, 3, '2025-02-15');
+      INSERT INTO jegy VALUES (5, 4, 2, 5, '2025-03-01');
+      INSERT INTO jegy VALUES (6, 2, 3, 2, '2025-03-03');
+    expected: |
+      osztaly,atlag
+      10.A,4.0
+      10.B,3.0
+      11.A,5.0
+    hidden: false
+  - stdin: |
+      CREATE TABLE osztaly (id INTEGER PRIMARY KEY, nev TEXT, terem TEXT);
+      CREATE TABLE diak (id INTEGER PRIMARY KEY, nev TEXT, osztaly_id INTEGER);
+      CREATE TABLE targy (id INTEGER PRIMARY KEY, nev TEXT);
+      CREATE TABLE jegy (id INTEGER PRIMARY KEY, diak_id INTEGER, targy_id INTEGER, jegy INTEGER, datum TEXT);
+      INSERT INTO osztaly VALUES (1, '10.A', '101');
+      INSERT INTO osztaly VALUES (2, '10.B', '204');
+      INSERT INTO osztaly VALUES (3, '11.A', '101');
+      INSERT INTO osztaly VALUES (4, '11.B', '204');
+      INSERT INTO diak VALUES (1, 'Balogh Karoly', 1);
+      INSERT INTO diak VALUES (2, 'Juhasz Reka', 2);
+      INSERT INTO diak VALUES (3, 'Molnar Hanna', 3);
+      INSERT INTO diak VALUES (4, 'Orosz David', 1);
+      INSERT INTO diak VALUES (5, 'Kovacs Gabor', NULL);
+      INSERT INTO diak VALUES (6, 'Papp Julia', 3);
+      INSERT INTO diak VALUES (7, 'Fekete Mate', 1);
+      INSERT INTO diak VALUES (8, 'Szabo Dora', 1);
+      INSERT INTO diak VALUES (9, 'Kiss Anna', 1);
+      INSERT INTO diak VALUES (10, 'Horvath Erik', 1);
+      INSERT INTO diak VALUES (11, 'Biro Peter', 3);
+      INSERT INTO diak VALUES (12, 'Szilagyi Nora', 1);
+      INSERT INTO targy VALUES (1, 'matematika');
+      INSERT INTO targy VALUES (2, 'informatika');
+      INSERT INTO targy VALUES (3, 'tortenelem');
+      INSERT INTO jegy VALUES (1, 1, 3, 4, '2025-03-02');
+      INSERT INTO jegy VALUES (2, 1, 2, 5, '2025-03-23');
+      INSERT INTO jegy VALUES (3, 1, 1, 3, '2025-02-05');
+      INSERT INTO jegy VALUES (4, 1, 3, 1, '2025-02-26');
+      INSERT INTO jegy VALUES (5, 2, 2, 2, '2025-03-13');
+      INSERT INTO jegy VALUES (6, 3, 1, 2, '2025-02-16');
+      INSERT INTO jegy VALUES (7, 3, 1, 1, '2025-02-07');
+      INSERT INTO jegy VALUES (8, 3, 3, 5, '2025-02-04');
+      INSERT INTO jegy VALUES (9, 3, 3, 4, '2025-03-07');
+      INSERT INTO jegy VALUES (10, 5, 1, 5, '2025-03-10');
+      INSERT INTO jegy VALUES (11, 5, 2, 4, '2025-03-11');
+      INSERT INTO jegy VALUES (12, 5, 2, 4, '2025-03-01');
+      INSERT INTO jegy VALUES (13, 6, 1, 4, '2025-02-16');
+      INSERT INTO jegy VALUES (14, 7, 3, 5, '2025-02-19');
+      INSERT INTO jegy VALUES (15, 9, 3, 5, '2025-02-06');
+      INSERT INTO jegy VALUES (16, 9, 3, 2, '2025-03-27');
+      INSERT INTO jegy VALUES (17, 9, 2, 3, '2025-03-08');
+      INSERT INTO jegy VALUES (18, 10, 1, 1, '2025-02-25');
+      INSERT INTO jegy VALUES (19, 11, 2, 2, '2025-02-22');
+      INSERT INTO jegy VALUES (20, 11, 3, 2, '2025-03-06');
+      INSERT INTO jegy VALUES (21, 11, 3, 5, '2025-02-12');
+      INSERT INTO jegy VALUES (22, 11, 2, 5, '2025-03-22');
+    expected: |
+      osztaly,atlag
+      10.A,3.22
+      10.B,2.0
+      11.A,3.33
+    hidden: true
+  - stdin: |
+      CREATE TABLE osztaly (id INTEGER PRIMARY KEY, nev TEXT, terem TEXT);
+      CREATE TABLE diak (id INTEGER PRIMARY KEY, nev TEXT, osztaly_id INTEGER);
+      CREATE TABLE targy (id INTEGER PRIMARY KEY, nev TEXT);
+      CREATE TABLE jegy (id INTEGER PRIMARY KEY, diak_id INTEGER, targy_id INTEGER, jegy INTEGER, datum TEXT);
+      INSERT INTO osztaly VALUES (1, '10.A', '101');
+      INSERT INTO osztaly VALUES (2, '10.B', '101');
+      INSERT INTO osztaly VALUES (3, '11.A', '101');
+      INSERT INTO osztaly VALUES (4, '11.B', '102');
+      INSERT INTO diak VALUES (1, 'Gal Vivien', 1);
+      INSERT INTO diak VALUES (2, 'Fekete Mate', 2);
+      INSERT INTO diak VALUES (3, 'Kovacs Gabor', NULL);
+      INSERT INTO diak VALUES (4, 'Szabo Dora', 1);
+      INSERT INTO diak VALUES (5, 'Horvath Erik', 2);
+      INSERT INTO diak VALUES (6, 'Simon Zoltan', 4);
+      INSERT INTO diak VALUES (7, 'Nagy Bela', 1);
+      INSERT INTO diak VALUES (8, 'Biro Peter', 4);
+      INSERT INTO diak VALUES (9, 'Varga Fanni', NULL);
+      INSERT INTO diak VALUES (10, 'Kiss Anna', 1);
+      INSERT INTO diak VALUES (11, 'Szilagyi Nora', 4);
+      INSERT INTO diak VALUES (12, 'Toth Csaba', 2);
+      INSERT INTO diak VALUES (13, 'Molnar Hanna', 2);
+      INSERT INTO diak VALUES (14, 'Balogh Karoly', 2);
+      INSERT INTO targy VALUES (1, 'matematika');
+      INSERT INTO targy VALUES (2, 'informatika');
+      INSERT INTO targy VALUES (3, 'tortenelem');
+      INSERT INTO jegy VALUES (1, 1, 1, 1, '2025-02-23');
+      INSERT INTO jegy VALUES (2, 1, 2, 5, '2025-03-09');
+      INSERT INTO jegy VALUES (3, 2, 2, 3, '2025-02-09');
+      INSERT INTO jegy VALUES (4, 2, 2, 2, '2025-03-02');
+      INSERT INTO jegy VALUES (5, 3, 3, 1, '2025-03-09');
+      INSERT INTO jegy VALUES (6, 3, 3, 3, '2025-03-13');
+      INSERT INTO jegy VALUES (7, 3, 3, 2, '2025-03-19');
+      INSERT INTO jegy VALUES (8, 5, 2, 5, '2025-02-10');
+      INSERT INTO jegy VALUES (9, 5, 3, 5, '2025-03-25');
+      INSERT INTO jegy VALUES (10, 5, 3, 5, '2025-03-03');
+      INSERT INTO jegy VALUES (11, 6, 2, 3, '2025-02-14');
+      INSERT INTO jegy VALUES (12, 7, 1, 2, '2025-02-13');
+      INSERT INTO jegy VALUES (13, 7, 1, 1, '2025-03-07');
+      INSERT INTO jegy VALUES (14, 7, 1, 1, '2025-03-12');
+      INSERT INTO jegy VALUES (15, 7, 1, 3, '2025-03-21');
+      INSERT INTO jegy VALUES (16, 9, 2, 1, '2025-02-18');
+      INSERT INTO jegy VALUES (17, 9, 1, 2, '2025-02-02');
+      INSERT INTO jegy VALUES (18, 10, 2, 1, '2025-02-19');
+      INSERT INTO jegy VALUES (19, 10, 2, 1, '2025-02-16');
+      INSERT INTO jegy VALUES (20, 11, 3, 3, '2025-03-16');
+      INSERT INTO jegy VALUES (21, 11, 3, 1, '2025-03-26');
+      INSERT INTO jegy VALUES (22, 13, 3, 3, '2025-02-01');
+      INSERT INTO jegy VALUES (23, 14, 3, 3, '2025-02-11');
+      INSERT INTO jegy VALUES (24, 14, 1, 2, '2025-03-23');
+    expected: |
+      osztaly,atlag
+      10.A,1.88
+      10.B,3.5
+      11.B,2.33
+    hidden: true
+  - stdin: |
+      CREATE TABLE osztaly (id INTEGER PRIMARY KEY, nev TEXT, terem TEXT);
+      CREATE TABLE diak (id INTEGER PRIMARY KEY, nev TEXT, osztaly_id INTEGER);
+      CREATE TABLE targy (id INTEGER PRIMARY KEY, nev TEXT);
+      CREATE TABLE jegy (id INTEGER PRIMARY KEY, diak_id INTEGER, targy_id INTEGER, jegy INTEGER, datum TEXT);
+      INSERT INTO osztaly VALUES (1, '10.A', '102');
+      INSERT INTO osztaly VALUES (2, '10.B', '101');
+      INSERT INTO osztaly VALUES (3, '11.A', '101');
+      INSERT INTO osztaly VALUES (4, '11.B', '102');
+      INSERT INTO diak VALUES (1, 'Orosz David', 1);
+      INSERT INTO diak VALUES (2, 'Balogh Karoly', 3);
+      INSERT INTO diak VALUES (3, 'Lakatos Eszter', 4);
+      INSERT INTO diak VALUES (4, 'Simon Zoltan', 1);
+      INSERT INTO diak VALUES (5, 'Horvath Erik', 3);
+      INSERT INTO diak VALUES (6, 'Toth Csaba', 4);
+      INSERT INTO diak VALUES (7, 'Juhasz Reka', 1);
+      INSERT INTO diak VALUES (8, 'Szabo Dora', 4);
+      INSERT INTO diak VALUES (9, 'Varga Fanni', 3);
+      INSERT INTO diak VALUES (10, 'Farkas Imre', 1);
+      INSERT INTO diak VALUES (11, 'Kiss Anna', 1);
+      INSERT INTO targy VALUES (1, 'matematika');
+      INSERT INTO targy VALUES (2, 'informatika');
+      INSERT INTO targy VALUES (3, 'tortenelem');
+      INSERT INTO jegy VALUES (1, 1, 3, 4, '2025-03-01');
+      INSERT INTO jegy VALUES (2, 2, 2, 1, '2025-02-26');
+      INSERT INTO jegy VALUES (3, 2, 1, 5, '2025-03-22');
+      INSERT INTO jegy VALUES (4, 2, 1, 5, '2025-02-24');
+      INSERT INTO jegy VALUES (5, 2, 2, 5, '2025-03-19');
+      INSERT INTO jegy VALUES (6, 3, 3, 3, '2025-02-27');
+      INSERT INTO jegy VALUES (7, 3, 2, 2, '2025-03-19');
+      INSERT INTO jegy VALUES (8, 3, 2, 2, '2025-02-26');
+      INSERT INTO jegy VALUES (9, 5, 3, 3, '2025-02-19');
+      INSERT INTO jegy VALUES (10, 5, 1, 1, '2025-02-14');
+      INSERT INTO jegy VALUES (11, 6, 3, 3, '2025-03-27');
+      INSERT INTO jegy VALUES (12, 7, 1, 3, '2025-03-18');
+      INSERT INTO jegy VALUES (13, 7, 2, 4, '2025-02-09');
+      INSERT INTO jegy VALUES (14, 7, 1, 1, '2025-02-23');
+      INSERT INTO jegy VALUES (15, 9, 1, 3, '2025-02-24');
+      INSERT INTO jegy VALUES (16, 9, 3, 1, '2025-03-06');
+      INSERT INTO jegy VALUES (17, 9, 2, 1, '2025-02-21');
+      INSERT INTO jegy VALUES (18, 9, 2, 4, '2025-02-06');
+      INSERT INTO jegy VALUES (19, 10, 3, 1, '2025-02-26');
+      INSERT INTO jegy VALUES (20, 10, 3, 1, '2025-03-24');
+      INSERT INTO jegy VALUES (21, 11, 2, 1, '2025-03-16');
+    expected: |
+      osztaly,atlag
+      10.A,2.14
+      11.A,2.9
+      11.B,2.5
+    hidden: true

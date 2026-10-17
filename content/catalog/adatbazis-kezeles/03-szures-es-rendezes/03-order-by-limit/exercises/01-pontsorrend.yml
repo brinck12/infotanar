@@ -1,0 +1,48 @@
+slug: pontsorrend
+title: Pontsorrend
+position: 0
+kind: sql
+level: kozep
+difficulty: 1
+published: false
+allowed_languages: [sql]
+sql_order_sensitive: true
+description: |
+  Az `ORDER BY` sorba rendezi az eredményt: alapból növekvő (`ASC`), a `DESC` csökkenő sorrendet ad. A rendezés a lekérdezés legvégén áll.
+
+  A `diak` tábla:
+
+  | oszlop | típus |
+  |---|---|
+  | `id` | egész, elsődleges kulcs |
+  | `nev` | szöveg |
+  | `osztaly` | szöveg |
+  | `pont` | egész |
+  | `szuletes` | szöveg (dátum, ÉÉÉÉ-HH-NN) |
+
+  Listázd ki a diákok **nevét és pontszámát** a **pontszám szerint csökkenő** sorrendben! A sorok sorrendje számít.
+
+  Tipp: `ORDER BY pont DESC`
+starter_code:
+  sql: |
+    SELECT nev, pont
+    FROM diak
+    ORDER BY ;
+sample_solutions:
+  sql: |
+    SELECT nev, pont
+    FROM diak
+    ORDER BY pont DESC;
+tests:
+  - stdin: "CREATE TABLE diak (id INTEGER PRIMARY KEY, nev TEXT, osztaly TEXT, pont INTEGER, szuletes TEXT);\nINSERT INTO diak VALUES\n(1, 'Bence', '9.A', 42, '2007-07-12'),\n(2, 'Balazs', '9.A', 76, '2005-07-24'),\n(3, 'Istvan', '10.A', 95, '2008-10-16'),\n(4, 'Gabor', '9.B', 52, '2005-08-23'),\n(5, 'Judit', '10.B', 78, '2007-12-04'),\n(6, 'Marcell', '9.A', 53, '2007-11-15');\n"
+    expected: "nev,pont\nIstvan,95\nJudit,78\nBalazs,76\nMarcell,53\nGabor,52\nBence,42\n"
+    hidden: false
+  - stdin: "CREATE TABLE diak (id INTEGER PRIMARY KEY, nev TEXT, osztaly TEXT, pont INTEGER, szuletes TEXT);\nINSERT INTO diak VALUES\n(1, 'Domonkos', '9.B', 85, '2006-12-15'),\n(2, 'Anna', '9.A', 70, '2008-11-22'),\n(3, 'Flora', '10.A', 33, '2007-12-01'),\n(4, 'Gabor', '9.A', 48, '2007-08-13'),\n(5, 'Fanni', '10.B', 55, '2006-02-04'),\n(6, 'Hanna', '10.A', 32, '2008-08-24'),\n(7, 'Sandor', '9.A', 93, '2008-09-19'),\n(8, 'Barbara', '10.B', 83, '2005-11-23');\n"
+    expected: "nev,pont\nSandor,93\nDomonkos,85\nBarbara,83\nAnna,70\nFanni,55\nGabor,48\nFlora,33\nHanna,32\n"
+    hidden: true
+  - stdin: "CREATE TABLE diak (id INTEGER PRIMARY KEY, nev TEXT, osztaly TEXT, pont INTEGER, szuletes TEXT);\nINSERT INTO diak VALUES\n(1, 'Istvan', '10.A', 43, '2006-02-04'),\n(2, 'Fanni', '9.A', 55, '2007-08-23'),\n(3, 'Gabor', '10.B', 40, '2008-04-12'),\n(4, 'Zsofia', '10.B', 54, '2008-10-13'),\n(5, 'Lilla', '11.A', 44, '2005-09-18'),\n(6, 'Dora', '9.A', 72, '2007-09-28'),\n(7, 'Sandor', '9.B', 86, '2006-04-09'),\n(8, 'Barbara', '11.A', 42, '2007-02-04'),\n(9, 'Bela', '10.A', 92, '2007-09-12'),\n(10, 'Zoltan', '10.A', 83, '2008-05-26');\n"
+    expected: "nev,pont\nBela,92\nSandor,86\nZoltan,83\nDora,72\nFanni,55\nZsofia,54\nLilla,44\nIstvan,43\nBarbara,42\nGabor,40\n"
+    hidden: true
+  - stdin: "CREATE TABLE diak (id INTEGER PRIMARY KEY, nev TEXT, osztaly TEXT, pont INTEGER, szuletes TEXT);\nINSERT INTO diak VALUES\n(1, 'Lilla', '9.A', 89, '2008-12-25'),\n(2, 'Balazs', '11.A', 59, '2006-08-02'),\n(3, 'Bence', '11.A', 82, '2005-04-05'),\n(4, 'Nora', '9.B', 92, '2007-06-01'),\n(5, 'Endre', '10.B', 39, '2008-06-05'),\n(6, 'Fanni', '11.A', 60, '2006-12-23'),\n(7, 'Laszlo', '9.A', 36, '2007-09-07'),\n(8, 'Eszter', '9.B', 46, '2006-08-03'),\n(9, 'Bela', '10.A', 52, '2008-07-10'),\n(10, 'Hanna', '9.B', 34, '2006-03-11'),\n(11, 'Dora', '11.A', 33, '2005-01-11'),\n(12, 'Judit', '11.A', 69, '2006-02-19');\n"
+    expected: "nev,pont\nNora,92\nLilla,89\nBence,82\nJudit,69\nFanni,60\nBalazs,59\nBela,52\nEszter,46\nEndre,39\nLaszlo,36\nHanna,34\nDora,33\n"
+    hidden: true

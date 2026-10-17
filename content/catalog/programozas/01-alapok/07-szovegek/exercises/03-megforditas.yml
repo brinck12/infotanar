@@ -1,0 +1,61 @@
+slug: megforditas
+title: Megfordítás
+position: 2
+kind: code
+level: kozep
+difficulty: 3
+published: false
+allowed_languages: [python, csharp]
+description: |
+  Olvass be egy sort (ékezet nélküli szöveg, lehet benne szóköz, lehet üres is), és írd ki **visszafelé**, a karaktereket fordított sorrendben.
+
+  Példa: a bemenet `alma`, a kimenet `amla`; a bemenet `abc def`, a kimenet `fed cba`.
+
+  A feladatot ciklussal oldd meg: építs fel egy új szöveget, a karaktereket mindig az eddigi eredmény **elé** fűzve.
+
+  Tipp: az eredmény üres szövegről indul, és a bejárás során `eredmeny = betu + eredmeny`.
+starter_code:
+  python: |
+    szoveg = input()
+    eredmeny = ""
+    # innen folytasd
+  csharp: |
+    using System;
+
+    class Program
+    {
+        static void Main()
+        {
+            var szoveg = Console.ReadLine();
+            var eredmeny = "";
+            // innen folytasd
+        }
+    }
+sample_solutions:
+  python: |
+    szoveg = input()
+    eredmeny = ""
+    for betu in szoveg:
+        eredmeny = betu + eredmeny
+    print(eredmeny)
+  csharp: |
+    using System;
+
+    class Program
+    {
+        static void Main()
+        {
+            var szoveg = Console.ReadLine();
+            var eredmeny = "";
+            foreach (char betu in szoveg)
+            {
+                eredmeny = betu + eredmeny;
+            }
+            Console.WriteLine(eredmeny);
+        }
+    }
+tests:
+  - { stdin: "alma\n", expected: "amla\n", hidden: false }
+  - { stdin: "\n", expected: "\n", hidden: true }
+  - { stdin: "a\n", expected: "a\n", hidden: true }
+  - { stdin: "abc def\n", expected: "fed cba\n", hidden: true }

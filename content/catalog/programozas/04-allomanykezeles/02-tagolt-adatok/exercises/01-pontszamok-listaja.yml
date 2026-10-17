@@ -1,0 +1,103 @@
+slug: pontszamok-listaja
+title: Pontszámok listája
+position: 0
+kind: code
+level: kozep
+difficulty: 1
+published: false
+allowed_languages:
+- python
+- csharp
+description: |
+  A `tanulok.txt` fájl tabulátorral tagolt, az első sora fejléc (`nev`, `osztaly`, `pont`). Írd ki minden tanuló nevét és pontszámát `nev: pont` alakban, a fejlécsor kihagyásával.
+
+  Példa: az `Anna<TAB>9a<TAB>78` sorból `Anna: 78` lesz.
+
+  Tipp: a `split("\t")` (C#-ban `Split('\t')`) szétvágja a sort a tabulátoroknál; az első sort külön kell kezelni.
+starter_code:
+  python: |
+    with open("tanulok.txt", encoding="utf-8") as f:
+        sorok = f.read().splitlines()
+    for sor in sorok[1:]:
+        mezok = sor.split("\t")
+        # ide írd a megoldást
+  csharp: |
+    using System;
+    using System.IO;
+
+    class Program
+    {
+        static void Main()
+        {
+            string[] sorok = File.ReadAllLines("tanulok.txt");
+            for (int i = 1; i < sorok.Length; i++)
+            {
+                string[] mezok = sorok[i].Split('\t');
+                // ide írd a megoldást
+            }
+        }
+    }
+sample_solutions:
+  python: |
+    with open("tanulok.txt", encoding="utf-8") as f:
+        sorok = f.read().splitlines()
+    for sor in sorok[1:]:
+        mezok = sor.split("\t")
+        print(mezok[0] + ": " + mezok[2])
+  csharp: |
+    using System;
+    using System.IO;
+
+    class Program
+    {
+        static void Main()
+        {
+            string[] sorok = File.ReadAllLines("tanulok.txt");
+            for (int i = 1; i < sorok.Length; i++)
+            {
+                string[] mezok = sorok[i].Split('\t');
+                Console.WriteLine(mezok[0] + ": " + mezok[2]);
+            }
+        }
+    }
+files:
+  tanulok.txt: tanulok.txt
+tests:
+- stdin: ''
+  expected: 'Anna: 78
+
+    Bela: 55
+
+    Csilla: 91
+
+    Denes: 40
+
+    '
+  hidden: false
+- stdin: ''
+  expected: 'Zita: 100
+
+    '
+  hidden: true
+  files:
+    tanulok.txt: teszt-2/tanulok.txt
+- stdin: ''
+  expected: 'Ede: 0
+
+    Fanni: 12
+
+    Geza: 99
+
+    Hajni: 64
+
+    Imre: 5
+
+    '
+  hidden: true
+  files:
+    tanulok.txt: teszt-3/tanulok.txt
+- stdin: ''
+  expected: ''
+  hidden: true
+  files:
+    tanulok.txt: teszt-4/tanulok.txt

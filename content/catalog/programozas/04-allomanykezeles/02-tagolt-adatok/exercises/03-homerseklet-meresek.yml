@@ -1,0 +1,171 @@
+slug: homerseklet-meresek
+title: Hőmérséklet-mérések
+position: 2
+kind: code
+level: kozep
+difficulty: 3
+published: false
+allowed_languages:
+- python
+- csharp
+description: |
+  A `meresek.csv` fájl pontosvesszővel (`;`) tagolt, az első sora fejléc (`datum;homerseklet`). Minden sor egy nap dátumát és a mért hőmérsékletet (egész fokban, lehet negatív) tartalmazza. Írd ki a legmelegebb és a leghidegebb napot, valamint a fagyos napok (0 foknál hidegebb) számát:
+
+  ```
+  Legmelegebb: 2024-07-02 31
+  Leghidegebb: 2024-01-05 -8
+  Fagyos napok: 2
+  ```
+
+  Holtverseny esetén a fájlban korábban szereplő nap számít.
+
+  Tipp: tárold a legjobb értéket és a hozzá tartozó dátumot is; csak akkor cserélj, ha az új érték szigorúan jobb.
+starter_code:
+  python: |
+    with open("meresek.csv", encoding="utf-8") as f:
+        sorok = f.read().splitlines()
+    elso = sorok[1].split(";")
+    meleg_datum = elso[0]
+    meleg = int(elso[1])
+    hideg_datum = elso[0]
+    hideg = int(elso[1])
+    fagyos = 0
+    for sor in sorok[1:]:
+        mezok = sor.split(";")
+        # ide írd a megoldást
+    print("Legmelegebb:", meleg_datum, meleg)
+    print("Leghidegebb:", hideg_datum, hideg)
+    print("Fagyos napok:", fagyos)
+  csharp: |
+    using System;
+    using System.IO;
+
+    class Program
+    {
+        static void Main()
+        {
+            string[] sorok = File.ReadAllLines("meresek.csv");
+            string[] elso = sorok[1].Split(';');
+            string melegDatum = elso[0];
+            int meleg = int.Parse(elso[1]);
+            string hidegDatum = elso[0];
+            int hideg = int.Parse(elso[1]);
+            int fagyos = 0;
+            for (int i = 1; i < sorok.Length; i++)
+            {
+                string[] mezok = sorok[i].Split(';');
+                // ide írd a megoldást
+            }
+            Console.WriteLine("Legmelegebb: " + melegDatum + " " + meleg);
+            Console.WriteLine("Leghidegebb: " + hidegDatum + " " + hideg);
+            Console.WriteLine("Fagyos napok: " + fagyos);
+        }
+    }
+sample_solutions:
+  python: |
+    with open("meresek.csv", encoding="utf-8") as f:
+        sorok = f.read().splitlines()
+    elso = sorok[1].split(";")
+    meleg_datum = elso[0]
+    meleg = int(elso[1])
+    hideg_datum = elso[0]
+    hideg = int(elso[1])
+    fagyos = 0
+    for sor in sorok[1:]:
+        mezok = sor.split(";")
+        ho = int(mezok[1])
+        if ho > meleg:
+            meleg = ho
+            meleg_datum = mezok[0]
+        if ho < hideg:
+            hideg = ho
+            hideg_datum = mezok[0]
+        if ho < 0:
+            fagyos += 1
+    print("Legmelegebb:", meleg_datum, meleg)
+    print("Leghidegebb:", hideg_datum, hideg)
+    print("Fagyos napok:", fagyos)
+  csharp: |
+    using System;
+    using System.IO;
+
+    class Program
+    {
+        static void Main()
+        {
+            string[] sorok = File.ReadAllLines("meresek.csv");
+            string[] elso = sorok[1].Split(';');
+            string melegDatum = elso[0];
+            int meleg = int.Parse(elso[1]);
+            string hidegDatum = elso[0];
+            int hideg = int.Parse(elso[1]);
+            int fagyos = 0;
+            for (int i = 1; i < sorok.Length; i++)
+            {
+                string[] mezok = sorok[i].Split(';');
+                int ho = int.Parse(mezok[1]);
+                if (ho > meleg)
+                {
+                    meleg = ho;
+                    melegDatum = mezok[0];
+                }
+                if (ho < hideg)
+                {
+                    hideg = ho;
+                    hidegDatum = mezok[0];
+                }
+                if (ho < 0)
+                {
+                    fagyos++;
+                }
+            }
+            Console.WriteLine("Legmelegebb: " + melegDatum + " " + meleg);
+            Console.WriteLine("Leghidegebb: " + hidegDatum + " " + hideg);
+            Console.WriteLine("Fagyos napok: " + fagyos);
+        }
+    }
+files:
+  meresek.csv: meresek.csv
+tests:
+- stdin: ''
+  expected: 'Legmelegebb: 2024-07-02 31
+
+    Leghidegebb: 2024-01-05 -8
+
+    Fagyos napok: 2
+
+    '
+  hidden: false
+- stdin: ''
+  expected: 'Legmelegebb: 2024-05-01 12
+
+    Leghidegebb: 2024-05-01 12
+
+    Fagyos napok: 0
+
+    '
+  hidden: true
+  files:
+    meresek.csv: teszt-2/meresek.csv
+- stdin: ''
+  expected: 'Legmelegebb: 2024-06-02 25
+
+    Leghidegebb: 2024-06-05 18
+
+    Fagyos napok: 0
+
+    '
+  hidden: true
+  files:
+    meresek.csv: teszt-3/meresek.csv
+- stdin: ''
+  expected: 'Legmelegebb: 2024-12-05 2
+
+    Leghidegebb: 2024-12-04 -10
+
+    Fagyos napok: 3
+
+    '
+  hidden: true
+  files:
+    meresek.csv: teszt-4/meresek.csv

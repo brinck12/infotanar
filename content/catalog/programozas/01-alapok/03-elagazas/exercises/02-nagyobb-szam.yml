@@ -1,0 +1,64 @@
+slug: nagyobb-szam
+title: Nagyobb szám
+position: 1
+kind: code
+level: kozep
+difficulty: 2
+published: false
+allowed_languages: [python, csharp]
+description: |
+  Olvass be két egész számot (külön sorban), és írd ki a nagyobbikat. Ha egyenlők, írd ki az egyiket.
+
+  Példa: a `4` és `9` bemenetre a kimenet `9`.
+
+  Tipp: hasonlítsd össze a két számot `>` jellel, és az `if` meg az `else` ágban írd ki a megfelelőt.
+starter_code:
+  python: |
+    a = int(input())
+    b = int(input())
+    # innen folytasd
+  csharp: |
+    using System;
+
+    class Program
+    {
+        static void Main()
+        {
+            int a = int.Parse(Console.ReadLine());
+            int b = int.Parse(Console.ReadLine());
+            // innen folytasd
+        }
+    }
+sample_solutions:
+  python: |
+    a = int(input())
+    b = int(input())
+    if a > b:
+        print(a)
+    else:
+        print(b)
+  csharp: |
+    using System;
+
+    class Program
+    {
+        static void Main()
+        {
+            int a = int.Parse(Console.ReadLine());
+            int b = int.Parse(Console.ReadLine());
+            if (a > b)
+            {
+                Console.WriteLine(a);
+            }
+            else
+            {
+                Console.WriteLine(b);
+            }
+        }
+    }
+tests:
+  - { stdin: "4\n9\n", expected: "9\n", hidden: false }
+  - { stdin: "9\n4\n", expected: "9\n", hidden: true }
+  - { stdin: "5\n5\n", expected: "5\n", hidden: true }
+  - { stdin: "-7\n-2\n", expected: "-2\n", hidden: true }
+  - { stdin: "0\n-1\n", expected: "0\n", hidden: true }

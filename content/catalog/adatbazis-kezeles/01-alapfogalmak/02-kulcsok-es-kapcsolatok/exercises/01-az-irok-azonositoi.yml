@@ -1,0 +1,43 @@
+slug: az-irok-azonositoi
+title: Az írók azonosítói
+position: 0
+kind: sql
+level: kozep
+difficulty: 1
+published: false
+allowed_languages: [sql]
+description: |
+  Az `iro` tábla elsődleges kulcsa az `id`: ennek értéke minden íróé más, ezért egyértelműen azonosítja a rekordot.
+
+  A `iro` tábla:
+
+  | oszlop | típus |
+  |---|---|
+  | `id` | egész, elsődleges kulcs |
+  | `nev` | szöveg |
+  | `szuletesi_ev` | egész |
+
+  Listázd ki minden író **azonosítóját és nevét**, ebben a sorrendben! A sorok sorrendje nem számít.
+
+  Tipp: két mezőt vesszővel választhatsz el: `SELECT mezo1, mezo2 FROM ...`
+starter_code:
+  sql: |
+    SELECT
+    FROM iro;
+sample_solutions:
+  sql: |
+    SELECT id, nev
+    FROM iro;
+tests:
+  - stdin: "CREATE TABLE iro (id INTEGER PRIMARY KEY, nev TEXT, szuletesi_ev INTEGER);\nINSERT INTO iro VALUES\n(1, 'Horvath Mate', 1911),\n(2, 'Szabo Reka', 1971),\n(3, 'Nagy Peter', 1952),\n(4, 'Kelemen Bela', 1947);\n"
+    expected: "id,nev\n1,Horvath Mate\n2,Szabo Reka\n3,Nagy Peter\n4,Kelemen Bela\n"
+    hidden: false
+  - stdin: "CREATE TABLE iro (id INTEGER PRIMARY KEY, nev TEXT, szuletesi_ev INTEGER);\nINSERT INTO iro VALUES\n(1, 'Varga Dora', 1935),\n(2, 'Molnar Eszter', 1976),\n(3, 'Kovacs Lilla', 1917),\n(4, 'Nagy Peter', 1982);\n"
+    expected: "id,nev\n1,Varga Dora\n2,Molnar Eszter\n3,Kovacs Lilla\n4,Nagy Peter\n"
+    hidden: true
+  - stdin: "CREATE TABLE iro (id INTEGER PRIMARY KEY, nev TEXT, szuletesi_ev INTEGER);\nINSERT INTO iro VALUES\n(1, 'Horvath Mate', 1959),\n(2, 'Varga Dora', 1939),\n(3, 'Molnar Eszter', 1973),\n(4, 'Nagy Peter', 1967);\n"
+    expected: "id,nev\n1,Horvath Mate\n2,Varga Dora\n3,Molnar Eszter\n4,Nagy Peter\n"
+    hidden: true
+  - stdin: "CREATE TABLE iro (id INTEGER PRIMARY KEY, nev TEXT, szuletesi_ev INTEGER);\nINSERT INTO iro VALUES\n(1, 'Kovacs Lilla', 1987),\n(2, 'Horvath Mate', 1952),\n(3, 'Toth Gabor', 1906),\n(4, 'Nagy Peter', 1976);\n"
+    expected: "id,nev\n1,Kovacs Lilla\n2,Horvath Mate\n3,Toth Gabor\n4,Nagy Peter\n"
+    hidden: true

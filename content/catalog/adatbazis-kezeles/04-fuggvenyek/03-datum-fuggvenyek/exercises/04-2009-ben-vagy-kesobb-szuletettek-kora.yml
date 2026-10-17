@@ -1,0 +1,87 @@
+slug: 2009-ben-vagy-kesobb-szuletettek-kora
+title: 2009-ben vagy később születettek kora
+position: 3
+kind: sql
+level: kozep
+difficulty: 3
+published: false
+allowed_languages: [sql]
+description: |
+    Listázd azoknak a tanulóknak a nevét (`nev`) és korát (`kor`), akik 2009. január 1-jén vagy később születtek. A kor egyszerűen a 2025 és a születési év különbsége.
+
+    A `tanulo` tábla:
+
+    | `id` | `nev` | `szuletes` |
+    |---|---|---|
+    | 1 | Kiss Anna | 2008-05-14 |
+    | 2 | Nagy Bela | 2009-11-02 |
+    | 3 | Toth Csaba | 2008-05-30 |
+    | 4 | Szabo Dora | 2009-02-27 |
+    | 5 | Varga Fanni | 2010-05-01 |
+
+    Az eredmény ezekre az adatokra:
+
+    | `nev` | `kor` |
+    |---|---|
+    | Nagy Bela | 16 |
+    | Szabo Dora | 16 |
+    | Varga Fanni | 15 |
+
+    Tipp: az ISO dátumszövegek betűrend szerint is időrendben vannak, ezért a szűréshez nem kell függvény: `szuletes >= '2009-01-01'`.
+starter_code:
+  sql: |
+    SELECT nev,
+      AS kor
+    FROM tanulo
+    WHERE ;
+sample_solutions:
+  sql: |
+    SELECT nev, 2025 - CAST(strftime('%Y', szuletes) AS INTEGER) AS kor
+    FROM tanulo
+    WHERE szuletes >= '2009-01-01';
+tests:
+  - stdin: |
+      CREATE TABLE tanulo (id INTEGER PRIMARY KEY, nev TEXT, szuletes TEXT);
+      INSERT INTO tanulo VALUES (1, 'Kiss Anna', '2008-05-14');
+      INSERT INTO tanulo VALUES (2, 'Nagy Bela', '2009-11-02');
+      INSERT INTO tanulo VALUES (3, 'Toth Csaba', '2008-05-30');
+      INSERT INTO tanulo VALUES (4, 'Szabo Dora', '2009-02-27');
+      INSERT INTO tanulo VALUES (5, 'Varga Fanni', '2010-05-01');
+    expected: |
+      nev,kor
+      Nagy Bela,16
+      Szabo Dora,16
+      Varga Fanni,15
+    hidden: false
+  - stdin: |
+      CREATE TABLE tanulo (id INTEGER PRIMARY KEY, nev TEXT, szuletes TEXT);
+      INSERT INTO tanulo VALUES (1, 'Kovacs Gabor', '2008-12-31');
+      INSERT INTO tanulo VALUES (2, 'Molnar Hanna', '2009-01-01');
+      INSERT INTO tanulo VALUES (3, 'Farkas Imre', '2007-05-09');
+      INSERT INTO tanulo VALUES (4, 'Papp Julia', '2011-03-18');
+    expected: |
+      nev,kor
+      Molnar Hanna,16
+      Papp Julia,14
+    hidden: true
+  - stdin: |
+      CREATE TABLE tanulo (id INTEGER PRIMARY KEY, nev TEXT, szuletes TEXT);
+      INSERT INTO tanulo VALUES (1, 'Balogh Karoly', '2010-12-24');
+      INSERT INTO tanulo VALUES (2, 'Meszaros Lilla', '2008-01-05');
+      INSERT INTO tanulo VALUES (3, 'Horvath Erik', '2009-05-31');
+      INSERT INTO tanulo VALUES (4, 'Simon Zoltan', '2009-09-09');
+      INSERT INTO tanulo VALUES (5, 'Lakatos Eszter', '2008-10-10');
+    expected: |
+      nev,kor
+      Balogh Karoly,15
+      Horvath Erik,16
+      Simon Zoltan,16
+    hidden: true
+  - stdin: |
+      CREATE TABLE tanulo (id INTEGER PRIMARY KEY, nev TEXT, szuletes TEXT);
+      INSERT INTO tanulo VALUES (1, 'Fekete Mate', '2009-12-31');
+      INSERT INTO tanulo VALUES (2, 'Juhasz Reka', '2007-05-31');
+    expected: |
+      nev,kor
+      Fekete Mate,16
+    hidden: true

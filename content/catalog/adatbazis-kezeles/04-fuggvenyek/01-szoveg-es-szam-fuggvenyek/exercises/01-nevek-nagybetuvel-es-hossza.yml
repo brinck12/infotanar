@@ -1,0 +1,111 @@
+slug: nevek-nagybetuvel-es-hossza
+title: Nevek nagybetűvel és hossza
+position: 0
+kind: sql
+level: kozep
+difficulty: 1
+published: false
+allowed_languages: [sql]
+description: |
+    Listázd a diákok nevét (`nev`), a nevet csupa nagybetűvel (`nagybetus`), és a név karaktereinek számát (`hossz`). A szóköz is karakternek számít.
+
+    A `diak` tábla:
+
+    | `id` | `nev` | `email` | `osztaly` | `atlag` | `pont_elozo` | `pont_most` |
+    |---|---|---|---|---|---|---|
+    | 1 | Kiss Anna | Kiss.Anna@SULI.hu | 10.A | 4.567 | 62 | 75 |
+    | 2 | Nagy Bela | Nagy.Bela@SULI.hu | 10.B | 3.842 | 70 | 66 |
+    | 3 | Toth Csaba | Toth.Csaba@SULI.hu | 10.A | 3.125 | 55 | 41 |
+    | 4 | Szabo Dora | Szabo.Dora@SULI.hu | 11.A | 4.918 | 80 | 92 |
+
+    Az eredmény ezekre az adatokra:
+
+    | `nev` | `nagybetus` | `hossz` |
+    |---|---|---|
+    | Kiss Anna | KISS ANNA | 9 |
+    | Nagy Bela | NAGY BELA | 9 |
+    | Toth Csaba | TOTH CSABA | 10 |
+    | Szabo Dora | SZABO DORA | 10 |
+
+    Tipp: az `UPPER(oszlop)` nagybetűssé alakít, a `LENGTH(oszlop)` a karakterek számát adja.
+starter_code:
+  sql: |
+    SELECT nev,
+      AS nagybetus,
+      AS hossz
+    FROM diak;
+sample_solutions:
+  sql: |
+    SELECT nev, UPPER(nev) AS nagybetus, LENGTH(nev) AS hossz
+    FROM diak;
+tests:
+  - stdin: |
+      CREATE TABLE diak (id INTEGER PRIMARY KEY, nev TEXT, email TEXT, osztaly TEXT, atlag REAL, pont_elozo INTEGER, pont_most INTEGER);
+      INSERT INTO diak VALUES (1, 'Kiss Anna', 'Kiss.Anna@SULI.hu', '10.A', 4.567, 62, 75);
+      INSERT INTO diak VALUES (2, 'Nagy Bela', 'Nagy.Bela@SULI.hu', '10.B', 3.842, 70, 66);
+      INSERT INTO diak VALUES (3, 'Toth Csaba', 'Toth.Csaba@SULI.hu', '10.A', 3.125, 55, 41);
+      INSERT INTO diak VALUES (4, 'Szabo Dora', 'Szabo.Dora@SULI.hu', '11.A', 4.918, 80, 92);
+    expected: |
+      nev,nagybetus,hossz
+      Kiss Anna,KISS ANNA,9
+      Nagy Bela,NAGY BELA,9
+      Toth Csaba,TOTH CSABA,10
+      Szabo Dora,SZABO DORA,10
+    hidden: false
+  - stdin: |
+      CREATE TABLE diak (id INTEGER PRIMARY KEY, nev TEXT, email TEXT, osztaly TEXT, atlag REAL, pont_elozo INTEGER, pont_most INTEGER);
+      INSERT INTO diak VALUES (1, 'Varga Fanni', 'Varga.Fanni@SULI.hu', '10.B', 4.287, 71, 96);
+      INSERT INTO diak VALUES (2, 'Orosz David', 'Orosz.David@SULI.hu', '10.B', 2.637, 31, 33);
+      INSERT INTO diak VALUES (3, 'Toth Csaba', 'Toth.Csaba@SULI.hu', '10.B', 3.821, 74, 66);
+      INSERT INTO diak VALUES (4, 'Papp Julia', 'Papp.Julia@SULI.hu', '10.A', 4.162, 67, 62);
+      INSERT INTO diak VALUES (5, 'Szabo Dora', 'Szabo.Dora@SULI.hu', '11.A', 2.091, 71, 46);
+      INSERT INTO diak VALUES (6, 'Farkas Imre', 'Farkas.Imre@SULI.hu', '10.A', 4.817, 73, 75);
+      INSERT INTO diak VALUES (7, 'Bo Li', 'Bo.Li@SULI.hu', '10.B', 3.456, 50, 60);
+    expected: |
+      nev,nagybetus,hossz
+      Varga Fanni,VARGA FANNI,11
+      Orosz David,OROSZ DAVID,11
+      Toth Csaba,TOTH CSABA,10
+      Papp Julia,PAPP JULIA,10
+      Szabo Dora,SZABO DORA,10
+      Farkas Imre,FARKAS IMRE,11
+      Bo Li,BO LI,5
+    hidden: true
+  - stdin: |
+      CREATE TABLE diak (id INTEGER PRIMARY KEY, nev TEXT, email TEXT, osztaly TEXT, atlag REAL, pont_elozo INTEGER, pont_most INTEGER);
+      INSERT INTO diak VALUES (1, 'Nagy Bela', 'Nagy.Bela@SULI.hu', '10.A', 4.553, 68, 81);
+      INSERT INTO diak VALUES (2, 'Toth Csaba', 'Toth.Csaba@SULI.hu', '11.A', 2.112, 57, 57);
+      INSERT INTO diak VALUES (3, 'Orosz David', 'Orosz.David@SULI.hu', '10.B', 4.408, 90, 99);
+      INSERT INTO diak VALUES (4, 'Horvath Erik', 'Horvath.Erik@SULI.hu', '10.A', 4.808, 47, 23);
+      INSERT INTO diak VALUES (5, 'Kovacs Gabor', 'Kovacs.Gabor@SULI.hu', '10.B', 3.093, 88, 90);
+      INSERT INTO diak VALUES (6, 'Biro Peter', 'Biro.Peter@SULI.hu', '11.A', 4.678, 40, 26);
+      INSERT INTO diak VALUES (7, 'Simon Zoltan', 'Simon.Zoltan@SULI.hu', '10.B', 2.711, 41, 27);
+      INSERT INTO diak VALUES (8, 'Meszaros Lilla', 'Meszaros.Lilla@SULI.hu', '11.A', 2.418, 53, 71);
+    expected: |
+      nev,nagybetus,hossz
+      Nagy Bela,NAGY BELA,9
+      Toth Csaba,TOTH CSABA,10
+      Orosz David,OROSZ DAVID,11
+      Horvath Erik,HORVATH ERIK,12
+      Kovacs Gabor,KOVACS GABOR,12
+      Biro Peter,BIRO PETER,10
+      Simon Zoltan,SIMON ZOLTAN,12
+      Meszaros Lilla,MESZAROS LILLA,14
+    hidden: true
+  - stdin: |
+      CREATE TABLE diak (id INTEGER PRIMARY KEY, nev TEXT, email TEXT, osztaly TEXT, atlag REAL, pont_elozo INTEGER, pont_most INTEGER);
+      INSERT INTO diak VALUES (1, 'Farkas Imre', 'Farkas.Imre@SULI.hu', '11.A', 4.747, 70, 49);
+      INSERT INTO diak VALUES (2, 'Orosz David', 'Orosz.David@SULI.hu', '11.A', 3.817, 46, 35);
+      INSERT INTO diak VALUES (3, 'Szilagyi Nora', 'Szilagyi.Nora@SULI.hu', '11.A', 2.577, 64, 69);
+      INSERT INTO diak VALUES (4, 'Varga Fanni', 'Varga.Fanni@SULI.hu', '11.A', 3.192, 44, 28);
+      INSERT INTO diak VALUES (5, 'Horvath Erik', 'Horvath.Erik@SULI.hu', '11.A', 4.608, 54, 29);
+      INSERT INTO diak VALUES (6, 'Ho Eva', 'Ho.Eva@SULI.hu', '11.A', 2.004, 71, 71);
+    expected: |
+      nev,nagybetus,hossz
+      Farkas Imre,FARKAS IMRE,11
+      Orosz David,OROSZ DAVID,11
+      Szilagyi Nora,SZILAGYI NORA,13
+      Varga Fanni,VARGA FANNI,11
+      Horvath Erik,HORVATH ERIK,12
+      Ho Eva,HO EVA,6
+    hidden: true

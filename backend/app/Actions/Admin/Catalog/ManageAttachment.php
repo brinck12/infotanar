@@ -51,7 +51,7 @@ use Throwable;
  */
 final readonly class ManageAttachment
 {
-    private const STRICT_NAME = '/^[A-Za-z0-9._-]{1,64}$/';
+    public const STRICT_NAME = '/^[A-Za-z0-9._-]{1,64}$/';
 
     /** Az `attachments.name` oszlop hossza. */
     private const MAX_NAME_LENGTH = 100;

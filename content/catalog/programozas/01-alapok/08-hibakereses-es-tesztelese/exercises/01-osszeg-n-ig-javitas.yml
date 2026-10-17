@@ -1,0 +1,67 @@
+slug: osszeg-n-ig-javitas
+title: Összeg N-ig (javítás)
+position: 0
+kind: code
+level: kozep
+difficulty: 1
+published: false
+allowed_languages: [python, csharp]
+description: |
+  A program az `1 + 2 + ... + n` összeget akarja kiszámolni, de **hibás**: az `n = 5` bemenetre `10`-et ír ki `15` helyett. Találd meg és javítsd ki a hibát.
+
+  A feladat: olvass be egy pozitív egész számot (`n`), és írd ki az 1-től `n`-ig terjedő egész számok összegét, egyetlen számként.
+
+  Példa: ha a bemenet `5`, a kimenet `15`.
+
+  Tipp: kövesd végig kézzel az `n = 3` esetet, és nézd meg, mely számokat adja össze a ciklus.
+starter_code:
+  python: |
+    n = int(input())
+    osszeg = 0
+    for i in range(1, n):
+        osszeg = osszeg + i
+    print(osszeg)
+  csharp: |
+    using System;
+
+    class Program
+    {
+        static void Main()
+        {
+            var n = int.Parse(Console.ReadLine());
+            var osszeg = 0;
+            for (int i = 1; i < n; i++)
+            {
+                osszeg = osszeg + i;
+            }
+            Console.WriteLine(osszeg);
+        }
+    }
+sample_solutions:
+  python: |
+    n = int(input())
+    osszeg = 0
+    for i in range(1, n + 1):
+        osszeg = osszeg + i
+    print(osszeg)
+  csharp: |
+    using System;
+
+    class Program
+    {
+        static void Main()
+        {
+            var n = int.Parse(Console.ReadLine());
+            var osszeg = 0;
+            for (int i = 1; i <= n; i++)
+            {
+                osszeg = osszeg + i;
+            }
+            Console.WriteLine(osszeg);
+        }
+    }
+tests:
+  - { stdin: "5\n", expected: "15\n", hidden: false }
+  - { stdin: "1\n", expected: "1\n", hidden: true }
+  - { stdin: "10\n", expected: "55\n", hidden: true }
+  - { stdin: "100\n", expected: "5050\n", hidden: true }

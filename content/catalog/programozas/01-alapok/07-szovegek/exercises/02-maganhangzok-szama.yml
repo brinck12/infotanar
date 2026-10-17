@@ -1,0 +1,65 @@
+slug: maganhangzok-szama
+title: Magánhangzók száma
+position: 1
+kind: code
+level: kozep
+difficulty: 2
+published: false
+allowed_languages: [python, csharp]
+description: |
+  Olvass be egy sort, amely ékezet nélküli betűkből és szóközökből áll. Számold meg a benne lévő magánhangzókat (`a`, `e`, `i`, `o`, `u`), kis- és nagybetűt egyformának véve. Kimenet:
+
+  `Maganhangzok: 3`
+
+  Példa: a bemenet `Egy Kutya`, a kimenet `Maganhangzok: 3` (az `E`, az `u` és az `a`; az `y` nem számít).
+
+  Tipp: alakítsd át a szöveget kisbetűssé, majd járd be a karaktereit, és minden karakternél nézd meg, szerepel-e az `aeiou` szövegben.
+starter_code:
+  python: |
+    szoveg = input()
+    db = 0
+    # innen folytasd
+  csharp: |
+    using System;
+
+    class Program
+    {
+        static void Main()
+        {
+            var szoveg = Console.ReadLine();
+            var db = 0;
+            // innen folytasd
+        }
+    }
+sample_solutions:
+  python: |
+    szoveg = input().lower()
+    db = 0
+    for betu in szoveg:
+        if betu in "aeiou":
+            db = db + 1
+    print("Maganhangzok: " + str(db))
+  csharp: |
+    using System;
+
+    class Program
+    {
+        static void Main()
+        {
+            var szoveg = Console.ReadLine().ToLower();
+            var db = 0;
+            foreach (char betu in szoveg)
+            {
+                if ("aeiou".IndexOf(betu) >= 0)
+                {
+                    db = db + 1;
+                }
+            }
+            Console.WriteLine("Maganhangzok: " + db);
+        }
+    }
+tests:
+  - { stdin: "Egy Kutya\n", expected: "Maganhangzok: 3\n", hidden: false }
+  - { stdin: "\n", expected: "Maganhangzok: 0\n", hidden: true }
+  - { stdin: "bcd\n", expected: "Maganhangzok: 0\n", hidden: true }
+  - { stdin: "AEIOU aeiou\n", expected: "Maganhangzok: 10\n", hidden: true }

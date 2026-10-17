@@ -1,0 +1,3 @@
+termek	darab	ar
+ingyenes	5	0
+dragabb	0	9999

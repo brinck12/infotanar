@@ -1,0 +1,161 @@
+slug: az-osztaly-legjobbja
+title: Az osztály legjobbja
+position: 3
+kind: code
+level: emelt
+difficulty: 3
+published: false
+allowed_languages:
+- python
+- csharp
+description: |
+  A `tanulok.txt` fájl tabulátorral tagolt, az első sora fejléc (`nev`, `osztaly`, `pont`). A felhasználó megad egy osztályt (pl. `9a`). Írd ki, hány tanuló jár ebbe az osztályba, és ki érte el közülük a legtöbb pontot:
+
+  ```
+  Letszam: 2
+  Legjobb: Csilla (91)
+  ```
+
+  Holtverseny esetén a fájlban korábbi tanuló számít. Ha nincs ilyen osztály, csak ezt írd ki: `Nincs ilyen osztaly`.
+
+  Tipp: a legjobb keresését (maximum) csak az adott osztály sorain végezd; a létszámot számláld közben.
+starter_code:
+  python: |
+    osztaly = input()
+    with open("tanulok.txt", encoding="utf-8") as f:
+        sorok = f.read().splitlines()
+    letszam = 0
+    legjobb_nev = ""
+    legjobb_pont = -1
+    for sor in sorok[1:]:
+        mezok = sor.split("\t")
+        # ide írd a megoldást
+  csharp: |
+    using System;
+    using System.IO;
+
+    class Program
+    {
+        static void Main()
+        {
+            string osztaly = Console.ReadLine();
+            string[] sorok = File.ReadAllLines("tanulok.txt");
+            int letszam = 0;
+            string legjobbNev = "";
+            int legjobbPont = -1;
+            for (int i = 1; i < sorok.Length; i++)
+            {
+                string[] mezok = sorok[i].Split('\t');
+                // ide írd a megoldást
+            }
+        }
+    }
+sample_solutions:
+  python: |
+    osztaly = input()
+    with open("tanulok.txt", encoding="utf-8") as f:
+        sorok = f.read().splitlines()
+    letszam = 0
+    legjobb_nev = ""
+    legjobb_pont = -1
+    for sor in sorok[1:]:
+        mezok = sor.split("\t")
+        if mezok[1] == osztaly:
+            letszam += 1
+            pont = int(mezok[2])
+            if pont > legjobb_pont:
+                legjobb_pont = pont
+                legjobb_nev = mezok[0]
+    if letszam == 0:
+        print("Nincs ilyen osztaly")
+    else:
+        print("Letszam:", letszam)
+        print("Legjobb: " + legjobb_nev + " (" + str(legjobb_pont) + ")")
+  csharp: |
+    using System;
+    using System.IO;
+
+    class Program
+    {
+        static void Main()
+        {
+            string osztaly = Console.ReadLine();
+            string[] sorok = File.ReadAllLines("tanulok.txt");
+            int letszam = 0;
+            string legjobbNev = "";
+            int legjobbPont = -1;
+            for (int i = 1; i < sorok.Length; i++)
+            {
+                string[] mezok = sorok[i].Split('\t');
+                if (mezok[1] == osztaly)
+                {
+                    letszam++;
+                    int pont = int.Parse(mezok[2]);
+                    if (pont > legjobbPont)
+                    {
+                        legjobbPont = pont;
+                        legjobbNev = mezok[0];
+                    }
+                }
+            }
+            if (letszam == 0)
+            {
+                Console.WriteLine("Nincs ilyen osztaly");
+            }
+            else
+            {
+                Console.WriteLine("Letszam: " + letszam);
+                Console.WriteLine("Legjobb: " + legjobbNev + " (" + legjobbPont + ")");
+            }
+        }
+    }
+files:
+  tanulok.txt: tanulok.txt
+tests:
+- stdin: '9a
+
+    '
+  expected: 'Letszam: 2
+
+    Legjobb: Csilla (91)
+
+    '
+  hidden: false
+- stdin: '9b
+
+    '
+  expected: 'Letszam: 2
+
+    Legjobb: Bela (55)
+
+    '
+  hidden: true
+- stdin: '10z
+
+    '
+  expected: 'Nincs ilyen osztaly
+
+    '
+  hidden: true
+- stdin: '9c
+
+    '
+  expected: 'Letszam: 2
+
+    Legjobb: Ede (70)
+
+    '
+  hidden: true
+  files:
+    tanulok.txt: teszt-4/tanulok.txt
+- stdin: '9a
+
+    '
+  expected: 'Letszam: 1
+
+    Legjobb: Hajni (0)
+
+    '
+  hidden: true
+  files:
+    tanulok.txt: teszt-5/tanulok.txt

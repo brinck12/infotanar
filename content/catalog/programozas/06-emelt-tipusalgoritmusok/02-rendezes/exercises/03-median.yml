@@ -1,0 +1,92 @@
+slug: median
+title: "Medián"
+position: 2
+kind: code
+level: emelt
+difficulty: 3
+published: false
+allowed_languages: [python, csharp]
+description: |
+  A bemenet első sora az elemek száma (N, legalább 1), a másodikban N egész szám áll szóközzel elválasztva. Írd ki a számok **mediánját** egy tizedesjeggyel: `Median: ...`. A medián a rendezett sorozat középső eleme, páros elemszámnál a két középső elem átlaga. Használhatod a beépített rendezést.
+
+  Példa bemenet:
+
+  ```
+  5
+  9 1 5 3 7
+  ```
+
+  Kimenet:
+
+  ```
+  Median: 5.0
+  ```
+
+  Tipp: rendezd a listát, és nézd meg az elemszám paritását. Pythonban az `f"{x:.1f}"`, C#-ban az `x.ToString("F1", CultureInfo.InvariantCulture)` adja az egy tizedesjegyű kiírást (`using System.Globalization;`).
+starter_code:
+  python: |
+    n = int(input())
+    a = [int(x) for x in input().split()]
+    # rendezd a listát, és számold ki a mediánt
+  csharp: |
+    using System;
+    using System.Collections.Generic;
+    using System.Globalization;
+
+    class Program
+    {
+        static void Main()
+        {
+            int n = int.Parse(Console.ReadLine());
+            var a = new List<int>();
+            foreach (string s in Console.ReadLine().Split(' '))
+            {
+                a.Add(int.Parse(s));
+            }
+            // rendezd a listát, és számold ki a mediánt
+        }
+    }
+sample_solutions:
+  python: |
+    n = int(input())
+    a = [int(x) for x in input().split()]
+    a.sort()
+    if n % 2 == 1:
+        median = a[n // 2]
+    else:
+        median = (a[n // 2 - 1] + a[n // 2]) / 2
+    print("Median: " + f"{median:.1f}")
+  csharp: |
+    using System;
+    using System.Collections.Generic;
+    using System.Globalization;
+
+    class Program
+    {
+        static void Main()
+        {
+            int n = int.Parse(Console.ReadLine());
+            var a = new List<int>();
+            foreach (string s in Console.ReadLine().Split(' '))
+            {
+                a.Add(int.Parse(s));
+            }
+            a.Sort();
+            double median;
+            if (n % 2 == 1)
+            {
+                median = a[n / 2];
+            }
+            else
+            {
+                median = (a[n / 2 - 1] + a[n / 2]) / 2.0;
+            }
+            Console.WriteLine("Median: " + median.ToString("F1", CultureInfo.InvariantCulture));
+        }
+    }
+tests:
+  - { stdin: "5\n9 1 5 3 7\n", expected: "Median: 5.0\n", hidden: false }
+  - { stdin: "4\n10 2 8 4\n", expected: "Median: 6.0\n", hidden: true }
+  - { stdin: "1\n-6\n", expected: "Median: -6.0\n", hidden: true }
+  - { stdin: "2\n1 2\n", expected: "Median: 1.5\n", hidden: true }
+  - { stdin: "6\n-5 -4 -3 3 4 5\n", expected: "Median: 0.0\n", hidden: true }

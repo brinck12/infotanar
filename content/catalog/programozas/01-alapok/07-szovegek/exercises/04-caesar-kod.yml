@@ -1,0 +1,81 @@
+slug: caesar-kod
+title: Caesar-kód
+position: 3
+kind: code
+level: kozep
+difficulty: 4
+published: false
+allowed_languages: [python, csharp]
+description: |
+  A Caesar-kód úgy titkosít, hogy minden betűt az ábécében `k` hellyel eltolva ír le; az ábécé végén körbefordul (`z` után ismét `a` jön). A szóközök változatlanok maradnak.
+
+  Olvass be két sort: az első az eltolás mértéke (`k`, 0 és 25 közötti egész), a második a titkosítandó szöveg, amely csak az angol ábécé kisbetűiből és szóközökből áll. Írd ki a titkosított szöveget.
+
+  Példa: a bemenet `3` és `abc xyz`, a kimenet `def abc`.
+
+  Tipp: legyen egy `abc` nevű szöveg az ábécé 26 betűjével. Egy betű helyét a keresés adja; az új hely `(hely + k) % 26`. A szóközt, amely nincs az ábécében (a keresés `-1`), változatlanul másold át.
+starter_code:
+  python: |
+    abc = "abcdefghijklmnopqrstuvwxyz"
+    k = int(input())
+    szoveg = input()
+    eredmeny = ""
+    # innen folytasd
+  csharp: |
+    using System;
+
+    class Program
+    {
+        static void Main()
+        {
+            var abc = "abcdefghijklmnopqrstuvwxyz";
+            var k = int.Parse(Console.ReadLine());
+            var szoveg = Console.ReadLine();
+            var eredmeny = "";
+            // innen folytasd
+        }
+    }
+sample_solutions:
+  python: |
+    abc = "abcdefghijklmnopqrstuvwxyz"
+    k = int(input())
+    szoveg = input()
+    eredmeny = ""
+    for betu in szoveg:
+        hely = abc.find(betu)
+        if hely == -1:
+            eredmeny = eredmeny + betu
+        else:
+            eredmeny = eredmeny + abc[(hely + k) % 26]
+    print(eredmeny)
+  csharp: |
+    using System;
+
+    class Program
+    {
+        static void Main()
+        {
+            var abc = "abcdefghijklmnopqrstuvwxyz";
+            var k = int.Parse(Console.ReadLine());
+            var szoveg = Console.ReadLine();
+            var eredmeny = "";
+            foreach (char betu in szoveg)
+            {
+                var hely = abc.IndexOf(betu);
+                if (hely == -1)
+                {
+                    eredmeny = eredmeny + betu;
+                }
+                else
+                {
+                    eredmeny = eredmeny + abc[(hely + k) % 26];
+                }
+            }
+            Console.WriteLine(eredmeny);
+        }
+    }
+tests:
+  - { stdin: "3\nabc xyz\n", expected: "def abc\n", hidden: false }
+  - { stdin: "0\nhello\n", expected: "hello\n", hidden: true }
+  - { stdin: "13\nhello world\n", expected: "uryyb jbeyq\n", hidden: true }
+  - { stdin: "25\nb\n", expected: "a\n", hidden: true }

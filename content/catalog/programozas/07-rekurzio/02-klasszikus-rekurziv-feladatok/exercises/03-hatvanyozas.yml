@@ -1,0 +1,78 @@
+slug: hatvanyozas
+title: "Hatványozás"
+position: 2
+kind: code
+level: emelt
+difficulty: 2
+published: false
+allowed_languages: [python, csharp]
+description: |
+  Olvass be két egész számot külön sorban: az `A` alapot (`1 ≤ A ≤ 10`) és az `N` kitevőt (`0 ≤ N ≤ 15`). Írd ki az `A^N` értékét rekurzív függvénnyel, a `**` operátor és a `Math.Pow` nélkül.
+
+  Példa: `A = 2`, `N = 10` esetén a kimenet `1024`. Ha `N = 0`, a kimenet `1`.
+
+  Tipp: `a^n = a · a^(n-1)`, az alapeset a nulladik hatvány. C#-ban használj `long` típust.
+starter_code:
+  python: |
+    def hatvany(a, n):
+        # TODO
+        pass
+
+    a = int(input())
+    n = int(input())
+    print(hatvany(a, n))
+  csharp: |
+    using System;
+
+    class Program
+    {
+        static long Hatvany(long a, int n)
+        {
+            // TODO
+            return 0;
+        }
+
+        static void Main()
+        {
+            long a = long.Parse(Console.ReadLine());
+            int n = int.Parse(Console.ReadLine());
+            Console.WriteLine(Hatvany(a, n));
+        }
+    }
+sample_solutions:
+  python: |
+    def hatvany(a, n):
+        if n == 0:
+            return 1
+        return a * hatvany(a, n - 1)
+
+    a = int(input())
+    n = int(input())
+    print(hatvany(a, n))
+  csharp: |
+    using System;
+
+    class Program
+    {
+        static long Hatvany(long a, int n)
+        {
+            if (n == 0)
+            {
+                return 1;
+            }
+            return a * Hatvany(a, n - 1);
+        }
+
+        static void Main()
+        {
+            long a = long.Parse(Console.ReadLine());
+            int n = int.Parse(Console.ReadLine());
+            Console.WriteLine(Hatvany(a, n));
+        }
+    }
+tests:
+  - { stdin: "2\n10\n", expected: "1024\n", hidden: false }
+  - { stdin: "7\n0\n", expected: "1\n", hidden: true }
+  - { stdin: "1\n15\n", expected: "1\n", hidden: true }
+  - { stdin: "10\n15\n", expected: "1000000000000000\n", hidden: true }
+  - { stdin: "3\n4\n", expected: "81\n", hidden: true }

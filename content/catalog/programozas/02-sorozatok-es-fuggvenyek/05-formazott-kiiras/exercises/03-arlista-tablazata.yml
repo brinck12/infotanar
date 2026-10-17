@@ -1,0 +1,69 @@
+slug: arlista-tablazata
+title: Árlista táblázata
+position: 2
+kind: code
+level: kozep
+difficulty: 3
+published: false
+allowed_languages: [python, csharp]
+description: |
+  Az első sorban egy `N` egész szám áll, utána `N` sor következik `nev ar` alakban (a név ékezet nélküli, szóköz nélküli, legfeljebb 9 karakteres; az ár legfeljebb 6 jegyű egész szám). Írj ki egy táblázatot: először egy fejlécsort, utána minden termék külön sorban. A név mezője **10 karakter széles, balra igazított**, az ár mezője **6 karakter széles, jobbra igazított**. A fejléc ugyanígy formázott `Termek` és `Ar` szöveggel.
+
+  Példa: a `2`, `alma 120`, `korte 85` bemenetre:
+
+  ```
+  Termek        Ar
+  alma         120
+  korte         85
+  ```
+
+  Tipp: Pythonban `{nev:<10}{ar:>6}`, C#-ban `{nev,-10}{ar,6}`. A sorok végén lévő szóközöket a rendszer nem veszi figyelembe.
+starter_code:
+  python: |
+    n = int(input())
+    print(f"{'Termek':<10}{'Ar':>6}")
+    # innen folytasd: olvasd be a sorokat és írd ki őket táblázatosan
+  csharp: |
+    using System;
+
+    class Program
+    {
+        static void Main()
+        {
+            int n = int.Parse(Console.ReadLine());
+            Console.WriteLine($"{"Termek",-10}{"Ar",6}");
+            // innen folytasd: olvasd be a sorokat és írd ki őket táblázatosan
+        }
+    }
+sample_solutions:
+  python: |
+    n = int(input())
+    print(f"{'Termek':<10}{'Ar':>6}")
+    for i in range(n):
+        resz = input().split()
+        nev = resz[0]
+        ar = int(resz[1])
+        print(f"{nev:<10}{ar:>6}")
+  csharp: |
+    using System;
+
+    class Program
+    {
+        static void Main()
+        {
+            int n = int.Parse(Console.ReadLine());
+            Console.WriteLine($"{"Termek",-10}{"Ar",6}");
+            for (int i = 0; i < n; i++)
+            {
+                string[] resz = Console.ReadLine().Split(' ');
+                string nev = resz[0];
+                int ar = int.Parse(resz[1]);
+                Console.WriteLine($"{nev,-10}{ar,6}");
+            }
+        }
+    }
+tests:
+  - { stdin: "2\nalma 120\nkorte 85\n", expected: "Termek        Ar\nalma         120\nkorte         85\n", hidden: false }
+  - { stdin: "1\nkenyer 1250\n", expected: "Termek        Ar\nkenyer      1250\n", hidden: true }
+  - { stdin: "2\ntej 99\nhus 123456\n", expected: "Termek        Ar\ntej           99\nhus       123456\n", hidden: true }
+  - { stdin: "0\n", expected: "Termek        Ar\n", hidden: true }

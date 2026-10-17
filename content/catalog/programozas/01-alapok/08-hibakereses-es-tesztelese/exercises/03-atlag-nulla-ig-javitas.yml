@@ -1,0 +1,93 @@
+slug: atlag-nullaig-javitas
+title: Átlag nulláig (javítás)
+position: 2
+kind: code
+level: kozep
+difficulty: 3
+published: false
+allowed_languages: [python, csharp]
+description: |
+  A program a beolvasott számok átlagát számolja, de **hibás**: egy bizonyos bemenetre összeomlik (futási hiba). Olvasd el a hibaüzenetet, és javítsd ki.
+
+  A feladat: olvass be pozitív egész számokat soronként, amíg `0`-t nem kapsz (a nulla nem tartozik az adatok közé). Írd ki az átlag egész részét ebben a formában: `Atlag: 5`. Ha egyetlen számot sem kaptál (az első sor már `0`), a kimenet `Nincs adat`.
+
+  Példák:
+
+  - a bemenet `4`, `6`, `0`, a kimenet `Atlag: 5`
+  - a bemenet `7`, `8`, `0`, a kimenet `Atlag: 7` (a `15 / 2` egész része 7)
+  - a bemenet `0`, a kimenet `Nincs adat`
+
+  Tipp: melyik bemenetnél lesz a darabszám nulla, és mi történik, ha nullával osztasz?
+starter_code:
+  python: |
+    osszeg = 0
+    db = 0
+    szam = int(input())
+    while szam != 0:
+        osszeg = osszeg + szam
+        db = db + 1
+        szam = int(input())
+    print("Atlag: " + str(osszeg // db))
+  csharp: |
+    using System;
+
+    class Program
+    {
+        static void Main()
+        {
+            var osszeg = 0;
+            var db = 0;
+            var szam = int.Parse(Console.ReadLine());
+            while (szam != 0)
+            {
+                osszeg = osszeg + szam;
+                db = db + 1;
+                szam = int.Parse(Console.ReadLine());
+            }
+            Console.WriteLine("Atlag: " + osszeg / db);
+        }
+    }
+sample_solutions:
+  python: |
+    osszeg = 0
+    db = 0
+    szam = int(input())
+    while szam != 0:
+        osszeg = osszeg + szam
+        db = db + 1
+        szam = int(input())
+    if db == 0:
+        print("Nincs adat")
+    else:
+        print("Atlag: " + str(osszeg // db))
+  csharp: |
+    using System;
+
+    class Program
+    {
+        static void Main()
+        {
+            var osszeg = 0;
+            var db = 0;
+            var szam = int.Parse(Console.ReadLine());
+            while (szam != 0)
+            {
+                osszeg = osszeg + szam;
+                db = db + 1;
+                szam = int.Parse(Console.ReadLine());
+            }
+            if (db == 0)
+            {
+                Console.WriteLine("Nincs adat");
+            }
+            else
+            {
+                Console.WriteLine("Atlag: " + osszeg / db);
+            }
+        }
+    }
+tests:
+  - { stdin: "4\n6\n0\n", expected: "Atlag: 5\n", hidden: false }
+  - { stdin: "0\n", expected: "Nincs adat\n", hidden: true }
+  - { stdin: "7\n8\n0\n", expected: "Atlag: 7\n", hidden: true }
+  - { stdin: "10\n0\n", expected: "Atlag: 10\n", hidden: true }

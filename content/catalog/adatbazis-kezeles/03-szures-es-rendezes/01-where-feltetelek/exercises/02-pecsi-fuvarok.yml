@@ -1,0 +1,49 @@
+slug: pecsi-fuvarok
+title: Pécsi fuvarok
+position: 1
+kind: sql
+level: kozep
+difficulty: 1
+published: false
+allowed_languages: [sql]
+description: |
+  Szöveget az `=` jellel hasonlítunk össze, a szöveget aposztróf közé kell tenni.
+
+  A `taxi` tábla:
+
+  | oszlop | típus |
+  |---|---|
+  | `id` | egész, elsődleges kulcs |
+  | `rendszam` | szöveg |
+  | `indulas` | szöveg |
+  | `cel` | szöveg |
+  | `km` | egész |
+  | `dij` | egész (Ft) |
+  | `fizetes` | szöveg (`keszpenz` vagy `kartya`) |
+
+  Listázd ki a **Pecs** városba tartó fuvarok **rendszámát és megtett távolságát** (`km`)! A sorok sorrendje nem számít.
+
+  Tipp: `WHERE cel = 'Pecs'` (a szöveg nagybetűit is pontosan írd).
+starter_code:
+  sql: |
+    SELECT rendszam, km
+    FROM taxi
+    WHERE ;
+sample_solutions:
+  sql: |
+    SELECT rendszam, km
+    FROM taxi
+    WHERE cel = 'Pecs';
+tests:
+  - stdin: "CREATE TABLE taxi (id INTEGER PRIMARY KEY, rendszam TEXT, indulas TEXT, cel TEXT, km INTEGER, dij INTEGER, fizetes TEXT);\nINSERT INTO taxi VALUES\n(1, 'GSB-932', 'Gyor', 'Eger', 56, 17300, 'kartya'),\n(2, 'CKF-513', 'Pecs', 'Szeged', 18, 6200, 'keszpenz'),\n(3, 'BPF-531', 'Pecs', 'Eger', 47, 14900, 'keszpenz'),\n(4, 'CRC-372', 'Szeged', 'Pecs', 6, 2600, 'keszpenz'),\n(5, 'DPB-198', 'Pecs', 'Eger', 53, 16700, 'keszpenz'),\n(6, 'APH-196', 'Gyor', 'Szeged', 16, 5300, 'keszpenz'),\n(7, 'DSC-211', 'Eger', 'Szeged', 29, 9500, 'keszpenz'),\n(8, 'DPB-494', 'Gyor', 'Eger', 36, 11800, 'kartya');\n"
+    expected: "rendszam,km\nCRC-372,6\n"
+    hidden: false
+  - stdin: "CREATE TABLE taxi (id INTEGER PRIMARY KEY, rendszam TEXT, indulas TEXT, cel TEXT, km INTEGER, dij INTEGER, fizetes TEXT);\nINSERT INTO taxi VALUES\n(1, 'HPH-317', 'Szeged', 'Gyor', 21, 7300, 'keszpenz'),\n(2, 'DLG-285', 'Pecs', 'Szeged', 37, 12100, 'kartya'),\n(3, 'BRC-274', 'Gyor', 'Szeged', 49, 15700, 'keszpenz'),\n(4, 'HTD-951', 'Gyor', 'Pecs', 14, 5000, 'kartya'),\n(5, 'HND-573', 'Gyor', 'Pecs', 44, 13700, 'kartya'),\n(6, 'DSB-657', 'Gyor', 'Szeged', 13, 4700, 'kartya'),\n(7, 'EKD-542', 'Szeged', 'Gyor', 5, 2000, 'kartya'),\n(8, 'DRG-283', 'Gyor', 'Szeged', 31, 10100, 'keszpenz'),\n(9, 'DPG-457', 'Eger', 'Szeged', 39, 12500, 'keszpenz');\n"
+    expected: "rendszam,km\nHTD-951,14\nHND-573,44\n"
+    hidden: true
+  - stdin: "CREATE TABLE taxi (id INTEGER PRIMARY KEY, rendszam TEXT, indulas TEXT, cel TEXT, km INTEGER, dij INTEGER, fizetes TEXT);\nINSERT INTO taxi VALUES\n(1, 'GRE-718', 'Pecs', 'Szeged', 13, 4700, 'keszpenz'),\n(2, 'CRF-488', 'Gyor', 'Pecs', 7, 2600, 'kartya'),\n(3, 'DRF-980', 'Pecs', 'Szeged', 45, 14000, 'keszpenz'),\n(4, 'AKA-874', 'Eger', 'Szeged', 30, 9800, 'kartya'),\n(5, 'DSA-316', 'Szeged', 'Gyor', 5, 2000, 'kartya'),\n(6, 'ALF-486', 'Gyor', 'Pecs', 26, 8300, 'keszpenz'),\n(7, 'BPA-822', 'Eger', 'Pecs', 39, 12500, 'keszpenz'),\n(8, 'AKH-404', 'Pecs', 'Gyor', 6, 2300, 'kartya'),\n(9, 'ESG-807', 'Szeged', 'Pecs', 8, 2900, 'keszpenz'),\n(10, 'ATC-436', 'Eger', 'Gyor', 60, 18800, 'kartya');\n"
+    expected: "rendszam,km\nCRF-488,7\nALF-486,26\nBPA-822,39\nESG-807,8\n"
+    hidden: true
+  - stdin: "CREATE TABLE taxi (id INTEGER PRIMARY KEY, rendszam TEXT, indulas TEXT, cel TEXT, km INTEGER, dij INTEGER, fizetes TEXT);\nINSERT INTO taxi VALUES\n(1, 'FTG-267', 'Szeged', 'Eger', 29, 9200, 'keszpenz'),\n(2, 'CKD-716', 'Eger', 'Pecs', 40, 13000, 'keszpenz'),\n(3, 'BSD-208', 'Gyor', 'Pecs', 39, 12500, 'kartya'),\n(4, 'GPF-558', 'Pecs', 'Eger', 13, 4700, 'kartya'),\n(5, 'DSA-622', 'Gyor', 'Eger', 42, 13600, 'kartya'),\n(6, 'EMB-361', 'Szeged', 'Gyor', 58, 18400, 'kartya'),\n(7, 'CNH-391', 'Eger', 'Pecs', 5, 2000, 'keszpenz'),\n(8, 'HMF-613', 'Eger', 'Pecs', 19, 6700, 'kartya'),\n(9, 'DPG-362', 'Gyor', 'Pecs', 18, 5900, 'kartya'),\n(10, 'BPB-802', 'Pecs', 'Gyor', 55, 17500, 'kartya'),\n(11, 'EKG-987', 'Eger', 'Pecs', 29, 9700, 'keszpenz'),\n(12, 'CPB-523', 'Szeged', 'Gyor', 46, 14600, 'kartya');\n"
+    expected: "rendszam,km\nCKD-716,40\nBSD-208,39\nCNH-391,5\nHMF-613,19\nDPG-362,18\nEKG-987,29\n"
+    hidden: true

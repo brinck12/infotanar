@@ -1,0 +1,4 @@
+nev	pont
+Anna	78
+Bela	35
+Csilla	49

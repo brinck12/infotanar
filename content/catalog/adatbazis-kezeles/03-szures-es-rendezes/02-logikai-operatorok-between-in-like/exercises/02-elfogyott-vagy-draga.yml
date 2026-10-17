@@ -1,0 +1,47 @@
+slug: elfogyott-vagy-draga
+title: Elfogyott vagy drága
+position: 1
+kind: sql
+level: kozep
+difficulty: 2
+published: false
+allowed_languages: [sql]
+description: |
+  Az `OR` akkor igaz, ha a két feltétel közül legalább az egyik igaz; az `AND` akkor, ha mindkettő. A `NOT` megfordítja a feltételt.
+
+  A `termek` tábla:
+
+  | oszlop | típus |
+  |---|---|
+  | `id` | egész, elsődleges kulcs |
+  | `nev` | szöveg |
+  | `kategoria` | szöveg |
+  | `ar` | egész (Ft) |
+  | `keszlet` | egész (db) |
+
+  Listázd ki azokat a termékeket (**nev, ar, keszlet**), amelyekből **elfogyott** (a készlet 0) **vagy** az áruk **1500 Ft-nál nagyobb**! A sorok sorrendje nem számít.
+
+  Tipp: `WHERE keszlet = 0 OR ar > 1500`
+starter_code:
+  sql: |
+    SELECT nev, ar, keszlet
+    FROM termek
+    WHERE ;
+sample_solutions:
+  sql: |
+    SELECT nev, ar, keszlet
+    FROM termek
+    WHERE keszlet = 0 OR ar > 1500;
+tests:
+  - stdin: "CREATE TABLE termek (id INTEGER PRIMARY KEY, nev TEXT, kategoria TEXT, ar INTEGER, keszlet INTEGER);\nINSERT INTO termek VALUES\n(1, 'Joghurt', 'zold', 1970, 0),\n(2, 'Turo', 'tej', 1800, 0),\n(3, 'Zsemle', 'edes', 100, 5),\n(4, 'Alma', 'zold', 1190, 0),\n(5, 'Narancs', 'zold', 1460, 22),\n(6, 'Burgonya', 'pek', 550, 17),\n(7, 'Kifli', 'zold', 1740, 3),\n(8, 'Sutemeny', 'edes', 730, 10);\n"
+    expected: "nev,ar,keszlet\nJoghurt,1970,0\nTuro,1800,0\nAlma,1190,0\nKifli,1740,3\n"
+    hidden: false
+  - stdin: "CREATE TABLE termek (id INTEGER PRIMARY KEY, nev TEXT, kategoria TEXT, ar INTEGER, keszlet INTEGER);\nINSERT INTO termek VALUES\n(1, 'Alma', 'tej', 1140, 0),\n(2, 'Vaj', 'pek', 1800, 23),\n(3, 'Uborka', 'edes', 100, 5),\n(4, 'Csoki', 'pek', 1310, 11),\n(5, 'Cukor', 'pek', 1230, 4),\n(6, 'Banan', 'zold', 1790, 11),\n(7, 'Paradicsom', 'tej', 650, 0),\n(8, 'Korte', 'edes', 820, 3),\n(9, 'Kenyer', 'zold', 320, 6);\n"
+    expected: "nev,ar,keszlet\nAlma,1140,0\nVaj,1800,23\nBanan,1790,11\nParadicsom,650,0\n"
+    hidden: true
+  - stdin: "CREATE TABLE termek (id INTEGER PRIMARY KEY, nev TEXT, kategoria TEXT, ar INTEGER, keszlet INTEGER);\nINSERT INTO termek VALUES\n(1, 'Turo', 'zold', 1820, 0),\n(2, 'Sajt', 'tej', 1800, 23),\n(3, 'Tejfol', 'edes', 100, 5),\n(4, 'Tej', 'zold', 650, 9),\n(5, 'Burgonya', 'zold', 1920, 0),\n(6, 'Narancs', 'zold', 160, 28),\n(7, 'Kenyer', 'edes', 1900, 18),\n(8, 'Alma', 'pek', 1030, 12),\n(9, 'Korte', 'pek', 1200, 20),\n(10, 'Sutemeny', 'pek', 540, 0);\n"
+    expected: "nev,ar,keszlet\nTuro,1820,0\nSajt,1800,23\nBurgonya,1920,0\nKenyer,1900,18\nSutemeny,540,0\n"
+    hidden: true
+  - stdin: "CREATE TABLE termek (id INTEGER PRIMARY KEY, nev TEXT, kategoria TEXT, ar INTEGER, keszlet INTEGER);\nINSERT INTO termek VALUES\n(1, 'Narancs', 'pek', 1840, 0),\n(2, 'Vaj', 'pek', 1800, 18),\n(3, 'Alma', 'zold', 100, 5),\n(4, 'Csoki', 'tej', 280, 27),\n(5, 'Tejfol', 'pek', 1480, 14),\n(6, 'Joghurt', 'edes', 1920, 5),\n(7, 'Korte', 'edes', 1830, 0),\n(8, 'Uborka', 'pek', 270, 27),\n(9, 'Sutemeny', 'zold', 670, 9),\n(10, 'Paradicsom', 'tej', 1370, 22),\n(11, 'Sajt', 'pek', 1450, 9),\n(12, 'Kenyer', 'tej', 1140, 0);\n"
+    expected: "nev,ar,keszlet\nNarancs,1840,0\nVaj,1800,18\nJoghurt,1920,5\nKorte,1830,0\nKenyer,1140,0\n"
+    hidden: true

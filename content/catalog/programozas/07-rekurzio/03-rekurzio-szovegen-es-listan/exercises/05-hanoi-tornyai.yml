@@ -1,0 +1,77 @@
+slug: hanoi-tornyai
+title: "Hanoi tornyai"
+position: 4
+kind: code
+level: emelt
+difficulty: 5
+published: false
+allowed_languages: [python, csharp]
+description: |
+  Olvass be egy `N` egész számot (`0 ≤ N ≤ 5`): ennyi korong van az `A` rúdon. Írd ki a Hanoi tornyai megoldásának lépéseit, hogy az összes korong az `A` rúdról a `C` rúdra kerüljön a `B` rúd segítségével. Minden lépés egy sor: `X -> Y` (korong mozgatása az `X` rúdról az `Y` rúdra).
+
+  A rekurzív leírás `Hanoi(n, honnan, hova, seged)`:
+  - Ha `n = 0`, nincs teendő.
+  - Különben: `Hanoi(n-1, honnan, seged, hova)`, aztán kiírni: `honnan -> hova`, aztán `Hanoi(n-1, seged, hova, honnan)`.
+
+  Példa: `N = 2` esetén a kimenet: `A -> B`, `A -> C`, `B -> C` külön sorokban. `N = 0` esetén a kimenet üres.
+
+  Tipp: a két rekurzív hívás között írd ki a lépést; a paraméterek sorrendjére figyelj.
+starter_code:
+  python: |
+    def hanoi(n, honnan, hova, seged):
+        # TODO
+        pass
+
+    hanoi(int(input()), "A", "C", "B")
+  csharp: |
+    using System;
+
+    class Program
+    {
+        static void Hanoi(int n, string honnan, string hova, string seged)
+        {
+            // TODO
+        }
+
+        static void Main()
+        {
+            Hanoi(int.Parse(Console.ReadLine()), "A", "C", "B");
+        }
+    }
+sample_solutions:
+  python: |
+    def hanoi(n, honnan, hova, seged):
+        if n == 0:
+            return
+        hanoi(n - 1, honnan, seged, hova)
+        print(honnan, "->", hova)
+        hanoi(n - 1, seged, hova, honnan)
+
+    hanoi(int(input()), "A", "C", "B")
+  csharp: |
+    using System;
+
+    class Program
+    {
+        static void Hanoi(int n, string honnan, string hova, string seged)
+        {
+            if (n == 0)
+            {
+                return;
+            }
+            Hanoi(n - 1, honnan, seged, hova);
+            Console.WriteLine(honnan + " -> " + hova);
+            Hanoi(n - 1, seged, hova, honnan);
+        }
+
+        static void Main()
+        {
+            Hanoi(int.Parse(Console.ReadLine()), "A", "C", "B");
+        }
+    }
+tests:
+  - { stdin: "2\n", expected: "A -> B\nA -> C\nB -> C\n", hidden: false }
+  - { stdin: "0\n", expected: "", hidden: true }
+  - { stdin: "1\n", expected: "A -> C\n", hidden: true }
+  - { stdin: "3\n", expected: "A -> C\nA -> B\nC -> B\nA -> C\nB -> A\nB -> C\nA -> C\n", hidden: true }
+  - { stdin: "5\n", expected: "A -> C\nA -> B\nC -> B\nA -> C\nB -> A\nB -> C\nA -> C\nA -> B\nC -> B\nC -> A\nB -> A\nC -> B\nA -> C\nA -> B\nC -> B\nA -> C\nB -> A\nB -> C\nA -> C\nB -> A\nC -> B\nC -> A\nB -> A\nB -> C\nA -> C\nA -> B\nC -> B\nA -> C\nB -> A\nB -> C\nA -> C\n", hidden: true }

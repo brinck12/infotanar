@@ -1,0 +1,5 @@
+nev	jegy
+Anna	5
+Bela	3
+Csilla	4
+Denes	2

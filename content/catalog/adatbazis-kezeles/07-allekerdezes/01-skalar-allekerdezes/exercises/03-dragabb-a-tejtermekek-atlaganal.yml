@@ -1,0 +1,131 @@
+slug: dragabb-a-tejtermekek-atlaganal
+title: Drágább a tejtermékek átlagánál
+position: 2
+kind: sql
+level: emelt
+difficulty: 3
+published: false
+allowed_languages:
+- sql
+description: |
+  A `termek` tábla:
+
+  | oszlop | típus |
+  |---|---|
+  | `id` | egész, elsődleges kulcs |
+  | `nev` | szöveg |
+  | `kategoria` | szöveg |
+  | `ar` | egész (Ft) |
+  | `keszlet` | egész (darab) |
+
+  Listázd ki azokat a termékeket (**nev, ar**), amelyek **drágábbak a `tej` kategóriájú termékek átlagos áránál**, bármelyik kategóriába is tartoznak! Az allekérdezésben szűrj a kategóriára. A sorok sorrendje nem számít.
+
+  Tipp: az allekérdezésnek saját `WHERE` feltétele is lehet: `(SELECT AVG(ar) FROM termek WHERE kategoria = 'tej')`.
+starter_code:
+  sql: |
+    SELECT nev, ar
+    FROM termek
+    WHERE ar > (SELECT AVG(ar) FROM termek WHERE );
+sample_solutions:
+  sql: |
+    SELECT nev, ar
+    FROM termek
+    WHERE ar > (SELECT AVG(ar) FROM termek WHERE kategoria = 'tej');
+tests:
+- stdin: |
+    CREATE TABLE termek (id INTEGER PRIMARY KEY, nev TEXT, kategoria TEXT, ar INTEGER, keszlet INTEGER);
+    INSERT INTO termek VALUES
+    (1, 'Csirkemell', 'hus', 1400, 28),
+    (2, 'Paprika', 'zold', 670, 0),
+    (3, 'Zsemle', 'pek', 1170, 3),
+    (4, 'Sajt', 'tej', 1520, 0),
+    (5, 'Sonka', 'hus', 510, 38),
+    (6, 'Vaj', 'tej', 300, 18),
+    (7, 'Szalami', 'hus', 2500, 34),
+    (8, 'Parizer', 'hus', 1690, 29),
+    (9, 'Alma', 'zold', 350, 5);
+  expected: |
+    nev,ar
+    Csirkemell,1400
+    Zsemle,1170
+    Sajt,1520
+    Szalami,2500
+    Parizer,1690
+  hidden: false
+- stdin: |
+    CREATE TABLE termek (id INTEGER PRIMARY KEY, nev TEXT, kategoria TEXT, ar INTEGER, keszlet INTEGER);
+    INSERT INTO termek VALUES
+    (1, 'Tej', 'tej', 290, 20),
+    (2, 'Csirkemell', 'hus', 2080, 0),
+    (3, 'Korte', 'zold', 160, 23),
+    (4, 'Paradicsom', 'zold', 1620, 12),
+    (5, 'Szalami', 'hus', 1650, 24),
+    (6, 'Alma', 'zold', 1680, 37),
+    (7, 'Kefir', 'tej', 1220, 3),
+    (8, 'Vaj', 'tej', 750, 1),
+    (9, 'Paprika', 'zold', 2270, 36),
+    (10, 'Parizer', 'hus', 1620, 30),
+    (11, 'Banan', 'zold', 2500, 0),
+    (12, 'Sajt', 'tej', 760, 21);
+  expected: |
+    nev,ar
+    Csirkemell,2080
+    Paradicsom,1620
+    Szalami,1650
+    Alma,1680
+    Kefir,1220
+    Paprika,2270
+    Parizer,1620
+    Banan,2500
+    Sajt,760
+  hidden: true
+- stdin: |
+    CREATE TABLE termek (id INTEGER PRIMARY KEY, nev TEXT, kategoria TEXT, ar INTEGER, keszlet INTEGER);
+    INSERT INTO termek VALUES
+    (1, 'Kifli', 'pek', 930, 11),
+    (2, 'Paradicsom', 'zold', 2170, 0),
+    (3, 'Tej', 'tej', 410, 28),
+    (4, 'Szalami', 'hus', 1220, 26),
+    (5, 'Banan', 'zold', 380, 13),
+    (6, 'Parizer', 'hus', 1220, 0),
+    (7, 'Paprika', 'zold', 2150, 24),
+    (8, 'Alma', 'zold', 270, 3),
+    (9, 'Zsemle', 'pek', 710, 27),
+    (10, 'Sonka', 'hus', 220, 0);
+  expected: |
+    nev,ar
+    Kifli,930
+    Paradicsom,2170
+    Szalami,1220
+    Parizer,1220
+    Paprika,2150
+    Zsemle,710
+  hidden: true
+- stdin: |
+    CREATE TABLE termek (id INTEGER PRIMARY KEY, nev TEXT, kategoria TEXT, ar INTEGER, keszlet INTEGER);
+    INSERT INTO termek VALUES
+    (1, 'Paprika', 'zold', 2010, 19),
+    (2, 'Sonka', 'hus', 1310, 0),
+    (3, 'Sajt', 'tej', 1510, 26),
+    (4, 'Tej', 'tej', 150, 17),
+    (5, 'Joghurt', 'tej', 730, 29),
+    (6, 'Paradicsom', 'zold', 1680, 31),
+    (7, 'Alma', 'zold', 560, 0),
+    (8, 'Csirkemell', 'hus', 640, 12),
+    (9, 'Kefir', 'tej', 2460, 0),
+    (10, 'Vaj', 'tej', 1090, 31),
+    (11, 'Zsemle', 'pek', 800, 1),
+    (12, 'Kifli', 'pek', 1200, 28),
+    (13, 'Korte', 'zold', 1560, 35),
+    (14, 'Pogacsa', 'pek', 2180, 39);
+  expected: |
+    nev,ar
+    Paprika,2010
+    Sonka,1310
+    Sajt,1510
+    Paradicsom,1680
+    Kefir,2460
+    Kifli,1200
+    Korte,1560
+    Pogacsa,2180
+  hidden: true

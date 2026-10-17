@@ -1,0 +1,90 @@
+slug: lista-maximuma-rekurzivan
+title: "Lista maximuma rekurzívan"
+position: 2
+kind: code
+level: emelt
+difficulty: 3
+published: false
+allowed_languages: [python, csharp]
+description: |
+  Az első sorban `N` áll (`1 ≤ N ≤ 100`), a következő `N` sorban egy-egy egész szám (lehet negatív). Írd ki a legnagyobbat **rekurzív** függvénnyel.
+
+  Példa: `4`, majd `3`, `9`, `2`, `9` esetén a kimenet `9`. Csupa negatív számnál is a legnagyobb a jó válasz.
+
+  Tipp: az alapeset az utolsó elem; különben az `i`-edik elem és a maradék maximuma közül a nagyobb a válasz.
+starter_code:
+  python: |
+    def maximum(lista, i):
+        # TODO
+        pass
+
+    n = int(input())
+    lista = []
+    for _ in range(n):
+        lista.append(int(input()))
+    print(maximum(lista, 0))
+  csharp: |
+    using System;
+
+    class Program
+    {
+        static int Maximum(int[] lista, int i)
+        {
+            // TODO
+            return 0;
+        }
+
+        static void Main()
+        {
+            int n = int.Parse(Console.ReadLine());
+            int[] lista = new int[n];
+            for (int i = 0; i < n; i++)
+            {
+                lista[i] = int.Parse(Console.ReadLine());
+            }
+            Console.WriteLine(Maximum(lista, 0));
+        }
+    }
+sample_solutions:
+  python: |
+    def maximum(lista, i):
+        if i == len(lista) - 1:
+            return lista[i]
+        return max(lista[i], maximum(lista, i + 1))
+
+    n = int(input())
+    lista = []
+    for _ in range(n):
+        lista.append(int(input()))
+    print(maximum(lista, 0))
+  csharp: |
+    using System;
+
+    class Program
+    {
+        static int Maximum(int[] lista, int i)
+        {
+            if (i == lista.Length - 1)
+            {
+                return lista[i];
+            }
+            return Math.Max(lista[i], Maximum(lista, i + 1));
+        }
+
+        static void Main()
+        {
+            int n = int.Parse(Console.ReadLine());
+            int[] lista = new int[n];
+            for (int i = 0; i < n; i++)
+            {
+                lista[i] = int.Parse(Console.ReadLine());
+            }
+            Console.WriteLine(Maximum(lista, 0));
+        }
+    }
+tests:
+  - { stdin: "4\n3\n9\n2\n9\n", expected: "9\n", hidden: false }
+  - { stdin: "1\n-5\n", expected: "-5\n", hidden: true }
+  - { stdin: "3\n-4\n-2\n-9\n", expected: "-2\n", hidden: true }
+  - { stdin: "5\n1\n2\n3\n4\n5\n", expected: "5\n", hidden: true }
+  - { stdin: "5\n5\n4\n3\n2\n1\n", expected: "5\n", hidden: true }

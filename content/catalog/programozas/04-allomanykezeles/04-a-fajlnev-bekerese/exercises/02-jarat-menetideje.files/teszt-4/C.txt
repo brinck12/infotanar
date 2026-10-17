@@ -1,0 +1,4 @@
+megallo	perc
+Piac	7
+Egyetem	7
+Stadion	3

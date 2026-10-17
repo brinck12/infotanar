@@ -1,0 +1,68 @@
+slug: szamok-osszege-egy-sorbol
+title: Számok összege egy sorból
+position: 0
+kind: code
+level: kozep
+difficulty: 1
+published: false
+allowed_languages: [python, csharp]
+description: |
+  A bemenet egyetlen sor, amelyben szóközzel elválasztva egész számok állnak (legalább egy). Írd ki az összegüket.
+
+  Példa: a `3 5 8` bemenetre a kimenet `16`.
+
+  Tipp: vágd szét a sort, alakítsd mindegyik darabot egész számmá, és adjd össze őket ciklussal.
+starter_code:
+  python: |
+    sor = input()
+    szamok = []
+    for resz in sor.split():
+        szamok.append(int(resz))
+    # innen folytasd
+  csharp: |
+    using System;
+    using System.Collections.Generic;
+
+    class Program
+    {
+        static void Main()
+        {
+            string sor = Console.ReadLine();
+            string[] reszek = sor.Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+            List<int> szamok = new List<int>();
+            foreach (string resz in reszek)
+            {
+                szamok.Add(int.Parse(resz));
+            }
+            // innen folytasd
+        }
+    }
+sample_solutions:
+  python: |
+    sor = input()
+    osszeg = 0
+    for resz in sor.split():
+        osszeg = osszeg + int(resz)
+    print(osszeg)
+  csharp: |
+    using System;
+
+    class Program
+    {
+        static void Main()
+        {
+            string sor = Console.ReadLine();
+            string[] reszek = sor.Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+            int osszeg = 0;
+            foreach (string resz in reszek)
+            {
+                osszeg = osszeg + int.Parse(resz);
+            }
+            Console.WriteLine(osszeg);
+        }
+    }
+tests:
+  - { stdin: "3 5 8\n", expected: "16\n", hidden: false }
+  - { stdin: "7\n", expected: "7\n", hidden: true }
+  - { stdin: "-4 10 -6 0\n", expected: "0\n", hidden: true }
+  - { stdin: "100 200 300 400 500\n", expected: "1500\n", hidden: true }

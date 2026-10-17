@@ -1,0 +1,5 @@
+termek	darab	ar
+fuzet	10	250
+radir	4	90
+vonalzo	3	300
+ceruza	25	80

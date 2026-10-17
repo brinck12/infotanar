@@ -1,0 +1,99 @@
+slug: ar-szerinti-kategoria
+title: Ár szerinti kategória
+position: 1
+kind: sql
+level: kozep
+difficulty: 2
+published: false
+allowed_languages: [sql]
+description: |
+    A boltban a 1000 Ft alatti termék `olcso`, az 1000 és 4999 Ft közötti `kozepes`, az 5000 Ft-os vagy drágább `draga`. Listázd a termék nevét (`nev`), árát (`ar`) és kategóriáját (`kategoria`).
+
+    A `termek` tábla:
+
+    | `id` | `nev` | `ar` | `keszlet` |
+    |---|---|---|---|
+    | 1 | Fuzet | 250 | 40 |
+    | 2 | Hatizsak | 8900 | 0 |
+    | 3 | Toll | 990 | 3 |
+    | 4 | Szamologep | 4500 | 12 |
+
+    Az eredmény ezekre az adatokra:
+
+    | `nev` | `ar` | `kategoria` |
+    |---|---|---|
+    | Fuzet | 250 | olcso |
+    | Hatizsak | 8900 | draga |
+    | Toll | 990 | olcso |
+    | Szamologep | 4500 | kozepes |
+
+    Tipp: a szöveges eredményt aposztrófok közé kell tenni; az `ELSE` ág fogja a többit.
+starter_code:
+  sql: |
+    SELECT nev, ar,
+      CASE
+        -- ide jönnek az ágak
+      END AS kategoria
+    FROM termek;
+sample_solutions:
+  sql: |
+    SELECT nev, ar,
+      CASE
+        WHEN ar < 1000 THEN 'olcso'
+        WHEN ar < 5000 THEN 'kozepes'
+        ELSE 'draga'
+      END AS kategoria
+    FROM termek;
+tests:
+  - stdin: |
+      CREATE TABLE termek (id INTEGER PRIMARY KEY, nev TEXT, ar INTEGER, keszlet INTEGER);
+      INSERT INTO termek VALUES (1, 'Fuzet', 250, 40);
+      INSERT INTO termek VALUES (2, 'Hatizsak', 8900, 0);
+      INSERT INTO termek VALUES (3, 'Toll', 990, 3);
+      INSERT INTO termek VALUES (4, 'Szamologep', 4500, 12);
+    expected: |
+      nev,ar,kategoria
+      Fuzet,250,olcso
+      Hatizsak,8900,draga
+      Toll,990,olcso
+      Szamologep,4500,kozepes
+    hidden: false
+  - stdin: |
+      CREATE TABLE termek (id INTEGER PRIMARY KEY, nev TEXT, ar INTEGER, keszlet INTEGER);
+      INSERT INTO termek VALUES (1, 'Ceruza', 1000, 4);
+      INSERT INTO termek VALUES (2, 'Radir', 150, 5);
+      INSERT INTO termek VALUES (3, 'Tolltarto', 4999, 0);
+      INSERT INTO termek VALUES (4, 'Vonalzo', 5000, 25);
+    expected: |
+      nev,ar,kategoria
+      Ceruza,1000,kozepes
+      Radir,150,olcso
+      Tolltarto,4999,kozepes
+      Vonalzo,5000,draga
+    hidden: true
+  - stdin: |
+      CREATE TABLE termek (id INTEGER PRIMARY KEY, nev TEXT, ar INTEGER, keszlet INTEGER);
+      INSERT INTO termek VALUES (1, 'Jegyzettomb', 1200, 30);
+      INSERT INTO termek VALUES (2, 'Ollo', 999, 1);
+      INSERT INTO termek VALUES (3, 'Szinesceruza', 3200, 0);
+      INSERT INTO termek VALUES (4, 'Festek', 5600, 7);
+      INSERT INTO termek VALUES (5, 'Ragaszto', 480, 5);
+    expected: |
+      nev,ar,kategoria
+      Jegyzettomb,1200,kozepes
+      Ollo,999,olcso
+      Szinesceruza,3200,kozepes
+      Festek,5600,draga
+      Ragaszto,480,olcso
+    hidden: true
+  - stdin: |
+      CREATE TABLE termek (id INTEGER PRIMARY KEY, nev TEXT, ar INTEGER, keszlet INTEGER);
+      INSERT INTO termek VALUES (1, 'Mappa', 300, 0);
+      INSERT INTO termek VALUES (2, 'Sorkiemelo', 1500, 4);
+      INSERT INTO termek VALUES (3, 'Laptop', 129000, 2);
+    expected: |
+      nev,ar,kategoria
+      Mappa,300,olcso
+      Sorkiemelo,1500,kozepes
+      Laptop,129000,draga
+    hidden: true

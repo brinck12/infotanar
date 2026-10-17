@@ -1,0 +1,136 @@
+slug: kereses-a-naploban
+title: Keresés a naplóban
+position: 3
+kind: code
+level: kozep
+difficulty: 3
+published: false
+allowed_languages:
+- python
+- csharp
+description: |
+  A `naplo.txt` fájl egy program naplója, soronként egy bejegyzéssel. A felhasználó egy keresőszót ad meg (egy sor a bemeneten). Írd ki sorban, eredeti formájukban azokat a naplósorokat, amelyek tartalmazzák a szót, majd a végén a találatok számát:
+
+  ```
+  Talalat: 2
+  ```
+
+  A keresés megkülönbözteti a kis- és nagybetűt. Ha nincs találat, csak a `Talalat: 0` sor jelenik meg.
+
+  Példa: a `hiba` szóra a `08:05 hiba: lemez tele` sor találat.
+
+  Tipp: szövegben szöveget a `in` operátor (C#-ban a `Contains` metódus) keres.
+starter_code:
+  python: |
+    szo = input()
+    talalat = 0
+    with open("naplo.txt", encoding="utf-8") as f:
+        for sor in f:
+            sor = sor.strip()
+            # ide írd a megoldást
+    print("Talalat:", talalat)
+  csharp: |
+    using System;
+    using System.IO;
+
+    class Program
+    {
+        static void Main()
+        {
+            string szo = Console.ReadLine();
+            int talalat = 0;
+            foreach (string sor in File.ReadAllLines("naplo.txt"))
+            {
+                // ide írd a megoldást
+            }
+            Console.WriteLine("Talalat: " + talalat);
+        }
+    }
+sample_solutions:
+  python: |
+    szo = input()
+    talalat = 0
+    with open("naplo.txt", encoding="utf-8") as f:
+        for sor in f:
+            sor = sor.strip()
+            if szo in sor:
+                print(sor)
+                talalat += 1
+    print("Talalat:", talalat)
+  csharp: |
+    using System;
+    using System.IO;
+
+    class Program
+    {
+        static void Main()
+        {
+            string szo = Console.ReadLine();
+            int talalat = 0;
+            foreach (string sor in File.ReadAllLines("naplo.txt"))
+            {
+                if (sor.Contains(szo))
+                {
+                    Console.WriteLine(sor);
+                    talalat++;
+                }
+            }
+            Console.WriteLine("Talalat: " + talalat);
+        }
+    }
+files:
+  naplo.txt: naplo.txt
+tests:
+- stdin: 'hiba
+
+    '
+  expected: '08:05 hiba: lemez tele
+
+    08:15 hiba: kapcsolat megszakadt
+
+    Talalat: 2
+
+    '
+  hidden: false
+- stdin: 'fagyas
+
+    '
+  expected: 'Talalat: 0
+
+    '
+  hidden: true
+- stdin: 'rendszer
+
+    '
+  expected: '08:00 indul a rendszer
+
+    08:20 leall a rendszer
+
+    Talalat: 2
+
+    '
+  hidden: true
+- stdin: 'OK
+
+    '
+  expected: '10:00 OK
+
+    10:02 OK minden rendben
+
+    Talalat: 2
+
+    '
+  hidden: true
+  files:
+    naplo.txt: teszt-4/naplo.txt
+- stdin: 'a
+
+    '
+  expected: 'alma
+
+    Talalat: 1
+
+    '
+  hidden: true
+  files:
+    naplo.txt: teszt-5/naplo.txt

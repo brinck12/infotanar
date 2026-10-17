@@ -1,0 +1,99 @@
+slug: szuletesi-ev-honap-es-nap
+title: Születési év, hónap és nap
+position: 0
+kind: sql
+level: kozep
+difficulty: 1
+published: false
+allowed_languages: [sql]
+description: |
+    A `tanulo` tábla a születési dátumot ISO szövegként (`ÉÉÉÉ-HH-NN`) tárolja. Add meg minden tanuló nevét (`nev`), születési évét (`ev`), hónapját (`honap`) és napját (`nap`) egész számként.
+
+    A `tanulo` tábla:
+
+    | `id` | `nev` | `szuletes` |
+    |---|---|---|
+    | 1 | Kiss Anna | 2008-05-14 |
+    | 2 | Nagy Bela | 2009-11-02 |
+    | 3 | Toth Csaba | 2008-05-30 |
+    | 4 | Szabo Dora | 2009-02-27 |
+    | 5 | Varga Fanni | 2010-05-01 |
+
+    Az eredmény ezekre az adatokra:
+
+    | `nev` | `ev` | `honap` | `nap` |
+    |---|---|---|---|
+    | Kiss Anna | 2008 | 5 | 14 |
+    | Nagy Bela | 2009 | 11 | 2 |
+    | Toth Csaba | 2008 | 5 | 30 |
+    | Szabo Dora | 2009 | 2 | 27 |
+    | Varga Fanni | 2010 | 5 | 1 |
+
+    Tipp: a hónap kódja `%m`, a napé `%d`; a `CAST(... AS INTEGER)` a szövegből számot csinál (a `05` így `5` lesz).
+starter_code:
+  sql: |
+    SELECT nev,
+      CAST(strftime('%Y', szuletes) AS INTEGER) AS ev,
+      AS honap,
+      AS nap
+    FROM tanulo;
+sample_solutions:
+  sql: |
+    SELECT nev,
+      CAST(strftime('%Y', szuletes) AS INTEGER) AS ev,
+      CAST(strftime('%m', szuletes) AS INTEGER) AS honap,
+      CAST(strftime('%d', szuletes) AS INTEGER) AS nap
+    FROM tanulo;
+tests:
+  - stdin: |
+      CREATE TABLE tanulo (id INTEGER PRIMARY KEY, nev TEXT, szuletes TEXT);
+      INSERT INTO tanulo VALUES (1, 'Kiss Anna', '2008-05-14');
+      INSERT INTO tanulo VALUES (2, 'Nagy Bela', '2009-11-02');
+      INSERT INTO tanulo VALUES (3, 'Toth Csaba', '2008-05-30');
+      INSERT INTO tanulo VALUES (4, 'Szabo Dora', '2009-02-27');
+      INSERT INTO tanulo VALUES (5, 'Varga Fanni', '2010-05-01');
+    expected: |
+      nev,ev,honap,nap
+      Kiss Anna,2008,5,14
+      Nagy Bela,2009,11,2
+      Toth Csaba,2008,5,30
+      Szabo Dora,2009,2,27
+      Varga Fanni,2010,5,1
+    hidden: false
+  - stdin: |
+      CREATE TABLE tanulo (id INTEGER PRIMARY KEY, nev TEXT, szuletes TEXT);
+      INSERT INTO tanulo VALUES (1, 'Kovacs Gabor', '2008-12-31');
+      INSERT INTO tanulo VALUES (2, 'Molnar Hanna', '2009-01-01');
+      INSERT INTO tanulo VALUES (3, 'Farkas Imre', '2007-05-09');
+      INSERT INTO tanulo VALUES (4, 'Papp Julia', '2011-03-18');
+    expected: |
+      nev,ev,honap,nap
+      Kovacs Gabor,2008,12,31
+      Molnar Hanna,2009,1,1
+      Farkas Imre,2007,5,9
+      Papp Julia,2011,3,18
+    hidden: true
+  - stdin: |
+      CREATE TABLE tanulo (id INTEGER PRIMARY KEY, nev TEXT, szuletes TEXT);
+      INSERT INTO tanulo VALUES (1, 'Balogh Karoly', '2010-12-24');
+      INSERT INTO tanulo VALUES (2, 'Meszaros Lilla', '2008-01-05');
+      INSERT INTO tanulo VALUES (3, 'Horvath Erik', '2009-05-31');
+      INSERT INTO tanulo VALUES (4, 'Simon Zoltan', '2009-09-09');
+      INSERT INTO tanulo VALUES (5, 'Lakatos Eszter', '2008-10-10');
+    expected: |
+      nev,ev,honap,nap
+      Balogh Karoly,2010,12,24
+      Meszaros Lilla,2008,1,5
+      Horvath Erik,2009,5,31
+      Simon Zoltan,2009,9,9
+      Lakatos Eszter,2008,10,10
+    hidden: true
+  - stdin: |
+      CREATE TABLE tanulo (id INTEGER PRIMARY KEY, nev TEXT, szuletes TEXT);
+      INSERT INTO tanulo VALUES (1, 'Fekete Mate', '2009-12-31');
+      INSERT INTO tanulo VALUES (2, 'Juhasz Reka', '2007-05-31');
+    expected: |
+      nev,ev,honap,nap
+      Fekete Mate,2009,12,31
+      Juhasz Reka,2007,5,31
+    hidden: true

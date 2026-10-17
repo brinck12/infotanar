@@ -1,0 +1,60 @@
+slug: teglalap-terulete-es-kerulete
+title: Téglalap területe és kerülete
+position: 0
+kind: code
+level: kozep
+difficulty: 1
+published: false
+allowed_languages: [python, csharp]
+description: |
+  Olvasd be egy téglalap két oldalának hosszát (egész számok, mindegyik külön sorban), majd írd ki a területét és a kerületét két külön sorban.
+
+  Példa: ha a bemenet a `3` és a `5`, a kimenet:
+
+  ```
+  Terulet: 15
+  Kerulet: 16
+  ```
+
+  Tipp: a terület a két oldal szorzata, a kerület az oldalak összegének kétszerese.
+starter_code:
+  python: |
+    a = int(input())
+    b = int(input())
+    # innen folytasd
+  csharp: |
+    using System;
+
+    class Program
+    {
+        static void Main()
+        {
+            int a = int.Parse(Console.ReadLine());
+            int b = int.Parse(Console.ReadLine());
+            // innen folytasd
+        }
+    }
+sample_solutions:
+  python: |
+    a = int(input())
+    b = int(input())
+    print("Terulet: " + str(a * b))
+    print("Kerulet: " + str(2 * (a + b)))
+  csharp: |
+    using System;
+
+    class Program
+    {
+        static void Main()
+        {
+            int a = int.Parse(Console.ReadLine());
+            int b = int.Parse(Console.ReadLine());
+            Console.WriteLine("Terulet: " + (a * b));
+            Console.WriteLine("Kerulet: " + (2 * (a + b)));
+        }
+    }
+tests:
+  - { stdin: "3\n5\n", expected: "Terulet: 15\nKerulet: 16\n", hidden: false }
+  - { stdin: "1\n1\n", expected: "Terulet: 1\nKerulet: 4\n", hidden: true }
+  - { stdin: "0\n7\n", expected: "Terulet: 0\nKerulet: 14\n", hidden: true }
+  - { stdin: "120\n250\n", expected: "Terulet: 30000\nKerulet: 740\n", hidden: true }

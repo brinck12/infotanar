@@ -1,0 +1,72 @@
+slug: homerseklet-atvaltas-tablazat
+title: Hőmérséklet-átváltás táblázat
+position: 3
+kind: code
+level: kozep
+difficulty: 3
+published: false
+allowed_languages: [python, csharp]
+description: |
+  Az első sorban egy `N` egész szám áll, utána `N` sorban egy-egy Celsius-fokban megadott hőmérséklet (valós szám, a tizedeselválasztó pont). Írj ki egy táblázatot **tabulátorral** elválasztott két oszloppal: az első sor a fejléc (`C`, tabulátor, `F`), utána minden hőmérséklethez egy sor: a Celsius-érték és a Fahrenheit-érték (`F = C * 9 / 5 + 32`), mindkettő **egy tizedesjegyre kerekítve**.
+
+  Példa: a `3`, `0`, `100`, `36.6` bemenetre (külön sorokban):
+
+  ```
+  C	F
+  0.0	32.0
+  100.0	212.0
+  36.6	97.9
+  ```
+
+  (A két oszlop közt tabulátor áll.)
+
+  Tipp: a tabulátor jele a `\t`; mindkét értéket egy tizedessel formázd (`.1f` / `F1`), C#-ban `CultureInfo.InvariantCulture` kell.
+starter_code:
+  python: |
+    n = int(input())
+    print("C\tF")
+    # innen folytasd
+  csharp: |
+    using System;
+    using System.Globalization;
+
+    class Program
+    {
+        static void Main()
+        {
+            int n = int.Parse(Console.ReadLine());
+            Console.WriteLine("C\tF");
+            // innen folytasd
+        }
+    }
+sample_solutions:
+  python: |
+    n = int(input())
+    print("C\tF")
+    for i in range(n):
+        c = float(input())
+        f = c * 9 / 5 + 32
+        print(f"{c:.1f}\t{f:.1f}")
+  csharp: |
+    using System;
+    using System.Globalization;
+
+    class Program
+    {
+        static void Main()
+        {
+            int n = int.Parse(Console.ReadLine());
+            Console.WriteLine("C\tF");
+            for (int i = 0; i < n; i++)
+            {
+                double c = double.Parse(Console.ReadLine(), CultureInfo.InvariantCulture);
+                double f = c * 9 / 5 + 32;
+                Console.WriteLine(string.Format(CultureInfo.InvariantCulture, "{0:F1}\t{1:F1}", c, f));
+            }
+        }
+    }
+tests:
+  - { stdin: "3\n0\n100\n36.6\n", expected: "C\tF\n0.0\t32.0\n100.0\t212.0\n36.6\t97.9\n", hidden: false }
+  - { stdin: "1\n-40\n", expected: "C\tF\n-40.0\t-40.0\n", hidden: true }
+  - { stdin: "2\n21.5\n-10.5\n", expected: "C\tF\n21.5\t70.7\n-10.5\t13.1\n", hidden: true }
+  - { stdin: "2\n37\n15\n", expected: "C\tF\n37.0\t98.6\n15.0\t59.0\n", hidden: true }

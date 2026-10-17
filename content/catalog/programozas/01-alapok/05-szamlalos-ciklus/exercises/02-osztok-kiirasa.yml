@@ -1,0 +1,66 @@
+slug: osztok-kiirasa
+title: Osztók kiírása
+position: 1
+kind: code
+level: kozep
+difficulty: 2
+published: false
+allowed_languages: [python, csharp]
+description: |
+  Olvass be egy pozitív egész számot, és írd ki az összes osztóját növekvő sorrendben, mindegyiket külön sorba. Az 1 és maga a szám is osztó.
+
+  Példa: ha a bemenet `12`, a kimenet:
+
+  ```
+  1
+  2
+  3
+  4
+  6
+  12
+  ```
+
+  Tipp: menj végig 1-től `n`-ig, és minden számnál a `%` maradékkal döntsd el, hogy osztója-e `n`-nek.
+starter_code:
+  python: |
+    n = int(input())
+    # ide írd a megoldást
+  csharp: |
+    using System;
+
+    class Program
+    {
+        static void Main()
+        {
+            var n = int.Parse(Console.ReadLine());
+            // ide írd a megoldást
+        }
+    }
+sample_solutions:
+  python: |
+    n = int(input())
+    for i in range(1, n + 1):
+        if n % i == 0:
+            print(i)
+  csharp: |
+    using System;
+
+    class Program
+    {
+        static void Main()
+        {
+            var n = int.Parse(Console.ReadLine());
+            for (int i = 1; i <= n; i++)
+            {
+                if (n % i == 0)
+                {
+                    Console.WriteLine(i);
+                }
+            }
+        }
+    }
+tests:
+  - { stdin: "12\n", expected: "1\n2\n3\n4\n6\n12\n", hidden: false }
+  - { stdin: "1\n", expected: "1\n", hidden: true }
+  - { stdin: "7\n", expected: "1\n7\n", hidden: true }
+  - { stdin: "30\n", expected: "1\n2\n3\n5\n6\n10\n15\n30\n", hidden: true }

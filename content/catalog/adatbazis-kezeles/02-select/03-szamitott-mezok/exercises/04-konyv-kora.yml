@@ -1,0 +1,47 @@
+slug: konyv-kora
+title: Könyv kora
+position: 3
+kind: sql
+level: kozep
+difficulty: 3
+published: false
+allowed_languages: [sql]
+description: |
+  A számított mezőt szöveggel is kombinálhatjuk, külön oszlopban.
+
+  A `konyv` tábla:
+
+  | oszlop | típus |
+  |---|---|
+  | `id` | egész, elsődleges kulcs |
+  | `cim` | szöveg |
+  | `szerzo` | szöveg |
+  | `ev` | egész (a kiadás éve) |
+  | `oldal` | egész |
+  | `ar` | egész (Ft) |
+  | `mufaj` | szöveg |
+
+  Listázd ki a könyvek **címét** és a kiadás óta eltelt éveket `kor` néven, ahol a kor `2025 - ev`! Ezután még egy oszlop következzen: `cimke` néven az `szerzo`, egy kettőspont és szóköz (`: `) és a cím összefűzve, például `Nagy Peter: Aranykor`. Az oszlopok sorrendje: `cim`, `kor`, `cimke`. A sorok sorrendje nem számít.
+
+  Tipp: három oszlop: `cim`, `2025 - ev AS kor`, és `szerzo || ': ' || cim AS cimke`.
+starter_code:
+  sql: |
+    SELECT
+    FROM konyv;
+sample_solutions:
+  sql: |
+    SELECT cim, 2025 - ev AS kor, szerzo || ': ' || cim AS cimke
+    FROM konyv;
+tests:
+  - stdin: "CREATE TABLE konyv (id INTEGER PRIMARY KEY, cim TEXT, szerzo TEXT, ev INTEGER, oldal INTEGER, ar INTEGER, mufaj TEXT);\nINSERT INTO konyv VALUES\n(1, 'Tavoli partok', 'Varga Dora', 2017, 639, 2300, 'vers'),\n(2, 'Szeleso ter', 'Szabo Reka', 2010, 486, 4000, 'tortenelem'),\n(3, 'Csendes folyo', 'Szabo Reka', 1998, 429, 4300, 'mese'),\n(4, 'Kis kert', 'Szabo Reka', 2018, 290, 5100, 'mese'),\n(5, 'Hazak kozott', 'Toth Gabor', 1975, 420, 5500, 'regeny');\n"
+    expected: "cim,kor,cimke\nTavoli partok,8,Varga Dora: Tavoli partok\nSzeleso ter,15,Szabo Reka: Szeleso ter\nCsendes folyo,27,Szabo Reka: Csendes folyo\nKis kert,7,Szabo Reka: Kis kert\nHazak kozott,50,Toth Gabor: Hazak kozott\n"
+    hidden: false
+  - stdin: "CREATE TABLE konyv (id INTEGER PRIMARY KEY, cim TEXT, szerzo TEXT, ev INTEGER, oldal INTEGER, ar INTEGER, mufaj TEXT);\nINSERT INTO konyv VALUES\n(1, 'A hidak kora', 'Kelemen Bela', 2011, 202, 8500, 'tortenelem'),\n(2, 'Kozos ut', 'Szabo Reka', 2014, 157, 7300, 'regeny'),\n(3, 'Tavoli partok', 'Molnar Eszter', 2001, 217, 4700, 'tortenelem'),\n(4, 'Havas varos', 'Horvath Mate', 2012, 579, 6900, 'tortenelem'),\n(5, 'Hazak kozott', 'Varga Dora', 2000, 103, 2600, 'regeny'),\n(6, 'Hegyi ut', 'Varga Dora', 1998, 448, 8800, 'tortenelem'),\n(7, 'A regi malom', 'Kovacs Lilla', 1976, 333, 6200, 'regeny'),\n(8, 'Utolso vonat', 'Molnar Eszter', 1957, 352, 5500, 'vers');\n"
+    expected: "cim,kor,cimke\nA hidak kora,14,Kelemen Bela: A hidak kora\nKozos ut,11,Szabo Reka: Kozos ut\nTavoli partok,24,Molnar Eszter: Tavoli partok\nHavas varos,13,Horvath Mate: Havas varos\nHazak kozott,25,Varga Dora: Hazak kozott\nHegyi ut,27,Varga Dora: Hegyi ut\nA regi malom,49,Kovacs Lilla: A regi malom\nUtolso vonat,68,Molnar Eszter: Utolso vonat\n"
+    hidden: true
+  - stdin: "CREATE TABLE konyv (id INTEGER PRIMARY KEY, cim TEXT, szerzo TEXT, ev INTEGER, oldal INTEGER, ar INTEGER, mufaj TEXT);\nINSERT INTO konyv VALUES\n(1, 'A tenger fiai', 'Kelemen Bela', 2006, 120, 8100, 'mese'),\n(2, 'Fenyes napok', 'Nagy Peter', 1950, 663, 6100, 'regeny'),\n(3, 'Aranykor', 'Varga Dora', 1976, 328, 2800, 'tortenelem'),\n(4, 'A hidak kora', 'Molnar Eszter', 2000, 266, 3800, 'mese'),\n(5, 'Utolso vonat', 'Kovacs Lilla', 1961, 304, 6900, 'regeny'),\n(6, 'Az ejszaka ura', 'Varga Dora', 1969, 187, 5700, 'mese'),\n(7, 'Hosszu nyar', 'Molnar Eszter', 1975, 656, 3600, 'tortenelem'),\n(8, 'Szel ellen', 'Molnar Eszter', 2014, 461, 4500, 'mese'),\n(9, 'Kozos ut', 'Nagy Peter', 2009, 192, 4600, 'tortenelem'),\n(10, 'Hazak kozott', 'Varga Dora', 2000, 673, 2600, 'tortenelem');\n"
+    expected: "cim,kor,cimke\nA tenger fiai,19,Kelemen Bela: A tenger fiai\nFenyes napok,75,Nagy Peter: Fenyes napok\nAranykor,49,Varga Dora: Aranykor\nA hidak kora,25,Molnar Eszter: A hidak kora\nUtolso vonat,64,Kovacs Lilla: Utolso vonat\nAz ejszaka ura,56,Varga Dora: Az ejszaka ura\nHosszu nyar,50,Molnar Eszter: Hosszu nyar\nSzel ellen,11,Molnar Eszter: Szel ellen\nKozos ut,16,Nagy Peter: Kozos ut\nHazak kozott,25,Varga Dora: Hazak kozott\n"
+    hidden: true
+  - stdin: "CREATE TABLE konyv (id INTEGER PRIMARY KEY, cim TEXT, szerzo TEXT, ev INTEGER, oldal INTEGER, ar INTEGER, mufaj TEXT);\nINSERT INTO konyv VALUES\n(1, 'Esti mesek', 'Kelemen Bela', 1988, 411, 6200, 'mese'),\n(2, 'Az ejszaka ura', 'Szabo Reka', 1998, 621, 9000, 'vers'),\n(3, 'Szel ellen', 'Kelemen Bela', 2011, 189, 7700, 'regeny'),\n(4, 'Havas varos', 'Szabo Reka', 2007, 272, 4500, 'vers'),\n(5, 'Sotet erdo', 'Kovacs Lilla', 1985, 263, 7600, 'regeny'),\n(6, 'A harang hangja', 'Horvath Mate', 1985, 92, 3600, 'vers'),\n(7, 'Zold ablak', 'Molnar Eszter', 1956, 361, 5100, 'tortenelem'),\n(8, 'Hazak kozott', 'Kelemen Bela', 2006, 144, 3500, 'vers'),\n(9, 'Csendes folyo', 'Kelemen Bela', 2009, 179, 7100, 'vers'),\n(10, 'A tenger fiai', 'Molnar Eszter', 1990, 313, 5900, 'regeny'),\n(11, 'A kert titka', 'Nagy Peter', 1988, 151, 2100, 'regeny'),\n(12, 'Nyari vihar', 'Molnar Eszter', 1960, 472, 4000, 'tortenelem');\n"
+    expected: "cim,kor,cimke\nEsti mesek,37,Kelemen Bela: Esti mesek\nAz ejszaka ura,27,Szabo Reka: Az ejszaka ura\nSzel ellen,14,Kelemen Bela: Szel ellen\nHavas varos,18,Szabo Reka: Havas varos\nSotet erdo,40,Kovacs Lilla: Sotet erdo\nA harang hangja,40,Horvath Mate: A harang hangja\nZold ablak,69,Molnar Eszter: Zold ablak\nHazak kozott,19,Kelemen Bela: Hazak kozott\nCsendes folyo,16,Kelemen Bela: Csendes folyo\nA tenger fiai,35,Molnar Eszter: A tenger fiai\nA kert titka,37,Nagy Peter: A kert titka\nNyari vihar,65,Molnar Eszter: Nyari vihar\n"
+    hidden: true

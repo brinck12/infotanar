@@ -1,0 +1,151 @@
+slug: fuggvenyekre-bontott-program
+title: Függvényekre bontott program
+position: 3
+kind: code
+level: kozep
+difficulty: 3
+published: false
+allowed_languages: [python, csharp]
+description: |
+  Az első sorban egy `N` egész szám áll (`N >= 1`), utána `N` egész szám következik, mindegyik külön sorban. Írd ki az összegüket és a legnagyobbat:
+
+  ```
+  Osszeg: <összeg>
+  Legnagyobb: <legnagyobb>
+  ```
+
+  A programot bontsd három függvényre: `beolvas(n)` (listát ad vissza), `osszeg(lista)` és `legnagyobb(lista)`. A főprogram csak hívja őket, és kiír. A legnagyobb elemet saját ciklussal keresd, ne a beépített `max` / `Max` használatával.
+
+  Példa: a `4`, `3`, `-1`, `9`, `4` bemenetre (külön sorokban):
+
+  ```
+  Osszeg: 15
+  Legnagyobb: 9
+  ```
+
+  Tipp: a legnagyobb keresésénél a lista első eleméből indulj ki, és minden további elemnél cseréld le, ha az nagyobb.
+starter_code:
+  python: |
+    def beolvas(n):
+        szamok = []
+        # ide írd a beolvasást
+        return szamok
+
+    def osszeg(lista):
+        # ide írd az összegzést
+        return 0
+
+    def legnagyobb(lista):
+        # ide írd a keresést
+        return 0
+
+    n = int(input())
+    # innen folytasd
+  csharp: |
+    using System;
+    using System.Collections.Generic;
+
+    class Program
+    {
+        static List<int> Beolvas(int n)
+        {
+            List<int> szamok = new List<int>();
+            // ide írd a beolvasást
+            return szamok;
+        }
+
+        static int Osszeg(List<int> lista)
+        {
+            // ide írd az összegzést
+            return 0;
+        }
+
+        static int Legnagyobb(List<int> lista)
+        {
+            // ide írd a keresést
+            return 0;
+        }
+
+        static void Main()
+        {
+            int n = int.Parse(Console.ReadLine());
+            // innen folytasd
+        }
+    }
+sample_solutions:
+  python: |
+    def beolvas(n):
+        szamok = []
+        for i in range(n):
+            szamok.append(int(input()))
+        return szamok
+
+    def osszeg(lista):
+        s = 0
+        for x in lista:
+            s = s + x
+        return s
+
+    def legnagyobb(lista):
+        m = lista[0]
+        for x in lista:
+            if x > m:
+                m = x
+        return m
+
+    n = int(input())
+    adatok = beolvas(n)
+    print("Osszeg:", osszeg(adatok))
+    print("Legnagyobb:", legnagyobb(adatok))
+  csharp: |
+    using System;
+    using System.Collections.Generic;
+
+    class Program
+    {
+        static List<int> Beolvas(int n)
+        {
+            List<int> szamok = new List<int>();
+            for (int i = 0; i < n; i++)
+            {
+                szamok.Add(int.Parse(Console.ReadLine()));
+            }
+            return szamok;
+        }
+
+        static int Osszeg(List<int> lista)
+        {
+            int s = 0;
+            foreach (int x in lista)
+            {
+                s = s + x;
+            }
+            return s;
+        }
+
+        static int Legnagyobb(List<int> lista)
+        {
+            int m = lista[0];
+            foreach (int x in lista)
+            {
+                if (x > m)
+                {
+                    m = x;
+                }
+            }
+            return m;
+        }
+
+        static void Main()
+        {
+            int n = int.Parse(Console.ReadLine());
+            List<int> adatok = Beolvas(n);
+            Console.WriteLine("Osszeg: " + Osszeg(adatok));
+            Console.WriteLine("Legnagyobb: " + Legnagyobb(adatok));
+        }
+    }
+tests:
+  - { stdin: "4\n3\n-1\n9\n4\n", expected: "Osszeg: 15\nLegnagyobb: 9\n", hidden: false }
+  - { stdin: "1\n-7\n", expected: "Osszeg: -7\nLegnagyobb: -7\n", hidden: true }
+  - { stdin: "3\n-5\n-2\n-9\n", expected: "Osszeg: -16\nLegnagyobb: -2\n", hidden: true }
+  - { stdin: "5\n1\n2\n3\n4\n5\n", expected: "Osszeg: 15\nLegnagyobb: 5\n", hidden: true }

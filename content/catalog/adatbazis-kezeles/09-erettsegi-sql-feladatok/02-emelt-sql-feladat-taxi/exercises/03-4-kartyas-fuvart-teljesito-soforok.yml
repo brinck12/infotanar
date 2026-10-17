@@ -1,0 +1,208 @@
+slug: 4-kartyas-fuvart-teljesito-soforok
+title: 4. Kártyás fuvart teljesítő sofőrök
+position: 2
+kind: sql
+level: emelt
+difficulty: 3
+published: false
+allowed_languages:
+- sql
+description: |
+  Egy taxitársaság nyilvántartása két táblából áll.
+
+  A `sofor` tábla a sofőröket tartalmazza:
+
+  | oszlop | típus |
+  |---|---|
+  | `id` | egész, elsődleges kulcs |
+  | `nev` | szöveg |
+  | `szuletes` | egész, a születési év |
+  | `angol` | egész: 1, ha beszél angolul, különben 0 |
+  | `nemet` | egész: 1, ha beszél németül, különben 0 |
+  | `engedely_ev` | egész, a taxis engedély megszerzésének éve |
+
+  A `fuvar` tábla a megtett fuvarokat:
+
+  | oszlop | típus |
+  |---|---|
+  | `id` | egész, elsődleges kulcs |
+  | `sofor_id` | egész, a `sofor` tábla `id` oszlopára mutat |
+  | `rendszam` | szöveg, az autó rendszáma (pl. `KMB-217`) |
+  | `datum` | szöveg (ÉÉÉÉ-HH-NN) |
+  | `km` | egész, a megtett út kilométerben |
+  | `ar` | egész, a fuvar ára forintban |
+  | `fizetes` | szöveg: `kartya` vagy `keszpenz` |
+
+  **4. feladat.** Adja meg lekérdezéssel azoknak a sofőröknek a nevét (**nev**), akiknek volt **legalább egy kártyával fizetett fuvaruk**! Minden név csak egyszer szerepeljen, akkor is, ha a sofőrnek több ilyen fuvara volt!
+starter_code:
+  sql: "SELECT \nFROM sofor INNER JOIN fuvar ON \nWHERE ;\n"
+sample_solutions:
+  sql: |
+    SELECT DISTINCT sofor.nev
+    FROM sofor INNER JOIN fuvar ON fuvar.sofor_id = sofor.id
+    WHERE fuvar.fizetes = 'kartya';
+tests:
+- stdin: |
+    CREATE TABLE sofor (id INTEGER PRIMARY KEY, nev TEXT, szuletes INTEGER, angol INTEGER, nemet INTEGER, engedely_ev INTEGER);
+    INSERT INTO sofor VALUES
+    (1, 'Toth Reka', 1975, 1, 0, 2007),
+    (2, 'Toth Viktor', 1984, 0, 1, 2000),
+    (3, 'Horvath Norbert', 1978, 0, 1, 2014),
+    (4, 'Molnar Imre', 1987, 0, 1, 2019),
+    (5, 'Toth Hanna', 1988, 0, 0, 2013);
+    CREATE TABLE fuvar (id INTEGER PRIMARY KEY, sofor_id INTEGER, rendszam TEXT, datum TEXT, km INTEGER, ar INTEGER, fizetes TEXT);
+    INSERT INTO fuvar VALUES
+    (1, 4, 'KME-332', '2026-03-06', 14, 4800, 'kartya'),
+    (2, 5, 'KMA-164', '2026-03-04', 16, 6000, 'keszpenz'),
+    (3, 2, 'KMA-344', '2026-03-01', 9, 3900, 'keszpenz'),
+    (4, 1, 'KMA-271', '2026-03-04', 3, 1900, 'kartya'),
+    (5, 3, 'TXD-173', '2026-03-06', 10, 4800, 'kartya'),
+    (6, 4, 'KME-332', '2026-03-02', 6, 3200, 'kartya'),
+    (7, 2, 'KMA-344', '2026-03-07', 12, 5600, 'kartya'),
+    (8, 5, 'KMA-164', '2026-03-01', 6, 3500, 'kartya'),
+    (9, 4, 'KME-332', '2026-03-07', 13, 4600, 'keszpenz'),
+    (10, 3, 'TXD-173', '2026-03-03', 15, 5100, 'kartya'),
+    (11, 5, 'KMA-164', '2026-03-05', 24, 8600, 'kartya'),
+    (12, 4, 'KME-332', '2026-03-04', 3, 2600, 'keszpenz'),
+    (13, 1, 'KMA-271', '2026-03-02', 5, 2200, 'kartya'),
+    (14, 3, 'TXD-173', '2026-03-07', 8, 2900, 'kartya');
+  expected: |
+    nev
+    Molnar Imre
+    Toth Reka
+    Horvath Norbert
+    Toth Viktor
+    Toth Hanna
+  hidden: false
+- stdin: |
+    CREATE TABLE sofor (id INTEGER PRIMARY KEY, nev TEXT, szuletes INTEGER, angol INTEGER, nemet INTEGER, engedely_ev INTEGER);
+    INSERT INTO sofor VALUES
+    (1, 'Balogh Dalma', 1977, 1, 1, 2002),
+    (2, 'Nagy Anna', 1973, 1, 1, 2011),
+    (3, 'Horvath Reka', 1971, 1, 0, 2005),
+    (4, 'Horvath Kata', 1995, 1, 1, 2022),
+    (5, 'Balogh Eszter', 1972, 1, 0, 2008),
+    (6, 'Kiss Zsofia', 1992, 1, 0, 2018);
+    CREATE TABLE fuvar (id INTEGER PRIMARY KEY, sofor_id INTEGER, rendszam TEXT, datum TEXT, km INTEGER, ar INTEGER, fizetes TEXT);
+    INSERT INTO fuvar VALUES
+    (1, 3, 'ABF-262', '2026-03-06', 25, 8000, 'keszpenz'),
+    (2, 4, 'ABD-174', '2026-03-06', 5, 2900, 'kartya'),
+    (3, 1, 'KMC-228', '2026-03-07', 21, 6800, 'kartya'),
+    (4, 6, 'KME-388', '2026-03-08', 14, 5200, 'kartya'),
+    (5, 2, 'KMB-197', '2026-03-04', 22, 7200, 'keszpenz'),
+    (6, 2, 'KMB-197', '2026-03-07', 16, 6100, 'kartya'),
+    (7, 3, 'ABF-262', '2026-03-04', 6, 3000, 'kartya'),
+    (8, 6, 'KME-388', '2026-03-07', 13, 4800, 'kartya'),
+    (9, 4, 'ABD-174', '2026-03-04', 15, 5500, 'kartya'),
+    (10, 2, 'KMB-197', '2026-03-02', 6, 2300, 'kartya'),
+    (11, 3, 'ABF-262', '2026-03-05', 5, 2700, 'kartya'),
+    (12, 5, 'KMB-178', '2026-03-06', 13, 5100, 'kartya'),
+    (13, 6, 'KME-388', '2026-03-01', 25, 9100, 'kartya'),
+    (14, 1, 'KMC-228', '2026-03-06', 22, 7900, 'kartya'),
+    (15, 5, 'KMB-178', '2026-03-03', 8, 3400, 'kartya'),
+    (16, 4, 'ABD-174', '2026-03-04', 14, 6200, 'kartya'),
+    (17, 2, 'KMB-197', '2026-03-08', 12, 5400, 'kartya'),
+    (18, 3, 'ABF-262', '2026-03-06', 6, 3400, 'keszpenz'),
+    (19, 4, 'ABD-174', '2026-03-08', 9, 4300, 'kartya'),
+    (20, 1, 'KMC-228', '2026-03-01', 9, 3400, 'kartya'),
+    (21, 1, 'KMC-228', '2026-03-06', 18, 6900, 'keszpenz');
+  expected: |
+    nev
+    Horvath Kata
+    Balogh Dalma
+    Kiss Zsofia
+    Nagy Anna
+    Horvath Reka
+    Balogh Eszter
+  hidden: true
+- stdin: |
+    CREATE TABLE sofor (id INTEGER PRIMARY KEY, nev TEXT, szuletes INTEGER, angol INTEGER, nemet INTEGER, engedely_ev INTEGER);
+    INSERT INTO sofor VALUES
+    (1, 'Kovacs Gabor', 1970, 1, 1, 2003),
+    (2, 'Balogh Dalma', 1995, 1, 0, 2003),
+    (3, 'Molnar Zsofia', 1976, 1, 1, 2013),
+    (4, 'Kiss Gergo', 1993, 1, 0, 2002),
+    (5, 'Kiss Maria', 1991, 0, 1, 2007),
+    (6, 'Toth Anna', 1970, 1, 0, 2018),
+    (7, 'Varga Bela', 1975, 0, 0, 2018);
+    CREATE TABLE fuvar (id INTEGER PRIMARY KEY, sofor_id INTEGER, rendszam TEXT, datum TEXT, km INTEGER, ar INTEGER, fizetes TEXT);
+    INSERT INTO fuvar VALUES
+    (1, 1, 'KMB-223', '2026-03-01', 13, 4600, 'kartya'),
+    (2, 3, 'ABB-229', '2026-03-03', 20, 7200, 'kartya'),
+    (3, 7, 'TXD-262', '2026-03-07', 16, 6300, 'kartya'),
+    (4, 7, 'TXD-262', '2026-03-05', 16, 6500, 'kartya'),
+    (5, 5, 'KMC-121', '2026-03-03', 23, 8100, 'keszpenz'),
+    (6, 2, 'KMB-395', '2026-03-07', 16, 5400, 'keszpenz'),
+    (7, 4, 'TXA-277', '2026-03-06', 20, 8000, 'kartya'),
+    (8, 5, 'KMC-121', '2026-03-03', 10, 4600, 'kartya'),
+    (9, 4, 'TXA-277', '2026-03-04', 8, 4400, 'kartya'),
+    (10, 3, 'ABB-229', '2026-03-01', 13, 4800, 'keszpenz'),
+    (11, 1, 'KMB-223', '2026-03-05', 21, 7600, 'kartya'),
+    (12, 6, 'KMA-239', '2026-03-04', 16, 6600, 'keszpenz'),
+    (13, 7, 'TXD-262', '2026-03-07', 16, 6000, 'keszpenz'),
+    (14, 6, 'KMA-239', '2026-03-07', 19, 6600, 'keszpenz'),
+    (15, 7, 'TXD-262', '2026-03-07', 15, 6200, 'kartya'),
+    (16, 2, 'KMB-395', '2026-03-03', 20, 7900, 'keszpenz'),
+    (17, 6, 'KMA-239', '2026-03-08', 13, 5800, 'kartya'),
+    (18, 5, 'KMC-121', '2026-03-01', 21, 8000, 'keszpenz'),
+    (19, 2, 'KMB-395', '2026-03-05', 5, 2100, 'keszpenz'),
+    (20, 6, 'KMA-239', '2026-03-04', 2, 2100, 'kartya'),
+    (21, 3, 'ABB-229', '2026-03-03', 6, 2600, 'kartya'),
+    (22, 2, 'KMB-395', '2026-03-06', 22, 8000, 'keszpenz');
+  expected: |
+    nev
+    Kovacs Gabor
+    Molnar Zsofia
+    Varga Bela
+    Kiss Gergo
+    Kiss Maria
+    Toth Anna
+  hidden: true
+- stdin: |
+    CREATE TABLE sofor (id INTEGER PRIMARY KEY, nev TEXT, szuletes INTEGER, angol INTEGER, nemet INTEGER, engedely_ev INTEGER);
+    INSERT INTO sofor VALUES
+    (1, 'Balogh Lilla', 1988, 0, 1, 2023),
+    (2, 'Kiss Zsofia', 1972, 1, 1, 2017),
+    (3, 'Nagy Bence', 1976, 1, 0, 2002),
+    (4, 'Horvath Norbert', 1998, 0, 1, 2019),
+    (5, 'Balogh Orsolya', 1983, 0, 0, 2012),
+    (6, 'Molnar Csaba', 1974, 0, 0, 2000),
+    (7, 'Kiss Anna', 2000, 1, 1, 2013),
+    (8, 'Farkas Hanna', 1970, 1, 1, 2016);
+    CREATE TABLE fuvar (id INTEGER PRIMARY KEY, sofor_id INTEGER, rendszam TEXT, datum TEXT, km INTEGER, ar INTEGER, fizetes TEXT);
+    INSERT INTO fuvar VALUES
+    (1, 4, 'ABF-180', '2026-03-05', 20, 7500, 'keszpenz'),
+    (2, 1, 'KMB-272', '2026-03-08', 19, 6600, 'keszpenz'),
+    (3, 8, 'ABD-136', '2026-03-02', 12, 4400, 'keszpenz'),
+    (4, 8, 'ABD-136', '2026-03-07', 10, 4200, 'kartya'),
+    (5, 4, 'ABF-180', '2026-03-04', 17, 6000, 'kartya'),
+    (6, 2, 'KMC-178', '2026-03-04', 23, 8600, 'kartya'),
+    (7, 1, 'KMB-272', '2026-03-04', 15, 6200, 'kartya'),
+    (8, 6, 'ABC-294', '2026-03-06', 7, 3300, 'kartya'),
+    (9, 7, 'TXC-174', '2026-03-01', 9, 3400, 'kartya'),
+    (10, 4, 'ABF-180', '2026-03-03', 17, 6500, 'kartya'),
+    (11, 3, 'TXF-314', '2026-03-01', 8, 3000, 'kartya'),
+    (12, 5, 'ABB-313', '2026-03-02', 11, 4200, 'keszpenz'),
+    (13, 5, 'ABB-313', '2026-03-07', 2, 1800, 'kartya'),
+    (14, 5, 'ABB-313', '2026-03-08', 22, 7400, 'keszpenz'),
+    (15, 6, 'ABC-294', '2026-03-04', 10, 4200, 'kartya'),
+    (16, 3, 'TXF-314', '2026-03-07', 14, 5300, 'kartya'),
+    (17, 8, 'ABD-136', '2026-03-05', 3, 1900, 'keszpenz'),
+    (18, 4, 'ABF-180', '2026-03-08', 12, 4400, 'kartya'),
+    (19, 6, 'ABC-294', '2026-03-08', 14, 5400, 'keszpenz'),
+    (20, 7, 'TXC-174', '2026-03-03', 3, 1800, 'kartya'),
+    (21, 7, 'TXC-174', '2026-03-02', 19, 7500, 'kartya'),
+    (22, 3, 'TXF-314', '2026-03-03', 9, 3700, 'kartya'),
+    (23, 5, 'ABB-313', '2026-03-08', 23, 8700, 'kartya'),
+    (24, 2, 'KMC-178', '2026-03-02', 12, 5100, 'kartya');
+  expected: |
+    nev
+    Farkas Hanna
+    Horvath Norbert
+    Kiss Zsofia
+    Balogh Lilla
+    Molnar Csaba
+    Kiss Anna
+    Nagy Bence
+    Balogh Orsolya
+  hidden: true

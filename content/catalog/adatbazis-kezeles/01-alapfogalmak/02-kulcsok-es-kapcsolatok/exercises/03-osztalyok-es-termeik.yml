@@ -1,0 +1,44 @@
+slug: osztalyok-es-termeik
+title: Osztályok és termeik
+position: 2
+kind: sql
+level: kozep
+difficulty: 1
+published: false
+allowed_languages: [sql]
+description: |
+  Az `osztaly` tábla minden osztályról tárolja a jelét és a termet, ahol tanulnak. Az `id` itt is az elsődleges kulcs; a `diak` táblában egy `osztaly_id` idegen kulcs hivatkozna rá.
+
+  A `osztaly` tábla:
+
+  | oszlop | típus |
+  |---|---|
+  | `id` | egész, elsődleges kulcs |
+  | `jel` | szöveg |
+  | `terem` | egész |
+  | `letszam` | egész |
+
+  Listázd ki az osztályok **jelét és termét**, ebben a sorrendben! A sorok sorrendje nem számít.
+
+  Tipp: az `id` és a `letszam` mezőre most nincs szükség, ne kérd le őket.
+starter_code:
+  sql: |
+    SELECT
+    FROM osztaly;
+sample_solutions:
+  sql: |
+    SELECT jel, terem
+    FROM osztaly;
+tests:
+  - stdin: "CREATE TABLE osztaly (id INTEGER PRIMARY KEY, jel TEXT, terem INTEGER, letszam INTEGER);\nINSERT INTO osztaly VALUES\n(1, '10.B', 111, 19),\n(2, '12.A', 129, 28),\n(3, '10.A', 107, 20);\n"
+    expected: "jel,terem\n10.B,111\n12.A,129\n10.A,107\n"
+    hidden: false
+  - stdin: "CREATE TABLE osztaly (id INTEGER PRIMARY KEY, jel TEXT, terem INTEGER, letszam INTEGER);\nINSERT INTO osztaly VALUES\n(1, '10.A', 124, 26),\n(2, '9.B', 114, 31),\n(3, '10.B', 129, 31),\n(4, '11.B', 123, 28),\n(5, '9.A', 117, 19);\n"
+    expected: "jel,terem\n10.A,124\n9.B,114\n10.B,129\n11.B,123\n9.A,117\n"
+    hidden: true
+  - stdin: "CREATE TABLE osztaly (id INTEGER PRIMARY KEY, jel TEXT, terem INTEGER, letszam INTEGER);\nINSERT INTO osztaly VALUES\n(1, '12.A', 108, 19),\n(2, '9.A', 116, 23),\n(3, '11.B', 105, 27),\n(4, '10.A', 104, 26),\n(5, '9.B', 112, 18),\n(6, '10.B', 110, 20);\n"
+    expected: "jel,terem\n12.A,108\n9.A,116\n11.B,105\n10.A,104\n9.B,112\n10.B,110\n"
+    hidden: true
+  - stdin: "CREATE TABLE osztaly (id INTEGER PRIMARY KEY, jel TEXT, terem INTEGER, letszam INTEGER);\nINSERT INTO osztaly VALUES\n(1, '9.A', 122, 27),\n(2, '12.A', 124, 30),\n(3, '10.A', 107, 20),\n(4, '11.B', 119, 28),\n(5, '9.B', 116, 19),\n(6, '11.A', 108, 27),\n(7, '10.B', 102, 28);\n"
+    expected: "jel,terem\n9.A,122\n12.A,124\n10.A,107\n11.B,119\n9.B,116\n11.A,108\n10.B,102\n"
+    hidden: true

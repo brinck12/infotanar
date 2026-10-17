@@ -1,0 +1,134 @@
+slug: kifuto-termekek
+title: Kifutó termékek
+position: 1
+kind: sql
+level: kozep
+difficulty: 2
+published: false
+allowed_languages:
+- sql
+description: |
+  A `termek` tábla:
+
+  | oszlop | típus |
+  |---|---|
+  | `id` | egész, elsődleges kulcs |
+  | `nev` | szöveg |
+  | `kategoria` | szöveg |
+  | `ar` | egész (Ft) |
+  | `keszlet` | egész (darab) |
+
+  Azokat a termékeket, amelyekből **legfeljebb 5 darab** van készleten, sorold át a `kifuto` kategóriába, és az áruk **csökkenjen 100 Ft-tal**. Egyetlen `UPDATE` utasítással, két oszlopot módosítva oldd meg!
+
+  A kód végén álló `SELECT` sort **ne töröld és ne módosítsd**: az mutatja meg a tábla állapotát módosítás után, és a rendszer ezt az eredményt hasonlítja az elvárthoz. A saját utasításodat a `SELECT` **elé** írd, pontosvesszővel lezárva.
+
+  Tipp: több oszlopot vesszővel elválasztva állíthatsz: `SET kategoria = ..., ar = ...`. A jobb oldalon az `ar` még a régi értéket jelenti.
+starter_code:
+  sql: |
+    -- Ide írd az UPDATE utasítást.
+
+    SELECT id, nev, kategoria, ar, keszlet FROM termek ORDER BY id;
+sample_solutions:
+  sql: |
+    UPDATE termek SET kategoria = 'kifuto', ar = ar - 100 WHERE keszlet <= 5;
+
+    SELECT id, nev, kategoria, ar, keszlet FROM termek ORDER BY id;
+tests:
+- stdin: |
+    CREATE TABLE termek (id INTEGER PRIMARY KEY, nev TEXT, kategoria TEXT, ar INTEGER, keszlet INTEGER);
+    INSERT INTO termek VALUES
+    (1, 'Kefir', 'tej', 1760, 0),
+    (2, 'Kifli', 'pek', 600, 37),
+    (3, 'Sajt', 'tej', 170, 4),
+    (4, 'Pogacsa', 'pek', 1930, 32),
+    (5, 'Csirkemell', 'hus', 1980, 40),
+    (6, 'Paradicsom', 'zold', 1970, 33),
+    (7, 'Szalami', 'hus', 140, 10),
+    (8, 'Paprika', 'zold', 1720, 7);
+  expected: |
+    id,nev,kategoria,ar,keszlet
+    1,Kefir,kifuto,1660,0
+    2,Kifli,pek,600,37
+    3,Sajt,kifuto,70,4
+    4,Pogacsa,pek,1930,32
+    5,Csirkemell,hus,1980,40
+    6,Paradicsom,zold,1970,33
+    7,Szalami,hus,140,10
+    8,Paprika,zold,1720,7
+  hidden: false
+- stdin: |
+    CREATE TABLE termek (id INTEGER PRIMARY KEY, nev TEXT, kategoria TEXT, ar INTEGER, keszlet INTEGER);
+    INSERT INTO termek VALUES
+    (1, 'Tej', 'tej', 1280, 17),
+    (2, 'Banan', 'zold', 1740, 0),
+    (3, 'Kefir', 'tej', 2470, 23),
+    (4, 'Szalami', 'hus', 1330, 0),
+    (5, 'Korte', 'zold', 870, 23),
+    (6, 'Alma', 'zold', 1300, 11),
+    (7, 'Paradicsom', 'zold', 1280, 3),
+    (8, 'Parizer', 'hus', 1310, 40),
+    (9, 'Csirkemell', 'hus', 2130, 0),
+    (10, 'Sajt', 'tej', 1430, 0);
+  expected: |
+    id,nev,kategoria,ar,keszlet
+    1,Tej,tej,1280,17
+    2,Banan,kifuto,1640,0
+    3,Kefir,tej,2470,23
+    4,Szalami,kifuto,1230,0
+    5,Korte,zold,870,23
+    6,Alma,zold,1300,11
+    7,Paradicsom,kifuto,1180,3
+    8,Parizer,hus,1310,40
+    9,Csirkemell,kifuto,2030,0
+    10,Sajt,kifuto,1330,0
+  hidden: true
+- stdin: |
+    CREATE TABLE termek (id INTEGER PRIMARY KEY, nev TEXT, kategoria TEXT, ar INTEGER, keszlet INTEGER);
+    INSERT INTO termek VALUES
+    (1, 'Alma', 'zold', 1310, 0),
+    (2, 'Sonka', 'hus', 2430, 25),
+    (3, 'Vaj', 'tej', 640, 24),
+    (4, 'Kenyer', 'pek', 1760, 39),
+    (5, 'Paradicsom', 'zold', 160, 33),
+    (6, 'Joghurt', 'tej', 760, 12),
+    (7, 'Szalami', 'hus', 1180, 29);
+  expected: |
+    id,nev,kategoria,ar,keszlet
+    1,Alma,kifuto,1210,0
+    2,Sonka,hus,2430,25
+    3,Vaj,tej,640,24
+    4,Kenyer,pek,1760,39
+    5,Paradicsom,zold,160,33
+    6,Joghurt,tej,760,12
+    7,Szalami,hus,1180,29
+  hidden: true
+- stdin: |
+    CREATE TABLE termek (id INTEGER PRIMARY KEY, nev TEXT, kategoria TEXT, ar INTEGER, keszlet INTEGER);
+    INSERT INTO termek VALUES
+    (1, 'Paprika', 'zold', 2100, 24),
+    (2, 'Vaj', 'tej', 1890, 8),
+    (3, 'Parizer', 'hus', 1350, 0),
+    (4, 'Joghurt', 'tej', 1640, 0),
+    (5, 'Zsemle', 'pek', 1710, 39),
+    (6, 'Paradicsom', 'zold', 520, 10),
+    (7, 'Szalami', 'hus', 2340, 14),
+    (8, 'Banan', 'zold', 990, 1),
+    (9, 'Alma', 'zold', 2110, 2),
+    (10, 'Sonka', 'hus', 150, 0),
+    (11, 'Kenyer', 'pek', 1630, 38),
+    (12, 'Csirkemell', 'hus', 690, 36);
+  expected: |
+    id,nev,kategoria,ar,keszlet
+    1,Paprika,zold,2100,24
+    2,Vaj,tej,1890,8
+    3,Parizer,kifuto,1250,0
+    4,Joghurt,kifuto,1540,0
+    5,Zsemle,pek,1710,39
+    6,Paradicsom,zold,520,10
+    7,Szalami,hus,2340,14
+    8,Banan,kifuto,890,1
+    9,Alma,kifuto,2010,2
+    10,Sonka,kifuto,50,0
+    11,Kenyer,pek,1630,38
+    12,Csirkemell,hus,690,36
+  hidden: true

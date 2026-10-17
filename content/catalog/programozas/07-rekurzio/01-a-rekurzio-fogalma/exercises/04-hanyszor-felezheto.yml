@@ -1,0 +1,72 @@
+slug: hanyszor-felezheto
+title: "Hányszor felezhető"
+position: 3
+kind: code
+level: emelt
+difficulty: 3
+published: false
+allowed_languages: [python, csharp]
+description: |
+  Olvass be egy `N` pozitív egész számot. Hányszor lehet egész osztással kettővel elosztani, amíg az eredmény 1 vagy kisebb lesz? Számold ki rekurzív függvénnyel.
+
+  A leírás: `lepes(n)` értéke 0, ha `n ≤ 1`; különben `1 + lepes(n osztva 2-vel, egészrész)`.
+
+  Példa: `N = 8` esetén `8 → 4 → 2 → 1`, tehát 3 lépés, a kimenet `3`. `N = 10` esetén `10 → 5 → 2 → 1`, a kimenet `3`.
+
+  Tipp: Pythonban az egész osztás `//`, C#-ban két egész szám `/` jele egész osztás.
+starter_code:
+  python: |
+    def lepes(n):
+        # TODO
+        pass
+
+    print(lepes(int(input())))
+  csharp: |
+    using System;
+
+    class Program
+    {
+        static int Lepes(int n)
+        {
+            // TODO
+            return 0;
+        }
+
+        static void Main()
+        {
+            Console.WriteLine(Lepes(int.Parse(Console.ReadLine())));
+        }
+    }
+sample_solutions:
+  python: |
+    def lepes(n):
+        if n <= 1:
+            return 0
+        return 1 + lepes(n // 2)
+
+    print(lepes(int(input())))
+  csharp: |
+    using System;
+
+    class Program
+    {
+        static int Lepes(int n)
+        {
+            if (n <= 1)
+            {
+                return 0;
+            }
+            return 1 + Lepes(n / 2);
+        }
+
+        static void Main()
+        {
+            Console.WriteLine(Lepes(int.Parse(Console.ReadLine())));
+        }
+    }
+tests:
+  - { stdin: "8\n", expected: "3\n", hidden: false }
+  - { stdin: "1\n", expected: "0\n", hidden: true }
+  - { stdin: "10\n", expected: "3\n", hidden: true }
+  - { stdin: "1000000\n", expected: "19\n", hidden: true }
+  - { stdin: "2\n", expected: "1\n", hidden: true }

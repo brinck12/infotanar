@@ -1,0 +1,134 @@
+slug: raktari-lekerdezes
+title: "Raktári lekérdezés"
+position: 1
+kind: code
+level: emelt
+difficulty: 3
+published: false
+allowed_languages: [python, csharp]
+description: |
+  A raktár készlete: az első sor a tételek száma (N, legalább 1), majd N sor: `cikkszam;db;egysegar` (a cikkszámok különbözők; a darabszám és az ár egész szám). Ezután egy sor a lekérdezések számával (M), majd M sor, mindegyikben egy cikkszám.
+
+  Minden lekérdezésre írj egy sort: `cikkszam: DB db, AR Ft/db`, vagy ha nincs ilyen cikk, `cikkszam: nincs`.
+
+  Példa bemenet:
+
+  ```
+  3
+  1042;12;350
+  0007;5;1200
+  2210;0;99
+  3
+  0007
+  1042
+  9999
+  ```
+
+  Kimenet:
+
+  ```
+  0007: 5 db, 1200 Ft/db
+  1042: 12 db, 350 Ft/db
+  9999: nincs
+  ```
+
+  Tipp: a cikkszám legyen szöveg (az elején lévő nullák számítanak), és szótárban tárold: kulcs a cikkszám, érték a rekord.
+starter_code:
+  python: |
+    from dataclasses import dataclass
+
+    @dataclass
+    class Cikk:
+        szam: str
+        db: int
+        ar: int
+
+    n = int(input())
+    keszlet = {}
+    # töltsd fel a szótárat, majd válaszolj a lekérdezésekre
+  csharp: |
+    using System;
+    using System.Collections.Generic;
+
+    class Cikk
+    {
+        public string Szam;
+        public int Db;
+        public int Ar;
+    }
+
+    class Program
+    {
+        static void Main()
+        {
+            int n = int.Parse(Console.ReadLine());
+            var keszlet = new Dictionary<string, Cikk>();
+            // töltsd fel a szótárat, majd válaszolj a lekérdezésekre
+        }
+    }
+sample_solutions:
+  python: |
+    from dataclasses import dataclass
+
+    @dataclass
+    class Cikk:
+        szam: str
+        db: int
+        ar: int
+
+    n = int(input())
+    keszlet = {}
+    for _ in range(n):
+        resz = input().split(";")
+        keszlet[resz[0]] = Cikk(resz[0], int(resz[1]), int(resz[2]))
+    m = int(input())
+    for _ in range(m):
+        kulcs = input()
+        if kulcs in keszlet:
+            c = keszlet[kulcs]
+            print(kulcs + ": " + str(c.db) + " db, " + str(c.ar) + " Ft/db")
+        else:
+            print(kulcs + ": nincs")
+  csharp: |
+    using System;
+    using System.Collections.Generic;
+
+    class Cikk
+    {
+        public string Szam;
+        public int Db;
+        public int Ar;
+    }
+
+    class Program
+    {
+        static void Main()
+        {
+            int n = int.Parse(Console.ReadLine());
+            var keszlet = new Dictionary<string, Cikk>();
+            for (int i = 0; i < n; i++)
+            {
+                string[] resz = Console.ReadLine().Split(';');
+                keszlet[resz[0]] = new Cikk { Szam = resz[0], Db = int.Parse(resz[1]), Ar = int.Parse(resz[2]) };
+            }
+            int m = int.Parse(Console.ReadLine());
+            for (int i = 0; i < m; i++)
+            {
+                string kulcs = Console.ReadLine();
+                if (keszlet.ContainsKey(kulcs))
+                {
+                    var c = keszlet[kulcs];
+                    Console.WriteLine(kulcs + ": " + c.Db + " db, " + c.Ar + " Ft/db");
+                }
+                else
+                {
+                    Console.WriteLine(kulcs + ": nincs");
+                }
+            }
+        }
+    }
+tests:
+  - { stdin: "3\n1042;12;350\n0007;5;1200\n2210;0;99\n3\n0007\n1042\n9999\n", expected: "0007: 5 db, 1200 Ft/db\n1042: 12 db, 350 Ft/db\n9999: nincs\n", hidden: false }
+  - { stdin: "1\nA1;1;1\n1\nA1\n", expected: "A1: 1 db, 1 Ft/db\n", hidden: true }
+  - { stdin: "2\n007;3;10\n7;4;20\n3\n7\n007\n0007\n", expected: "7: 4 db, 20 Ft/db\n007: 3 db, 10 Ft/db\n0007: nincs\n", hidden: true }
+  - { stdin: "2\nx;100;5\ny;200;6\n0\n", expected: "", hidden: true }

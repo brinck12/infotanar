@@ -1,0 +1,5 @@
+megallo	perc
+Kozpont	5
+Park	6
+Vasutallomas	12
+Korhaz	8

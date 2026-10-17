@@ -1,0 +1,121 @@
+slug: egy-ciklus-eleg
+title: "Egy ciklus elég"
+position: 1
+kind: code
+level: emelt
+difficulty: 3
+published: false
+allowed_languages: [python, csharp]
+description: |
+  Az alábbi program beolvassa a számokat egy listába, majd **négy** ciklussal kiszámolja az összeget, a legnagyobbat és a darabszámot. Alakítsd át úgy, hogy **egyetlen** ciklus olvassa be és dolgozza fel a számokat, lista nélkül. A kimenet ne változzon.
+
+  Bemenet: az első sorban `N` (`1 ≤ N ≤ 100`), utána `N` sorban egy-egy egész szám (lehet negatív). Kimenet három sor: `Osszeg: ...`, `Legnagyobb: ...`, `Darab: ...`.
+
+  Példa: `3`, majd `4`, `-1`, `9` esetén:
+
+  ```text
+  Osszeg: 12
+  Legnagyobb: 9
+  Darab: 3
+  ```
+
+  Tipp: a legnagyobb kezdőértékét az első elemből add meg (például egy jelzővel, hogy volt-e már elem).
+starter_code:
+  python: |
+    n = int(input())
+    lista = []
+    for i in range(n):
+        lista.append(int(input()))
+    osszeg = 0
+    for i in range(n):
+        osszeg = osszeg + lista[i]
+    legnagyobb = lista[0]
+    for i in range(n):
+        if lista[i] > legnagyobb:
+            legnagyobb = lista[i]
+    db = 0
+    for i in range(n):
+        db = db + 1
+    print("Osszeg:", osszeg)
+    print("Legnagyobb:", legnagyobb)
+    print("Darab:", db)
+  csharp: |
+    using System;
+
+    class Program
+    {
+
+        static void Main()
+        {
+            int n = int.Parse(Console.ReadLine());
+            int[] lista = new int[n];
+            for (int i = 0; i < n; i++)
+            {
+                lista[i] = int.Parse(Console.ReadLine());
+            }
+            int osszeg = 0;
+            for (int i = 0; i < n; i++)
+            {
+                osszeg = osszeg + lista[i];
+            }
+            int legnagyobb = lista[0];
+            for (int i = 0; i < n; i++)
+            {
+                if (lista[i] > legnagyobb)
+                {
+                    legnagyobb = lista[i];
+                }
+            }
+            int db = 0;
+            for (int i = 0; i < n; i++)
+            {
+                db = db + 1;
+            }
+            Console.WriteLine("Osszeg: " + osszeg);
+            Console.WriteLine("Legnagyobb: " + legnagyobb);
+            Console.WriteLine("Darab: " + db);
+        }
+    }
+sample_solutions:
+  python: |
+    n = int(input())
+    osszeg = 0
+    legnagyobb = None
+    for _ in range(n):
+        szam = int(input())
+        osszeg += szam
+        if legnagyobb is None or szam > legnagyobb:
+            legnagyobb = szam
+    print("Osszeg:", osszeg)
+    print("Legnagyobb:", legnagyobb)
+    print("Darab:", n)
+  csharp: |
+    using System;
+
+    class Program
+    {
+
+        static void Main()
+        {
+            int n = int.Parse(Console.ReadLine());
+            int osszeg = 0;
+            int legnagyobb = 0;
+            for (int i = 0; i < n; i++)
+            {
+                int szam = int.Parse(Console.ReadLine());
+                osszeg += szam;
+                if (i == 0 || szam > legnagyobb)
+                {
+                    legnagyobb = szam;
+                }
+            }
+            Console.WriteLine("Osszeg: " + osszeg);
+            Console.WriteLine("Legnagyobb: " + legnagyobb);
+            Console.WriteLine("Darab: " + n);
+        }
+    }
+tests:
+  - { stdin: "3\n4\n-1\n9\n", expected: "Osszeg: 12\nLegnagyobb: 9\nDarab: 3\n", hidden: false }
+  - { stdin: "1\n-5\n", expected: "Osszeg: -5\nLegnagyobb: -5\nDarab: 1\n", hidden: true }
+  - { stdin: "4\n-3\n-8\n-1\n-9\n", expected: "Osszeg: -21\nLegnagyobb: -1\nDarab: 4\n", hidden: true }
+  - { stdin: "5\n1\n2\n3\n4\n5\n", expected: "Osszeg: 15\nLegnagyobb: 5\nDarab: 5\n", hidden: true }

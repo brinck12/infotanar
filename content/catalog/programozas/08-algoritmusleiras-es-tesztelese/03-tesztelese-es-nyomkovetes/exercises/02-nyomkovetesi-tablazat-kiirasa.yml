@@ -1,0 +1,84 @@
+slug: nyomkovetesi-tablazat-kiirasa
+title: "Nyomkövetési táblázat kiírása"
+position: 1
+kind: code
+level: emelt
+difficulty: 2
+published: false
+allowed_languages: [python, csharp]
+description: |
+  Olvass be egy `N` számot (`0 ≤ N ≤ 50`), majd `N` egész számot külön sorban. Az összegzés minden lépése után írd ki a nyomkövetési táblázat egy sorát: a lépés sorszámát (1-től), a beolvasott számot és az összeg új értékét, szóközzel elválasztva. Utána, az utolsó sorban `Vege:` és az összeg álljon.
+
+  Példa: `3`, majd `5`, `-2`, `4` esetén a kimenet:
+
+  ```text
+  1 5 5
+  2 -2 3
+  3 4 7
+  Vege: 7
+  ```
+
+  `N = 0` esetén csak a `Vege: 0` sor jelenik meg.
+
+  Tipp: a kiírás a ciklus belsejébe kerül, a `Vege:` sor a ciklus után.
+starter_code:
+  python: |
+    n = int(input())
+    osszeg = 0
+    for i in range(1, n + 1):
+        szam = int(input())
+        osszeg += szam
+        # TODO: a táblázat egy sora
+    print("Vege:", osszeg)
+  csharp: |
+    using System;
+
+    class Program
+    {
+
+        static void Main()
+        {
+            int n = int.Parse(Console.ReadLine());
+            int osszeg = 0;
+            for (int i = 1; i <= n; i++)
+            {
+                int szam = int.Parse(Console.ReadLine());
+                osszeg += szam;
+                // TODO: a táblázat egy sora
+            }
+            Console.WriteLine("Vege: " + osszeg);
+        }
+    }
+sample_solutions:
+  python: |
+    n = int(input())
+    osszeg = 0
+    for i in range(1, n + 1):
+        szam = int(input())
+        osszeg += szam
+        print(i, szam, osszeg)
+    print("Vege:", osszeg)
+  csharp: |
+    using System;
+
+    class Program
+    {
+
+        static void Main()
+        {
+            int n = int.Parse(Console.ReadLine());
+            int osszeg = 0;
+            for (int i = 1; i <= n; i++)
+            {
+                int szam = int.Parse(Console.ReadLine());
+                osszeg += szam;
+                Console.WriteLine(i + " " + szam + " " + osszeg);
+            }
+            Console.WriteLine("Vege: " + osszeg);
+        }
+    }
+tests:
+  - { stdin: "3\n5\n-2\n4\n", expected: "1 5 5\n2 -2 3\n3 4 7\nVege: 7\n", hidden: false }
+  - { stdin: "0\n", expected: "Vege: 0\n", hidden: true }
+  - { stdin: "1\n9\n", expected: "1 9 9\nVege: 9\n", hidden: true }
+  - { stdin: "4\n0\n0\n-3\n3\n", expected: "1 0 0\n2 0 0\n3 -3 -3\n4 3 0\nVege: 0\n", hidden: true }

@@ -1,0 +1,147 @@
+slug: 1-ujabb-filmek
+title: 1. Újabb filmek
+position: 0
+kind: sql
+level: kozep
+difficulty: 1
+published: false
+allowed_languages:
+- sql
+sql_order_sensitive: true
+description: |
+  Egy filmadatbázis két táblából áll.
+
+  A `mufaj` tábla:
+
+  | oszlop | típus |
+  |---|---|
+  | `id` | egész, elsődleges kulcs |
+  | `nev` | szöveg (pl. `vigjatek`, `drama`, `akcio`, `scifi`, `animacio`) |
+
+  A `film` tábla:
+
+  | oszlop | típus |
+  |---|---|
+  | `id` | egész, elsődleges kulcs |
+  | `cim` | szöveg |
+  | `ev` | egész, a bemutató éve |
+  | `hossz` | egész, a játékidő percben |
+  | `mufaj_id` | egész, a `mufaj` tábla `id` oszlopára mutat |
+  | `ertekeles` | egész, 1 és 10 között |
+
+  **1. feladat.** Adja meg lekérdezéssel azoknak a filmeknek a címét és bemutatójuk évét (**cim, ev**), amelyeket **2000 után** (2000-et nem beleértve) mutattak be! A találatokat rendezze **bemutató éve szerint növekvő**, azonos évnél cím szerint ábécérendbe!
+starter_code:
+  sql: "SELECT cim, ev\nFROM film\nWHERE \nORDER BY ;\n"
+sample_solutions:
+  sql: |
+    SELECT cim, ev
+    FROM film
+    WHERE ev > 2000
+    ORDER BY ev, cim;
+tests:
+- stdin: |
+    CREATE TABLE mufaj (id INTEGER PRIMARY KEY, nev TEXT);
+    INSERT INTO mufaj VALUES
+    (1, 'vigjatek'),
+    (2, 'drama'),
+    (3, 'akcio'),
+    (4, 'scifi'),
+    (5, 'animacio');
+    CREATE TABLE film (id INTEGER PRIMARY KEY, cim TEXT, ev INTEGER, hossz INTEGER, mufaj_id INTEGER, ertekeles INTEGER);
+    INSERT INTO film VALUES
+    (1, 'Orokseg', 2019, 135, 2, 5),
+    (2, 'Aprilis', 2000, 126, 4, 5),
+    (3, 'Csendes ejszaka', 2008, 109, 4, 5),
+    (4, 'Nyari szel', 1987, 142, 2, 7),
+    (5, 'Mesevonat', 2011, 105, 1, 10),
+    (6, 'Bolygok', 2019, 139, 2, 8),
+    (7, 'Palanta', 1996, 93, 3, 5),
+    (8, 'Egy nap', 2003, 91, 1, 6);
+  expected: |
+    cim,ev
+    Egy nap,2003
+    Csendes ejszaka,2008
+    Mesevonat,2011
+    Bolygok,2019
+    Orokseg,2019
+  hidden: false
+- stdin: |
+    CREATE TABLE mufaj (id INTEGER PRIMARY KEY, nev TEXT);
+    INSERT INTO mufaj VALUES
+    (1, 'vigjatek'),
+    (2, 'drama'),
+    (3, 'akcio'),
+    (4, 'scifi'),
+    (5, 'animacio');
+    CREATE TABLE film (id INTEGER PRIMARY KEY, cim TEXT, ev INTEGER, hossz INTEGER, mufaj_id INTEGER, ertekeles INTEGER);
+    INSERT INTO film VALUES
+    (1, 'Palanta', 1994, 148, 5, 9),
+    (2, 'Atkelo', 2006, 124, 5, 7),
+    (3, 'Rejtekhely', 1986, 106, 1, 8),
+    (4, 'Aranyhal', 2022, 136, 2, 4),
+    (5, 'Egy nap', 1987, 108, 4, 9),
+    (6, 'Utazok', 1992, 154, 2, 8),
+    (7, 'Delibab', 1992, 116, 4, 7),
+    (8, 'Nyari szel', 1988, 123, 5, 5),
+    (9, 'Fenyes jovo', 1997, 130, 4, 8),
+    (10, 'Orokseg', 1987, 87, 3, 4);
+  expected: |
+    cim,ev
+    Atkelo,2006
+    Aranyhal,2022
+  hidden: true
+- stdin: |
+    CREATE TABLE mufaj (id INTEGER PRIMARY KEY, nev TEXT);
+    INSERT INTO mufaj VALUES
+    (1, 'vigjatek'),
+    (2, 'drama'),
+    (3, 'akcio'),
+    (4, 'scifi'),
+    (5, 'animacio');
+    CREATE TABLE film (id INTEGER PRIMARY KEY, cim TEXT, ev INTEGER, hossz INTEGER, mufaj_id INTEGER, ertekeles INTEGER);
+    INSERT INTO film VALUES
+    (1, 'Almodozok', 1998, 107, 5, 6),
+    (2, 'Delibab', 2023, 159, 4, 7),
+    (3, 'Kikoto', 2003, 150, 3, 7),
+    (4, 'Bolygok', 1999, 164, 4, 7),
+    (5, 'Aranyhal', 1999, 122, 3, 5),
+    (6, 'Aprilis', 1993, 89, 5, 7),
+    (7, 'Zuhatag', 2013, 95, 1, 9),
+    (8, 'Palanta', 2022, 154, 1, 9),
+    (9, 'Utazok', 2019, 142, 2, 7),
+    (10, 'Csendes ejszaka', 2015, 165, 2, 10),
+    (11, 'Hajnal', 2003, 149, 1, 4),
+    (12, 'Vihar elott', 1997, 99, 4, 8);
+  expected: |
+    cim,ev
+    Hajnal,2003
+    Kikoto,2003
+    Zuhatag,2013
+    Csendes ejszaka,2015
+    Utazok,2019
+    Palanta,2022
+    Delibab,2023
+  hidden: true
+- stdin: |
+    CREATE TABLE mufaj (id INTEGER PRIMARY KEY, nev TEXT);
+    INSERT INTO mufaj VALUES
+    (1, 'vigjatek'),
+    (2, 'drama'),
+    (3, 'akcio'),
+    (4, 'scifi'),
+    (5, 'animacio');
+    CREATE TABLE film (id INTEGER PRIMARY KEY, cim TEXT, ev INTEGER, hossz INTEGER, mufaj_id INTEGER, ertekeles INTEGER);
+    INSERT INTO film VALUES
+    (1, 'Orokseg', 2005, 129, 1, 6),
+    (2, 'Hajnal', 2007, 123, 1, 6),
+    (3, 'Palanta', 1990, 95, 4, 8),
+    (4, 'Haromszog', 2017, 124, 2, 4),
+    (5, 'Szivarvany', 1998, 129, 3, 7),
+    (6, 'Aprilis', 2005, 148, 1, 6);
+  expected: |
+    cim,ev
+    Aprilis,2005
+    Orokseg,2005
+    Hajnal,2007
+    Haromszog,2017
+  hidden: true

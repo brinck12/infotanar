@@ -1,0 +1,2 @@
+megallo	perc
+Kozpont	5

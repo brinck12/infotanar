@@ -1,0 +1,71 @@
+slug: szamjegyek-osszege
+title: "Számjegyek összege"
+position: 4
+kind: code
+level: emelt
+difficulty: 3
+published: false
+allowed_languages: [python, csharp]
+description: |
+  Olvass be egy `N` nemnegatív egész számot (`0 ≤ N ≤ 2000000000`), és írd ki a számjegyeinek összegét **rekurzív** függvénnyel. Szöveggé alakítást ne használj.
+
+  Példa: `N = 352` esetén a kimenet `10`; `N = 0` esetén `0`.
+
+  Tipp: az utolsó számjegy `n % 10`, a többi számjegyből álló szám `n / 10` (egész osztás).
+starter_code:
+  python: |
+    def szj(n):
+        # TODO
+        pass
+
+    print(szj(int(input())))
+  csharp: |
+    using System;
+
+    class Program
+    {
+        static int Szj(int n)
+        {
+            // TODO
+            return 0;
+        }
+
+        static void Main()
+        {
+            Console.WriteLine(Szj(int.Parse(Console.ReadLine())));
+        }
+    }
+sample_solutions:
+  python: |
+    def szj(n):
+        if n == 0:
+            return 0
+        return n % 10 + szj(n // 10)
+
+    print(szj(int(input())))
+  csharp: |
+    using System;
+
+    class Program
+    {
+        static int Szj(int n)
+        {
+            if (n == 0)
+            {
+                return 0;
+            }
+            return n % 10 + Szj(n / 10);
+        }
+
+        static void Main()
+        {
+            Console.WriteLine(Szj(int.Parse(Console.ReadLine())));
+        }
+    }
+tests:
+  - { stdin: "352\n", expected: "10\n", hidden: false }
+  - { stdin: "0\n", expected: "0\n", hidden: true }
+  - { stdin: "7\n", expected: "7\n", hidden: true }
+  - { stdin: "1000000000\n", expected: "1\n", hidden: true }
+  - { stdin: "2000000000\n", expected: "2\n", hidden: true }
+  - { stdin: "99999\n", expected: "45\n", hidden: true }

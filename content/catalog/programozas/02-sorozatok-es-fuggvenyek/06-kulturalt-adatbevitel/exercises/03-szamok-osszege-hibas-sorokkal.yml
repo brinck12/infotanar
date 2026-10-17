@@ -1,0 +1,97 @@
+slug: szamok-osszege-hibas-sorokkal
+title: Számok összege hibás sorokkal
+position: 2
+kind: code
+level: kozep
+difficulty: 3
+published: false
+allowed_languages: [python, csharp]
+description: |
+  A program sorokat olvas be egészen addig, amíg a `vege` szót nem kapja (ezt a sort már nem kell feldolgozni). Minden sor egy egész szám lehet, de néha hibás adat érkezik (például `abc`, tizedestört vagy üres sor). A hibás sorokat ne számold bele az összegbe, hanem csak számold meg őket. A végén írd ki két sorban:
+
+  ```
+  Osszeg: <a jó számok összege>
+  Ervenytelen: <a hibás sorok száma>
+  ```
+
+  Példa: az `5`, `abc`, `7`, `vege` bemenetre (külön sorokban):
+
+  ```
+  Osszeg: 12
+  Ervenytelen: 1
+  ```
+
+  Tipp: Pythonban `try` / `except ValueError`, C#-ban `int.TryParse` kezeli a hibás szöveget. A `vege` ellenőrzése az átalakítás előtt történjen.
+starter_code:
+  python: |
+    osszeg = 0
+    hibas = 0
+    while True:
+        sor = input()
+        # innen folytasd
+  csharp: |
+    using System;
+
+    class Program
+    {
+        static void Main()
+        {
+            int osszeg = 0;
+            int hibas = 0;
+            while (true)
+            {
+                string sor = Console.ReadLine();
+                // innen folytasd
+            }
+        }
+    }
+sample_solutions:
+  python: |
+    osszeg = 0
+    hibas = 0
+    while True:
+        sor = input()
+        if sor == "vege":
+            break
+        try:
+            osszeg = osszeg + int(sor)
+        except ValueError:
+            hibas = hibas + 1
+    print("Osszeg:", osszeg)
+    print("Ervenytelen:", hibas)
+  csharp: |
+    using System;
+
+    class Program
+    {
+        static void Main()
+        {
+            int osszeg = 0;
+            int hibas = 0;
+            while (true)
+            {
+                string sor = Console.ReadLine();
+                if (sor == "vege")
+                {
+                    break;
+                }
+                int szam;
+                if (int.TryParse(sor, out szam))
+                {
+                    osszeg = osszeg + szam;
+                }
+                else
+                {
+                    hibas = hibas + 1;
+                }
+            }
+            Console.WriteLine("Osszeg: " + osszeg);
+            Console.WriteLine("Ervenytelen: " + hibas);
+        }
+    }
+tests:
+  - { stdin: "5\nabc\n7\nvege\n", expected: "Osszeg: 12\nErvenytelen: 1\n", hidden: false }
+  - { stdin: "vege\n", expected: "Osszeg: 0\nErvenytelen: 0\n", hidden: true }
+  - { stdin: "x\ny\nvege\n", expected: "Osszeg: 0\nErvenytelen: 2\n", hidden: true }
+  - { stdin: "3.5\n-4\n10\nvege\n", expected: "Osszeg: 6\nErvenytelen: 1\n", hidden: true }
+  - { stdin: "4\n\n6\nvege\n", expected: "Osszeg: 10\nErvenytelen: 1\n", hidden: true }

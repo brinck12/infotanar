@@ -1,0 +1,116 @@
+slug: arvizszint
+title: "Árvízszint"
+position: 1
+kind: code
+level: emelt
+difficulty: 4
+published: false
+allowed_languages: [python, csharp]
+description: |
+  Egy folyó vízállását N napon át mérték. A bemenet első sora `N T` (a napok száma, legalább 1, és a küszöbérték, cm), a másodikban N egész szám áll szóközzel elválasztva: a napi vízállások. **Küszöbátlépés** az a nap, amelyen a vízállás nagyobb a küszöbnél, az előző napon pedig legfeljebb akkora volt (az első nap nem lehet átlépés, mert nincs előző mérés). Írd ki az első átlépés napját 1-től számozva (`Elso: ...`; ha nincs, `Elso: nincs`), és az átlépések számát (`Atlepes: ...`).
+
+  Példa bemenet:
+
+  ```
+  8 300
+  250 290 310 320 295 305 300 301
+  ```
+
+  Kimenet:
+
+  ```
+  Elso: 3
+  Atlepes: 3
+  ```
+
+  Tipp: a feltétel két szomszédos mérésre vonatkozik, ezért a bejárás a második naptól indul. A keresés és a megszámlálás ugyanazzal a feltétellel dolgozik.
+starter_code:
+  python: |
+    n, t = input().split()
+    n = int(n)
+    t = int(t)
+    a = [int(x) for x in input().split()]
+    # keresd az átlépéseket
+  csharp: |
+    using System;
+    using System.Collections.Generic;
+
+    class Program
+    {
+        static void Main()
+        {
+            string[] fej = Console.ReadLine().Split(' ');
+            int n = int.Parse(fej[0]);
+            int t = int.Parse(fej[1]);
+            var a = new List<int>();
+            foreach (string s in Console.ReadLine().Split(' '))
+            {
+                a.Add(int.Parse(s));
+            }
+            // keresd az átlépéseket
+        }
+    }
+sample_solutions:
+  python: |
+    n, t = input().split()
+    n = int(n)
+    t = int(t)
+    a = [int(x) for x in input().split()]
+    elso = 0
+    db = 0
+    for i in range(1, n):
+        if a[i - 1] <= t and a[i] > t:
+            db += 1
+            if elso == 0:
+                elso = i + 1
+    if elso == 0:
+        print("Elso: nincs")
+    else:
+        print("Elso:", elso)
+    print("Atlepes:", db)
+  csharp: |
+    using System;
+    using System.Collections.Generic;
+
+    class Program
+    {
+        static void Main()
+        {
+            string[] fej = Console.ReadLine().Split(' ');
+            int n = int.Parse(fej[0]);
+            int t = int.Parse(fej[1]);
+            var a = new List<int>();
+            foreach (string s in Console.ReadLine().Split(' '))
+            {
+                a.Add(int.Parse(s));
+            }
+            int elso = 0;
+            int db = 0;
+            for (int i = 1; i < n; i++)
+            {
+                if (a[i - 1] <= t && a[i] > t)
+                {
+                    db++;
+                    if (elso == 0)
+                    {
+                        elso = i + 1;
+                    }
+                }
+            }
+            if (elso == 0)
+            {
+                Console.WriteLine("Elso: nincs");
+            }
+            else
+            {
+                Console.WriteLine("Elso: " + elso);
+            }
+            Console.WriteLine("Atlepes: " + db);
+        }
+    }
+tests:
+  - { stdin: "8 300\n250 290 310 320 295 305 300 301\n", expected: "Elso: 3\nAtlepes: 3\n", hidden: false }
+  - { stdin: "1 100\n500\n", expected: "Elso: nincs\nAtlepes: 0\n", hidden: true }
+  - { stdin: "4 50\n60 70 80 90\n", expected: "Elso: nincs\nAtlepes: 0\n", hidden: true }
+  - { stdin: "5 10\n1 2 3 4 5\n", expected: "Elso: nincs\nAtlepes: 0\n", hidden: true }
+  - { stdin: "6 0\n-1 0 1 0 -1 5\n", expected: "Elso: 3\nAtlepes: 2\n", hidden: true }

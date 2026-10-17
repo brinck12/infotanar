@@ -1,0 +1,105 @@
+slug: tabulatoros-tablazat-irasa
+title: Tabulátoros táblázat írása
+position: 1
+kind: code
+level: kozep
+difficulty: 3
+published: false
+allowed_languages:
+- python
+- csharp
+description: |
+  A felhasználó megad egy pozitív egész számot (`n`). Írd a `tabla.txt` fájlba egy táblázatot tabulátorral tagolva: az első sor a fejléc (`szam`, `negyzet`, `kob`), utána minden `i` számra 1-től `n`-ig egy sor, amely `i`-t, `i` négyzetét és `i` köbét tartalmazza. Ezután olvasd vissza a fájlt, és írd ki a tartalmát változtatás nélkül (a tabulátorok a kimenetben is megmaradnak).
+
+  Példa `n = 2` esetén (a `<TAB>` tabulátor):
+
+  ```
+  szam<TAB>negyzet<TAB>kob
+  1<TAB>1<TAB>1
+  2<TAB>4<TAB>8
+  ```
+
+  Tipp: a mezőket a `"\t".join(...)` (C#-ban a `string.Join("\t", ...)`) fűzi össze tabulátorral; a számokat előbb szöveggé kell alakítani.
+starter_code:
+  python: |
+    n = int(input())
+    with open("tabla.txt", "w", encoding="utf-8") as f:
+        f.write("szam\tnegyzet\tkob\n")
+        # ide írd a sorokat
+    with open("tabla.txt", encoding="utf-8") as f:
+        for sor in f:
+            print(sor.rstrip("\n"))
+  csharp: |
+    using System;
+    using System.IO;
+
+    class Program
+    {
+        static void Main()
+        {
+            int n = int.Parse(Console.ReadLine());
+            using (StreamWriter iro = new StreamWriter("tabla.txt"))
+            {
+                iro.WriteLine("szam\tnegyzet\tkob");
+                // ide írd a sorokat
+            }
+            foreach (string sor in File.ReadAllLines("tabla.txt"))
+            {
+                Console.WriteLine(sor);
+            }
+        }
+    }
+sample_solutions:
+  python: |
+    n = int(input())
+    with open("tabla.txt", "w", encoding="utf-8") as f:
+        f.write("szam\tnegyzet\tkob\n")
+        for i in range(1, n + 1):
+            f.write("\t".join([str(i), str(i * i), str(i ** 3)]) + "\n")
+    with open("tabla.txt", encoding="utf-8") as f:
+        for sor in f:
+            print(sor.rstrip("\n"))
+  csharp: |
+    using System;
+    using System.IO;
+
+    class Program
+    {
+        static void Main()
+        {
+            int n = int.Parse(Console.ReadLine());
+            using (StreamWriter iro = new StreamWriter("tabla.txt"))
+            {
+                iro.WriteLine("szam\tnegyzet\tkob");
+                for (int i = 1; i <= n; i++)
+                {
+                    iro.WriteLine(string.Join("\t", i, i * i, i * i * i));
+                }
+            }
+            foreach (string sor in File.ReadAllLines("tabla.txt"))
+            {
+                Console.WriteLine(sor);
+            }
+        }
+    }
+tests:
+- stdin: '2
+
+    '
+  expected: "szam\tnegyzet\tkob\n1\t1\t1\n2\t4\t8\n"
+  hidden: false
+- stdin: '1
+
+    '
+  expected: "szam\tnegyzet\tkob\n1\t1\t1\n"
+  hidden: true
+- stdin: '5
+
+    '
+  expected: "szam\tnegyzet\tkob\n1\t1\t1\n2\t4\t8\n3\t9\t27\n4\t16\t64\n5\t25\t125\n"
+  hidden: true
+- stdin: '10
+
+    '
+  expected: "szam\tnegyzet\tkob\n1\t1\t1\n2\t4\t8\n3\t9\t27\n4\t16\t64\n5\t25\t125\n6\t36\t216\n7\t49\t343\n8\t64\t512\n9\t81\t729\n10\t100\t1000\n"
+  hidden: true

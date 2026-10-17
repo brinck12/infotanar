@@ -1,0 +1,112 @@
+slug: jo-tanulok-uj-fajlba
+title: Jó tanulók új fájlba
+position: 3
+kind: code
+level: emelt
+difficulty: 4
+published: false
+allowed_languages:
+- python
+- csharp
+description: |
+  Az osztályok jegyei külön fájlokban vannak, az osztály jelével nevezve: `9a.txt`, `9b.txt`. A fájl tabulátorral tagolt, az első sora fejléc (`nev`, `jegy`). A felhasználó megadja az osztály jelét (pl. `9a`). Készítsd el a `jel_jo.txt` nevű fájlt (pl. `9a_jo.txt`), amelybe a fejléc után azok a sorok kerülnek, ahol a jegy legalább 4, az eredeti sorrendben. Ezután olvasd vissza az új fájlt, írd ki a tartalmát, a végén pedig a jó tanulók számát:
+
+  ```
+  nev<TAB>jegy
+  Anna<TAB>5
+  Csilla<TAB>4
+  Jo tanulok: 2
+  ```
+
+  Tipp: két fájlnevet kell összeállítanod: `jel + ".txt"` az olvasáshoz és `jel + "_jo.txt"` az íráshoz.
+starter_code:
+  python: |
+    jel = input()
+    with open(jel + ".txt", encoding="utf-8") as f:
+        sorok = f.read().splitlines()
+    # ide írd az új fájl készítését és a kiírást
+  csharp: |
+    using System;
+    using System.IO;
+
+    class Program
+    {
+        static void Main()
+        {
+            string jel = Console.ReadLine();
+            string[] sorok = File.ReadAllLines(jel + ".txt");
+            // ide írd az új fájl készítését és a kiírást
+        }
+    }
+sample_solutions:
+  python: |
+    jel = input()
+    with open(jel + ".txt", encoding="utf-8") as f:
+        sorok = f.read().splitlines()
+    with open(jel + "_jo.txt", "w", encoding="utf-8") as ki:
+        ki.write(sorok[0] + "\n")
+        for sor in sorok[1:]:
+            if int(sor.split("\t")[1]) >= 4:
+                ki.write(sor + "\n")
+    with open(jel + "_jo.txt", encoding="utf-8") as f:
+        kiirt = f.read().splitlines()
+    for sor in kiirt:
+        print(sor)
+    print("Jo tanulok:", len(kiirt) - 1)
+  csharp: |
+    using System;
+    using System.IO;
+
+    class Program
+    {
+        static void Main()
+        {
+            string jel = Console.ReadLine();
+            string[] sorok = File.ReadAllLines(jel + ".txt");
+            using (StreamWriter ki = new StreamWriter(jel + "_jo.txt"))
+            {
+                ki.WriteLine(sorok[0]);
+                for (int i = 1; i < sorok.Length; i++)
+                {
+                    if (int.Parse(sorok[i].Split('\t')[1]) >= 4)
+                    {
+                        ki.WriteLine(sorok[i]);
+                    }
+                }
+            }
+            string[] kiirt = File.ReadAllLines(jel + "_jo.txt");
+            foreach (string sor in kiirt)
+            {
+                Console.WriteLine(sor);
+            }
+            Console.WriteLine("Jo tanulok: " + (kiirt.Length - 1));
+        }
+    }
+files:
+  9a.txt: 9a.txt
+  9b.txt: 9b.txt
+tests:
+- stdin: '9a
+
+    '
+  expected: "nev\tjegy\nAnna\t5\nCsilla\t4\nJo tanulok: 2\n"
+  hidden: false
+- stdin: '9b
+
+    '
+  expected: "nev\tjegy\nFerenc\t4\nJo tanulok: 1\n"
+  hidden: true
+- stdin: '9a
+
+    '
+  expected: "nev\tjegy\nJo tanulok: 0\n"
+  hidden: true
+  files:
+    9a.txt: teszt-3/9a.txt
+- stdin: '10c
+
+    '
+  expected: "nev\tjegy\nGeza\t4\nImre\t5\nJolan\t4\nJo tanulok: 3\n"
+  hidden: true
+  files:
+    10c.txt: teszt-4/10c.txt

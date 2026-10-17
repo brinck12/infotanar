@@ -1,0 +1,124 @@
+slug: tobbszempontu-nevsor
+title: "Többszempontú névsor"
+position: 1
+kind: code
+level: emelt
+difficulty: 3
+published: false
+allowed_languages: [python, csharp]
+description: |
+  Diákok adatai: az első sor a diákok száma (N, legalább 1), majd N sor: `nev;osztaly;pont` (ékezet nélküli nevek és osztályok, a pont egész szám). Rendezd őket: **osztály szerint növekvő** (a szöveg karakterkódja szerint), azon belül **pont szerint csökkenő**, azon belül **név szerint növekvő** sorrendbe. Soronként `osztaly nev pont` alakban írd ki őket.
+
+  Példa bemenet:
+
+  ```
+  5
+  Anna;9B;40
+  Bence;9A;30
+  Csilla;9B;40
+  David;9A;35
+  Emil;9B;50
+  ```
+
+  Kimenet:
+
+  ```
+  9A David 35
+  9A Bence 30
+  9B Emil 50
+  9B Anna 40
+  9B Csilla 40
+  ```
+
+  Tipp: Pythonban a kulcs lehet egy `(osztaly, -pont, nev)` n-es. C#-ban az `OrderBy`, `ThenByDescending`, `ThenBy` lánc kell, a szövegekhez `StringComparer.Ordinal`-lal.
+starter_code:
+  python: |
+    from dataclasses import dataclass
+
+    @dataclass
+    class Diak:
+        nev: str
+        osztaly: str
+        pont: int
+
+    n = int(input())
+    diakok = []
+    # olvasd be, rendezd három szempont szerint, írd ki
+  csharp: |
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+
+    class Diak
+    {
+        public string Nev;
+        public string Osztaly;
+        public int Pont;
+    }
+
+    class Program
+    {
+        static void Main()
+        {
+            int n = int.Parse(Console.ReadLine());
+            var diakok = new List<Diak>();
+            // olvasd be, rendezd három szempont szerint, írd ki
+        }
+    }
+sample_solutions:
+  python: |
+    from dataclasses import dataclass
+
+    @dataclass
+    class Diak:
+        nev: str
+        osztaly: str
+        pont: int
+
+    n = int(input())
+    diakok = []
+    for _ in range(n):
+        resz = input().split(";")
+        diakok.append(Diak(resz[0], resz[1], int(resz[2])))
+    rang = sorted(diakok, key=lambda d: (d.osztaly, -d.pont, d.nev))
+    for d in rang:
+        print(d.osztaly, d.nev, d.pont)
+  csharp: |
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+
+    class Diak
+    {
+        public string Nev;
+        public string Osztaly;
+        public int Pont;
+    }
+
+    class Program
+    {
+        static void Main()
+        {
+            int n = int.Parse(Console.ReadLine());
+            var diakok = new List<Diak>();
+            for (int i = 0; i < n; i++)
+            {
+                string[] resz = Console.ReadLine().Split(';');
+                diakok.Add(new Diak { Nev = resz[0], Osztaly = resz[1], Pont = int.Parse(resz[2]) });
+            }
+            var rang = diakok
+                .OrderBy(d => d.Osztaly, StringComparer.Ordinal)
+                .ThenByDescending(d => d.Pont)
+                .ThenBy(d => d.Nev, StringComparer.Ordinal)
+                .ToList();
+            foreach (var d in rang)
+            {
+                Console.WriteLine(d.Osztaly + " " + d.Nev + " " + d.Pont);
+            }
+        }
+    }
+tests:
+  - { stdin: "5\nAnna;9B;40\nBence;9A;30\nCsilla;9B;40\nDavid;9A;35\nEmil;9B;50\n", expected: "9A David 35\n9A Bence 30\n9B Emil 50\n9B Anna 40\n9B Csilla 40\n", hidden: false }
+  - { stdin: "1\nFanni;10A;0\n", expected: "10A Fanni 0\n", hidden: true }
+  - { stdin: "4\nGabor;9A;10\nGabor;9A;10\nAdam;9A;10\nZoli;9A;10\n", expected: "9A Adam 10\n9A Gabor 10\n9A Gabor 10\n9A Zoli 10\n", hidden: true }
+  - { stdin: "3\nHanna;9C;-5\nIvan;9C;-1\nJudit;9C;-5\n", expected: "9C Ivan -1\n9C Hanna -5\n9C Judit -5\n", hidden: true }

@@ -1,0 +1,146 @@
+slug: osztalyonkenti-osszesites
+title: "Osztályonkénti összesítés"
+position: 3
+kind: code
+level: emelt
+difficulty: 4
+published: false
+allowed_languages: [python, csharp]
+description: |
+  A bemenet első sora a tanulók száma (N, legalább 1), majd N sor: `nev;osztaly;pont` (a pont egész szám). Minden osztályhoz írj ki egy sort az osztályok **első előfordulásának sorrendjében**:
+
+  `osztaly: K fo, osszpont P, legjobb: nev`
+
+  ahol K az osztály létszáma, P a pontjaik összege, a `legjobb` pedig a legtöbb pontot elért tanuló (holtversenynél a bemenetben előbbi).
+
+  Példa bemenet:
+
+  ```
+  5
+  Anna;9A;42
+  Bence;9B;37
+  Csilla;9A;45
+  David;9B;37
+  Eszter;9A;10
+  ```
+
+  Kimenet:
+
+  ```
+  9A: 3 fo, osszpont 97, legjobb: Csilla
+  9B: 2 fo, osszpont 74, legjobb: Bence
+  ```
+
+  Tipp: tárold a tanulókat osztályonként egy szótárban (a kulcs az osztály neve, az érték a tanulók listája), és az osztályok sorrendjét külön listában őrizd.
+starter_code:
+  python: |
+    from dataclasses import dataclass
+
+    @dataclass
+    class Tanulo:
+        nev: str
+        osztaly: str
+        pont: int
+
+    n = int(input())
+    csoport = {}
+    # olvasd be a tanulókat osztályonként, majd írd ki az összesítést
+  csharp: |
+    using System;
+    using System.Collections.Generic;
+
+    class Tanulo
+    {
+        public string Nev;
+        public string Osztaly;
+        public int Pont;
+    }
+
+    class Program
+    {
+        static void Main()
+        {
+            int n = int.Parse(Console.ReadLine());
+            var csoport = new Dictionary<string, List<Tanulo>>();
+            var sorrend = new List<string>();
+            // olvasd be a tanulókat osztályonként, majd írd ki az összesítést
+        }
+    }
+sample_solutions:
+  python: |
+    from dataclasses import dataclass
+
+    @dataclass
+    class Tanulo:
+        nev: str
+        osztaly: str
+        pont: int
+
+    n = int(input())
+    csoport = {}
+    for _ in range(n):
+        resz = input().split(";")
+        t = Tanulo(resz[0], resz[1], int(resz[2]))
+        if t.osztaly not in csoport:
+            csoport[t.osztaly] = []
+        csoport[t.osztaly].append(t)
+    for osztaly in csoport:
+        lista = csoport[osztaly]
+        osszeg = 0
+        legjobb = lista[0]
+        for t in lista:
+            osszeg += t.pont
+            if t.pont > legjobb.pont:
+                legjobb = t
+        print(osztaly + ": " + str(len(lista)) + " fo, osszpont " + str(osszeg) + ", legjobb: " + legjobb.nev)
+  csharp: |
+    using System;
+    using System.Collections.Generic;
+
+    class Tanulo
+    {
+        public string Nev;
+        public string Osztaly;
+        public int Pont;
+    }
+
+    class Program
+    {
+        static void Main()
+        {
+            int n = int.Parse(Console.ReadLine());
+            var csoport = new Dictionary<string, List<Tanulo>>();
+            var sorrend = new List<string>();
+            for (int i = 0; i < n; i++)
+            {
+                string[] resz = Console.ReadLine().Split(';');
+                var t = new Tanulo { Nev = resz[0], Osztaly = resz[1], Pont = int.Parse(resz[2]) };
+                if (!csoport.ContainsKey(t.Osztaly))
+                {
+                    csoport[t.Osztaly] = new List<Tanulo>();
+                    sorrend.Add(t.Osztaly);
+                }
+                csoport[t.Osztaly].Add(t);
+            }
+            foreach (string osztaly in sorrend)
+            {
+                var lista = csoport[osztaly];
+                int osszeg = 0;
+                var legjobb = lista[0];
+                foreach (var t in lista)
+                {
+                    osszeg += t.Pont;
+                    if (t.Pont > legjobb.Pont)
+                    {
+                        legjobb = t;
+                    }
+                }
+                Console.WriteLine(osztaly + ": " + lista.Count + " fo, osszpont " + osszeg + ", legjobb: " + legjobb.Nev);
+            }
+        }
+    }
+tests:
+  - { stdin: "5\nAnna;9A;42\nBence;9B;37\nCsilla;9A;45\nDavid;9B;37\nEszter;9A;10\n", expected: "9A: 3 fo, osszpont 97, legjobb: Csilla\n9B: 2 fo, osszpont 74, legjobb: Bence\n", hidden: false }
+  - { stdin: "1\nFanni;10C;0\n", expected: "10C: 1 fo, osszpont 0, legjobb: Fanni\n", hidden: true }
+  - { stdin: "4\nGabor;11A;20\nHanna;11A;20\nIvan;11A;20\nJudit;11A;19\n", expected: "11A: 4 fo, osszpont 79, legjobb: Gabor\n", hidden: true }
+  - { stdin: "6\nKata;9B;5\nLajos;9A;6\nMiklos;9C;7\nNora;9B;8\nOszkar;9A;9\nPeti;9C;1\n", expected: "9B: 2 fo, osszpont 13, legjobb: Nora\n9A: 2 fo, osszpont 15, legjobb: Oszkar\n9C: 2 fo, osszpont 8, legjobb: Miklos\n", hidden: true }

@@ -1,0 +1,121 @@
+slug: teglalap-osztaly
+title: "Téglalap osztály"
+position: 1
+kind: code
+level: emelt
+difficulty: 2
+published: false
+allowed_languages: [python, csharp]
+description: |
+  Készíts `Teglalap` osztályt két oldallal (`a`, `b`) és két metódussal: `terulet()` és `kerulet()`. A program olvasson be két egész számot (az oldalakat, külön sorban), hozzon létre egy téglalapot, és írja ki a `Terulet: ...` és `Kerulet: ...` sorokat.
+
+  Példa bemenet:
+
+  ```
+  3
+  4
+  ```
+
+  Kimenet:
+
+  ```
+  Terulet: 12
+  Kerulet: 14
+  ```
+
+  Tipp: a számítás a metódusokba kerüljön, a kiírás pedig csak hívja őket.
+starter_code:
+  python: |
+    from dataclasses import dataclass
+
+    @dataclass
+    class Teglalap:
+        a: int
+        b: int
+
+        def terulet(self):
+            pass  # töltsd ki
+
+        def kerulet(self):
+            pass  # töltsd ki
+
+    # olvasd be az oldalakat, és írd ki az eredményt
+  csharp: |
+    using System;
+
+    class Teglalap
+    {
+        public int A;
+        public int B;
+
+        public int Terulet()
+        {
+            return 0; // töltsd ki
+        }
+
+        public int Kerulet()
+        {
+            return 0; // töltsd ki
+        }
+    }
+
+    class Program
+    {
+        static void Main()
+        {
+            // olvasd be az oldalakat, és írd ki az eredményt
+        }
+    }
+sample_solutions:
+  python: |
+    from dataclasses import dataclass
+
+    @dataclass
+    class Teglalap:
+        a: int
+        b: int
+
+        def terulet(self):
+            return self.a * self.b
+
+        def kerulet(self):
+            return 2 * (self.a + self.b)
+
+    t = Teglalap(int(input()), int(input()))
+    print("Terulet:", t.terulet())
+    print("Kerulet:", t.kerulet())
+  csharp: |
+    using System;
+
+    class Teglalap
+    {
+        public int A;
+        public int B;
+
+        public int Terulet()
+        {
+            return A * B;
+        }
+
+        public int Kerulet()
+        {
+            return 2 * (A + B);
+        }
+    }
+
+    class Program
+    {
+        static void Main()
+        {
+            var t = new Teglalap();
+            t.A = int.Parse(Console.ReadLine());
+            t.B = int.Parse(Console.ReadLine());
+            Console.WriteLine("Terulet: " + t.Terulet());
+            Console.WriteLine("Kerulet: " + t.Kerulet());
+        }
+    }
+tests:
+  - { stdin: "3\n4\n", expected: "Terulet: 12\nKerulet: 14\n", hidden: false }
+  - { stdin: "10\n10\n", expected: "Terulet: 100\nKerulet: 40\n", hidden: true }
+  - { stdin: "1\n1\n", expected: "Terulet: 1\nKerulet: 4\n", hidden: true }
+  - { stdin: "120\n35\n", expected: "Terulet: 4200\nKerulet: 310\n", hidden: true }

@@ -1,0 +1,77 @@
+slug: eletkor-ellenorzese
+title: Életkor ellenőrzése
+position: 1
+kind: code
+level: kozep
+difficulty: 2
+published: false
+allowed_languages: [python, csharp]
+description: |
+  Kérd be a felhasználó életkorát a `Adja meg az eletkorat (0-120): ` kérdéssel (a kérdés végén szóköz áll, a kérdés után nincs új sor). A bevitt számok mind egész számok. Ha az érték nincs a 0 és 120 közötti tartományban (a határok még jók), írd ki a `Hibas adat!` sort (új sorral), és kérdezd meg újra, a kérdést újra kiírva. Ha az érték jó, írd ki: `Elfogadva: <kor> ev`.
+
+  A beolvasott értékek nem látszanak a kimenetben.
+
+  Példa: a `-5`, `200`, `30` bemenetre (külön sorokban) a kimenet:
+
+  ```
+  Adja meg az eletkorat (0-120): Hibas adat!
+  Adja meg az eletkorat (0-120): Hibas adat!
+  Adja meg az eletkorat (0-120): Elfogadva: 30 ev
+  ```
+
+  Tipp: használj `while True` ciklust, és a `break`-kel lépj ki, ha az érték megfelelő.
+starter_code:
+  python: |
+    while True:
+        kor = int(input("Adja meg az eletkorat (0-120): "))
+        # innen folytasd
+  csharp: |
+    using System;
+
+    class Program
+    {
+        static void Main()
+        {
+            int kor;
+            while (true)
+            {
+                Console.Write("Adja meg az eletkorat (0-120): ");
+                kor = int.Parse(Console.ReadLine());
+                // innen folytasd
+            }
+        }
+    }
+sample_solutions:
+  python: |
+    while True:
+        kor = int(input("Adja meg az eletkorat (0-120): "))
+        if 0 <= kor <= 120:
+            break
+        print("Hibas adat!")
+    print("Elfogadva:", kor, "ev")
+  csharp: |
+    using System;
+
+    class Program
+    {
+        static void Main()
+        {
+            int kor;
+            while (true)
+            {
+                Console.Write("Adja meg az eletkorat (0-120): ");
+                kor = int.Parse(Console.ReadLine());
+                if (kor >= 0 && kor <= 120)
+                {
+                    break;
+                }
+                Console.WriteLine("Hibas adat!");
+            }
+            Console.WriteLine("Elfogadva: " + kor + " ev");
+        }
+    }
+tests:
+  - { stdin: "17\n", expected: "Adja meg az eletkorat (0-120): Elfogadva: 17 ev\n", hidden: false }
+  - { stdin: "-5\n200\n30\n", expected: "Adja meg az eletkorat (0-120): Hibas adat!\nAdja meg az eletkorat (0-120): Hibas adat!\nAdja meg az eletkorat (0-120): Elfogadva: 30 ev\n", hidden: true }
+  - { stdin: "0\n", expected: "Adja meg az eletkorat (0-120): Elfogadva: 0 ev\n", hidden: true }
+  - { stdin: "121\n120\n", expected: "Adja meg az eletkorat (0-120): Hibas adat!\nAdja meg az eletkorat (0-120): Elfogadva: 120 ev\n", hidden: true }

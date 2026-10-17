@@ -1,0 +1,70 @@
+slug: osszeg-rekurzioval
+title: "Összeg rekurzióval"
+position: 2
+kind: code
+level: emelt
+difficulty: 2
+published: false
+allowed_languages: [python, csharp]
+description: |
+  Olvass be egy `N` egész számot (`0 ≤ N ≤ 500`), és számold ki rekurzív függvénnyel az `1 + 2 + ... + N` összeget. Az eredményt egyetlen sorban írd ki. Ciklust ne használj.
+
+  Példa: ha `N = 4`, a kimenet `10`. Ha `N = 0`, a kimenet `0`.
+
+  Tipp: az `osszeg(n)` értéke `n + osszeg(n - 1)`, az alapeset `osszeg(0) = 0`.
+starter_code:
+  python: |
+    def osszeg(n):
+        # TODO
+        pass
+
+    print(osszeg(int(input())))
+  csharp: |
+    using System;
+
+    class Program
+    {
+        static int Osszeg(int n)
+        {
+            // TODO
+            return 0;
+        }
+
+        static void Main()
+        {
+            Console.WriteLine(Osszeg(int.Parse(Console.ReadLine())));
+        }
+    }
+sample_solutions:
+  python: |
+    def osszeg(n):
+        if n == 0:
+            return 0
+        return n + osszeg(n - 1)
+
+    print(osszeg(int(input())))
+  csharp: |
+    using System;
+
+    class Program
+    {
+        static int Osszeg(int n)
+        {
+            if (n == 0)
+            {
+                return 0;
+            }
+            return n + Osszeg(n - 1);
+        }
+
+        static void Main()
+        {
+            Console.WriteLine(Osszeg(int.Parse(Console.ReadLine())));
+        }
+    }
+tests:
+  - { stdin: "4\n", expected: "10\n", hidden: false }
+  - { stdin: "0\n", expected: "0\n", hidden: true }
+  - { stdin: "1\n", expected: "1\n", hidden: true }
+  - { stdin: "100\n", expected: "5050\n", hidden: true }
+  - { stdin: "500\n", expected: "125250\n", hidden: true }

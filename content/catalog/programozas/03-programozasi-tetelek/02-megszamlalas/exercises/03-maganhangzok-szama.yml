@@ -1,0 +1,105 @@
+slug: maganhangzok-szama
+title: Magánhangzók száma
+position: 2
+kind: code
+level: kozep
+difficulty: 3
+published: false
+allowed_languages:
+- python
+- csharp
+description: |
+  ## Feladat
+
+  Olvass be egy sort, és írd ki, **hány magánhangzó** van benne! Magánhangzónak az `a`, `e`, `i`, `o`, `u` betűket tekintjük, kis- és nagybetűt egyaránt. A bemenet csak ékezet nélküli betűket és szóközöket tartalmaz.
+
+  ### Bemenet
+
+  Egyetlen sor szöveg (legfeljebb 200 karakter).
+
+  ### Kimenet
+
+  Egyetlen sorban a magánhangzók száma.
+
+  ### Példa
+
+  Bemenet: `Informatika`. Kimenet: `5`
+
+  Tipp: alakítsd a szöveget kisbetűssé, és számold meg azokat a karaktereket, amelyek benne vannak az `"aeiou"` szövegben.
+starter_code:
+  python: |
+    szoveg = input().lower()
+    db = 0
+    for betu in szoveg:
+        # TODO: számold meg a magánhangzókat
+        pass
+    print(db)
+  csharp: |
+    using System;
+
+    class Program
+    {
+        static void Main()
+        {
+            string szoveg = Console.ReadLine().ToLowerInvariant();
+            int db = 0;
+            foreach (char betu in szoveg)
+            {
+                // TODO: számold meg a magánhangzókat
+            }
+            Console.WriteLine(db);
+        }
+    }
+sample_solutions:
+  python: |
+    szoveg = input().lower()
+    db = 0
+    for betu in szoveg:
+        if betu in "aeiou":
+            db += 1
+    print(db)
+  csharp: |
+    using System;
+
+    class Program
+    {
+        static void Main()
+        {
+            string szoveg = Console.ReadLine().ToLowerInvariant();
+            int db = 0;
+            foreach (char betu in szoveg)
+            {
+                if ("aeiou".IndexOf(betu) >= 0)
+                {
+                    db++;
+                }
+            }
+            Console.WriteLine(db);
+        }
+    }
+tests:
+- stdin: |
+    Informatika
+  expected: |
+    5
+  hidden: false
+- stdin: |
+    xyz
+  expected: |
+    0
+  hidden: true
+- stdin: |
+    AEIOU
+  expected: |
+    5
+  hidden: true
+- stdin: |
+    erettsegi vizsga
+  expected: |
+    6
+  hidden: true
+- stdin: |
+    Programozas Tetelek
+  expected: |
+    7
+  hidden: true

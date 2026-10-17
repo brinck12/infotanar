@@ -1,0 +1,6 @@
+nev	osztaly	pont
+Ede	9a	0
+Fanni	9a	12
+Geza	9b	99
+Hajni	9c	64
+Imre	9c	5

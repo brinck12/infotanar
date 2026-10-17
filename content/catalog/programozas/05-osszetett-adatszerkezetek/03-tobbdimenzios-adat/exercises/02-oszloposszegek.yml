@@ -1,0 +1,111 @@
+slug: oszloposszegek
+title: "Oszlopösszegek"
+position: 1
+kind: code
+level: emelt
+difficulty: 3
+published: false
+allowed_languages: [python, csharp]
+description: |
+  A bemenet első sora `R C`, utána R sor, mindegyikben C egész szám szóközzel elválasztva. Írd ki az oszlopok összegét egyetlen sorban, szóközzel elválasztva, balról jobbra.
+
+  Példa bemenet:
+
+  ```
+  2 3
+  5 1 4
+  2 8 3
+  ```
+
+  Kimenet:
+
+  ```
+  7 9 7
+  ```
+
+  Tipp: az oszlopösszegnél a külső ciklus az oszlopokon (`j`) halad, a belső a sorokon (`i`), az elem pedig továbbra is `matrix[i][j]`.
+starter_code:
+  python: |
+    r, c = input().split()
+    r = int(r)
+    c = int(c)
+    matrix = []
+    for _ in range(r):
+        matrix.append([int(x) for x in input().split()])
+    # írd ki az oszlopösszegeket egy sorban
+  csharp: |
+    using System;
+    using System.Collections.Generic;
+
+    class Program
+    {
+        static void Main()
+        {
+            string[] meret = Console.ReadLine().Split(' ');
+            int r = int.Parse(meret[0]);
+            int c = int.Parse(meret[1]);
+            int[,] matrix = new int[r, c];
+            for (int i = 0; i < r; i++)
+            {
+                string[] sor = Console.ReadLine().Split(' ');
+                for (int j = 0; j < c; j++)
+                {
+                    matrix[i, j] = int.Parse(sor[j]);
+                }
+            }
+            // írd ki az oszlopösszegeket egy sorban
+        }
+    }
+sample_solutions:
+  python: |
+    r, c = input().split()
+    r = int(r)
+    c = int(c)
+    matrix = []
+    for _ in range(r):
+        matrix.append([int(x) for x in input().split()])
+    osszegek = []
+    for j in range(c):
+        osszeg = 0
+        for i in range(r):
+            osszeg += matrix[i][j]
+        osszegek.append(str(osszeg))
+    print(" ".join(osszegek))
+  csharp: |
+    using System;
+    using System.Collections.Generic;
+
+    class Program
+    {
+        static void Main()
+        {
+            string[] meret = Console.ReadLine().Split(' ');
+            int r = int.Parse(meret[0]);
+            int c = int.Parse(meret[1]);
+            int[,] matrix = new int[r, c];
+            for (int i = 0; i < r; i++)
+            {
+                string[] sor = Console.ReadLine().Split(' ');
+                for (int j = 0; j < c; j++)
+                {
+                    matrix[i, j] = int.Parse(sor[j]);
+                }
+            }
+            var osszegek = new List<int>();
+            for (int j = 0; j < c; j++)
+            {
+                int osszeg = 0;
+                for (int i = 0; i < r; i++)
+                {
+                    osszeg += matrix[i, j];
+                }
+                osszegek.Add(osszeg);
+            }
+            Console.WriteLine(string.Join(" ", osszegek));
+        }
+    }
+tests:
+  - { stdin: "2 3\n5 1 4\n2 8 3\n", expected: "7 9 7\n", hidden: false }
+  - { stdin: "1 4\n1 2 3 4\n", expected: "1 2 3 4\n", hidden: true }
+  - { stdin: "4 1\n1\n2\n3\n4\n", expected: "10\n", hidden: true }
+  - { stdin: "3 3\n0 0 0\n-5 5 -5\n100 200 300\n", expected: "95 205 295\n", hidden: true }

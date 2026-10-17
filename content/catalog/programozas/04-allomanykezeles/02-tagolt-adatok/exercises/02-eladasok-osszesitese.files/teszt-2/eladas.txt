@@ -1,0 +1,2 @@
+termek	darab	ar
+toll	1	120

@@ -1,0 +1,75 @@
+slug: feladatok-sorszammal
+title: Feladatok sorszámmal
+position: 0
+kind: code
+level: kozep
+difficulty: 1
+published: false
+allowed_languages: [python, csharp]
+description: |
+  Írj érettségi stílusú, két részből álló programot. A kimenetet pontosan így építsd fel (a `<...>` helyére a megfelelő érték kerül):
+
+  ```
+  1. feladat
+  Adja meg a nevet: Udvozlom, <nev>!
+  2. feladat
+  Adja meg a szamot: A szam negyzete: <negyzet>
+  ```
+
+  Az `1. feladat` és a `2. feladat` sorok után a program kiírja a kérdést (új sor nélkül), beolvassa a választ, és csak utána írja ki az eredményt. A beolvasott érték **nem látszik** a kimenetben, ezért a kérdés és az eredmény egy sorban követi egymást. Az első rész egy nevet, a második egy egész számot olvas be.
+
+  Példa: a `Anna` és az `5` bemenetre a kimenet:
+
+  ```
+  1. feladat
+  Adja meg a nevet: Udvozlom, Anna!
+  2. feladat
+  Adja meg a szamot: A szam negyzete: 25
+  ```
+
+  Tipp: Pythonban az `input("kerdes")` kiírja a kérdést; C#-ban `Console.Write(...)` kell, mert a `WriteLine` sort törne.
+starter_code:
+  python: |
+    print("1. feladat")
+    # innen folytasd
+  csharp: |
+    using System;
+
+    class Program
+    {
+        static void Main()
+        {
+            Console.WriteLine("1. feladat");
+            // innen folytasd
+        }
+    }
+sample_solutions:
+  python: |
+    print("1. feladat")
+    nev = input("Adja meg a nevet: ")
+    print("Udvozlom, " + nev + "!")
+    print("2. feladat")
+    szam = int(input("Adja meg a szamot: "))
+    print("A szam negyzete:", szam * szam)
+  csharp: |
+    using System;
+
+    class Program
+    {
+        static void Main()
+        {
+            Console.WriteLine("1. feladat");
+            Console.Write("Adja meg a nevet: ");
+            string nev = Console.ReadLine();
+            Console.WriteLine("Udvozlom, " + nev + "!");
+            Console.WriteLine("2. feladat");
+            Console.Write("Adja meg a szamot: ");
+            int szam = int.Parse(Console.ReadLine());
+            Console.WriteLine("A szam negyzete: " + szam * szam);
+        }
+    }
+tests:
+  - { stdin: "Anna\n5\n", expected: "1. feladat\nAdja meg a nevet: Udvozlom, Anna!\n2. feladat\nAdja meg a szamot: A szam negyzete: 25\n", hidden: false }
+  - { stdin: "Bela\n-3\n", expected: "1. feladat\nAdja meg a nevet: Udvozlom, Bela!\n2. feladat\nAdja meg a szamot: A szam negyzete: 9\n", hidden: true }
+  - { stdin: "Kata Zoltan\n0\n", expected: "1. feladat\nAdja meg a nevet: Udvozlom, Kata Zoltan!\n2. feladat\nAdja meg a szamot: A szam negyzete: 0\n", hidden: true }
+  - { stdin: "Eva\n100\n", expected: "1. feladat\nAdja meg a nevet: Udvozlom, Eva!\n2. feladat\nAdja meg a szamot: A szam negyzete: 10000\n", hidden: true }

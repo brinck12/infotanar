@@ -1,0 +1,157 @@
+slug: negyzetszamok-fajlba
+title: Négyzetszámok fájlba
+position: 0
+kind: code
+level: kozep
+difficulty: 2
+published: false
+allowed_languages:
+- python
+- csharp
+description: |
+  A felhasználó megad egy pozitív egész számot (`n`). Írd a `negyzetek.txt` fájlba az első `n` négyzetszámot (1, 4, 9, ...), soronként egyet. Ezután olvasd vissza a fájlt, írd ki a sorait, és a végén azt, hány sort olvastál:
+
+  ```
+  1
+  4
+  9
+  Sorok: 3
+  ```
+
+  (A példa az `n = 3` esetre szól.)
+
+  Tipp: a fájlt előbb be kell zárni az írásból (Pythonban a `with` blokk végén zárul, C#-ban a `using` blokk végén), és csak utána nyisd meg olvasásra.
+starter_code:
+  python: |
+    n = int(input())
+    with open("negyzetek.txt", "w", encoding="utf-8") as f:
+        # ide írd az írást
+        pass
+    with open("negyzetek.txt", encoding="utf-8") as f:
+        sorok = f.read().splitlines()
+    # ide írd a kiírást
+  csharp: |
+    using System;
+    using System.IO;
+
+    class Program
+    {
+        static void Main()
+        {
+            int n = int.Parse(Console.ReadLine());
+            using (StreamWriter iro = new StreamWriter("negyzetek.txt"))
+            {
+                // ide írd az írást
+            }
+            string[] sorok = File.ReadAllLines("negyzetek.txt");
+            // ide írd a kiírást
+        }
+    }
+sample_solutions:
+  python: |
+    n = int(input())
+    with open("negyzetek.txt", "w", encoding="utf-8") as f:
+        for i in range(1, n + 1):
+            f.write(str(i * i) + "\n")
+    with open("negyzetek.txt", encoding="utf-8") as f:
+        sorok = f.read().splitlines()
+    for sor in sorok:
+        print(sor)
+    print("Sorok:", len(sorok))
+  csharp: |
+    using System;
+    using System.IO;
+
+    class Program
+    {
+        static void Main()
+        {
+            int n = int.Parse(Console.ReadLine());
+            using (StreamWriter iro = new StreamWriter("negyzetek.txt"))
+            {
+                for (int i = 1; i <= n; i++)
+                {
+                    iro.WriteLine(i * i);
+                }
+            }
+            string[] sorok = File.ReadAllLines("negyzetek.txt");
+            foreach (string sor in sorok)
+            {
+                Console.WriteLine(sor);
+            }
+            Console.WriteLine("Sorok: " + sorok.Length);
+        }
+    }
+tests:
+- stdin: '3
+
+    '
+  expected: '1
+
+    4
+
+    9
+
+    Sorok: 3
+
+    '
+  hidden: false
+- stdin: '1
+
+    '
+  expected: '1
+
+    Sorok: 1
+
+    '
+  hidden: true
+- stdin: '12
+
+    '
+  expected: '1
+
+    4
+
+    9
+
+    16
+
+    25
+
+    36
+
+    49
+
+    64
+
+    81
+
+    100
+
+    121
+
+    144
+
+    Sorok: 12
+
+    '
+  hidden: true
+- stdin: '6
+
+    '
+  expected: '1
+
+    4
+
+    9
+
+    16
+
+    25
+
+    36
+
+    Sorok: 6
+
+    '
+  hidden: true

@@ -1,0 +1,117 @@
+slug: jegyatlag-erettsegi-stilusban
+title: Jegyátlag érettségi stílusban
+position: 3
+kind: code
+level: kozep
+difficulty: 4
+published: false
+allowed_languages: [python, csharp]
+description: |
+  Írj háromrészes, érettségi stílusú programot. A bevitt értékek mind egész számok. A program kimenete (a bevitt értékek nem látszanak benne):
+
+  ```
+  1. feladat
+  Hany jegye van (1-5)?
+  2. feladat
+  1. jegy (1-5): 2. jegy (1-5): ...
+  3. feladat
+  Az atlag: <átlag két tizedesjeggyel>
+  ```
+
+  - **1. feladat:** kérd be a jegyek számát a `Hany jegye van (1-5)? ` kérdéssel. Csak 1 és 5 közötti szám jó; különben írd ki a `Hibas adat!` sort (új sorral), és kérdezd meg újra.
+  - **2. feladat:** kérd be a jegyeket egyenként a `<sorszám>. jegy (1-5): ` kérdéssel (a sorszám 1-től indul). A jegy is csak 1 és 5 közötti lehet; hibás adatnál ugyanúgy `Hibas adat!` és újrakérdezés, a kérdést újra kiírva.
+  - **3. feladat:** írd ki a jegyek átlagát: `Az atlag: <érték>` két tizedesjegyre kerekítve.
+
+  Példa: a `3`, `5`, `4`, `4` bemenetre (külön sorokban) a kimenet:
+
+  ```
+  1. feladat
+  Hany jegye van (1-5)? 2. feladat
+  1. jegy (1-5): 2. jegy (1-5): 3. jegy (1-5): 3. feladat
+  Az atlag: 4.33
+  ```
+
+  Tipp: a "kérdez, ellenőriz, újrakérdez" rész egy `beker(kerdes, also, felso)` függvénybe kerül, amelyet mindkét feladatrész használ. C#-ban az átlag kiírásához `CultureInfo.InvariantCulture` kell.
+starter_code:
+  python: |
+    def beker(kerdes, also, felso):
+        # kérdez, ellenőriz, hibánál újrakérdez; a jó számot adja vissza
+        return also
+
+    print("1. feladat")
+    # innen folytasd
+  csharp: |
+    using System;
+    using System.Globalization;
+
+    class Program
+    {
+        static int Beker(string kerdes, int also, int felso)
+        {
+            // kérdez, ellenőriz, hibánál újrakérdez; a jó számot adja vissza
+            return also;
+        }
+
+        static void Main()
+        {
+            Console.WriteLine("1. feladat");
+            // innen folytasd
+        }
+    }
+sample_solutions:
+  python: |
+    def beker(kerdes, also, felso):
+        while True:
+            szam = int(input(kerdes))
+            if also <= szam <= felso:
+                return szam
+            print("Hibas adat!")
+
+    print("1. feladat")
+    n = beker("Hany jegye van (1-5)? ", 1, 5)
+    print("2. feladat")
+    osszeg = 0
+    for i in range(1, n + 1):
+        osszeg = osszeg + beker(str(i) + ". jegy (1-5): ", 1, 5)
+    print("3. feladat")
+    print(f"Az atlag: {osszeg / n:.2f}")
+  csharp: |
+    using System;
+    using System.Globalization;
+
+    class Program
+    {
+        static int Beker(string kerdes, int also, int felso)
+        {
+            while (true)
+            {
+                Console.Write(kerdes);
+                int szam = int.Parse(Console.ReadLine());
+                if (szam >= also && szam <= felso)
+                {
+                    return szam;
+                }
+                Console.WriteLine("Hibas adat!");
+            }
+        }
+
+        static void Main()
+        {
+            Console.WriteLine("1. feladat");
+            int n = Beker("Hany jegye van (1-5)? ", 1, 5);
+            Console.WriteLine("2. feladat");
+            int osszeg = 0;
+            for (int i = 1; i <= n; i++)
+            {
+                osszeg = osszeg + Beker(i + ". jegy (1-5): ", 1, 5);
+            }
+            Console.WriteLine("3. feladat");
+            double atlag = (double)osszeg / n;
+            Console.WriteLine(string.Format(CultureInfo.InvariantCulture, "Az atlag: {0:F2}", atlag));
+        }
+    }
+tests:
+  - { stdin: "3\n5\n4\n4\n", expected: "1. feladat\nHany jegye van (1-5)? 2. feladat\n1. jegy (1-5): 2. jegy (1-5): 3. jegy (1-5): 3. feladat\nAz atlag: 4.33\n", hidden: false }
+  - { stdin: "1\n3\n", expected: "1. feladat\nHany jegye van (1-5)? 2. feladat\n1. jegy (1-5): 3. feladat\nAz atlag: 3.00\n", hidden: true }
+  - { stdin: "0\n2\n7\n5\n2\n", expected: "1. feladat\nHany jegye van (1-5)? Hibas adat!\nHany jegye van (1-5)? 2. feladat\n1. jegy (1-5): Hibas adat!\n1. jegy (1-5): 2. jegy (1-5): 3. feladat\nAz atlag: 3.50\n", hidden: true }
+  - { stdin: "5\n5\n5\n5\n5\n4\n", expected: "1. feladat\nHany jegye van (1-5)? 2. feladat\n1. jegy (1-5): 2. jegy (1-5): 3. jegy (1-5): 4. jegy (1-5): 5. jegy (1-5): 3. feladat\nAz atlag: 4.80\n", hidden: true }

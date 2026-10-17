@@ -1,0 +1,128 @@
+slug: atlagnal-hosszabb-szavak
+title: "Átlagnál hosszabb szavak"
+position: 3
+kind: code
+level: emelt
+difficulty: 4
+published: false
+allowed_languages: [python, csharp]
+description: |
+  A bemenet első sora a szavak száma (N, legalább 1), majd N sor, soronként egy (ékezet nélküli, szóközt nem tartalmazó) szó. Válogasd szét őket aszerint, hogy hosszabbak-e a szavak átlagos hosszánál. Két sort írj ki: `Hosszu: ...` (a szigorúan az átlagnál hosszabb szavak) és `Rovid: ...` (a többi), a szavak szóközzel elválasztva, a bemenet sorrendjében. Üres csoportnál `-` álljon.
+
+  Példa bemenet:
+
+  ```
+  5
+  alma
+  korte
+  banan
+  szilva
+  fa
+  ```
+
+  Kimenet:
+
+  ```
+  Hosszu: korte banan szilva
+  Rovid: alma fa
+  ```
+
+  Tipp: két menetre van szükség: előbb add össze a hosszakat, aztán válogass. Az átlaggal való összehasonlítást kerüld osztás nélkül: a szó akkor hosszabb az átlagnál, ha `hossz * N > osszeg`.
+starter_code:
+  python: |
+    n = int(input())
+    szavak = []
+    for _ in range(n):
+        szavak.append(input())
+    # 1. menet: összeg, 2. menet: szétválogatás
+  csharp: |
+    using System;
+    using System.Collections.Generic;
+
+    class Program
+    {
+        static void Main()
+        {
+            int n = int.Parse(Console.ReadLine());
+            var szavak = new List<string>();
+            for (int i = 0; i < n; i++)
+            {
+                szavak.Add(Console.ReadLine());
+            }
+            // 1. menet: összeg, 2. menet: szétválogatás
+        }
+    }
+sample_solutions:
+  python: |
+    n = int(input())
+    szavak = []
+    for _ in range(n):
+        szavak.append(input())
+    osszeg = 0
+    for sz in szavak:
+        osszeg += len(sz)
+    hosszu = []
+    rovid = []
+    for sz in szavak:
+        if len(sz) * n > osszeg:
+            hosszu.append(sz)
+        else:
+            rovid.append(sz)
+
+    def sor(lista):
+        if len(lista) == 0:
+            return "-"
+        return " ".join(lista)
+
+    print("Hosszu: " + sor(hosszu))
+    print("Rovid: " + sor(rovid))
+  csharp: |
+    using System;
+    using System.Collections.Generic;
+
+    class Program
+    {
+        static string Sor(List<string> lista)
+        {
+            if (lista.Count == 0)
+            {
+                return "-";
+            }
+            return string.Join(" ", lista);
+        }
+
+        static void Main()
+        {
+            int n = int.Parse(Console.ReadLine());
+            var szavak = new List<string>();
+            for (int i = 0; i < n; i++)
+            {
+                szavak.Add(Console.ReadLine());
+            }
+            int osszeg = 0;
+            foreach (string sz in szavak)
+            {
+                osszeg += sz.Length;
+            }
+            var hosszu = new List<string>();
+            var rovid = new List<string>();
+            foreach (string sz in szavak)
+            {
+                if (sz.Length * n > osszeg)
+                {
+                    hosszu.Add(sz);
+                }
+                else
+                {
+                    rovid.Add(sz);
+                }
+            }
+            Console.WriteLine("Hosszu: " + Sor(hosszu));
+            Console.WriteLine("Rovid: " + Sor(rovid));
+        }
+    }
+tests:
+  - { stdin: "5\nalma\nkorte\nbanan\nszilva\nfa\n", expected: "Hosszu: korte banan szilva\nRovid: alma fa\n", hidden: false }
+  - { stdin: "1\nszo\n", expected: "Hosszu: -\nRovid: szo\n", hidden: true }
+  - { stdin: "3\nabc\nabc\nabc\n", expected: "Hosszu: -\nRovid: abc abc abc\n", hidden: true }
+  - { stdin: "4\na\nbb\nccc\ndddd\n", expected: "Hosszu: ccc dddd\nRovid: a bb\n", hidden: true }

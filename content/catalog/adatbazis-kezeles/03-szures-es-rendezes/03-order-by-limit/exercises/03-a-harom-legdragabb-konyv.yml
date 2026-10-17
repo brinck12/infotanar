@@ -1,0 +1,51 @@
+slug: a-harom-legdragabb-konyv
+title: A három legdrágább könyv
+position: 2
+kind: sql
+level: kozep
+difficulty: 2
+published: false
+allowed_languages: [sql]
+sql_order_sensitive: true
+description: |
+  A `LIMIT n` csak az első `n` sort adja vissza, ezért rendezéssel együtt használva "a legnagyobb/legkisebb n" lekérdezhető. (MariaDB-ben is `LIMIT`, SQL Serverben `TOP`.)
+
+  A `konyv` tábla:
+
+  | oszlop | típus |
+  |---|---|
+  | `id` | egész, elsődleges kulcs |
+  | `cim` | szöveg |
+  | `szerzo` | szöveg |
+  | `ev` | egész (a kiadás éve) |
+  | `oldal` | egész |
+  | `ar` | egész (Ft) |
+  | `mufaj` | szöveg |
+
+  Listázd ki a **három legdrágább** könyv **címét és árát**, ár szerint csökkenő sorrendben! (Az árak mind különbözők.) A sorok sorrendje számít.
+
+  Tipp: előbb rendezz csökkenőre, utána korlátozd a sorok számát: `ORDER BY ... DESC LIMIT 3`.
+starter_code:
+  sql: |
+    SELECT cim, ar
+    FROM konyv
+    ORDER BY ;
+sample_solutions:
+  sql: |
+    SELECT cim, ar
+    FROM konyv
+    ORDER BY ar DESC
+    LIMIT 3;
+tests:
+  - stdin: "CREATE TABLE konyv (id INTEGER PRIMARY KEY, cim TEXT, szerzo TEXT, ev INTEGER, oldal INTEGER, ar INTEGER, mufaj TEXT);\nINSERT INTO konyv VALUES\n(1, 'Kis kert', 'Kelemen Bela', 1953, 480, 8200, 'tortenelem'),\n(2, 'A kert titka', 'Kovacs Lilla', 1967, 278, 6600, 'regeny'),\n(3, 'Szeleso ter', 'Varga Dora', 1993, 192, 6200, 'tortenelem'),\n(4, 'A tenger fiai', 'Kovacs Lilla', 2006, 198, 6700, 'tortenelem'),\n(5, 'Papirhajo', 'Molnar Eszter', 1984, 304, 3600, 'tortenelem'),\n(6, 'Nyari vihar', 'Horvath Mate', 1990, 589, 4700, 'mese');\n"
+    expected: "cim,ar\nKis kert,8200\nA tenger fiai,6700\nA kert titka,6600\n"
+    hidden: false
+  - stdin: "CREATE TABLE konyv (id INTEGER PRIMARY KEY, cim TEXT, szerzo TEXT, ev INTEGER, oldal INTEGER, ar INTEGER, mufaj TEXT);\nINSERT INTO konyv VALUES\n(1, 'Nyari vihar', 'Nagy Peter', 1967, 484, 8600, 'tortenelem'),\n(2, 'A regi malom', 'Varga Dora', 1999, 699, 3800, 'regeny'),\n(3, 'Foldrajzi felfedezok', 'Nagy Peter', 2004, 533, 7400, 'vers'),\n(4, 'Az ejszaka ura', 'Toth Gabor', 1989, 247, 2300, 'regeny'),\n(5, 'Zold ablak', 'Varga Dora', 1979, 309, 5000, 'vers'),\n(6, 'Ures szoba', 'Horvath Mate', 1962, 289, 2100, 'regeny'),\n(7, 'Az elso tavasz', 'Nagy Peter', 2005, 420, 5400, 'vers'),\n(8, 'Hazak kozott', 'Molnar Eszter', 1993, 301, 7300, 'regeny');\n"
+    expected: "cim,ar\nNyari vihar,8600\nFoldrajzi felfedezok,7400\nHazak kozott,7300\n"
+    hidden: true
+  - stdin: "CREATE TABLE konyv (id INTEGER PRIMARY KEY, cim TEXT, szerzo TEXT, ev INTEGER, oldal INTEGER, ar INTEGER, mufaj TEXT);\nINSERT INTO konyv VALUES\n(1, 'A regi malom', 'Molnar Eszter', 1952, 191, 4900, 'regeny'),\n(2, 'Utolso vonat', 'Varga Dora', 1964, 165, 1600, 'mese'),\n(3, 'Csendes folyo', 'Kovacs Lilla', 1970, 618, 5500, 'tortenelem'),\n(4, 'Tavoli partok', 'Toth Gabor', 1987, 415, 7600, 'vers'),\n(5, 'Fenyes napok', 'Szabo Reka', 1968, 463, 4200, 'regeny'),\n(6, 'Sotet erdo', 'Horvath Mate', 1956, 541, 2200, 'vers'),\n(7, 'Aranykor', 'Varga Dora', 1987, 696, 9000, 'vers'),\n(8, 'Hegyi ut', 'Nagy Peter', 1962, 227, 7300, 'vers'),\n(9, 'Az elso tavasz', 'Nagy Peter', 1955, 657, 3600, 'vers'),\n(10, 'A masik part', 'Kelemen Bela', 1970, 506, 7500, 'vers');\n"
+    expected: "cim,ar\nAranykor,9000\nTavoli partok,7600\nA masik part,7500\n"
+    hidden: true
+  - stdin: "CREATE TABLE konyv (id INTEGER PRIMARY KEY, cim TEXT, szerzo TEXT, ev INTEGER, oldal INTEGER, ar INTEGER, mufaj TEXT);\nINSERT INTO konyv VALUES\n(1, 'Hazak kozott', 'Toth Gabor', 1980, 623, 2500, 'mese'),\n(2, 'Nyari vihar', 'Molnar Eszter', 1969, 326, 6600, 'tortenelem'),\n(3, 'Esti mesek', 'Kelemen Bela', 2020, 389, 7100, 'mese'),\n(4, 'Papirhajo', 'Varga Dora', 1951, 133, 8600, 'vers'),\n(5, 'A kek hold', 'Horvath Mate', 1987, 472, 5500, 'regeny'),\n(6, 'Szel ellen', 'Kovacs Lilla', 1985, 482, 8800, 'regeny'),\n(7, 'Hosszu nyar', 'Varga Dora', 1980, 231, 3100, 'tortenelem'),\n(8, 'Sotet erdo', 'Horvath Mate', 1974, 220, 7300, 'mese'),\n(9, 'Utolso vonat', 'Kovacs Lilla', 2005, 144, 5900, 'vers'),\n(10, 'Csendes folyo', 'Kovacs Lilla', 1960, 232, 9000, 'tortenelem'),\n(11, 'Zold ablak', 'Varga Dora', 2012, 211, 2300, 'vers'),\n(12, 'Fenyes napok', 'Szabo Reka', 1957, 172, 3000, 'mese');\n"
+    expected: "cim,ar\nCsendes folyo,9000\nSzel ellen,8800\nPapirhajo,8600\n"
+    hidden: true

@@ -1,0 +1,83 @@
+slug: majusi-szuletesnapok
+title: Májusi születésnapok
+position: 1
+kind: sql
+level: kozep
+difficulty: 2
+published: false
+allowed_languages: [sql]
+description: |
+    Listázd azoknak a tanulóknak a nevét (`nev`) és születési dátumát (`szuletes`), akik májusban születtek, bármelyik évben.
+
+    A `tanulo` tábla:
+
+    | `id` | `nev` | `szuletes` |
+    |---|---|---|
+    | 1 | Kiss Anna | 2008-05-14 |
+    | 2 | Nagy Bela | 2009-11-02 |
+    | 3 | Toth Csaba | 2008-05-30 |
+    | 4 | Szabo Dora | 2009-02-27 |
+    | 5 | Varga Fanni | 2010-05-01 |
+
+    Az eredmény ezekre az adatokra:
+
+    | `nev` | `szuletes` |
+    |---|---|
+    | Kiss Anna | 2008-05-14 |
+    | Toth Csaba | 2008-05-30 |
+    | Varga Fanni | 2010-05-01 |
+
+    Tipp: a `strftime` szöveget ad vissza, ezért a hónapot szövegként, kétjegyűen (`'05'`) hasonlítsd.
+starter_code:
+  sql: |
+    SELECT nev, szuletes
+    FROM tanulo
+    WHERE ;
+sample_solutions:
+  sql: |
+    SELECT nev, szuletes
+    FROM tanulo
+    WHERE strftime('%m', szuletes) = '05';
+tests:
+  - stdin: |
+      CREATE TABLE tanulo (id INTEGER PRIMARY KEY, nev TEXT, szuletes TEXT);
+      INSERT INTO tanulo VALUES (1, 'Kiss Anna', '2008-05-14');
+      INSERT INTO tanulo VALUES (2, 'Nagy Bela', '2009-11-02');
+      INSERT INTO tanulo VALUES (3, 'Toth Csaba', '2008-05-30');
+      INSERT INTO tanulo VALUES (4, 'Szabo Dora', '2009-02-27');
+      INSERT INTO tanulo VALUES (5, 'Varga Fanni', '2010-05-01');
+    expected: |
+      nev,szuletes
+      Kiss Anna,2008-05-14
+      Toth Csaba,2008-05-30
+      Varga Fanni,2010-05-01
+    hidden: false
+  - stdin: |
+      CREATE TABLE tanulo (id INTEGER PRIMARY KEY, nev TEXT, szuletes TEXT);
+      INSERT INTO tanulo VALUES (1, 'Kovacs Gabor', '2008-12-31');
+      INSERT INTO tanulo VALUES (2, 'Molnar Hanna', '2009-01-01');
+      INSERT INTO tanulo VALUES (3, 'Farkas Imre', '2007-05-09');
+      INSERT INTO tanulo VALUES (4, 'Papp Julia', '2011-03-18');
+    expected: |
+      nev,szuletes
+      Farkas Imre,2007-05-09
+    hidden: true
+  - stdin: |
+      CREATE TABLE tanulo (id INTEGER PRIMARY KEY, nev TEXT, szuletes TEXT);
+      INSERT INTO tanulo VALUES (1, 'Balogh Karoly', '2010-12-24');
+      INSERT INTO tanulo VALUES (2, 'Meszaros Lilla', '2008-01-05');
+      INSERT INTO tanulo VALUES (3, 'Horvath Erik', '2009-05-31');
+      INSERT INTO tanulo VALUES (4, 'Simon Zoltan', '2009-09-09');
+      INSERT INTO tanulo VALUES (5, 'Lakatos Eszter', '2008-10-10');
+    expected: |
+      nev,szuletes
+      Horvath Erik,2009-05-31
+    hidden: true
+  - stdin: |
+      CREATE TABLE tanulo (id INTEGER PRIMARY KEY, nev TEXT, szuletes TEXT);
+      INSERT INTO tanulo VALUES (1, 'Fekete Mate', '2009-12-31');
+      INSERT INTO tanulo VALUES (2, 'Juhasz Reka', '2007-05-31');
+    expected: |
+      nev,szuletes
+      Juhasz Reka,2007-05-31
+    hidden: true

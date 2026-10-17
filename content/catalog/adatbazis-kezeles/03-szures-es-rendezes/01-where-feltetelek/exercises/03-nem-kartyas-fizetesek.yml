@@ -1,0 +1,49 @@
+slug: nem-kartyas-fizetesek
+title: Nem kártyás fizetések
+position: 2
+kind: sql
+level: kozep
+difficulty: 2
+published: false
+allowed_languages: [sql]
+description: |
+  A `<>` jelentése: nem egyenlő (MariaDB-ben a `!=` is használható).
+
+  A `taxi` tábla:
+
+  | oszlop | típus |
+  |---|---|
+  | `id` | egész, elsődleges kulcs |
+  | `rendszam` | szöveg |
+  | `indulas` | szöveg |
+  | `cel` | szöveg |
+  | `km` | egész |
+  | `dij` | egész (Ft) |
+  | `fizetes` | szöveg (`keszpenz` vagy `kartya`) |
+
+  Listázd ki azokat a fuvarokat (**id, rendszam, fizetes**), amelyeket **nem kártyával** (`fizetes` nem `kartya`) fizettek ki! A sorok sorrendje nem számít.
+
+  Tipp: `WHERE fizetes <> 'kartya'`
+starter_code:
+  sql: |
+    SELECT id, rendszam, fizetes
+    FROM taxi
+    WHERE ;
+sample_solutions:
+  sql: |
+    SELECT id, rendszam, fizetes
+    FROM taxi
+    WHERE fizetes <> 'kartya';
+tests:
+  - stdin: "CREATE TABLE taxi (id INTEGER PRIMARY KEY, rendszam TEXT, indulas TEXT, cel TEXT, km INTEGER, dij INTEGER, fizetes TEXT);\nINSERT INTO taxi VALUES\n(1, 'BMD-147', 'Pecs', 'Eger', 34, 11000, 'kartya'),\n(2, 'GPC-214', 'Pecs', 'Szeged', 41, 13300, 'kartya'),\n(3, 'GKE-884', 'Gyor', 'Pecs', 39, 12700, 'kartya'),\n(4, 'GPG-418', 'Pecs', 'Szeged', 9, 3500, 'keszpenz'),\n(5, 'DSF-262', 'Szeged', 'Gyor', 36, 11800, 'kartya'),\n(6, 'GTF-204', 'Eger', 'Pecs', 40, 13000, 'kartya'),\n(7, 'ARE-896', 'Pecs', 'Eger', 48, 14900, 'keszpenz'),\n(8, 'CKD-644', 'Szeged', 'Eger', 5, 2500, 'kartya');\n"
+    expected: "id,rendszam,fizetes\n4,GPG-418,keszpenz\n7,ARE-896,keszpenz\n"
+    hidden: false
+  - stdin: "CREATE TABLE taxi (id INTEGER PRIMARY KEY, rendszam TEXT, indulas TEXT, cel TEXT, km INTEGER, dij INTEGER, fizetes TEXT);\nINSERT INTO taxi VALUES\n(1, 'HNE-731', 'Gyor', 'Eger', 17, 6100, 'keszpenz'),\n(2, 'ENG-429', 'Gyor', 'Szeged', 58, 17900, 'kartya'),\n(3, 'HLB-214', 'Szeged', 'Gyor', 6, 2800, 'kartya'),\n(4, 'ELA-272', 'Gyor', 'Pecs', 56, 17800, 'keszpenz'),\n(5, 'CTA-816', 'Pecs', 'Szeged', 47, 14600, 'kartya'),\n(6, 'ASF-480', 'Pecs', 'Szeged', 8, 3200, 'kartya'),\n(7, 'HRA-889', 'Szeged', 'Eger', 6, 2300, 'keszpenz'),\n(8, 'BMD-410', 'Pecs', 'Gyor', 19, 6200, 'kartya'),\n(9, 'FRB-372', 'Szeged', 'Pecs', 40, 12800, 'keszpenz');\n"
+    expected: "id,rendszam,fizetes\n1,HNE-731,keszpenz\n4,ELA-272,keszpenz\n7,HRA-889,keszpenz\n9,FRB-372,keszpenz\n"
+    hidden: true
+  - stdin: "CREATE TABLE taxi (id INTEGER PRIMARY KEY, rendszam TEXT, indulas TEXT, cel TEXT, km INTEGER, dij INTEGER, fizetes TEXT);\nINSERT INTO taxi VALUES\n(1, 'GNE-771', 'Szeged', 'Eger', 37, 11600, 'keszpenz'),\n(2, 'CTE-362', 'Pecs', 'Szeged', 56, 17600, 'kartya'),\n(3, 'DRD-943', 'Pecs', 'Eger', 56, 17300, 'kartya'),\n(4, 'BRH-721', 'Szeged', 'Gyor', 51, 16100, 'kartya'),\n(5, 'FPD-853', 'Eger', 'Gyor', 44, 13700, 'kartya'),\n(6, 'GLB-552', 'Eger', 'Szeged', 25, 8000, 'kartya'),\n(7, 'BTH-627', 'Eger', 'Pecs', 9, 3700, 'kartya'),\n(8, 'APC-748', 'Gyor', 'Eger', 22, 7600, 'kartya'),\n(9, 'ARA-670', 'Gyor', 'Szeged', 6, 2300, 'keszpenz'),\n(10, 'BLB-161', 'Pecs', 'Eger', 50, 16000, 'kartya');\n"
+    expected: "id,rendszam,fizetes\n1,GNE-771,keszpenz\n9,ARA-670,keszpenz\n"
+    hidden: true
+  - stdin: "CREATE TABLE taxi (id INTEGER PRIMARY KEY, rendszam TEXT, indulas TEXT, cel TEXT, km INTEGER, dij INTEGER, fizetes TEXT);\nINSERT INTO taxi VALUES\n(1, 'FKD-121', 'Gyor', 'Pecs', 15, 5000, 'kartya'),\n(2, 'CKG-123', 'Eger', 'Gyor', 47, 14900, 'keszpenz'),\n(3, 'ATD-645', 'Gyor', 'Pecs', 45, 14300, 'kartya'),\n(4, 'ATG-638', 'Gyor', 'Pecs', 55, 17000, 'kartya'),\n(5, 'HSF-134', 'Szeged', 'Gyor', 58, 17900, 'keszpenz'),\n(6, 'FKB-104', 'Szeged', 'Gyor', 57, 17600, 'kartya'),\n(7, 'DPB-189', 'Pecs', 'Gyor', 46, 14600, 'kartya'),\n(8, 'ARC-541', 'Eger', 'Szeged', 30, 10000, 'kartya'),\n(9, 'AMH-626', 'Szeged', 'Gyor', 47, 14600, 'keszpenz'),\n(10, 'BMC-579', 'Eger', 'Gyor', 35, 11500, 'keszpenz'),\n(11, 'CSF-390', 'Gyor', 'Szeged', 13, 4400, 'kartya'),\n(12, 'ALE-739', 'Eger', 'Pecs', 38, 11900, 'keszpenz');\n"
+    expected: "id,rendszam,fizetes\n2,CKG-123,keszpenz\n5,HSF-134,keszpenz\n9,AMH-626,keszpenz\n10,BMC-579,keszpenz\n12,ALE-739,keszpenz\n"
+    hidden: true

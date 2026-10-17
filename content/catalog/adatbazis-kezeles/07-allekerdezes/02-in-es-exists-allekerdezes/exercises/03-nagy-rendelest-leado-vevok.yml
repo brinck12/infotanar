@@ -1,0 +1,170 @@
+slug: nagy-rendelest-leado-vevok
+title: Nagy rendelést leadó vevők
+position: 2
+kind: sql
+level: emelt
+difficulty: 3
+published: false
+allowed_languages:
+- sql
+description: |
+  A `vevo` tábla:
+
+  | oszlop | típus |
+  |---|---|
+  | `id` | egész, elsődleges kulcs |
+  | `nev` | szöveg |
+  | `varos` | szöveg |
+
+  A `rendeles` tábla (a `vevo_id` a `vevo` tábla `id` oszlopára mutat):
+
+  | oszlop | típus |
+  |---|---|
+  | `id` | egész, elsődleges kulcs |
+  | `vevo_id` | egész, idegen kulcs |
+  | `osszeg` | egész (Ft) |
+
+  Listázd ki azoknak a vevőknek a nevét (**nev**), akiknek van **20 000 Ft-nál nagyobb** értékű rendelésük! Használj `EXISTS` operátort **korrelált** allekérdezéssel: az allekérdezés a külső lekérdezés aktuális vevőjére hivatkozik. Minden vevő legfeljebb egyszer szerepeljen. A sorok sorrendje nem számít.
+
+  Tipp: `WHERE EXISTS (SELECT 1 FROM rendeles WHERE rendeles.vevo_id = vevo.id AND osszeg > 20000)`
+starter_code:
+  sql: |
+    SELECT nev
+    FROM vevo
+    WHERE EXISTS (SELECT 1 FROM rendeles WHERE );
+sample_solutions:
+  sql: |
+    SELECT nev
+    FROM vevo
+    WHERE EXISTS (SELECT 1 FROM rendeles WHERE rendeles.vevo_id = vevo.id AND osszeg > 20000);
+tests:
+- stdin: |
+    CREATE TABLE vevo (id INTEGER PRIMARY KEY, nev TEXT, varos TEXT);
+    INSERT INTO vevo VALUES
+    (1, 'Toth Reka', 'Szeged'),
+    (2, 'Balogh Viktor', 'Budapest'),
+    (3, 'Balogh Norbert', 'Gyor'),
+    (4, 'Nagy Hanna', 'Budapest'),
+    (5, 'Kovacs Emese', 'Szeged'),
+    (6, 'Farkas Fanni', 'Szeged'),
+    (7, 'Kiss Istvan', 'Pecs'),
+    (8, 'Szabo Peter', 'Gyor');
+    CREATE TABLE rendeles (id INTEGER PRIMARY KEY, vevo_id INTEGER, osszeg INTEGER);
+    INSERT INTO rendeles VALUES
+    (1, 6, 11000),
+    (2, 5, 6000),
+    (3, 8, 5500),
+    (4, 6, 40000),
+    (5, 8, 7000),
+    (6, 5, 29500),
+    (7, 1, 28500),
+    (8, 5, 20000),
+    (9, 8, 26500);
+  expected: |
+    nev
+    Toth Reka
+    Kovacs Emese
+    Farkas Fanni
+    Szabo Peter
+  hidden: false
+- stdin: |
+    CREATE TABLE vevo (id INTEGER PRIMARY KEY, nev TEXT, varos TEXT);
+    INSERT INTO vevo VALUES
+    (1, 'Balogh Dalma', 'Pecs'),
+    (2, 'Kiss Anna', 'Budapest'),
+    (3, 'Nagy Reka', 'Gyor'),
+    (4, 'Horvath Kata', 'Budapest'),
+    (5, 'Farkas Eszter', 'Szeged'),
+    (6, 'Horvath Zsofia', 'Gyor'),
+    (7, 'Nagy Tamas', 'Pecs'),
+    (8, 'Kiss Dora', 'Gyor'),
+    (9, 'Varga Istvan', 'Budapest'),
+    (10, 'Varga Julia', 'Gyor');
+    CREATE TABLE rendeles (id INTEGER PRIMARY KEY, vevo_id INTEGER, osszeg INTEGER);
+    INSERT INTO rendeles VALUES
+    (1, 8, 6500),
+    (2, 6, 27500),
+    (3, 3, 20000),
+    (4, 6, 31500),
+    (5, 5, 29500),
+    (6, 5, 4000),
+    (7, 9, 2500),
+    (8, 1, 26000),
+    (9, 9, 39500),
+    (10, 6, 26000),
+    (11, 8, 33500),
+    (12, 1, 18000),
+    (13, 1, 22000);
+  expected: |
+    nev
+    Balogh Dalma
+    Farkas Eszter
+    Horvath Zsofia
+    Kiss Dora
+    Varga Istvan
+  hidden: true
+- stdin: |
+    CREATE TABLE vevo (id INTEGER PRIMARY KEY, nev TEXT, varos TEXT);
+    INSERT INTO vevo VALUES
+    (1, 'Kovacs Gabor', 'Budapest'),
+    (2, 'Balogh Dalma', 'Pecs'),
+    (3, 'Molnar Zsofia', 'Gyor'),
+    (4, 'Kiss Gergo', 'Budapest'),
+    (5, 'Kiss Maria', 'Gyor'),
+    (6, 'Toth Anna', 'Gyor'),
+    (7, 'Varga Bela', 'Szeged');
+    CREATE TABLE rendeles (id INTEGER PRIMARY KEY, vevo_id INTEGER, osszeg INTEGER);
+    INSERT INTO rendeles VALUES
+    (1, 1, 21500),
+    (2, 7, 4000),
+    (3, 5, 1500),
+    (4, 4, 28000),
+    (5, 7, 22500),
+    (6, 1, 25000),
+    (7, 7, 5500);
+  expected: |
+    nev
+    Kovacs Gabor
+    Kiss Gergo
+    Varga Bela
+  hidden: true
+- stdin: |
+    CREATE TABLE vevo (id INTEGER PRIMARY KEY, nev TEXT, varos TEXT);
+    INSERT INTO vevo VALUES
+    (1, 'Balogh Lilla', 'Pecs'),
+    (2, 'Molnar Zsofia', 'Budapest'),
+    (3, 'Kiss Bence', 'Budapest'),
+    (4, 'Farkas Norbert', 'Gyor'),
+    (5, 'Horvath Orsolya', 'Szeged'),
+    (6, 'Toth Csaba', 'Gyor'),
+    (7, 'Horvath Anna', 'Szeged'),
+    (8, 'Kiss Hanna', 'Budapest'),
+    (9, 'Molnar Tamas', 'Szeged'),
+    (10, 'Kovacs Bela', 'Gyor'),
+    (11, 'Farkas Eszter', 'Budapest'),
+    (12, 'Nagy Julia', 'Szeged');
+    CREATE TABLE rendeles (id INTEGER PRIMARY KEY, vevo_id INTEGER, osszeg INTEGER);
+    INSERT INTO rendeles VALUES
+    (1, 7, 14500),
+    (2, 1, 29000),
+    (3, 12, 40000),
+    (4, 5, 36500),
+    (5, 4, 34000),
+    (6, 4, 29000),
+    (7, 5, 14000),
+    (8, 7, 3500),
+    (9, 1, 26000),
+    (10, 11, 21500),
+    (11, 12, 13000),
+    (12, 7, 39500),
+    (13, 8, 36000);
+  expected: |
+    nev
+    Balogh Lilla
+    Farkas Norbert
+    Horvath Orsolya
+    Horvath Anna
+    Kiss Hanna
+    Farkas Eszter
+    Nagy Julia
+  hidden: true

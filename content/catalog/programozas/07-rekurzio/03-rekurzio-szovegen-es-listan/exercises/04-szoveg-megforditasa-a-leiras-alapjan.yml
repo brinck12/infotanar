@@ -1,0 +1,76 @@
+slug: szoveg-megforditasa-a-leiras-alapjan
+title: "Szöveg megfordítása a leírás alapján"
+position: 3
+kind: code
+level: emelt
+difficulty: 4
+published: false
+allowed_languages: [python, csharp]
+description: |
+  Kódold le az alábbi mondatszerű rekurzív algoritmust, és írd ki az eredményét a beolvasott szóra.
+
+  `Fordit(s)`:
+  - Ha `s` hossza legfeljebb 1, akkor az eredmény maga `s`.
+  - Különben az eredmény: `Fordit(s második karakterétől a végéig)` után írva `s` első karaktere.
+
+  Bemenet: egy szó (kisbetűs, szóköz nélkül) vagy üres sor. Kimenet: a megfordított szó (üres bemenetnél üres sor).
+
+  Példa: `kutya` esetén a kimenet `aytuk`.
+
+  Tipp: Pythonban `s[1:]` a második karaktertől a végéig tartó rész, C#-ban `s.Substring(1)`. Ciklust és a beépített megfordítást ne használd.
+starter_code:
+  python: |
+    def fordit(s):
+        # TODO: alapeset és rekurzív eset a leírás szerint
+        return s
+
+    print(fordit(input()))
+  csharp: |
+    using System;
+
+    class Program
+    {
+        static string Fordit(string s)
+        {
+            // TODO: alapeset és rekurzív eset a leírás szerint
+            return s;
+        }
+
+        static void Main()
+        {
+            Console.WriteLine(Fordit(Console.ReadLine()));
+        }
+    }
+sample_solutions:
+  python: |
+    def fordit(s):
+        if len(s) <= 1:
+            return s
+        return fordit(s[1:]) + s[0]
+
+    print(fordit(input()))
+  csharp: |
+    using System;
+
+    class Program
+    {
+        static string Fordit(string s)
+        {
+            if (s.Length <= 1)
+            {
+                return s;
+            }
+            return Fordit(s.Substring(1)) + s[0];
+        }
+
+        static void Main()
+        {
+            Console.WriteLine(Fordit(Console.ReadLine()));
+        }
+    }
+tests:
+  - { stdin: "kutya\n", expected: "aytuk\n", hidden: false }
+  - { stdin: "a\n", expected: "a\n", hidden: true }
+  - { stdin: "\n", expected: "\n", hidden: true }
+  - { stdin: "abba\n", expected: "abba\n", hidden: true }
+  - { stdin: "programozas\n", expected: "sazomargorp\n", hidden: true }

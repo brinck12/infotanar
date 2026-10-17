@@ -1,0 +1,127 @@
+slug: raktarkeszlet-erteke
+title: "Raktárkészlet értéke"
+position: 1
+kind: code
+level: emelt
+difficulty: 3
+published: false
+allowed_languages: [python, csharp]
+description: |
+  Egy raktár készletlistájának első sora a tételek száma (N, legalább 1), majd N sor: `termek;db;egysegar` (a darabszám és az egységár egész szám, forintban). Egy tétel értéke a darabszám és az egységár szorzata.
+
+  Írd ki a teljes készlet értékét (`Osszes ertek: ... Ft`), és a legnagyobb értékű tételt (`Legertekesebb: nev (... Ft)`). Egyenlő értéknél az előbb szereplő tétel számít.
+
+  Példa bemenet:
+
+  ```
+  3
+  alma;10;200
+  korte;5;500
+  szilva;20;100
+  ```
+
+  Kimenet:
+
+  ```
+  Osszes ertek: 6500 Ft
+  Legertekesebb: korte (2500 Ft)
+  ```
+
+  Tipp: két tételt kell egyszerre kezelned: egy összegzést és egy maximumkiválasztást. Egyetlen ciklusban is megoldható.
+starter_code:
+  python: |
+    from dataclasses import dataclass
+
+    @dataclass
+    class Tetel:
+        termek: str
+        db: int
+        egysegar: int
+
+    n = int(input())
+    tetelek = []
+    # olvasd be a tételeket, majd összegezz és keress maximumot
+  csharp: |
+    using System;
+    using System.Collections.Generic;
+
+    class Tetel
+    {
+        public string Termek;
+        public int Db;
+        public int Egysegar;
+    }
+
+    class Program
+    {
+        static void Main()
+        {
+            int n = int.Parse(Console.ReadLine());
+            var tetelek = new List<Tetel>();
+            // olvasd be a tételeket, majd összegezz és keress maximumot
+        }
+    }
+sample_solutions:
+  python: |
+    from dataclasses import dataclass
+
+    @dataclass
+    class Tetel:
+        termek: str
+        db: int
+        egysegar: int
+
+    n = int(input())
+    tetelek = []
+    for _ in range(n):
+        resz = input().split(";")
+        tetelek.append(Tetel(resz[0], int(resz[1]), int(resz[2])))
+    osszes = 0
+    legjobb = tetelek[0]
+    for t in tetelek:
+        osszes += t.db * t.egysegar
+        if t.db * t.egysegar > legjobb.db * legjobb.egysegar:
+            legjobb = t
+    print("Osszes ertek:", osszes, "Ft")
+    print("Legertekesebb: " + legjobb.termek + " (" + str(legjobb.db * legjobb.egysegar) + " Ft)")
+  csharp: |
+    using System;
+    using System.Collections.Generic;
+
+    class Tetel
+    {
+        public string Termek;
+        public int Db;
+        public int Egysegar;
+    }
+
+    class Program
+    {
+        static void Main()
+        {
+            int n = int.Parse(Console.ReadLine());
+            var tetelek = new List<Tetel>();
+            for (int i = 0; i < n; i++)
+            {
+                string[] resz = Console.ReadLine().Split(';');
+                tetelek.Add(new Tetel { Termek = resz[0], Db = int.Parse(resz[1]), Egysegar = int.Parse(resz[2]) });
+            }
+            int osszes = 0;
+            var legjobb = tetelek[0];
+            foreach (var t in tetelek)
+            {
+                osszes += t.Db * t.Egysegar;
+                if (t.Db * t.Egysegar > legjobb.Db * legjobb.Egysegar)
+                {
+                    legjobb = t;
+                }
+            }
+            Console.WriteLine("Osszes ertek: " + osszes + " Ft");
+            Console.WriteLine("Legertekesebb: " + legjobb.Termek + " (" + (legjobb.Db * legjobb.Egysegar) + " Ft)");
+        }
+    }
+tests:
+  - { stdin: "3\nalma;10;200\nkorte;5;500\nszilva;20;100\n", expected: "Osszes ertek: 6500 Ft\nLegertekesebb: korte (2500 Ft)\n", hidden: false }
+  - { stdin: "1\nlisztes zsak;0;350\n", expected: "Osszes ertek: 0 Ft\nLegertekesebb: lisztes zsak (0 Ft)\n", hidden: true }
+  - { stdin: "2\ntej;10;300\nkenyer;6;500\n", expected: "Osszes ertek: 6000 Ft\nLegertekesebb: tej (3000 Ft)\n", hidden: true }
+  - { stdin: "4\ncukor;100;400\nso;50;150\nliszt;80;500\nolaj;3;1200\n", expected: "Osszes ertek: 91100 Ft\nLegertekesebb: cukor (40000 Ft)\n", hidden: true }

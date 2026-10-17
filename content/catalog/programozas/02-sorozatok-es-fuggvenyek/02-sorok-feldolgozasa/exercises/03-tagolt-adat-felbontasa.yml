@@ -1,0 +1,71 @@
+slug: tagolt-adat-felbontasa
+title: Tagolt adat felbontása
+position: 2
+kind: code
+level: kozep
+difficulty: 2
+published: false
+allowed_languages: [python, csharp]
+description: |
+  A bemenet egyetlen sor `nev;kor;varos` alakban, pontosvesszővel elválasztva (a név több szóból is állhat, a kor egész szám). Írd ki három sorban:
+
+  ```
+  Nev: <név>
+  Varos: <város>
+  Jovore: <kor + 1>
+  ```
+
+  Példa: a `Kiss Anna;17;Pecs` bemenetre:
+
+  ```
+  Nev: Kiss Anna
+  Varos: Pecs
+  Jovore: 18
+  ```
+
+  Tipp: a pontosvessző mentén vágj szét; a mezők sorrendje: 0. név, 1. kor, 2. város. A kort számmá kell alakítanod, mielőtt hozzáadsz egyet.
+starter_code:
+  python: |
+    adat = input()
+    mezok = adat.split(";")
+    # innen folytasd
+  csharp: |
+    using System;
+
+    class Program
+    {
+        static void Main()
+        {
+            string adat = Console.ReadLine();
+            string[] mezok = adat.Split(';');
+            // innen folytasd
+        }
+    }
+sample_solutions:
+  python: |
+    adat = input()
+    mezok = adat.split(";")
+    kor = int(mezok[1])
+    print("Nev: " + mezok[0])
+    print("Varos: " + mezok[2])
+    print("Jovore: " + str(kor + 1))
+  csharp: |
+    using System;
+
+    class Program
+    {
+        static void Main()
+        {
+            string adat = Console.ReadLine();
+            string[] mezok = adat.Split(';');
+            int kor = int.Parse(mezok[1]);
+            Console.WriteLine("Nev: " + mezok[0]);
+            Console.WriteLine("Varos: " + mezok[2]);
+            Console.WriteLine("Jovore: " + (kor + 1));
+        }
+    }
+tests:
+  - { stdin: "Kiss Anna;17;Pecs\n", expected: "Nev: Kiss Anna\nVaros: Pecs\nJovore: 18\n", hidden: false }
+  - { stdin: "Nagy Bela;0;Gyor\n", expected: "Nev: Nagy Bela\nVaros: Gyor\nJovore: 1\n", hidden: true }
+  - { stdin: "Eva;99;Szeged\n", expected: "Nev: Eva\nVaros: Szeged\nJovore: 100\n", hidden: true }
+  - { stdin: "Toth Maria Zsuzsanna;45;Nyiregyhaza\n", expected: "Nev: Toth Maria Zsuzsanna\nVaros: Nyiregyhaza\nJovore: 46\n", hidden: true }

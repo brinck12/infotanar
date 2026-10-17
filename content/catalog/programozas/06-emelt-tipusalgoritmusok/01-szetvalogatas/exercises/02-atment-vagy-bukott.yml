@@ -1,0 +1,109 @@
+slug: atment-vagy-bukott
+title: "Átment vagy bukott"
+position: 1
+kind: code
+level: emelt
+difficulty: 3
+published: false
+allowed_languages: [python, csharp]
+description: |
+  Egy osztály félévi jegyei: az első sor a tanulók száma (N, legalább 1), majd N sor: `nev;jegy` (a jegy 1 és 5 közötti egész). A 2-es vagy jobb jegy átmenő. Írd ki két sorban, a bemenet sorrendjében, a neveket vesszővel és szóközzel (`, `) elválasztva: `Atment: ...` és `Bukott: ...`. Üres csoportnál a kettőspont után `-` álljon.
+
+  Példa bemenet:
+
+  ```
+  4
+  Anna;5
+  Bence;1
+  Csilla;2
+  David;1
+  ```
+
+  Kimenet:
+
+  ```
+  Atment: Anna, Csilla
+  Bukott: Bence, David
+  ```
+
+  Tipp: a rekordot (vagy legalább a nevet) tedd a megfelelő listába, a kiíráshoz a nevek listáját kell összefűznöd.
+starter_code:
+  python: |
+    n = int(input())
+    atment = []
+    bukott = []
+    # olvasd be a tanulókat, és válogasd szét őket
+  csharp: |
+    using System;
+    using System.Collections.Generic;
+
+    class Program
+    {
+        static void Main()
+        {
+            int n = int.Parse(Console.ReadLine());
+            var atment = new List<string>();
+            var bukott = new List<string>();
+            // olvasd be a tanulókat, és válogasd szét őket
+        }
+    }
+sample_solutions:
+  python: |
+    n = int(input())
+    atment = []
+    bukott = []
+    for _ in range(n):
+        resz = input().split(";")
+        if int(resz[1]) >= 2:
+            atment.append(resz[0])
+        else:
+            bukott.append(resz[0])
+
+    def sor(lista):
+        if len(lista) == 0:
+            return "-"
+        return ", ".join(lista)
+
+    print("Atment: " + sor(atment))
+    print("Bukott: " + sor(bukott))
+  csharp: |
+    using System;
+    using System.Collections.Generic;
+
+    class Program
+    {
+        static string Sor(List<string> lista)
+        {
+            if (lista.Count == 0)
+            {
+                return "-";
+            }
+            return string.Join(", ", lista);
+        }
+
+        static void Main()
+        {
+            int n = int.Parse(Console.ReadLine());
+            var atment = new List<string>();
+            var bukott = new List<string>();
+            for (int i = 0; i < n; i++)
+            {
+                string[] resz = Console.ReadLine().Split(';');
+                if (int.Parse(resz[1]) >= 2)
+                {
+                    atment.Add(resz[0]);
+                }
+                else
+                {
+                    bukott.Add(resz[0]);
+                }
+            }
+            Console.WriteLine("Atment: " + Sor(atment));
+            Console.WriteLine("Bukott: " + Sor(bukott));
+        }
+    }
+tests:
+  - { stdin: "4\nAnna;5\nBence;1\nCsilla;2\nDavid;1\n", expected: "Atment: Anna, Csilla\nBukott: Bence, David\n", hidden: false }
+  - { stdin: "1\nEmil;3\n", expected: "Atment: Emil\nBukott: -\n", hidden: true }
+  - { stdin: "2\nFanni;1\nGabor;1\n", expected: "Atment: -\nBukott: Fanni, Gabor\n", hidden: true }
+  - { stdin: "3\nHanna;4\nIvan;5\nJudit;3\n", expected: "Atment: Hanna, Ivan, Judit\nBukott: -\n", hidden: true }

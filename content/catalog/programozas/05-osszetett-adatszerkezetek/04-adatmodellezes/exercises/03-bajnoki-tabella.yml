@@ -1,0 +1,191 @@
+slug: bajnoki-tabella
+title: "Bajnoki tabella"
+position: 2
+kind: code
+level: emelt
+difficulty: 4
+published: false
+allowed_languages: [python, csharp]
+description: |
+  Egy labdarúgó-bajnokság mérkőzései: az első sor a mérkőzések száma (N, legalább 1), majd N sor: `hazai;vendeg;hazai_gol;vendeg_gol`. A győztes 3 pontot, a döntetlen mindkét csapat 1-1 pontot kap, a vesztes 0-t.
+
+  Írd ki minden csapat sorát az első előfordulás sorrendjében: `csapat pont gyozelem dontetlen vereseg` (szóközzel elválasztva). Utána egy sor: `Vezeto: csapat` (a legtöbb pontú csapat; egyenlő pontnál az, amelyik előbb szerepel a kiírásban).
+
+  Példa bemenet:
+
+  ```
+  3
+  Alfa;Beta;2;1
+  Gamma;Alfa;0;0
+  Beta;Gamma;3;1
+  ```
+
+  Kimenet:
+
+  ```
+  Alfa 4 1 1 0
+  Beta 3 1 0 1
+  Gamma 1 0 1 1
+  Vezeto: Alfa
+  ```
+
+  Tipp: a csapat legyen rekord (név, pont, győzelem, döntetlen, vereség), a csapatokat pedig szótár tartsa nyilván név szerint, az első előfordulás sorrendjét pedig egy lista.
+starter_code:
+  python: |
+    from dataclasses import dataclass
+
+    @dataclass
+    class Csapat:
+        nev: str
+        pont: int = 0
+        gy: int = 0
+        d: int = 0
+        v: int = 0
+
+    n = int(input())
+    csapatok = {}
+    # dolgozd fel a mérkőzéseket
+  csharp: |
+    using System;
+    using System.Collections.Generic;
+
+    class Csapat
+    {
+        public string Nev;
+        public int Pont;
+        public int Gy;
+        public int D;
+        public int V;
+    }
+
+    class Program
+    {
+        static void Main()
+        {
+            int n = int.Parse(Console.ReadLine());
+            var csapatok = new Dictionary<string, Csapat>();
+            var sorrend = new List<string>();
+            // dolgozd fel a mérkőzéseket
+        }
+    }
+sample_solutions:
+  python: |
+    from dataclasses import dataclass
+
+    @dataclass
+    class Csapat:
+        nev: str
+        pont: int = 0
+        gy: int = 0
+        d: int = 0
+        v: int = 0
+
+    def keres(csapatok, nev):
+        if nev not in csapatok:
+            csapatok[nev] = Csapat(nev)
+        return csapatok[nev]
+
+    n = int(input())
+    csapatok = {}
+    for _ in range(n):
+        resz = input().split(";")
+        hazai = keres(csapatok, resz[0])
+        vendeg = keres(csapatok, resz[1])
+        hg = int(resz[2])
+        vg = int(resz[3])
+        if hg > vg:
+            hazai.pont += 3
+            hazai.gy += 1
+            vendeg.v += 1
+        elif hg < vg:
+            vendeg.pont += 3
+            vendeg.gy += 1
+            hazai.v += 1
+        else:
+            hazai.pont += 1
+            vendeg.pont += 1
+            hazai.d += 1
+            vendeg.d += 1
+    vezeto = None
+    for nev in csapatok:
+        cs = csapatok[nev]
+        print(cs.nev, cs.pont, cs.gy, cs.d, cs.v)
+        if vezeto is None or cs.pont > vezeto.pont:
+            vezeto = cs
+    print("Vezeto: " + vezeto.nev)
+  csharp: |
+    using System;
+    using System.Collections.Generic;
+
+    class Csapat
+    {
+        public string Nev;
+        public int Pont;
+        public int Gy;
+        public int D;
+        public int V;
+    }
+
+    class Program
+    {
+        static Dictionary<string, Csapat> csapatok = new Dictionary<string, Csapat>();
+        static List<string> sorrend = new List<string>();
+
+        static Csapat Keres(string nev)
+        {
+            if (!csapatok.ContainsKey(nev))
+            {
+                csapatok[nev] = new Csapat { Nev = nev };
+                sorrend.Add(nev);
+            }
+            return csapatok[nev];
+        }
+
+        static void Main()
+        {
+            int n = int.Parse(Console.ReadLine());
+            for (int i = 0; i < n; i++)
+            {
+                string[] resz = Console.ReadLine().Split(';');
+                var hazai = Keres(resz[0]);
+                var vendeg = Keres(resz[1]);
+                int hg = int.Parse(resz[2]);
+                int vg = int.Parse(resz[3]);
+                if (hg > vg)
+                {
+                    hazai.Pont += 3;
+                    hazai.Gy++;
+                    vendeg.V++;
+                }
+                else if (hg < vg)
+                {
+                    vendeg.Pont += 3;
+                    vendeg.Gy++;
+                    hazai.V++;
+                }
+                else
+                {
+                    hazai.Pont++;
+                    vendeg.Pont++;
+                    hazai.D++;
+                    vendeg.D++;
+                }
+            }
+            Csapat vezeto = null;
+            foreach (string nev in sorrend)
+            {
+                var cs = csapatok[nev];
+                Console.WriteLine(cs.Nev + " " + cs.Pont + " " + cs.Gy + " " + cs.D + " " + cs.V);
+                if (vezeto == null || cs.Pont > vezeto.Pont)
+                {
+                    vezeto = cs;
+                }
+            }
+            Console.WriteLine("Vezeto: " + vezeto.Nev);
+        }
+    }
+tests:
+  - { stdin: "3\nAlfa;Beta;2;1\nGamma;Alfa;0;0\nBeta;Gamma;3;1\n", expected: "Alfa 4 1 1 0\nBeta 3 1 0 1\nGamma 1 0 1 1\nVezeto: Alfa\n", hidden: false }
+  - { stdin: "1\nX;Y;1;1\n", expected: "X 1 0 1 0\nY 1 0 1 0\nVezeto: X\n", hidden: true }
+  - { stdin: "2\nA;B;0;5\nB;A;1;0\n", expected: "A 0 0 0 2\nB 6 2 0 0\nVezeto: B\n", hidden: true }
+  - { stdin: "4\nKek;Zold;1;0\nPiros;Sarga;2;2\nZold;Piros;0;3\nSarga;Kek;1;1\n", expected: "Kek 4 1 1 0\nZold 0 0 0 2\nPiros 4 1 1 0\nSarga 2 0 2 0\nVezeto: Kek\n", hidden: true }

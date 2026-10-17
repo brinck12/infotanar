@@ -1,0 +1,110 @@
+slug: uj-oszlop-az-e-mail-cimnek
+title: Új oszlop az e-mail címnek
+position: 2
+kind: sql
+level: emelt
+difficulty: 3
+published: false
+allowed_languages:
+- sql
+sql_order_sensitive: true
+description: |
+  A `diak` tábla:
+
+  | oszlop | típus |
+  |---|---|
+  | `id` | egész, elsődleges kulcs |
+  | `nev` | szöveg |
+  | `osztaly` | szöveg |
+  | `pont` | egész |
+
+  A diákoknak e-mail címet is nyilván akarunk tartani. Bővítsd a `diak` táblát egy `email` nevű szöveges oszloppal (`ALTER TABLE ... ADD COLUMN ...`), majd töltsd ki minden diáknál úgy, hogy az e-mail cím a **diák neve kisbetűsen, a szóköz helyett ponttal, utána `@suli.hu`** legyen. Például a `Kiss Anna` nevű diáké `kiss.anna@suli.hu`.
+
+  (Az `ALTER TABLE` nem szerepel az érettségi követelményei között, de a gyakorlatban nagyon hasznos.)
+
+  A kód végén álló `SELECT` sort **ne töröld és ne módosítsd**: az mutatja meg a tábla állapotát módosítás után, és a rendszer ezt az eredményt hasonlítja az elvárthoz. A saját utasításodat a `SELECT` **elé** írd, pontosvesszővel lezárva.
+
+  Tipp: `REPLACE(LOWER(nev), ' ', '.') || '@suli.hu'` – az `||` jel összefűzi a szövegeket (MariaDB-ben `CONCAT`).
+starter_code:
+  sql: |
+    -- Ide írd az ALTER TABLE és az UPDATE utasítást.
+
+    SELECT id, email FROM diak ORDER BY id;
+sample_solutions:
+  sql: |
+    ALTER TABLE diak ADD COLUMN email TEXT;
+
+    UPDATE diak SET email = REPLACE(LOWER(nev), ' ', '.') || '@suli.hu';
+
+    SELECT id, email FROM diak ORDER BY id;
+tests:
+- stdin: |
+    CREATE TABLE diak (id INTEGER PRIMARY KEY, nev TEXT, osztaly TEXT, pont INTEGER);
+    INSERT INTO diak VALUES
+    (1, 'Toth Reka', '9.A', 75),
+    (2, 'Toth Viktor', '9.A', 50),
+    (3, 'Horvath Norbert', '9.B', 25),
+    (4, 'Molnar Imre', '10.B', 23),
+    (5, 'Toth Hanna', '9.B', 94);
+  expected: |
+    id,email
+    1,toth.reka@suli.hu
+    2,toth.viktor@suli.hu
+    3,horvath.norbert@suli.hu
+    4,molnar.imre@suli.hu
+    5,toth.hanna@suli.hu
+  hidden: false
+- stdin: |
+    CREATE TABLE diak (id INTEGER PRIMARY KEY, nev TEXT, osztaly TEXT, pont INTEGER);
+    INSERT INTO diak VALUES
+    (1, 'Balogh Dalma', '9.A', 54),
+    (2, 'Nagy Anna', '10.A', 29),
+    (3, 'Horvath Reka', '9.A', 63),
+    (4, 'Horvath Kata', '10.A', 65),
+    (5, 'Balogh Eszter', '9.A', 80),
+    (6, 'Kiss Zsofia', '9.A', 42);
+  expected: |
+    id,email
+    1,balogh.dalma@suli.hu
+    2,nagy.anna@suli.hu
+    3,horvath.reka@suli.hu
+    4,horvath.kata@suli.hu
+    5,balogh.eszter@suli.hu
+    6,kiss.zsofia@suli.hu
+  hidden: true
+- stdin: |
+    CREATE TABLE diak (id INTEGER PRIMARY KEY, nev TEXT, osztaly TEXT, pont INTEGER);
+    INSERT INTO diak VALUES
+    (1, 'Kovacs Gabor', '10.B', 26),
+    (2, 'Kiss Dalma', '9.A', 40),
+    (3, 'Kiss Zsofia', '10.A', 21),
+    (4, 'Kovacs Gergo', '10.A', 75);
+  expected: |
+    id,email
+    1,kovacs.gabor@suli.hu
+    2,kiss.dalma@suli.hu
+    3,kiss.zsofia@suli.hu
+    4,kovacs.gergo@suli.hu
+  hidden: true
+- stdin: |
+    CREATE TABLE diak (id INTEGER PRIMARY KEY, nev TEXT, osztaly TEXT, pont INTEGER);
+    INSERT INTO diak VALUES
+    (1, 'Balogh Lilla', '10.A', 39),
+    (2, 'Kiss Zsofia', '10.A', 24),
+    (3, 'Nagy Bence', '10.B', 70),
+    (4, 'Horvath Norbert', '9.A', 52),
+    (5, 'Balogh Orsolya', '9.A', 31),
+    (6, 'Molnar Csaba', '10.B', 51),
+    (7, 'Kiss Anna', '10.B', 99),
+    (8, 'Farkas Hanna', '9.B', 21);
+  expected: |
+    id,email
+    1,balogh.lilla@suli.hu
+    2,kiss.zsofia@suli.hu
+    3,nagy.bence@suli.hu
+    4,horvath.norbert@suli.hu
+    5,balogh.orsolya@suli.hu
+    6,molnar.csaba@suli.hu
+    7,kiss.anna@suli.hu
+    8,farkas.hanna@suli.hu
+  hidden: true

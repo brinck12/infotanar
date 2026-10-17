@@ -1,0 +1,118 @@
+slug: legjobb-tanulo
+title: "Legjobb tanuló"
+position: 0
+kind: code
+level: emelt
+difficulty: 2
+published: false
+allowed_languages: [python, csharp]
+description: |
+  A bemenet első sora a tanulók száma (N, legalább 1), majd N sor: `nev;pont`, ahol a pont egész szám. Írd ki a legtöbb pontot elért tanuló nevét és pontját a `Legjobb: nev` és `Pont: ...` sorokban. Holtverseny esetén az a tanuló számít, aki a bemenetben előbb szerepel.
+
+  Példa bemenet:
+
+  ```
+  3
+  Anna;42
+  Bence;37
+  Csilla;45
+  ```
+
+  Kimenet:
+
+  ```
+  Legjobb: Csilla
+  Pont: 45
+  ```
+
+  Tipp: hozz létre rekordot a sorokból, és maximumkiválasztásnál a rekordot jegyezd meg, ne csak a pontszámot.
+starter_code:
+  python: |
+    from dataclasses import dataclass
+
+    @dataclass
+    class Tanulo:
+        nev: str
+        pont: int
+
+    n = int(input())
+    tanulok = []
+    # olvasd be a rekordokat, majd keresd meg a legjobbat
+  csharp: |
+    using System;
+    using System.Collections.Generic;
+
+    class Tanulo
+    {
+        public string Nev;
+        public int Pont;
+    }
+
+    class Program
+    {
+        static void Main()
+        {
+            int n = int.Parse(Console.ReadLine());
+            var tanulok = new List<Tanulo>();
+            // olvasd be a rekordokat, majd keresd meg a legjobbat
+        }
+    }
+sample_solutions:
+  python: |
+    from dataclasses import dataclass
+
+    @dataclass
+    class Tanulo:
+        nev: str
+        pont: int
+
+    n = int(input())
+    tanulok = []
+    for _ in range(n):
+        resz = input().split(";")
+        tanulok.append(Tanulo(resz[0], int(resz[1])))
+    legjobb = tanulok[0]
+    for t in tanulok:
+        if t.pont > legjobb.pont:
+            legjobb = t
+    print("Legjobb:", legjobb.nev)
+    print("Pont:", legjobb.pont)
+  csharp: |
+    using System;
+    using System.Collections.Generic;
+
+    class Tanulo
+    {
+        public string Nev;
+        public int Pont;
+    }
+
+    class Program
+    {
+        static void Main()
+        {
+            int n = int.Parse(Console.ReadLine());
+            var tanulok = new List<Tanulo>();
+            for (int i = 0; i < n; i++)
+            {
+                string[] resz = Console.ReadLine().Split(';');
+                tanulok.Add(new Tanulo { Nev = resz[0], Pont = int.Parse(resz[1]) });
+            }
+            var legjobb = tanulok[0];
+            foreach (var t in tanulok)
+            {
+                if (t.Pont > legjobb.Pont)
+                {
+                    legjobb = t;
+                }
+            }
+            Console.WriteLine("Legjobb: " + legjobb.Nev);
+            Console.WriteLine("Pont: " + legjobb.Pont);
+        }
+    }
+tests:
+  - { stdin: "3\nAnna;42\nBence;37\nCsilla;45\n", expected: "Legjobb: Csilla\nPont: 45\n", hidden: false }
+  - { stdin: "1\nDora;10\n", expected: "Legjobb: Dora\nPont: 10\n", hidden: true }
+  - { stdin: "4\nEmil;50\nFanni;50\nGabor;49\nHanna;50\n", expected: "Legjobb: Emil\nPont: 50\n", hidden: true }
+  - { stdin: "3\nIda;-5\nJanos;-2\nKata;-9\n", expected: "Legjobb: Janos\nPont: -2\n", hidden: true }
+  - { stdin: "5\nLaci;0\nMaja;1\nNora;100\nOlga;99\nPeti;100\n", expected: "Legjobb: Nora\nPont: 100\n", hidden: true }

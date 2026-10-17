@@ -1,0 +1,117 @@
+slug: unio-ismetlodes-nelkul
+title: "Unió ismétlődés nélkül"
+position: 0
+kind: code
+level: emelt
+difficulty: 2
+published: false
+allowed_languages: [python, csharp]
+description: |
+  Két számsorozat érkezik négy sorban: az első elemszáma (N, legalább 1), maga a sorozat szóközzel elválasztva, a második elemszáma (M, legalább 1), majd az is. Egy sorozatban egy érték többször is szerepelhet. Írd ki a két sorozat **unióját** (azokat az értékeket, amelyek legalább az egyikben szerepelnek), mindegyiket egyszer, abban a sorrendben, ahogy először előfordulnak az első sorozat után a másodikat folytatva: `Unio: ...`.
+
+  Példa bemenet:
+
+  ```
+  4
+  4 1 7 4
+  4
+  9 4 6 1
+  ```
+
+  Kimenet:
+
+  ```
+  Unio: 4 1 7 9 6
+  ```
+
+  Tipp: először az első sorozat új elemei kerülnek az eredménybe, utána a másodikéi, mindig ellenőrizve, hogy az érték nincs-e még benne.
+starter_code:
+  python: |
+    n = int(input())
+    a = [int(x) for x in input().split()]
+    m = int(input())
+    b = [int(x) for x in input().split()]
+    # készítsd el az uniót
+  csharp: |
+    using System;
+    using System.Collections.Generic;
+
+    class Program
+    {
+        static List<int> Beolvas()
+        {
+            Console.ReadLine();
+            var lista = new List<int>();
+            foreach (string s in Console.ReadLine().Split(' '))
+            {
+                lista.Add(int.Parse(s));
+            }
+            return lista;
+        }
+
+        static void Main()
+        {
+            var a = Beolvas();
+            var b = Beolvas();
+            // készítsd el az uniót
+        }
+    }
+sample_solutions:
+  python: |
+    n = int(input())
+    a = [int(x) for x in input().split()]
+    m = int(input())
+    b = [int(x) for x in input().split()]
+    unio = []
+    for x in a:
+        if x not in unio:
+            unio.append(x)
+    for x in b:
+        if x not in unio:
+            unio.append(x)
+    print("Unio: " + " ".join(str(x) for x in unio))
+  csharp: |
+    using System;
+    using System.Collections.Generic;
+
+    class Program
+    {
+        static List<int> Beolvas()
+        {
+            Console.ReadLine();
+            var lista = new List<int>();
+            foreach (string s in Console.ReadLine().Split(' '))
+            {
+                lista.Add(int.Parse(s));
+            }
+            return lista;
+        }
+
+        static void Main()
+        {
+            var a = Beolvas();
+            var b = Beolvas();
+            var unio = new List<int>();
+            foreach (int x in a)
+            {
+                if (!unio.Contains(x))
+                {
+                    unio.Add(x);
+                }
+            }
+            foreach (int x in b)
+            {
+                if (!unio.Contains(x))
+                {
+                    unio.Add(x);
+                }
+            }
+            Console.WriteLine("Unio: " + string.Join(" ", unio));
+        }
+    }
+tests:
+  - { stdin: "4\n4 1 7 4\n4\n9 4 6 1\n", expected: "Unio: 4 1 7 9 6\n", hidden: false }
+  - { stdin: "1\n5\n1\n5\n", expected: "Unio: 5\n", hidden: true }
+  - { stdin: "3\n1 2 3\n3\n4 5 6\n", expected: "Unio: 1 2 3 4 5 6\n", hidden: true }
+  - { stdin: "5\n2 2 2 2 2\n3\n3 3 2\n", expected: "Unio: 2 3\n", hidden: true }
+  - { stdin: "2\n-1 0\n2\n0 -1\n", expected: "Unio: -1 0\n", hidden: true }

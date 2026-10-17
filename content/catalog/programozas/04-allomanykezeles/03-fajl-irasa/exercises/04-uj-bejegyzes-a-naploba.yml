@@ -1,0 +1,137 @@
+slug: uj-bejegyzes-a-naploba
+title: Új bejegyzés a naplóba
+position: 3
+kind: code
+level: emelt
+difficulty: 3
+published: false
+allowed_languages:
+- python
+- csharp
+description: |
+  A `naplo.txt` fájl egy napló, soronként egy bejegyzéssel. A felhasználó megad egy új bejegyzést (egy sor a bemeneten). Fűzd hozzá a fájl végére a meglévő sorok megtartásával (ne írd felül a fájlt!), majd olvasd vissza a fájlt, írd ki minden sorát, a végén pedig a sorok számát:
+
+  ```
+  indul
+  munka
+  leall
+  Sorok: 3
+  ```
+
+  (A példa a `leall` bejegyzésre szól.)
+
+  Tipp: a hozzáfűző megnyitási mód Pythonban az `"a"` (append), C#-ban a `File.AppendAllText` vagy a `new StreamWriter(nev, true)`. A bejegyzés után ne felejts sortörést írni.
+starter_code:
+  python: |
+    uj = input()
+    with open("naplo.txt", "a", encoding="utf-8") as f:
+        # ide írd a hozzáfűzést
+        pass
+    with open("naplo.txt", encoding="utf-8") as f:
+        sorok = f.read().splitlines()
+    # ide írd a kiírást
+  csharp: |
+    using System;
+    using System.IO;
+
+    class Program
+    {
+        static void Main()
+        {
+            string uj = Console.ReadLine();
+            // ide írd a hozzáfűzést
+            string[] sorok = File.ReadAllLines("naplo.txt");
+            // ide írd a kiírást
+        }
+    }
+sample_solutions:
+  python: |
+    uj = input()
+    with open("naplo.txt", "a", encoding="utf-8") as f:
+        f.write(uj + "\n")
+    with open("naplo.txt", encoding="utf-8") as f:
+        sorok = f.read().splitlines()
+    for sor in sorok:
+        print(sor)
+    print("Sorok:", len(sorok))
+  csharp: |
+    using System;
+    using System.IO;
+
+    class Program
+    {
+        static void Main()
+        {
+            string uj = Console.ReadLine();
+            File.AppendAllText("naplo.txt", uj + "\n");
+            string[] sorok = File.ReadAllLines("naplo.txt");
+            foreach (string sor in sorok)
+            {
+                Console.WriteLine(sor);
+            }
+            Console.WriteLine("Sorok: " + sorok.Length);
+        }
+    }
+files:
+  naplo.txt: naplo.txt
+tests:
+- stdin: 'leall
+
+    '
+  expected: 'indul
+
+    munka
+
+    leall
+
+    Sorok: 3
+
+    '
+  hidden: false
+- stdin: 'masodik
+
+    '
+  expected: 'indul
+
+    munka
+
+    masodik
+
+    Sorok: 3
+
+    '
+  hidden: true
+- stdin: 'elso bejegyzes
+
+    '
+  expected: 'regi
+
+    elso bejegyzes
+
+    Sorok: 2
+
+    '
+  hidden: true
+  files:
+    naplo.txt: teszt-3/naplo.txt
+- stdin: 'zaro
+
+    '
+  expected: 'a
+
+    b
+
+    c
+
+    d
+
+    e
+
+    zaro
+
+    Sorok: 6
+
+    '
+  hidden: true
+  files:
+    naplo.txt: teszt-4/naplo.txt

@@ -1,0 +1,104 @@
+slug: buborekrendezes
+title: "Buborékrendezés"
+position: 1
+kind: code
+level: emelt
+difficulty: 3
+published: false
+allowed_languages: [python, csharp]
+description: |
+  A bemenet első sora az elemek száma (N, legalább 1), a másodikban N egész szám áll szóközzel elválasztva. Rendezd a számokat **növekvő sorrendbe cserés (buborék) rendezéssel**, a beépített rendezés használata nélkül: a szomszédos, rossz sorrendű elempárokat cseréld meg, amíg egy menetben már nem volt csere. Írd ki a rendezett sort (`Rendezve: ...`) és az elvégzett cserék számát (`Csere: ...`).
+
+  Példa bemenet:
+
+  ```
+  4
+  5 2 9 1
+  ```
+
+  Kimenet:
+
+  ```
+  Rendezve: 1 2 5 9
+  Csere: 4
+  ```
+
+  Tipp: egy csere pontosan egy rossz sorrendű párt szüntet meg, ezért a cserék száma nem függ attól, hogyan szervezed a menetet. Az egyenlő szomszédokat ne cseréld.
+starter_code:
+  python: |
+    n = int(input())
+    a = [int(x) for x in input().split()]
+    # buborékrendezés, a cserék számolásával
+  csharp: |
+    using System;
+    using System.Collections.Generic;
+
+    class Program
+    {
+        static void Main()
+        {
+            int n = int.Parse(Console.ReadLine());
+            var a = new List<int>();
+            foreach (string s in Console.ReadLine().Split(' '))
+            {
+                a.Add(int.Parse(s));
+            }
+            // buborékrendezés, a cserék számolásával
+        }
+    }
+sample_solutions:
+  python: |
+    n = int(input())
+    a = [int(x) for x in input().split()]
+    csere = 0
+    volt = True
+    while volt:
+        volt = False
+        for j in range(n - 1):
+            if a[j] > a[j + 1]:
+                a[j], a[j + 1] = a[j + 1], a[j]
+                csere += 1
+                volt = True
+    print("Rendezve: " + " ".join(str(x) for x in a))
+    print("Csere:", csere)
+  csharp: |
+    using System;
+    using System.Collections.Generic;
+
+    class Program
+    {
+        static void Main()
+        {
+            int n = int.Parse(Console.ReadLine());
+            var a = new List<int>();
+            foreach (string s in Console.ReadLine().Split(' '))
+            {
+                a.Add(int.Parse(s));
+            }
+            int csere = 0;
+            bool volt = true;
+            while (volt)
+            {
+                volt = false;
+                for (int j = 0; j < n - 1; j++)
+                {
+                    if (a[j] > a[j + 1])
+                    {
+                        int seged = a[j];
+                        a[j] = a[j + 1];
+                        a[j + 1] = seged;
+                        csere++;
+                        volt = true;
+                    }
+                }
+            }
+            Console.WriteLine("Rendezve: " + string.Join(" ", a));
+            Console.WriteLine("Csere: " + csere);
+        }
+    }
+tests:
+  - { stdin: "4\n5 2 9 1\n", expected: "Rendezve: 1 2 5 9\nCsere: 4\n", hidden: false }
+  - { stdin: "1\n3\n", expected: "Rendezve: 3\nCsere: 0\n", hidden: true }
+  - { stdin: "4\n1 2 2 3\n", expected: "Rendezve: 1 2 2 3\nCsere: 0\n", hidden: true }
+  - { stdin: "5\n5 4 3 2 1\n", expected: "Rendezve: 1 2 3 4 5\nCsere: 10\n", hidden: true }
+  - { stdin: "6\n2 -1 2 -1 0 0\n", expected: "Rendezve: -1 -1 0 0 2 2\nCsere: 7\n", hidden: true }

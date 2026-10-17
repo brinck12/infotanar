@@ -1,0 +1,126 @@
+slug: kozos-tagok
+title: "Közös tagok"
+position: 2
+kind: code
+level: emelt
+difficulty: 3
+published: false
+allowed_languages: [python, csharp]
+description: |
+  Két szakkör névsora érkezik: az első szakkör létszáma (N, legalább 1), majd N sor, soronként egy név (ékezet nélkül); a második szakkör létszáma (M, legalább 1), majd M név. Egy névsorban a nevek különbözők. Írd ki a közös tagok számát (`Kozos tagok: k`), majd soronként a nevüket az első névsor sorrendjében.
+
+  Példa bemenet:
+
+  ```
+  3
+  Anna
+  Bence
+  Csilla
+  3
+  Csilla
+  David
+  Anna
+  ```
+
+  Kimenet:
+
+  ```
+  Kozos tagok: 2
+  Anna
+  Csilla
+  ```
+
+  Tipp: az első névsor minden nevére döntsd el, hogy szerepel-e a másodikban.
+starter_code:
+  python: |
+    n = int(input())
+    a = []
+    for _ in range(n):
+        a.append(input())
+    m = int(input())
+    b = []
+    for _ in range(m):
+        b.append(input())
+    # keresd a közös neveket
+  csharp: |
+    using System;
+    using System.Collections.Generic;
+
+    class Program
+    {
+        static List<string> Beolvas()
+        {
+            int n = int.Parse(Console.ReadLine());
+            var lista = new List<string>();
+            for (int i = 0; i < n; i++)
+            {
+                lista.Add(Console.ReadLine());
+            }
+            return lista;
+        }
+
+        static void Main()
+        {
+            var a = Beolvas();
+            var b = Beolvas();
+            // keresd a közös neveket
+        }
+    }
+sample_solutions:
+  python: |
+    n = int(input())
+    a = []
+    for _ in range(n):
+        a.append(input())
+    m = int(input())
+    b = []
+    for _ in range(m):
+        b.append(input())
+    kozos = []
+    for nev in a:
+        if nev in b:
+            kozos.append(nev)
+    print("Kozos tagok:", len(kozos))
+    for nev in kozos:
+        print(nev)
+  csharp: |
+    using System;
+    using System.Collections.Generic;
+
+    class Program
+    {
+        static List<string> Beolvas()
+        {
+            int n = int.Parse(Console.ReadLine());
+            var lista = new List<string>();
+            for (int i = 0; i < n; i++)
+            {
+                lista.Add(Console.ReadLine());
+            }
+            return lista;
+        }
+
+        static void Main()
+        {
+            var a = Beolvas();
+            var b = Beolvas();
+            var kozos = new List<string>();
+            foreach (string nev in a)
+            {
+                if (b.Contains(nev))
+                {
+                    kozos.Add(nev);
+                }
+            }
+            Console.WriteLine("Kozos tagok: " + kozos.Count);
+            foreach (string nev in kozos)
+            {
+                Console.WriteLine(nev);
+            }
+        }
+    }
+tests:
+  - { stdin: "3\nAnna\nBence\nCsilla\n3\nCsilla\nDavid\nAnna\n", expected: "Kozos tagok: 2\nAnna\nCsilla\n", hidden: false }
+  - { stdin: "1\nEmil\n1\nEmil\n", expected: "Kozos tagok: 1\nEmil\n", hidden: true }
+  - { stdin: "2\nFanni\nGabor\n1\nHanna\n", expected: "Kozos tagok: 0\n", hidden: true }
+  - { stdin: "4\nIvan\nJudit\nKata\nLaci\n4\nLaci\nKata\nJudit\nIvan\n", expected: "Kozos tagok: 4\nIvan\nJudit\nKata\nLaci\n", hidden: true }

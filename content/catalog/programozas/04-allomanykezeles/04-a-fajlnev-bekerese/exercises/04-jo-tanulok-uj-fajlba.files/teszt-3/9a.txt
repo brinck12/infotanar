@@ -1,0 +1,3 @@
+nev	jegy
+Ede	1
+Fanni	2

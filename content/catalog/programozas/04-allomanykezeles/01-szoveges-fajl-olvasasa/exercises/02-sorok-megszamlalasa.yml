@@ -1,0 +1,79 @@
+slug: sorok-megszamlalasa
+title: Sorok megszámlálása
+position: 1
+kind: code
+level: kozep
+difficulty: 1
+published: false
+allowed_languages:
+- python
+- csharp
+description: |
+  A `naplo.txt` fájl egy program naplóját tartalmazza, soronként egy bejegyzéssel. Számold meg, hány sora van a fájlnak, és írd ki így:
+
+  `Sorok szama: 4`
+
+  Tipp: a sorokat végigjárhatod egy számláló növelésével, vagy beolvashatod őket listába, és a lista hosszát kérdezheted le.
+starter_code:
+  python: |
+    with open("naplo.txt", encoding="utf-8") as f:
+        sorok = f.read().splitlines()
+    # ide írd a megoldást
+  csharp: |
+    using System;
+    using System.IO;
+
+    class Program
+    {
+        static void Main()
+        {
+            string[] sorok = File.ReadAllLines("naplo.txt");
+            // ide írd a megoldást
+        }
+    }
+sample_solutions:
+  python: |
+    with open("naplo.txt", encoding="utf-8") as f:
+        sorok = f.read().splitlines()
+    print("Sorok szama:", len(sorok))
+  csharp: |
+    using System;
+    using System.IO;
+
+    class Program
+    {
+        static void Main()
+        {
+            string[] sorok = File.ReadAllLines("naplo.txt");
+            Console.WriteLine("Sorok szama: " + sorok.Length);
+        }
+    }
+files:
+  naplo.txt: naplo.txt
+tests:
+- stdin: ''
+  expected: 'Sorok szama: 4
+
+    '
+  hidden: false
+- stdin: ''
+  expected: 'Sorok szama: 1
+
+    '
+  hidden: true
+  files:
+    naplo.txt: teszt-2/naplo.txt
+- stdin: ''
+  expected: 'Sorok szama: 9
+
+    '
+  hidden: true
+  files:
+    naplo.txt: teszt-3/naplo.txt
+- stdin: ''
+  expected: 'Sorok szama: 3
+
+    '
+  hidden: true
+  files:
+    naplo.txt: teszt-4/naplo.txt

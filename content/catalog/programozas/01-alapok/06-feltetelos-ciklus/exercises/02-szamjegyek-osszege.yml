@@ -1,0 +1,64 @@
+slug: szamjegyek-osszege
+title: Számjegyek összege
+position: 1
+kind: code
+level: kozep
+difficulty: 2
+published: false
+allowed_languages: [python, csharp]
+description: |
+  Olvass be egy nemnegatív egész számot, és add össze a számjegyeit. A kimenet formája:
+
+  `Szamjegyosszeg: 13`
+
+  Példa: ha a bemenet `472`, a kimenet `Szamjegyosszeg: 13`, mert `4 + 7 + 2 = 13`. A `0` számjegyösszege `0`.
+
+  Tipp: az utolsó számjegyet a `% 10` adja, a számot az egész osztás `10`-zel rövidíti. Ismételd, amíg a szám pozitív.
+starter_code:
+  python: |
+    szam = int(input())
+    osszeg = 0
+    # innen folytasd
+  csharp: |
+    using System;
+
+    class Program
+    {
+        static void Main()
+        {
+            var szam = int.Parse(Console.ReadLine());
+            var osszeg = 0;
+            // innen folytasd
+        }
+    }
+sample_solutions:
+  python: |
+    szam = int(input())
+    osszeg = 0
+    while szam > 0:
+        osszeg = osszeg + szam % 10
+        szam = szam // 10
+    print("Szamjegyosszeg: " + str(osszeg))
+  csharp: |
+    using System;
+
+    class Program
+    {
+        static void Main()
+        {
+            var szam = int.Parse(Console.ReadLine());
+            var osszeg = 0;
+            while (szam > 0)
+            {
+                osszeg = osszeg + szam % 10;
+                szam = szam / 10;
+            }
+            Console.WriteLine("Szamjegyosszeg: " + osszeg);
+        }
+    }
+tests:
+  - { stdin: "472\n", expected: "Szamjegyosszeg: 13\n", hidden: false }
+  - { stdin: "0\n", expected: "Szamjegyosszeg: 0\n", hidden: true }
+  - { stdin: "7\n", expected: "Szamjegyosszeg: 7\n", hidden: true }
+  - { stdin: "9045\n", expected: "Szamjegyosszeg: 18\n", hidden: true }
+  - { stdin: "1000000\n", expected: "Szamjegyosszeg: 1\n", hidden: true }

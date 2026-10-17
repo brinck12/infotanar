@@ -1,0 +1,144 @@
+slug: ismetlodo-kod-fuggvenybe
+title: "Ismétlődő kód függvénybe"
+position: 4
+kind: code
+level: emelt
+difficulty: 3
+published: false
+allowed_languages: [python, csharp]
+description: |
+  Az alábbi program három számról dönti el, hogy prímszám-e, de a vizsgálat kódja háromszor szerepel szinte szó szerint. Írd át úgy, hogy egyetlen `prim(n)` függvény végezze a vizsgálatot, és a főprogram **ciklusban** hívja háromszor. A kimenet ne változzon.
+
+  Bemenet: három egész szám (`1 ≤ N ≤ 100000`) külön sorban. Kimenet: három sor, mindegyikben `igen` vagy `nem` aszerint, hogy a megfelelő szám prímszám-e. Az 1 nem prímszám.
+
+  Példa: `7`, `10`, `1` esetén `igen`, `nem`, `nem` külön sorokban.
+
+  Tipp: a vizsgálat elég `2`-től a szám négyzetgyökéig (`i * i <= n`) elvégezni.
+starter_code:
+  python: |
+    a = int(input())
+    p1 = True
+    if a < 2:
+        p1 = False
+    for i in range(2, a):
+        if a % i == 0:
+            p1 = False
+    print("igen" if p1 else "nem")
+    b = int(input())
+    p2 = True
+    if b < 2:
+        p2 = False
+    for i in range(2, b):
+        if b % i == 0:
+            p2 = False
+    print("igen" if p2 else "nem")
+    c = int(input())
+    p3 = True
+    if c < 2:
+        p3 = False
+    for i in range(2, c):
+        if c % i == 0:
+            p3 = False
+    print("igen" if p3 else "nem")
+  csharp: |
+    using System;
+
+    class Program
+    {
+
+        static void Main()
+        {
+            int a = int.Parse(Console.ReadLine());
+            bool p1 = true;
+            if (a < 2)
+            {
+                p1 = false;
+            }
+            for (int i = 2; i < a; i++)
+            {
+                if (a % i == 0)
+                {
+                    p1 = false;
+                }
+            }
+            Console.WriteLine(p1 ? "igen" : "nem");
+            int b = int.Parse(Console.ReadLine());
+            bool p2 = true;
+            if (b < 2)
+            {
+                p2 = false;
+            }
+            for (int i = 2; i < b; i++)
+            {
+                if (b % i == 0)
+                {
+                    p2 = false;
+                }
+            }
+            Console.WriteLine(p2 ? "igen" : "nem");
+            int c = int.Parse(Console.ReadLine());
+            bool p3 = true;
+            if (c < 2)
+            {
+                p3 = false;
+            }
+            for (int i = 2; i < c; i++)
+            {
+                if (c % i == 0)
+                {
+                    p3 = false;
+                }
+            }
+            Console.WriteLine(p3 ? "igen" : "nem");
+        }
+    }
+sample_solutions:
+  python: |
+    def prim(n):
+        if n < 2:
+            return False
+        i = 2
+        while i * i <= n:
+            if n % i == 0:
+                return False
+            i += 1
+        return True
+
+    for _ in range(3):
+        szam = int(input())
+        print("igen" if prim(szam) else "nem")
+  csharp: |
+    using System;
+
+    class Program
+    {
+        static bool Prim(int n)
+        {
+            if (n < 2)
+            {
+                return false;
+            }
+            for (int i = 2; (long)i * i <= n; i++)
+            {
+                if (n % i == 0)
+                {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        static void Main()
+        {
+            for (int k = 0; k < 3; k++)
+            {
+                int szam = int.Parse(Console.ReadLine());
+                Console.WriteLine(Prim(szam) ? "igen" : "nem");
+            }
+        }
+    }
+tests:
+  - { stdin: "7\n10\n1\n", expected: "igen\nnem\nnem\n", hidden: false }
+  - { stdin: "2\n3\n4\n", expected: "igen\nigen\nnem\n", hidden: true }
+  - { stdin: "99991\n100000\n97\n", expected: "igen\nnem\nigen\n", hidden: true }
+  - { stdin: "1\n1\n1\n", expected: "nem\nnem\nnem\n", hidden: true }

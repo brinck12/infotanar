@@ -1,0 +1,90 @@
+slug: szavak-gyakorisaga
+title: Szavak gyakorisága
+position: 2
+kind: code
+level: kozep
+difficulty: 3
+published: false
+allowed_languages: [python, csharp]
+description: |
+  Az első sorban egy `N` egész szám áll (`N >= 1`), utána `N` szó következik (csak kisbetűs, ékezet nélküli betűk), mindegyik külön sorban. Írd ki ábécé sorrendben minden különböző szót és azt, hogy hányszor szerepelt, `szó: darab` alakban, külön sorokban.
+
+  Példa: a `4`, `alma`, `korte`, `alma`, `alma` bemenetre (külön sorokban):
+
+  ```
+  alma: 3
+  korte: 1
+  ```
+
+  Tipp: a szótár kulcsa a szó, értéke a darabszám. A kulcsokat a kiírás előtt rendezd.
+starter_code:
+  python: |
+    n = int(input())
+    db = {}
+    for i in range(n):
+        szo = input()
+        # innen folytasd
+  csharp: |
+    using System;
+    using System.Collections.Generic;
+
+    class Program
+    {
+        static void Main()
+        {
+            int n = int.Parse(Console.ReadLine());
+            Dictionary<string, int> db = new Dictionary<string, int>();
+            for (int i = 0; i < n; i++)
+            {
+                string szo = Console.ReadLine();
+                // innen folytasd
+            }
+        }
+    }
+sample_solutions:
+  python: |
+    n = int(input())
+    db = {}
+    for i in range(n):
+        szo = input()
+        if szo in db:
+            db[szo] = db[szo] + 1
+        else:
+            db[szo] = 1
+    for szo in sorted(db):
+        print(szo + ": " + str(db[szo]))
+  csharp: |
+    using System;
+    using System.Collections.Generic;
+
+    class Program
+    {
+        static void Main()
+        {
+            int n = int.Parse(Console.ReadLine());
+            Dictionary<string, int> db = new Dictionary<string, int>();
+            for (int i = 0; i < n; i++)
+            {
+                string szo = Console.ReadLine();
+                if (db.ContainsKey(szo))
+                {
+                    db[szo] = db[szo] + 1;
+                }
+                else
+                {
+                    db[szo] = 1;
+                }
+            }
+            List<string> kulcsok = new List<string>(db.Keys);
+            kulcsok.Sort();
+            foreach (string szo in kulcsok)
+            {
+                Console.WriteLine(szo + ": " + db[szo]);
+            }
+        }
+    }
+tests:
+  - { stdin: "4\nalma\nkorte\nalma\nalma\n", expected: "alma: 3\nkorte: 1\n", hidden: false }
+  - { stdin: "1\nfa\n", expected: "fa: 1\n", hidden: true }
+  - { stdin: "5\nzold\nkek\npiros\nkek\nzold\n", expected: "kek: 2\npiros: 1\nzold: 2\n", hidden: true }
+  - { stdin: "3\nx\nx\nx\n", expected: "x: 3\n", hidden: true }

@@ -1,0 +1,2 @@
+nev	osztaly	pont
+Hajni	9a	0

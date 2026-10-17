@@ -1,0 +1,89 @@
+slug: szamkitalalos-jatek
+title: Számkitalálós játék
+position: 3
+kind: code
+level: kozep
+difficulty: 3
+published: false
+allowed_languages: [python, csharp]
+description: |
+  Készíts számkitalálós játékot. Az első beolvasott szám a **titkos szám**. Ezután tippeket olvass be soronként, amíg el nem találják a titkos számot. Minden tippre válaszolj:
+
+  - ha a tipp **kisebb** a titkos számnál, írd ki: `nagyobb` (vagyis nagyobbat kell tippelni),
+  - ha a tipp **nagyobb** a titkos számnál, írd ki: `kisebb`,
+  - ha a tipp pontos, írd ki: `Talalt! Tippek szama: N`, ahol `N` az összes tipp száma, majd fejezd be a programot.
+
+  Példa: a bemenet `50`, `20`, `70`, `50` (külön sorokban), a kimenet:
+
+  ```
+  nagyobb
+  kisebb
+  Talalt! Tippek szama: 3
+  ```
+
+  Tipp: számold a tippeket egy változóban, és használj `break`-et vagy olyan feltételt, amely a találatkor hamissá válik.
+starter_code:
+  python: |
+    titkos = int(input())
+    db = 0
+    # innen folytasd
+  csharp: |
+    using System;
+
+    class Program
+    {
+        static void Main()
+        {
+            var titkos = int.Parse(Console.ReadLine());
+            var db = 0;
+            // innen folytasd
+        }
+    }
+sample_solutions:
+  python: |
+    titkos = int(input())
+    db = 0
+    while True:
+        tipp = int(input())
+        db = db + 1
+        if tipp == titkos:
+            print("Talalt! Tippek szama: " + str(db))
+            break
+        if tipp < titkos:
+            print("nagyobb")
+        else:
+            print("kisebb")
+  csharp: |
+    using System;
+
+    class Program
+    {
+        static void Main()
+        {
+            var titkos = int.Parse(Console.ReadLine());
+            var db = 0;
+            while (true)
+            {
+                var tipp = int.Parse(Console.ReadLine());
+                db = db + 1;
+                if (tipp == titkos)
+                {
+                    Console.WriteLine("Talalt! Tippek szama: " + db);
+                    break;
+                }
+                if (tipp < titkos)
+                {
+                    Console.WriteLine("nagyobb");
+                }
+                else
+                {
+                    Console.WriteLine("kisebb");
+                }
+            }
+        }
+    }
+tests:
+  - { stdin: "50\n20\n70\n50\n", expected: "nagyobb\nkisebb\nTalalt! Tippek szama: 3\n", hidden: false }
+  - { stdin: "7\n7\n", expected: "Talalt! Tippek szama: 1\n", hidden: true }
+  - { stdin: "-5\n0\n-10\n-5\n", expected: "kisebb\nnagyobb\nTalalt! Tippek szama: 3\n", hidden: true }
+  - { stdin: "1\n5\n4\n3\n2\n1\n", expected: "kisebb\nkisebb\nkisebb\nkisebb\nTalalt! Tippek szama: 5\n", hidden: true }

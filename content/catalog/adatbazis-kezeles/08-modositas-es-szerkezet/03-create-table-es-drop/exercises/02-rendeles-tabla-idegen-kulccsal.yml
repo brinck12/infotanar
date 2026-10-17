@@ -1,0 +1,107 @@
+slug: rendeles-tabla-idegen-kulccsal
+title: Rendelés tábla idegen kulccsal
+position: 1
+kind: sql
+level: emelt
+difficulty: 3
+published: false
+allowed_languages:
+- sql
+sql_order_sensitive: true
+description: |
+  A `vevo` tábla:
+
+  | oszlop | típus |
+  |---|---|
+  | `id` | egész, elsődleges kulcs |
+  | `nev` | szöveg |
+  | `varos` | szöveg |
+
+
+  A `rendeles` tábla még nem létezik. Hozd létre ezzel a szerkezettel:
+
+  | oszlop | típus | megkötés |
+  |---|---|---|
+  | `id` | egész | elsődleges kulcs |
+  | `vevo_id` | egész | NOT NULL, idegen kulcs a `vevo(id)` oszlopra |
+  | `osszeg` | egész | |
+
+  Majd vigyél fel három rendelést: (1, 1, 5000), (2, 1, 7000), (3, 2, 3000) – az `id`, a `vevo_id` és az `osszeg` sorrendjében. Az ellenőrző lekérdezés vevőnként összegzi a rendelések értékét.
+
+  A kód végén álló `SELECT` sort **ne töröld és ne módosítsd**: az mutatja meg a tábla állapotát módosítás után, és a rendszer ezt az eredményt hasonlítja az elvárthoz. A saját utasításodat a `SELECT` **elé** írd, pontosvesszővel lezárva.
+
+  Tipp: az idegen kulcs a tábla definíciójában adható meg: `FOREIGN KEY (vevo_id) REFERENCES vevo(id)`.
+starter_code:
+  sql: |
+    -- Ide írd a CREATE TABLE és az INSERT utasítást.
+
+    SELECT vevo.nev, SUM(rendeles.osszeg) AS osszesen
+    FROM vevo INNER JOIN rendeles ON rendeles.vevo_id = vevo.id
+    GROUP BY vevo.id, vevo.nev
+    ORDER BY vevo.id;
+sample_solutions:
+  sql: |
+    CREATE TABLE rendeles (
+      id INTEGER PRIMARY KEY,
+      vevo_id INTEGER NOT NULL,
+      osszeg INTEGER,
+      FOREIGN KEY (vevo_id) REFERENCES vevo(id)
+    );
+
+    INSERT INTO rendeles VALUES (1, 1, 5000), (2, 1, 7000), (3, 2, 3000);
+
+    SELECT vevo.nev, SUM(rendeles.osszeg) AS osszesen
+    FROM vevo INNER JOIN rendeles ON rendeles.vevo_id = vevo.id
+    GROUP BY vevo.id, vevo.nev
+    ORDER BY vevo.id;
+tests:
+- stdin: |
+    CREATE TABLE vevo (id INTEGER PRIMARY KEY, nev TEXT, varos TEXT);
+    INSERT INTO vevo VALUES
+    (1, 'Szabo Fanni', 'Szeged'),
+    (2, 'Nagy Lilla', 'Gyor'),
+    (3, 'Farkas Bela', 'Pecs'),
+    (4, 'Kovacs Eszter', 'Gyor');
+  expected: |
+    nev,osszesen
+    Szabo Fanni,12000
+    Nagy Lilla,3000
+  hidden: false
+- stdin: |
+    CREATE TABLE vevo (id INTEGER PRIMARY KEY, nev TEXT, varos TEXT);
+    INSERT INTO vevo VALUES
+    (1, 'Kiss Tamas', 'Budapest'),
+    (2, 'Nagy Anna', 'Szeged'),
+    (3, 'Balogh Laszlo', 'Budapest');
+  expected: |
+    nev,osszesen
+    Kiss Tamas,12000
+    Nagy Anna,3000
+  hidden: true
+- stdin: |
+    CREATE TABLE vevo (id INTEGER PRIMARY KEY, nev TEXT, varos TEXT);
+    INSERT INTO vevo VALUES
+    (1, 'Szabo Julia', 'Pecs'),
+    (2, 'Horvath Bence', 'Gyor'),
+    (3, 'Varga Orsolya', 'Pecs'),
+    (4, 'Varga Emese', 'Szeged'),
+    (5, 'Molnar Laszlo', 'Budapest');
+  expected: |
+    nev,osszesen
+    Szabo Julia,12000
+    Horvath Bence,3000
+  hidden: true
+- stdin: |
+    CREATE TABLE vevo (id INTEGER PRIMARY KEY, nev TEXT, varos TEXT);
+    INSERT INTO vevo VALUES
+    (1, 'Molnar Norbert', 'Gyor'),
+    (2, 'Molnar Aron', 'Gyor'),
+    (3, 'Balogh Emese', 'Pecs'),
+    (4, 'Szabo Lilla', 'Szeged'),
+    (5, 'Varga Gabor', 'Budapest'),
+    (6, 'Farkas Peter', 'Budapest');
+  expected: |
+    nev,osszesen
+    Molnar Norbert,12000
+    Molnar Aron,3000
+  hidden: true

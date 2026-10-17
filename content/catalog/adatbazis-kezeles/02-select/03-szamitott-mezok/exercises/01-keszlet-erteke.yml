@@ -1,0 +1,45 @@
+slug: keszlet-erteke
+title: Készlet értéke
+position: 0
+kind: sql
+level: kozep
+difficulty: 1
+published: false
+allowed_languages: [sql]
+description: |
+  A `SELECT` után nemcsak mezőnevet, hanem kifejezést is írhatunk: `+`, `-`, `*` és zárójelek használhatók. A kiszámított oszlop neve alapból a kifejezés lenne, ezért érdemes aliast adni.
+
+  A `termek` tábla:
+
+  | oszlop | típus |
+  |---|---|
+  | `id` | egész, elsődleges kulcs |
+  | `nev` | szöveg |
+  | `kategoria` | szöveg |
+  | `ar` | egész (Ft) |
+  | `keszlet` | egész (db) |
+
+  Listázd ki minden termék **nevét** és a készlet értékét (`ar` szorozva a `keszlet`-tel) `ertek` néven! A sorok sorrendje nem számít.
+
+  Tipp: `ar * keszlet AS ertek`
+starter_code:
+  sql: |
+    SELECT
+    FROM termek;
+sample_solutions:
+  sql: |
+    SELECT nev, ar * keszlet AS ertek
+    FROM termek;
+tests:
+  - stdin: "CREATE TABLE termek (id INTEGER PRIMARY KEY, nev TEXT, kategoria TEXT, ar INTEGER, keszlet INTEGER);\nINSERT INTO termek VALUES\n(1, 'Turo', 'tej', 1490, 7),\n(2, 'Zsemle', 'tej', 720, 30),\n(3, 'Kenyer', 'edes', 1950, 28),\n(4, 'Keksz', 'tej', 1860, 0),\n(5, 'Tej', 'tej', 940, 11);\n"
+    expected: "nev,ertek\nTuro,10430\nZsemle,21600\nKenyer,54600\nKeksz,0\nTej,10340\n"
+    hidden: false
+  - stdin: "CREATE TABLE termek (id INTEGER PRIMARY KEY, nev TEXT, kategoria TEXT, ar INTEGER, keszlet INTEGER);\nINSERT INTO termek VALUES\n(1, 'Turo', 'pek', 250, 22),\n(2, 'Joghurt', 'edes', 1200, 6),\n(3, 'Kenyer', 'zold', 1610, 6),\n(4, 'Uborka', 'edes', 860, 0),\n(5, 'Vaj', 'pek', 1250, 26),\n(6, 'Tejfol', 'zold', 520, 6),\n(7, 'Burgonya', 'zold', 1360, 0),\n(8, 'Keksz', 'pek', 1280, 0);\n"
+    expected: "nev,ertek\nTuro,5500\nJoghurt,7200\nKenyer,9660\nUborka,0\nVaj,32500\nTejfol,3120\nBurgonya,0\nKeksz,0\n"
+    hidden: true
+  - stdin: "CREATE TABLE termek (id INTEGER PRIMARY KEY, nev TEXT, kategoria TEXT, ar INTEGER, keszlet INTEGER);\nINSERT INTO termek VALUES\n(1, 'Paradicsom', 'zold', 730, 7),\n(2, 'Tej', 'tej', 1030, 30),\n(3, 'Sajt', 'tej', 1790, 6),\n(4, 'Alma', 'zold', 1040, 0),\n(5, 'Narancs', 'tej', 940, 0),\n(6, 'Turo', 'pek', 840, 7),\n(7, 'Zsemle', 'edes', 1320, 13),\n(8, 'Cukor', 'zold', 450, 2),\n(9, 'Kifli', 'pek', 1030, 6),\n(10, 'Korte', 'zold', 1430, 24);\n"
+    expected: "nev,ertek\nParadicsom,5110\nTej,30900\nSajt,10740\nAlma,0\nNarancs,0\nTuro,5880\nZsemle,17160\nCukor,900\nKifli,6180\nKorte,34320\n"
+    hidden: true
+  - stdin: "CREATE TABLE termek (id INTEGER PRIMARY KEY, nev TEXT, kategoria TEXT, ar INTEGER, keszlet INTEGER);\nINSERT INTO termek VALUES\n(1, 'Tejfol', 'zold', 1440, 0),\n(2, 'Zsemle', 'edes', 840, 30),\n(3, 'Keksz', 'pek', 1500, 10),\n(4, 'Joghurt', 'zold', 220, 24),\n(5, 'Sutemeny', 'zold', 810, 13),\n(6, 'Csoki', 'edes', 970, 7),\n(7, 'Sajt', 'zold', 1220, 14),\n(8, 'Kenyer', 'tej', 800, 19),\n(9, 'Korte', 'edes', 1350, 6),\n(10, 'Kifli', 'pek', 180, 30),\n(11, 'Alma', 'edes', 100, 0),\n(12, 'Turo', 'tej', 520, 3);\n"
+    expected: "nev,ertek\nTejfol,0\nZsemle,25200\nKeksz,15000\nJoghurt,5280\nSutemeny,10530\nCsoki,6790\nSajt,17080\nKenyer,15200\nKorte,8100\nKifli,5400\nAlma,0\nTuro,1560\n"
+    hidden: true

@@ -1,0 +1,60 @@
+slug: fizetendo-osszeg
+title: Fizetendő összeg
+position: 1
+kind: code
+level: kozep
+difficulty: 2
+published: false
+allowed_languages: [python, csharp]
+description: |
+  Két sorban kapsz adatot: egy termék egységárát (valós szám, a tizedeselválasztó pont), majd a vásárolt darabszámot (egész szám). Írd ki a fizetendő összeget **két tizedesjeggyel**, ebben a formában:
+
+  `Osszesen: 599.70 Ft`
+
+  Példa: a `199.9` és a `3` bemenetre a kimenet `Osszesen: 599.70 Ft`.
+
+  Tipp: az összeg az egységár és a darabszám szorzata; a két tizedesjegyet a formátum adja, nem kell külön kerekíteni.
+starter_code:
+  python: |
+    ar = float(input())
+    db = int(input())
+    # innen folytasd
+  csharp: |
+    using System;
+    using System.Globalization;
+
+    class Program
+    {
+        static void Main()
+        {
+            double ar = double.Parse(Console.ReadLine(), CultureInfo.InvariantCulture);
+            int db = int.Parse(Console.ReadLine());
+            // innen folytasd
+        }
+    }
+sample_solutions:
+  python: |
+    ar = float(input())
+    db = int(input())
+    osszeg = ar * db
+    print(f"Osszesen: {osszeg:.2f} Ft")
+  csharp: |
+    using System;
+    using System.Globalization;
+
+    class Program
+    {
+        static void Main()
+        {
+            double ar = double.Parse(Console.ReadLine(), CultureInfo.InvariantCulture);
+            int db = int.Parse(Console.ReadLine());
+            double osszeg = ar * db;
+            Console.WriteLine(string.Format(CultureInfo.InvariantCulture, "Osszesen: {0:F2} Ft", osszeg));
+        }
+    }
+tests:
+  - { stdin: "199.9\n3\n", expected: "Osszesen: 599.70 Ft\n", hidden: false }
+  - { stdin: "250\n4\n", expected: "Osszesen: 1000.00 Ft\n", hidden: true }
+  - { stdin: "0.5\n1\n", expected: "Osszesen: 0.50 Ft\n", hidden: true }
+  - { stdin: "1234.5678\n2\n", expected: "Osszesen: 2469.14 Ft\n", hidden: true }
+  - { stdin: "19.99\n3\n", expected: "Osszesen: 59.97 Ft\n", hidden: true }

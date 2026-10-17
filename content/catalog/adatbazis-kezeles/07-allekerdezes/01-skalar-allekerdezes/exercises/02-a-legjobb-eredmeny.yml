@@ -1,0 +1,97 @@
+slug: a-legjobb-eredmeny
+title: A legjobb eredmény
+position: 1
+kind: sql
+level: emelt
+difficulty: 2
+published: false
+allowed_languages:
+- sql
+description: |
+  A `diak` tábla:
+
+  | oszlop | típus |
+  |---|---|
+  | `id` | egész, elsődleges kulcs |
+  | `nev` | szöveg |
+  | `osztaly` | szöveg |
+  | `pont` | egész |
+
+  Add meg annak a diáknak (vagy diákoknak, ha holtverseny van) a nevét és pontszámát (**nev, pont**), aki a **legtöbb pontot** érte el! Az `ORDER BY ... LIMIT 1` helyett használj allekérdezést, hogy holtverseny esetén mindenki megjelenjen.
+
+  Tipp: a `MAX(pont)`-ot adó allekérdezés eredményével hasonlítsd össze a `pont` oszlopot.
+starter_code:
+  sql: |
+    SELECT nev, pont
+    FROM diak
+    WHERE pont = ;
+sample_solutions:
+  sql: |
+    SELECT nev, pont
+    FROM diak
+    WHERE pont = (SELECT MAX(pont) FROM diak);
+tests:
+- stdin: |
+    CREATE TABLE diak (id INTEGER PRIMARY KEY, nev TEXT, osztaly TEXT, pont INTEGER);
+    INSERT INTO diak VALUES
+    (1, 'Toth Fanni', '9.A', 23),
+    (2, 'Kovacs Bela', '10.B', 98),
+    (3, 'Varga Eszter', '9.B', 84),
+    (4, 'Balogh Hajnal', '9.B', 22),
+    (5, 'Kovacs Gabor', '9.A', 72),
+    (6, 'Balogh Csaba', '9.B', 32),
+    (7, 'Szabo Sandor', '10.A', 75),
+    (8, 'Balogh Maria', '9.A', 89);
+  expected: |
+    nev,pont
+    Kovacs Bela,98
+  hidden: false
+- stdin: |
+    CREATE TABLE diak (id INTEGER PRIMARY KEY, nev TEXT, osztaly TEXT, pont INTEGER);
+    INSERT INTO diak VALUES
+    (1, 'Balogh Tamas', '10.A', 41),
+    (2, 'Toth Anna', '10.B', 81),
+    (3, 'Balogh Laszlo', '10.A', 58),
+    (4, 'Kiss Fanni', '10.B', 73),
+    (5, 'Horvath Bela', '9.B', 80),
+    (6, 'Molnar Csaba', '10.B', 52),
+    (7, 'Toth Zsofia', '9.A', 79),
+    (8, 'Nagy Viktor', '10.B', 51),
+    (9, 'Kovacs Lilla', '10.B', 37),
+    (10, 'Nagy Gergo', '9.B', 86);
+  expected: |
+    nev,pont
+    Nagy Gergo,86
+  hidden: true
+- stdin: |
+    CREATE TABLE diak (id INTEGER PRIMARY KEY, nev TEXT, osztaly TEXT, pont INTEGER);
+    INSERT INTO diak VALUES
+    (1, 'Horvath Julia', '10.A', 47),
+    (2, 'Varga Bence', '9.A', 96),
+    (3, 'Varga Orsolya', '9.A', 85),
+    (4, 'Molnar Emese', '9.A', 76),
+    (5, 'Horvath Laszlo', '10.B', 42),
+    (6, 'Kovacs Hanna', '10.A', 72);
+  expected: |
+    nev,pont
+    Varga Bence,96
+  hidden: true
+- stdin: |
+    CREATE TABLE diak (id INTEGER PRIMARY KEY, nev TEXT, osztaly TEXT, pont INTEGER);
+    INSERT INTO diak VALUES
+    (1, 'Farkas Norbert', '10.A', 38),
+    (2, 'Molnar Aron', '9.B', 90),
+    (3, 'Kovacs Emese', '9.A', 47),
+    (4, 'Varga Lilla', '10.A', 20),
+    (5, 'Toth Gabor', '10.A', 64),
+    (6, 'Nagy Peter', '9.A', 28),
+    (7, 'Nagy Eszter', '10.B', 22),
+    (8, 'Molnar Bence', '10.A', 47),
+    (9, 'Nagy Dalma', '10.B', 91),
+    (10, 'Nagy Tamas', '9.B', 41),
+    (11, 'Balogh Hanna', '10.B', 31),
+    (12, 'Balogh Kata', '10.B', 21);
+  expected: |
+    nev,pont
+    Nagy Dalma,91
+  hidden: true

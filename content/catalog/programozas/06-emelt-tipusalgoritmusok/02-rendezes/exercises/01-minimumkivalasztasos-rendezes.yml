@@ -1,0 +1,106 @@
+slug: minimumkivalasztasos-rendezes
+title: "Minimumkiválasztásos rendezés"
+position: 0
+kind: code
+level: emelt
+difficulty: 3
+published: false
+allowed_languages: [python, csharp]
+description: |
+  A bemenet első sora az elemek száma (N, legalább 1), a másodikban N egész szám áll szóközzel elválasztva. Rendezd a számokat **növekvő sorrendbe minimumkiválasztásos rendezéssel**, a beépített rendezés használata nélkül. Írd ki a rendezett sort (`Rendezve: ...`), majd a cserék számát (`Csere: ...`). Csere akkor történik, ha az `i`-edik helyre kerülő legkisebb elem helye (az első legkisebb) nem az `i`-edik hely.
+
+  Példa bemenet:
+
+  ```
+  4
+  5 2 9 1
+  ```
+
+  Kimenet:
+
+  ```
+  Rendezve: 1 2 5 9
+  Csere: 2
+  ```
+
+  Tipp: a legkisebb elem helyének keresésekor a szigorú `<` az első legkisebbet adja. Csak akkor cserélj, ha a két hely különbözik.
+starter_code:
+  python: |
+    n = int(input())
+    a = [int(x) for x in input().split()]
+    # rendezd a listát minimumkiválasztással, és számold a cseréket
+  csharp: |
+    using System;
+    using System.Collections.Generic;
+
+    class Program
+    {
+        static void Main()
+        {
+            int n = int.Parse(Console.ReadLine());
+            var a = new List<int>();
+            foreach (string s in Console.ReadLine().Split(' '))
+            {
+                a.Add(int.Parse(s));
+            }
+            // rendezd a listát minimumkiválasztással, és számold a cseréket
+        }
+    }
+sample_solutions:
+  python: |
+    n = int(input())
+    a = [int(x) for x in input().split()]
+    csere = 0
+    for i in range(n - 1):
+        m = i
+        for j in range(i + 1, n):
+            if a[j] < a[m]:
+                m = j
+        if m != i:
+            a[i], a[m] = a[m], a[i]
+            csere += 1
+    print("Rendezve: " + " ".join(str(x) for x in a))
+    print("Csere:", csere)
+  csharp: |
+    using System;
+    using System.Collections.Generic;
+
+    class Program
+    {
+        static void Main()
+        {
+            int n = int.Parse(Console.ReadLine());
+            var a = new List<int>();
+            foreach (string s in Console.ReadLine().Split(' '))
+            {
+                a.Add(int.Parse(s));
+            }
+            int csere = 0;
+            for (int i = 0; i < n - 1; i++)
+            {
+                int m = i;
+                for (int j = i + 1; j < n; j++)
+                {
+                    if (a[j] < a[m])
+                    {
+                        m = j;
+                    }
+                }
+                if (m != i)
+                {
+                    int seged = a[i];
+                    a[i] = a[m];
+                    a[m] = seged;
+                    csere++;
+                }
+            }
+            Console.WriteLine("Rendezve: " + string.Join(" ", a));
+            Console.WriteLine("Csere: " + csere);
+        }
+    }
+tests:
+  - { stdin: "4\n5 2 9 1\n", expected: "Rendezve: 1 2 5 9\nCsere: 2\n", hidden: false }
+  - { stdin: "1\n7\n", expected: "Rendezve: 7\nCsere: 0\n", hidden: true }
+  - { stdin: "5\n1 2 3 4 5\n", expected: "Rendezve: 1 2 3 4 5\nCsere: 0\n", hidden: true }
+  - { stdin: "5\n5 4 3 2 1\n", expected: "Rendezve: 1 2 3 4 5\nCsere: 2\n", hidden: true }
+  - { stdin: "6\n3 3 1 3 2 1\n", expected: "Rendezve: 1 1 2 3 3 3\nCsere: 3\n", hidden: true }

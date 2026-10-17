@@ -1,0 +1,3 @@
+nev	jegy
+Emese	3
+Ferenc	4

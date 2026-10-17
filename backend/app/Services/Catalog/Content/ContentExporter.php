@@ -4,10 +4,12 @@ declare(strict_types=1);
 
 namespace App\Services\Catalog\Content;
 
+use App\Enums\AttachmentRole;
 use App\Models\Exercise;
 use App\Models\Lesson;
 use App\Models\Module;
 use App\Models\Track;
+use App\Services\Files\PrivateFileStore;
 use Illuminate\Support\Str;
 use Symfony\Component\Yaml\Exception\ParseException;
 use Symfony\Component\Yaml\Yaml;
@@ -31,7 +33,10 @@ final class ContentExporter
     /** @var list<string> */
     private array $collisions = [];
 
-    public function __construct(private readonly ContentReader $reader) {}
+    public function __construct(
+        private readonly ContentReader $reader,
+        private readonly PrivateFileStore $files,
+    ) {}
 
     /**
      * @param  list<string>  $only  útvonal-előtag slugjai: <track>[/<modul>[/<lecke>]]
@@ -99,7 +104,7 @@ final class ContentExporter
     {
         $files = [];
         $tracks = Track::query()
-            ->with('modules.lessons.exercises.testCases')
+            ->with('modules.lessons.exercises.testCases', 'modules.lessons.exercises.attachments')
             ->orderBy('position')
             ->orderBy('id')
             ->get();
@@ -182,7 +187,13 @@ final class ContentExporter
                 continue;
             }
             $seen[$slug] = $label;
-            $files[$rel] = $this->yaml($rel, $this->exerciseData($exercise, $slug));
+            $dataFiles = [];
+            $files[$rel] = $this->yaml($rel, $this->exerciseData($exercise, $slug, $dataFiles));
+            // Az adatfájlok a feladatfájl melletti `<fájlnév-törzs>.files/` mappába kerülnek.
+            $filesDir = substr($rel, 0, -strlen('.yml')).'.files/';
+            foreach ($dataFiles as $path => $bytes) {
+                $files[$filesDir.$path] = $bytes;
+            }
         }
 
         return $files;
@@ -221,9 +232,10 @@ final class ContentExporter
     }
 
     /**
+     * @param  array<string, string>  $dataFiles  kimenet: a `.files` mappán belüli útvonal => tartalom
      * @return array<string, mixed>
      */
-    private function exerciseData(Exercise $exercise, string $slug): array
+    private function exerciseData(Exercise $exercise, string $slug, array &$dataFiles): array
     {
         $data = [
             'slug' => $slug,
@@ -261,9 +273,36 @@ final class ContentExporter
             $data['limits'] = $limits;
         }
 
+        // Közös fájlok laposan (`adatok.txt`), a tesztesetekéi a `teszt-N/` almappában (azonos név nem ütközik).
+        $shared = [];
+        $perTest = [];
+        foreach ($exercise->attachments as $attachment) {
+            if ($attachment->role === AttachmentRole::Source && $attachment->test_case_id === null) {
+                $shared[$attachment->name] = $attachment->name;
+                $dataFiles[$attachment->name] = $this->files->bytes($attachment->storedFile());
+            } elseif ($attachment->role === AttachmentRole::Input && $attachment->test_case_id !== null) {
+                $perTest[$attachment->test_case_id][] = $attachment;
+            }
+        }
+        ksort($shared, SORT_STRING);
+        if ($shared !== []) {
+            $data['files'] = $shared;
+        }
+
         $tests = [];
-        foreach ($exercise->testCases as $case) {
-            $tests[] = ['stdin' => $case->stdin, 'expected' => $case->expected_stdout, 'hidden' => $case->is_hidden];
+        foreach ($exercise->testCases as $index => $case) {
+            $test = ['stdin' => $case->stdin, 'expected' => $case->expected_stdout, 'hidden' => $case->is_hidden];
+            $own = [];
+            foreach ($perTest[$case->id] ?? [] as $attachment) {
+                $path = 'teszt-'.($index + 1).'/'.$attachment->name;
+                $own[$attachment->name] = $path;
+                $dataFiles[$path] = $this->files->bytes($attachment->storedFile());
+            }
+            ksort($own, SORT_STRING);
+            if ($own !== []) {
+                $test['files'] = $own;
+            }
+            $tests[] = $test;
         }
         $data['tests'] = $tests;
 

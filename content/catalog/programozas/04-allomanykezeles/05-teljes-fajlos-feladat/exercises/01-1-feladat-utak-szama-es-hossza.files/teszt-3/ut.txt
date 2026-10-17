@@ -1,0 +1,2 @@
+datum	sofor	km	perc
+2024-05-10	Biro	7	12

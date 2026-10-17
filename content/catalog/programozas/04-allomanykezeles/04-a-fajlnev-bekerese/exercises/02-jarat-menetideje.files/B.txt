@@ -1,0 +1,3 @@
+megallo	perc
+Telep	4
+Iskola	4

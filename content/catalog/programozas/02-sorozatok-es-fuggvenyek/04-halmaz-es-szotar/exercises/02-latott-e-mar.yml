@@ -1,0 +1,87 @@
+slug: latott-e-mar
+title: Látott-e már
+position: 1
+kind: code
+level: kozep
+difficulty: 2
+published: false
+allowed_languages: [python, csharp]
+description: |
+  Az első sorban egy `N` egész szám áll, utána `N` szó következik (kisbetűs, ékezet nélküli), mindegyik külön sorban. Minden szóhoz írd ki külön sorba, hogy `uj` (ha most szerepel először), vagy `mar volt` (ha korábban már szerepelt).
+
+  Példa: az `5`, `alma`, `korte`, `alma`, `szilva`, `korte` bemenetre (külön sorokban):
+
+  ```
+  uj
+  uj
+  mar volt
+  uj
+  mar volt
+  ```
+
+  Tipp: tartsd egy halmazban a már látott szavakat; minden szónál előbb kérdezd meg, benne van-e, aztán tedd bele.
+starter_code:
+  python: |
+    n = int(input())
+    latott = set()
+    for i in range(n):
+        szo = input()
+        # innen folytasd
+  csharp: |
+    using System;
+    using System.Collections.Generic;
+
+    class Program
+    {
+        static void Main()
+        {
+            int n = int.Parse(Console.ReadLine());
+            HashSet<string> latott = new HashSet<string>();
+            for (int i = 0; i < n; i++)
+            {
+                string szo = Console.ReadLine();
+                // innen folytasd
+            }
+        }
+    }
+sample_solutions:
+  python: |
+    n = int(input())
+    latott = set()
+    for i in range(n):
+        szo = input()
+        if szo in latott:
+            print("mar volt")
+        else:
+            print("uj")
+            latott.add(szo)
+  csharp: |
+    using System;
+    using System.Collections.Generic;
+
+    class Program
+    {
+        static void Main()
+        {
+            int n = int.Parse(Console.ReadLine());
+            HashSet<string> latott = new HashSet<string>();
+            for (int i = 0; i < n; i++)
+            {
+                string szo = Console.ReadLine();
+                if (latott.Contains(szo))
+                {
+                    Console.WriteLine("mar volt");
+                }
+                else
+                {
+                    Console.WriteLine("uj");
+                    latott.Add(szo);
+                }
+            }
+        }
+    }
+tests:
+  - { stdin: "5\nalma\nkorte\nalma\nszilva\nkorte\n", expected: "uj\nuj\nmar volt\nuj\nmar volt\n", hidden: false }
+  - { stdin: "1\nalma\n", expected: "uj\n", hidden: true }
+  - { stdin: "4\nka\nka\nka\nka\n", expected: "uj\nmar volt\nmar volt\nmar volt\n", hidden: true }
+  - { stdin: "3\nabc\nabd\nab\n", expected: "uj\nuj\nuj\n", hidden: true }

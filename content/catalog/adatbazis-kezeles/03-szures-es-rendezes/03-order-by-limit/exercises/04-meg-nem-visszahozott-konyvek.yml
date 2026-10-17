@@ -1,0 +1,49 @@
+slug: meg-nem-visszahozott-konyvek
+title: Még nem visszahozott könyvek
+position: 3
+kind: sql
+level: kozep
+difficulty: 3
+published: false
+allowed_languages: [sql]
+sql_order_sensitive: true
+description: |
+  Az üres (NULL) érték nem egyenlő semmivel, még önmagával sem: `visszahozas = NULL` soha nem igaz. A NULL vizsgálata `IS NULL`, illetve `IS NOT NULL`.
+
+  A `kolcsonzes` tábla:
+
+  | oszlop | típus |
+  |---|---|
+  | `id` | egész, elsődleges kulcs |
+  | `olvaso` | szöveg |
+  | `cim` | szöveg |
+  | `kivetel` | szöveg (dátum) |
+  | `visszahozas` | szöveg (dátum), üres (NULL), ha még nincs visszahozva |
+
+  Listázd ki azoknak a kölcsönzéseknek az **olvasóját, könyvcímét és kivételi dátumát**, amelyek **még nincsenek visszahozva** (`visszahozas` NULL), a kivétel dátuma szerint növekvő sorrendben! (A kivételi dátumok mind különbözők.) A sorok sorrendje számít.
+
+  Tipp: `WHERE visszahozas IS NULL`, a rendezés pedig `ORDER BY kivetel`.
+starter_code:
+  sql: |
+    SELECT olvaso, cim, kivetel
+    FROM kolcsonzes
+    WHERE ;
+sample_solutions:
+  sql: |
+    SELECT olvaso, cim, kivetel
+    FROM kolcsonzes
+    WHERE visszahozas IS NULL
+    ORDER BY kivetel;
+tests:
+  - stdin: "CREATE TABLE kolcsonzes (id INTEGER PRIMARY KEY, olvaso TEXT, cim TEXT, kivetel TEXT, visszahozas TEXT);\nINSERT INTO kolcsonzes VALUES\n(1, 'Nora', 'Fenyes napok', '2025-03-06', NULL),\n(2, 'Flora', 'Hazak kozott', '2025-03-24', NULL),\n(3, 'Marcell', 'A tenger fiai', '2025-03-19', '2025-04-02'),\n(4, 'Gabor', 'Az elso tavasz', '2025-03-21', NULL),\n(5, 'Balazs', 'A tenger fiai', '2025-03-17', NULL),\n(6, 'Hanna', 'A regi malom', '2025-03-11', NULL),\n(7, 'Anna', 'A kek hold', '2025-03-25', NULL);\n"
+    expected: "olvaso,cim,kivetel\nNora,Fenyes napok,2025-03-06\nHanna,A regi malom,2025-03-11\nBalazs,A tenger fiai,2025-03-17\nGabor,Az elso tavasz,2025-03-21\nFlora,Hazak kozott,2025-03-24\nAnna,A kek hold,2025-03-25\n"
+    hidden: false
+  - stdin: "CREATE TABLE kolcsonzes (id INTEGER PRIMARY KEY, olvaso TEXT, cim TEXT, kivetel TEXT, visszahozas TEXT);\nINSERT INTO kolcsonzes VALUES\n(1, 'Kata', 'Hegyi ut', '2025-03-13', NULL),\n(2, 'Flora', 'Foldrajzi felfedezok', '2025-03-15', '2025-04-17'),\n(3, 'Lilla', 'Nyari vihar', '2025-03-27', NULL),\n(4, 'Sandor', 'Az utolso ora', '2025-03-06', '2025-04-24'),\n(5, 'Lilla', 'Ures szoba', '2025-03-28', '2025-04-24'),\n(6, 'Eszter', 'A regi malom', '2025-03-04', NULL),\n(7, 'Olivia', 'Havas varos', '2025-03-01', '2025-04-21'),\n(8, 'Zoltan', 'Foldrajzi felfedezok', '2025-03-19', '2025-04-13'),\n(9, 'Tamas', 'Szel ellen', '2025-03-24', '2025-04-02');\n"
+    expected: "olvaso,cim,kivetel\nEszter,A regi malom,2025-03-04\nKata,Hegyi ut,2025-03-13\nLilla,Nyari vihar,2025-03-27\n"
+    hidden: true
+  - stdin: "CREATE TABLE kolcsonzes (id INTEGER PRIMARY KEY, olvaso TEXT, cim TEXT, kivetel TEXT, visszahozas TEXT);\nINSERT INTO kolcsonzes VALUES\n(1, 'Gabor', 'A hidak kora', '2025-03-07', '2025-04-10'),\n(2, 'Zoltan', 'Aranykor', '2025-03-21', NULL),\n(3, 'Dora', 'Havas varos', '2025-03-12', NULL),\n(4, 'Olivia', 'Kis kert', '2025-03-10', NULL),\n(5, 'Tamas', 'A hidak kora', '2025-03-04', '2025-04-04'),\n(6, 'Sandor', 'A kert titka', '2025-03-23', '2025-04-02'),\n(7, 'Anna', 'Aranykor', '2025-03-11', NULL),\n(8, 'Reka', 'Csendes folyo', '2025-03-14', '2025-04-03'),\n(9, 'Tamas', 'A masik part', '2025-03-09', NULL),\n(10, 'Bence', 'Kis kert', '2025-03-08', '2025-04-09'),\n(11, 'Sandor', 'A hidak kora', '2025-03-06', '2025-04-05');\n"
+    expected: "olvaso,cim,kivetel\nTamas,A masik part,2025-03-09\nOlivia,Kis kert,2025-03-10\nAnna,Aranykor,2025-03-11\nDora,Havas varos,2025-03-12\nZoltan,Aranykor,2025-03-21\n"
+    hidden: true
+  - stdin: "CREATE TABLE kolcsonzes (id INTEGER PRIMARY KEY, olvaso TEXT, cim TEXT, kivetel TEXT, visszahozas TEXT);\nINSERT INTO kolcsonzes VALUES\n(1, 'Gergo', 'Kozos ut', '2025-03-13', NULL),\n(2, 'Lilla', 'Kis kert', '2025-03-11', '2025-04-22'),\n(3, 'Judit', 'Ures szoba', '2025-03-21', '2025-04-18'),\n(4, 'Flora', 'A regi malom', '2025-03-17', '2025-04-13'),\n(5, 'Sandor', 'Kis kert', '2025-03-18', NULL),\n(6, 'Fanni', 'A kert titka', '2025-03-01', '2025-04-14'),\n(7, 'Anna', 'Az elso tavasz', '2025-03-20', '2025-04-07'),\n(8, 'Marcell', 'Hegyi ut', '2025-03-05', NULL),\n(9, 'Eszter', 'Hazak kozott', '2025-03-26', '2025-04-28'),\n(10, 'Marcell', 'Utolso vonat', '2025-03-09', '2025-04-03'),\n(11, 'Gergo', 'Szeleso ter', '2025-03-14', '2025-04-14'),\n(12, 'Laszlo', 'Csendes folyo', '2025-03-27', '2025-04-11'),\n(13, 'Judit', 'Aranykor', '2025-03-28', NULL);\n"
+    expected: "olvaso,cim,kivetel\nMarcell,Hegyi ut,2025-03-05\nGergo,Kozos ut,2025-03-13\nSandor,Kis kert,2025-03-18\nJudit,Aranykor,2025-03-28\n"
+    hidden: true

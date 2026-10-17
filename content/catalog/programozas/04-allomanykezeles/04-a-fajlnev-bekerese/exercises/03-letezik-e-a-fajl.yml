@@ -1,0 +1,110 @@
+slug: letezik-e-a-fajl
+title: Létezik-e a fájl?
+position: 2
+kind: code
+level: kozep
+difficulty: 3
+published: false
+allowed_languages:
+- python
+- csharp
+description: |
+  A felhasználó megad egy nevet (pl. `alma`). A program a `nev.txt` nevű fájlt keresi. Ha a fájl nem létezik, ezt írja ki (a teljes fájlnévvel):
+
+  `Nincs ilyen allomany: szilva.txt`
+
+  Ha létezik, a sorainak számát:
+
+  `Sorok szama: 3`
+
+  Tipp: a fájl létezését Pythonban az `os.path.exists(nev)` (előtte `import os`), C#-ban a `File.Exists(nev)` adja meg. Fájlt, ami nincs ott, nem szabad megnyitni: hibával leáll a program.
+starter_code:
+  python: |
+    import os
+
+    nev = input() + ".txt"
+    # ide írd a megoldást
+  csharp: |
+    using System;
+    using System.IO;
+
+    class Program
+    {
+        static void Main()
+        {
+            string nev = Console.ReadLine() + ".txt";
+            // ide írd a megoldást
+        }
+    }
+sample_solutions:
+  python: |
+    import os
+
+    nev = input() + ".txt"
+    if os.path.exists(nev):
+        with open(nev, encoding="utf-8") as f:
+            print("Sorok szama:", len(f.read().splitlines()))
+    else:
+        print("Nincs ilyen allomany: " + nev)
+  csharp: |
+    using System;
+    using System.IO;
+
+    class Program
+    {
+        static void Main()
+        {
+            string nev = Console.ReadLine() + ".txt";
+            if (File.Exists(nev))
+            {
+                Console.WriteLine("Sorok szama: " + File.ReadAllLines(nev).Length);
+            }
+            else
+            {
+                Console.WriteLine("Nincs ilyen allomany: " + nev);
+            }
+        }
+    }
+files:
+  alma.txt: alma.txt
+  korte.txt: korte.txt
+tests:
+- stdin: 'alma
+
+    '
+  expected: 'Sorok szama: 3
+
+    '
+  hidden: false
+- stdin: 'szilva
+
+    '
+  expected: 'Nincs ilyen allomany: szilva.txt
+
+    '
+  hidden: true
+- stdin: 'korte
+
+    '
+  expected: 'Sorok szama: 2
+
+    '
+  hidden: true
+- stdin: 'alma
+
+    '
+  expected: 'Sorok szama: 1
+
+    '
+  hidden: true
+  files:
+    alma.txt: teszt-4/alma.txt
+- stdin: 'barack
+
+    '
+  expected: 'Sorok szama: 6
+
+    '
+  hidden: true
+  files:
+    barack.txt: teszt-5/barack.txt

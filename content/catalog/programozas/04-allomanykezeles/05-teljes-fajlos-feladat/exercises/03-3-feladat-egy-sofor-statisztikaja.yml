@@ -1,0 +1,167 @@
+slug: 3-feladat-egy-sofor-statisztikaja
+title: '3. feladat: egy sofőr statisztikája'
+position: 2
+kind: code
+level: kozep
+difficulty: 3
+published: false
+allowed_languages:
+- python
+- csharp
+description: |
+  Az `ut.txt` fájl egy fuvarozó cég útjait tartalmazza, tabulátorral tagolva. Az első sor fejléc (`datum`, `sofor`, `km`, `perc`); minden további sor egy út: a dátum (`EEEE-HH-NN` alakban), a sofőr neve (ékezet nélkül, szóköz nélkül), a megtett kilométerek és az út ideje percben (egész számok). A fájl legalább egy utat tartalmaz.
+
+  A felhasználó megad egy sofőrnevet. Írd ki a `3. feladat` szöveget, majd a sofőr útjainak számát és kilométereinek összegét:
+
+  ```
+  3. feladat
+  Utak szama: 4
+  Osszes km: 330
+  ```
+
+  Ha a sofőr nem szerepel a fájlban, a második és harmadik sor helyett ezt írd: `Nincs ilyen sofor`. A névben a kis- és nagybetű számít.
+
+  Tipp: a nevet a program elején kérd be; a feladat számlálás és összegzés egyszerre.
+starter_code:
+  python: |
+    print("3. feladat")
+    nev = input()
+    with open("ut.txt", encoding="utf-8") as f:
+        sorok = f.read().splitlines()
+    # ide írd a megoldást
+  csharp: |
+    using System;
+    using System.IO;
+
+    class Program
+    {
+        static void Main()
+        {
+            Console.WriteLine("3. feladat");
+            string nev = Console.ReadLine();
+            string[] sorok = File.ReadAllLines("ut.txt");
+            // ide írd a megoldást
+        }
+    }
+sample_solutions:
+  python: |
+    print("3. feladat")
+    nev = input()
+    with open("ut.txt", encoding="utf-8") as f:
+        sorok = f.read().splitlines()
+    db = 0
+    km = 0
+    for sor in sorok[1:]:
+        mezok = sor.split("\t")
+        if mezok[1] == nev:
+            db += 1
+            km += int(mezok[2])
+    if db == 0:
+        print("Nincs ilyen sofor")
+    else:
+        print("Utak szama:", db)
+        print("Osszes km:", km)
+  csharp: |
+    using System;
+    using System.IO;
+
+    class Program
+    {
+        static void Main()
+        {
+            Console.WriteLine("3. feladat");
+            string nev = Console.ReadLine();
+            string[] sorok = File.ReadAllLines("ut.txt");
+            int db = 0;
+            int km = 0;
+            for (int i = 1; i < sorok.Length; i++)
+            {
+                string[] mezok = sorok[i].Split('\t');
+                if (mezok[1] == nev)
+                {
+                    db++;
+                    km += int.Parse(mezok[2]);
+                }
+            }
+            if (db == 0)
+            {
+                Console.WriteLine("Nincs ilyen sofor");
+            }
+            else
+            {
+                Console.WriteLine("Utak szama: " + db);
+                Console.WriteLine("Osszes km: " + km);
+            }
+        }
+    }
+files:
+  ut.txt: ut.txt
+tests:
+- stdin: 'Kovacs
+
+    '
+  expected: '3. feladat
+
+    Utak szama: 4
+
+    Osszes km: 330
+
+    '
+  hidden: false
+- stdin: 'Szabo
+
+    '
+  expected: '3. feladat
+
+    Utak szama: 3
+
+    Osszes km: 285
+
+    '
+  hidden: true
+- stdin: 'kovacs
+
+    '
+  expected: '3. feladat
+
+    Nincs ilyen sofor
+
+    '
+  hidden: true
+- stdin: 'Varga
+
+    '
+  expected: '3. feladat
+
+    Utak szama: 2
+
+    Osszes km: 200
+
+    '
+  hidden: true
+  files:
+    ut.txt: teszt-4/ut.txt
+- stdin: 'Kovacs
+
+    '
+  expected: '3. feladat
+
+    Nincs ilyen sofor
+
+    '
+  hidden: true
+  files:
+    ut.txt: teszt-5/ut.txt
+- stdin: 'Biro
+
+    '
+  expected: '3. feladat
+
+    Utak szama: 1
+
+    Osszes km: 7
+
+    '
+  hidden: true
+  files:
+    ut.txt: teszt-6/ut.txt

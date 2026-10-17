@@ -1,0 +1,114 @@
+slug: harom-lista-metszete
+title: "Három lista metszete"
+position: 3
+kind: code
+level: emelt
+difficulty: 4
+published: false
+allowed_languages: [python, csharp]
+description: |
+  A bemenet első sora a listák száma (K, legalább 1), majd K sor, mindegyikben egy nem üres, szóközzel elválasztott egész számokból álló lista (egy listában egy érték többször is szerepelhet). Írd ki azokat az értékeket, amelyek **mindegyik** listában szerepelnek, növekvő sorrendben, mindegyiket egyszer: `Kozos: ...`. Ha nincs ilyen érték, a kettőspont után `-` álljon.
+
+  Példa bemenet:
+
+  ```
+  3
+  1 2 3 4
+  2 4 6 4
+  4 2 9
+  ```
+
+  Kimenet:
+
+  ```
+  Kozos: 2 4
+  ```
+
+  Tipp: kezdd az első lista értékeivel, és minden további listával szűkítsd a közös elemek gyűjteményét. Pythonban a `set` metszete (`&`) segít; C#-ban a `HashSet<int>.IntersectWith`.
+starter_code:
+  python: |
+    k = int(input())
+    listak = []
+    for _ in range(k):
+        listak.append([int(x) for x in input().split()])
+    # szűkítsd lépésenként a közös elemeket
+  csharp: |
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+
+    class Program
+    {
+        static void Main()
+        {
+            int k = int.Parse(Console.ReadLine());
+            var listak = new List<List<int>>();
+            for (int i = 0; i < k; i++)
+            {
+                var lista = new List<int>();
+                foreach (string s in Console.ReadLine().Split(' '))
+                {
+                    lista.Add(int.Parse(s));
+                }
+                listak.Add(lista);
+            }
+            // szűkítsd lépésenként a közös elemeket
+        }
+    }
+sample_solutions:
+  python: |
+    k = int(input())
+    listak = []
+    for _ in range(k):
+        listak.append([int(x) for x in input().split()])
+    kozos = set(listak[0])
+    for lista in listak:
+        kozos = kozos & set(lista)
+    eredmeny = sorted(kozos)
+    if len(eredmeny) == 0:
+        print("Kozos: -")
+    else:
+        print("Kozos: " + " ".join(str(x) for x in eredmeny))
+  csharp: |
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+
+    class Program
+    {
+        static void Main()
+        {
+            int k = int.Parse(Console.ReadLine());
+            var listak = new List<List<int>>();
+            for (int i = 0; i < k; i++)
+            {
+                var lista = new List<int>();
+                foreach (string s in Console.ReadLine().Split(' '))
+                {
+                    lista.Add(int.Parse(s));
+                }
+                listak.Add(lista);
+            }
+            var kozos = new HashSet<int>(listak[0]);
+            foreach (var lista in listak)
+            {
+                kozos.IntersectWith(lista);
+            }
+            var eredmeny = kozos.ToList();
+            eredmeny.Sort();
+            if (eredmeny.Count == 0)
+            {
+                Console.WriteLine("Kozos: -");
+            }
+            else
+            {
+                Console.WriteLine("Kozos: " + string.Join(" ", eredmeny));
+            }
+        }
+    }
+tests:
+  - { stdin: "3\n1 2 3 4\n2 4 6 4\n4 2 9\n", expected: "Kozos: 2 4\n", hidden: false }
+  - { stdin: "1\n5 5 3\n", expected: "Kozos: 3 5\n", hidden: true }
+  - { stdin: "2\n1 2\n3 4\n", expected: "Kozos: -\n", hidden: true }
+  - { stdin: "3\n7 7 7\n7\n7 8 7\n", expected: "Kozos: 7\n", hidden: true }
+  - { stdin: "4\n-1 0 1 2\n0 2 -1\n2 -1 5 0\n-1 2 0 9 9\n", expected: "Kozos: -1 0 2\n", hidden: true }

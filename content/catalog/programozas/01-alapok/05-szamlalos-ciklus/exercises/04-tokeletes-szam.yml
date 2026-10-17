@@ -1,0 +1,79 @@
+slug: tokeletes-szam
+title: Tökéletes szám
+position: 3
+kind: code
+level: kozep
+difficulty: 3
+published: false
+allowed_languages: [python, csharp]
+description: |
+  Egy pozitív egész szám **tökéletes**, ha egyenlő a nála kisebb pozitív osztóinak összegével. Például a 6 tökéletes, mert `1 + 2 + 3 = 6`.
+
+  Olvass be egy pozitív egész számot, és írd ki, hogy tökéletes-e: `igen` vagy `nem`.
+
+  Példák:
+
+  - bemenet `6`, kimenet `igen`
+  - bemenet `12`, kimenet `nem` (az osztók összege `1 + 2 + 3 + 4 + 6 = 16`)
+
+  Tipp: az összegző változót a ciklus előtt nullázd; a ciklus 1-től `n - 1`-ig menjen, hogy maga az `n` ne számítson bele.
+starter_code:
+  python: |
+    n = int(input())
+    osszeg = 0
+    # innen folytasd
+  csharp: |
+    using System;
+
+    class Program
+    {
+        static void Main()
+        {
+            var n = int.Parse(Console.ReadLine());
+            var osszeg = 0;
+            // innen folytasd
+        }
+    }
+sample_solutions:
+  python: |
+    n = int(input())
+    osszeg = 0
+    for i in range(1, n):
+        if n % i == 0:
+            osszeg = osszeg + i
+    if osszeg == n:
+        print("igen")
+    else:
+        print("nem")
+  csharp: |
+    using System;
+
+    class Program
+    {
+        static void Main()
+        {
+            var n = int.Parse(Console.ReadLine());
+            var osszeg = 0;
+            for (int i = 1; i < n; i++)
+            {
+                if (n % i == 0)
+                {
+                    osszeg = osszeg + i;
+                }
+            }
+            if (osszeg == n)
+            {
+                Console.WriteLine("igen");
+            }
+            else
+            {
+                Console.WriteLine("nem");
+            }
+        }
+    }
+tests:
+  - { stdin: "6\n", expected: "igen\n", hidden: false }
+  - { stdin: "28\n", expected: "igen\n", hidden: true }
+  - { stdin: "12\n", expected: "nem\n", hidden: true }
+  - { stdin: "1\n", expected: "nem\n", hidden: true }
+  - { stdin: "496\n", expected: "igen\n", hidden: true }

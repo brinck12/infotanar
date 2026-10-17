@@ -1,0 +1,116 @@
+slug: osztalyzat-a-pontokbol
+title: Osztályzat a pontokból
+position: 0
+kind: sql
+level: kozep
+difficulty: 2
+published: false
+allowed_languages: [sql]
+description: |
+    A `dolgozat` táblában a diákok pontszáma 0 és 100 között van. Add meg minden diák nevét (`nev`) és jegyét (`jegy`): 85 ponttól 5-ös, 70-től 4-es, 55-től 3-as, 40-től 2-es, az alatt 1-es.
+
+    A `dolgozat` tábla:
+
+    | `id` | `nev` | `pont` |
+    |---|---|---|
+    | 1 | Kiss Anna | 92 |
+    | 2 | Nagy Bela | 70 |
+    | 3 | Toth Csaba | 54 |
+    | 4 | Szabo Dora | 40 |
+    | 5 | Varga Fanni | 23 |
+
+    Az eredmény ezekre az adatokra:
+
+    | `nev` | `jegy` |
+    |---|---|
+    | Kiss Anna | 5 |
+    | Nagy Bela | 4 |
+    | Toth Csaba | 2 |
+    | Szabo Dora | 2 |
+    | Varga Fanni | 1 |
+
+    Tipp: a `CASE` az első igaz `WHEN` ágat választja, ezért a feltételeket felülről lefelé, szigorúbbtól a lazább felé írd.
+starter_code:
+  sql: |
+    SELECT nev,
+      CASE
+        WHEN pont >= 85 THEN 5
+        -- folytasd
+      END AS jegy
+    FROM dolgozat;
+sample_solutions:
+  sql: |
+    SELECT nev,
+      CASE
+        WHEN pont >= 85 THEN 5
+        WHEN pont >= 70 THEN 4
+        WHEN pont >= 55 THEN 3
+        WHEN pont >= 40 THEN 2
+        ELSE 1
+      END AS jegy
+    FROM dolgozat;
+tests:
+  - stdin: |
+      CREATE TABLE dolgozat (id INTEGER PRIMARY KEY, nev TEXT, pont INTEGER);
+      INSERT INTO dolgozat VALUES (1, 'Kiss Anna', 92);
+      INSERT INTO dolgozat VALUES (2, 'Nagy Bela', 70);
+      INSERT INTO dolgozat VALUES (3, 'Toth Csaba', 54);
+      INSERT INTO dolgozat VALUES (4, 'Szabo Dora', 40);
+      INSERT INTO dolgozat VALUES (5, 'Varga Fanni', 23);
+    expected: |
+      nev,jegy
+      Kiss Anna,5
+      Nagy Bela,4
+      Toth Csaba,2
+      Szabo Dora,2
+      Varga Fanni,1
+    hidden: false
+  - stdin: |
+      CREATE TABLE dolgozat (id INTEGER PRIMARY KEY, nev TEXT, pont INTEGER);
+      INSERT INTO dolgozat VALUES (1, 'Kovacs Gabor', 85);
+      INSERT INTO dolgozat VALUES (2, 'Molnar Hanna', 84);
+      INSERT INTO dolgozat VALUES (3, 'Farkas Imre', 70);
+      INSERT INTO dolgozat VALUES (4, 'Papp Julia', 69);
+      INSERT INTO dolgozat VALUES (5, 'Balogh Karoly', 55);
+      INSERT INTO dolgozat VALUES (6, 'Meszaros Lilla', 54);
+    expected: |
+      nev,jegy
+      Kovacs Gabor,5
+      Molnar Hanna,4
+      Farkas Imre,4
+      Papp Julia,3
+      Balogh Karoly,3
+      Meszaros Lilla,2
+    hidden: true
+  - stdin: |
+      CREATE TABLE dolgozat (id INTEGER PRIMARY KEY, nev TEXT, pont INTEGER);
+      INSERT INTO dolgozat VALUES (1, 'Horvath Erik', 100);
+      INSERT INTO dolgozat VALUES (2, 'Simon Zoltan', 0);
+      INSERT INTO dolgozat VALUES (3, 'Lakatos Eszter', 40);
+      INSERT INTO dolgozat VALUES (4, 'Fekete Mate', 39);
+    expected: |
+      nev,jegy
+      Horvath Erik,5
+      Simon Zoltan,1
+      Lakatos Eszter,2
+      Fekete Mate,1
+    hidden: true
+  - stdin: |
+      CREATE TABLE dolgozat (id INTEGER PRIMARY KEY, nev TEXT, pont INTEGER);
+      INSERT INTO dolgozat VALUES (1, 'Juhasz Reka', 88);
+      INSERT INTO dolgozat VALUES (2, 'Biro Peter', 61);
+      INSERT INTO dolgozat VALUES (3, 'Szilagyi Nora', 47);
+      INSERT INTO dolgozat VALUES (4, 'Orosz David', 12);
+      INSERT INTO dolgozat VALUES (5, 'Gal Vivien', 76);
+      INSERT INTO dolgozat VALUES (6, 'Kiss Anna', 99);
+      INSERT INTO dolgozat VALUES (7, 'Nagy Bela', 55);
+    expected: |
+      nev,jegy
+      Juhasz Reka,5
+      Biro Peter,3
+      Szilagyi Nora,2
+      Orosz David,1
+      Gal Vivien,4
+      Kiss Anna,5
+      Nagy Bela,3
+    hidden: true
