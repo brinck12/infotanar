@@ -417,7 +417,10 @@ test.describe('catalog:import eles import @regression', () => {
 
   test('nem domain kivetel eseten magyar hibaval all le, es semmi nem irodik', () => {
     tinkerJson(`
-      DB::unprepared("CREATE TRIGGER pw_import_boom BEFORE INSERT ON exercises BEGIN SELECT RAISE(ABORT, 'pw-import boom'); END;");
+      $mysql = DB::connection()->getDriverName() === 'mysql';
+      DB::unprepared($mysql
+        ? "CREATE TRIGGER pw_import_boom BEFORE INSERT ON exercises FOR EACH ROW SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'pw-import boom'"
+        : "CREATE TRIGGER pw_import_boom BEFORE INSERT ON exercises BEGIN SELECT RAISE(ABORT, 'pw-import boom'); END;");
       return true;
     `)
     try {
