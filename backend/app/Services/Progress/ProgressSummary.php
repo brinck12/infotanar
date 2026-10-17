@@ -11,9 +11,13 @@ final readonly class ProgressSummary
         public int $total,
     ) {}
 
-    /** Lefele kerekitve: 100% csak akkor, ha tenyleg minden kesz. */
+    /** Lefele kerekitve: 100% csak akkor, ha tenyleg minden kesz, es 0% csak akkor, ha meg semmi sem. */
     public function percent(): int
     {
-        return $this->total === 0 ? 0 : intdiv($this->completed * 100, $this->total);
+        if ($this->total === 0) {
+            return 0;
+        }
+
+        return max(intdiv($this->completed * 100, $this->total), $this->completed > 0 ? 1 : 0);
     }
 }
