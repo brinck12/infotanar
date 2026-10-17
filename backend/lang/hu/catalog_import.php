@@ -20,6 +20,7 @@ return [
     'slug_format' => 'A(z) „:field” csak kisbetűs ASCII betűt, számot és kötőjelet tartalmazhat.',
     'slug_title_mismatch' => 'A feladat slugja („:slug”) nem egyezik a címből képzett slugéval („:expected”).',
     'duplicate_slug' => 'Ismétlődő slug („:slug”) ugyanabban a szülőben, első előfordulás: :other',
+    'module_slug_taken' => 'A szakasz slugja („:slug”) már egy másik tanulási úton szerepel, és a szakaszok slugja az egész katalógusban egyedi. Első előfordulás: :other',
     'duplicate_position' => 'Ismétlődő position (:position) ugyanabban a szülőben, első előfordulás: :other',
     'language_not_allowed' => 'A(z) „:field” nyelve („:language”) nincs az allowed_languages között.',
     'no_tests' => 'Legalább egy tesztesetet meg kell adni a „tests” alatt.',

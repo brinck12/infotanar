@@ -49,6 +49,8 @@ final class ContentValidator
         $this->problems = $set->problems;
 
         $this->checkSiblings($set->tracks);
+        // A szakasz slugja az adatbázisban az összes tanulási úton egyedi (modules.slug), nem csak egy úton belül.
+        $moduleSlugs = [];
         foreach ($set->tracks as $track) {
             $this->checkCommon($track->path, $track->attributes, 'track');
             $this->checkOptionalText($track->path, $track->attributes, 'description');
@@ -56,6 +58,14 @@ final class ContentValidator
 
             $this->checkSiblings($track->modules);
             foreach ($track->modules as $module) {
+                $moduleSlug = $module->attributes['slug'] ?? null;
+                if (is_string($moduleSlug)) {
+                    if (isset($moduleSlugs[$moduleSlug])) {
+                        $this->add($module->path, 'module_slug_taken', ['slug' => $moduleSlug, 'other' => $moduleSlugs[$moduleSlug]]);
+                    } else {
+                        $moduleSlugs[$moduleSlug] = $module->path;
+                    }
+                }
                 $this->checkCommon($module->path, $module->attributes, 'module');
                 $this->checkOptionalText($module->path, $module->attributes, 'description');
 
