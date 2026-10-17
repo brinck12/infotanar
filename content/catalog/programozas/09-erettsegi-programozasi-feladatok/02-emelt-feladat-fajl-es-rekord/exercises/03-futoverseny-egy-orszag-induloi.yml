@@ -1,0 +1,211 @@
+slug: futoverseny-egy-orszag-induloi
+title: 'Futóverseny: egy ország indulói'
+position: 2
+kind: code
+level: emelt
+difficulty: 3
+published: false
+allowed_languages:
+- python
+- csharp
+description: |
+  Egy atlétikai versenyen a futók eredményeit a `verseny.txt` fájl tartalmazza. Az első sor fejléc (`nev`, `orszag`, `tav`, `ido`), utána minden sor egy eredmény, tabulátorral tagolva: a versenyző neve (ékezet nélkül, szóközt tartalmazhat), az országkód (három nagybetű), a táv méterben (100, 200 vagy 400) és az elért idő másodpercben, két tizedesjegyes tizedestörtként (pontokkal, pl. `11.52`). Egy versenyző több távon is indulhatott, ezért a neve többször szerepelhet, mindig ugyanazzal az országkóddal és különböző távval. A fájl legalább egy eredményt tartalmaz.
+
+  A programban egy eredményt rekordként (osztályként) érdemes tárolni: név, ország, táv, idő. Minden részfeladat kimenete a sorszámával kezdődik (`N. feladat`), a kimenetben ne használj ékezetes betűt. Ahol a feladat bevitelt kér, a kérdést külön sorban írd ki, csak utána olvass be.
+
+  A program kérjen be egy országkódot (`Add meg az orszagkodot:` felirattal), majd írja ki, hány eredményt értek el az ország versenyzői, és hány **különböző** versenyző indult. Ha az országnak nincs eredménye, csak a `Nincs ilyen orszag.` sort írd ki.
+
+  ```
+  Eredmenyek: <db>
+  Versenyzok: <db>
+  ```
+
+  Bemenet a mintaadatokhoz (amit a felhasználó begépel):
+
+  ```
+  GER
+  ```
+
+  Kimenet a mellékelt mintafájllal:
+
+  ```
+  3. feladat
+  Add meg az orszagkodot:
+  Eredmenyek: 5
+  Versenyzok: 2
+  ```
+
+  Tipp: a különböző elemek megszámlálásához halmaz (set, `HashSet`) való: ugyanaz a név csak egyszer kerül bele.
+starter_code:
+  python: |
+    class Eredmeny:
+        def __init__(self, nev, orszag, tav, ido):
+            self.nev = nev
+            self.orszag = orszag
+            self.tav = tav
+            self.ido = ido
+    print("3. feladat")
+    with open("verseny.txt", encoding="utf-8") as f:
+        sorok = f.read().splitlines()
+    eredmenyek = []
+    for sor in sorok[1:]:
+        r = sor.split("\t")
+        eredmenyek.append(Eredmeny(r[0], r[1], int(r[2]), float(r[3])))
+    # ide írd a megoldást
+  csharp: |
+    using System;
+    using System.Collections.Generic;
+    using System.Globalization;
+    using System.IO;
+    using System.Linq;
+
+    class Eredmeny
+    {
+        public string Nev;
+        public string Orszag;
+        public int Tav;
+        public double Ido;
+    }
+
+    class Program
+    {
+        static void Main()
+        {
+            Console.WriteLine("3. feladat");
+            string[] sorok = File.ReadAllLines("verseny.txt");
+            List<Eredmeny> eredmenyek = new List<Eredmeny>();
+            for (int i = 1; i < sorok.Length; i++)
+            {
+                string[] r = sorok[i].Split('\t');
+                Eredmeny e = new Eredmeny();
+                e.Nev = r[0];
+                e.Orszag = r[1];
+                e.Tav = int.Parse(r[2]);
+                e.Ido = double.Parse(r[3], CultureInfo.InvariantCulture);
+                eredmenyek.Add(e);
+            }
+            // ide írd a megoldást
+        }
+    }
+sample_solutions:
+  python: |
+    class Eredmeny:
+        def __init__(self, nev, orszag, tav, ido):
+            self.nev = nev
+            self.orszag = orszag
+            self.tav = tav
+            self.ido = ido
+    print("3. feladat")
+    with open("verseny.txt", encoding="utf-8") as f:
+        sorok = f.read().splitlines()
+    eredmenyek = []
+    for sor in sorok[1:]:
+        r = sor.split("\t")
+        eredmenyek.append(Eredmeny(r[0], r[1], int(r[2]), float(r[3])))
+    print("Add meg az orszagkodot:")
+    kod = input()
+    db = 0
+    nevek = set()
+    for e in eredmenyek:
+        if e.orszag == kod:
+            db += 1
+            nevek.add(e.nev)
+    if db == 0:
+        print("Nincs ilyen orszag.")
+    else:
+        print("Eredmenyek:", db)
+        print("Versenyzok:", len(nevek))
+  csharp: |
+    using System;
+    using System.Collections.Generic;
+    using System.Globalization;
+    using System.IO;
+    using System.Linq;
+
+    class Eredmeny
+    {
+        public string Nev;
+        public string Orszag;
+        public int Tav;
+        public double Ido;
+    }
+
+    class Program
+    {
+        static void Main()
+        {
+            Console.WriteLine("3. feladat");
+            string[] sorok = File.ReadAllLines("verseny.txt");
+            List<Eredmeny> eredmenyek = new List<Eredmeny>();
+            for (int i = 1; i < sorok.Length; i++)
+            {
+                string[] r = sorok[i].Split('\t');
+                Eredmeny e = new Eredmeny();
+                e.Nev = r[0];
+                e.Orszag = r[1];
+                e.Tav = int.Parse(r[2]);
+                e.Ido = double.Parse(r[3], CultureInfo.InvariantCulture);
+                eredmenyek.Add(e);
+            }
+            Console.WriteLine("Add meg az orszagkodot:");
+            string kod = Console.ReadLine();
+            int db = 0;
+            HashSet<string> nevek = new HashSet<string>();
+            foreach (Eredmeny e in eredmenyek)
+            {
+                if (e.Orszag == kod)
+                {
+                    db++;
+                    nevek.Add(e.Nev);
+                }
+            }
+            if (db == 0)
+            {
+                Console.WriteLine("Nincs ilyen orszag.");
+            }
+            else
+            {
+                Console.WriteLine("Eredmenyek: " + db);
+                Console.WriteLine("Versenyzok: " + nevek.Count);
+            }
+        }
+    }
+files:
+  verseny.txt: verseny.txt
+tests:
+- stdin: |
+    GER
+  expected: |
+    3. feladat
+    Add meg az orszagkodot:
+    Eredmenyek: 5
+    Versenyzok: 2
+  hidden: false
+- stdin: |
+    GER
+  expected: |
+    3. feladat
+    Add meg az orszagkodot:
+    Nincs ilyen orszag.
+  hidden: true
+  files:
+    verseny.txt: teszt-2/verseny.txt
+- stdin: |
+    GER
+  expected: |
+    3. feladat
+    Add meg az orszagkodot:
+    Eredmenyek: 7
+    Versenyzok: 3
+  hidden: true
+  files:
+    verseny.txt: teszt-3/verseny.txt
+- stdin: |
+    XXX
+  expected: |
+    3. feladat
+    Add meg az orszagkodot:
+    Nincs ilyen orszag.
+  hidden: true
+  files:
+    verseny.txt: teszt-4/verseny.txt

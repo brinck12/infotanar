@@ -1,0 +1,6 @@
+nev	orszag	tav	ido
+Horvath Zoli	HUN	400	49.87
+Molnar Reka	FRA	400	48.01
+Papp Domi	FRA	400	47.82
+Molnar Reka	FRA	200	22.56
+Varga Lili	POL	200	24.36

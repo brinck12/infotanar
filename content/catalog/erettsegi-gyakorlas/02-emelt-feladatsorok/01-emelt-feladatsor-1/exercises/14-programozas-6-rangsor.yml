@@ -1,0 +1,237 @@
+slug: programozas-6-rangsor
+title: Programozás 6 - Rangsor
+position: 13
+kind: code
+level: emelt
+difficulty: 4
+published: false
+allowed_languages:
+- python
+- csharp
+description: |-
+  Az `utak.txt` a kerékpárkölcsönző egy havi (30 napos) forgalmát tartalmazza, soronként egy úttal, pontosvesszővel elválasztva: `bicikli;nap;indulás;érkezés;távolság`. A bicikli azonosítója `B-01` alakú, a nap a hónap napja (1–30), az indulás és az érkezés `ÓÓ:PP` alakú időpont (ugyanazon a napon belül, az érkezés mindig az indulás után van), a távolság méterben egész szám. A sorok nem rendezettek. Az adatokban nincs ékezet, a fájl legalább egy sort tartalmaz.
+
+  **6. feladat.** Készítsen **rangsort** a biciklikről a megtett összes távolság szerint! Írja ki a legtöbbet futott legfeljebb öt biciklit, **csökkenő** sorrendben: a helyezést, az azonosítót, az összes távolságot méterben és az utak számát a minta szerint. Azonos távolság esetén az azonosító szerint növekvő sorrend dönt. Ha ötnél kevesebb bicikli szerepel az adatokban, mindet írja ki.
+
+  A mintafájlra a kimenet:
+
+  ```text
+  6. feladat:
+  1. B-02 134320 m (11 ut)
+  2. B-03 129141 m (12 ut)
+  3. B-04 123459 m (11 ut)
+  4. B-01 62221 m (8 ut)
+  5. B-07 39044 m (4 ut)
+  ```
+
+  Tipp: összegezd biciklinként a távolságot és az utak számát (szótárral vagy `Dictionary`-vel), majd rendezd a párokat két szempont szerint: előbb a távolság csökkenően, azonos értéknél az azonosító növekvően. Pythonban a `sorted(..., key=lambda ...)` kulcsa lehet egy `(-távolság, azonosító)` pár.
+starter_code:
+  python: |
+    class Ut:
+        def __init__(self, sor):
+            r = sor.split(";")
+            self.bicikli = r[0]
+            self.nap = int(r[1])
+            self.indulas = r[2]
+            self.erkezes = r[3]
+            self.tav = int(r[4])
+
+        def perc(self):
+            i = self.indulas.split(":")
+            e = self.erkezes.split(":")
+            return (int(e[0]) * 60 + int(e[1])) - (int(i[0]) * 60 + int(i[1]))
+
+
+    with open("utak.txt", encoding="utf-8") as f:
+        utak = [Ut(sor) for sor in f.read().splitlines()]
+    # ide írd a megoldást
+  csharp: |
+    using System;
+    using System.Collections.Generic;
+    using System.IO;
+
+    class Ut
+    {
+        public string Bicikli;
+        public int Nap;
+        public string Indulas;
+        public string Erkezes;
+        public int Tav;
+
+        public Ut(string sor)
+        {
+            string[] r = sor.Split(';');
+            Bicikli = r[0];
+            Nap = int.Parse(r[1]);
+            Indulas = r[2];
+            Erkezes = r[3];
+            Tav = int.Parse(r[4]);
+        }
+
+        public static int Percben(string ido)
+        {
+            string[] r = ido.Split(':');
+            return int.Parse(r[0]) * 60 + int.Parse(r[1]);
+        }
+
+        public int Perc()
+        {
+            return Percben(Erkezes) - Percben(Indulas);
+        }
+    }
+
+    class Program
+    {
+        static void Main()
+        {
+            List<Ut> utak = new List<Ut>();
+            foreach (string sor in File.ReadAllLines("utak.txt"))
+            {
+                utak.Add(new Ut(sor));
+            }
+            // ide írd a megoldást
+        }
+    }
+sample_solutions:
+  python: |
+    class Ut:
+        def __init__(self, sor):
+            r = sor.split(";")
+            self.bicikli = r[0]
+            self.nap = int(r[1])
+            self.indulas = r[2]
+            self.erkezes = r[3]
+            self.tav = int(r[4])
+
+        def perc(self):
+            i = self.indulas.split(":")
+            e = self.erkezes.split(":")
+            return (int(e[0]) * 60 + int(e[1])) - (int(i[0]) * 60 + int(i[1]))
+
+
+    with open("utak.txt", encoding="utf-8") as f:
+        utak = [Ut(sor) for sor in f.read().splitlines()]
+    osszeg = {}
+    darab = {}
+    for u in utak:
+        osszeg[u.bicikli] = osszeg.get(u.bicikli, 0) + u.tav
+        darab[u.bicikli] = darab.get(u.bicikli, 0) + 1
+    rang = sorted(osszeg, key=lambda b: (-osszeg[b], b))
+    print("6. feladat:")
+    for i in range(min(5, len(rang))):
+        b = rang[i]
+        print(str(i + 1) + ". " + b + " " + str(osszeg[b]) + " m (" + str(darab[b]) + " ut)")
+  csharp: |
+    using System;
+    using System.Collections.Generic;
+    using System.IO;
+
+    class Ut
+    {
+        public string Bicikli;
+        public int Nap;
+        public string Indulas;
+        public string Erkezes;
+        public int Tav;
+
+        public Ut(string sor)
+        {
+            string[] r = sor.Split(';');
+            Bicikli = r[0];
+            Nap = int.Parse(r[1]);
+            Indulas = r[2];
+            Erkezes = r[3];
+            Tav = int.Parse(r[4]);
+        }
+
+        public static int Percben(string ido)
+        {
+            string[] r = ido.Split(':');
+            return int.Parse(r[0]) * 60 + int.Parse(r[1]);
+        }
+
+        public int Perc()
+        {
+            return Percben(Erkezes) - Percben(Indulas);
+        }
+    }
+
+    class Program
+    {
+        static void Main()
+        {
+            List<Ut> utak = new List<Ut>();
+            foreach (string sor in File.ReadAllLines("utak.txt"))
+            {
+                utak.Add(new Ut(sor));
+            }
+            Dictionary<string, int> osszeg = new Dictionary<string, int>();
+            Dictionary<string, int> darab = new Dictionary<string, int>();
+            foreach (Ut u in utak)
+            {
+                if (!osszeg.ContainsKey(u.Bicikli))
+                {
+                    osszeg[u.Bicikli] = 0;
+                    darab[u.Bicikli] = 0;
+                }
+                osszeg[u.Bicikli] += u.Tav;
+                darab[u.Bicikli]++;
+            }
+            List<string> rang = new List<string>(osszeg.Keys);
+            rang.Sort((a, b) =>
+            {
+                if (osszeg[a] != osszeg[b])
+                {
+                    return osszeg[b].CompareTo(osszeg[a]);
+                }
+                return string.CompareOrdinal(a, b);
+            });
+            Console.WriteLine("6. feladat:");
+            for (int i = 0; i < rang.Count && i < 5; i++)
+            {
+                string b = rang[i];
+                Console.WriteLine((i + 1) + ". " + b + " " + osszeg[b] + " m (" + darab[b] + " ut)");
+            }
+        }
+    }
+files:
+  utak.txt: utak.txt
+tests:
+- stdin: ''
+  expected: |
+    6. feladat:
+    1. B-02 134320 m (11 ut)
+    2. B-03 129141 m (12 ut)
+    3. B-04 123459 m (11 ut)
+    4. B-01 62221 m (8 ut)
+    5. B-07 39044 m (4 ut)
+  hidden: false
+- stdin: ''
+  expected: |
+    6. feladat:
+    1. B-06 72671 m (9 ut)
+    2. B-05 72236 m (7 ut)
+    3. B-02 47339 m (5 ut)
+    4. B-01 25912 m (4 ut)
+    5. B-03 10796 m (1 ut)
+  hidden: true
+  files:
+    utak.txt: teszt-2/utak.txt
+- stdin: ''
+  expected: |
+    6. feladat:
+    1. B-05 5120 m (1 ut)
+  hidden: true
+  files:
+    utak.txt: teszt-3/utak.txt
+- stdin: ''
+  expected: |
+    6. feladat:
+    1. B-01 127854 m (11 ut)
+    2. B-06 100902 m (9 ut)
+    3. B-08 96130 m (8 ut)
+    4. B-03 63430 m (6 ut)
+    5. B-09 53189 m (6 ut)
+  hidden: true
+  files:
+    utak.txt: teszt-4/utak.txt

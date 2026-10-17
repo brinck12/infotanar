@@ -1,0 +1,188 @@
+slug: programozas-7-viharjelentes-fajlba
+title: Programozás 7 - Viharjelentés fájlba
+position: 14
+kind: code
+level: emelt
+difficulty: 5
+published: false
+allowed_languages:
+- python
+- csharp
+description: |-
+  Egy meteorológiai állomás egy hónapos napi adatait az `idojaras.txt` fájl tartalmazza (UTF-8, ékezet nélkül). Az első sor fejléc (`nap;min;max;csapadek;szel`), utána minden sor egy nap adatait tartalmazza, pontosvesszővel elválasztva: a nap sorszáma (1-től folyamatosan növekszik), a legalacsonyabb és a legmagasabb hőmérséklet °C-ban (egész számok, lehet negatív), a napi csapadék mm-ben (0, ha nem esett) és a legerősebb széllökés km/h-ban. A fájl legalább egy napot tartalmaz.
+
+  A programban egy nap adatait rekordként (osztályként) érdemes tárolni. A kimenetben ne használjon ékezetes betűt, a szöveg pontosan egyezzen a mintával.
+
+  **7. feladat** (9 pont). Egy napot **viharosnak** nevezünk, ha a széllökés legalább 60 km/h. Írjon a `viharos.txt` fájlba jelentést: az első sor a fejléc (`nap;szel;csapadek`), utána minden viharos napról egy sor, `nap;szel;csapadek` alakban, a szél szerint csökkenő sorrendben (azonos szélnél a korábbi nap előbb). Ha nincs viharos nap, a fájlban csak a fejléc szerepel. A fájl írása után a program írja ki a viharos napok számát, majd **olvassa vissza a fájlt, és írja ki a tartalmát** a képernyőre, pontosan úgy, ahogy a fájlban áll.
+
+  A mintafájlra a kimenet:
+
+  ```text
+  7. feladat
+  Viharos napok: 0
+  nap;szel;csapadek
+  ```
+
+  Tipp: a fájlba írás után zárd le a fájlt (Pythonban `with`, C#-ban `File.WriteAllText`), és csak utána nyisd meg olvasásra. A sorvégeket mindig `\n`-nel írd.
+starter_code:
+  python: |
+    class Nap:
+        def __init__(self, nap, min_, max_, csapadek, szel):
+            self.nap = nap
+            self.min = min_
+            self.max = max_
+            self.csapadek = csapadek
+            self.szel = szel
+
+
+    with open("idojaras.txt", encoding="utf-8") as f:
+        sorok = f.read().splitlines()
+    napok = []
+    for sor in sorok[1:]:
+        r = sor.split(";")
+        napok.append(Nap(int(r[0]), int(r[1]), int(r[2]), int(r[3]), int(r[4])))
+    print("7. feladat")
+    # ide írd a megoldást
+  csharp: |
+    using System;
+    using System.Collections.Generic;
+    using System.Globalization;
+    using System.IO;
+    using System.Linq;
+
+    class Nap
+    {
+        public int Sorszam;
+        public int Min;
+        public int Max;
+        public int Csapadek;
+        public int Szel;
+    }
+
+    class Program
+    {
+        static void Main()
+        {
+            string[] sorok = File.ReadAllLines("idojaras.txt");
+            List<Nap> napok = new List<Nap>();
+            for (int i = 1; i < sorok.Length; i++)
+            {
+                string[] r = sorok[i].Split(';');
+                Nap n = new Nap();
+                n.Sorszam = int.Parse(r[0]);
+                n.Min = int.Parse(r[1]);
+                n.Max = int.Parse(r[2]);
+                n.Csapadek = int.Parse(r[3]);
+                n.Szel = int.Parse(r[4]);
+                napok.Add(n);
+            }
+            Console.WriteLine("7. feladat");
+            // ide írd a megoldást
+        }
+    }
+sample_solutions:
+  python: |
+    class Nap:
+        def __init__(self, nap, min_, max_, csapadek, szel):
+            self.nap = nap
+            self.min = min_
+            self.max = max_
+            self.csapadek = csapadek
+            self.szel = szel
+
+
+    with open("idojaras.txt", encoding="utf-8") as f:
+        sorok = f.read().splitlines()
+    napok = []
+    for sor in sorok[1:]:
+        r = sor.split(";")
+        napok.append(Nap(int(r[0]), int(r[1]), int(r[2]), int(r[3]), int(r[4])))
+    print("7. feladat")
+    viharos = sorted([n for n in napok if n.szel >= 60], key=lambda n: -n.szel)
+    with open("viharos.txt", "w", encoding="utf-8", newline="\n") as f:
+        f.write("nap;szel;csapadek\n")
+        for n in viharos:
+            f.write(f"{n.nap};{n.szel};{n.csapadek}\n")
+    print("Viharos napok:", len(viharos))
+    with open("viharos.txt", encoding="utf-8") as f:
+        print(f.read(), end="")
+  csharp: |
+    using System;
+    using System.Collections.Generic;
+    using System.Globalization;
+    using System.IO;
+    using System.Linq;
+
+    class Nap
+    {
+        public int Sorszam;
+        public int Min;
+        public int Max;
+        public int Csapadek;
+        public int Szel;
+    }
+
+    class Program
+    {
+        static void Main()
+        {
+            string[] sorok = File.ReadAllLines("idojaras.txt");
+            List<Nap> napok = new List<Nap>();
+            for (int i = 1; i < sorok.Length; i++)
+            {
+                string[] r = sorok[i].Split(';');
+                Nap n = new Nap();
+                n.Sorszam = int.Parse(r[0]);
+                n.Min = int.Parse(r[1]);
+                n.Max = int.Parse(r[2]);
+                n.Csapadek = int.Parse(r[3]);
+                n.Szel = int.Parse(r[4]);
+                napok.Add(n);
+            }
+            Console.WriteLine("7. feladat");
+            List<Nap> viharos = napok.Where(n => n.Szel >= 60).OrderByDescending(n => n.Szel).ToList();
+            string tartalom = "nap;szel;csapadek\n";
+            foreach (Nap n in viharos)
+            {
+                tartalom += n.Sorszam + ";" + n.Szel + ";" + n.Csapadek + "\n";
+            }
+            File.WriteAllText("viharos.txt", tartalom);
+            Console.WriteLine("Viharos napok: " + viharos.Count);
+            Console.Write(File.ReadAllText("viharos.txt"));
+        }
+    }
+files:
+  idojaras.txt: idojaras.txt
+tests:
+- stdin: ''
+  expected: |
+    7. feladat
+    Viharos napok: 0
+    nap;szel;csapadek
+  hidden: false
+- stdin: ''
+  expected: |
+    7. feladat
+    Viharos napok: 2
+    nap;szel;csapadek
+    4;62;0
+    13;62;25
+  hidden: true
+  files:
+    idojaras.txt: teszt-2/idojaras.txt
+- stdin: ''
+  expected: |
+    7. feladat
+    Viharos napok: 0
+    nap;szel;csapadek
+  hidden: true
+  files:
+    idojaras.txt: teszt-3/idojaras.txt
+- stdin: ''
+  expected: |
+    7. feladat
+    Viharos napok: 0
+    nap;szel;csapadek
+  hidden: true
+  files:
+    idojaras.txt: teszt-4/idojaras.txt

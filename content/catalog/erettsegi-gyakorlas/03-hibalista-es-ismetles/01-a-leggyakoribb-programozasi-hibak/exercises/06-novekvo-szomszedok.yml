@@ -1,0 +1,102 @@
+slug: novekvo-szomszedok
+title: "Növekvő szomszédok"
+position: 5
+kind: code
+level: emelt
+difficulty: 3
+published: false
+allowed_languages: [python, csharp]
+description: |
+  Az alábbi program azt számolná meg, hány helyen nagyobb egy szám a közvetlenül előtte állónál. Futtatáskor azonban hibaüzenettel leáll. Keresd meg és javítsd a hibát!
+
+  Bemenet: az első sorban `N` (`1 ≤ N ≤ 100`), a második sorban `N` darab szóközzel elválasztott egész szám. Kimenet: azoknak a szomszédos pároknak a száma, ahol a második szám nagyobb az elsőnél.
+
+  Példa: `5`, majd `3 5 4 8 9` esetén a kimenet `3` (a `3`→`5`, a `4`→`8` és a `8`→`9` pár).
+
+  Tipp: az utolsó elemnek nincs rákövetkezője. Meddig mehet a ciklusváltozó, ha az `i + 1`-edik elemet is használod?
+starter_code:
+  python: |
+    n = int(input())
+    szamok = [int(x) for x in input().split()]
+    db = 0
+    for i in range(n):
+        if szamok[i] < szamok[i + 1]:
+            db += 1
+    print(db)
+  csharp: |
+    using System;
+    using System.Globalization;
+
+    class Program
+    {
+        static void Main()
+        {
+            int n = int.Parse(Console.ReadLine());
+            string[] reszek = Console.ReadLine().Split(' ');
+            int[] szamok = new int[n];
+            for (int i = 0; i < n; i++)
+            {
+                szamok[i] = int.Parse(reszek[i]);
+            }
+            int db = 0;
+            for (int i = 0; i < n; i++)
+            {
+                if (szamok[i] < szamok[i + 1])
+                {
+                    db++;
+                }
+            }
+            Console.WriteLine(db);
+        }
+    }
+sample_solutions:
+  python: |
+    n = int(input())
+    szamok = [int(x) for x in input().split()]
+    db = 0
+    for i in range(n - 1):
+        if szamok[i] < szamok[i + 1]:
+            db += 1
+    print(db)
+  csharp: |
+    using System;
+    using System.Globalization;
+
+    class Program
+    {
+        static void Main()
+        {
+            int n = int.Parse(Console.ReadLine());
+            string[] reszek = Console.ReadLine().Split(' ');
+            int[] szamok = new int[n];
+            for (int i = 0; i < n; i++)
+            {
+                szamok[i] = int.Parse(reszek[i]);
+            }
+            int db = 0;
+            for (int i = 0; i < n - 1; i++)
+            {
+                if (szamok[i] < szamok[i + 1])
+                {
+                    db++;
+                }
+            }
+            Console.WriteLine(db);
+        }
+    }
+tests:
+  - stdin: "5\n3 5 4 8 9\n"
+    expected: "3\n"
+    hidden: false
+  - stdin: "1\n42\n"
+    expected: "0\n"
+    hidden: true
+  - stdin: "4\n9 7 5 3\n"
+    expected: "0\n"
+    hidden: true
+  - stdin: "4\n2 2 2 2\n"
+    expected: "0\n"
+    hidden: true
+  - stdin: "6\n-3 -2 -1 0 1 2\n"
+    expected: "5\n"
+    hidden: true

@@ -1,0 +1,272 @@
+slug: programozas-6-csapadek-a-naptarban
+title: Programozás 6 - Csapadék a naptárban
+position: 13
+kind: code
+level: emelt
+difficulty: 4
+published: false
+allowed_languages:
+- python
+- csharp
+description: |-
+  Egy meteorológiai állomás egy hónapos napi adatait az `idojaras.txt` fájl tartalmazza (UTF-8, ékezet nélkül). Az első sor fejléc (`nap;min;max;csapadek;szel`), utána minden sor egy nap adatait tartalmazza, pontosvesszővel elválasztva: a nap sorszáma (1-től folyamatosan növekszik), a legalacsonyabb és a legmagasabb hőmérséklet °C-ban (egész számok, lehet negatív), a napi csapadék mm-ben (0, ha nem esett) és a legerősebb széllökés km/h-ban. A fájl legalább egy napot tartalmaz.
+
+  A programban egy nap adatait rekordként (osztályként) érdemes tárolni. A kimenetben ne használjon ékezetes betűt, a szöveg pontosan egyezzen a mintával.
+
+  **6. feladat** (8 pont). A hónap csapadékát egy **kétdimenziós táblázatba** (mátrixba) kell rendezni: egy sor egy hét, egy oszlop egy hétköznap (hétfő = 1. oszlop, vasárnap = 7. oszlop). Kérje be, hogy a hónap első napja a hét hányadik napja (1-7)! A kérdést (`Az elso nap a het hanyadik napja (1-7)?`) külön sorban írja ki, csak utána olvasson be. A hónap napjait folyamatosan, a megadott oszloptól kezdve töltse a táblázatba: a sorok száma annyi, ahány hétre a hónap kiterjed.
+
+  Írja ki a táblázatot soronként: `N. het:`, utána hét, 4 karakter szélességre jobbra igazított cella (a nap csapadéka mm-ben, vagy `-`, ha abban a cellában nincs a hónaphoz tartozó nap), majd ` | `, végül a hét csapadékösszege. A táblázat után írja ki, melyik hétköznap (oszlop) volt a legcsapadékosabb összesen (holtversenynél az első).
+
+  Minta (3-as bevitellel, a mintafájlra):
+
+  ```text
+  6. feladat
+  Az elso nap a het hanyadik napja (1-7)?
+  1. het:   -   -  15  10   3   0   8 | 36
+  2. het:   0   0   9   0   0   0   0 | 9
+  3. het:   0  24   0   6   3  15  25 | 73
+  4. het:   0  18  11  12  11   0   0 | 52
+  5. het:   0   2   0   0   -   -   - | 2
+  Legcsapadekosabb hetnap: 2. (44 mm)
+  ```
+
+  Tipp: a nap helye a táblázatban: ha a nulla alapú sorszám `k = (elso - 1) + (nap - 1)`, akkor a sor `k // 7`, az oszlop `k % 7`. A hiányzó cellákat tölts fel `-1`-gyel, és az összegzésnél hagyd ki őket. A cella kiírása 4 karakter szélességre: Pythonban `f"{v:4d}"`, C#-ban `v.ToString().PadLeft(4)`.
+starter_code:
+  python: |
+    class Nap:
+        def __init__(self, nap, min_, max_, csapadek, szel):
+            self.nap = nap
+            self.min = min_
+            self.max = max_
+            self.csapadek = csapadek
+            self.szel = szel
+
+
+    with open("idojaras.txt", encoding="utf-8") as f:
+        sorok = f.read().splitlines()
+    napok = []
+    for sor in sorok[1:]:
+        r = sor.split(";")
+        napok.append(Nap(int(r[0]), int(r[1]), int(r[2]), int(r[3]), int(r[4])))
+    print("6. feladat")
+    print("Az elso nap a het hanyadik napja (1-7)?")
+    # ide írd a megoldást
+  csharp: |
+    using System;
+    using System.Collections.Generic;
+    using System.Globalization;
+    using System.IO;
+    using System.Linq;
+
+    class Nap
+    {
+        public int Sorszam;
+        public int Min;
+        public int Max;
+        public int Csapadek;
+        public int Szel;
+    }
+
+    class Program
+    {
+        static void Main()
+        {
+            string[] sorok = File.ReadAllLines("idojaras.txt");
+            List<Nap> napok = new List<Nap>();
+            for (int i = 1; i < sorok.Length; i++)
+            {
+                string[] r = sorok[i].Split(';');
+                Nap n = new Nap();
+                n.Sorszam = int.Parse(r[0]);
+                n.Min = int.Parse(r[1]);
+                n.Max = int.Parse(r[2]);
+                n.Csapadek = int.Parse(r[3]);
+                n.Szel = int.Parse(r[4]);
+                napok.Add(n);
+            }
+            Console.WriteLine("6. feladat");
+            Console.WriteLine("Az elso nap a het hanyadik napja (1-7)?");
+            // ide írd a megoldást
+        }
+    }
+sample_solutions:
+  python: |
+    class Nap:
+        def __init__(self, nap, min_, max_, csapadek, szel):
+            self.nap = nap
+            self.min = min_
+            self.max = max_
+            self.csapadek = csapadek
+            self.szel = szel
+
+
+    with open("idojaras.txt", encoding="utf-8") as f:
+        sorok = f.read().splitlines()
+    napok = []
+    for sor in sorok[1:]:
+        r = sor.split(";")
+        napok.append(Nap(int(r[0]), int(r[1]), int(r[2]), int(r[3]), int(r[4])))
+    print("6. feladat")
+    print("Az elso nap a het hanyadik napja (1-7)?")
+    elso = int(input())
+    sorok_szama = (elso - 1 + len(napok) + 6) // 7
+    tabla = [[-1] * 7 for _ in range(sorok_szama)]
+    for n in napok:
+        k = (elso - 1) + (n.nap - 1)
+        tabla[k // 7][k % 7] = n.csapadek
+    oszlopossz = [0] * 7
+    for i in range(sorok_szama):
+        sor = ""
+        het = 0
+        for j in range(7):
+            v = tabla[i][j]
+            if v < 0:
+                sor += "   -"
+            else:
+                sor += f"{v:4d}"
+                het += v
+                oszlopossz[j] += v
+        print(f"{i + 1}. het:{sor} | {het}")
+    legjobb = 0
+    for j in range(7):
+        if oszlopossz[j] > oszlopossz[legjobb]:
+            legjobb = j
+    print(f"Legcsapadekosabb hetnap: {legjobb + 1}. ({oszlopossz[legjobb]} mm)")
+  csharp: |
+    using System;
+    using System.Collections.Generic;
+    using System.Globalization;
+    using System.IO;
+    using System.Linq;
+
+    class Nap
+    {
+        public int Sorszam;
+        public int Min;
+        public int Max;
+        public int Csapadek;
+        public int Szel;
+    }
+
+    class Program
+    {
+        static void Main()
+        {
+            string[] sorok = File.ReadAllLines("idojaras.txt");
+            List<Nap> napok = new List<Nap>();
+            for (int i = 1; i < sorok.Length; i++)
+            {
+                string[] r = sorok[i].Split(';');
+                Nap n = new Nap();
+                n.Sorszam = int.Parse(r[0]);
+                n.Min = int.Parse(r[1]);
+                n.Max = int.Parse(r[2]);
+                n.Csapadek = int.Parse(r[3]);
+                n.Szel = int.Parse(r[4]);
+                napok.Add(n);
+            }
+            Console.WriteLine("6. feladat");
+            Console.WriteLine("Az elso nap a het hanyadik napja (1-7)?");
+            int elso = int.Parse(Console.ReadLine());
+            int sorokSzama = (elso - 1 + napok.Count + 6) / 7;
+            int[,] tabla = new int[sorokSzama, 7];
+            for (int i = 0; i < sorokSzama; i++)
+            {
+                for (int j = 0; j < 7; j++)
+                {
+                    tabla[i, j] = -1;
+                }
+            }
+            foreach (Nap n in napok)
+            {
+                int k = (elso - 1) + (n.Sorszam - 1);
+                tabla[k / 7, k % 7] = n.Csapadek;
+            }
+            int[] oszlopossz = new int[7];
+            for (int i = 0; i < sorokSzama; i++)
+            {
+                string sor = "";
+                int het = 0;
+                for (int j = 0; j < 7; j++)
+                {
+                    int v = tabla[i, j];
+                    if (v < 0)
+                    {
+                        sor += "   -";
+                    }
+                    else
+                    {
+                        sor += v.ToString().PadLeft(4);
+                        het += v;
+                        oszlopossz[j] += v;
+                    }
+                }
+                Console.WriteLine((i + 1) + ". het:" + sor + " | " + het);
+            }
+            int legjobb = 0;
+            for (int j = 0; j < 7; j++)
+            {
+                if (oszlopossz[j] > oszlopossz[legjobb])
+                {
+                    legjobb = j;
+                }
+            }
+            Console.WriteLine("Legcsapadekosabb hetnap: " + (legjobb + 1) + ". (" + oszlopossz[legjobb] + " mm)");
+        }
+    }
+files:
+  idojaras.txt: idojaras.txt
+tests:
+- stdin: '3
+
+    '
+  expected: |
+    6. feladat
+    Az elso nap a het hanyadik napja (1-7)?
+    1. het:   -   -  15  10   3   0   8 | 36
+    2. het:   0   0   9   0   0   0   0 | 9
+    3. het:   0  24   0   6   3  15  25 | 73
+    4. het:   0  18  11  12  11   0   0 | 52
+    5. het:   0   2   0   0   -   -   - | 2
+    Legcsapadekosabb hetnap: 2. (44 mm)
+  hidden: false
+- stdin: '1
+
+    '
+  expected: |
+    6. feladat
+    Az elso nap a het hanyadik napja (1-7)?
+    1. het:   0   0  24   0   0  20  17 | 61
+    2. het:  22  13  14   0   0  25  21 | 95
+    3. het:  13  18   0   0  14   0   0 | 45
+    4. het:   0   0   0   0   0   0  21 | 21
+    5. het:  26   0   0   -   -   -   - | 26
+    Legcsapadekosabb hetnap: 1. (61 mm)
+  hidden: true
+  files:
+    idojaras.txt: teszt-2/idojaras.txt
+- stdin: '1
+
+    '
+  expected: |
+    6. feladat
+    Az elso nap a het hanyadik napja (1-7)?
+    1. het:  27  21   0   1   0   0   0 | 49
+    2. het:   0  16  17   0   0   0   0 | 33
+    3. het:   0  13   6  28   0  21   0 | 68
+    4. het:   0   0   0  21   0   0  14 | 35
+    Legcsapadekosabb hetnap: 2. (50 mm)
+  hidden: true
+  files:
+    idojaras.txt: teszt-3/idojaras.txt
+- stdin: '7
+
+    '
+  expected: |
+    6. feladat
+    Az elso nap a het hanyadik napja (1-7)?
+    1. het:   -   -   -   -   -   -   0 | 0
+    Legcsapadekosabb hetnap: 1. (0 mm)
+  hidden: true
+  files:
+    idojaras.txt: teszt-4/idojaras.txt

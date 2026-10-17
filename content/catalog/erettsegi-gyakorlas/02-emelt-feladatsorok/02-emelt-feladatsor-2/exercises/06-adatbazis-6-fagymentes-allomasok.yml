@@ -1,0 +1,208 @@
+slug: adatbazis-6-fagymentes-allomasok
+title: Adatbázis 6 - Fagymentes állomások
+position: 5
+kind: sql
+level: emelt
+difficulty: 3
+published: false
+allowed_languages:
+- sql
+sql_order_sensitive: true
+description: |-
+  Az adatbázis két táblából áll.
+
+  A `allomas` tábla az időjárás-állomásokat tartalmazza:
+
+  | oszlop | típus |
+  |---|---|
+  | `id` | egész, elsődleges kulcs |
+  | `nev` | szöveg, az állomás neve |
+  | `telepules` | szöveg, a település neve |
+  | `magassag` | egész, a tengerszint feletti magasság méterben |
+
+  A `meres` tábla a napi méréseket tartalmazza:
+
+  | oszlop | típus |
+  |---|---|
+  | `id` | egész, elsődleges kulcs |
+  | `allomas_id` | egész, az `allomas` tábla `id` oszlopára mutat |
+  | `datum` | szöveg, `ÉÉÉÉ-HH-NN` alakban (pl. `2026-04-14`) |
+  | `homerseklet` | valós szám, a napi középhőmérséklet °C-ban |
+  | `csapadek` | valós szám, a napi csapadék mm-ben (0, ha nem esett) |
+  | `szel` | egész, a legerősebb széllökés km/h-ban |
+
+  **6. feladat.** Adja meg azoknak az állomásoknak a nevét (`nev`), amelyeknél **nincs olyan mérés, amelyen a hőmérséklet 0 °C alatti**. Az olyan állomás is szerepeljen, amelynek még egyáltalán nincs mérése. A sorok név szerint növekvő sorrendben jöjjenek! (5 pont)
+
+  Tipp: a "nincs olyan" kifejezése: `NOT EXISTS (SELECT 1 FROM meres ... )` korrelált allekérdezéssel.
+starter_code:
+  sql: |
+    SELECT a.nev AS nev
+    FROM allomas a
+    WHERE NOT EXISTS (SELECT 1 FROM meres m WHERE )
+    ORDER BY ;
+sample_solutions:
+  sql: |
+    SELECT a.nev AS nev
+    FROM allomas a
+    WHERE NOT EXISTS (SELECT 1 FROM meres m WHERE m.allomas_id = a.id AND m.homerseklet < 0)
+    ORDER BY a.nev;
+tests:
+- stdin: |
+    CREATE TABLE allomas (id INTEGER PRIMARY KEY, nev TEXT, telepules TEXT, magassag INTEGER);
+    CREATE TABLE meres (id INTEGER PRIMARY KEY, allomas_id INTEGER, datum TEXT, homerseklet REAL, csapadek REAL, szel INTEGER);
+    INSERT INTO allomas VALUES
+    (1, 'Debrecen', 'Debrecen', 120),
+    (2, 'Nyiregyhaza', 'Nyiregyhaza', 112),
+    (3, 'Baja', 'Baja', 90),
+    (4, 'Tokaj', 'Tokaj', 95),
+    (5, 'Kekes', 'Matrafured', 1014),
+    (6, 'Koszeg', 'Koszeg', 290);
+    INSERT INTO meres VALUES
+    (1, 5, '2026-03-09', 5.1, 2.0, 61),
+    (2, 3, '2026-04-27', 5.4, 0.5, 54),
+    (3, 4, '2026-04-27', 12.0, 2.0, 5),
+    (4, 5, '2026-03-20', -0.2, 0, 7),
+    (5, 4, '2026-04-20', 7.8, 3.6, 33),
+    (6, 3, '2026-03-27', 10.0, 19.0, 56),
+    (7, 5, '2026-04-03', 11.9, 5.5, 33),
+    (8, 5, '2026-03-09', 2.7, 0, 55),
+    (9, 1, '2026-03-03', 14.4, 0, 4),
+    (10, 2, '2026-04-09', 6.2, 19.0, 54),
+    (11, 4, '2026-04-03', 4.5, 5.5, 15),
+    (12, 3, '2026-03-14', 7.9, 1.2, 35),
+    (13, 1, '2026-03-14', 3.5, 19.0, 75),
+    (14, 2, '2026-03-14', 9.3, 0, 57),
+    (15, 4, '2026-03-20', 5.0, 0, 4),
+    (16, 3, '2026-03-03', 14.8, 5.5, 30),
+    (17, 2, '2026-03-03', 8.6, 1.2, 22),
+    (18, 2, '2026-04-27', 9.2, 0, 46),
+    (19, 3, '2026-03-20', 8.6, 0, 78),
+    (20, 2, '2026-04-27', 3.6, 0, 62),
+    (21, 2, '2026-04-09', 15.9, 2.0, 27),
+    (22, 2, '2026-04-27', 7.5, 0, 35),
+    (23, 2, '2026-04-09', 5.5, 3.6, 65),
+    (24, 5, '2026-03-09', -0.0, 0, 8),
+    (25, 5, '2026-04-09', 11.4, 0, 36),
+    (26, 4, '2026-04-20', 14.2, 5.5, 26);
+  expected: |
+    nev
+    Baja
+    Debrecen
+    Koszeg
+    Nyiregyhaza
+    Tokaj
+  hidden: false
+- stdin: |
+    CREATE TABLE allomas (id INTEGER PRIMARY KEY, nev TEXT, telepules TEXT, magassag INTEGER);
+    CREATE TABLE meres (id INTEGER PRIMARY KEY, allomas_id INTEGER, datum TEXT, homerseklet REAL, csapadek REAL, szel INTEGER);
+    INSERT INTO allomas VALUES
+    (1, 'Debrecen', 'Debrecen', 120),
+    (2, 'Galyatető', 'Matrafured', 965),
+    (3, 'Nyiregyhaza', 'Nyiregyhaza', 112),
+    (4, 'Pecs', 'Pecs', 205),
+    (5, 'Szentgotthard', 'Szentgotthard', 220),
+    (6, 'Kekes', 'Matrafured', 1014),
+    (7, 'Sopron', 'Sopron', 230);
+    INSERT INTO meres VALUES
+    (1, 3, '2026-04-27', 4.7, 19.0, 33),
+    (2, 5, '2026-04-03', -2.1, 19.0, 24),
+    (3, 3, '2026-03-20', 10.2, 0, 13),
+    (4, 5, '2026-04-09', 6.8, 0, 15),
+    (5, 1, '2026-03-09', 10.3, 3.6, 58),
+    (6, 4, '2026-03-14', -0.6, 0, 73),
+    (7, 3, '2026-04-20', 9.9, 0.5, 25),
+    (8, 5, '2026-04-09', 8.5, 0, 64),
+    (9, 4, '2026-03-20', 5.9, 1.2, 37),
+    (10, 3, '2026-03-27', 10.7, 12.4, 18),
+    (11, 3, '2026-04-20', 1.5, 0, 77),
+    (12, 7, '2026-04-09', 7.8, 0, 59),
+    (13, 1, '2026-04-09', 5.1, 0, 9),
+    (14, 4, '2026-03-14', 0.6, 3.6, 13),
+    (15, 6, '2026-04-14', -2.5, 0, 48),
+    (16, 5, '2026-04-14', 6.2, 0, 51),
+    (17, 2, '2026-03-20', -1.4, 19.0, 25),
+    (18, 4, '2026-03-20', 10.0, 0, 32),
+    (19, 5, '2026-04-03', -2.0, 0, 26),
+    (20, 2, '2026-04-27', 4.5, 3.6, 18),
+    (21, 3, '2026-04-03', 11.4, 0.5, 39),
+    (22, 6, '2026-04-14', -4.5, 19.0, 49),
+    (23, 3, '2026-03-14', 7.3, 0, 61),
+    (24, 3, '2026-04-03', 6.5, 0, 69),
+    (25, 6, '2026-03-27', 3.0, 3.6, 70),
+    (26, 3, '2026-03-03', -1.2, 0, 20),
+    (27, 5, '2026-03-20', 9.4, 0, 29),
+    (28, 4, '2026-04-27', 4.1, 0, 37),
+    (29, 7, '2026-03-09', -1.6, 0, 55),
+    (30, 7, '2026-04-09', 0.4, 8.0, 76),
+    (31, 2, '2026-03-03', -5.6, 0.5, 13),
+    (32, 4, '2026-03-09', 4.9, 12.4, 49);
+  expected: |
+    nev
+    Debrecen
+  hidden: true
+- stdin: |
+    CREATE TABLE allomas (id INTEGER PRIMARY KEY, nev TEXT, telepules TEXT, magassag INTEGER);
+    CREATE TABLE meres (id INTEGER PRIMARY KEY, allomas_id INTEGER, datum TEXT, homerseklet REAL, csapadek REAL, szel INTEGER);
+    INSERT INTO allomas VALUES
+    (1, 'Galyatető', 'Matrafured', 965),
+    (2, 'Baja', 'Baja', 90),
+    (3, 'Szentgotthard', 'Szentgotthard', 220),
+    (4, 'Kekes', 'Matrafured', 1014);
+    INSERT INTO meres VALUES
+    (1, 3, '2026-03-14', 8.8, 0, 20),
+    (2, 1, '2026-03-27', 10.1, 0, 7),
+    (3, 2, '2026-03-27', 9.2, 0.5, 22),
+    (4, 1, '2026-04-14', 14.5, 5.5, 59),
+    (5, 1, '2026-03-20', 13.5, 0, 66),
+    (6, 3, '2026-04-03', 14.2, 0, 59),
+    (7, 3, '2026-04-27', 11.0, 0, 37),
+    (8, 3, '2026-04-14', 12.7, 2.0, 60),
+    (9, 3, '2026-04-20', 9.2, 0, 49),
+    (10, 2, '2026-03-27', 12.4, 0, 54),
+    (11, 1, '2026-03-20', 10.7, 3.6, 50),
+    (12, 1, '2026-04-09', 4.1, 19.0, 4),
+    (13, 3, '2026-03-14', 12.4, 3.6, 67),
+    (14, 3, '2026-04-09', 17.8, 2.0, 36);
+  expected: |
+    nev
+    Baja
+    Galyatető
+    Kekes
+    Szentgotthard
+  hidden: true
+- stdin: |
+    CREATE TABLE allomas (id INTEGER PRIMARY KEY, nev TEXT, telepules TEXT, magassag INTEGER);
+    CREATE TABLE meres (id INTEGER PRIMARY KEY, allomas_id INTEGER, datum TEXT, homerseklet REAL, csapadek REAL, szel INTEGER);
+    INSERT INTO allomas VALUES
+    (1, 'Koszeg', 'Koszeg', 290),
+    (2, 'Tokaj', 'Tokaj', 95),
+    (3, 'Nyiregyhaza', 'Nyiregyhaza', 112),
+    (4, 'Kekes', 'Matrafured', 1014),
+    (5, 'Galyatető', 'Matrafured', 965);
+    INSERT INTO meres VALUES
+    (1, 3, '2026-04-14', -1.8, 0, 42),
+    (2, 4, '2026-03-09', -1.2, 0, 37),
+    (3, 2, '2026-03-27', 5.8, 0, 50),
+    (4, 5, '2026-03-14', -7.9, 5.5, 5),
+    (5, 1, '2026-03-09', -4.9, 0, 39),
+    (6, 2, '2026-04-27', 5.6, 0, 60),
+    (7, 5, '2026-04-27', -8.6, 1.2, 50),
+    (8, 2, '2026-04-20', 5.8, 19.0, 28),
+    (9, 3, '2026-03-27', 0.3, 0, 68),
+    (10, 3, '2026-03-27', -4.2, 1.2, 39),
+    (11, 1, '2026-04-20', -6.1, 1.2, 15),
+    (12, 4, '2026-04-14', -3.8, 12.4, 43),
+    (13, 4, '2026-03-09', -4.1, 0, 36),
+    (14, 4, '2026-04-27', -4.9, 0, 66),
+    (15, 1, '2026-04-27', 0.9, 5.5, 60),
+    (16, 1, '2026-04-09', 4.3, 0, 6),
+    (17, 3, '2026-04-14', 3.7, 0, 37),
+    (18, 3, '2026-04-20', -1.6, 0, 64),
+    (19, 3, '2026-03-20', -4.3, 0, 43),
+    (20, 1, '2026-04-20', 6.3, 5.5, 49),
+    (21, 3, '2026-03-03', -4.1, 3.6, 33),
+    (22, 3, '2026-03-20', 5.8, 0, 30);
+  expected: |
+    nev
+    Tokaj
+  hidden: true

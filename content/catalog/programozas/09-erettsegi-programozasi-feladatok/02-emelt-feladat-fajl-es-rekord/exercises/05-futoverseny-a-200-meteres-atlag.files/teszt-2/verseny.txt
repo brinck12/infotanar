@@ -1,0 +1,2 @@
+nev	orszag	tav	ido
+Kiss Anna	HUN	100	11.80

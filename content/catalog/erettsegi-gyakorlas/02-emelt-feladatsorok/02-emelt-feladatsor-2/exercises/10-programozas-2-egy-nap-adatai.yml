@@ -1,0 +1,224 @@
+slug: programozas-2-egy-nap-adatai
+title: Programozás 2 - Egy nap adatai
+position: 9
+kind: code
+level: emelt
+difficulty: 2
+published: false
+allowed_languages:
+- python
+- csharp
+description: |-
+  Egy meteorológiai állomás egy hónapos napi adatait az `idojaras.txt` fájl tartalmazza (UTF-8, ékezet nélkül). Az első sor fejléc (`nap;min;max;csapadek;szel`), utána minden sor egy nap adatait tartalmazza, pontosvesszővel elválasztva: a nap sorszáma (1-től folyamatosan növekszik), a legalacsonyabb és a legmagasabb hőmérséklet °C-ban (egész számok, lehet negatív), a napi csapadék mm-ben (0, ha nem esett) és a legerősebb széllökés km/h-ban. A fájl legalább egy napot tartalmaz.
+
+  A programban egy nap adatait rekordként (osztályként) érdemes tárolni. A kimenetben ne használjon ékezetes betűt, a szöveg pontosan egyezzen a mintával.
+
+  **2. feladat** (6 pont). Kérjen be a felhasználótól egy nap sorszámát! A kérdést (`Adja meg a nap sorszamat:`) külön sorban írja ki, csak utána olvasson be. Ha van ilyen nap, írja ki a minimumát, maximumát és a napi ingadozást (maximum mínusz minimum) a mintának megfelelően, ha nincs, a `Nincs ilyen nap.` sort. Ezután, a bevitel eredményétől függetlenül, írja ki a hónap legnagyobb napi ingadozását is (holtversenynél a korábbi nap számít).
+
+  Minta (17-es bevitellel, a mintafájlra):
+
+  ```text
+  2. feladat
+  Adja meg a nap sorszamat:
+  17. nap: min 12 C, max 18 C, ingadozas 6 C
+  Legnagyobb ingadozas: 15. nap (10 C)
+  ```
+
+  Tipp: a keresést ciklussal végezd: ha nem találtál napot, a keresett érték marad `None` / `null`. A bevitel `input()` / `Console.ReadLine()` után egész számmá alakítandó.
+starter_code:
+  python: |
+    class Nap:
+        def __init__(self, nap, min_, max_, csapadek, szel):
+            self.nap = nap
+            self.min = min_
+            self.max = max_
+            self.csapadek = csapadek
+            self.szel = szel
+
+
+    with open("idojaras.txt", encoding="utf-8") as f:
+        sorok = f.read().splitlines()
+    napok = []
+    for sor in sorok[1:]:
+        r = sor.split(";")
+        napok.append(Nap(int(r[0]), int(r[1]), int(r[2]), int(r[3]), int(r[4])))
+    print("2. feladat")
+    # ide írd a megoldást
+  csharp: |
+    using System;
+    using System.Collections.Generic;
+    using System.Globalization;
+    using System.IO;
+    using System.Linq;
+
+    class Nap
+    {
+        public int Sorszam;
+        public int Min;
+        public int Max;
+        public int Csapadek;
+        public int Szel;
+    }
+
+    class Program
+    {
+        static void Main()
+        {
+            string[] sorok = File.ReadAllLines("idojaras.txt");
+            List<Nap> napok = new List<Nap>();
+            for (int i = 1; i < sorok.Length; i++)
+            {
+                string[] r = sorok[i].Split(';');
+                Nap n = new Nap();
+                n.Sorszam = int.Parse(r[0]);
+                n.Min = int.Parse(r[1]);
+                n.Max = int.Parse(r[2]);
+                n.Csapadek = int.Parse(r[3]);
+                n.Szel = int.Parse(r[4]);
+                napok.Add(n);
+            }
+            Console.WriteLine("2. feladat");
+            // ide írd a megoldást
+        }
+    }
+sample_solutions:
+  python: |
+    class Nap:
+        def __init__(self, nap, min_, max_, csapadek, szel):
+            self.nap = nap
+            self.min = min_
+            self.max = max_
+            self.csapadek = csapadek
+            self.szel = szel
+
+
+    with open("idojaras.txt", encoding="utf-8") as f:
+        sorok = f.read().splitlines()
+    napok = []
+    for sor in sorok[1:]:
+        r = sor.split(";")
+        napok.append(Nap(int(r[0]), int(r[1]), int(r[2]), int(r[3]), int(r[4])))
+    print("2. feladat")
+    print("Adja meg a nap sorszamat:")
+    keresett = int(input())
+    talalt = None
+    for n in napok:
+        if n.nap == keresett:
+            talalt = n
+    if talalt is None:
+        print("Nincs ilyen nap.")
+    else:
+        print(f"{talalt.nap}. nap: min {talalt.min} C, max {talalt.max} C, ingadozas {talalt.max - talalt.min} C")
+    legnagyobb = napok[0]
+    for n in napok:
+        if n.max - n.min > legnagyobb.max - legnagyobb.min:
+            legnagyobb = n
+    print(f"Legnagyobb ingadozas: {legnagyobb.nap}. nap ({legnagyobb.max - legnagyobb.min} C)")
+  csharp: |
+    using System;
+    using System.Collections.Generic;
+    using System.Globalization;
+    using System.IO;
+    using System.Linq;
+
+    class Nap
+    {
+        public int Sorszam;
+        public int Min;
+        public int Max;
+        public int Csapadek;
+        public int Szel;
+    }
+
+    class Program
+    {
+        static void Main()
+        {
+            string[] sorok = File.ReadAllLines("idojaras.txt");
+            List<Nap> napok = new List<Nap>();
+            for (int i = 1; i < sorok.Length; i++)
+            {
+                string[] r = sorok[i].Split(';');
+                Nap n = new Nap();
+                n.Sorszam = int.Parse(r[0]);
+                n.Min = int.Parse(r[1]);
+                n.Max = int.Parse(r[2]);
+                n.Csapadek = int.Parse(r[3]);
+                n.Szel = int.Parse(r[4]);
+                napok.Add(n);
+            }
+            Console.WriteLine("2. feladat");
+            Console.WriteLine("Adja meg a nap sorszamat:");
+            int keresett = int.Parse(Console.ReadLine());
+            Nap talalt = null;
+            foreach (Nap n in napok)
+            {
+                if (n.Sorszam == keresett)
+                {
+                    talalt = n;
+                }
+            }
+            if (talalt == null)
+            {
+                Console.WriteLine("Nincs ilyen nap.");
+            }
+            else
+            {
+                Console.WriteLine(talalt.Sorszam + ". nap: min " + talalt.Min + " C, max " + talalt.Max + " C, ingadozas " + (talalt.Max - talalt.Min) + " C");
+            }
+            Nap legnagyobb = napok[0];
+            foreach (Nap n in napok)
+            {
+                if (n.Max - n.Min > legnagyobb.Max - legnagyobb.Min)
+                {
+                    legnagyobb = n;
+                }
+            }
+            Console.WriteLine("Legnagyobb ingadozas: " + legnagyobb.Sorszam + ". nap (" + (legnagyobb.Max - legnagyobb.Min) + " C)");
+        }
+    }
+files:
+  idojaras.txt: idojaras.txt
+tests:
+- stdin: '17
+
+    '
+  expected: |
+    2. feladat
+    Adja meg a nap sorszamat:
+    17. nap: min 12 C, max 18 C, ingadozas 6 C
+    Legnagyobb ingadozas: 15. nap (10 C)
+  hidden: false
+- stdin: '31
+
+    '
+  expected: |
+    2. feladat
+    Adja meg a nap sorszamat:
+    31. nap: min -2 C, max 6 C, ingadozas 8 C
+    Legnagyobb ingadozas: 4. nap (11 C)
+  hidden: true
+  files:
+    idojaras.txt: teszt-2/idojaras.txt
+- stdin: '40
+
+    '
+  expected: |
+    2. feladat
+    Adja meg a nap sorszamat:
+    Nincs ilyen nap.
+    Legnagyobb ingadozas: 7. nap (11 C)
+  hidden: true
+  files:
+    idojaras.txt: teszt-3/idojaras.txt
+- stdin: '1
+
+    '
+  expected: |
+    2. feladat
+    Adja meg a nap sorszamat:
+    1. nap: min 2 C, max 9 C, ingadozas 7 C
+    Legnagyobb ingadozas: 1. nap (7 C)
+  hidden: true
+  files:
+    idojaras.txt: teszt-4/idojaras.txt

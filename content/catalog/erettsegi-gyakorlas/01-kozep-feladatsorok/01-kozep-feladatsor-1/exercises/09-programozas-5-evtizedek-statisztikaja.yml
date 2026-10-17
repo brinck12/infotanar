@@ -1,0 +1,90 @@
+slug: programozas-5-evtizedek-statisztikaja
+title: Programozás 5 - Évtizedek statisztikája
+position: 8
+kind: code
+level: kozep
+difficulty: 4
+published: false
+allowed_languages:
+- python
+- csharp
+description: "A `konyvek.txt` a könyvtár állományát tartalmazza, soronként egy könyvvel, pontosvesszővel elválasztva: `szerző;cím;kiadás éve;oldalszám`. Az adatokban nincs ékezet, a fájl legalább egy sort tartalmaz.\n\n**5. feladat.** Készítsen statisztikát a kiadás évtizede szerint! Az `5. feladat:` sor után írja ki növekvő sorrendben minden olyan évtizedet, amelyből van könyv, a minta formájában (`1990-es evek: 3`). Az évtized az évszám tízesre lefelé kerekített értéke.\n\nA mintafájlra a kimenet:\n\n```text\n5. feladat:\r\n1960-es evek: 2\r\n1970-es evek: 4\r\n1990-es evek: 1\r\n2000-es evek: 1\r\n2010-es evek: 2\r\n2020-es evek: 2\r\n```\n\nTipp: az évtized `ev // 10 * 10` (C#-ban `ev / 10 * 10`). Szótárral (`Dictionary`) számolhatod a darabszámokat, kiíráskor a kulcsokat rendezd."
+starter_code:
+  python: |
+    with open("konyvek.txt", encoding="utf-8") as f:
+        konyvek = [sor.split(";") for sor in f.read().splitlines()]
+    # ide írd a megoldást
+  csharp: |
+    using System;
+    using System.Collections.Generic;
+    using System.IO;
+
+    class Program
+    {
+        static void Main()
+        {
+            string[] sorok = File.ReadAllLines("konyvek.txt");
+            // ide írd a megoldást
+        }
+    }
+sample_solutions:
+  python: |
+    with open("konyvek.txt", encoding="utf-8") as f:
+        konyvek = [sor.split(";") for sor in f.read().splitlines()]
+    stat = {}
+    for k in konyvek:
+        ev = int(k[2]) // 10 * 10
+        stat[ev] = stat.get(ev, 0) + 1
+    print("5. feladat:")
+    for ev in sorted(stat):
+        print(str(ev) + "-es evek:", stat[ev])
+  csharp: |
+    using System;
+    using System.Collections.Generic;
+    using System.IO;
+
+    class Program
+    {
+        static void Main()
+        {
+            string[] sorok = File.ReadAllLines("konyvek.txt");
+            Dictionary<int, int> stat = new Dictionary<int, int>();
+            foreach (string sor in sorok)
+            {
+                int ev = int.Parse(sor.Split(';')[2]) / 10 * 10;
+                if (!stat.ContainsKey(ev))
+                {
+                    stat[ev] = 0;
+                }
+                stat[ev]++;
+            }
+            List<int> evek = new List<int>(stat.Keys);
+            evek.Sort();
+            Console.WriteLine("5. feladat:");
+            foreach (int ev in evek)
+            {
+                Console.WriteLine(ev + "-es evek: " + stat[ev]);
+            }
+        }
+    }
+files:
+  konyvek.txt: konyvek.txt
+tests:
+- stdin: ''
+  expected: "5. feladat:\r\n1960-es evek: 2\r\n1970-es evek: 4\r\n1990-es evek: 1\r\n2000-es evek: 1\r\n2010-es evek: 2\r\n2020-es evek: 2\r\n"
+  hidden: false
+- stdin: ''
+  expected: "5. feladat:\r\n2020-es evek: 1\r\n"
+  hidden: true
+  files:
+    konyvek.txt: teszt-2/konyvek.txt
+- stdin: ''
+  expected: "5. feladat:\r\n1960-es evek: 1\r\n1970-es evek: 4\r\n1980-es evek: 2\r\n1990-es evek: 5\r\n2000-es evek: 7\r\n2010-es evek: 4\r\n2020-es evek: 3\r\n"
+  hidden: true
+  files:
+    konyvek.txt: teszt-3/konyvek.txt
+- stdin: ''
+  expected: "5. feladat:\r\n2000-es evek: 4\r\n2010-es evek: 5\r\n"
+  hidden: true
+  files:
+    konyvek.txt: teszt-4/konyvek.txt

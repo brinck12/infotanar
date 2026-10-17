@@ -1,0 +1,87 @@
+slug: sorok-osszege
+title: "Sorok összege"
+position: 4
+kind: code
+level: emelt
+difficulty: 3
+published: false
+allowed_languages: [python, csharp]
+description: |
+  Az alábbi program soronként összegzi a számokat, de a második sortól kezdve rossz összegeket ír ki. A `2`, majd `1 2 3` és `4 5` bemenetre `6` és `15` jön ki, a helyes eredmény viszont `6` és `9`. Keresd meg és javítsd a hibát!
+
+  Bemenet: az első sorban `M` (`1 ≤ M ≤ 20`), utána `M` sorban szóközzel elválasztott egész számok (soronként legalább egy). Kimenet: `M` sor, mindegyikben az adott sor számainak összege.
+
+  Példa: `2`, majd `1 2 3` és `4 5` esetén a kimenet `6`, majd `9`.
+
+  Tipp: hol kapja meg az összeg a kezdőértékét? Minden új sornál újra nulláról kell indulnia.
+starter_code:
+  python: |
+    m = int(input())
+    osszeg = 0
+    for _ in range(m):
+        for szam in input().split():
+            osszeg += int(szam)
+        print(osszeg)
+  csharp: |
+    using System;
+    using System.Globalization;
+
+    class Program
+    {
+        static void Main()
+        {
+            int m = int.Parse(Console.ReadLine());
+            int osszeg = 0;
+            for (int i = 0; i < m; i++)
+            {
+                string[] szamok = Console.ReadLine().Split(' ');
+                foreach (string szam in szamok)
+                {
+                    osszeg += int.Parse(szam);
+                }
+                Console.WriteLine(osszeg);
+            }
+        }
+    }
+sample_solutions:
+  python: |
+    m = int(input())
+    for _ in range(m):
+        osszeg = 0
+        for szam in input().split():
+            osszeg += int(szam)
+        print(osszeg)
+  csharp: |
+    using System;
+    using System.Globalization;
+
+    class Program
+    {
+        static void Main()
+        {
+            int m = int.Parse(Console.ReadLine());
+            for (int i = 0; i < m; i++)
+            {
+                int osszeg = 0;
+                string[] szamok = Console.ReadLine().Split(' ');
+                foreach (string szam in szamok)
+                {
+                    osszeg += int.Parse(szam);
+                }
+                Console.WriteLine(osszeg);
+            }
+        }
+    }
+tests:
+  - stdin: "2\n1 2 3\n4 5\n"
+    expected: "6\n9\n"
+    hidden: false
+  - stdin: "1\n-7 7 -1\n"
+    expected: "-1\n"
+    hidden: true
+  - stdin: "3\n5\n5\n5\n"
+    expected: "5\n5\n5\n"
+    hidden: true
+  - stdin: "3\n10 20\n-30 -40\n0 0 1\n"
+    expected: "30\n-70\n1\n"
+    hidden: true

@@ -1,0 +1,269 @@
+slug: adatbazis-3-oktoberi-kolcsonzesek
+title: Adatbázis 3 - Októberi kölcsönzések
+position: 2
+kind: sql
+level: kozep
+difficulty: 3
+published: false
+allowed_languages:
+- sql
+sql_order_sensitive: true
+description: |-
+  Az adatbázis két táblából áll.
+
+  A `konyv` tábla:
+
+  | oszlop | típus |
+  |---|---|
+  | `id` | egész, elsődleges kulcs |
+  | `cim` | szöveg, a könyv címe |
+  | `szerzo` | szöveg |
+  | `ev` | egész, a kiadás éve |
+  | `oldal` | egész, az oldalszám |
+  | `mufaj` | szöveg (`regeny`, `ifjusagi`, `ismeretterjeszto`, `mese`, `vers`) |
+
+  A `kolcsonzes` tábla:
+
+  | oszlop | típus |
+  |---|---|
+  | `id` | egész, elsődleges kulcs |
+  | `konyv_id` | egész, a `konyv` tábla `id` oszlopára mutat |
+  | `olvaso` | szöveg, az olvasó neve |
+  | `datum` | szöveg, `ÉÉÉÉ-HH-NN` alakban (pl. `2025-10-14`) |
+  | `napok` | egész, a kölcsönzési idő napokban |
+
+  **3. feladat.** Listázza ki a 2025 októberében történt kölcsönzéseket! Az eredmény oszlopai: az olvasó neve `olvaso` néven, a könyv címe `cim` néven és a kölcsönzés dátuma `datum` néven. A sorrend: dátum szerint növekvően, azonos dátumnál cím, majd olvasó neve szerint növekvően.
+
+  Tipp: a két táblát a `konyv_id = id` feltétellel kapcsold össze; a dátum szövegként a `LIKE '2025-10-%'` mintával szűrhető (MariaDB-ben ugyanígy).
+starter_code:
+  sql: "SELECT k.olvaso AS olvaso, b.cim AS cim, k.datum AS datum\nFROM kolcsonzes k\nJOIN konyv b ON \nWHERE \nORDER BY ;\n"
+sample_solutions:
+  sql: |
+    SELECT k.olvaso AS olvaso, b.cim AS cim, k.datum AS datum
+    FROM kolcsonzes k
+    JOIN konyv b ON k.konyv_id = b.id
+    WHERE k.datum LIKE '2025-10-%'
+    ORDER BY k.datum, b.cim, k.olvaso;
+tests:
+- stdin: |
+    CREATE TABLE konyv (id INTEGER PRIMARY KEY, cim TEXT, szerzo TEXT, ev INTEGER, oldal INTEGER, mufaj TEXT);
+    CREATE TABLE kolcsonzes (id INTEGER PRIMARY KEY, konyv_id INTEGER, olvaso TEXT, datum TEXT, napok INTEGER);
+    INSERT INTO konyv VALUES
+    (1, 'Kisfiu a parton', 'Kovacs Peter', 1991, 498, 'vers'),
+    (2, 'Kek ejszaka', 'Kovacs Peter', 1971, 193, 'ismeretterjeszto'),
+    (3, 'Papirsarkany', 'Toth Gabor', 1995, 501, 'ismeretterjeszto'),
+    (4, 'Tengerparti nyar', 'Nemes Anna', 2018, 125, 'ismeretterjeszto'),
+    (5, 'Napraforgo', 'Farkas Daniel', 2009, 247, 'ismeretterjeszto'),
+    (6, 'Szel a fak kozott', 'Szabo Eszter', 2001, 149, 'ifjusagi'),
+    (7, 'A csillagok nyomaban', 'Horvath Mate', 2004, 561, 'ifjusagi'),
+    (8, 'Barlangok vilaga', 'Horvath Mate', 1993, 261, 'mese'),
+    (9, 'Holdfeny', 'Szabo Eszter', 2003, 131, 'vers'),
+    (10, 'Varos a felhokben', 'Nemes Anna', 1979, 482, 'mese');
+    INSERT INTO kolcsonzes VALUES
+    (1, 10, 'Balogh Tamas', '2025-11-18', 28),
+    (2, 5, 'Simon Vera', '2025-11-25', 21),
+    (3, 5, 'Lukacs Adam', '2025-09-27', 28),
+    (4, 6, 'Kiss Dora', '2025-10-12', 7),
+    (5, 3, 'Lukacs Adam', '2025-10-20', 28),
+    (6, 9, 'Kiss Dora', '2025-11-02', 21),
+    (7, 1, 'Pal Judit', '2025-09-01', 14),
+    (8, 10, 'Pal Judit', '2025-11-08', 14),
+    (9, 10, 'Balogh Tamas', '2025-10-16', 28),
+    (10, 4, 'Simon Vera', '2025-09-01', 14),
+    (11, 10, 'Simon Vera', '2025-11-04', 21),
+    (12, 2, 'Kiss Dora', '2025-10-01', 28),
+    (13, 1, 'Simon Vera', '2025-09-17', 7),
+    (14, 6, 'Kiss Dora', '2025-10-13', 7),
+    (15, 10, 'Balogh Tamas', '2025-11-25', 28),
+    (16, 10, 'Fekete Zsolt', '2025-10-12', 7),
+    (17, 1, 'Lukacs Adam', '2025-09-12', 28),
+    (18, 1, 'Kiss Dora', '2025-10-07', 14),
+    (19, 1, 'Kiss Dora', '2025-10-11', 7),
+    (20, 5, 'Fekete Zsolt', '2025-09-17', 28),
+    (21, 8, 'Lukacs Adam', '2025-11-15', 7),
+    (22, 6, 'Fekete Zsolt', '2025-10-15', 7),
+    (23, 5, 'Fekete Zsolt', '2025-09-20', 28),
+    (24, 3, 'Kiss Dora', '2025-10-12', 14),
+    (25, 1, 'Simon Vera', '2025-11-05', 7),
+    (26, 8, 'Pal Judit', '2025-11-19', 14),
+    (27, 3, 'Fekete Zsolt', '2025-09-08', 7);
+  expected: |
+    olvaso,cim,datum
+    Kiss Dora,Kek ejszaka,2025-10-01
+    Kiss Dora,Kisfiu a parton,2025-10-07
+    Kiss Dora,Kisfiu a parton,2025-10-11
+    Kiss Dora,Papirsarkany,2025-10-12
+    Kiss Dora,Szel a fak kozott,2025-10-12
+    Fekete Zsolt,Varos a felhokben,2025-10-12
+    Kiss Dora,Szel a fak kozott,2025-10-13
+    Fekete Zsolt,Szel a fak kozott,2025-10-15
+    Balogh Tamas,Varos a felhokben,2025-10-16
+    Lukacs Adam,Papirsarkany,2025-10-20
+  hidden: false
+- stdin: |
+    CREATE TABLE konyv (id INTEGER PRIMARY KEY, cim TEXT, szerzo TEXT, ev INTEGER, oldal INTEGER, mufaj TEXT);
+    CREATE TABLE kolcsonzes (id INTEGER PRIMARY KEY, konyv_id INTEGER, olvaso TEXT, datum TEXT, napok INTEGER);
+    INSERT INTO konyv VALUES
+    (1, 'Az utolso nyar', 'Molnar Reka', 2014, 164, 'ismeretterjeszto'),
+    (2, 'A negy evszak', 'Farkas Daniel', 2020, 415, 'vers'),
+    (3, 'Tengerparti nyar', 'Farkas Daniel', 1997, 376, 'vers'),
+    (4, 'Csendes folyo', 'Molnar Reka', 1974, 579, 'ismeretterjeszto'),
+    (5, 'A kis hajos', 'Molnar Reka', 2013, 454, 'mese'),
+    (6, 'Utazas a Foldon at', 'Nemes Anna', 2024, 496, 'ismeretterjeszto'),
+    (7, 'Kek ejszaka', 'Farkas Daniel', 1992, 208, 'ismeretterjeszto'),
+    (8, 'A titkos kert', 'Szabo Eszter', 2007, 584, 'ismeretterjeszto');
+    INSERT INTO kolcsonzes VALUES
+    (1, 2, 'Lukacs Adam', '2025-10-21', 28),
+    (2, 8, 'Pal Judit', '2025-11-11', 21),
+    (3, 5, 'Balogh Tamas', '2025-11-16', 28),
+    (4, 5, 'Balogh Tamas', '2025-09-11', 28),
+    (5, 3, 'Simon Vera', '2025-11-11', 28),
+    (6, 5, 'Fekete Zsolt', '2025-10-24', 7),
+    (7, 5, 'Balogh Tamas', '2025-09-02', 21),
+    (8, 1, 'Pal Judit', '2025-10-07', 7),
+    (9, 7, 'Fekete Zsolt', '2025-10-10', 21),
+    (10, 1, 'Fekete Zsolt', '2025-09-26', 14),
+    (11, 3, 'Fekete Zsolt', '2025-11-12', 14),
+    (12, 6, 'Kiss Dora', '2025-10-21', 14),
+    (13, 1, 'Balogh Tamas', '2025-10-01', 14),
+    (14, 3, 'Fekete Zsolt', '2025-10-06', 7),
+    (15, 4, 'Simon Vera', '2025-10-04', 28),
+    (16, 5, 'Kiss Dora', '2025-10-22', 28),
+    (17, 7, 'Fekete Zsolt', '2025-10-25', 7),
+    (18, 2, 'Pal Judit', '2025-10-10', 14),
+    (19, 3, 'Fekete Zsolt', '2025-09-16', 28),
+    (20, 1, 'Lukacs Adam', '2025-10-10', 14),
+    (21, 4, 'Pal Judit', '2025-09-06', 7),
+    (22, 5, 'Lukacs Adam', '2025-11-27', 14);
+  expected: |
+    olvaso,cim,datum
+    Balogh Tamas,Az utolso nyar,2025-10-01
+    Simon Vera,Csendes folyo,2025-10-04
+    Fekete Zsolt,Tengerparti nyar,2025-10-06
+    Pal Judit,Az utolso nyar,2025-10-07
+    Pal Judit,A negy evszak,2025-10-10
+    Lukacs Adam,Az utolso nyar,2025-10-10
+    Fekete Zsolt,Kek ejszaka,2025-10-10
+    Lukacs Adam,A negy evszak,2025-10-21
+    Kiss Dora,Utazas a Foldon at,2025-10-21
+    Kiss Dora,A kis hajos,2025-10-22
+    Fekete Zsolt,A kis hajos,2025-10-24
+    Fekete Zsolt,Kek ejszaka,2025-10-25
+  hidden: true
+- stdin: |
+    CREATE TABLE konyv (id INTEGER PRIMARY KEY, cim TEXT, szerzo TEXT, ev INTEGER, oldal INTEGER, mufaj TEXT);
+    CREATE TABLE kolcsonzes (id INTEGER PRIMARY KEY, konyv_id INTEGER, olvaso TEXT, datum TEXT, napok INTEGER);
+    INSERT INTO konyv VALUES
+    (1, 'Papirsarkany', 'Toth Gabor', 1990, 190, 'regeny'),
+    (2, 'A regi malom', 'Horvath Mate', 2019, 442, 'vers'),
+    (3, 'Esti mesek', 'Toth Gabor', 2015, 537, 'ifjusagi'),
+    (4, 'A csillagok nyomaban', 'Kovacs Peter', 2010, 584, 'regeny'),
+    (5, 'Napraforgo', 'Kovacs Peter', 1975, 403, 'ifjusagi'),
+    (6, 'A megtalalt level', 'Toth Gabor', 2003, 106, 'vers'),
+    (7, 'Tortenelmi kalauz', 'Nemes Anna', 1998, 587, 'regeny'),
+    (8, 'Barlangok vilaga', 'Toth Gabor', 1978, 349, 'ifjusagi'),
+    (9, 'A negy evszak', 'Nemes Anna', 2018, 594, 'ifjusagi'),
+    (10, 'A tanito naploja', 'Nemes Anna', 2024, 587, 'ifjusagi'),
+    (11, 'Csendes folyo', 'Varga Lilla', 2004, 389, 'regeny'),
+    (12, 'Holdfeny', 'Varga Lilla', 1994, 491, 'vers'),
+    (13, 'Lampasok', 'Farkas Daniel', 2023, 370, 'regeny'),
+    (14, 'A kis hajos', 'Toth Gabor', 1970, 196, 'ismeretterjeszto');
+    INSERT INTO kolcsonzes VALUES
+    (1, 2, 'Lukacs Adam', '2025-09-13', 21),
+    (2, 4, 'Balogh Tamas', '2025-09-04', 21),
+    (3, 2, 'Pal Judit', '2025-10-26', 7),
+    (4, 1, 'Fekete Zsolt', '2025-09-27', 7),
+    (5, 5, 'Fekete Zsolt', '2025-10-03', 21),
+    (6, 14, 'Balogh Tamas', '2025-09-16', 28),
+    (7, 4, 'Balogh Tamas', '2025-09-02', 21),
+    (8, 1, 'Balogh Tamas', '2025-10-06', 14),
+    (9, 11, 'Pal Judit', '2025-11-15', 14),
+    (10, 13, 'Simon Vera', '2025-11-12', 7),
+    (11, 3, 'Balogh Tamas', '2025-10-01', 14),
+    (12, 1, 'Balogh Tamas', '2025-09-27', 14),
+    (13, 3, 'Simon Vera', '2025-10-28', 14),
+    (14, 12, 'Simon Vera', '2025-10-25', 14),
+    (15, 9, 'Fekete Zsolt', '2025-10-22', 14),
+    (16, 2, 'Simon Vera', '2025-10-20', 28),
+    (17, 13, 'Balogh Tamas', '2025-10-26', 7),
+    (18, 2, 'Balogh Tamas', '2025-11-07', 21),
+    (19, 3, 'Balogh Tamas', '2025-11-13', 21),
+    (20, 1, 'Pal Judit', '2025-11-09', 14),
+    (21, 12, 'Simon Vera', '2025-11-16', 28),
+    (22, 5, 'Balogh Tamas', '2025-11-09', 7),
+    (23, 5, 'Fekete Zsolt', '2025-11-28', 14),
+    (24, 7, 'Lukacs Adam', '2025-09-11', 21),
+    (25, 4, 'Pal Judit', '2025-10-16', 21);
+  expected: |
+    olvaso,cim,datum
+    Balogh Tamas,Esti mesek,2025-10-01
+    Fekete Zsolt,Napraforgo,2025-10-03
+    Balogh Tamas,Papirsarkany,2025-10-06
+    Pal Judit,A csillagok nyomaban,2025-10-16
+    Simon Vera,A regi malom,2025-10-20
+    Fekete Zsolt,A negy evszak,2025-10-22
+    Simon Vera,Holdfeny,2025-10-25
+    Pal Judit,A regi malom,2025-10-26
+    Balogh Tamas,Lampasok,2025-10-26
+    Simon Vera,Esti mesek,2025-10-28
+  hidden: true
+- stdin: |
+    CREATE TABLE konyv (id INTEGER PRIMARY KEY, cim TEXT, szerzo TEXT, ev INTEGER, oldal INTEGER, mufaj TEXT);
+    CREATE TABLE kolcsonzes (id INTEGER PRIMARY KEY, konyv_id INTEGER, olvaso TEXT, datum TEXT, napok INTEGER);
+    INSERT INTO konyv VALUES
+    (1, 'Esti mesek', 'Molnar Reka', 2014, 153, 'regeny'),
+    (2, 'Az elveszett kulcs', 'Nemes Anna', 2017, 375, 'mese'),
+    (3, 'A regi malom', 'Molnar Reka', 2016, 109, 'regeny'),
+    (4, 'A megtalalt level', 'Horvath Mate', 2022, 475, 'mese'),
+    (5, 'Varos a felhokben', 'Molnar Reka', 2000, 455, 'ismeretterjeszto'),
+    (6, 'Holdfeny', 'Molnar Reka', 2022, 419, 'ismeretterjeszto'),
+    (7, 'Aranyhal', 'Farkas Daniel', 1978, 222, 'ismeretterjeszto'),
+    (8, 'Napraforgo', 'Kovacs Peter', 1997, 203, 'vers'),
+    (9, 'A csillagok nyomaban', 'Molnar Reka', 1979, 123, 'regeny'),
+    (10, 'Az utolso nyar', 'Toth Gabor', 2024, 205, 'ismeretterjeszto'),
+    (11, 'Csendes folyo', 'Farkas Daniel', 1988, 166, 'vers');
+    INSERT INTO kolcsonzes VALUES
+    (1, 2, 'Balogh Tamas', '2025-09-05', 7),
+    (2, 4, 'Lukacs Adam', '2025-10-28', 14),
+    (3, 1, 'Balogh Tamas', '2025-10-20', 28),
+    (4, 1, 'Lukacs Adam', '2025-10-25', 14),
+    (5, 5, 'Pal Judit', '2025-10-14', 21),
+    (6, 2, 'Lukacs Adam', '2025-10-23', 7),
+    (7, 5, 'Pal Judit', '2025-11-25', 7),
+    (8, 4, 'Pal Judit', '2025-10-04', 7),
+    (9, 5, 'Lukacs Adam', '2025-10-25', 21),
+    (10, 1, 'Simon Vera', '2025-11-14', 14),
+    (11, 9, 'Balogh Tamas', '2025-10-27', 7),
+    (12, 5, 'Simon Vera', '2025-10-23', 21),
+    (13, 4, 'Fekete Zsolt', '2025-10-03', 7),
+    (14, 4, 'Kiss Dora', '2025-10-18', 7),
+    (15, 1, 'Kiss Dora', '2025-09-24', 7),
+    (16, 3, 'Balogh Tamas', '2025-10-06', 28),
+    (17, 3, 'Lukacs Adam', '2025-10-09', 7),
+    (18, 1, 'Lukacs Adam', '2025-11-11', 7),
+    (19, 8, 'Fekete Zsolt', '2025-11-01', 28),
+    (20, 3, 'Kiss Dora', '2025-10-24', 21),
+    (21, 3, 'Simon Vera', '2025-10-16', 28),
+    (22, 3, 'Simon Vera', '2025-10-23', 7),
+    (23, 4, 'Lukacs Adam', '2025-09-22', 21),
+    (24, 5, 'Balogh Tamas', '2025-09-02', 28),
+    (25, 6, 'Pal Judit', '2025-09-02', 7);
+  expected: |
+    olvaso,cim,datum
+    Fekete Zsolt,A megtalalt level,2025-10-03
+    Pal Judit,A megtalalt level,2025-10-04
+    Balogh Tamas,A regi malom,2025-10-06
+    Lukacs Adam,A regi malom,2025-10-09
+    Pal Judit,Varos a felhokben,2025-10-14
+    Simon Vera,A regi malom,2025-10-16
+    Kiss Dora,A megtalalt level,2025-10-18
+    Balogh Tamas,Esti mesek,2025-10-20
+    Simon Vera,A regi malom,2025-10-23
+    Lukacs Adam,Az elveszett kulcs,2025-10-23
+    Simon Vera,Varos a felhokben,2025-10-23
+    Kiss Dora,A regi malom,2025-10-24
+    Lukacs Adam,Esti mesek,2025-10-25
+    Lukacs Adam,Varos a felhokben,2025-10-25
+    Balogh Tamas,A csillagok nyomaban,2025-10-27
+    Lukacs Adam,A megtalalt level,2025-10-28
+  hidden: true

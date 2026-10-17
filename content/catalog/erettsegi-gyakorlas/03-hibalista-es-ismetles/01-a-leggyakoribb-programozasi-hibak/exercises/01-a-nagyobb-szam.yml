@@ -1,0 +1,91 @@
+slug: a-nagyobb-szam
+title: "A nagyobb szám"
+position: 0
+kind: code
+level: kozep
+difficulty: 1
+published: false
+allowed_languages: [python, csharp]
+description: |
+  Az alábbi program két egész számot olvas be, és a nagyobbat írná ki. Mégis hibásan működik: a `9` és `10` bemenetre `9`-et ír ki `10` helyett. Keresd meg és javítsd a hibát!
+
+  Bemenet: két sor, mindkettőben egy egész szám. Kimenet: a nagyobb szám.
+
+  Példa: `9`, majd `10` esetén a kimenet `10`.
+
+  Tipp: nézd meg, milyen típusú értékeket hasonlít össze a program. A szövegeket betűrendben veti össze, nem érték szerint.
+starter_code:
+  python: |
+    a = input()
+    b = input()
+    if a > b:
+        print(a)
+    else:
+        print(b)
+  csharp: |
+    using System;
+    using System.Globalization;
+
+    class Program
+    {
+        static void Main()
+        {
+            string a = Console.ReadLine();
+            string b = Console.ReadLine();
+            if (string.CompareOrdinal(a, b) > 0)
+            {
+                Console.WriteLine(a);
+            }
+            else
+            {
+                Console.WriteLine(b);
+            }
+        }
+    }
+sample_solutions:
+  python: |
+    a = int(input())
+    b = int(input())
+    if a > b:
+        print(a)
+    else:
+        print(b)
+  csharp: |
+    using System;
+    using System.Globalization;
+
+    class Program
+    {
+        static void Main()
+        {
+            int a = int.Parse(Console.ReadLine());
+            int b = int.Parse(Console.ReadLine());
+            if (a > b)
+            {
+                Console.WriteLine(a);
+            }
+            else
+            {
+                Console.WriteLine(b);
+            }
+        }
+    }
+tests:
+  - stdin: "9\n10\n"
+    expected: "10\n"
+    hidden: false
+  - stdin: "100\n25\n"
+    expected: "100\n"
+    hidden: true
+  - stdin: "7\n7\n"
+    expected: "7\n"
+    hidden: true
+  - stdin: "-9\n-12\n"
+    expected: "-9\n"
+    hidden: true
+  - stdin: "0\n-1\n"
+    expected: "0\n"
+    hidden: true
+  - stdin: "5\n123\n"
+    expected: "123\n"
+    hidden: true

@@ -1,0 +1,230 @@
+slug: programozas-5-meleg-sorozat-rekurzioval
+title: Programozás 5 - Meleg sorozat rekurzióval
+position: 12
+kind: code
+level: emelt
+difficulty: 4
+published: false
+allowed_languages:
+- python
+- csharp
+description: |-
+  Egy meteorológiai állomás egy hónapos napi adatait az `idojaras.txt` fájl tartalmazza (UTF-8, ékezet nélkül). Az első sor fejléc (`nap;min;max;csapadek;szel`), utána minden sor egy nap adatait tartalmazza, pontosvesszővel elválasztva: a nap sorszáma (1-től folyamatosan növekszik), a legalacsonyabb és a legmagasabb hőmérséklet °C-ban (egész számok, lehet negatív), a napi csapadék mm-ben (0, ha nem esett) és a legerősebb széllökés km/h-ban. A fájl legalább egy napot tartalmaz.
+
+  A programban egy nap adatait rekordként (osztályként) érdemes tárolni. A kimenetben ne használjon ékezetes betűt, a szöveg pontosan egyezzen a mintával.
+
+  **5. feladat** (8 pont). Egy napot **melegnek** nevezünk, ha a maximuma legalább 15 °C. Írjon **rekurzív** függvényt, amely megadja, hány egymást követő meleg nap végződik az adott sorszámú (a lista szerinti, 0-tól induló indexű) napnál: ha az adott nap nem meleg, az eredmény 0, egyébként 1 + az előző nap eredménye (az első nap előtt nincs előző nap, ott az eredmény 0). A függvény segítségével keresse meg a leghosszabb meleg sorozatot, és írja ki a hosszát és az utolsó napját! Holtversenynél a korábbi sorozat számít. Ha egyetlen meleg nap sem volt, a kimenet a `Nem volt meleg nap.` sor.
+
+  A mintafájlra a kimenet:
+
+  ```text
+  5. feladat
+  Leghosszabb meleg sorozat: 16 nap, az utolso napja: 23. nap
+  ```
+
+  Tipp: a rekurzió alapesete az, amikor a nap nem meleg (0), vagy nincs előző nap; a lépés `1 + sorozat(i - 1)`. A leghosszabbat egy ciklus keresi meg az összes index kipróbálásával; a függvényt a `main` előtt definiáld.
+starter_code:
+  python: |
+    class Nap:
+        def __init__(self, nap, min_, max_, csapadek, szel):
+            self.nap = nap
+            self.min = min_
+            self.max = max_
+            self.csapadek = csapadek
+            self.szel = szel
+
+
+    with open("idojaras.txt", encoding="utf-8") as f:
+        sorok = f.read().splitlines()
+    napok = []
+    for sor in sorok[1:]:
+        r = sor.split(";")
+        napok.append(Nap(int(r[0]), int(r[1]), int(r[2]), int(r[3]), int(r[4])))
+    print("5. feladat")
+
+
+    def sorozat(i):
+        # rekurzív függvény: hány meleg nap végződik az i. indexű napnál
+        return 0
+
+
+    # ide írd a megoldást
+  csharp: |
+    using System;
+    using System.Collections.Generic;
+    using System.Globalization;
+    using System.IO;
+    using System.Linq;
+
+    class Nap
+    {
+        public int Sorszam;
+        public int Min;
+        public int Max;
+        public int Csapadek;
+        public int Szel;
+    }
+
+    class Program
+    {
+        // rekurzív függvény: hány meleg nap végződik az i. indexű napnál
+        static int Sorozat(List<Nap> napok, int i)
+        {
+            return 0;
+        }
+
+        static void Main()
+        {
+            string[] sorok = File.ReadAllLines("idojaras.txt");
+            List<Nap> napok = new List<Nap>();
+            for (int i = 1; i < sorok.Length; i++)
+            {
+                string[] r = sorok[i].Split(';');
+                Nap n = new Nap();
+                n.Sorszam = int.Parse(r[0]);
+                n.Min = int.Parse(r[1]);
+                n.Max = int.Parse(r[2]);
+                n.Csapadek = int.Parse(r[3]);
+                n.Szel = int.Parse(r[4]);
+                napok.Add(n);
+            }
+            Console.WriteLine("5. feladat");
+            // ide írd a megoldást
+        }
+    }
+sample_solutions:
+  python: |
+    class Nap:
+        def __init__(self, nap, min_, max_, csapadek, szel):
+            self.nap = nap
+            self.min = min_
+            self.max = max_
+            self.csapadek = csapadek
+            self.szel = szel
+
+
+    with open("idojaras.txt", encoding="utf-8") as f:
+        sorok = f.read().splitlines()
+    napok = []
+    for sor in sorok[1:]:
+        r = sor.split(";")
+        napok.append(Nap(int(r[0]), int(r[1]), int(r[2]), int(r[3]), int(r[4])))
+    print("5. feladat")
+
+
+    def sorozat(i):
+        if napok[i].max < 15:
+            return 0
+        if i == 0:
+            return 1
+        return 1 + sorozat(i - 1)
+
+
+    legjobb = 0
+    utolso = 0
+    for i in range(len(napok)):
+        h = sorozat(i)
+        if h > legjobb:
+            legjobb = h
+            utolso = napok[i].nap
+    if legjobb == 0:
+        print("Nem volt meleg nap.")
+    else:
+        print(f"Leghosszabb meleg sorozat: {legjobb} nap, az utolso napja: {utolso}. nap")
+  csharp: |
+    using System;
+    using System.Collections.Generic;
+    using System.Globalization;
+    using System.IO;
+    using System.Linq;
+
+    class Nap
+    {
+        public int Sorszam;
+        public int Min;
+        public int Max;
+        public int Csapadek;
+        public int Szel;
+    }
+
+    class Program
+    {
+        static int Sorozat(List<Nap> napok, int i)
+        {
+            if (napok[i].Max < 15)
+            {
+                return 0;
+            }
+            if (i == 0)
+            {
+                return 1;
+            }
+            return 1 + Sorozat(napok, i - 1);
+        }
+
+        static void Main()
+        {
+            string[] sorok = File.ReadAllLines("idojaras.txt");
+            List<Nap> napok = new List<Nap>();
+            for (int i = 1; i < sorok.Length; i++)
+            {
+                string[] r = sorok[i].Split(';');
+                Nap n = new Nap();
+                n.Sorszam = int.Parse(r[0]);
+                n.Min = int.Parse(r[1]);
+                n.Max = int.Parse(r[2]);
+                n.Csapadek = int.Parse(r[3]);
+                n.Szel = int.Parse(r[4]);
+                napok.Add(n);
+            }
+            Console.WriteLine("5. feladat");
+            int legjobb = 0;
+            int utolso = 0;
+            for (int i = 0; i < napok.Count; i++)
+            {
+                int h = Sorozat(napok, i);
+                if (h > legjobb)
+                {
+                    legjobb = h;
+                    utolso = napok[i].Sorszam;
+                }
+            }
+            if (legjobb == 0)
+            {
+                Console.WriteLine("Nem volt meleg nap.");
+            }
+            else
+            {
+                Console.WriteLine("Leghosszabb meleg sorozat: " + legjobb + " nap, az utolso napja: " + utolso + ". nap");
+            }
+        }
+    }
+files:
+  idojaras.txt: idojaras.txt
+tests:
+- stdin: ''
+  expected: |
+    5. feladat
+    Leghosszabb meleg sorozat: 16 nap, az utolso napja: 23. nap
+  hidden: false
+- stdin: ''
+  expected: |
+    5. feladat
+    Nem volt meleg nap.
+  hidden: true
+  files:
+    idojaras.txt: teszt-2/idojaras.txt
+- stdin: ''
+  expected: |
+    5. feladat
+    Leghosszabb meleg sorozat: 28 nap, az utolso napja: 28. nap
+  hidden: true
+  files:
+    idojaras.txt: teszt-3/idojaras.txt
+- stdin: ''
+  expected: |
+    5. feladat
+    Nem volt meleg nap.
+  hidden: true
+  files:
+    idojaras.txt: teszt-4/idojaras.txt

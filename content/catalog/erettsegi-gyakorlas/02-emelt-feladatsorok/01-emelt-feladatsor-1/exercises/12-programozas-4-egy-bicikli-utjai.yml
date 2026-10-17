@@ -1,0 +1,250 @@
+slug: programozas-4-egy-bicikli-utjai
+title: Programozás 4 - Egy bicikli útjai
+position: 11
+kind: code
+level: emelt
+difficulty: 3
+published: false
+allowed_languages:
+- python
+- csharp
+description: |-
+  Az `utak.txt` a kerékpárkölcsönző egy havi (30 napos) forgalmát tartalmazza, soronként egy úttal, pontosvesszővel elválasztva: `bicikli;nap;indulás;érkezés;távolság`. A bicikli azonosítója `B-01` alakú, a nap a hónap napja (1–30), az indulás és az érkezés `ÓÓ:PP` alakú időpont (ugyanazon a napon belül, az érkezés mindig az indulás után van), a távolság méterben egész szám. A sorok nem rendezettek. Az adatokban nincs ékezet, a fájl legalább egy sort tartalmaz.
+
+  **4. feladat.** Kérjen be a billentyűzetről egy bicikli-azonosítót (például `B-03`; **ne írjon ki hozzá kérdést**)! Írja ki a megadott bicikli összes útját **a fájlbeli sorrendben**, majd az utak számát és a megtett távolság összegét méterben. Ha nincs ilyen bicikli, a mintának megfelelő üzenetet írja ki. A fájl mellett a bemenet egyetlen sor: a bicikli azonosítója.
+
+  A mintafájlra és a `B-03` bemenetre a kimenet:
+
+  ```text
+  4. feladat: B-03
+  2. nap 10:26-12:03 (21440 m)
+  2. nap 08:20-08:52 (5438 m)
+  9. nap 07:07-07:26 (3265 m)
+  10. nap 10:33-11:20 (10898 m)
+  10. nap 08:49-09:22 (9314 m)
+  11. nap 10:09-10:19 (2588 m)
+  11. nap 08:25-09:44 (18780 m)
+  20. nap 09:37-10:26 (9728 m)
+  22. nap 10:53-11:35 (7080 m)
+  22. nap 09:43-10:30 (14762 m)
+  25. nap 09:56-11:16 (14579 m)
+  26. nap 07:07-07:53 (11269 m)
+  Osszesen: 12 ut, 129141 m
+  ```
+
+  Tipp: kiválogatás: menj végig a listán, és az azonosító egyezése alapján gyűjtsd az utakat egy külön listába; az összegzést és a darabszámot is ebből számold.
+starter_code:
+  python: |
+    class Ut:
+        def __init__(self, sor):
+            r = sor.split(";")
+            self.bicikli = r[0]
+            self.nap = int(r[1])
+            self.indulas = r[2]
+            self.erkezes = r[3]
+            self.tav = int(r[4])
+
+        def perc(self):
+            i = self.indulas.split(":")
+            e = self.erkezes.split(":")
+            return (int(e[0]) * 60 + int(e[1])) - (int(i[0]) * 60 + int(i[1]))
+
+
+    with open("utak.txt", encoding="utf-8") as f:
+        utak = [Ut(sor) for sor in f.read().splitlines()]
+    # ide írd a megoldást
+  csharp: |
+    using System;
+    using System.Collections.Generic;
+    using System.IO;
+
+    class Ut
+    {
+        public string Bicikli;
+        public int Nap;
+        public string Indulas;
+        public string Erkezes;
+        public int Tav;
+
+        public Ut(string sor)
+        {
+            string[] r = sor.Split(';');
+            Bicikli = r[0];
+            Nap = int.Parse(r[1]);
+            Indulas = r[2];
+            Erkezes = r[3];
+            Tav = int.Parse(r[4]);
+        }
+
+        public static int Percben(string ido)
+        {
+            string[] r = ido.Split(':');
+            return int.Parse(r[0]) * 60 + int.Parse(r[1]);
+        }
+
+        public int Perc()
+        {
+            return Percben(Erkezes) - Percben(Indulas);
+        }
+    }
+
+    class Program
+    {
+        static void Main()
+        {
+            List<Ut> utak = new List<Ut>();
+            foreach (string sor in File.ReadAllLines("utak.txt"))
+            {
+                utak.Add(new Ut(sor));
+            }
+            // ide írd a megoldást
+        }
+    }
+sample_solutions:
+  python: |
+    class Ut:
+        def __init__(self, sor):
+            r = sor.split(";")
+            self.bicikli = r[0]
+            self.nap = int(r[1])
+            self.indulas = r[2]
+            self.erkezes = r[3]
+            self.tav = int(r[4])
+
+        def perc(self):
+            i = self.indulas.split(":")
+            e = self.erkezes.split(":")
+            return (int(e[0]) * 60 + int(e[1])) - (int(i[0]) * 60 + int(i[1]))
+
+
+    with open("utak.txt", encoding="utf-8") as f:
+        utak = [Ut(sor) for sor in f.read().splitlines()]
+    bicikli = input().strip()
+    valogatott = [u for u in utak if u.bicikli == bicikli]
+    print("4. feladat: " + bicikli)
+    if len(valogatott) == 0:
+        print("Nincs ilyen bicikli.")
+    else:
+        for u in valogatott:
+            print(str(u.nap) + ". nap " + u.indulas + "-" + u.erkezes + " (" + str(u.tav) + " m)")
+        print("Osszesen: " + str(len(valogatott)) + " ut, " + str(sum(u.tav for u in valogatott)) + " m")
+  csharp: |
+    using System;
+    using System.Collections.Generic;
+    using System.IO;
+
+    class Ut
+    {
+        public string Bicikli;
+        public int Nap;
+        public string Indulas;
+        public string Erkezes;
+        public int Tav;
+
+        public Ut(string sor)
+        {
+            string[] r = sor.Split(';');
+            Bicikli = r[0];
+            Nap = int.Parse(r[1]);
+            Indulas = r[2];
+            Erkezes = r[3];
+            Tav = int.Parse(r[4]);
+        }
+
+        public static int Percben(string ido)
+        {
+            string[] r = ido.Split(':');
+            return int.Parse(r[0]) * 60 + int.Parse(r[1]);
+        }
+
+        public int Perc()
+        {
+            return Percben(Erkezes) - Percben(Indulas);
+        }
+    }
+
+    class Program
+    {
+        static void Main()
+        {
+            List<Ut> utak = new List<Ut>();
+            foreach (string sor in File.ReadAllLines("utak.txt"))
+            {
+                utak.Add(new Ut(sor));
+            }
+            string bicikli = Console.ReadLine().Trim();
+            List<Ut> valogatott = new List<Ut>();
+            foreach (Ut u in utak)
+            {
+                if (u.Bicikli == bicikli)
+                {
+                    valogatott.Add(u);
+                }
+            }
+            Console.WriteLine("4. feladat: " + bicikli);
+            if (valogatott.Count == 0)
+            {
+                Console.WriteLine("Nincs ilyen bicikli.");
+            }
+            else
+            {
+                int osszeg = 0;
+                foreach (Ut u in valogatott)
+                {
+                    Console.WriteLine(u.Nap + ". nap " + u.Indulas + "-" + u.Erkezes + " (" + u.Tav + " m)");
+                    osszeg += u.Tav;
+                }
+                Console.WriteLine("Osszesen: " + valogatott.Count + " ut, " + osszeg + " m");
+            }
+        }
+    }
+files:
+  utak.txt: utak.txt
+tests:
+- stdin: |
+    B-03
+  expected: |
+    4. feladat: B-03
+    2. nap 10:26-12:03 (21440 m)
+    2. nap 08:20-08:52 (5438 m)
+    9. nap 07:07-07:26 (3265 m)
+    10. nap 10:33-11:20 (10898 m)
+    10. nap 08:49-09:22 (9314 m)
+    11. nap 10:09-10:19 (2588 m)
+    11. nap 08:25-09:44 (18780 m)
+    20. nap 09:37-10:26 (9728 m)
+    22. nap 10:53-11:35 (7080 m)
+    22. nap 09:43-10:30 (14762 m)
+    25. nap 09:56-11:16 (14579 m)
+    26. nap 07:07-07:53 (11269 m)
+    Osszesen: 12 ut, 129141 m
+  hidden: false
+- stdin: |
+    B-01
+  expected: |
+    4. feladat: B-01
+    1. nap 09:07-09:28 (5843 m)
+    1. nap 10:24-11:12 (12535 m)
+    20. nap 09:27-09:40 (4101 m)
+    29. nap 08:25-08:39 (3433 m)
+    Osszesen: 4 ut, 25912 m
+  hidden: true
+  files:
+    utak.txt: teszt-2/utak.txt
+- stdin: |
+    B-05
+  expected: |
+    4. feladat: B-05
+    9. nap 08:05-08:41 (5120 m)
+    Osszesen: 1 ut, 5120 m
+  hidden: true
+  files:
+    utak.txt: teszt-3/utak.txt
+- stdin: |
+    B-99
+  expected: |
+    4. feladat: B-99
+    Nincs ilyen bicikli.
+  hidden: true
+  files:
+    utak.txt: teszt-4/utak.txt

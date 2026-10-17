@@ -1,0 +1,47 @@
+slug: gyakori-olvasok
+title: "Gyakori olvasók"
+position: 3
+kind: sql
+level: kozep
+difficulty: 3
+published: false
+allowed_languages: [sql]
+description: |
+  Egy könyvtár kölcsönzéseit a `kolcsonzes` tábla tárolja, soronként egy kölcsönzést. Az alábbi lekérdezés azokat az olvasókat akarja kilistázni, akik **legalább 3 könyvet** kölcsönöztek, de hibaüzenettel leáll. Javítsd ki!
+
+  A `kolcsonzes` tábla:
+
+  | oszlop | típus |
+  |---|---|
+  | `id` | egész, elsődleges kulcs |
+  | `olvaso` | szöveg (az olvasó neve) |
+  | `konyv_id` | egész |
+
+  Add meg az olvasó nevét (`olvaso`) és a kölcsönzései számát (`db`)! A sorok sorrendje nem számít.
+
+  Tipp: a `WHERE` a csoportosítás előtt szűri a sorokat, az összesítő függvény eredményére viszont csak a csoportosítás után lehet szűrni. Erre külön kulcsszó van.
+starter_code:
+  sql: |
+    SELECT olvaso, COUNT(*) AS db
+    FROM kolcsonzes
+    WHERE COUNT(*) >= 3
+    GROUP BY olvaso;
+sample_solutions:
+  sql: |
+    SELECT olvaso, COUNT(*) AS db
+    FROM kolcsonzes
+    GROUP BY olvaso
+    HAVING COUNT(*) >= 3;
+tests:
+  - stdin: "CREATE TABLE kolcsonzes (id INTEGER PRIMARY KEY, olvaso TEXT, konyv_id INTEGER);\nINSERT INTO kolcsonzes VALUES\n(1, 'Anna', 1),\n(2, 'Anna', 2),\n(3, 'Anna', 3),\n(4, 'Bela', 1),\n(5, 'Bela', 4),\n(6, 'Cili', 5),\n(7, 'Cili', 6),\n(8, 'Cili', 7),\n(9, 'Cili', 8);\n"
+    expected: "olvaso,db\nAnna,3\nCili,4\n"
+    hidden: false
+  - stdin: "CREATE TABLE kolcsonzes (id INTEGER PRIMARY KEY, olvaso TEXT, konyv_id INTEGER);\nINSERT INTO kolcsonzes VALUES\n(1, 'Dani', 1),\n(2, 'Emma', 2);\n"
+    expected: "olvaso,db\n"
+    hidden: true
+  - stdin: "CREATE TABLE kolcsonzes (id INTEGER PRIMARY KEY, olvaso TEXT, konyv_id INTEGER);\nINSERT INTO kolcsonzes VALUES\n(1, 'Feri', 1),\n(2, 'Feri', 2),\n(3, 'Feri', 3);\n"
+    expected: "olvaso,db\nFeri,3\n"
+    hidden: true
+  - stdin: "CREATE TABLE kolcsonzes (id INTEGER PRIMARY KEY, olvaso TEXT, konyv_id INTEGER);\nINSERT INTO kolcsonzes VALUES\n(1, 'Gabor', 1),\n(2, 'Hanna', 1),\n(3, 'Gabor', 2),\n(4, 'Hanna', 2),\n(5, 'Gabor', 3),\n(6, 'Hanna', 3),\n(7, 'Hanna', 4);\n"
+    expected: "olvaso,db\nGabor,3\nHanna,4\n"
+    hidden: true

@@ -1,0 +1,81 @@
+slug: programozas-2-a-leghosszabb-konyv
+title: Programozás 2 - A leghosszabb könyv
+position: 5
+kind: code
+level: kozep
+difficulty: 2
+published: false
+allowed_languages:
+- python
+- csharp
+description: "A `konyvek.txt` a könyvtár állományát tartalmazza, soronként egy könyvvel, pontosvesszővel elválasztva: `szerző;cím;kiadás éve;oldalszám`. Az adatokban nincs ékezet, a fájl legalább egy sort tartalmaz.\n\n**2. feladat.** Keresse meg a legtöbb oldalas könyvet (csak egy ilyen van), és írja ki a címét és oldalszámát a minta szerint.\n\nA mintafájlra a kimenet:\n\n```text\n2. feladat: Leghosszabb konyv: Holdfeny (552 oldal)\r\n```\n\nTipp: tartsd egy változóban az eddigi legnagyobb oldalszámot és a hozzá tartozó címet; az oldalszámot alakítsd számmá."
+starter_code:
+  python: |
+    with open("konyvek.txt", encoding="utf-8") as f:
+        konyvek = [sor.split(";") for sor in f.read().splitlines()]
+    # ide írd a megoldást
+  csharp: |
+    using System;
+    using System.Collections.Generic;
+    using System.IO;
+
+    class Program
+    {
+        static void Main()
+        {
+            string[] sorok = File.ReadAllLines("konyvek.txt");
+            // ide írd a megoldást
+        }
+    }
+sample_solutions:
+  python: |
+    with open("konyvek.txt", encoding="utf-8") as f:
+        konyvek = [sor.split(";") for sor in f.read().splitlines()]
+    legjobb = max(konyvek, key=lambda k: int(k[3]))
+    print("2. feladat: Leghosszabb konyv:", legjobb[1], "(" + legjobb[3], "oldal)")
+  csharp: |
+    using System;
+    using System.Collections.Generic;
+    using System.IO;
+
+    class Program
+    {
+        static void Main()
+        {
+            string[] sorok = File.ReadAllLines("konyvek.txt");
+            string[] legjobb = null;
+            int max = -1;
+            foreach (string sor in sorok)
+            {
+                string[] r = sor.Split(';');
+                int oldal = int.Parse(r[3]);
+                if (oldal > max)
+                {
+                    max = oldal;
+                    legjobb = r;
+                }
+            }
+            Console.WriteLine("2. feladat: Leghosszabb konyv: " + legjobb[1] + " (" + legjobb[3] + " oldal)");
+        }
+    }
+files:
+  konyvek.txt: konyvek.txt
+tests:
+- stdin: ''
+  expected: "2. feladat: Leghosszabb konyv: Holdfeny (552 oldal)\r\n"
+  hidden: false
+- stdin: ''
+  expected: "2. feladat: Leghosszabb konyv: Tengerparti nyar (632 oldal)\r\n"
+  hidden: true
+  files:
+    konyvek.txt: teszt-2/konyvek.txt
+- stdin: ''
+  expected: "2. feladat: Leghosszabb konyv: Ezust ora (635 oldal)\r\n"
+  hidden: true
+  files:
+    konyvek.txt: teszt-3/konyvek.txt
+- stdin: ''
+  expected: "2. feladat: Leghosszabb konyv: Varos a felhokben (615 oldal)\r\n"
+  hidden: true
+  files:
+    konyvek.txt: teszt-4/konyvek.txt

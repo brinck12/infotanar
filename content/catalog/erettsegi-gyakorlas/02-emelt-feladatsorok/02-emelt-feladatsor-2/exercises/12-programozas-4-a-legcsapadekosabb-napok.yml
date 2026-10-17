@@ -1,0 +1,212 @@
+slug: programozas-4-a-legcsapadekosabb-napok
+title: Programozás 4 - A legcsapadékosabb napok
+position: 11
+kind: code
+level: emelt
+difficulty: 3
+published: false
+allowed_languages:
+- python
+- csharp
+description: |-
+  Egy meteorológiai állomás egy hónapos napi adatait az `idojaras.txt` fájl tartalmazza (UTF-8, ékezet nélkül). Az első sor fejléc (`nap;min;max;csapadek;szel`), utána minden sor egy nap adatait tartalmazza, pontosvesszővel elválasztva: a nap sorszáma (1-től folyamatosan növekszik), a legalacsonyabb és a legmagasabb hőmérséklet °C-ban (egész számok, lehet negatív), a napi csapadék mm-ben (0, ha nem esett) és a legerősebb széllökés km/h-ban. A fájl legalább egy napot tartalmaz.
+
+  A programban egy nap adatait rekordként (osztályként) érdemes tárolni. A kimenetben ne használjon ékezetes betűt, a szöveg pontosan egyezzen a mintával.
+
+  **4. feladat** (7 pont). Írja ki az öt legcsapadékosabb napot csapadék szerint csökkenő sorrendben! Azonos csapadéknál a korábbi nap szerepeljen előbb. Csak olyan nap kerülhet a listára, amelyen esett csapadék (`csapadek > 0`); ha ilyen nap ötnél kevesebb van, az összeset írja ki, ha egy sem, a `Nem esett csapadek.` sort. Végül írja ki az egész hónap összes csapadékát is.
+
+  A mintafájlra a kimenet:
+
+  ```text
+  4. feladat
+  Legcsapadekosabb napok:
+  1. 19. nap: 25 mm
+  2. 14. nap: 24 mm
+  3. 21. nap: 18 mm
+  4. 1. nap: 15 mm
+  5. 18. nap: 15 mm
+  Osszes csapadek: 172 mm
+  ```
+
+  Tipp: a rendezést ne kézzel írd, használd a nyelv rendezőjét: Pythonban a `sorted(..., key=...)` stabil rendezés, C#-ban az `OrderByDescending` is az. Stabil rendezésnél az azonos kulcsú elemek az eredeti sorrendjükben maradnak.
+starter_code:
+  python: |
+    class Nap:
+        def __init__(self, nap, min_, max_, csapadek, szel):
+            self.nap = nap
+            self.min = min_
+            self.max = max_
+            self.csapadek = csapadek
+            self.szel = szel
+
+
+    with open("idojaras.txt", encoding="utf-8") as f:
+        sorok = f.read().splitlines()
+    napok = []
+    for sor in sorok[1:]:
+        r = sor.split(";")
+        napok.append(Nap(int(r[0]), int(r[1]), int(r[2]), int(r[3]), int(r[4])))
+    print("4. feladat")
+    # ide írd a megoldást
+  csharp: |
+    using System;
+    using System.Collections.Generic;
+    using System.Globalization;
+    using System.IO;
+    using System.Linq;
+
+    class Nap
+    {
+        public int Sorszam;
+        public int Min;
+        public int Max;
+        public int Csapadek;
+        public int Szel;
+    }
+
+    class Program
+    {
+        static void Main()
+        {
+            string[] sorok = File.ReadAllLines("idojaras.txt");
+            List<Nap> napok = new List<Nap>();
+            for (int i = 1; i < sorok.Length; i++)
+            {
+                string[] r = sorok[i].Split(';');
+                Nap n = new Nap();
+                n.Sorszam = int.Parse(r[0]);
+                n.Min = int.Parse(r[1]);
+                n.Max = int.Parse(r[2]);
+                n.Csapadek = int.Parse(r[3]);
+                n.Szel = int.Parse(r[4]);
+                napok.Add(n);
+            }
+            Console.WriteLine("4. feladat");
+            // ide írd a megoldást
+        }
+    }
+sample_solutions:
+  python: |
+    class Nap:
+        def __init__(self, nap, min_, max_, csapadek, szel):
+            self.nap = nap
+            self.min = min_
+            self.max = max_
+            self.csapadek = csapadek
+            self.szel = szel
+
+
+    with open("idojaras.txt", encoding="utf-8") as f:
+        sorok = f.read().splitlines()
+    napok = []
+    for sor in sorok[1:]:
+        r = sor.split(";")
+        napok.append(Nap(int(r[0]), int(r[1]), int(r[2]), int(r[3]), int(r[4])))
+    print("4. feladat")
+    esos = [n for n in napok if n.csapadek > 0]
+    esos = sorted(esos, key=lambda n: -n.csapadek)
+    if len(esos) == 0:
+        print("Nem esett csapadek.")
+    else:
+        print("Legcsapadekosabb napok:")
+        for i, n in enumerate(esos[:5]):
+            print(f"{i + 1}. {n.nap}. nap: {n.csapadek} mm")
+    print("Osszes csapadek:", sum(n.csapadek for n in napok), "mm")
+  csharp: |
+    using System;
+    using System.Collections.Generic;
+    using System.Globalization;
+    using System.IO;
+    using System.Linq;
+
+    class Nap
+    {
+        public int Sorszam;
+        public int Min;
+        public int Max;
+        public int Csapadek;
+        public int Szel;
+    }
+
+    class Program
+    {
+        static void Main()
+        {
+            string[] sorok = File.ReadAllLines("idojaras.txt");
+            List<Nap> napok = new List<Nap>();
+            for (int i = 1; i < sorok.Length; i++)
+            {
+                string[] r = sorok[i].Split(';');
+                Nap n = new Nap();
+                n.Sorszam = int.Parse(r[0]);
+                n.Min = int.Parse(r[1]);
+                n.Max = int.Parse(r[2]);
+                n.Csapadek = int.Parse(r[3]);
+                n.Szel = int.Parse(r[4]);
+                napok.Add(n);
+            }
+            Console.WriteLine("4. feladat");
+            List<Nap> esos = napok.Where(n => n.Csapadek > 0).OrderByDescending(n => n.Csapadek).ToList();
+            if (esos.Count == 0)
+            {
+                Console.WriteLine("Nem esett csapadek.");
+            }
+            else
+            {
+                Console.WriteLine("Legcsapadekosabb napok:");
+                for (int i = 0; i < Math.Min(5, esos.Count); i++)
+                {
+                    Console.WriteLine((i + 1) + ". " + esos[i].Sorszam + ". nap: " + esos[i].Csapadek + " mm");
+                }
+            }
+            Console.WriteLine("Osszes csapadek: " + napok.Sum(n => n.Csapadek) + " mm");
+        }
+    }
+files:
+  idojaras.txt: idojaras.txt
+tests:
+- stdin: ''
+  expected: |
+    4. feladat
+    Legcsapadekosabb napok:
+    1. 19. nap: 25 mm
+    2. 14. nap: 24 mm
+    3. 21. nap: 18 mm
+    4. 1. nap: 15 mm
+    5. 18. nap: 15 mm
+    Osszes csapadek: 172 mm
+  hidden: false
+- stdin: ''
+  expected: |
+    4. feladat
+    Legcsapadekosabb napok:
+    1. 29. nap: 26 mm
+    2. 13. nap: 25 mm
+    3. 3. nap: 24 mm
+    4. 8. nap: 22 mm
+    5. 14. nap: 21 mm
+    Osszes csapadek: 248 mm
+  hidden: true
+  files:
+    idojaras.txt: teszt-2/idojaras.txt
+- stdin: ''
+  expected: |
+    4. feladat
+    Legcsapadekosabb napok:
+    1. 18. nap: 28 mm
+    2. 1. nap: 27 mm
+    3. 2. nap: 21 mm
+    4. 20. nap: 21 mm
+    5. 25. nap: 21 mm
+    Osszes csapadek: 185 mm
+  hidden: true
+  files:
+    idojaras.txt: teszt-3/idojaras.txt
+- stdin: ''
+  expected: |
+    4. feladat
+    Nem esett csapadek.
+    Osszes csapadek: 0 mm
+  hidden: true
+  files:
+    idojaras.txt: teszt-4/idojaras.txt

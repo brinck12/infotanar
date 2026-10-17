@@ -1,0 +1,217 @@
+slug: programozas-3-fagyos-sorozatok
+title: Programozás 3 - Fagyos sorozatok
+position: 10
+kind: code
+level: emelt
+difficulty: 3
+published: false
+allowed_languages:
+- python
+- csharp
+description: |-
+  Egy meteorológiai állomás egy hónapos napi adatait az `idojaras.txt` fájl tartalmazza (UTF-8, ékezet nélkül). Az első sor fejléc (`nap;min;max;csapadek;szel`), utána minden sor egy nap adatait tartalmazza, pontosvesszővel elválasztva: a nap sorszáma (1-től folyamatosan növekszik), a legalacsonyabb és a legmagasabb hőmérséklet °C-ban (egész számok, lehet negatív), a napi csapadék mm-ben (0, ha nem esett) és a legerősebb széllökés km/h-ban. A fájl legalább egy napot tartalmaz.
+
+  A programban egy nap adatait rekordként (osztályként) érdemes tárolni. A kimenetben ne használjon ékezetes betűt, a szöveg pontosan egyezzen a mintával.
+
+  **3. feladat** (7 pont). Egy napot **fagyosnak** nevezünk, ha a minimuma 0 °C alatti. Írja ki a fagyos napok számát, majd a leghosszabb, egymást követő fagyos napokból álló sorozat hosszát és első-utolsó napját! Holtversenynél a korábbi sorozat számít. Ha nem volt fagyos nap, a kimenet a `Nem volt fagyos nap.` sor (a darabszám sor ekkor is megjelenik).
+
+  A mintafájlra a kimenet:
+
+  ```text
+  3. feladat
+  Fagyos napok szama: 3
+  Leghosszabb fagyos sorozat: 3 nap (5. nap - 7. nap)
+  ```
+
+  Tipp: menet közben tartsd számon az éppen futó sorozat hosszát: fagyos napnál nő, egyébként nullázódik. Ha az aktuális hossz meghaladja az eddigi legjobbat, jegyezd fel a sorozat utolsó napját is; a kezdőnap ebből és a hosszból számolható.
+starter_code:
+  python: |
+    class Nap:
+        def __init__(self, nap, min_, max_, csapadek, szel):
+            self.nap = nap
+            self.min = min_
+            self.max = max_
+            self.csapadek = csapadek
+            self.szel = szel
+
+
+    with open("idojaras.txt", encoding="utf-8") as f:
+        sorok = f.read().splitlines()
+    napok = []
+    for sor in sorok[1:]:
+        r = sor.split(";")
+        napok.append(Nap(int(r[0]), int(r[1]), int(r[2]), int(r[3]), int(r[4])))
+    print("3. feladat")
+    # ide írd a megoldást
+  csharp: |
+    using System;
+    using System.Collections.Generic;
+    using System.Globalization;
+    using System.IO;
+    using System.Linq;
+
+    class Nap
+    {
+        public int Sorszam;
+        public int Min;
+        public int Max;
+        public int Csapadek;
+        public int Szel;
+    }
+
+    class Program
+    {
+        static void Main()
+        {
+            string[] sorok = File.ReadAllLines("idojaras.txt");
+            List<Nap> napok = new List<Nap>();
+            for (int i = 1; i < sorok.Length; i++)
+            {
+                string[] r = sorok[i].Split(';');
+                Nap n = new Nap();
+                n.Sorszam = int.Parse(r[0]);
+                n.Min = int.Parse(r[1]);
+                n.Max = int.Parse(r[2]);
+                n.Csapadek = int.Parse(r[3]);
+                n.Szel = int.Parse(r[4]);
+                napok.Add(n);
+            }
+            Console.WriteLine("3. feladat");
+            // ide írd a megoldást
+        }
+    }
+sample_solutions:
+  python: |
+    class Nap:
+        def __init__(self, nap, min_, max_, csapadek, szel):
+            self.nap = nap
+            self.min = min_
+            self.max = max_
+            self.csapadek = csapadek
+            self.szel = szel
+
+
+    with open("idojaras.txt", encoding="utf-8") as f:
+        sorok = f.read().splitlines()
+    napok = []
+    for sor in sorok[1:]:
+        r = sor.split(";")
+        napok.append(Nap(int(r[0]), int(r[1]), int(r[2]), int(r[3]), int(r[4])))
+    print("3. feladat")
+    fagyos = 0
+    hossz = 0
+    legjobb = 0
+    vege = 0
+    for n in napok:
+        if n.min < 0:
+            fagyos += 1
+            hossz += 1
+            if hossz > legjobb:
+                legjobb = hossz
+                vege = n.nap
+        else:
+            hossz = 0
+    print("Fagyos napok szama:", fagyos)
+    if legjobb == 0:
+        print("Nem volt fagyos nap.")
+    else:
+        print(f"Leghosszabb fagyos sorozat: {legjobb} nap ({vege - legjobb + 1}. nap - {vege}. nap)")
+  csharp: |
+    using System;
+    using System.Collections.Generic;
+    using System.Globalization;
+    using System.IO;
+    using System.Linq;
+
+    class Nap
+    {
+        public int Sorszam;
+        public int Min;
+        public int Max;
+        public int Csapadek;
+        public int Szel;
+    }
+
+    class Program
+    {
+        static void Main()
+        {
+            string[] sorok = File.ReadAllLines("idojaras.txt");
+            List<Nap> napok = new List<Nap>();
+            for (int i = 1; i < sorok.Length; i++)
+            {
+                string[] r = sorok[i].Split(';');
+                Nap n = new Nap();
+                n.Sorszam = int.Parse(r[0]);
+                n.Min = int.Parse(r[1]);
+                n.Max = int.Parse(r[2]);
+                n.Csapadek = int.Parse(r[3]);
+                n.Szel = int.Parse(r[4]);
+                napok.Add(n);
+            }
+            Console.WriteLine("3. feladat");
+            int fagyos = 0;
+            int hossz = 0;
+            int legjobb = 0;
+            int vege = 0;
+            foreach (Nap n in napok)
+            {
+                if (n.Min < 0)
+                {
+                    fagyos++;
+                    hossz++;
+                    if (hossz > legjobb)
+                    {
+                        legjobb = hossz;
+                        vege = n.Sorszam;
+                    }
+                }
+                else
+                {
+                    hossz = 0;
+                }
+            }
+            Console.WriteLine("Fagyos napok szama: " + fagyos);
+            if (legjobb == 0)
+            {
+                Console.WriteLine("Nem volt fagyos nap.");
+            }
+            else
+            {
+                Console.WriteLine("Leghosszabb fagyos sorozat: " + legjobb + " nap (" + (vege - legjobb + 1) + ". nap - " + vege + ". nap)");
+            }
+        }
+    }
+files:
+  idojaras.txt: idojaras.txt
+tests:
+- stdin: ''
+  expected: |
+    3. feladat
+    Fagyos napok szama: 3
+    Leghosszabb fagyos sorozat: 3 nap (5. nap - 7. nap)
+  hidden: false
+- stdin: ''
+  expected: |
+    3. feladat
+    Fagyos napok szama: 24
+    Leghosszabb fagyos sorozat: 11 nap (17. nap - 27. nap)
+  hidden: true
+  files:
+    idojaras.txt: teszt-2/idojaras.txt
+- stdin: ''
+  expected: |
+    3. feladat
+    Fagyos napok szama: 0
+    Nem volt fagyos nap.
+  hidden: true
+  files:
+    idojaras.txt: teszt-3/idojaras.txt
+- stdin: ''
+  expected: |
+    3. feladat
+    Fagyos napok szama: 0
+    Nem volt fagyos nap.
+  hidden: true
+  files:
+    idojaras.txt: teszt-4/idojaras.txt
