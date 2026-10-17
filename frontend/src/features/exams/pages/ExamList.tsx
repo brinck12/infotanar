@@ -49,8 +49,8 @@ export function ExamList() {
     <main className="mx-auto w-full max-w-page flex-1 px-4 pt-8 pb-24 md:px-6">
       <PageTitle>Érettségi gyakorlás</PageTitle>
       <Lead className="mt-3 max-w-prose text-18">
-        Teljes feladatsorok az érettségi felépítésében és nehézségében: megoldhatod őket lépésenként, a feladatonkénti visszajelzéssel, vagy időmérővel,
-        vizsgahelyzetben.
+        Programozási és adatbázis-feladatsorok az érettségi felépítésében és nehézségében: megoldhatod őket lépésenként, feladatonkénti visszajelzéssel,
+        vagy időmérős vizsgaként. A táblázat- és dokumentumfeladatokhoz a tanulási utak leckéi adnak gyakorlást.
       </Lead>
 
       {running?.attempt && (

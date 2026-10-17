@@ -111,7 +111,7 @@ export function LearningPath() {
                       </span>
                       <span className="font-serif text-22 leading-snug font-semibold">Érettségi gyakorlás</span>
                       <span className="text-16 leading-relaxed text-ink-soft">
-                        Teljes közép- és emelt szintű feladatsorok, hibalistával és ismétlési tervvel.
+                        Programozási és adatbázis-feladatsorok közép- és emelt szinten, hibalistával és ismétlési tervvel.
                       </span>
                     </Link>
                   </li>

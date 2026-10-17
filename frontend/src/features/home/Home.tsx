@@ -48,8 +48,8 @@ const TRACKS: ReadonlyArray<{ icon: IconName; title: string; body: string; point
   {
     icon: 'slides',
     title: 'Érettségi gyakorlás',
-    body: 'Teljes közép- és emelt szintű feladatsorok a vizsga szerkezetében, hibalistával és ismétlési tervvel.',
-    points: 'Teljes feladatsorok',
+    body: 'Programozási és adatbázis-feladatsorok a vizsga szerkezetében, hibalistával és ismétlési tervvel.',
+    points: 'Közép és emelt szint',
     to: '/vizsgak',
   },
 ]
@@ -61,7 +61,7 @@ const STEPS: ReadonlyArray<{ icon: IconName; title: string; body: string }> = [
     title: 'Gyakorolsz',
     body: 'Feladatok azonnali ellenőrzéssel. A programodat lefuttatjuk, és tesztesetenként megmutatjuk, mi sikerült.',
   },
-  { icon: 'flag', title: 'Vizsgázol', body: 'Teljes feladatsorok a vizsga szerkezetében, a pontozási szempontok szerint.' },
+  { icon: 'flag', title: 'Vizsgázol', body: 'Feladatsorok a vizsga szerkezetében, részfeladatonként ellenőrizve.' },
 ]
 
 const PREMIUM = [
