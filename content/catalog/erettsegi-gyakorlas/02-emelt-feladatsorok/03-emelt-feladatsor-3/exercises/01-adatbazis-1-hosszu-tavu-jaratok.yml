@@ -173,8 +173,7 @@ tests:
     (7, 4, 4, 17, '14:45', 40, 0),
     (8, 4, 1, 13, '19:00', 126, 68),
     (9, 4, 5, 25, '20:25', 96, 46);
-  expected: |
-    szam,cel,tav
+  expected: ""
   hidden: true
 - stdin: |
     CREATE TABLE legitarsasag (id INTEGER PRIMARY KEY, nev TEXT, orszag TEXT);

@@ -36,7 +36,7 @@ tests:
     expected: "nev,osztaly,pont\nAnna,9.A,80\nCili,9.B,50\n"
     hidden: false
   - stdin: "CREATE TABLE diak (id INTEGER PRIMARY KEY, nev TEXT, osztaly TEXT, pont INTEGER);\nINSERT INTO diak VALUES\n(1, 'Feri', '9.A', 10),\n(2, 'Gabor', '9.A', 20);\n"
-    expected: "nev,osztaly,pont\n"
+    expected: ""
     hidden: true
   - stdin: "CREATE TABLE diak (id INTEGER PRIMARY KEY, nev TEXT, osztaly TEXT, pont INTEGER);\nINSERT INTO diak VALUES\n(1, 'Hanna', '10.A', 60),\n(2, 'Ivan', '10.B', 70),\n(3, 'Jolan', '9.B', 55);\n"
     expected: "nev,osztaly,pont\nJolan,9.B,55\n"

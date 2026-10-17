@@ -36,7 +36,7 @@ tests:
     expected: "cim\nAranyember\nAlma\n"
     hidden: false
   - stdin: "CREATE TABLE konyv (id INTEGER PRIMARY KEY, cim TEXT, szerzo TEXT, ev INTEGER);\nINSERT INTO konyv VALUES\n(1, 'Zold ut', 'Kiss', 2005),\n(2, 'Piros', 'Nagy', 1990);\n"
-    expected: "cim\n"
+    expected: ""
     hidden: true
   - stdin: "CREATE TABLE konyv (id INTEGER PRIMARY KEY, cim TEXT, szerzo TEXT, ev INTEGER);\nINSERT INTO konyv VALUES\n(1, 'A kicsi herceg', 'Saint', 1943),\n(2, 'Anna', 'Varga', 2015),\n(3, 'Ablak', 'Kovacs', 1988);\n"
     expected: "cim\nA kicsi herceg\nAnna\nAblak\n"

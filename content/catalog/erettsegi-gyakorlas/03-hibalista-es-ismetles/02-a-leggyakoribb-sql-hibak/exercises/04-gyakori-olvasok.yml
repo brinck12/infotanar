@@ -37,7 +37,7 @@ tests:
     expected: "olvaso,db\nAnna,3\nCili,4\n"
     hidden: false
   - stdin: "CREATE TABLE kolcsonzes (id INTEGER PRIMARY KEY, olvaso TEXT, konyv_id INTEGER);\nINSERT INTO kolcsonzes VALUES\n(1, 'Dani', 1),\n(2, 'Emma', 2);\n"
-    expected: "olvaso,db\n"
+    expected: ""
     hidden: true
   - stdin: "CREATE TABLE kolcsonzes (id INTEGER PRIMARY KEY, olvaso TEXT, konyv_id INTEGER);\nINSERT INTO kolcsonzes VALUES\n(1, 'Feri', 1),\n(2, 'Feri', 2),\n(3, 'Feri', 3);\n"
     expected: "olvaso,db\nFeri,3\n"
