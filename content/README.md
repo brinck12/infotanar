@@ -40,6 +40,20 @@ A leckeszövegben a Python és C# példát **közvetlenül egymás után** áll�
 
 Más jelölővel (pl. `py`, `cs`, `c#`) a blokk nem lesz fül.
 
+### Nyelvfüggő szövegrészek
+
+Ha a lecke magyarázata is nyelvenként más, zárd a részt egy `::: python` vagy `::: csharp` sorba és egy `:::` sorba (a jelölők külön bekezdések, előttük és utánuk üres sor kell):
+
+```
+::: python
+
+A kiírást a `print` végzi.
+
+:::
+```
+
+A leckeoldal tetején nyelvválasztó jelenik meg, és csak a választott nyelv részei látszanak. A jelölőkön kívüli szöveg mindenkinek szól. A szekción belül egyetlen nyelvű kódblokk áll, ezért ott nem lesz lapfül. Minden nyitó jelölőnek legyen záró párja, különben a jelölő szövegként látszik.
+
 A tesztekben szereplő ékezetes szöveget mindig ellenőrizd valódi Judge0-n (`catalog:verify --drafts --negative`): a Mono `Console` kódolása a konténer nyelvi beállításától (locale) függ, ezért C#-ban az ékezetes kimenet a helyi futtatástól eltérhet.
 
 ## Munkafolyamat
