@@ -98,10 +98,16 @@ function TaskSolveContent() {
   const task = useQuery({ ...taskQuery(taskId), enabled: validId })
 
   useDocumentMeta(task.data ? { title: task.data.title, description: `Gyakorlófeladat: ${task.data.title}` } : null)
+  // A morzsamenü a tananyagot követi: tanulási út, a feladat leckéje, maga a feladat.
+  const lesson = task.data?.lesson
   useCrumbs(
     task.data
-      ? [{ label: 'Feladatok', to: '/feladatok' }, { label: task.data.topic.name, to: `/feladatok?temakor=${task.data.topic.slug}` }, { label: task.data.title }]
-      : [{ label: 'Feladatok', to: '/feladatok' }],
+      ? [
+          { label: 'Tanulási út', to: '/tanulasi-ut' },
+          ...(lesson?.slug && lesson.track_slug ? [{ label: lesson.title, to: `/tanulasi-ut/${lesson.track_slug}/${lesson.slug}` }] : []),
+          { label: task.data.title },
+        ]
+      : [{ label: 'Tanulási út', to: '/tanulasi-ut' }],
   )
 
   if (!validId || task.isError) {

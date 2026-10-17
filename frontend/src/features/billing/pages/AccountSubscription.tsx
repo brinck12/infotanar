@@ -51,7 +51,7 @@ function NoSubscription({ plan }: { plan: Plan }) {
         <Badge kind="prem">Ingyenes csomag</Badge>
       </div>
       <Banner kind="info" className="mt-4" action={<ButtonLink to="/elofizetes">Prémium előfizetés</ButtonLink>}>
-        Az első két lecke minden sávban ingyenes. A többihez Prémium előfizetés kell, {formatHuf(plan.price_huf)} havonta.
+        Az első két lecke minden tanulási úton ingyenes. A többihez Prémium előfizetés kell, {formatHuf(plan.price_huf)} havonta.
       </Banner>
     </Panel>
   )

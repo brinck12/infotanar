@@ -73,7 +73,7 @@ export function AdminOverview() {
   if (figures.unverified) {
     todos.push({ icon: 'user', text: `${figures.unverified} felhasználó e-mail-címe nincs megerősítve`, to: '/admin/felhasznalok?megerositve=0' })
   }
-  if (figures.draftTracks) todos.push({ icon: 'book', text: `${figures.draftTracks} képzési ág piszkozat, a tanulók nem látják`, to: '/admin/tananyag' })
+  if (figures.draftTracks) todos.push({ icon: 'book', text: `${figures.draftTracks} tanulási út piszkozat, a tanulók nem látják`, to: '/admin/tananyag' })
   if (figures.incompleteRubrics) {
     todos.push({ icon: 'file', text: `${figures.incompleteRubrics} feladathoz hiányzik az értékelőlap`, to: '/admin/tananyag' })
   }
@@ -88,7 +88,7 @@ export function AdminOverview() {
         <Stat label="Regisztrált felhasználó" value={count(figures.users)} note={`ebből megerősítetlen: ${count(figures.unverified)}`} />
         <Stat label="Aktív előfizető" value={count(figures.active)} note={`fizetési hibával: ${count(figures.pastDue)}`} />
         <Stat label="Sikertelen számla" value={count(figures.stuckInvoices)} note="javításra vár" />
-        <Stat label="Képzési ág" value={count(figures.tracks)} note={`ebből piszkozat: ${count(figures.draftTracks)}`} />
+        <Stat label="Tanulási út" value={count(figures.tracks)} note={`ebből piszkozat: ${count(figures.draftTracks)}`} />
         {overview.data && (
           <>
             <Stat label="Hiányos értékelőlap" value={count(figures.incompleteRubrics)} note="feltöltéses feladat vagy vizsgarész" />

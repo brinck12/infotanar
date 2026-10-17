@@ -133,7 +133,7 @@ test.describe('Admin áttekintő (GET /admin/overview)', () => {
     })
   })
 
-  test.describe('képzési ágak és legutóbbi műveletek', () => {
+  test.describe('tanulási utak és legutóbbi műveletek', () => {
     test('az új piszkozat ág beleszámít, a létrehozása pedig a műveletek élére kerül', { tag: '@smoke' }, async ({ apiClient }) => {
       const admin = await adminAccount(apiClient)
       const before = (await overviewOf(admin.client)).catalog

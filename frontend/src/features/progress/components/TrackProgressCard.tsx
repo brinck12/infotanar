@@ -27,7 +27,7 @@ export function LessonStatusBadge({ status }: { status: LessonProgressStatus }) 
   )
 }
 
-/** Egy képzési ág összesítője; kinyitva modulonként a leckék állapota. */
+/** Egy tanulási út összesítője; kinyitva modulonként a leckék állapota. */
 export function TrackProgressCard({ track, defaultOpen }: { track: TrackProgress; defaultOpen: boolean }) {
   const [open, setOpen] = useState(defaultOpen)
   const panelId = useId()

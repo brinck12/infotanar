@@ -4,7 +4,7 @@ import { catalogKeys } from './api'
 
 /**
  * Beadás (kód, fájl vagy vizsga) után elavul minden, ami a néző haladását mutatja:
- * a haladás-jelentés, a képzési ágak, a feladatlisták és (ha ismert) maga a feladat.
+ * a haladás-jelentés, a tanulási utak, a feladatlisták és (ha ismert) maga a feladat.
  */
 export function invalidateSolveState(queryClient: QueryClient, taskId?: number): void {
   void queryClient.invalidateQueries({ queryKey: progressKeys.all })

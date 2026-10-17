@@ -1,6 +1,6 @@
 import { useId } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
-import { trackIcon } from '../../../shared/domain/exam'
+import { PRACTICE_TRACK, trackIcon } from '../../../shared/domain/exam'
 import { Badge } from '../../../shared/ui/Badge'
 import { ButtonLink } from '../../../shared/ui/Button'
 import { cx } from '../../../shared/ui/cx'
@@ -32,14 +32,15 @@ function stageState(module: ModuleSummary, statuses: Map<number, LessonProgressS
   return module.lessons.some((lesson) => lesson.is_free) || module.lessons.length === 0 ? 'open' : 'premium'
 }
 
-/** Tanulási út: a pontok megoszlása, majd sávonként a szakaszok az alapoktól a feladatsorokig. */
+/** Tanulási út: a pontok megoszlása, majd tanulási utanként a szakaszok az alapoktól a feladatsorokig. */
 export function LearningPath() {
   const { tree, isPending, error, refetch } = useCatalogTree()
   const statuses = useLessonStatuses()
   const [params, setParams] = useSearchParams()
   const tabsId = useId()
 
-  const tracks = tree?.tracks ?? []
+  // A teljes feladatsorok az „Érettségi gyakorlás” oldalon vannak, nem a tanulási utak között.
+  const tracks = (tree?.tracks ?? []).filter((track) => track.slug !== PRACTICE_TRACK)
   const active = tracks.find((track) => track.slug === params.get('sav')) ?? tracks[0]
 
   return (
@@ -60,11 +61,11 @@ export function LearningPath() {
         ) : isPending ? (
           <Skeleton lines={6} label="Tanulási út betöltése…" />
         ) : !active ? (
-          <EmptyState title="Még nincs közzétett tananyag">Amint megjelenik az első sáv, itt találod a szakaszait.</EmptyState>
+          <EmptyState title="Még nincs közzétett tananyag">Amint megjelenik az első tanulási út, itt találod a szakaszait.</EmptyState>
         ) : (
           <>
             <Tabs
-              label="Sávok"
+              label="Tanulási utak"
               idPrefix={tabsId}
               tabs={tracks.map((track) => ({ id: track.slug, label: track.title }))}
               active={active.slug}
@@ -76,7 +77,7 @@ export function LearningPath() {
 
             {tracks.length > 1 && (
               <section className="mt-18" aria-labelledby="tobbi-sav">
-                <SectionTitle id="tobbi-sav">A többi sáv</SectionTitle>
+                <SectionTitle id="tobbi-sav">A többi tanulási út</SectionTitle>
                 <p className="mt-2 max-w-prose text-16 leading-relaxed text-ink-soft">
                   Mindegyik ugyanígy épül fel, az alapoktól az érettségi-jellegű feladatokig. Mindegyikben az első két lecke ingyenes.
                 </p>
@@ -100,6 +101,20 @@ export function LearningPath() {
                         </Link>
                       </li>
                     ))}
+                  <li className="flex">
+                    <Link
+                      to="/vizsgak"
+                      className="flex flex-1 flex-col gap-2 rounded-md border border-line bg-sheet p-6 text-ink no-underline hover:bg-faint hover:text-ink"
+                    >
+                      <span className="inline-flex size-10 items-center justify-center rounded-md bg-note">
+                        <Icon name="flag" size={22} />
+                      </span>
+                      <span className="font-serif text-22 leading-snug font-semibold">Érettségi gyakorlás</span>
+                      <span className="text-16 leading-relaxed text-ink-soft">
+                        Teljes közép- és emelt szintű feladatsorok, hibalistával és ismétlési tervvel.
+                      </span>
+                    </Link>
+                  </li>
                 </ul>
               </section>
             )}
@@ -118,7 +133,7 @@ function TrackStages({ track, statuses }: { track: TrackDetail; statuses: Map<nu
   const isProgramming = trackIcon(track.slug) === 'code'
 
   if (stages.length === 0) {
-    return <EmptyState title="Ebben a sávban még nincs lecke">Hamarosan érkezik. Addig nézz körül a többi sávban.</EmptyState>
+    return <EmptyState title="Ebben a tanulási úton még nincs lecke">Hamarosan érkezik. Addig nézz körül a többi tanulási úton.</EmptyState>
   }
 
   return (
@@ -139,7 +154,7 @@ function TrackStages({ track, statuses }: { track: TrackDetail; statuses: Map<nu
             </p>
           )}
           <ButtonLink to={`/tanulasi-ut/${track.slug}`} variant="secondary" className="mt-4">
-            A sáv minden leckéje
+            Az út minden leckéje
           </ButtonLink>
         </Panel>
 

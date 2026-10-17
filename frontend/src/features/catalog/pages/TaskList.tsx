@@ -38,7 +38,7 @@ interface TaskGroup {
   tasks: TaskListItem[]
 }
 
-/** Képzési áganként csoportosít; amíg a katalógus szerkezete nem ismert, témakörönként. */
+/** Tanulási utanként csoportosít; amíg a katalógus szerkezete nem ismert, témakörönként. */
 function groupTasks(tasks: TaskListItem[], tree: CatalogTree | null): TaskGroup[] {
   const groups = new Map<string, TaskGroup>()
 
@@ -109,7 +109,7 @@ export function TaskList() {
   return (
     <main className="mx-auto w-full max-w-page flex-1 px-4 pt-8 pb-24 md:px-6">
       <PageTitle>Feladatok</PageTitle>
-      <Lead className="mt-3 max-w-prose text-18">Válassz egy témát, és kezdd el az első olyan feladattal, ami még nincs kész.</Lead>
+      <Lead className="mt-3 max-w-prose text-18">Az összes feladat egy helyen, a tananyag sorrendjében. Szűrhetsz szintre és arra, hogy mi van még hátra.</Lead>
 
       {lastTask && (
         <Panel kind="highlight" className="mt-8 flex flex-wrap items-center gap-x-8 gap-y-4" data-testid="continue-task">
@@ -126,7 +126,7 @@ export function TaskList() {
 
       <div className="mt-10 flex flex-col gap-3">
         {trackOptions.length > 2 && (
-          <FilterChips label="Téma" options={trackOptions} value={track} onChange={(value) => updateFilter('sav', value)} />
+          <FilterChips label="Tanulási út" options={trackOptions} value={track} onChange={(value) => updateFilter('sav', value)} />
         )}
         <div className="flex flex-wrap gap-x-10 gap-y-3">
           <FilterChips label="Szint" options={LEVELS} value={level} onChange={(value) => updateFilter('szint', value)} />

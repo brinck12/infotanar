@@ -16,7 +16,7 @@ export const catalogKeys = {
   taskLists: () => [...catalogKeys.all, 'tasks'] as const,
   tasks: (filter: TaskFilter) => [...catalogKeys.taskLists(), filter] as const,
   task: (id: number) => [...catalogKeys.all, 'task', id] as const,
-  /** A képzési ágak listája és egy-egy ág; a néző haladását is tartalmazzák. */
+  /** A tanulási utak listája és egy-egy út; a néző haladását is tartalmazzák. */
   tracks: () => [...catalogKeys.all, 'tracks'] as const,
   track: (slug: string) => [...catalogKeys.tracks(), slug] as const,
 }
@@ -27,7 +27,7 @@ export const tracksQuery = () =>
     queryFn: async ({ signal }) => (await http.get<Envelope<TrackSummary[]>>('/tracks', { signal })).data.data,
   })
 
-/** Egy képzési ág szerkezete: modulok, leckék (zárolás, haladás), feladatok. */
+/** Egy tanulási út szerkezete: modulok, leckék (zárolás, haladás), feladatok. */
 export const trackQuery = (slug: string) =>
   queryOptions({
     queryKey: catalogKeys.track(slug),

@@ -18,7 +18,7 @@ import { trackQuery } from '../../catalog/api'
 import { useLessonStatuses } from '../../progress/useLessonStatuses'
 import { NotFound } from '../../system/NotFound'
 
-/** Egy sáv áttekintése: modulonként a leckék és a hozzájuk tartozó gyakorlófeladatok. */
+/** Egy tanulási út áttekintése: modulonként a leckék és a hozzájuk tartozó gyakorlófeladatok. */
 export function TrackPage() {
   const { sav = '' } = useParams<{ sav: string }>()
   const { user } = useAuth()
@@ -26,7 +26,7 @@ export function TrackPage() {
   const statuses = useLessonStatuses()
   useDocumentMeta(track.data ? { title: track.data.title, description: track.data.description ?? undefined } : null)
 
-  if (track.isPending) return <PageLoader label="Sáv betöltése…" />
+  if (track.isPending) return <PageLoader label="Tanulási út betöltése…" />
   if (track.isError) {
     if (httpStatus(track.error) === 404) return <NotFound />
     return (
@@ -51,7 +51,7 @@ export function TrackPage() {
 
       <div className="mt-8 flex flex-wrap items-start gap-8">
         <div className="flex min-w-0 flex-1 basis-140 flex-col gap-6">
-          {modules.length === 0 && <EmptyState title="Ebben a sávban még nincs lecke">Hamarosan érkezik.</EmptyState>}
+          {modules.length === 0 && <EmptyState title="Ebben a tanulási úton még nincs lecke">Hamarosan érkezik.</EmptyState>}
           {modules.map((module) => (
             <ModuleSection key={module.id} module={module} statuses={statuses} />
           ))}

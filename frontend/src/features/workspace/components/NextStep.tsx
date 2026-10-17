@@ -62,7 +62,7 @@ export function NextStep({ task, lessonCompleted }: { task: UnlockedTaskDetail; 
         )
       }
     >
-      {step ? 'Minden teszten átment. Folytasd a következővel, amíg lendületben vagy.' : 'Ez volt a sáv utolsó leckéje.'}
+      {step ? 'Minden teszten átment. Folytasd a következővel, amíg lendületben vagy.' : 'Ez volt az út utolsó leckéje.'}
     </Banner>
   )
 }

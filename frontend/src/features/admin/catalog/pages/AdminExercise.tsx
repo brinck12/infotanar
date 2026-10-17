@@ -425,7 +425,7 @@ function ExerciseEditor({ lesson, exercise }: { lesson: AdminLesson; exercise: A
           <SavedNote mutation={save} />
         </div>
         <p className="text-14 leading-relaxed text-ink-soft">
-          Csak közzétett feladat jelenik meg a tanulóknak, és a leckének meg a képzési ágnak is közzétettnek kell lennie.
+          Csak közzétett feladat jelenik meg a tanulóknak, és a leckének meg a tanulási útnak is közzétettnek kell lennie.
         </p>
       </div>
     </AdminShell>

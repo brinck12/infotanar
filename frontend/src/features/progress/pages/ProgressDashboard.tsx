@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { daysUntilExam, tasksUntilExam } from '../../../shared/domain/exam'
 import { readLastTask, userKeyOf } from '../../../shared/domain/lastTask'
@@ -15,7 +16,7 @@ import { RecentSubmissions } from '../../submissions/components/RecentSubmission
 import { progressQuery } from '../api'
 import { TrackProgressCard } from '../components/TrackProgressCard'
 
-/** Haladásom (#28): visszaszámlálás, összesítés és képzési áganként a leckék állapota. */
+/** Haladásom (#28): visszaszámlálás, összesítés és tanulási utanként a leckék állapota. */
 export function ProgressDashboard() {
   const { user } = useAuth()
   const progress = useQuery(progressQuery())
@@ -44,6 +45,12 @@ export function ProgressDashboard() {
           </ButtonLink>
         )}
       </Panel>
+
+      <p className="mt-4">
+        <Link to="/feladatok?allapot=todo" className="text-16 font-semibold">
+          Még megoldatlan feladataim
+        </Link>
+      </p>
 
       {progress.isError ? (
         <div className="mt-8">
@@ -74,7 +81,7 @@ function Report({ report }: { report: ProgressReport }) {
 
       <Panel as="section" className="mt-6" aria-labelledby="savok-osszesites">
         <CardTitle as="h2" id="savok-osszesites">Hol tartasz a tanulási utakon?</CardTitle>
-        <p className="mt-1 text-15 leading-relaxed text-ink-soft">A teljesített leckék aránya sávonként.</p>
+        <p className="mt-1 text-15 leading-relaxed text-ink-soft">A teljesített leckék aránya tanulási utak szerint.</p>
         <ul className="mt-4 flex flex-col gap-4">
           {report.tracks.map((track) => (
             <li key={track.id}>
@@ -90,7 +97,7 @@ function Report({ report }: { report: ProgressReport }) {
         </ul>
       </Panel>
 
-      <h2 className="mt-12 font-serif text-28 leading-snug font-semibold tracking-tight">Leckék sávonként</h2>
+      <h2 className="mt-12 font-serif text-28 leading-snug font-semibold tracking-tight">Leckék tanulási utak szerint</h2>
       <ul className="mt-5 flex flex-col gap-4">
         {report.tracks.map((track, index) => (
           <TrackProgressCard key={track.id} track={track} defaultOpen={index === 0} />

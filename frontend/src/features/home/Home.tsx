@@ -50,7 +50,7 @@ const TRACKS: ReadonlyArray<{ icon: IconName; title: string; body: string; point
     title: 'Érettségi gyakorlás',
     body: 'Teljes közép- és emelt szintű feladatsorok a vizsga szerkezetében, hibalistával és ismétlési tervvel.',
     points: 'Teljes feladatsorok',
-    to: '/tanulasi-ut/erettsegi-gyakorlas',
+    to: '/vizsgak',
   },
 ]
 

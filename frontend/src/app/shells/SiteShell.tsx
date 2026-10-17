@@ -11,8 +11,7 @@ import { SiteFooter } from './SiteFooter'
 
 const NAV = [
   { to: '/tanulasi-ut', label: 'Tanulási út' },
-  { to: '/feladatok', label: 'Feladatok' },
-  { to: '/vizsgak', label: 'Gyakorló vizsgák' },
+  { to: '/vizsgak', label: 'Érettségi gyakorlás' },
   { to: '/szobeli', label: 'Szóbeli' },
   { to: '/haladas', label: 'Haladásom' },
   { to: '/arak', label: 'Árak' },

@@ -7,7 +7,7 @@ export interface LessonPlace {
   track: TrackDetail
   module: ModuleSummary
   lesson: LessonSummary
-  /** A lecke sorszáma a képzési ágon belül (1-től), a modulokon átívelve. */
+  /** A lecke sorszáma a tanulási úton belül (1-től), a modulokon átívelve. */
   position: number
   previous: LessonSummary | null
   next: LessonSummary | null

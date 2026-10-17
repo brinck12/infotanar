@@ -8,7 +8,7 @@ test.describe('Kezdőlap', () => {
     await homePage.goto()
 
     await expect(homePage.heading).toContainText('Az alapoktól az érettségi feladatsorig')
-    for (const name of ['Tanulási út', 'Feladatok', 'Gyakorló vizsgák', 'Szóbeli', 'Haladásom', 'Árak']) {
+    for (const name of ['Tanulási út', 'Érettségi gyakorlás', 'Szóbeli', 'Haladásom', 'Árak']) {
       await expect(homePage.navLink(name)).toBeVisible()
     }
     await expect(homePage.price).toBeVisible()
@@ -50,7 +50,7 @@ test.describe('Kezdőlap', () => {
 })
 
 test.describe('Tanulási út', () => {
-  test('a pontok megoszlása és a sáv szakaszai megjelennek', { tag: '@smoke' }, async ({ learningPathPage }) => {
+  test('a pontok megoszlása és a tanulási út szakaszai megjelennek', { tag: '@smoke' }, async ({ learningPathPage }) => {
     await learningPathPage.goto()
 
     await expect(learningPathPage.pointsBar).toHaveAccessibleName(/Középszint: .*Táblázatkezelés 25/)

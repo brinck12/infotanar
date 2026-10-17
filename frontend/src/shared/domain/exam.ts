@@ -32,7 +32,10 @@ export const EXAM_TOTAL: Readonly<Record<Level, { points: number; minutes: numbe
   emelt: { points: 120, minutes: 240 },
 }
 
-/** A hat tanulási út ikonja a képzési ág slugja alapján; ismeretlen ágnál könyv. */
+/** A tanulási út, amelynek leckéi a teljes feladatsorok; az „Érettségi gyakorlás” oldal mutatja őket. */
+export const PRACTICE_TRACK = 'erettsegi-gyakorlas'
+
+/** A hat tanulási út ikonja a tanulási út slugja alapján; ismeretlen útnál könyv. */
 export function trackIcon(slug: string): IconName {
   if (/prog|python|csharp|algo/.test(slug)) return 'code'
   if (/adatb|sql/.test(slug)) return 'db'

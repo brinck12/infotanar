@@ -40,7 +40,7 @@ function TrackEditor({ track }: { track: AdminTrack }) {
 
   return (
     <AdminShell crumbs={[{ label: 'Admin', to: '/admin' }, { label: 'Katalógus', to: '/admin/tananyag' }, { label: track.title }]} title={track.title}>
-      <Section title="Képzési ág adatai" aside={<SavedNote mutation={save} />}>
+      <Section title="A tanulási út adatai" aside={<SavedNote mutation={save} />}>
         <MutationError error={save.error} fields={['title', 'slug', 'description', 'is_published']} />
         <form onSubmit={submit} noValidate className="grid gap-5">
           <div className="grid gap-5 sm:grid-cols-2">
@@ -56,7 +56,7 @@ function TrackEditor({ track }: { track: AdminTrack }) {
           />
           <CheckboxField
             label="Közzétéve"
-            hint="Csak közzétett képzési ág jelenik meg a tanulóknak."
+            hint="Csak közzétett tanulási út jelenik meg a tanulóknak."
             checked={form.is_published}
             onChange={(e) => setForm({ ...form, is_published: e.target.checked })}
             error={errors.is_published}
@@ -69,17 +69,17 @@ function TrackEditor({ track }: { track: AdminTrack }) {
         </form>
       </Section>
 
-      <Section title="Modulok">
+      <Section title="Szakaszok">
         <MutationError error={modules.deleteChild.error ?? modules.reorderChildren.error} />
         <ChildList
-          noun="modul"
+          noun="szakasz"
           items={(track.modules ?? []).map((module) => ({
             id: module.id,
             title: module.title,
             to: `/admin/tananyag/modulok/${module.id}`,
             meta: <StatusPill tone="info">{module.lesson_count ?? 0} lecke</StatusPill>,
           }))}
-          emptyText="Ebben a képzési ágban még nincs modul."
+          emptyText="Ebben a tanulási úton még nincs szakasz."
           busy={modules.busy}
           onReorder={(ids) => modules.reorderChildren.mutate(ids)}
           onDelete={(moduleId) => modules.deleteChild.mutate(moduleId)}
@@ -87,8 +87,8 @@ function TrackEditor({ track }: { track: AdminTrack }) {
         <div className="mt-5 border-t border-grid pt-5">
           <MutationError error={modules.createChild.error} fields={['title', 'slug']} />
           <QuickCreate
-            titleLabel="Új modul címe"
-            submitLabel="Modul létrehozása"
+            titleLabel="Új szakasz címe"
+            submitLabel="Szakasz létrehozása"
             busy={modules.createChild.isPending}
             errors={createErrors}
             onCreate={(values) => modules.createChild.mutate({ ...values, track_id: track.id })}
