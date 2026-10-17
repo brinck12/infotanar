@@ -1,0 +1,5 @@
+csapat	varos	megoldott	buntetes
+Elso Egri	Eger	4	100
+Masik	Pecs	9	10
+Masodik Egri	Eger	4	100
+Gyenge	Eger	4	120

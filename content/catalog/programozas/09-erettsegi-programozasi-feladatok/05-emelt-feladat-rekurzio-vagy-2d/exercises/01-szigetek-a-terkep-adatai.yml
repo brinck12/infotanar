@@ -1,0 +1,160 @@
+slug: szigetek-a-terkep-adatai
+title: 'Szigetek: a térkép adatai'
+position: 0
+kind: code
+level: emelt
+difficulty: 1
+published: false
+allowed_languages:
+- python
+- csharp
+description: |
+  A `terkep.txt` fájl egy tenger térképét tartalmazza. Az első sorban két egész szám áll szóközzel elválasztva: a sorok száma (`n`) és az oszlopok száma (`m`). Ezután `n` sor következik, mindegyik pontosan `m` karakter: `#` a szárazföld, `.` a víz. Egy **sziget** a vízszintesen vagy függőlegesen (átlósan nem) szomszédos `#` mezők összefüggő csoportja. A sorokat és az oszlopokat a kimenetben 1-től számozd. Minden részfeladat kimenete a sorszámával kezdődik (`N. feladat`), a kimenetben ne használj ékezetes betűt. Ahol a feladat bevitelt kér, a kérdést külön sorban írd ki, csak utána olvass be.
+
+  Olvasd be a térképet, és írd ki a sorok és az oszlopok számát, valamint a szárazföldi (`#`) mezők darabszámát.
+
+  ```
+  Sorok: <n>
+  Oszlopok: <m>
+  Fold: <db>
+  ```
+
+  Kimenet a mellékelt mintafájllal:
+
+  ```
+  1. feladat
+  Sorok: 8
+  Oszlopok: 10
+  Fold: 24
+  ```
+
+  Tipp: A `#` karaktereket soronként is megszámolhatod, és az összegüket gyűjtheted egy változóban.
+starter_code:
+  python: |
+    with open("terkep.txt", encoding="utf-8") as f:
+        sorok = f.read().splitlines()
+    meret = sorok[0].split()
+    n = int(meret[0])
+    m = int(meret[1])
+    terkep = sorok[1:1 + n]
+    print("1. feladat")
+    # ide írd a megoldást
+  csharp: |
+    using System;
+    using System.Collections.Generic;
+    using System.IO;
+    using System.Linq;
+
+    class Program
+    {
+        static string[] terkep;
+        static int n;
+        static int m;
+
+        static void Main()
+        {
+            string[] sorok = File.ReadAllLines("terkep.txt");
+            string[] meret = sorok[0].Split(' ');
+            n = int.Parse(meret[0]);
+            m = int.Parse(meret[1]);
+            terkep = new string[n];
+            for (int i = 0; i < n; i++)
+            {
+                terkep[i] = sorok[i + 1];
+            }
+            Console.WriteLine("1. feladat");
+            // ide írd a megoldást
+        }
+    }
+sample_solutions:
+  python: |
+    with open("terkep.txt", encoding="utf-8") as f:
+        sorok = f.read().splitlines()
+    meret = sorok[0].split()
+    n = int(meret[0])
+    m = int(meret[1])
+    terkep = sorok[1:1 + n]
+    print("1. feladat")
+    fold = 0
+    for sor in terkep:
+        fold += sor.count("#")
+    print("Sorok:", n)
+    print("Oszlopok:", m)
+    print("Fold:", fold)
+  csharp: |
+    using System;
+    using System.Collections.Generic;
+    using System.IO;
+    using System.Linq;
+
+    class Program
+    {
+        static string[] terkep;
+        static int n;
+        static int m;
+
+        static void Main()
+        {
+            string[] sorok = File.ReadAllLines("terkep.txt");
+            string[] meret = sorok[0].Split(' ');
+            n = int.Parse(meret[0]);
+            m = int.Parse(meret[1]);
+            terkep = new string[n];
+            for (int i = 0; i < n; i++)
+            {
+                terkep[i] = sorok[i + 1];
+            }
+            Console.WriteLine("1. feladat");
+            int fold = 0;
+            foreach (string sor in terkep)
+            {
+                foreach (char c in sor)
+                {
+                    if (c == '#')
+                    {
+                        fold++;
+                    }
+                }
+            }
+            Console.WriteLine("Sorok: " + n);
+            Console.WriteLine("Oszlopok: " + m);
+            Console.WriteLine("Fold: " + fold);
+        }
+    }
+files:
+  terkep.txt: terkep.txt
+tests:
+- stdin: ''
+  expected: |
+    1. feladat
+    Sorok: 8
+    Oszlopok: 10
+    Fold: 24
+  hidden: false
+- stdin: ''
+  expected: |
+    1. feladat
+    Sorok: 3
+    Oszlopok: 5
+    Fold: 0
+  hidden: true
+  files:
+    terkep.txt: teszt-2/terkep.txt
+- stdin: ''
+  expected: |
+    1. feladat
+    Sorok: 4
+    Oszlopok: 4
+    Fold: 16
+  hidden: true
+  files:
+    terkep.txt: teszt-3/terkep.txt
+- stdin: ''
+  expected: |
+    1. feladat
+    Sorok: 1
+    Oszlopok: 7
+    Fold: 4
+  hidden: true
+  files:
+    terkep.txt: teszt-4/terkep.txt

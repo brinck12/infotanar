@@ -1,0 +1,177 @@
+slug: programozas-2-a-legnagyobb-keses
+title: Programozás 2 - A legnagyobb késés
+position: 9
+kind: code
+level: emelt
+difficulty: 2
+published: false
+allowed_languages:
+- python
+- csharp
+description: |
+  Az `indulasok.txt` a repülőtér egy havi (30 napos) forgalmát tartalmazza, soronként egy indulással, pontosvesszővel elválasztva: `járatszám;célállomás;távolság km;nap;indulás;utasok;késés`. A járatszám két betűből és négy számjegyből áll (pl. `MA1017`), a nap a hónap napja (1–30), az indulás `ÓÓ:PP` alakú, a késés percben értendő (0, ha pontosan indult). Az adatokban nincs ékezet, a fájl legalább egy sort tartalmaz, a sorok nincsenek sorrendben, és egy járat egy napon egy időpontban legfeljebb egyszer szerepel.
+
+  **2. feladat.** Keresse meg a legnagyobb késéssel induló járatot! Írja ki a késést, a járatszámot, a célállomást és a napot. Ha több azonos legnagyobb késés van, az **első** számít a fájlban.
+
+  A mintafájlra a kimenet:
+
+  ```text
+  2. feladat: A legnagyobb keses 89 perc, jarat: DA6336 (Roma), nap: 23.
+  ```
+
+  Tipp: maximumkiválasztás; csak szigorúan nagyobb érték cserélje le az eddigi legjobbat.
+starter_code:
+  python: |
+    class Indulas:
+        def __init__(self, sor):
+            r = sor.split(";")
+            self.jarat = r[0]
+            self.cel = r[1]
+            self.tav = int(r[2])
+            self.nap = int(r[3])
+            self.ido = r[4]
+            self.utas = int(r[5])
+            self.keses = int(r[6])
+
+
+    with open("indulasok.txt", encoding="utf-8") as f:
+        indulasok = [Indulas(sor) for sor in f.read().splitlines()]
+    # ide írd a megoldást
+  csharp: |
+    using System;
+    using System.Collections.Generic;
+    using System.IO;
+
+    class Indulas
+    {
+        public string Jarat;
+        public string Cel;
+        public int Tav;
+        public int Nap;
+        public string Ido;
+        public int Utas;
+        public int Keses;
+
+        public Indulas(string sor)
+        {
+            string[] r = sor.Split(';');
+            Jarat = r[0];
+            Cel = r[1];
+            Tav = int.Parse(r[2]);
+            Nap = int.Parse(r[3]);
+            Ido = r[4];
+            Utas = int.Parse(r[5]);
+            Keses = int.Parse(r[6]);
+        }
+    }
+
+    class Program
+    {
+        static void Main()
+        {
+            List<Indulas> indulasok = new List<Indulas>();
+            foreach (string sor in File.ReadAllLines("indulasok.txt"))
+            {
+                indulasok.Add(new Indulas(sor));
+            }
+            // ide írd a megoldást
+        }
+    }
+sample_solutions:
+  python: |
+    class Indulas:
+        def __init__(self, sor):
+            r = sor.split(";")
+            self.jarat = r[0]
+            self.cel = r[1]
+            self.tav = int(r[2])
+            self.nap = int(r[3])
+            self.ido = r[4]
+            self.utas = int(r[5])
+            self.keses = int(r[6])
+
+
+    with open("indulasok.txt", encoding="utf-8") as f:
+        indulasok = [Indulas(sor) for sor in f.read().splitlines()]
+    legjobb = indulasok[0]
+    for i in indulasok:
+        if i.keses > legjobb.keses:
+            legjobb = i
+    print("2. feladat: A legnagyobb keses " + str(legjobb.keses) + " perc, jarat: " + legjobb.jarat + " (" + legjobb.cel + "), nap: " + str(legjobb.nap) + ".")
+  csharp: |
+    using System;
+    using System.Collections.Generic;
+    using System.IO;
+
+    class Indulas
+    {
+        public string Jarat;
+        public string Cel;
+        public int Tav;
+        public int Nap;
+        public string Ido;
+        public int Utas;
+        public int Keses;
+
+        public Indulas(string sor)
+        {
+            string[] r = sor.Split(';');
+            Jarat = r[0];
+            Cel = r[1];
+            Tav = int.Parse(r[2]);
+            Nap = int.Parse(r[3]);
+            Ido = r[4];
+            Utas = int.Parse(r[5]);
+            Keses = int.Parse(r[6]);
+        }
+    }
+
+    class Program
+    {
+        static void Main()
+        {
+            List<Indulas> indulasok = new List<Indulas>();
+            foreach (string sor in File.ReadAllLines("indulasok.txt"))
+            {
+                indulasok.Add(new Indulas(sor));
+            }
+            Indulas legjobb = indulasok[0];
+            foreach (Indulas i in indulasok)
+            {
+                if (i.Keses > legjobb.Keses)
+                {
+                    legjobb = i;
+                }
+            }
+            Console.WriteLine("2. feladat: A legnagyobb keses " + legjobb.Keses + " perc, jarat: " + legjobb.Jarat + " (" + legjobb.Cel + "), nap: " + legjobb.Nap + ".");
+        }
+    }
+files:
+  indulasok.txt: indulasok.txt
+tests:
+- stdin: ''
+  expected: '2. feladat: A legnagyobb keses 89 perc, jarat: DA6336 (Roma), nap: 23.
+
+    '
+  hidden: false
+- stdin: ''
+  expected: '2. feladat: A legnagyobb keses 0 perc, jarat: TV4052 (Isztambul), nap: 21.
+
+    '
+  hidden: true
+  files:
+    indulasok.txt: teszt-2/indulasok.txt
+- stdin: ''
+  expected: '2. feladat: A legnagyobb keses 90 perc, jarat: TV6274 (Dubaj), nap: 14.
+
+    '
+  hidden: true
+  files:
+    indulasok.txt: teszt-3/indulasok.txt
+- stdin: ''
+  expected: '2. feladat: A legnagyobb keses 73 perc, jarat: TV5163 (Athen), nap: 16.
+
+    '
+  hidden: true
+  files:
+    indulasok.txt: teszt-4/indulasok.txt

@@ -1,0 +1,210 @@
+slug: programozoverseny-egy-varos-csapatai
+title: 'Programozóverseny: egy város csapatai'
+position: 2
+kind: code
+level: emelt
+difficulty: 3
+published: false
+allowed_languages:
+- python
+- csharp
+description: |
+  Egy iskolai programozóversenyen a csapatok eredményeit a `csapatok.txt` fájl tartalmazza. Az első sor fejléc (`csapat`, `varos`, `megoldott`, `buntetes`), utána minden sor egy csapat, tabulátorral tagolva: a csapat neve (ékezet nélkül, szóközt tartalmazhat), a város neve (ékezet nélkül, egyetlen szó), a megoldott feladatok száma és a büntetőpercek száma (mindkettő egész szám). Egy csapat egyszer szerepel. A fájl legalább egy csapatot tartalmaz.
+
+  A **rangsorban** az a csapat áll előbb, amelyik több feladatot oldott meg; azonos számú megoldás esetén a kevesebb büntetőperces; ha ez is azonos, a fájlban előbb szereplő. A programban egy csapatot rekordként (osztályként) érdemes tárolni. Minden részfeladat kimenete a sorszámával kezdődik (`N. feladat`), a kimenetben ne használj ékezetes betűt. Ahol a feladat bevitelt kér, a kérdést külön sorban írd ki, csak utána olvass be.
+
+  Kérj be egy városnevet. Add meg, hány csapat indult onnan, és melyik volt közülük a legjobb (több megoldott feladat; azonos szám esetén kevesebb büntetőperc; ha ez is azonos, a fájlban előbb szereplő). Ha a városból nem indult csapat, a kimenet a `Nincs ilyen varos.` sor.
+
+  ```
+  Csapatok szama: <db>
+  Legjobb csapat: <nev> (<megoldott> megoldott, <buntetes> perc)
+  ```
+
+  Kimenet a mellékelt mintafájllal és `Szeged` bemenettel:
+
+  ```
+  3. feladat
+  Add meg a varost:
+  Csapatok szama: 3
+  Legjobb csapat: Indexelok (8 megoldott, 220 perc)
+  ```
+
+  Tipp: szűrt maximumkiválasztás; az összehasonlítás két szempontú: előbb a megoldott, egyenlőségnél a büntetés számít. A "legjobb" kezdetben üres.
+starter_code:
+  python: |
+    class Csapat:
+        def __init__(self, nev, varos, megoldott, buntetes):
+            self.nev = nev
+            self.varos = varos
+            self.megoldott = megoldott
+            self.buntetes = buntetes
+    print("3. feladat")
+    with open("csapatok.txt", encoding="utf-8") as f:
+        sorok = f.read().splitlines()
+    csapatok = []
+    for sor in sorok[1:]:
+        r = sor.split("\t")
+        csapatok.append(Csapat(r[0], r[1], int(r[2]), int(r[3])))
+    # ide írd a megoldást
+  csharp: |
+    using System;
+    using System.Collections.Generic;
+    using System.Globalization;
+    using System.IO;
+    using System.Linq;
+
+    class Csapat
+    {
+        public string Nev;
+        public string Varos;
+        public int Megoldott;
+        public int Buntetes;
+    }
+
+    class Program
+    {
+        static void Main()
+        {
+            Console.WriteLine("3. feladat");
+            string[] sorok = File.ReadAllLines("csapatok.txt");
+            List<Csapat> csapatok = new List<Csapat>();
+            for (int i = 1; i < sorok.Length; i++)
+            {
+                string[] r = sorok[i].Split('\t');
+                Csapat c = new Csapat();
+                c.Nev = r[0];
+                c.Varos = r[1];
+                c.Megoldott = int.Parse(r[2]);
+                c.Buntetes = int.Parse(r[3]);
+                csapatok.Add(c);
+            }
+            // ide írd a megoldást
+        }
+    }
+sample_solutions:
+  python: |
+    class Csapat:
+        def __init__(self, nev, varos, megoldott, buntetes):
+            self.nev = nev
+            self.varos = varos
+            self.megoldott = megoldott
+            self.buntetes = buntetes
+    print("3. feladat")
+    with open("csapatok.txt", encoding="utf-8") as f:
+        sorok = f.read().splitlines()
+    csapatok = []
+    for sor in sorok[1:]:
+        r = sor.split("\t")
+        csapatok.append(Csapat(r[0], r[1], int(r[2]), int(r[3])))
+    print("Add meg a varost:")
+    varos = input()
+    db = 0
+    legjobb = None
+    for c in csapatok:
+        if c.varos == varos:
+            db += 1
+            if legjobb is None or c.megoldott > legjobb.megoldott or (c.megoldott == legjobb.megoldott and c.buntetes < legjobb.buntetes):
+                legjobb = c
+    if db == 0:
+        print("Nincs ilyen varos.")
+    else:
+        print(f"Csapatok szama: {db}")
+        print(f"Legjobb csapat: {legjobb.nev} ({legjobb.megoldott} megoldott, {legjobb.buntetes} perc)")
+  csharp: |
+    using System;
+    using System.Collections.Generic;
+    using System.Globalization;
+    using System.IO;
+    using System.Linq;
+
+    class Csapat
+    {
+        public string Nev;
+        public string Varos;
+        public int Megoldott;
+        public int Buntetes;
+    }
+
+    class Program
+    {
+        static void Main()
+        {
+            Console.WriteLine("3. feladat");
+            string[] sorok = File.ReadAllLines("csapatok.txt");
+            List<Csapat> csapatok = new List<Csapat>();
+            for (int i = 1; i < sorok.Length; i++)
+            {
+                string[] r = sorok[i].Split('\t');
+                Csapat c = new Csapat();
+                c.Nev = r[0];
+                c.Varos = r[1];
+                c.Megoldott = int.Parse(r[2]);
+                c.Buntetes = int.Parse(r[3]);
+                csapatok.Add(c);
+            }
+            Console.WriteLine("Add meg a varost:");
+            string varos = Console.ReadLine();
+            int db = 0;
+            Csapat legjobb = null;
+            foreach (Csapat c in csapatok)
+            {
+                if (c.Varos == varos)
+                {
+                    db++;
+                    if (legjobb == null || c.Megoldott > legjobb.Megoldott || (c.Megoldott == legjobb.Megoldott && c.Buntetes < legjobb.Buntetes))
+                    {
+                        legjobb = c;
+                    }
+                }
+            }
+            if (db == 0)
+            {
+                Console.WriteLine("Nincs ilyen varos.");
+            }
+            else
+            {
+                Console.WriteLine("Csapatok szama: " + db);
+                Console.WriteLine("Legjobb csapat: " + legjobb.Nev + " (" + legjobb.Megoldott + " megoldott, " + legjobb.Buntetes + " perc)");
+            }
+        }
+    }
+files:
+  csapatok.txt: csapatok.txt
+tests:
+- stdin: |
+    Szeged
+  expected: |
+    3. feladat
+    Add meg a varost:
+    Csapatok szama: 3
+    Legjobb csapat: Indexelok (8 megoldott, 220 perc)
+  hidden: false
+- stdin: |
+    Gyor
+  expected: |
+    3. feladat
+    Add meg a varost:
+    Csapatok szama: 2
+    Legjobb csapat: Esetleg (9 megoldott, 180 perc)
+  hidden: true
+  files:
+    csapatok.txt: teszt-2/csapatok.txt
+- stdin: |
+    Budapest
+  expected: |
+    3. feladat
+    Add meg a varost:
+    Nincs ilyen varos.
+  hidden: true
+  files:
+    csapatok.txt: teszt-3/csapatok.txt
+- stdin: |
+    Eger
+  expected: |
+    3. feladat
+    Add meg a varost:
+    Csapatok szama: 3
+    Legjobb csapat: Elso Egri (4 megoldott, 100 perc)
+  hidden: true
+  files:
+    csapatok.txt: teszt-4/csapatok.txt

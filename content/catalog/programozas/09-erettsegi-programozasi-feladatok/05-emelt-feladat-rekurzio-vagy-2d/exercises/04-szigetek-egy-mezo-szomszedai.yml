@@ -1,0 +1,219 @@
+slug: szigetek-egy-mezo-szomszedai
+title: 'Szigetek: egy mező szomszédai'
+position: 3
+kind: code
+level: emelt
+difficulty: 3
+published: false
+allowed_languages:
+- python
+- csharp
+description: |
+  A `terkep.txt` fájl egy tenger térképét tartalmazza. Az első sorban két egész szám áll szóközzel elválasztva: a sorok száma (`n`) és az oszlopok száma (`m`). Ezután `n` sor következik, mindegyik pontosan `m` karakter: `#` a szárazföld, `.` a víz. Egy **sziget** a vízszintesen vagy függőlegesen (átlósan nem) szomszédos `#` mezők összefüggő csoportja. A sorokat és az oszlopokat a kimenetben 1-től számozd. Minden részfeladat kimenete a sorszámával kezdődik (`N. feladat`), a kimenetben ne használj ékezetes betűt. Ahol a feladat bevitelt kér, a kérdést külön sorban írd ki, csak utána olvass be.
+
+  A program kérjen be egy sor- és egy oszlopszámot (`Add meg a sort es az oszlopot:` felirattal, egy sorban, szóközzel elválasztva, 1-től számozva). Írja ki, hogy az a mező szárazföld vagy víz, és hány szárazföldi szomszédja van (fent, lent, balra, jobbra; a térképen kívüli mező nem számít). Ha a mező kívül esik a térképen, csak a `Terkepen kivul.` sort írd ki.
+
+  ```
+  Mezo: fold
+  Szomszedos fold: <db>
+  ```
+  (A `Mezo:` után `fold` vagy `viz` áll.)
+
+  Bemenet a mintaadatokhoz (amit a felhasználó begépel):
+
+  ```
+  2 3
+  ```
+
+  Kimenet a mellékelt mintafájllal:
+
+  ```
+  4. feladat
+  Add meg a sort es az oszlopot:
+  Mezo: fold
+  Szomszedos fold: 3
+  ```
+
+  Tipp: A négy irányt egy kis tömbbel is bejárhatod: `(-1, 0), (1, 0), (0, -1), (0, 1)`. Minden szomszédnál előbb a határokat ellenőrizd, és csak utána olvasd ki a mezőt.
+starter_code:
+  python: |
+    with open("terkep.txt", encoding="utf-8") as f:
+        sorok = f.read().splitlines()
+    meret = sorok[0].split()
+    n = int(meret[0])
+    m = int(meret[1])
+    terkep = sorok[1:1 + n]
+    print("4. feladat")
+    # ide írd a megoldást
+  csharp: |
+    using System;
+    using System.Collections.Generic;
+    using System.IO;
+    using System.Linq;
+
+    class Program
+    {
+        static string[] terkep;
+        static int n;
+        static int m;
+
+        static void Main()
+        {
+            string[] sorok = File.ReadAllLines("terkep.txt");
+            string[] meret = sorok[0].Split(' ');
+            n = int.Parse(meret[0]);
+            m = int.Parse(meret[1]);
+            terkep = new string[n];
+            for (int i = 0; i < n; i++)
+            {
+                terkep[i] = sorok[i + 1];
+            }
+            Console.WriteLine("4. feladat");
+            // ide írd a megoldást
+        }
+    }
+sample_solutions:
+  python: |
+    with open("terkep.txt", encoding="utf-8") as f:
+        sorok = f.read().splitlines()
+    meret = sorok[0].split()
+    n = int(meret[0])
+    m = int(meret[1])
+    terkep = sorok[1:1 + n]
+    print("4. feladat")
+    print("Add meg a sort es az oszlopot:")
+    adat = input().split()
+    s = int(adat[0])
+    o = int(adat[1])
+    if s < 1 or s > n or o < 1 or o > m:
+        print("Terkepen kivul.")
+    else:
+        i = s - 1
+        j = o - 1
+        if terkep[i][j] == "#":
+            print("Mezo: fold")
+        else:
+            print("Mezo: viz")
+        szomszed = 0
+        for di, dj in ((-1, 0), (1, 0), (0, -1), (0, 1)):
+            a = i + di
+            b = j + dj
+            if 0 <= a < n and 0 <= b < m and terkep[a][b] == "#":
+                szomszed += 1
+        print("Szomszedos fold:", szomszed)
+  csharp: |
+    using System;
+    using System.Collections.Generic;
+    using System.IO;
+    using System.Linq;
+
+    class Program
+    {
+        static string[] terkep;
+        static int n;
+        static int m;
+
+        static void Main()
+        {
+            string[] sorok = File.ReadAllLines("terkep.txt");
+            string[] meret = sorok[0].Split(' ');
+            n = int.Parse(meret[0]);
+            m = int.Parse(meret[1]);
+            terkep = new string[n];
+            for (int i = 0; i < n; i++)
+            {
+                terkep[i] = sorok[i + 1];
+            }
+            Console.WriteLine("4. feladat");
+            Console.WriteLine("Add meg a sort es az oszlopot:");
+            string[] adat = Console.ReadLine().Split(' ');
+            int s = int.Parse(adat[0]);
+            int o = int.Parse(adat[1]);
+            if (s < 1 || s > n || o < 1 || o > m)
+            {
+                Console.WriteLine("Terkepen kivul.");
+            }
+            else
+            {
+                int i = s - 1;
+                int j = o - 1;
+                if (terkep[i][j] == '#')
+                {
+                    Console.WriteLine("Mezo: fold");
+                }
+                else
+                {
+                    Console.WriteLine("Mezo: viz");
+                }
+                int[] di = { -1, 1, 0, 0 };
+                int[] dj = { 0, 0, -1, 1 };
+                int szomszed = 0;
+                for (int k = 0; k < 4; k++)
+                {
+                    int a = i + di[k];
+                    int b = j + dj[k];
+                    if (a >= 0 && a < n && b >= 0 && b < m && terkep[a][b] == '#')
+                    {
+                        szomszed++;
+                    }
+                }
+                Console.WriteLine("Szomszedos fold: " + szomszed);
+            }
+        }
+    }
+files:
+  terkep.txt: terkep.txt
+tests:
+- stdin: |
+    2 3
+  expected: |
+    4. feladat
+    Add meg a sort es az oszlopot:
+    Mezo: fold
+    Szomszedos fold: 3
+  hidden: false
+- stdin: |
+    2 2
+  expected: |
+    4. feladat
+    Add meg a sort es az oszlopot:
+    Mezo: viz
+    Szomszedos fold: 0
+  hidden: true
+  files:
+    terkep.txt: teszt-2/terkep.txt
+- stdin: |
+    1 1
+  expected: |
+    4. feladat
+    Add meg a sort es az oszlopot:
+    Mezo: fold
+    Szomszedos fold: 2
+  hidden: true
+  files:
+    terkep.txt: teszt-3/terkep.txt
+- stdin: |
+    2 1
+  expected: |
+    4. feladat
+    Add meg a sort es az oszlopot:
+    Terkepen kivul.
+  hidden: true
+  files:
+    terkep.txt: teszt-4/terkep.txt
+- stdin: |
+    6 5
+  expected: |
+    4. feladat
+    Add meg a sort es az oszlopot:
+    Mezo: fold
+    Szomszedos fold: 1
+  hidden: true
+- stdin: |
+    8 10
+  expected: |
+    4. feladat
+    Add meg a sort es az oszlopot:
+    Mezo: viz
+    Szomszedos fold: 0
+  hidden: true

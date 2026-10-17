@@ -1,0 +1,170 @@
+slug: szigetek-ures-es-teli-oszlopok
+title: 'Szigetek: üres és teli oszlopok'
+position: 2
+kind: code
+level: emelt
+difficulty: 3
+published: false
+allowed_languages:
+- python
+- csharp
+description: |
+  A `terkep.txt` fájl egy tenger térképét tartalmazza. Az első sorban két egész szám áll szóközzel elválasztva: a sorok száma (`n`) és az oszlopok száma (`m`). Ezután `n` sor következik, mindegyik pontosan `m` karakter: `#` a szárazföld, `.` a víz. Egy **sziget** a vízszintesen vagy függőlegesen (átlósan nem) szomszédos `#` mezők összefüggő csoportja. A sorokat és az oszlopokat a kimenetben 1-től számozd. Minden részfeladat kimenete a sorszámával kezdődik (`N. feladat`), a kimenetben ne használj ékezetes betűt. Ahol a feladat bevitelt kér, a kérdést külön sorban írd ki, csak utána olvass be.
+
+  Számold meg, hány oszlopban nincs egyetlen szárazföldi mező sem (üres oszlop), és hány oszlop csupa szárazföld (teli oszlop).
+
+  ```
+  Ures oszlopok: <db>
+  Teli oszlopok: <db>
+  ```
+
+  Kimenet a mellékelt mintafájllal:
+
+  ```
+  3. feladat
+  Ures oszlopok: 1
+  Teli oszlopok: 0
+  ```
+
+  Tipp: Az oszlopot a külső ciklus járja végig, a sorokat a belső: így egy oszlop földmezőit tudod megszámolni, és összevetheted `0`-val, illetve a sorok számával.
+starter_code:
+  python: |
+    with open("terkep.txt", encoding="utf-8") as f:
+        sorok = f.read().splitlines()
+    meret = sorok[0].split()
+    n = int(meret[0])
+    m = int(meret[1])
+    terkep = sorok[1:1 + n]
+    print("3. feladat")
+    # ide írd a megoldást
+  csharp: |
+    using System;
+    using System.Collections.Generic;
+    using System.IO;
+    using System.Linq;
+
+    class Program
+    {
+        static string[] terkep;
+        static int n;
+        static int m;
+
+        static void Main()
+        {
+            string[] sorok = File.ReadAllLines("terkep.txt");
+            string[] meret = sorok[0].Split(' ');
+            n = int.Parse(meret[0]);
+            m = int.Parse(meret[1]);
+            terkep = new string[n];
+            for (int i = 0; i < n; i++)
+            {
+                terkep[i] = sorok[i + 1];
+            }
+            Console.WriteLine("3. feladat");
+            // ide írd a megoldást
+        }
+    }
+sample_solutions:
+  python: |
+    with open("terkep.txt", encoding="utf-8") as f:
+        sorok = f.read().splitlines()
+    meret = sorok[0].split()
+    n = int(meret[0])
+    m = int(meret[1])
+    terkep = sorok[1:1 + n]
+    print("3. feladat")
+    ures = 0
+    teli = 0
+    for j in range(m):
+        db = 0
+        for i in range(n):
+            if terkep[i][j] == "#":
+                db += 1
+        if db == 0:
+            ures += 1
+        if db == n:
+            teli += 1
+    print("Ures oszlopok:", ures)
+    print("Teli oszlopok:", teli)
+  csharp: |
+    using System;
+    using System.Collections.Generic;
+    using System.IO;
+    using System.Linq;
+
+    class Program
+    {
+        static string[] terkep;
+        static int n;
+        static int m;
+
+        static void Main()
+        {
+            string[] sorok = File.ReadAllLines("terkep.txt");
+            string[] meret = sorok[0].Split(' ');
+            n = int.Parse(meret[0]);
+            m = int.Parse(meret[1]);
+            terkep = new string[n];
+            for (int i = 0; i < n; i++)
+            {
+                terkep[i] = sorok[i + 1];
+            }
+            Console.WriteLine("3. feladat");
+            int ures = 0;
+            int teli = 0;
+            for (int j = 0; j < m; j++)
+            {
+                int db = 0;
+                for (int i = 0; i < n; i++)
+                {
+                    if (terkep[i][j] == '#')
+                    {
+                        db++;
+                    }
+                }
+                if (db == 0)
+                {
+                    ures++;
+                }
+                if (db == n)
+                {
+                    teli++;
+                }
+            }
+            Console.WriteLine("Ures oszlopok: " + ures);
+            Console.WriteLine("Teli oszlopok: " + teli);
+        }
+    }
+files:
+  terkep.txt: terkep.txt
+tests:
+- stdin: ''
+  expected: |
+    3. feladat
+    Ures oszlopok: 1
+    Teli oszlopok: 0
+  hidden: false
+- stdin: ''
+  expected: |
+    3. feladat
+    Ures oszlopok: 5
+    Teli oszlopok: 0
+  hidden: true
+  files:
+    terkep.txt: teszt-2/terkep.txt
+- stdin: ''
+  expected: |
+    3. feladat
+    Ures oszlopok: 0
+    Teli oszlopok: 4
+  hidden: true
+  files:
+    terkep.txt: teszt-3/terkep.txt
+- stdin: ''
+  expected: |
+    3. feladat
+    Ures oszlopok: 3
+    Teli oszlopok: 4
+  hidden: true
+  files:
+    terkep.txt: teszt-4/terkep.txt

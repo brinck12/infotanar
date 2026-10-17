@@ -1,0 +1,242 @@
+slug: programozas-4-egy-jarat-indulasai
+title: Programozás 4 - Egy járat indulásai
+position: 11
+kind: code
+level: emelt
+difficulty: 3
+published: false
+allowed_languages:
+- python
+- csharp
+description: |
+  Az `indulasok.txt` a repülőtér egy havi (30 napos) forgalmát tartalmazza, soronként egy indulással, pontosvesszővel elválasztva: `járatszám;célállomás;távolság km;nap;indulás;utasok;késés`. A járatszám két betűből és négy számjegyből áll (pl. `MA1017`), a nap a hónap napja (1–30), az indulás `ÓÓ:PP` alakú, a késés percben értendő (0, ha pontosan indult). Az adatokban nincs ékezet, a fájl legalább egy sort tartalmaz, a sorok nincsenek sorrendben, és egy járat egy napon egy időpontban legfeljebb egyszer szerepel.
+
+  **4. feladat.** Kérjen be egy járatszámot! Ha a járat indult a hónapban, írja ki a `4. feladat:` sort, alá az indulásait **időrendben** (nap, majd indulási idő szerint) `nap indulás utasok késés` alakban, soronként egyet. Ha nincs ilyen járat, a kimenet egyetlen sor: `4. feladat: Nincs ilyen jarat!`
+
+  Minta (a billentyűzetről beolvasott sor):
+
+  ```text
+  MA3104
+  ```
+
+  A mintafájlra a kimenet:
+
+  ```text
+  4. feladat:
+  7 06:15 155 47
+  9 07:40 87 14
+  20 09:05 72 50
+  23 13:20 102 0
+  25 20:25 167 65
+  ```
+
+  Tipp: válogasd ki a járat indulásait egy listába, majd rendezd nap és indulási idő szerint (az `ÓÓ:PP` szöveg ábécérendje megegyezik az időrenddel).
+starter_code:
+  python: |
+    class Indulas:
+        def __init__(self, sor):
+            r = sor.split(";")
+            self.jarat = r[0]
+            self.cel = r[1]
+            self.tav = int(r[2])
+            self.nap = int(r[3])
+            self.ido = r[4]
+            self.utas = int(r[5])
+            self.keses = int(r[6])
+
+
+    with open("indulasok.txt", encoding="utf-8") as f:
+        indulasok = [Indulas(sor) for sor in f.read().splitlines()]
+    # ide írd a megoldást
+  csharp: |
+    using System;
+    using System.Collections.Generic;
+    using System.IO;
+
+    class Indulas
+    {
+        public string Jarat;
+        public string Cel;
+        public int Tav;
+        public int Nap;
+        public string Ido;
+        public int Utas;
+        public int Keses;
+
+        public Indulas(string sor)
+        {
+            string[] r = sor.Split(';');
+            Jarat = r[0];
+            Cel = r[1];
+            Tav = int.Parse(r[2]);
+            Nap = int.Parse(r[3]);
+            Ido = r[4];
+            Utas = int.Parse(r[5]);
+            Keses = int.Parse(r[6]);
+        }
+    }
+
+    class Program
+    {
+        static void Main()
+        {
+            List<Indulas> indulasok = new List<Indulas>();
+            foreach (string sor in File.ReadAllLines("indulasok.txt"))
+            {
+                indulasok.Add(new Indulas(sor));
+            }
+            // ide írd a megoldást
+        }
+    }
+sample_solutions:
+  python: |
+    class Indulas:
+        def __init__(self, sor):
+            r = sor.split(";")
+            self.jarat = r[0]
+            self.cel = r[1]
+            self.tav = int(r[2])
+            self.nap = int(r[3])
+            self.ido = r[4]
+            self.utas = int(r[5])
+            self.keses = int(r[6])
+
+
+    with open("indulasok.txt", encoding="utf-8") as f:
+        indulasok = [Indulas(sor) for sor in f.read().splitlines()]
+    kod = input().strip()
+    talalatok = [i for i in indulasok if i.jarat == kod]
+    talalatok.sort(key=lambda i: (i.nap, i.ido))
+    if len(talalatok) == 0:
+        print("4. feladat: Nincs ilyen jarat!")
+    else:
+        print("4. feladat:")
+        for i in talalatok:
+            print(i.nap, i.ido, i.utas, i.keses)
+  csharp: |
+    using System;
+    using System.Collections.Generic;
+    using System.IO;
+
+    class Indulas
+    {
+        public string Jarat;
+        public string Cel;
+        public int Tav;
+        public int Nap;
+        public string Ido;
+        public int Utas;
+        public int Keses;
+
+        public Indulas(string sor)
+        {
+            string[] r = sor.Split(';');
+            Jarat = r[0];
+            Cel = r[1];
+            Tav = int.Parse(r[2]);
+            Nap = int.Parse(r[3]);
+            Ido = r[4];
+            Utas = int.Parse(r[5]);
+            Keses = int.Parse(r[6]);
+        }
+    }
+
+    class Program
+    {
+        static void Main()
+        {
+            List<Indulas> indulasok = new List<Indulas>();
+            foreach (string sor in File.ReadAllLines("indulasok.txt"))
+            {
+                indulasok.Add(new Indulas(sor));
+            }
+            string kod = Console.ReadLine().Trim();
+            List<Indulas> talalatok = new List<Indulas>();
+            foreach (Indulas i in indulasok)
+            {
+                if (i.Jarat == kod)
+                {
+                    talalatok.Add(i);
+                }
+            }
+            talalatok.Sort((a, b) =>
+            {
+                if (a.Nap != b.Nap)
+                {
+                    return a.Nap.CompareTo(b.Nap);
+                }
+                return string.CompareOrdinal(a.Ido, b.Ido);
+            });
+            if (talalatok.Count == 0)
+            {
+                Console.WriteLine("4. feladat: Nincs ilyen jarat!");
+            }
+            else
+            {
+                Console.WriteLine("4. feladat:");
+                foreach (Indulas i in talalatok)
+                {
+                    Console.WriteLine(i.Nap + " " + i.Ido + " " + i.Utas + " " + i.Keses);
+                }
+            }
+        }
+    }
+files:
+  indulasok.txt: indulasok.txt
+tests:
+- stdin: 'MA3104
+
+    '
+  expected: '4. feladat:
+
+    7 06:15 155 47
+
+    9 07:40 87 14
+
+    20 09:05 72 50
+
+    23 13:20 102 0
+
+    25 20:25 167 65
+
+    '
+  hidden: false
+- stdin: 'TV4052
+
+    '
+  expected: '4. feladat:
+
+    21 16:10 80 0
+
+    '
+  hidden: true
+  files:
+    indulasok.txt: teszt-2/indulasok.txt
+- stdin: 'MA3104
+
+    '
+  expected: '4. feladat:
+
+    2 16:10 37 28
+
+    3 11:55 171 0
+
+    3 14:45 97 0
+
+    13 21:50 72 0
+
+    25 19:00 51 0
+
+    '
+  hidden: true
+  files:
+    indulasok.txt: teszt-3/indulasok.txt
+- stdin: 'ZZ0000
+
+    '
+  expected: '4. feladat: Nincs ilyen jarat!
+
+    '
+  hidden: true
+  files:
+    indulasok.txt: teszt-4/indulasok.txt

@@ -1,0 +1,5 @@
+csapat	varos	megoldott	buntetes
+A	Pecs	2	1
+B	Eger	1	1
+C	Eger	1	1
+D	Bekes	2	1

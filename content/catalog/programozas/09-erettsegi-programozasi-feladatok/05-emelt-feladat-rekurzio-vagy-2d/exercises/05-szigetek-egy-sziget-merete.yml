@@ -1,0 +1,217 @@
+slug: szigetek-egy-sziget-merete
+title: 'Szigetek: egy sziget mérete'
+position: 4
+kind: code
+level: emelt
+difficulty: 4
+published: false
+allowed_languages:
+- python
+- csharp
+description: |
+  A `terkep.txt` fájl egy tenger térképét tartalmazza. Az első sorban két egész szám áll szóközzel elválasztva: a sorok száma (`n`) és az oszlopok száma (`m`). Ezután `n` sor következik, mindegyik pontosan `m` karakter: `#` a szárazföld, `.` a víz. Egy **sziget** a vízszintesen vagy függőlegesen (átlósan nem) szomszédos `#` mezők összefüggő csoportja. A sorokat és az oszlopokat a kimenetben 1-től számozd. Minden részfeladat kimenete a sorszámával kezdődik (`N. feladat`), a kimenetben ne használj ékezetes betűt. Ahol a feladat bevitelt kér, a kérdést külön sorban írd ki, csak utána olvass be.
+
+  A program kérjen be egy sor- és egy oszlopszámot (`Add meg a sort es az oszlopot:` felirattal, egy sorban, szóközzel elválasztva, 1-től számozva). Írja ki, hány mezőből áll az a sziget, amelyhez a megadott mező tartozik. Ha a mező víz, a kimenet `Viz.`, ha kívül esik a térképen, `Terkepen kivul.`.
+
+  A sziget méretét **rekurzív függvénnyel** számold: egy szárazföldi mezőhöz tartozó sziget mérete 1 plusz a négy szomszédja felől számolt új mezők száma. Jegyezd meg a már bejárt mezőket, különben a rekurzió végtelen ciklusba fut.
+
+  ```
+  Sziget merete: <db>
+  ```
+
+  Bemenet a mintaadatokhoz (amit a felhasználó begépel):
+
+  ```
+  2 3
+  ```
+
+  Kimenet a mellékelt mintafájllal:
+
+  ```
+  5. feladat
+  Add meg a sort es az oszlopot:
+  Sziget merete: 5
+  ```
+
+  Tipp: A függvény alapesetei: a mező a térképen kívül van, víz, vagy már bejártad. Egyébként jelöld meg bejártnak, és add össze a négy szomszéd hívásának eredményét.
+starter_code:
+  python: |
+    with open("terkep.txt", encoding="utf-8") as f:
+        sorok = f.read().splitlines()
+    meret = sorok[0].split()
+    n = int(meret[0])
+    m = int(meret[1])
+    terkep = sorok[1:1 + n]
+    print("5. feladat")
+    # ide írd a megoldást
+  csharp: |
+    using System;
+    using System.Collections.Generic;
+    using System.IO;
+    using System.Linq;
+
+    class Program
+    {
+        static string[] terkep;
+        static int n;
+        static int m;
+
+        static void Main()
+        {
+            string[] sorok = File.ReadAllLines("terkep.txt");
+            string[] meret = sorok[0].Split(' ');
+            n = int.Parse(meret[0]);
+            m = int.Parse(meret[1]);
+            terkep = new string[n];
+            for (int i = 0; i < n; i++)
+            {
+                terkep[i] = sorok[i + 1];
+            }
+            Console.WriteLine("5. feladat");
+            // ide írd a megoldást
+        }
+    }
+sample_solutions:
+  python: |
+    with open("terkep.txt", encoding="utf-8") as f:
+        sorok = f.read().splitlines()
+    meret = sorok[0].split()
+    n = int(meret[0])
+    m = int(meret[1])
+    terkep = sorok[1:1 + n]
+    def sziget_meret(i, j, latott):
+        if i < 0 or i >= n or j < 0 or j >= m:
+            return 0
+        if terkep[i][j] != "#" or latott[i][j]:
+            return 0
+        latott[i][j] = True
+        return (1 + sziget_meret(i - 1, j, latott) + sziget_meret(i + 1, j, latott)
+                + sziget_meret(i, j - 1, latott) + sziget_meret(i, j + 1, latott))
+    print("5. feladat")
+    print("Add meg a sort es az oszlopot:")
+    adat = input().split()
+    s = int(adat[0])
+    o = int(adat[1])
+    if s < 1 or s > n or o < 1 or o > m:
+        print("Terkepen kivul.")
+    elif terkep[s - 1][o - 1] != "#":
+        print("Viz.")
+    else:
+        latott = [[False] * m for _ in range(n)]
+        print("Sziget merete:", sziget_meret(s - 1, o - 1, latott))
+  csharp: |
+    using System;
+    using System.Collections.Generic;
+    using System.IO;
+    using System.Linq;
+
+    class Program
+    {
+        static string[] terkep;
+        static int n;
+        static int m;
+
+        static int SzigetMeret(int i, int j, bool[,] latott)
+        {
+            if (i < 0 || i >= n || j < 0 || j >= m)
+            {
+                return 0;
+            }
+            if (terkep[i][j] != '#' || latott[i, j])
+            {
+                return 0;
+            }
+            latott[i, j] = true;
+            return 1 + SzigetMeret(i - 1, j, latott) + SzigetMeret(i + 1, j, latott)
+                + SzigetMeret(i, j - 1, latott) + SzigetMeret(i, j + 1, latott);
+        }
+
+        static void Main()
+        {
+            string[] sorok = File.ReadAllLines("terkep.txt");
+            string[] meret = sorok[0].Split(' ');
+            n = int.Parse(meret[0]);
+            m = int.Parse(meret[1]);
+            terkep = new string[n];
+            for (int i = 0; i < n; i++)
+            {
+                terkep[i] = sorok[i + 1];
+            }
+            Console.WriteLine("5. feladat");
+            Console.WriteLine("Add meg a sort es az oszlopot:");
+            string[] adat = Console.ReadLine().Split(' ');
+            int s = int.Parse(adat[0]);
+            int o = int.Parse(adat[1]);
+            if (s < 1 || s > n || o < 1 || o > m)
+            {
+                Console.WriteLine("Terkepen kivul.");
+            }
+            else if (terkep[s - 1][o - 1] != '#')
+            {
+                Console.WriteLine("Viz.");
+            }
+            else
+            {
+                bool[,] latott = new bool[n, m];
+                Console.WriteLine("Sziget merete: " + SzigetMeret(s - 1, o - 1, latott));
+            }
+        }
+    }
+files:
+  terkep.txt: terkep.txt
+tests:
+- stdin: |
+    2 3
+  expected: |
+    5. feladat
+    Add meg a sort es az oszlopot:
+    Sziget merete: 5
+  hidden: false
+- stdin: |
+    2 2
+  expected: |
+    5. feladat
+    Add meg a sort es az oszlopot:
+    Viz.
+  hidden: true
+  files:
+    terkep.txt: teszt-2/terkep.txt
+- stdin: |
+    4 4
+  expected: |
+    5. feladat
+    Add meg a sort es az oszlopot:
+    Sziget merete: 16
+  hidden: true
+  files:
+    terkep.txt: teszt-3/terkep.txt
+- stdin: |
+    1 3
+  expected: |
+    5. feladat
+    Add meg a sort es az oszlopot:
+    Sziget merete: 2
+  hidden: true
+  files:
+    terkep.txt: teszt-4/terkep.txt
+- stdin: |
+    9 1
+  expected: |
+    5. feladat
+    Add meg a sort es az oszlopot:
+    Terkepen kivul.
+  hidden: true
+- stdin: |
+    3 5
+  expected: |
+    5. feladat
+    Add meg a sort es az oszlopot:
+    Sziget merete: 2
+  hidden: true
+- stdin: |
+    6 8
+  expected: |
+    5. feladat
+    Add meg a sort es az oszlopot:
+    Sziget merete: 5
+  hidden: true

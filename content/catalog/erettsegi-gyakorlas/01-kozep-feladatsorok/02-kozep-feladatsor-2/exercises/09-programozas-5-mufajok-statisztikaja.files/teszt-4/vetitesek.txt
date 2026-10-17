@@ -1,0 +1,8 @@
+Az utolso vonat;akcio;118;21:15;30;2500
+A kis robot;animacio;84;17:45;47;1800
+Nyari szel;vigjatek;96;21:15;109;1800
+Nyari szel;vigjatek;96;10:00;119;1800
+Hold a tenger folott;drama;131;10:00;88;2200
+Tavoli partok;drama;142;20:00;12;1800
+Szellemvaros;scifi;124;17:45;46;2500
+Nyari szel;vigjatek;96;20:00;43;2200

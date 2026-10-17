@@ -1,0 +1,25 @@
+Csillagkapu;scifi;137;20:00;94;2500
+A kis robot;animacio;84;20:00;14;2500
+Hold a tenger folott;drama;131;20:00;53;2200
+Tavoli partok;drama;142;21:15;91;1800
+Csillagkapu;scifi;137;10:00;21;1800
+Az utolso vonat;akcio;118;10:00;33;1800
+Nyari szel;vigjatek;96;18:30;71;2200
+Nyari szel;vigjatek;96;20:00;57;2500
+Az ejszaka kiralya;akcio;109;12:30;105;2500
+A kis robot;animacio;84;10:00;52;1800
+A kis robot;animacio;84;20:00;84;2500
+Csillagkapu;scifi;137;21:15;37;2500
+Szellemvaros;scifi;124;12:30;101;2500
+Csillagkapu;scifi;137;18:30;29;2500
+Szellemvaros;scifi;124;10:00;66;1800
+Nyari szel;vigjatek;96;17:45;70;2200
+Hold a tenger folott;drama;131;17:45;49;1800
+Hold a tenger folott;drama;131;15:15;67;2500
+Hold a tenger folott;drama;131;18:30;103;1800
+Az ejszaka kiralya;akcio;109;15:15;7;2500
+Csillagkapu;scifi;137;18:30;84;2200
+Az ejszaka kiralya;akcio;109;21:15;98;2200
+Szellemvaros;scifi;124;20:00;118;1800
+Nyari szel;vigjatek;96;17:45;104;1800
+Tavoli partok;drama;142;20:00;42;1800

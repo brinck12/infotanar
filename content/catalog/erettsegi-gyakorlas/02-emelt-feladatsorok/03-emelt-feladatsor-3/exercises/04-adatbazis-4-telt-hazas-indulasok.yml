@@ -1,0 +1,377 @@
+slug: adatbazis-4-telt-hazas-indulasok
+title: Adatbázis 4 - Telt házas indulások
+position: 3
+kind: sql
+level: emelt
+difficulty: 3
+published: false
+allowed_languages:
+- sql
+sql_order_sensitive: true
+description: |
+  Az adatbázis négy táblából áll.
+
+  A `legitarsasag` tábla:
+
+  | oszlop | típus |
+  |---|---|
+  | `id` | egész, elsődleges kulcs |
+  | `nev` | szöveg, a légitársaság neve |
+  | `orszag` | szöveg, a székhely országa |
+
+  A `gep` tábla (a repülőgéptípusok):
+
+  | oszlop | típus |
+  |---|---|
+  | `id` | egész, elsődleges kulcs |
+  | `tipus` | szöveg, a gép típusa |
+  | `ferohely` | egész, az ülőhelyek száma |
+
+  A `jarat` tábla:
+
+  | oszlop | típus |
+  |---|---|
+  | `id` | egész, elsődleges kulcs |
+  | `szam` | szöveg, a járatszám (pl. `MA1017`) |
+  | `legitarsasag_id` | egész, a `legitarsasag` tábla `id` oszlopára mutat |
+  | `cel` | szöveg, a célállomás neve |
+  | `tav` | egész, a távolság kilométerben |
+
+  Az `indulas` tábla (egy hónap tényleges indulásai):
+
+  | oszlop | típus |
+  |---|---|
+  | `id` | egész, elsődleges kulcs |
+  | `jarat_id` | egész, a `jarat` tábla `id` oszlopára mutat |
+  | `gep_id` | egész, a `gep` tábla `id` oszlopára mutat |
+  | `nap` | egész, a hónap napja (1–30) |
+  | `ido` | szöveg, az indulás `ÓÓ:PP` alakban |
+  | `utas` | egész, a felszálló utasok száma |
+  | `keses` | egész, a késés percben (0, ha pontosan indult) |
+
+  **4. feladat.** Listázza ki azokat az indulásokat, amelyeknél a gép **legalább 90%-ig megtelt** (az utasok száma szorozva 100-zal legalább 90-szerese a férőhelynek)! A lekérdezés négy oszlopot adjon `szam`, `nap`, `utas` és `ferohely` néven; a sorok nap, azonos naphoz tartozó indulás ideje, végül járatszám szerint növekvő sorrendben jöjjenek!
+
+  Tipp: három tábla kapcsolódik: az `indulas` a `jarat`hoz és a `gep`hez is tartozik. A százalékot egész számokkal ellenőrizd, ne osztással.
+starter_code:
+  sql: "SELECT jarat.szam AS szam, indulas.nap AS nap, indulas.utas AS utas, gep.ferohely AS ferohely\nFROM indulas JOIN jarat ON  JOIN gep ON \nWHERE \nORDER BY ;\n"
+sample_solutions:
+  sql: |
+    SELECT jarat.szam AS szam, indulas.nap AS nap, indulas.utas AS utas, gep.ferohely AS ferohely
+    FROM indulas JOIN jarat ON jarat.id = indulas.jarat_id JOIN gep ON gep.id = indulas.gep_id
+    WHERE indulas.utas * 100 >= 90 * gep.ferohely
+    ORDER BY indulas.nap, indulas.ido, jarat.szam;
+tests:
+- stdin: |
+    CREATE TABLE legitarsasag (id INTEGER PRIMARY KEY, nev TEXT, orszag TEXT);
+    CREATE TABLE gep (id INTEGER PRIMARY KEY, tipus TEXT, ferohely INTEGER);
+    CREATE TABLE jarat (id INTEGER PRIMARY KEY, szam TEXT, legitarsasag_id INTEGER, cel TEXT, tav INTEGER);
+    CREATE TABLE indulas (id INTEGER PRIMARY KEY, jarat_id INTEGER, gep_id INTEGER, nap INTEGER, ido TEXT, utas INTEGER, keses INTEGER);
+    INSERT INTO legitarsasag VALUES
+    (1, 'Magyar Szarnyak', 'Magyarorszag'),
+    (2, 'Duna Air', 'Magyarorszag'),
+    (3, 'Alpesi Legi', 'Ausztria'),
+    (4, 'Balti Jet', 'Litvania'),
+    (5, 'Tengeri Vonal', 'Gorogorszag');
+    INSERT INTO gep VALUES
+    (1, 'A220', 130),
+    (2, 'B737', 180),
+    (3, 'E190', 100),
+    (4, 'ATR72', 70),
+    (5, 'A320', 170);
+    INSERT INTO jarat VALUES
+    (1, 'MA1017', 1, 'Becs', 250),
+    (2, 'MA2059', 1, 'Berlin', 690),
+    (4, 'DA4129', 2, 'London', 1450),
+    (5, 'DA5207', 2, 'Paris', 1250),
+    (6, 'DA6336', 2, 'Roma', 900),
+    (7, 'AL7405', 3, 'Madrid', 1800),
+    (8, 'AL8518', 3, 'Roma', 900),
+    (10, 'BJ1749', 4, 'Oslo', 1700),
+    (11, 'BJ2831', 4, 'London', 1450),
+    (12, 'BJ3945', 4, 'Lisszabon', 2300),
+    (13, 'TV4052', 5, 'Isztambul', 1100),
+    (14, 'TV5163', 5, 'Athen', 1100),
+    (15, 'TV6274', 5, 'Dubaj', 3600),
+    (16, 'TV7385', 5, 'Newark', 7000);
+    INSERT INTO indulas VALUES
+    (1, 1, 4, 12, '19:00', 66, 89),
+    (2, 1, 4, 14, '21:50', 36, 70),
+    (3, 10, 3, 23, '07:40', 91, 0),
+    (4, 1, 5, 15, '09:05', 136, 24),
+    (5, 13, 2, 2, '16:10', 168, 0),
+    (6, 13, 1, 25, '19:00', 124, 50),
+    (7, 5, 5, 11, '09:05', 131, 65),
+    (8, 8, 4, 11, '16:10', 64, 0),
+    (9, 14, 4, 16, '06:15', 66, 41),
+    (10, 11, 2, 20, '07:40', 134, 43),
+    (11, 7, 3, 25, '19:00', 92, 0),
+    (12, 4, 3, 25, '14:45', 90, 85),
+    (13, 5, 5, 14, '09:05', 164, 49),
+    (14, 13, 2, 8, '10:30', 146, 62),
+    (15, 1, 1, 27, '11:55', 107, 0),
+    (16, 8, 4, 8, '09:05', 68, 19),
+    (17, 4, 4, 24, '21:50', 65, 68),
+    (18, 5, 2, 29, '13:20', 144, 62),
+    (19, 6, 5, 5, '17:35', 153, 0),
+    (20, 4, 3, 23, '06:15', 65, 75),
+    (21, 8, 4, 9, '20:25', 60, 18),
+    (22, 4, 1, 4, '14:45', 127, 19),
+    (23, 2, 3, 28, '07:40', 98, 51),
+    (24, 10, 5, 29, '10:30', 158, 26),
+    (25, 14, 1, 24, '17:35', 97, 8),
+    (26, 1, 1, 13, '16:10', 101, 0),
+    (27, 14, 5, 8, '11:55', 90, 0),
+    (28, 4, 3, 10, '21:50', 85, 74),
+    (29, 2, 1, 18, '19:00', 112, 0),
+    (30, 11, 5, 10, '11:55', 109, 0),
+    (31, 7, 1, 7, '13:20', 91, 0),
+    (32, 2, 4, 21, '07:40', 35, 57),
+    (33, 10, 4, 17, '17:35', 37, 0),
+    (34, 1, 1, 22, '14:45', 128, 52),
+    (35, 14, 2, 14, '16:10', 131, 81),
+    (36, 13, 4, 3, '06:15', 68, 28),
+    (37, 10, 5, 21, '20:25', 118, 0),
+    (38, 10, 5, 13, '11:55', 152, 1),
+    (39, 4, 3, 11, '10:30', 59, 0),
+    (40, 4, 3, 3, '17:35', 74, 60);
+  expected: |
+    szam,nap,utas,ferohely
+    TV4052,2,168,180
+    TV4052,3,68,70
+    DA4129,4,127,130
+    DA6336,5,153,170
+    AL8518,8,68,70
+    AL8518,11,64,70
+    MA1017,12,66,70
+    DA5207,14,164,170
+    TV5163,16,66,70
+    MA1017,22,128,130
+    BJ1749,23,91,100
+    DA4129,24,65,70
+    DA4129,25,90,100
+    AL7405,25,92,100
+    TV4052,25,124,130
+    MA2059,28,98,100
+    BJ1749,29,158,170
+  hidden: false
+- stdin: |
+    CREATE TABLE legitarsasag (id INTEGER PRIMARY KEY, nev TEXT, orszag TEXT);
+    CREATE TABLE gep (id INTEGER PRIMARY KEY, tipus TEXT, ferohely INTEGER);
+    CREATE TABLE jarat (id INTEGER PRIMARY KEY, szam TEXT, legitarsasag_id INTEGER, cel TEXT, tav INTEGER);
+    CREATE TABLE indulas (id INTEGER PRIMARY KEY, jarat_id INTEGER, gep_id INTEGER, nap INTEGER, ido TEXT, utas INTEGER, keses INTEGER);
+    INSERT INTO legitarsasag VALUES
+    (1, 'Magyar Szarnyak', 'Magyarorszag'),
+    (2, 'Duna Air', 'Magyarorszag'),
+    (3, 'Alpesi Legi', 'Ausztria'),
+    (4, 'Balti Jet', 'Litvania'),
+    (5, 'Tengeri Vonal', 'Gorogorszag');
+    INSERT INTO gep VALUES
+    (1, 'A220', 130),
+    (2, 'B737', 180),
+    (3, 'E190', 100),
+    (4, 'ATR72', 70),
+    (5, 'A320', 170);
+    INSERT INTO jarat VALUES
+    (1, 'MA1017', 1, 'Becs', 250),
+    (4, 'DA4129', 2, 'London', 1450),
+    (5, 'DA5207', 2, 'Paris', 1250),
+    (8, 'AL8518', 3, 'Roma', 900),
+    (10, 'BJ1749', 4, 'Oslo', 1700);
+    INSERT INTO indulas VALUES
+    (1, 1, 3, 23, '07:40', 55, 0),
+    (2, 1, 2, 11, '19:00', 145, 7),
+    (3, 5, 5, 29, '06:15', 166, 0),
+    (4, 1, 5, 19, '17:35', 163, 34),
+    (5, 1, 5, 13, '11:55', 161, 24),
+    (6, 4, 5, 2, '13:20', 138, 65),
+    (7, 4, 4, 17, '14:45', 40, 0),
+    (8, 4, 1, 13, '19:00', 126, 68),
+    (9, 4, 5, 25, '20:25', 96, 46);
+  expected: |
+    szam,nap,utas,ferohely
+    MA1017,13,161,170
+    DA4129,13,126,130
+    MA1017,19,163,170
+    DA5207,29,166,170
+  hidden: true
+- stdin: |
+    CREATE TABLE legitarsasag (id INTEGER PRIMARY KEY, nev TEXT, orszag TEXT);
+    CREATE TABLE gep (id INTEGER PRIMARY KEY, tipus TEXT, ferohely INTEGER);
+    CREATE TABLE jarat (id INTEGER PRIMARY KEY, szam TEXT, legitarsasag_id INTEGER, cel TEXT, tav INTEGER);
+    CREATE TABLE indulas (id INTEGER PRIMARY KEY, jarat_id INTEGER, gep_id INTEGER, nap INTEGER, ido TEXT, utas INTEGER, keses INTEGER);
+    INSERT INTO legitarsasag VALUES
+    (1, 'Magyar Szarnyak', 'Magyarorszag'),
+    (2, 'Duna Air', 'Magyarorszag'),
+    (3, 'Alpesi Legi', 'Ausztria'),
+    (4, 'Balti Jet', 'Litvania'),
+    (5, 'Tengeri Vonal', 'Gorogorszag');
+    INSERT INTO gep VALUES
+    (1, 'A220', 130),
+    (2, 'B737', 180),
+    (3, 'E190', 100),
+    (4, 'ATR72', 70),
+    (5, 'A320', 170);
+    INSERT INTO jarat VALUES
+    (1, 'MA1017', 1, 'Becs', 250),
+    (2, 'MA2059', 1, 'Berlin', 690),
+    (3, 'MA3104', 1, 'Paris', 1250),
+    (4, 'DA4129', 2, 'London', 1450),
+    (5, 'DA5207', 2, 'Paris', 1250),
+    (6, 'DA6336', 2, 'Roma', 900),
+    (7, 'AL7405', 3, 'Madrid', 1800),
+    (8, 'AL8518', 3, 'Roma', 900),
+    (9, 'AL9627', 3, 'Athen', 1100),
+    (10, 'BJ1749', 4, 'Oslo', 1700),
+    (11, 'BJ2831', 4, 'London', 1450),
+    (12, 'BJ3945', 4, 'Lisszabon', 2300),
+    (13, 'TV4052', 5, 'Isztambul', 1100),
+    (14, 'TV5163', 5, 'Athen', 1100),
+    (15, 'TV6274', 5, 'Dubaj', 3600),
+    (16, 'TV7385', 5, 'Newark', 7000);
+    INSERT INTO indulas VALUES
+    (1, 4, 1, 20, '16:10', 128, 3),
+    (2, 9, 4, 21, '21:50', 36, 0),
+    (3, 1, 2, 19, '13:20', 136, 48),
+    (4, 10, 3, 10, '20:25', 80, 0),
+    (5, 8, 2, 19, '16:10', 167, 87),
+    (6, 14, 5, 17, '10:30', 156, 73),
+    (7, 5, 5, 19, '11:55', 132, 70),
+    (8, 5, 5, 29, '16:10', 157, 0),
+    (9, 13, 4, 4, '21:50', 65, 76),
+    (10, 2, 4, 13, '09:05', 36, 51),
+    (11, 1, 1, 6, '10:30', 116, 8),
+    (12, 9, 1, 15, '21:50', 115, 0),
+    (13, 4, 3, 2, '07:40', 62, 59),
+    (14, 5, 1, 7, '07:40', 106, 0),
+    (15, 9, 3, 18, '10:30', 92, 57),
+    (16, 13, 4, 11, '20:25', 63, 53),
+    (17, 2, 2, 23, '20:25', 144, 72),
+    (18, 10, 3, 18, '06:15', 100, 0),
+    (19, 9, 2, 24, '14:45', 164, 0),
+    (20, 12, 2, 18, '07:40', 150, 35),
+    (21, 1, 1, 11, '14:45', 74, 52),
+    (22, 4, 1, 26, '20:25', 124, 11),
+    (23, 7, 4, 23, '11:55', 52, 23),
+    (24, 9, 3, 18, '11:55', 55, 0),
+    (25, 1, 4, 28, '16:10', 56, 53),
+    (26, 5, 4, 22, '13:20', 44, 0),
+    (27, 6, 1, 6, '14:45', 117, 71),
+    (28, 5, 1, 18, '11:55', 81, 19),
+    (29, 9, 5, 12, '07:40', 100, 0),
+    (30, 13, 1, 15, '06:15', 130, 0),
+    (31, 13, 4, 19, '20:25', 64, 0),
+    (32, 6, 5, 19, '09:05', 96, 0),
+    (33, 9, 3, 13, '19:00', 91, 90),
+    (34, 11, 1, 20, '09:05', 112, 0),
+    (35, 1, 2, 5, '19:00', 127, 38),
+    (36, 10, 1, 26, '06:15', 102, 0),
+    (37, 1, 1, 5, '13:20', 120, 0),
+    (38, 7, 2, 11, '19:00', 145, 69),
+    (39, 11, 5, 8, '21:50', 124, 85),
+    (40, 11, 4, 5, '13:20', 44, 6),
+    (41, 8, 2, 13, '13:20', 158, 0),
+    (42, 6, 1, 14, '14:45', 128, 21),
+    (43, 10, 3, 30, '14:45', 95, 0),
+    (44, 5, 4, 15, '09:05', 53, 3),
+    (45, 9, 4, 29, '19:00', 40, 25),
+    (46, 11, 1, 25, '14:45', 65, 0),
+    (47, 7, 1, 9, '06:15', 87, 86),
+    (48, 12, 2, 22, '11:55', 164, 66),
+    (49, 8, 1, 18, '07:40', 108, 0),
+    (50, 11, 1, 26, '11:55', 113, 27),
+    (51, 9, 3, 21, '10:30', 69, 0),
+    (52, 5, 5, 14, '16:10', 122, 0),
+    (53, 12, 5, 1, '10:30', 104, 0),
+    (54, 13, 1, 5, '20:25', 84, 15),
+    (55, 14, 1, 19, '07:40', 67, 81),
+    (56, 1, 3, 17, '11:55', 76, 83),
+    (57, 1, 1, 29, '10:30', 73, 0),
+    (58, 4, 2, 16, '06:15', 162, 50),
+    (59, 13, 5, 2, '19:00', 90, 18),
+    (60, 3, 3, 26, '06:15', 82, 54);
+  expected: |
+    szam,nap,utas,ferohely
+    TV4052,4,65,70
+    MA1017,5,120,130
+    DA6336,6,117,130
+    TV4052,11,63,70
+    AL9627,13,91,100
+    DA6336,14,128,130
+    TV4052,15,130,130
+    DA4129,16,162,180
+    TV5163,17,156,170
+    BJ1749,18,100,100
+    AL9627,18,92,100
+    AL8518,19,167,180
+    TV4052,19,64,70
+    DA4129,20,128,130
+    BJ3945,22,164,180
+    AL9627,24,164,180
+    DA4129,26,124,130
+    DA5207,29,157,170
+    BJ1749,30,95,100
+  hidden: true
+- stdin: |
+    CREATE TABLE legitarsasag (id INTEGER PRIMARY KEY, nev TEXT, orszag TEXT);
+    CREATE TABLE gep (id INTEGER PRIMARY KEY, tipus TEXT, ferohely INTEGER);
+    CREATE TABLE jarat (id INTEGER PRIMARY KEY, szam TEXT, legitarsasag_id INTEGER, cel TEXT, tav INTEGER);
+    CREATE TABLE indulas (id INTEGER PRIMARY KEY, jarat_id INTEGER, gep_id INTEGER, nap INTEGER, ido TEXT, utas INTEGER, keses INTEGER);
+    INSERT INTO legitarsasag VALUES
+    (1, 'Magyar Szarnyak', 'Magyarorszag'),
+    (2, 'Duna Air', 'Magyarorszag'),
+    (3, 'Alpesi Legi', 'Ausztria'),
+    (4, 'Balti Jet', 'Litvania'),
+    (5, 'Tengeri Vonal', 'Gorogorszag');
+    INSERT INTO gep VALUES
+    (1, 'A220', 130),
+    (2, 'B737', 180),
+    (3, 'E190', 100),
+    (4, 'ATR72', 70),
+    (5, 'A320', 170);
+    INSERT INTO jarat VALUES
+    (2, 'MA2059', 1, 'Berlin', 690),
+    (3, 'MA3104', 1, 'Paris', 1250),
+    (4, 'DA4129', 2, 'London', 1450),
+    (10, 'BJ1749', 4, 'Oslo', 1700),
+    (11, 'BJ2831', 4, 'London', 1450),
+    (12, 'BJ3945', 4, 'Lisszabon', 2300),
+    (13, 'TV4052', 5, 'Isztambul', 1100),
+    (14, 'TV5163', 5, 'Athen', 1100),
+    (16, 'TV7385', 5, 'Newark', 7000);
+    INSERT INTO indulas VALUES
+    (1, 12, 3, 25, '09:05', 50, 82),
+    (2, 2, 2, 1, '17:35', 146, 64),
+    (3, 2, 5, 22, '11:55', 163, 10),
+    (4, 11, 1, 21, '13:20', 85, 0),
+    (5, 12, 1, 3, '11:55', 126, 63),
+    (6, 13, 5, 10, '11:55', 110, 0),
+    (7, 10, 2, 26, '09:05', 115, 17),
+    (8, 10, 5, 17, '11:55', 153, 11),
+    (9, 12, 3, 5, '11:55', 64, 0),
+    (10, 13, 1, 10, '14:45', 85, 0),
+    (11, 3, 4, 24, '19:00', 63, 0),
+    (12, 4, 4, 2, '06:15', 49, 12),
+    (13, 2, 4, 3, '13:20', 52, 68),
+    (14, 10, 2, 28, '14:45', 173, 0),
+    (15, 4, 5, 24, '07:40', 87, 70),
+    (16, 2, 4, 23, '20:25', 47, 35),
+    (17, 10, 3, 13, '20:25', 50, 0),
+    (18, 2, 1, 16, '16:10', 120, 68),
+    (19, 12, 2, 29, '19:00', 107, 0),
+    (20, 2, 1, 4, '07:40', 117, 90),
+    (21, 10, 3, 2, '09:05', 56, 15),
+    (22, 3, 1, 25, '17:35', 98, 40),
+    (23, 4, 4, 22, '20:25', 47, 85),
+    (24, 13, 3, 24, '09:05', 98, 0),
+    (25, 3, 3, 15, '13:20', 64, 18);
+  expected: |
+    szam,nap,utas,ferohely
+    BJ3945,3,126,130
+    MA2059,4,117,130
+    MA2059,16,120,130
+    BJ1749,17,153,170
+    MA2059,22,163,170
+    TV4052,24,98,100
+    MA3104,24,63,70
+    BJ1749,28,173,180
+  hidden: true

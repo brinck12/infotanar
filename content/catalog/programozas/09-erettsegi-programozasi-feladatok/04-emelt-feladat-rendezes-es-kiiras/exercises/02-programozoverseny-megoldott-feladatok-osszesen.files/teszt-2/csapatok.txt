@@ -1,0 +1,2 @@
+csapat	varos	megoldott	buntetes
+Nulla	Eger	0	0

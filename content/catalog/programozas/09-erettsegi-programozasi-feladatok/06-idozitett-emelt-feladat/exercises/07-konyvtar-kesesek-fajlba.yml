@@ -1,0 +1,199 @@
+slug: konyvtar-kesesek-fajlba
+title: 'Könyvtár: késések fájlba'
+position: 6
+kind: code
+level: emelt
+difficulty: 5
+published: false
+allowed_languages:
+- python
+- csharp
+description: |
+  A városi könyvtár kölcsönzéseit a `kolcsonzes.txt` fájl tartalmazza. Az első sor fejléc (`olvaso`, `kod`, `ki`, `be`), utána minden sor egy kölcsönzés, tabulátorral tagolva: az olvasó neve (ékezet nélkül, szóközt tartalmazhat), a könyv kódja (pl. `K101`), a kikölcsönzés napja és a visszahozás napja az év napjaként számozva (1–365, az év nem szökőév). A visszahozás napja mindig nagyobb a kikölcsönzés napjánál. Egy olvasó és egy könyv többször is szerepelhet. A fájl legalább egy kölcsönzést tartalmaz. Egy kölcsönzés időtartama `be - ki` nap; a kölcsönzési határidő 14 nap. A programban egy kölcsönzést rekordként (osztályként) érdemes tárolni. Minden részfeladat kimenete a sorszámával kezdődik (`N. feladat`), a kimenetben ne használj ékezetes betűt. Ahol a feladat bevitelt kér, a kérdést külön sorban írd ki, csak utána olvass be.
+
+  **(9 pont)** Írd a késett kölcsönzéseket (időtartam > 14 nap) a `keses.txt` fájlba, a késés szerint csökkenő sorrendben; azonos késésnél maradjon a fájlbeli sorrend. Egy sor: `olvaso;kod;keses`, pontosztóval elválasztva (a késés a 14 napon túli napok száma). Utána olvasd vissza a fájlt, és írd ki a tartalmát soronként. Ha nincs késés, csak a `Nincs keses.` sort írd ki, és fájlt ne hozz létre.
+
+  ```
+  <olvaso>;<kod>;<keses>
+  ```
+
+  Kimenet a mellékelt mintafájllal:
+
+  ```
+  7. feladat
+  Nagy Peter;K310;16
+  Varga Zita;K205;14
+  Nagy Peter;K205;8
+  Toth Bela;K101;7
+  Nagy Peter;K101;1
+  Toth Bela;K205;1
+  ```
+
+  Tipp: A stabil rendezés megtartja az azonos kulcsú elemek eredeti sorrendjét: Pythonban a `sorted`, C#-ban az `OrderByDescending` ilyen.
+starter_code:
+  python: |
+    class Kolcsonzes:
+        def __init__(self, olvaso, kod, ki, be):
+            self.olvaso = olvaso
+            self.kod = kod
+            self.ki = ki
+            self.be = be
+    with open("kolcsonzes.txt", encoding="utf-8") as f:
+        sorok = f.read().splitlines()
+    kolcsonzesek = []
+    for sor in sorok[1:]:
+        r = sor.split("\t")
+        kolcsonzesek.append(Kolcsonzes(r[0], r[1], int(r[2]), int(r[3])))
+    print("7. feladat")
+    # ide írd a megoldást
+  csharp: |
+    using System;
+    using System.Collections.Generic;
+    using System.Globalization;
+    using System.IO;
+    using System.Linq;
+
+    class Kolcsonzes
+    {
+        public string Olvaso;
+        public string Kod;
+        public int Ki;
+        public int Be;
+    }
+
+    class Program
+    {
+        static List<Kolcsonzes> kolcsonzesek = new List<Kolcsonzes>();
+
+        static void Main()
+        {
+            string[] sorok = File.ReadAllLines("kolcsonzes.txt");
+            for (int i = 1; i < sorok.Length; i++)
+            {
+                string[] r = sorok[i].Split('\t');
+                Kolcsonzes k = new Kolcsonzes();
+                k.Olvaso = r[0];
+                k.Kod = r[1];
+                k.Ki = int.Parse(r[2]);
+                k.Be = int.Parse(r[3]);
+                kolcsonzesek.Add(k);
+            }
+            Console.WriteLine("7. feladat");
+            // ide írd a megoldást
+        }
+    }
+sample_solutions:
+  python: |
+    class Kolcsonzes:
+        def __init__(self, olvaso, kod, ki, be):
+            self.olvaso = olvaso
+            self.kod = kod
+            self.ki = ki
+            self.be = be
+    with open("kolcsonzes.txt", encoding="utf-8") as f:
+        sorok = f.read().splitlines()
+    kolcsonzesek = []
+    for sor in sorok[1:]:
+        r = sor.split("\t")
+        kolcsonzesek.append(Kolcsonzes(r[0], r[1], int(r[2]), int(r[3])))
+    print("7. feladat")
+    kesok = [k for k in kolcsonzesek if k.be - k.ki > 14]
+    if len(kesok) == 0:
+        print("Nincs keses.")
+    else:
+        kesok = sorted(kesok, key=lambda k: -(k.be - k.ki - 14))
+        with open("keses.txt", "w", encoding="utf-8") as ki:
+            for k in kesok:
+                ki.write(k.olvaso + ";" + k.kod + ";" + str(k.be - k.ki - 14) + "\n")
+        with open("keses.txt", encoding="utf-8") as be:
+            for sor in be.read().splitlines():
+                print(sor)
+  csharp: |
+    using System;
+    using System.Collections.Generic;
+    using System.Globalization;
+    using System.IO;
+    using System.Linq;
+
+    class Kolcsonzes
+    {
+        public string Olvaso;
+        public string Kod;
+        public int Ki;
+        public int Be;
+    }
+
+    class Program
+    {
+        static List<Kolcsonzes> kolcsonzesek = new List<Kolcsonzes>();
+
+        static void Main()
+        {
+            string[] sorok = File.ReadAllLines("kolcsonzes.txt");
+            for (int i = 1; i < sorok.Length; i++)
+            {
+                string[] r = sorok[i].Split('\t');
+                Kolcsonzes k = new Kolcsonzes();
+                k.Olvaso = r[0];
+                k.Kod = r[1];
+                k.Ki = int.Parse(r[2]);
+                k.Be = int.Parse(r[3]);
+                kolcsonzesek.Add(k);
+            }
+            Console.WriteLine("7. feladat");
+            List<Kolcsonzes> kesok = kolcsonzesek.Where(k => k.Be - k.Ki > 14).OrderByDescending(k => k.Be - k.Ki).ToList();
+            if (kesok.Count == 0)
+            {
+                Console.WriteLine("Nincs keses.");
+            }
+            else
+            {
+                List<string> kiSorok = new List<string>();
+                foreach (Kolcsonzes k in kesok)
+                {
+                    kiSorok.Add(k.Olvaso + ";" + k.Kod + ";" + (k.Be - k.Ki - 14));
+                }
+                File.WriteAllLines("keses.txt", kiSorok.ToArray());
+                foreach (string sor in File.ReadAllLines("keses.txt"))
+                {
+                    Console.WriteLine(sor);
+                }
+            }
+        }
+    }
+files:
+  kolcsonzes.txt: kolcsonzes.txt
+tests:
+- stdin: ''
+  expected: |
+    7. feladat
+    Nagy Peter;K310;16
+    Varga Zita;K205;14
+    Nagy Peter;K205;8
+    Toth Bela;K101;7
+    Nagy Peter;K101;1
+    Toth Bela;K205;1
+  hidden: false
+- stdin: ''
+  expected: |
+    7. feladat
+    Nincs keses.
+  hidden: true
+  files:
+    kolcsonzes.txt: teszt-2/kolcsonzes.txt
+- stdin: ''
+  expected: |
+    7. feladat
+    Nincs keses.
+  hidden: true
+  files:
+    kolcsonzes.txt: teszt-3/kolcsonzes.txt
+- stdin: ''
+  expected: |
+    7. feladat
+    Ivan Nora;B1;85
+    Gal Reka;B1;17
+    Fo Mate;B1;15
+  hidden: true
+  files:
+    kolcsonzes.txt: teszt-4/kolcsonzes.txt

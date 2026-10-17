@@ -1,0 +1,241 @@
+slug: programozas-4-egy-film-vetitesei
+title: Programozás 4 - Egy film vetítései
+position: 7
+kind: code
+level: kozep
+difficulty: 3
+published: false
+allowed_languages:
+- python
+- csharp
+description: |
+  A `vetitesek.txt` a mozi vetítéseit tartalmazza, soronként egy vetítéssel, pontosvesszővel elválasztva: `cím;műfaj;játékidő percben;kezdés;eladott jegyek;jegyár`. A kezdés `ÓÓ:PP` alakú. Az adatokban nincs ékezet, a fájl legalább egy sort tartalmaz.
+
+  **4. feladat.** Kérjen be egy filmcímet! Ha a filmnek van vetítése a fájlban, írja ki a `4. feladat:` sort, alá pedig a vetítések kezdési idejét és az eladott jegyek számát a fájlbeli sorrendben, soronként egy vetítést `kezdés eladott` alakban. Ha nincs, a kimenet egyetlen sor: `4. feladat: Nincs ilyen film!`
+
+  Minta (a billentyűzetről beolvasott sor):
+
+  ```text
+  A kis robot
+  ```
+
+  A mintafájlra a kimenet:
+
+  ```text
+  4. feladat:
+  18:30 50
+  15:15 67
+  15:15 61
+  17:45 105
+  20:00 106
+  ```
+
+  Tipp: gyűjtsd a találatokat egy listába; a lista hossza dönti el, melyik kiírás kell.
+starter_code:
+  python: |
+    class Vetites:
+        def __init__(self, sor):
+            r = sor.split(";")
+            self.cim = r[0]
+            self.mufaj = r[1]
+            self.hossz = int(r[2])
+            self.kezdes = r[3]
+            self.eladott = int(r[4])
+            self.jegyar = int(r[5])
+
+        def bevetel(self):
+            return self.eladott * self.jegyar
+
+
+    with open("vetitesek.txt", encoding="utf-8") as f:
+        vetitesek = [Vetites(sor) for sor in f.read().splitlines()]
+    # ide írd a megoldást
+  csharp: |
+    using System;
+    using System.Collections.Generic;
+    using System.IO;
+
+    class Vetites
+    {
+        public string Cim;
+        public string Mufaj;
+        public int Hossz;
+        public string Kezdes;
+        public int Eladott;
+        public int Jegyar;
+
+        public Vetites(string sor)
+        {
+            string[] r = sor.Split(';');
+            Cim = r[0];
+            Mufaj = r[1];
+            Hossz = int.Parse(r[2]);
+            Kezdes = r[3];
+            Eladott = int.Parse(r[4]);
+            Jegyar = int.Parse(r[5]);
+        }
+
+        public int Bevetel()
+        {
+            return Eladott * Jegyar;
+        }
+    }
+
+    class Program
+    {
+        static void Main()
+        {
+            List<Vetites> vetitesek = new List<Vetites>();
+            foreach (string sor in File.ReadAllLines("vetitesek.txt"))
+            {
+                vetitesek.Add(new Vetites(sor));
+            }
+            // ide írd a megoldást
+        }
+    }
+sample_solutions:
+  python: |
+    class Vetites:
+        def __init__(self, sor):
+            r = sor.split(";")
+            self.cim = r[0]
+            self.mufaj = r[1]
+            self.hossz = int(r[2])
+            self.kezdes = r[3]
+            self.eladott = int(r[4])
+            self.jegyar = int(r[5])
+
+        def bevetel(self):
+            return self.eladott * self.jegyar
+
+
+    with open("vetitesek.txt", encoding="utf-8") as f:
+        vetitesek = [Vetites(sor) for sor in f.read().splitlines()]
+    cim = input().strip()
+    talalatok = [v for v in vetitesek if v.cim == cim]
+    if len(talalatok) == 0:
+        print("4. feladat: Nincs ilyen film!")
+    else:
+        print("4. feladat:")
+        for v in talalatok:
+            print(v.kezdes, v.eladott)
+  csharp: |
+    using System;
+    using System.Collections.Generic;
+    using System.IO;
+
+    class Vetites
+    {
+        public string Cim;
+        public string Mufaj;
+        public int Hossz;
+        public string Kezdes;
+        public int Eladott;
+        public int Jegyar;
+
+        public Vetites(string sor)
+        {
+            string[] r = sor.Split(';');
+            Cim = r[0];
+            Mufaj = r[1];
+            Hossz = int.Parse(r[2]);
+            Kezdes = r[3];
+            Eladott = int.Parse(r[4]);
+            Jegyar = int.Parse(r[5]);
+        }
+
+        public int Bevetel()
+        {
+            return Eladott * Jegyar;
+        }
+    }
+
+    class Program
+    {
+        static void Main()
+        {
+            List<Vetites> vetitesek = new List<Vetites>();
+            foreach (string sor in File.ReadAllLines("vetitesek.txt"))
+            {
+                vetitesek.Add(new Vetites(sor));
+            }
+            string cim = Console.ReadLine().Trim();
+            List<Vetites> talalatok = new List<Vetites>();
+            foreach (Vetites v in vetitesek)
+            {
+                if (v.Cim == cim)
+                {
+                    talalatok.Add(v);
+                }
+            }
+            if (talalatok.Count == 0)
+            {
+                Console.WriteLine("4. feladat: Nincs ilyen film!");
+            }
+            else
+            {
+                Console.WriteLine("4. feladat:");
+                foreach (Vetites v in talalatok)
+                {
+                    Console.WriteLine(v.Kezdes + " " + v.Eladott);
+                }
+            }
+        }
+    }
+files:
+  vetitesek.txt: vetitesek.txt
+tests:
+- stdin: 'A kis robot
+
+    '
+  expected: '4. feladat:
+
+    18:30 50
+
+    15:15 67
+
+    15:15 61
+
+    17:45 105
+
+    20:00 106
+
+    '
+  hidden: false
+- stdin: 'Nincs Ilyen Film
+
+    '
+  expected: '4. feladat: Nincs ilyen film!
+
+    '
+  hidden: true
+  files:
+    vetitesek.txt: teszt-2/vetitesek.txt
+- stdin: 'Hold a tenger folott
+
+    '
+  expected: '4. feladat:
+
+    20:00 53
+
+    17:45 49
+
+    15:15 67
+
+    18:30 103
+
+    '
+  hidden: true
+  files:
+    vetitesek.txt: teszt-3/vetitesek.txt
+- stdin: 'Hold a tenger folott
+
+    '
+  expected: '4. feladat:
+
+    10:00 88
+
+    '
+  hidden: true
+  files:
+    vetitesek.txt: teszt-4/vetitesek.txt

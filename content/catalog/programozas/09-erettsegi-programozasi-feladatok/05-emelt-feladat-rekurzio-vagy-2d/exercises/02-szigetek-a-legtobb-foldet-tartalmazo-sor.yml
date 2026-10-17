@@ -1,0 +1,172 @@
+slug: szigetek-a-legtobb-foldet-tartalmazo-sor
+title: 'Szigetek: a legtöbb földet tartalmazó sor'
+position: 1
+kind: code
+level: emelt
+difficulty: 2
+published: false
+allowed_languages:
+- python
+- csharp
+description: |
+  A `terkep.txt` fájl egy tenger térképét tartalmazza. Az első sorban két egész szám áll szóközzel elválasztva: a sorok száma (`n`) és az oszlopok száma (`m`). Ezután `n` sor következik, mindegyik pontosan `m` karakter: `#` a szárazföld, `.` a víz. Egy **sziget** a vízszintesen vagy függőlegesen (átlósan nem) szomszédos `#` mezők összefüggő csoportja. A sorokat és az oszlopokat a kimenetben 1-től számozd. Minden részfeladat kimenete a sorszámával kezdődik (`N. feladat`), a kimenetben ne használj ékezetes betűt. Ahol a feladat bevitelt kér, a kérdést külön sorban írd ki, csak utána olvass be.
+
+  Keresd meg azt a sort, amelyben a legtöbb szárazföldi mező van, és írd ki a sorszámát és a földmezők számát. Holtverseny esetén az első (legkisebb sorszámú) sor számít. Ha a térképen nincs szárazföld, csak a `Nincs fold.` sort írd ki.
+
+  ```
+  Sor: <sorszám>
+  Fold: <db>
+  ```
+
+  Kimenet a mellékelt mintafájllal:
+
+  ```
+  2. feladat
+  Sor: 6
+  Fold: 5
+  ```
+
+  Tipp: A legjobb darabszámot 0-ról indítsd, és csak szigorú `>` összehasonlításnál cseréld, így az első sor marad meg.
+starter_code:
+  python: |
+    with open("terkep.txt", encoding="utf-8") as f:
+        sorok = f.read().splitlines()
+    meret = sorok[0].split()
+    n = int(meret[0])
+    m = int(meret[1])
+    terkep = sorok[1:1 + n]
+    print("2. feladat")
+    # ide írd a megoldást
+  csharp: |
+    using System;
+    using System.Collections.Generic;
+    using System.IO;
+    using System.Linq;
+
+    class Program
+    {
+        static string[] terkep;
+        static int n;
+        static int m;
+
+        static void Main()
+        {
+            string[] sorok = File.ReadAllLines("terkep.txt");
+            string[] meret = sorok[0].Split(' ');
+            n = int.Parse(meret[0]);
+            m = int.Parse(meret[1]);
+            terkep = new string[n];
+            for (int i = 0; i < n; i++)
+            {
+                terkep[i] = sorok[i + 1];
+            }
+            Console.WriteLine("2. feladat");
+            // ide írd a megoldást
+        }
+    }
+sample_solutions:
+  python: |
+    with open("terkep.txt", encoding="utf-8") as f:
+        sorok = f.read().splitlines()
+    meret = sorok[0].split()
+    n = int(meret[0])
+    m = int(meret[1])
+    terkep = sorok[1:1 + n]
+    print("2. feladat")
+    legjobb = 0
+    sorszam = 0
+    for i in range(n):
+        db = terkep[i].count("#")
+        if db > legjobb:
+            legjobb = db
+            sorszam = i + 1
+    if legjobb == 0:
+        print("Nincs fold.")
+    else:
+        print("Sor:", sorszam)
+        print("Fold:", legjobb)
+  csharp: |
+    using System;
+    using System.Collections.Generic;
+    using System.IO;
+    using System.Linq;
+
+    class Program
+    {
+        static string[] terkep;
+        static int n;
+        static int m;
+
+        static void Main()
+        {
+            string[] sorok = File.ReadAllLines("terkep.txt");
+            string[] meret = sorok[0].Split(' ');
+            n = int.Parse(meret[0]);
+            m = int.Parse(meret[1]);
+            terkep = new string[n];
+            for (int i = 0; i < n; i++)
+            {
+                terkep[i] = sorok[i + 1];
+            }
+            Console.WriteLine("2. feladat");
+            int legjobb = 0;
+            int sorszam = 0;
+            for (int i = 0; i < n; i++)
+            {
+                int db = 0;
+                foreach (char c in terkep[i])
+                {
+                    if (c == '#')
+                    {
+                        db++;
+                    }
+                }
+                if (db > legjobb)
+                {
+                    legjobb = db;
+                    sorszam = i + 1;
+                }
+            }
+            if (legjobb == 0)
+            {
+                Console.WriteLine("Nincs fold.");
+            }
+            else
+            {
+                Console.WriteLine("Sor: " + sorszam);
+                Console.WriteLine("Fold: " + legjobb);
+            }
+        }
+    }
+files:
+  terkep.txt: terkep.txt
+tests:
+- stdin: ''
+  expected: |
+    2. feladat
+    Sor: 6
+    Fold: 5
+  hidden: false
+- stdin: ''
+  expected: |
+    2. feladat
+    Nincs fold.
+  hidden: true
+  files:
+    terkep.txt: teszt-2/terkep.txt
+- stdin: ''
+  expected: |
+    2. feladat
+    Sor: 1
+    Fold: 4
+  hidden: true
+  files:
+    terkep.txt: teszt-3/terkep.txt
+- stdin: ''
+  expected: |
+    2. feladat
+    Sor: 1
+    Fold: 4
+  hidden: true
+  files:
+    terkep.txt: teszt-4/terkep.txt

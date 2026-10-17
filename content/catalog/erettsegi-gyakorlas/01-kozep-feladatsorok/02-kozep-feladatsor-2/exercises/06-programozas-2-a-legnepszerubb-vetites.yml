@@ -1,0 +1,187 @@
+slug: programozas-2-a-legnepszerubb-vetites
+title: Programozás 2 - A legnépszerűbb vetítés
+position: 5
+kind: code
+level: kozep
+difficulty: 2
+published: false
+allowed_languages:
+- python
+- csharp
+description: |
+  A `vetitesek.txt` a mozi vetítéseit tartalmazza, soronként egy vetítéssel, pontosvesszővel elválasztva: `cím;műfaj;játékidő percben;kezdés;eladott jegyek;jegyár`. A kezdés `ÓÓ:PP` alakú. Az adatokban nincs ékezet, a fájl legalább egy sort tartalmaz.
+
+  **2. feladat.** Keresse meg azt a vetítést, amelyre a legtöbb jegyet adták el! Írja ki a jegyek számát és a film címét. Ha több ilyen is van, az **első** számít.
+
+  A mintafájlra a kimenet:
+
+  ```text
+  2. feladat: A legtobb jegyet (116 db) a(z) Az ejszaka kiralya vetitesen adtak el.
+  ```
+
+  Tipp: maximumkiválasztás; csak szigorúan nagyobb érték cserélje le az eddigi legjobbat.
+starter_code:
+  python: |
+    class Vetites:
+        def __init__(self, sor):
+            r = sor.split(";")
+            self.cim = r[0]
+            self.mufaj = r[1]
+            self.hossz = int(r[2])
+            self.kezdes = r[3]
+            self.eladott = int(r[4])
+            self.jegyar = int(r[5])
+
+        def bevetel(self):
+            return self.eladott * self.jegyar
+
+
+    with open("vetitesek.txt", encoding="utf-8") as f:
+        vetitesek = [Vetites(sor) for sor in f.read().splitlines()]
+    # ide írd a megoldást
+  csharp: |
+    using System;
+    using System.Collections.Generic;
+    using System.IO;
+
+    class Vetites
+    {
+        public string Cim;
+        public string Mufaj;
+        public int Hossz;
+        public string Kezdes;
+        public int Eladott;
+        public int Jegyar;
+
+        public Vetites(string sor)
+        {
+            string[] r = sor.Split(';');
+            Cim = r[0];
+            Mufaj = r[1];
+            Hossz = int.Parse(r[2]);
+            Kezdes = r[3];
+            Eladott = int.Parse(r[4]);
+            Jegyar = int.Parse(r[5]);
+        }
+
+        public int Bevetel()
+        {
+            return Eladott * Jegyar;
+        }
+    }
+
+    class Program
+    {
+        static void Main()
+        {
+            List<Vetites> vetitesek = new List<Vetites>();
+            foreach (string sor in File.ReadAllLines("vetitesek.txt"))
+            {
+                vetitesek.Add(new Vetites(sor));
+            }
+            // ide írd a megoldást
+        }
+    }
+sample_solutions:
+  python: |
+    class Vetites:
+        def __init__(self, sor):
+            r = sor.split(";")
+            self.cim = r[0]
+            self.mufaj = r[1]
+            self.hossz = int(r[2])
+            self.kezdes = r[3]
+            self.eladott = int(r[4])
+            self.jegyar = int(r[5])
+
+        def bevetel(self):
+            return self.eladott * self.jegyar
+
+
+    with open("vetitesek.txt", encoding="utf-8") as f:
+        vetitesek = [Vetites(sor) for sor in f.read().splitlines()]
+    legjobb = vetitesek[0]
+    for v in vetitesek:
+        if v.eladott > legjobb.eladott:
+            legjobb = v
+    print("2. feladat: A legtobb jegyet (" + str(legjobb.eladott) + " db) a(z) " + legjobb.cim + " vetitesen adtak el.")
+  csharp: |
+    using System;
+    using System.Collections.Generic;
+    using System.IO;
+
+    class Vetites
+    {
+        public string Cim;
+        public string Mufaj;
+        public int Hossz;
+        public string Kezdes;
+        public int Eladott;
+        public int Jegyar;
+
+        public Vetites(string sor)
+        {
+            string[] r = sor.Split(';');
+            Cim = r[0];
+            Mufaj = r[1];
+            Hossz = int.Parse(r[2]);
+            Kezdes = r[3];
+            Eladott = int.Parse(r[4]);
+            Jegyar = int.Parse(r[5]);
+        }
+
+        public int Bevetel()
+        {
+            return Eladott * Jegyar;
+        }
+    }
+
+    class Program
+    {
+        static void Main()
+        {
+            List<Vetites> vetitesek = new List<Vetites>();
+            foreach (string sor in File.ReadAllLines("vetitesek.txt"))
+            {
+                vetitesek.Add(new Vetites(sor));
+            }
+            Vetites legjobb = vetitesek[0];
+            foreach (Vetites v in vetitesek)
+            {
+                if (v.Eladott > legjobb.Eladott)
+                {
+                    legjobb = v;
+                }
+            }
+            Console.WriteLine("2. feladat: A legtobb jegyet (" + legjobb.Eladott + " db) a(z) " + legjobb.Cim + " vetitesen adtak el.");
+        }
+    }
+files:
+  vetitesek.txt: vetitesek.txt
+tests:
+- stdin: ''
+  expected: '2. feladat: A legtobb jegyet (116 db) a(z) Az ejszaka kiralya vetitesen adtak el.
+
+    '
+  hidden: false
+- stdin: ''
+  expected: '2. feladat: A legtobb jegyet (83 db) a(z) Nyari szel vetitesen adtak el.
+
+    '
+  hidden: true
+  files:
+    vetitesek.txt: teszt-2/vetitesek.txt
+- stdin: ''
+  expected: '2. feladat: A legtobb jegyet (118 db) a(z) Szellemvaros vetitesen adtak el.
+
+    '
+  hidden: true
+  files:
+    vetitesek.txt: teszt-3/vetitesek.txt
+- stdin: ''
+  expected: '2. feladat: A legtobb jegyet (119 db) a(z) Nyari szel vetitesen adtak el.
+
+    '
+  hidden: true
+  files:
+    vetitesek.txt: teszt-4/vetitesek.txt

@@ -1,0 +1,4 @@
+csapat	varos	megoldott	buntetes
+A	Eger	0	0
+B	Gyor	0	0
+C	Eger	0	0

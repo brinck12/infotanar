@@ -1,0 +1,3 @@
+csapat	varos	megoldott	buntetes
+Lassu	Eger	5	300
+Gyors	Pecs	5	100

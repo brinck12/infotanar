@@ -1,0 +1,14 @@
+A kis robot;animacio;84;18:30;50;2200
+Az utolso vonat;akcio;118;20:00;69;1800
+A kis robot;animacio;84;15:15;67;2500
+A kis robot;animacio;84;15:15;61;1800
+Szellemvaros;scifi;124;12:30;25;1800
+Csillagkapu;scifi;137;21:15;73;2200
+A kis robot;animacio;84;17:45;105;2200
+A kis robot;animacio;84;20:00;106;2200
+Az ejszaka kiralya;akcio;109;12:30;13;2200
+Csillagkapu;scifi;137;15:15;32;1800
+Tavoli partok;drama;142;20:00;114;2200
+Az ejszaka kiralya;akcio;109;21:15;53;1800
+Az ejszaka kiralya;akcio;109;10:00;56;2500
+Az ejszaka kiralya;akcio;109;10:00;116;2200

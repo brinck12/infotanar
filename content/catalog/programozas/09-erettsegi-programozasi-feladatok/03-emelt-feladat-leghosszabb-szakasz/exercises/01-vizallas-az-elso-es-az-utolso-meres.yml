@@ -1,0 +1,166 @@
+slug: vizallas-az-elso-es-az-utolso-meres
+title: 'Vízállás: az első és az utolsó mérés'
+position: 0
+kind: code
+level: emelt
+difficulty: 2
+published: false
+allowed_languages:
+- python
+- csharp
+description: |
+  Egy folyó vízállását naponta egyszer mérik. A `vizallas.txt` fájl első sora fejléc (`datum`, `allas`), utána minden sor egy mérés, tabulátorral tagolva: a dátum (`ÉÉÉÉ-HH-NN` alakban) és a vízállás centiméterben (egész szám). A sorok időrendben, hézag nélkül követik egymást: minden sor az előző napot követő nap mérése. A fájl legalább egy mérést tartalmaz.
+
+  A programban egy mérést rekordként (osztályként) érdemes tárolni: dátum, vízállás. Minden részfeladat kimenete a sorszámával kezdődik (`N. feladat`), a kimenetben ne használj ékezetes betűt. Ahol a feladat bevitelt kér, a kérdést külön sorban írd ki, csak utána olvass be.
+
+  Írd ki a mérések számát, az első és az utolsó mérés dátumát és vízállását.
+
+  ```
+  Meresek szama: <db>
+  Elso meres: <datum>, <allas> cm
+  Utolso meres: <datum>, <allas> cm
+  ```
+
+  Kimenet a mellékelt mintafájllal:
+
+  ```
+  1. feladat
+  Meresek szama: 30
+  Elso meres: 2024-03-01, 142 cm
+  Utolso meres: 2024-03-30, 158 cm
+  ```
+
+  Tipp: az első elem a `0`, az utolsó a `len(meresek) - 1` indexű; egyetlen mérésnél a kettő ugyanaz.
+starter_code:
+  python: |
+    class Meres:
+        def __init__(self, datum, allas):
+            self.datum = datum
+            self.allas = allas
+    print("1. feladat")
+    with open("vizallas.txt", encoding="utf-8") as f:
+        sorok = f.read().splitlines()
+    meresek = []
+    for sor in sorok[1:]:
+        r = sor.split("\t")
+        meresek.append(Meres(r[0], int(r[1])))
+    # ide írd a megoldást
+  csharp: |
+    using System;
+    using System.Collections.Generic;
+    using System.IO;
+    using System.Linq;
+
+    class Meres
+    {
+        public string Datum;
+        public int Allas;
+    }
+
+    class Program
+    {
+        static void Main()
+        {
+            Console.WriteLine("1. feladat");
+            string[] sorok = File.ReadAllLines("vizallas.txt");
+            List<Meres> meresek = new List<Meres>();
+            for (int i = 1; i < sorok.Length; i++)
+            {
+                string[] r = sorok[i].Split('\t');
+                Meres m = new Meres();
+                m.Datum = r[0];
+                m.Allas = int.Parse(r[1]);
+                meresek.Add(m);
+            }
+            // ide írd a megoldást
+        }
+    }
+sample_solutions:
+  python: |
+    class Meres:
+        def __init__(self, datum, allas):
+            self.datum = datum
+            self.allas = allas
+    print("1. feladat")
+    with open("vizallas.txt", encoding="utf-8") as f:
+        sorok = f.read().splitlines()
+    meresek = []
+    for sor in sorok[1:]:
+        r = sor.split("\t")
+        meresek.append(Meres(r[0], int(r[1])))
+    print(f"Meresek szama: {len(meresek)}")
+    e = meresek[0]
+    u = meresek[-1]
+    print(f"Elso meres: {e.datum}, {e.allas} cm")
+    print(f"Utolso meres: {u.datum}, {u.allas} cm")
+  csharp: |
+    using System;
+    using System.Collections.Generic;
+    using System.IO;
+    using System.Linq;
+
+    class Meres
+    {
+        public string Datum;
+        public int Allas;
+    }
+
+    class Program
+    {
+        static void Main()
+        {
+            Console.WriteLine("1. feladat");
+            string[] sorok = File.ReadAllLines("vizallas.txt");
+            List<Meres> meresek = new List<Meres>();
+            for (int i = 1; i < sorok.Length; i++)
+            {
+                string[] r = sorok[i].Split('\t');
+                Meres m = new Meres();
+                m.Datum = r[0];
+                m.Allas = int.Parse(r[1]);
+                meresek.Add(m);
+            }
+            Console.WriteLine("Meresek szama: " + meresek.Count);
+            Meres e = meresek[0];
+            Meres u = meresek[meresek.Count - 1];
+            Console.WriteLine("Elso meres: " + e.Datum + ", " + e.Allas + " cm");
+            Console.WriteLine("Utolso meres: " + u.Datum + ", " + u.Allas + " cm");
+        }
+    }
+files:
+  vizallas.txt: vizallas.txt
+tests:
+- stdin: ''
+  expected: |
+    1. feladat
+    Meresek szama: 30
+    Elso meres: 2024-03-01, 142 cm
+    Utolso meres: 2024-03-30, 158 cm
+  hidden: false
+- stdin: ''
+  expected: |
+    1. feladat
+    Meresek szama: 1
+    Elso meres: 2024-03-01, 120 cm
+    Utolso meres: 2024-03-01, 120 cm
+  hidden: true
+  files:
+    vizallas.txt: teszt-2/vizallas.txt
+- stdin: ''
+  expected: |
+    1. feladat
+    Meresek szama: 2
+    Elso meres: 2024-02-28, 100 cm
+    Utolso meres: 2024-02-29, 90 cm
+  hidden: true
+  files:
+    vizallas.txt: teszt-3/vizallas.txt
+- stdin: ''
+  expected: |
+    1. feladat
+    Meresek szama: 60
+    Elso meres: 2023-12-20, 100 cm
+    Utolso meres: 2024-02-17, 134 cm
+  hidden: true
+  files:
+    vizallas.txt: teszt-4/vizallas.txt

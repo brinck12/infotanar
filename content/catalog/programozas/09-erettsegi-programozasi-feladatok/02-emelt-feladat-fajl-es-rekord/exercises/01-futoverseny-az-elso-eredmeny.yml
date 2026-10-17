@@ -133,8 +133,8 @@ sample_solutions:
                 eredmenyek.Add(e);
             }
             Console.WriteLine("Eredmenyek szama: " + eredmenyek.Count);
-            Eredmeny e = eredmenyek[0];
-            Console.WriteLine("Az elso eredmeny: " + e.Nev + " (" + e.Orszag + ") " + e.Tav + " m " + e.Ido.ToString("F2", CultureInfo.InvariantCulture) + " mp");
+            Eredmeny elso = eredmenyek[0];
+            Console.WriteLine("Az elso eredmeny: " + elso.Nev + " (" + elso.Orszag + ") " + elso.Tav + " m " + elso.Ido.ToString("F2", CultureInfo.InvariantCulture) + " mp");
         }
     }
 files:

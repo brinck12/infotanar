@@ -1,0 +1,6 @@
+olvaso	kod	ki	be
+Pap Lili	A1	1	8
+Rez Gabor	A2	1	8
+Pap Lili	A3	30	37
+Rez Gabor	A1	30	37
+Szel Ivan	A2	59	60

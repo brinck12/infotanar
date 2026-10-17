@@ -1,0 +1,268 @@
+slug: programozas-3-celallomasok-rangsora
+title: Programozás 3 - Célállomások rangsora
+position: 10
+kind: code
+level: emelt
+difficulty: 3
+published: false
+allowed_languages:
+- python
+- csharp
+description: |
+  Az `indulasok.txt` a repülőtér egy havi (30 napos) forgalmát tartalmazza, soronként egy indulással, pontosvesszővel elválasztva: `járatszám;célállomás;távolság km;nap;indulás;utasok;késés`. A járatszám két betűből és négy számjegyből áll (pl. `MA1017`), a nap a hónap napja (1–30), az indulás `ÓÓ:PP` alakú, a késés percben értendő (0, ha pontosan indult). Az adatokban nincs ékezet, a fájl legalább egy sort tartalmaz, a sorok nincsenek sorrendben, és egy járat egy napon egy időpontban legfeljebb egyszer szerepel.
+
+  **3. feladat.** Összegezze célállomásonként a felszállt utasokat, és írja ki a célállomásokat az utasszám szerint **csökkenő** sorrendben! Azonos utasszámnál a célállomás neve szerinti ábécésorrend döntsön. Írja ki a `3. feladat:` sort, alá soronként `célállomás: utasok fo` alakban az eredményt.
+
+  A mintafájlra a kimenet:
+
+  ```text
+  3. feladat:
+  Roma: 752 fo
+  Paris: 707 fo
+  Becs: 614 fo
+  Dubaj: 466 fo
+  Athen: 444 fo
+  Oslo: 347 fo
+  Lisszabon: 169 fo
+  London: 167 fo
+  Newark: 111 fo
+  Berlin: 46 fo
+  Madrid: 35 fo
+  ```
+
+  Tipp: először összegzés (szótár vagy két párhuzamos lista), utána rendezés két kulccsal. Használhatod a beépített rendezést, de saját rendezést (például kiválasztásos) is írhatsz.
+starter_code:
+  python: |
+    class Indulas:
+        def __init__(self, sor):
+            r = sor.split(";")
+            self.jarat = r[0]
+            self.cel = r[1]
+            self.tav = int(r[2])
+            self.nap = int(r[3])
+            self.ido = r[4]
+            self.utas = int(r[5])
+            self.keses = int(r[6])
+
+
+    with open("indulasok.txt", encoding="utf-8") as f:
+        indulasok = [Indulas(sor) for sor in f.read().splitlines()]
+    # ide írd a megoldást
+  csharp: |
+    using System;
+    using System.Collections.Generic;
+    using System.IO;
+
+    class Indulas
+    {
+        public string Jarat;
+        public string Cel;
+        public int Tav;
+        public int Nap;
+        public string Ido;
+        public int Utas;
+        public int Keses;
+
+        public Indulas(string sor)
+        {
+            string[] r = sor.Split(';');
+            Jarat = r[0];
+            Cel = r[1];
+            Tav = int.Parse(r[2]);
+            Nap = int.Parse(r[3]);
+            Ido = r[4];
+            Utas = int.Parse(r[5]);
+            Keses = int.Parse(r[6]);
+        }
+    }
+
+    class Program
+    {
+        static void Main()
+        {
+            List<Indulas> indulasok = new List<Indulas>();
+            foreach (string sor in File.ReadAllLines("indulasok.txt"))
+            {
+                indulasok.Add(new Indulas(sor));
+            }
+            // ide írd a megoldást
+        }
+    }
+sample_solutions:
+  python: |
+    class Indulas:
+        def __init__(self, sor):
+            r = sor.split(";")
+            self.jarat = r[0]
+            self.cel = r[1]
+            self.tav = int(r[2])
+            self.nap = int(r[3])
+            self.ido = r[4]
+            self.utas = int(r[5])
+            self.keses = int(r[6])
+
+
+    with open("indulasok.txt", encoding="utf-8") as f:
+        indulasok = [Indulas(sor) for sor in f.read().splitlines()]
+    ossz = {}
+    for i in indulasok:
+        ossz[i.cel] = ossz.get(i.cel, 0) + i.utas
+    lista = sorted(ossz.items(), key=lambda p: (-p[1], p[0]))
+    print("3. feladat:")
+    for cel, utas in lista:
+        print(cel + ": " + str(utas) + " fo")
+  csharp: |
+    using System;
+    using System.Collections.Generic;
+    using System.IO;
+
+    class Indulas
+    {
+        public string Jarat;
+        public string Cel;
+        public int Tav;
+        public int Nap;
+        public string Ido;
+        public int Utas;
+        public int Keses;
+
+        public Indulas(string sor)
+        {
+            string[] r = sor.Split(';');
+            Jarat = r[0];
+            Cel = r[1];
+            Tav = int.Parse(r[2]);
+            Nap = int.Parse(r[3]);
+            Ido = r[4];
+            Utas = int.Parse(r[5]);
+            Keses = int.Parse(r[6]);
+        }
+    }
+
+    class Program
+    {
+        static void Main()
+        {
+            List<Indulas> indulasok = new List<Indulas>();
+            foreach (string sor in File.ReadAllLines("indulasok.txt"))
+            {
+                indulasok.Add(new Indulas(sor));
+            }
+            Dictionary<string, int> ossz = new Dictionary<string, int>();
+            foreach (Indulas i in indulasok)
+            {
+                if (!ossz.ContainsKey(i.Cel))
+                {
+                    ossz[i.Cel] = 0;
+                }
+                ossz[i.Cel] += i.Utas;
+            }
+            List<KeyValuePair<string, int>> lista = new List<KeyValuePair<string, int>>(ossz);
+            lista.Sort((a, b) =>
+            {
+                if (a.Value != b.Value)
+                {
+                    return b.Value.CompareTo(a.Value);
+                }
+                return string.CompareOrdinal(a.Key, b.Key);
+            });
+            Console.WriteLine("3. feladat:");
+            foreach (KeyValuePair<string, int> p in lista)
+            {
+                Console.WriteLine(p.Key + ": " + p.Value + " fo");
+            }
+        }
+    }
+files:
+  indulasok.txt: indulasok.txt
+tests:
+- stdin: ''
+  expected: '3. feladat:
+
+    Roma: 752 fo
+
+    Paris: 707 fo
+
+    Becs: 614 fo
+
+    Dubaj: 466 fo
+
+    Athen: 444 fo
+
+    Oslo: 347 fo
+
+    Lisszabon: 169 fo
+
+    London: 167 fo
+
+    Newark: 111 fo
+
+    Berlin: 46 fo
+
+    Madrid: 35 fo
+
+    '
+  hidden: false
+- stdin: ''
+  expected: '3. feladat:
+
+    Isztambul: 80 fo
+
+    '
+  hidden: true
+  files:
+    indulasok.txt: teszt-2/indulasok.txt
+- stdin: ''
+  expected: '3. feladat:
+
+    Athen: 1297 fo
+
+    Paris: 965 fo
+
+    Roma: 932 fo
+
+    Lisszabon: 797 fo
+
+    London: 715 fo
+
+    Becs: 638 fo
+
+    Dubaj: 529 fo
+
+    Isztambul: 302 fo
+
+    Oslo: 268 fo
+
+    Madrid: 127 fo
+
+    Berlin: 87 fo
+
+    Newark: 48 fo
+
+    '
+  hidden: true
+  files:
+    indulasok.txt: teszt-3/indulasok.txt
+- stdin: ''
+  expected: '3. feladat:
+
+    Madrid: 300 fo
+
+    Roma: 271 fo
+
+    Lisszabon: 209 fo
+
+    Isztambul: 175 fo
+
+    London: 164 fo
+
+    Berlin: 144 fo
+
+    Paris: 131 fo
+
+    Athen: 70 fo
+
+    '
+  hidden: true
+  files:
+    indulasok.txt: teszt-4/indulasok.txt
