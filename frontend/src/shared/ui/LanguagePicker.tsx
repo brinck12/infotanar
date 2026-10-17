@@ -12,5 +12,5 @@ const TABS: ReadonlyArray<{ id: StudyLanguage; label: string }> = [
 export function LanguagePicker() {
   const [language, choose] = useLessonLanguage()
 
-  return <Tabs label="Programozási nyelv" idPrefix={useId()} tabs={TABS} active={language} onChange={choose} />
+  return <Tabs label="Programozási nyelv" idPrefix={useId()} controls={false} tabs={TABS} active={language} onChange={choose} />
 }

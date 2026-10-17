@@ -14,11 +14,13 @@ interface TabsProps<T extends string> {
   onChange: (id: T) => void
   /** A fülek és a panelek azonosítójának közös előtagja. */
   idPrefix: string
+  /** Hamis, ha a fülekhez nincs `TabPanel` (pl. a nyelvválasztó): ilyenkor nincs mire mutatnia az `aria-controls`-nak. */
+  controls?: boolean
   className?: string
 }
 
 /** Fülsor: nyilakkal bejárható, az aktív fül fehér, alul 3 px zöld vonallal. */
-export function Tabs<T extends string>({ label, tabs, active, onChange, idPrefix, className }: TabsProps<T>) {
+export function Tabs<T extends string>({ label, tabs, active, onChange, idPrefix, controls = true, className }: TabsProps<T>) {
   const refs = useRef(new Map<T, HTMLButtonElement>())
 
   function onKeyDown(event: KeyboardEvent<HTMLButtonElement>, index: number) {
@@ -46,7 +48,7 @@ export function Tabs<T extends string>({ label, tabs, active, onChange, idPrefix
             role="tab"
             id={`${idPrefix}-tab-${tab.id}`}
             aria-selected={selected}
-            aria-controls={`${idPrefix}-panel-${tab.id}`}
+            aria-controls={controls ? `${idPrefix}-panel-${tab.id}` : undefined}
             tabIndex={selected ? 0 : -1}
             onClick={() => onChange(tab.id)}
             onKeyDown={(event) => onKeyDown(event, index)}

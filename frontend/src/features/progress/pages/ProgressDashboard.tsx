@@ -73,7 +73,7 @@ function Report({ report }: { report: ProgressReport }) {
       </section>
 
       <Panel as="section" className="mt-6" aria-labelledby="savok-osszesites">
-        <CardTitle id="savok-osszesites">Hol tartasz a tanulási utakon?</CardTitle>
+        <CardTitle as="h2" id="savok-osszesites">Hol tartasz a tanulási utakon?</CardTitle>
         <p className="mt-1 text-15 leading-relaxed text-ink-soft">A teljesített leckék aránya sávonként.</p>
         <ul className="mt-4 flex flex-col gap-4">
           {report.tracks.map((track) => (

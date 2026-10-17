@@ -30,11 +30,11 @@ test.describe('Kezdőlap', () => {
     await expect(homePage.demoResults.nth(3)).not.toContainText('Bemenet')
   })
 
-  test('az első feladat gombja a feladatlistára visz', { tag: '@regression' }, async ({ homePage, taskListPage }) => {
+  test('a kezdő gomb a tanulási útra visz', { tag: '@regression' }, async ({ homePage, learningPathPage }) => {
     await homePage.goto()
     await homePage.firstTaskLink.click()
 
-    await expect(taskListPage.heading).toBeVisible()
+    await expect(learningPathPage.heading).toBeVisible()
   })
 
   test('keskeny kijelzőn a főmenü gombra nyílik', { tag: '@regression' }, async ({ homePage, page }) => {

@@ -83,7 +83,7 @@ export function Oral() {
                   <Icon name={topic.icon} size={22} />
                 </span>
                 <span className="font-serif text-22 leading-snug font-semibold">{topic.title}</span>
-                <span className="text-16 leading-relaxed text-ink-soft">Elméleti téma kifejtése, majd egy programozási feladat bemutatása.</span>
+                <span className="text-16 leading-relaxed text-ink-soft">Vázlat, időzítő, jegyzet és önértékelés ehhez a témához.</span>
                 <span className="mt-auto border-t border-grid pt-3 text-15 font-semibold text-ink-soft">
                   {attemptsLabel(attemptsOf(topic.slug))}
                 </span>

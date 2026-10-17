@@ -19,7 +19,7 @@ export class HomePage extends BasePage {
     this.heading = page.getByRole('heading', { level: 1 })
     this.mainNav = page.getByRole('navigation', { name: 'Főmenü' })
     this.menuButton = page.getByRole('button', { name: 'Menü' })
-    this.firstTaskLink = page.getByRole('link', { name: 'Első feladat megnyitása' })
+    this.firstTaskLink = page.getByRole('link', { name: 'Kezdd el a tanulást' })
     this.demo = page.getByTestId('live-demo')
     this.demoRunButton = this.demo.getByRole('button', { name: 'Futtatás' })
     this.demoSubmitButton = this.demo.getByRole('button', { name: 'Beadás' })

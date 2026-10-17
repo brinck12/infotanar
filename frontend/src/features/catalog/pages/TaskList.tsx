@@ -42,7 +42,15 @@ interface TaskGroup {
 function groupTasks(tasks: TaskListItem[], tree: CatalogTree | null): TaskGroup[] {
   const groups = new Map<string, TaskGroup>()
 
-  for (const task of tasks) {
+  // A feladatok a tananyag sorrendjében követik egymást (lecke, azon belül a feladat helye), nem betűrendben.
+  const position = (task: TaskListItem): number => {
+    const found = tree?.exercises.get(task.id)
+    if (!found) return Number.MAX_SAFE_INTEGER
+    return found.place.position * 1000 + found.place.lesson.exercises.findIndex((exercise) => exercise.id === task.id)
+  }
+  const ordered = tree ? [...tasks].sort((a, b) => position(a) - position(b)) : tasks
+
+  for (const task of ordered) {
     const track = tree?.exercises.get(task.id)?.place.track
     const key = track ? `sav:${track.slug}` : `tema:${task.topic.slug}`
     const group = groups.get(key) ?? { key, title: track?.title ?? task.topic.name, tasks: [] }
@@ -67,7 +75,7 @@ export function TaskList() {
 
   const tasks = useQuery(tasksQuery({ topic: topic || undefined, level: level || undefined }))
   // A katalógus szerkezetének hiánya nem blokkolja a feladatok megjelenítését.
-  const { tree } = useCatalogTree()
+  const { tree, isPending: treePending } = useCatalogTree()
   const lastTask = readLastTask(userKeyOf(user))
 
   function updateFilter(key: 'sav' | 'szint' | 'allapot', value: string) {
@@ -129,7 +137,7 @@ export function TaskList() {
       </div>
 
       <div className="mt-12">
-        {tasks.isPending && <CardSkeleton count={6} label="Feladatok betöltése…" />}
+        {(tasks.isPending || (tasks.isSuccess && treePending)) && <CardSkeleton count={6} label="Feladatok betöltése…" />}
 
         {tasks.isError && (
           <div data-testid="task-list-error">
@@ -137,7 +145,7 @@ export function TaskList() {
           </div>
         )}
 
-        {tasks.isSuccess && visible.length === 0 && (
+        {tasks.isSuccess && !treePending && visible.length === 0 && (
           <EmptyState
             title="Nincs a szűrésnek megfelelő feladat"
             action={
@@ -151,7 +159,7 @@ export function TaskList() {
         )}
 
         <div className="flex flex-col gap-12">
-          {groups.map((group) => {
+          {(treePending ? [] : groups).map((group) => {
             const done = group.tasks.filter((task) => statusOf(task) === 'solved').length
             return (
               <section key={group.key} aria-labelledby={`csoport-${group.key}`}>
