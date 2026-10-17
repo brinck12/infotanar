@@ -22,17 +22,39 @@ php artisan catalog:verify                     # minden publikált feladat
 php artisan catalog:verify --track=python-alapok   # egy tanulási út (slug vagy azonosító)
 php artisan catalog:verify --exercise=12       # egy feladat (piszkozat is lehet)
 php artisan catalog:verify --json              # géppel olvasható kimenet (CI, naplózás)
+php artisan catalog:verify --track=python-alapok --drafts   # a nem publikált feladatokat is
+php artisan catalog:verify --track=python-alapok --drafts --negative
 ```
+
+Opciók:
+
+- `--drafts`: a **nem publikált** (piszkozat) feladatokat is ellenőrzi, `--track` és `--exercise` mellett is. Nélküle csak a publikált feladatok futnak.
+- `--negative`: az **üres programot** is lefuttatja minden nyelven, és ha az minden teszten átmegy, a feladat hibás. Ez a túl engedékeny elvárt kimenet (például üres vagy mindent elfogadó) ellen véd, amit a mintamegoldás futtatása egyedül nem vesz észre.
+
+## Munkamenet új tartalomnál
+
+1. `php artisan catalog:import` a fájlokból piszkozatként tölti be a feladatokat (`published: false`).
+2. `php artisan catalog:verify --track=<slug> --drafts --negative`: zöld futásig javítsd a mintamegoldást vagy az elvárt kimenetet.
+3. Állítsd a feladatot `published: true`-ra a forrásfájlban.
+4. Futtasd újra a `catalog:import`-ot, ez publikálja.
 
 Kimenet feladatonként: `OK`, `HIBA` (okkal és tesztesetenként), `KIHAGY` (böngészős feladat: a szerver nem ellenőrzi). Hibánál a kilépési kód 1.
 
 ## Mit számít hibának
 
 - **Hiányzik a mintamegoldás.** Kódfeladatnál a `sample_solutions` mezőben legalább egy engedélyezett nyelven kell megoldás (az admin felületen a feladat szerkesztőjében). Fájlfeladatnál a `sample_solution` szerepű feltöltött fájl.
+- **Hiányzik egy engedélyezett nyelv mintamegoldása.** Az `allowed_languages` minden nyelvéhez (`python`, `csharp`, `sql`) kell mintamegoldás; az üzenet megnevezi a hiányzó nyelv(ek)et. Ez mindig érvényes, a kapcsolóktól függetlenül. Ez a szigorúbb szabály az admin „Kipróbálás” műveletet és a CLI-s ellenőrzést is érinti, a publikálási kaput viszont nem: az továbbra is csak legalább egy engedélyezett nyelvű mintamegoldást kér.
+- `--negative` mellett: az üres program is átmegy minden teszten.
 - Nincs teszteset (kódfeladat) vagy nincs értékelőlap-pont (fájlfeladat).
 - Bármelyik teszteset nem `elfogadva` (rossz kimenet, fordítási hiba, futásidejű hiba, időtúllépés, szabálysértés).
 - Fájlfeladatnál a mintamegoldás nem kapja meg a teljes automatikus pontszámot az értékelőlapon.
 - Judge0 nem elérhető: a tesztesetek rendszerhibát jeleznek, a parancs hibával áll le (ilyenkor előbb az alagutat/Judge0-t nézd).
+
+## Tudnivalók
+
+- A `catalog:verify --negative` a nem szerkesztős (nem kódszerkesztős) feladatfajtáknál figyelmen kívül marad: az üres program próbája csak szerkesztős feladatra értelmes.
+- A `position` vagy a slug megváltoztatása után a `catalog:export --force` egy régi `NN-slug` mappát hagyhat az új mellett. Töröld a régit, különben a validátor és a CI `duplicate_slug` hibát jelez.
+- A `catalog:import --dry-run` a `constraints` szabályait és az `sql` nyelvi szabályt is ellenőrzi, tehát a CI már az importnál korábban elkapja a hibás szabályt vagy nyelvlistát.
 
 ## Hibajavítás
 

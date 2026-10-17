@@ -6,6 +6,7 @@ import type { ApiClient } from '../../src/api/ApiClient'
 import type { AdminExercise, AdminExercisePayload, DataEnvelope } from '../../src/api/types'
 import { ECHO_PROGRAM, fixtureFile, FIXTURE_FILES, JUDGE0_CONTROL, SEEDED } from '../../src/data'
 import { expect, test } from '../../src/fixtures'
+import { artisanResult, tinkerJson } from '../../src/support/artisan'
 
 const BASE: AdminExercisePayload = {
   lesson_id: SEEDED.typed.sheetUpload.lessonId,
@@ -261,5 +262,65 @@ test.describe('POST /admin/exercises/{id}/verify', () => {
     const result = await verifyExercise(admin.client, exercise.id)
     expect(result.status).toBe(200)
     expect(result.body.data).toMatchObject({ kind: 'sheet_upload', status: 'passed' })
+  })
+})
+
+interface CliReport {
+  ok: boolean
+  exercises: { exercise_id: number; status: string; message: string | null }[]
+}
+
+/** A `catalog:verify --json` kimenete; ha nincs ellenorizendo feladat, a parancs nem JSON-t ir: ures jelentes. */
+function verifyCli(args: string[]): CliReport {
+  const result = artisanResult(['catalog:verify', '--json', ...args])
+  return result.stdout.trimStart().startsWith('{') ? (JSON.parse(result.stdout) as CliReport) : { ok: false, exercises: [] }
+}
+
+function reportOf(report: CliReport, id: number): CliReport['exercises'][number] | undefined {
+  return report.exercises.find((row) => row.exercise_id === id)
+}
+
+test.describe('catalog:verify: nyelvenkénti mintamegoldás', () => {
+  test('az engedélyezett nyelvek mindegyikéhez kell mintamegoldás', { tag: '@regression' }, async ({ apiClient }) => {
+    const admin = await adminAccount(apiClient)
+    const exercise = await codeExercise(admin.client, { allowed_languages: ['python', 'csharp'], sample_solutions: { python: ECHO_PROGRAM } })
+
+    const result = await verifyExercise(admin.client, exercise.id)
+
+    expect(result.body.data.status).toBe('failed')
+    expect(result.body.data.message).toContain('csharp')
+    expect(result.body.data.message).not.toContain('python')
+  })
+})
+
+test.describe('catalog:verify --drafts', () => {
+  test('a piszkozat feladat csak --drafts kapcsolóval kerül az ellenőrzésbe', { tag: '@regression' }, async ({ apiClient }) => {
+    const admin = await adminAccount(apiClient)
+    const exercise = await codeExercise(admin.client, { sample_solutions: { python: ECHO_PROGRAM }, is_published: false })
+    const slug = String(tinkerJson(`return App\\Models\\Exercise::query()->findOrFail(${String(exercise.id)})->lesson->module->track->slug;`))
+
+    expect(reportOf(verifyCli([`--track=${slug}`]), exercise.id)).toBeUndefined()
+    expect(reportOf(verifyCli([`--track=${slug}`, '--drafts']), exercise.id)).toMatchObject({ status: 'passed' })
+  })
+})
+
+test.describe('catalog:verify --negative', () => {
+  test('az üres programon is átmenő feladat hibás, a szigorú feladat nem', { tag: '@regression' }, async ({ apiClient }) => {
+    const admin = await adminAccount(apiClient)
+    const strict = await codeExercise(admin.client, { sample_solutions: { python: ECHO_PROGRAM } })
+    const lenient = await newExercise(admin.client, { sample_solutions: { python: ECHO_PROGRAM } })
+    // A mock az üres programra üres kimenetet ad: az üres elvárt kimenet ezt is elfogadja.
+    // Az API üres elvárt kimenetet nem enged, ezért az adatbázisban írjuk át.
+    expect((await createTestCase(admin.client, lenient.id, { stdin: '', expected_stdout: 'x', is_hidden: false })).status).toBe(201)
+    tinkerJson(`App\\Models\\TestCase::query()->where('exercise_id', ${String(lenient.id)})->update(['expected_stdout' => '']); return true;`)
+
+    expect(reportOf(verifyCli([`--exercise=${String(lenient.id)}`]), lenient.id)).toMatchObject({ status: 'passed' })
+
+    const negative = verifyCli([`--exercise=${String(lenient.id)}`, '--negative'])
+    expect(negative.ok).toBe(false)
+    expect(reportOf(negative, lenient.id)).toMatchObject({ status: 'failed' })
+    expect(reportOf(negative, lenient.id)?.message).toContain('python')
+
+    expect(reportOf(verifyCli([`--exercise=${String(strict.id)}`, '--negative']), strict.id)).toMatchObject({ status: 'passed' })
   })
 })

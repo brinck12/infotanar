@@ -1,0 +1,45 @@
+slug: koszontes-kiirasa
+title: Köszöntés kiírása
+position: 0
+kind: code
+level: kozep
+difficulty: 1
+published: false
+allowed_languages: [python, csharp]
+description: |
+  Írj programot, amely a képernyőre írja a következő sort, pontosan így:
+
+  `Üdv az InfoTanár oldalán!`
+
+  A program nem kér be semmit.
+
+  Tipp: a kiírandó szöveget idézőjelek közé kell tenni, és a mondatvégi felkiáltójelet is ki kell írni.
+starter_code:
+  python: |
+    # ide írd a megoldást
+  csharp: |
+    using System;
+
+    class Program
+    {
+        static void Main()
+        {
+            // ide írd a megoldást
+        }
+    }
+sample_solutions:
+  python: |
+    print("Üdv az InfoTanár oldalán!")
+  csharp: |
+    using System;
+
+    class Program
+    {
+        static void Main()
+        {
+            Console.WriteLine("Üdv az InfoTanár oldalán!");
+        }
+    }
+tests:
+  - { stdin: "", expected: "Üdv az InfoTanár oldalán!\n", hidden: false }
+  - { stdin: "\n", expected: "Üdv az InfoTanár oldalán!\n", hidden: true }

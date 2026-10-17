@@ -322,6 +322,15 @@
     margin: 16px 0 0;
   }
 
+  /* Nyelvi lapfülek a kódblokkok fölött: a távolságot a külső doboz adja, a kódfelület közvetlenül a fülek alatt áll. */
+  .prose-task .prose-code-tabs {
+    margin: 16px 0 0;
+  }
+
+  .prose-task .prose-code-tabs .prose-code {
+    margin: 0;
+  }
+
   .prose-task a {
     overflow-wrap: anywhere;
   }

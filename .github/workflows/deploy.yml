@@ -96,7 +96,7 @@ jobs:
           DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
         run: |
           ssh -i ~/.ssh/deploy_key "$DEPLOY_USER@$DEPLOY_HOST" \
-            "mkdir -p '$DEPLOY_PATH/frontend' '$DEPLOY_PATH/backend'"
+            "mkdir -p '$DEPLOY_PATH/frontend' '$DEPLOY_PATH/backend' '$DEPLOY_PATH/content'"
 
       - name: Frontend feltöltése
         env:
@@ -125,12 +125,25 @@ jobs:
             -e "ssh -i ~/.ssh/deploy_key" \
             backend/ "$DEPLOY_USER@$DEPLOY_HOST:$DEPLOY_PATH/backend/"
 
+      - name: Tartalmi fájlok feltöltése
+        env:
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+          DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+          DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
+        run: |
+          rsync -az --delete \
+            -e "ssh -i ~/.ssh/deploy_key" \
+            content/ "$DEPLOY_USER@$DEPLOY_HOST:$DEPLOY_PATH/content/"
+
       - name: Migráció és cache-ek frissítése
         env:
           DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
           DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
           DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
           STRICT_CONFIG_FLAG: ${{ vars.DEPLOY_STRICT_CONFIG == 'true' && '--strict' || '' }}
+          # Alapértelmezés: kikapcsolva, hogy az első deploy ne írja felül az admin
+          # felületen készült tartalmat (előbb catalog:export, git-commit, majd bekapcsolás).
+          CATALOG_IMPORT: ${{ vars.CATALOG_IMPORT_ON_DEPLOY == 'true' && 'yes' || '' }}
         run: |
           ssh -i ~/.ssh/deploy_key "$DEPLOY_USER@$DEPLOY_HOST" bash -se <<EOSSH
           set -euo pipefail
@@ -172,6 +185,12 @@ jobs:
 
           # OPcache miatt a php-fpm-nek ujra kell olvasnia a fajlokat.
           sudo -n systemctl reload php8.3-fpm
+
+          # Opcionalis tartalom-import (CATALOG_IMPORT_ON_DEPLOY); a vegen fut, hogy egy
+          # hibas import ne hagyja felig kesz allapotban a cache-eket. Admin felhasznalo kell.
+          if [ -n "$CATALOG_IMPORT" ]; then
+            php artisan catalog:import
+          fi
           EOSSH
 
       # A DEPLOY_URL a nyilvanos, HTTPS-es cim (pl. https://infotanar.hu). A curl

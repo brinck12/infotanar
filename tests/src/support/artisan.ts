@@ -5,7 +5,7 @@
  *
  * Az adatbazis a `test:prepare-api-fixtures` utan all; az itt irt sorokat a tesztek maguk takaritjak.
  */
-import { execFileSync } from 'node:child_process'
+import { execFileSync, spawnSync } from 'node:child_process'
 import path from 'node:path'
 
 export const BACKEND_DIR = path.resolve(process.env.TEST_BACKEND_PATH ?? path.join(__dirname, '../../../backend'))
@@ -108,4 +108,23 @@ export function storedPreferences(userId: number): unknown {
 /** Szobeli gyakorlas sort ir egy (akar torolt) felhasznalonak: a seprés tesztjehez. */
 export function plantOralPractice(userId: number): void {
   tinkerJson(`App\\Models\\OralPractice::query()->create(['user_id' => ${String(userId)}, 'topic' => 'szovegszerkesztes']); return true;`)
+}
+
+/** Egy artisan parancs eredmenye: nem dob nem-nulla kilepesi kodra (a hibaeseteket tesztelni lehessen). */
+export interface ArtisanResult {
+  status: number
+  stdout: string
+  stderr: string
+}
+
+/** Lefuttat egy artisan parancsot, es a kilepesi kodot, valamint a kimeneteket adja vissza. */
+export function artisanResult(args: string[]): ArtisanResult {
+  const result = spawnSync('php', ['artisan', ...args], {
+    cwd: BACKEND_DIR,
+    env: backendEnv(),
+    encoding: 'utf8',
+    maxBuffer: 16 * 1024 * 1024,
+  })
+
+  return { status: result.status ?? 1, stdout: result.stdout, stderr: result.stderr }
 }

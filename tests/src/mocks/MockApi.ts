@@ -9,6 +9,8 @@ const API = '**/api/v1'
 export interface MockCatalog {
   topics: Topic[]
   tasks: TaskDetail[]
+  /** A leckék Markdown szövege; hiányában a rövid alapszöveg. */
+  lessonContent?: string
 }
 
 export interface MockResponseOptions {
@@ -83,7 +85,11 @@ export class MockApi {
     await this.page.route(`${API}/tracks`, (route) => route.fulfill({ json: { data: [toTrackSummary(track)] } }))
     await this.page.route(`${API}/tracks/*`, (route) => route.fulfill({ json: { data: track } }))
     await this.page.route(`${API}/tracks/*/lessons/*`, (route) => {
-      const lesson = toLessonDetail(track, decodeURIComponent(new URL(route.request().url()).pathname.split('/').at(-1) ?? ''))
+      const lesson = toLessonDetail(
+        track,
+        decodeURIComponent(new URL(route.request().url()).pathname.split('/').at(-1) ?? ''),
+        catalog.lessonContent
+      )
       return lesson ? route.fulfill({ json: { data: lesson } }) : route.fulfill({ status: 404, json: { message: 'Not Found' } })
     })
     await this.page.route(`${API}/billing/plan`, (route) =>

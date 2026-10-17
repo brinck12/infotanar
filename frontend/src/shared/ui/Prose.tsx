@@ -3,6 +3,11 @@ import ReactMarkdown, { type Components } from 'react-markdown'
 import { Link } from 'react-router-dom'
 import remarkGfm from 'remark-gfm'
 import { CodeBlock, type CodeLanguage } from './CodeBlock'
+import { CodeTabs } from './CodeTabsBlock'
+import { remarkCodeTabs, parseCodeTabBlocks } from './codeTabs'
+import { remarkLangSections } from './langSections'
+import { useLessonLanguage } from '../domain/lessonLanguage'
+import type { StudyLanguage } from '../domain/preferences'
 import { cx } from './cx'
 import { headingId } from './headings'
 
@@ -24,13 +29,13 @@ export function Prose({ markdown, className, codeBlocks = false, anchors = false
   const components: Components = {
     a: ProseLink,
     table: ScrollableTable,
-    ...(codeBlocks && { pre: HighlightedBlock }),
+    ...(codeBlocks && { pre: HighlightedBlock, 'code-tabs': CodeTabsElement, 'lang-section': LangSectionElement }),
     ...(anchors && { h2: AnchoredHeading }),
   }
 
   return (
     <div className={cx('prose-task', className)}>
-      <ReactMarkdown remarkPlugins={[remarkGfm]} components={components}>
+      <ReactMarkdown remarkPlugins={codeBlocks ? [remarkGfm, remarkLangSections, remarkCodeTabs] : [remarkGfm]} components={components}>
         {markdown}
       </ReactMarkdown>
     </div>
@@ -98,4 +103,16 @@ function HighlightedBlock({ children }: ComponentProps<'pre'>) {
       className="prose-code rounded-md"
     />
   )
+}
+
+/** A `remarkCodeTabs` által készített elem; a blokkok JSON-ként érkeznek. */
+function CodeTabsElement({ blocks }: { blocks?: string }) {
+  return <CodeTabs blocks={parseCodeTabBlocks(blocks)} />
+}
+
+/** A `remarkLangSections` által készített elem: csak a választott nyelven jelenik meg. */
+function LangSectionElement({ language, children }: { language?: StudyLanguage; children?: ReactNode }) {
+  const [chosen] = useLessonLanguage()
+
+  return language === chosen ? <>{children}</> : null
 }

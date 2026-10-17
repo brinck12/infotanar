@@ -23,6 +23,9 @@ enum AuditAction: string
     case CatalogDeleted = 'catalog.deleted';
     case CatalogReordered = 'catalog.reordered';
 
+    // A `catalog:import` egy futasanak osszefoglalo esemenye (csak darabszamok, alany nelkul).
+    case CatalogImported = 'catalog_imported';
+
     // Feladathoz vagy vizsgahoz csatolt fajlok; az alany maga a csatolmany.
     case AttachmentUploaded = 'attachment.uploaded';
     case AttachmentDeleted = 'attachment.deleted';

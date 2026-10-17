@@ -1,0 +1,12 @@
+slug: pw-import-rossz-nyelv
+title: PW import rossz nyelv
+position: 1
+kind: code
+level: kozep
+difficulty: 1
+allowed_languages: [ruby]
+description: x
+sample_solutions:
+  ruby: puts 1
+tests:
+  - { stdin: "", expected: "1\n" }

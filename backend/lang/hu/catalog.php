@@ -15,6 +15,8 @@ return [
     'sample_solution_language' => 'Mintamegoldás csak engedélyezett nyelvre adható meg („:language” nincs az engedélyezettek között).',
     'verify' => [
         'sample_missing' => 'hiányzik a mintamegoldás',
+        'sample_language_missing' => 'hiányzik a mintamegoldás ehhez a nyelvhez: :languages',
+        'negative_passed' => 'az üres program is átmegy minden teszten (:languages): az elvárt kimenet túl engedékeny',
         'no_test_cases' => 'nincs teszteset',
         'rubric_empty' => 'nincs értékelőlap',
         'browser_only' => 'böngészős feladat: a szerver nem ellenőrzi',

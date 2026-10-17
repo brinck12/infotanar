@@ -95,6 +95,21 @@ jobs:
       - name: Végpontlista naprakész
         run: php artisan docs:endpoints --check
 
+      # A content/catalog fájljai (Markdown/YAML) minden pushnál érvényesítődnek: a
+      # tartalmi hiba itt bukik, nem az importnál. Eldobható sqlite adatbázison fut,
+      # a dry-run nem ír bele, de az összevetéshez a sémának meg kell lennie.
+      - name: Tartalmi fájlok érvényesítése (catalog:import --dry-run)
+        env:
+          APP_ENV: testing
+          # Csak az eldobható CI-adatbázishoz; nem titok.
+          APP_KEY: base64:IuoO2O2E2ePTfNKZ3XNlVF5ZfvMJM5zld0sDIFlKhQ8=
+          DB_CONNECTION: sqlite
+          DB_DATABASE: ${{ runner.temp }}/catalog-dry-run.sqlite
+        run: |
+          touch "$DB_DATABASE"
+          php artisan migrate --force
+          php artisan catalog:import --dry-run
+
       # Egy már lefutott migráció szerkesztése az éles adatbázison nem fut le
       # újra: a séma csak új migrációval változhat. A PR merge-commitját
       # hasonlítjuk a célághoz, így a célág újabb migrációi nem zavarnak be.

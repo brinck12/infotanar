@@ -7,6 +7,7 @@ import { AdminExercisePage } from '../pages/AdminExercisePage'
 import { ExamPage } from '../pages/ExamPage'
 import { HomePage } from '../pages/HomePage'
 import { LearningPathPage } from '../pages/LearningPathPage'
+import { LessonPage } from '../pages/LessonPage'
 import { OnboardingPage } from '../pages/OnboardingPage'
 import { OralPage } from '../pages/OralPage'
 import { RegisterPage } from '../pages/RegisterPage'
@@ -33,6 +34,7 @@ export interface FrameworkFixtures {
   onboardingPage: OnboardingPage
   oralPage: OralPage
   learningPathPage: LearningPathPage
+  lessonPage: LessonPage
   registerPage: RegisterPage
   sheetPracticePage: SheetPracticePage
   taskListPage: TaskListPage
@@ -94,6 +96,10 @@ export const test = base.extend<FrameworkFixtures & A11yFixtures & FrameworkOpti
 
   learningPathPage: async ({ page, mockApi: _ }, use) => {
     await use(new LearningPathPage(page))
+  },
+
+  lessonPage: async ({ page, mockApi: _ }, use) => {
+    await use(new LessonPage(page))
   },
 
   registerPage: async ({ page, mockApi: _ }, use) => {

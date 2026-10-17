@@ -19,12 +19,15 @@ use Illuminate\Database\Eloquent\Builder;
  *   php artisan catalog:verify
  *   php artisan catalog:verify --track=python-alapok --json
  *   php artisan catalog:verify --exercise=12     (piszkozat is ellenorizheto)
+ *   php artisan catalog:verify --track=python-alapok --drafts --negative
  */
 final class VerifyCatalogCommand extends Command
 {
     protected $signature = 'catalog:verify
         {--exercise= : Csak ez a feladat (azonosító); piszkozat is lehet}
         {--track= : Csak ennek a tanulási útnak a feladatai (azonosító vagy slug)}
+        {--drafts : A nem publikált feladatokat is ellenőrzi (a --track / --exercise szűkítheti)}
+        {--negative : Az üres programnak el kell buknia: ha minden teszten átmegy, a feladat hibás}
         {--json : Géppel olvasható kimenet}';
 
     protected $description = 'A publikált feladatok mintamegoldásának lefuttatása a saját teszteseteiken (valódi Judge0 kell)';
@@ -39,7 +42,7 @@ final class VerifyCatalogCommand extends Command
             return self::FAILURE;
         }
 
-        $verifications = array_map($verifier->verify(...), $exercises);
+        $verifications = array_map(fn (Exercise $exercise): ExerciseVerification => $verifier->verify($exercise, $this->option('negative') === true), $exercises);
         $failures = array_filter($verifications, static fn (ExerciseVerification $v): bool => $v->isFailure());
 
         if ($this->option('json') === true) {
@@ -81,7 +84,7 @@ final class VerifyCatalogCommand extends Command
 
         if (is_string($exercise) && $exercise !== '') {
             $query->whereKey((int) $exercise);
-        } else {
+        } elseif ($this->option('drafts') !== true) {
             $query->published();
         }
 

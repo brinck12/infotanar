@@ -11,6 +11,8 @@ import { cx } from '../../../shared/ui/cx'
 import { StateIcon } from '../../../shared/ui/Icon'
 import { PageLoader } from '../../../shared/ui/PageLoader'
 import { Panel } from '../../../shared/ui/Panel'
+import { LanguagePicker } from '../../../shared/ui/LanguagePicker'
+import { hasLanguageContent } from '../../../shared/ui/langSections'
 import { Prose } from '../../../shared/ui/Prose'
 import { LoadError } from '../../../shared/ui/States'
 import { CardTitle, PageTitle } from '../../../shared/ui/Text'
@@ -102,7 +104,8 @@ function Lesson({ lesson }: { lesson: LessonDetail }) {
 
               {lesson.content.trim() !== '' && (
                 <Panel as="section" pad="xl" aria-label="Tananyag" data-testid="lesson-content">
-                  <Prose markdown={lesson.content} codeBlocks />
+                  {hasLanguageContent(lesson.content) && <LanguagePicker />}
+                  <Prose markdown={lesson.content} codeBlocks className={hasLanguageContent(lesson.content) ? 'mt-6' : undefined} />
                 </Panel>
               )}
 
