@@ -1,0 +1,48 @@
+slug: a-harom-legjobb
+title: "A három legjobb"
+position: 5
+kind: sql
+level: kozep
+difficulty: 2
+published: false
+allowed_languages: [sql]
+sql_order_sensitive: true
+description: |
+  Az alábbi lekérdezésnek a **három legtöbb pontot elérő** diákot kellene kiadnia a pontszám szerint csökkenő sorrendben. Ehelyett a három legrosszabbat adja vissza. Javítsd ki!
+
+  A `diak` tábla:
+
+  | oszlop | típus |
+  |---|---|
+  | `id` | `INT`, elsődleges kulcs |
+  | `nev` | `VARCHAR(50)` |
+  | `pont` | `INT` |
+
+  Add meg a `nev` és `pont` oszlopot, a legtöbb ponttal rendelkező diákkal kezdve! A sorrend most számít. A pontszámok a legjobb három között nem egyeznek meg.
+
+  Tipp: az `ORDER BY` alapértelmezett iránya növekvő. A csökkenő sorrendhez külön kulcsszó kell.
+starter_code:
+  sql: |
+    SELECT nev, pont
+    FROM diak
+    ORDER BY pont
+    LIMIT 3;
+sample_solutions:
+  sql: |
+    SELECT nev, pont
+    FROM diak
+    ORDER BY pont DESC
+    LIMIT 3;
+tests:
+  - stdin: "CREATE TABLE diak (id INTEGER PRIMARY KEY, nev TEXT, pont INTEGER);\nINSERT INTO diak VALUES\n(1, 'Anna', 80),\n(2, 'Bela', 45),\n(3, 'Cili', 95),\n(4, 'Dani', 60),\n(5, 'Emma', 88);\n"
+    expected: "nev,pont\nCili,95\nEmma,88\nAnna,80\n"
+    hidden: false
+  - stdin: "CREATE TABLE diak (id INTEGER PRIMARY KEY, nev TEXT, pont INTEGER);\nINSERT INTO diak VALUES\n(1, 'Feri', 10),\n(2, 'Gabor', 30),\n(3, 'Hanna', 20);\n"
+    expected: "nev,pont\nGabor,30\nHanna,20\nFeri,10\n"
+    hidden: true
+  - stdin: "CREATE TABLE diak (id INTEGER PRIMARY KEY, nev TEXT, pont INTEGER);\nINSERT INTO diak VALUES\n(1, 'Ivan', 70),\n(2, 'Jolan', 71),\n(3, 'Kata', 72),\n(4, 'Laci', 73),\n(5, 'Mate', 74),\n(6, 'Nora', 75),\n(7, 'Oliver', 5);\n"
+    expected: "nev,pont\nNora,75\nMate,74\nLaci,73\n"
+    hidden: true
+  - stdin: "CREATE TABLE diak (id INTEGER PRIMARY KEY, nev TEXT, pont INTEGER);\nINSERT INTO diak VALUES\n(1, 'Panna', 100),\n(2, 'Rita', 99);\n"
+    expected: "nev,pont\nPanna,100\nRita,99\n"
+    hidden: true

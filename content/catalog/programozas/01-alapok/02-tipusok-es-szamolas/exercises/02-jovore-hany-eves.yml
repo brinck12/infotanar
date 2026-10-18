@@ -1,0 +1,53 @@
+slug: jovore-hany-eves
+title: Jövőre hány éves
+position: 1
+kind: code
+level: kozep
+difficulty: 2
+published: false
+allowed_languages: [python, csharp]
+description: |
+  Olvasd be egy gyerek keresztnevét (ékezet nélkül), majd a korát (egész szám), mindegyiket külön sorban. Írd ki, hány éves lesz jövőre, pontosan ebben a formában: `<nev> jovore <kor+1> eves lesz.`
+
+  Példa: ha a bemenet `Anna` és `14`, a kimenet `Anna jovore 15 eves lesz.`
+
+  Tipp: a kort számként kell beolvasni, hogy hozzáadhass egyet, a kiíráshoz viszont szöveggé kell alakítani (`str(...)`, illetve `$"..."` vagy `.ToString()`).
+starter_code:
+  python: |
+    nev = input()
+    kor = int(input())
+    # innen folytasd
+  csharp: |
+    using System;
+
+    class Program
+    {
+        static void Main()
+        {
+            string nev = Console.ReadLine();
+            int kor = int.Parse(Console.ReadLine());
+            // innen folytasd
+        }
+    }
+sample_solutions:
+  python: |
+    nev = input()
+    kor = int(input())
+    print(nev + " jovore " + str(kor + 1) + " eves lesz.")
+  csharp: |
+    using System;
+
+    class Program
+    {
+        static void Main()
+        {
+            string nev = Console.ReadLine();
+            int kor = int.Parse(Console.ReadLine());
+            Console.WriteLine($"{nev} jovore {kor + 1} eves lesz.");
+        }
+    }
+tests:
+  - { stdin: "Anna\n14\n", expected: "Anna jovore 15 eves lesz.\n", hidden: false }
+  - { stdin: "Bela\n0\n", expected: "Bela jovore 1 eves lesz.\n", hidden: true }
+  - { stdin: "Zsofia\n99\n", expected: "Zsofia jovore 100 eves lesz.\n", hidden: true }
+  - { stdin: "Ed\n17\n", expected: "Ed jovore 18 eves lesz.\n", hidden: true }

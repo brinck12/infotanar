@@ -1,0 +1,106 @@
+slug: hany-listaban-szerepel
+title: "Hány listában szerepel"
+position: 3
+kind: code
+level: emelt
+difficulty: 4
+published: false
+allowed_languages: [python, csharp]
+description: |
+  A bemenet első sora a listák száma (K, legalább 1), majd K sor, mindegyikben egy nem üres, szóközzel elválasztott egész számokból álló lista. Egy listán belül egy érték többször is szerepelhet, de egy listát **egy előfordulásnak** számítunk. Írd ki az uniójukban szereplő minden értéket növekvő sorrendben, soronként `ertek: db` alakban, ahol `db` azon listák száma, amelyekben az érték szerepel.
+
+  Példa bemenet:
+
+  ```
+  3
+  1 2 3
+  2 3 4
+  3 3 9
+  ```
+
+  Kimenet:
+
+  ```
+  1: 1
+  2: 2
+  3: 3
+  4: 1
+  9: 1
+  ```
+
+  Tipp: minden listából készíts halmazt (így az ismétlődés nem számít), és szótárban számold, hány halmazban fordul elő az érték. A kiíráshoz rendezd a kulcsokat.
+starter_code:
+  python: |
+    k = int(input())
+    szamlalo = {}
+    # olvasd be a listákat, és számold a listánkénti előfordulást
+  csharp: |
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+
+    class Program
+    {
+        static void Main()
+        {
+            int k = int.Parse(Console.ReadLine());
+            var szamlalo = new Dictionary<int, int>();
+            // olvasd be a listákat, és számold a listánkénti előfordulást
+        }
+    }
+sample_solutions:
+  python: |
+    k = int(input())
+    szamlalo = {}
+    for _ in range(k):
+        halmaz = set(int(x) for x in input().split())
+        for x in halmaz:
+            if x in szamlalo:
+                szamlalo[x] += 1
+            else:
+                szamlalo[x] = 1
+    for x in sorted(szamlalo):
+        print(str(x) + ": " + str(szamlalo[x]))
+  csharp: |
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+
+    class Program
+    {
+        static void Main()
+        {
+            int k = int.Parse(Console.ReadLine());
+            var szamlalo = new Dictionary<int, int>();
+            for (int i = 0; i < k; i++)
+            {
+                var halmaz = new HashSet<int>();
+                foreach (string s in Console.ReadLine().Split(' '))
+                {
+                    halmaz.Add(int.Parse(s));
+                }
+                foreach (int x in halmaz)
+                {
+                    if (szamlalo.ContainsKey(x))
+                    {
+                        szamlalo[x]++;
+                    }
+                    else
+                    {
+                        szamlalo[x] = 1;
+                    }
+                }
+            }
+            var kulcsok = szamlalo.Keys.ToList();
+            kulcsok.Sort();
+            foreach (int x in kulcsok)
+            {
+                Console.WriteLine(x + ": " + szamlalo[x]);
+            }
+        }
+    }
+tests:
+  - { stdin: "3\n1 2 3\n2 3 4\n3 3 9\n", expected: "1: 1\n2: 2\n3: 3\n4: 1\n9: 1\n", hidden: false }
+  - { stdin: "1\n5 5 5\n", expected: "5: 1\n", hidden: true }
+  - { stdin: "2\n-1 0\n0 1\n", expected: "-1: 1\n0: 2\n1: 1\n", hidden: true }
+  - { stdin: "4\n10\n10 20\n10 20 30\n10 20 30 40\n", expected: "10: 4\n20: 3\n30: 2\n40: 1\n", hidden: true }

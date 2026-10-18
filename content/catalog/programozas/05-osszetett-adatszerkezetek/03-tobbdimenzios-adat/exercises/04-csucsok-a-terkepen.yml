@@ -1,0 +1,143 @@
+slug: csucsok-a-terkepen
+title: "Csúcsok a térképen"
+position: 3
+kind: code
+level: emelt
+difficulty: 4
+published: false
+allowed_languages: [python, csharp]
+description: |
+  Egy terep magasságait R × C-s táblázat adja: az első sor `R C`, utána R sor, soronként C egész szám. Egy mező **csúcs**, ha a magassága szigorúan nagyobb minden közvetlen (fel, le, balra, jobbra) szomszédjáénál. A szélső mezőknek kevesebb szomszédjuk van, azokat csak a létezőkhöz hasonlítjuk.
+
+  Írd ki az első sorba a csúcsok számát (`Csucsok: k`), utána soronként a csúcsok helyét `sor oszlop` alakban, 1-től számozva, soronként balról jobbra, fentről lefelé haladva.
+
+  Példa bemenet:
+
+  ```
+  3 4
+  1 2 1 1
+  1 9 2 3
+  4 1 1 8
+  ```
+
+  Kimenet:
+
+  ```
+  Csucsok: 3
+  2 2
+  3 1
+  3 4
+  ```
+
+  Tipp: a szomszéd indexét olvasás előtt ellenőrizd. Egy mező akkor csúcs, ha egyik létező szomszédja sem nagyobb vagy egyenlő nála.
+starter_code:
+  python: |
+    r, c = input().split()
+    r = int(r)
+    c = int(c)
+    terkep = []
+    for _ in range(r):
+        terkep.append([int(x) for x in input().split()])
+    # keresd meg a csúcsokat
+  csharp: |
+    using System;
+    using System.Collections.Generic;
+
+    class Program
+    {
+        static void Main()
+        {
+            string[] meret = Console.ReadLine().Split(' ');
+            int r = int.Parse(meret[0]);
+            int c = int.Parse(meret[1]);
+            int[,] terkep = new int[r, c];
+            for (int i = 0; i < r; i++)
+            {
+                string[] sor = Console.ReadLine().Split(' ');
+                for (int j = 0; j < c; j++)
+                {
+                    terkep[i, j] = int.Parse(sor[j]);
+                }
+            }
+            // keresd meg a csúcsokat
+        }
+    }
+sample_solutions:
+  python: |
+    r, c = input().split()
+    r = int(r)
+    c = int(c)
+    terkep = []
+    for _ in range(r):
+        terkep.append([int(x) for x in input().split()])
+    irany = [(-1, 0), (1, 0), (0, -1), (0, 1)]
+    csucsok = []
+    for i in range(r):
+        for j in range(c):
+            csucs = True
+            for di, dj in irany:
+                ni = i + di
+                nj = j + dj
+                if 0 <= ni < r and 0 <= nj < c and terkep[ni][nj] >= terkep[i][j]:
+                    csucs = False
+            if csucs:
+                csucsok.append((i + 1, j + 1))
+    print("Csucsok:", len(csucsok))
+    for i, j in csucsok:
+        print(i, j)
+  csharp: |
+    using System;
+    using System.Collections.Generic;
+
+    class Program
+    {
+        static void Main()
+        {
+            string[] meret = Console.ReadLine().Split(' ');
+            int r = int.Parse(meret[0]);
+            int c = int.Parse(meret[1]);
+            int[,] terkep = new int[r, c];
+            for (int i = 0; i < r; i++)
+            {
+                string[] sor = Console.ReadLine().Split(' ');
+                for (int j = 0; j < c; j++)
+                {
+                    terkep[i, j] = int.Parse(sor[j]);
+                }
+            }
+            int[] di = { -1, 1, 0, 0 };
+            int[] dj = { 0, 0, -1, 1 };
+            var csucsok = new List<string>();
+            for (int i = 0; i < r; i++)
+            {
+                for (int j = 0; j < c; j++)
+                {
+                    bool csucs = true;
+                    for (int k = 0; k < 4; k++)
+                    {
+                        int ni = i + di[k];
+                        int nj = j + dj[k];
+                        if (ni >= 0 && ni < r && nj >= 0 && nj < c && terkep[ni, nj] >= terkep[i, j])
+                        {
+                            csucs = false;
+                        }
+                    }
+                    if (csucs)
+                    {
+                        csucsok.Add((i + 1) + " " + (j + 1));
+                    }
+                }
+            }
+            Console.WriteLine("Csucsok: " + csucsok.Count);
+            foreach (string s in csucsok)
+            {
+                Console.WriteLine(s);
+            }
+        }
+    }
+tests:
+  - { stdin: "3 4\n1 2 1 1\n1 9 2 3\n4 1 1 8\n", expected: "Csucsok: 3\n2 2\n3 1\n3 4\n", hidden: false }
+  - { stdin: "1 1\n5\n", expected: "Csucsok: 1\n1 1\n", hidden: true }
+  - { stdin: "2 2\n3 3\n3 3\n", expected: "Csucsok: 0\n", hidden: true }
+  - { stdin: "3 3\n9 1 9\n1 1 1\n9 1 9\n", expected: "Csucsok: 4\n1 1\n1 3\n3 1\n3 3\n", hidden: true }
+  - { stdin: "1 5\n1 3 2 5 4\n", expected: "Csucsok: 2\n1 2\n1 4\n", hidden: true }

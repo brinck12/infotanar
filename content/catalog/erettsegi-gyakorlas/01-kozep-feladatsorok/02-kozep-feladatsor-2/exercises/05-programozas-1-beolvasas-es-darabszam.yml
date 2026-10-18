@@ -1,0 +1,175 @@
+slug: programozas-1-beolvasas-es-darabszam
+title: Programozás 1 - Beolvasás és darabszám
+position: 4
+kind: code
+level: kozep
+difficulty: 1
+published: false
+allowed_languages:
+- python
+- csharp
+description: |
+  A `vetitesek.txt` a mozi vetítéseit tartalmazza, soronként egy vetítéssel, pontosvesszővel elválasztva: `cím;műfaj;játékidő percben;kezdés;eladott jegyek;jegyár`. A kezdés `ÓÓ:PP` alakú. Az adatokban nincs ékezet, a fájl legalább egy sort tartalmaz.
+
+  **1. feladat.** Olvassa be a fájlt, és írja ki, hány vetítés szerepel benne, a mintának megfelelően.
+
+  A mintafájlra a kimenet:
+
+  ```text
+  1. feladat: A fajlban 14 vetites szerepel.
+  ```
+
+  Tipp: a fájl sorainak száma a vetítések száma.
+starter_code:
+  python: |
+    class Vetites:
+        def __init__(self, sor):
+            r = sor.split(";")
+            self.cim = r[0]
+            self.mufaj = r[1]
+            self.hossz = int(r[2])
+            self.kezdes = r[3]
+            self.eladott = int(r[4])
+            self.jegyar = int(r[5])
+
+        def bevetel(self):
+            return self.eladott * self.jegyar
+
+
+    with open("vetitesek.txt", encoding="utf-8") as f:
+        vetitesek = [Vetites(sor) for sor in f.read().splitlines()]
+    # ide írd a megoldást
+  csharp: |
+    using System;
+    using System.Collections.Generic;
+    using System.IO;
+
+    class Vetites
+    {
+        public string Cim;
+        public string Mufaj;
+        public int Hossz;
+        public string Kezdes;
+        public int Eladott;
+        public int Jegyar;
+
+        public Vetites(string sor)
+        {
+            string[] r = sor.Split(';');
+            Cim = r[0];
+            Mufaj = r[1];
+            Hossz = int.Parse(r[2]);
+            Kezdes = r[3];
+            Eladott = int.Parse(r[4]);
+            Jegyar = int.Parse(r[5]);
+        }
+
+        public int Bevetel()
+        {
+            return Eladott * Jegyar;
+        }
+    }
+
+    class Program
+    {
+        static void Main()
+        {
+            List<Vetites> vetitesek = new List<Vetites>();
+            foreach (string sor in File.ReadAllLines("vetitesek.txt"))
+            {
+                vetitesek.Add(new Vetites(sor));
+            }
+            // ide írd a megoldást
+        }
+    }
+sample_solutions:
+  python: |
+    class Vetites:
+        def __init__(self, sor):
+            r = sor.split(";")
+            self.cim = r[0]
+            self.mufaj = r[1]
+            self.hossz = int(r[2])
+            self.kezdes = r[3]
+            self.eladott = int(r[4])
+            self.jegyar = int(r[5])
+
+        def bevetel(self):
+            return self.eladott * self.jegyar
+
+
+    with open("vetitesek.txt", encoding="utf-8") as f:
+        vetitesek = [Vetites(sor) for sor in f.read().splitlines()]
+    print("1. feladat: A fajlban", len(vetitesek), "vetites szerepel.")
+  csharp: |
+    using System;
+    using System.Collections.Generic;
+    using System.IO;
+
+    class Vetites
+    {
+        public string Cim;
+        public string Mufaj;
+        public int Hossz;
+        public string Kezdes;
+        public int Eladott;
+        public int Jegyar;
+
+        public Vetites(string sor)
+        {
+            string[] r = sor.Split(';');
+            Cim = r[0];
+            Mufaj = r[1];
+            Hossz = int.Parse(r[2]);
+            Kezdes = r[3];
+            Eladott = int.Parse(r[4]);
+            Jegyar = int.Parse(r[5]);
+        }
+
+        public int Bevetel()
+        {
+            return Eladott * Jegyar;
+        }
+    }
+
+    class Program
+    {
+        static void Main()
+        {
+            List<Vetites> vetitesek = new List<Vetites>();
+            foreach (string sor in File.ReadAllLines("vetitesek.txt"))
+            {
+                vetitesek.Add(new Vetites(sor));
+            }
+            Console.WriteLine("1. feladat: A fajlban " + vetitesek.Count + " vetites szerepel.");
+        }
+    }
+files:
+  vetitesek.txt: vetitesek.txt
+tests:
+- stdin: ''
+  expected: '1. feladat: A fajlban 14 vetites szerepel.
+
+    '
+  hidden: false
+- stdin: ''
+  expected: '1. feladat: A fajlban 1 vetites szerepel.
+
+    '
+  hidden: true
+  files:
+    vetitesek.txt: teszt-2/vetitesek.txt
+- stdin: ''
+  expected: '1. feladat: A fajlban 25 vetites szerepel.
+
+    '
+  hidden: true
+  files:
+    vetitesek.txt: teszt-3/vetitesek.txt
+- stdin: ''
+  expected: '1. feladat: A fajlban 8 vetites szerepel.
+
+    '
+  hidden: true
+  files:
+    vetitesek.txt: teszt-4/vetitesek.txt

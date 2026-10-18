@@ -1,0 +1,47 @@
+slug: a-konyvek-cimei
+title: A könyvek címei
+position: 2
+kind: sql
+level: kozep
+difficulty: 1
+published: false
+allowed_languages: [sql]
+description: |
+  Az iskolai könyvtár katalógusa a `konyv` táblában van. A teljes tábla helyett gyakran csak egyetlen mezőre van szükség.
+
+  A `konyv` tábla:
+
+  | oszlop | típus |
+  |---|---|
+  | `id` | egész, elsődleges kulcs |
+  | `cim` | szöveg |
+  | `szerzo` | szöveg |
+  | `ev` | egész (a kiadás éve) |
+  | `oldal` | egész |
+  | `ar` | egész (Ft) |
+  | `mufaj` | szöveg |
+
+  Listázd ki **csak a könyvek címét**! A lekérdezés eredménye egyetlen oszlop legyen. A sorok sorrendje nem számít.
+
+  Tipp: a `*` helyére írd a mező nevét: `SELECT mezo FROM tabla;`
+starter_code:
+  sql: |
+    SELECT
+    FROM konyv;
+sample_solutions:
+  sql: |
+    SELECT cim
+    FROM konyv;
+tests:
+  - stdin: "CREATE TABLE konyv (id INTEGER PRIMARY KEY, cim TEXT, szerzo TEXT, ev INTEGER, oldal INTEGER, ar INTEGER, mufaj TEXT);\nINSERT INTO konyv VALUES\n(1, 'A regi malom', 'Kovacs Lilla', 2019, 615, 8700, 'mese'),\n(2, 'Havas varos', 'Toth Gabor', 1989, 525, 1500, 'mese'),\n(3, 'Foldrajzi felfedezok', 'Toth Gabor', 1994, 459, 6200, 'regeny'),\n(4, 'A kek hold', 'Varga Dora', 1996, 530, 6600, 'vers');\n"
+    expected: "cim\nA regi malom\nHavas varos\nFoldrajzi felfedezok\nA kek hold\n"
+    hidden: false
+  - stdin: "CREATE TABLE konyv (id INTEGER PRIMARY KEY, cim TEXT, szerzo TEXT, ev INTEGER, oldal INTEGER, ar INTEGER, mufaj TEXT);\nINSERT INTO konyv VALUES\n(1, 'Az ejszaka ura', 'Szabo Reka', 2004, 349, 1700, 'tortenelem'),\n(2, 'A tenger fiai', 'Kelemen Bela', 1953, 608, 4800, 'regeny'),\n(3, 'Sotet erdo', 'Molnar Eszter', 1991, 682, 7700, 'vers'),\n(4, 'Utolso vonat', 'Horvath Mate', 2003, 272, 3000, 'mese'),\n(5, 'Nyari vihar', 'Szabo Reka', 2007, 318, 7500, 'tortenelem'),\n(6, 'A masik part', 'Nagy Peter', 1997, 434, 5700, 'regeny'),\n(7, 'Csendes folyo', 'Molnar Eszter', 2013, 574, 2200, 'regeny');\n"
+    expected: "cim\nAz ejszaka ura\nA tenger fiai\nSotet erdo\nUtolso vonat\nNyari vihar\nA masik part\nCsendes folyo\n"
+    hidden: true
+  - stdin: "CREATE TABLE konyv (id INTEGER PRIMARY KEY, cim TEXT, szerzo TEXT, ev INTEGER, oldal INTEGER, ar INTEGER, mufaj TEXT);\nINSERT INTO konyv VALUES\n(1, 'Az ejszaka ura', 'Toth Gabor', 1953, 571, 2800, 'regeny'),\n(2, 'Sotet erdo', 'Varga Dora', 1981, 306, 8700, 'vers'),\n(3, 'Csendes folyo', 'Horvath Mate', 1962, 560, 7500, 'regeny'),\n(4, 'Ures szoba', 'Kovacs Lilla', 1993, 278, 9000, 'tortenelem'),\n(5, 'Az elso tavasz', 'Kovacs Lilla', 1976, 654, 8200, 'vers'),\n(6, 'Papirhajo', 'Szabo Reka', 2004, 475, 4200, 'mese'),\n(7, 'Zold ablak', 'Toth Gabor', 2008, 327, 5900, 'mese'),\n(8, 'Hazak kozott', 'Kelemen Bela', 2004, 596, 6900, 'tortenelem'),\n(9, 'Hegyi ut', 'Nagy Peter', 1981, 301, 2600, 'vers'),\n(10, 'Esti mesek', 'Horvath Mate', 1982, 699, 6600, 'tortenelem');\n"
+    expected: "cim\nAz ejszaka ura\nSotet erdo\nCsendes folyo\nUres szoba\nAz elso tavasz\nPapirhajo\nZold ablak\nHazak kozott\nHegyi ut\nEsti mesek\n"
+    hidden: true
+  - stdin: "CREATE TABLE konyv (id INTEGER PRIMARY KEY, cim TEXT, szerzo TEXT, ev INTEGER, oldal INTEGER, ar INTEGER, mufaj TEXT);\nINSERT INTO konyv VALUES\n(1, 'A regi malom', 'Kovacs Lilla', 1950, 141, 1700, 'tortenelem'),\n(2, 'Havas varos', 'Toth Gabor', 1971, 430, 6800, 'tortenelem'),\n(3, 'Kis kert', 'Varga Dora', 1970, 128, 5800, 'vers'),\n(4, 'Fenyes napok', 'Kovacs Lilla', 1987, 488, 6100, 'vers'),\n(5, 'Az ejszaka ura', 'Horvath Mate', 1994, 386, 6700, 'mese'),\n(6, 'A kert titka', 'Varga Dora', 1994, 206, 4800, 'regeny'),\n(7, 'Szel ellen', 'Horvath Mate', 1981, 694, 1600, 'mese'),\n(8, 'A kek hold', 'Varga Dora', 2010, 228, 8400, 'regeny'),\n(9, 'Csendes folyo', 'Nagy Peter', 1994, 569, 8500, 'regeny'),\n(10, 'A hidak kora', 'Kovacs Lilla', 2019, 85, 3000, 'regeny'),\n(11, 'A masik part', 'Horvath Mate', 2003, 663, 4600, 'tortenelem'),\n(12, 'Esti mesek', 'Toth Gabor', 1974, 367, 8600, 'regeny');\n"
+    expected: "cim\nA regi malom\nHavas varos\nKis kert\nFenyes napok\nAz ejszaka ura\nA kert titka\nSzel ellen\nA kek hold\nCsendes folyo\nA hidak kora\nA masik part\nEsti mesek\n"
+    hidden: true

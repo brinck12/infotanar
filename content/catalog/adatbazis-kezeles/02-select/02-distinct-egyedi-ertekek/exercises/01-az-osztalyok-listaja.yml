@@ -1,0 +1,45 @@
+slug: az-osztalyok-listaja
+title: Az osztályok listája
+position: 0
+kind: sql
+level: kozep
+difficulty: 1
+published: false
+allowed_languages: [sql]
+description: |
+  A `diak` táblában egy osztály többször is szerepel, hiszen több diák jár bele. A `DISTINCT` kulcsszó kiszűri az ismétlődő sorokat.
+
+  A `diak` tábla:
+
+  | oszlop | típus |
+  |---|---|
+  | `id` | egész, elsődleges kulcs |
+  | `nev` | szöveg |
+  | `osztaly` | szöveg |
+  | `pont` | egész |
+  | `szuletes` | szöveg (dátum, ÉÉÉÉ-HH-NN) |
+
+  Listázd ki, mely osztályokba járnak diákok! Mindegyik osztály **csak egyszer** szerepeljen, az oszlop neve maradjon `osztaly`. A sorok sorrendje nem számít.
+
+  Tipp: a `DISTINCT` közvetlenül a `SELECT` után áll: `SELECT DISTINCT mezo`.
+starter_code:
+  sql: |
+    SELECT
+    FROM diak;
+sample_solutions:
+  sql: |
+    SELECT DISTINCT osztaly
+    FROM diak;
+tests:
+  - stdin: "CREATE TABLE diak (id INTEGER PRIMARY KEY, nev TEXT, osztaly TEXT, pont INTEGER, szuletes TEXT);\nINSERT INTO diak VALUES\n(1, 'Sandor', '9.A', 34, '2005-11-19'),\n(2, 'Reka', '11.A', 58, '2007-03-04'),\n(3, 'Hanna', '9.B', 79, '2005-10-17'),\n(4, 'Olivia', '10.B', 87, '2005-08-05'),\n(5, 'Judit', '10.A', 32, '2007-09-17'),\n(6, 'Istvan', '10.A', 84, '2008-04-05'),\n(7, 'Flora', '11.A', 78, '2005-05-04');\n"
+    expected: "osztaly\n9.A\n11.A\n9.B\n10.B\n10.A\n"
+    hidden: false
+  - stdin: "CREATE TABLE diak (id INTEGER PRIMARY KEY, nev TEXT, osztaly TEXT, pont INTEGER, szuletes TEXT);\nINSERT INTO diak VALUES\n(1, 'Sandor', '11.A', 78, '2008-09-17'),\n(2, 'Domonkos', '10.A', 50, '2005-10-05'),\n(3, 'Kata', '9.A', 88, '2006-09-08'),\n(4, 'Laszlo', '11.A', 77, '2008-01-06'),\n(5, 'Endre', '10.B', 54, '2008-05-10'),\n(6, 'Olivia', '10.B', 56, '2008-12-27'),\n(7, 'Istvan', '10.A', 84, '2008-10-13'),\n(8, 'Gergo', '9.A', 98, '2008-11-24'),\n(9, 'Dora', '9.A', 71, '2005-03-22');\n"
+    expected: "osztaly\n11.A\n10.A\n9.A\n10.B\n"
+    hidden: true
+  - stdin: "CREATE TABLE diak (id INTEGER PRIMARY KEY, nev TEXT, osztaly TEXT, pont INTEGER, szuletes TEXT);\nINSERT INTO diak VALUES\n(1, 'Csilla', '11.A', 32, '2008-09-04'),\n(2, 'Bela', '9.B', 39, '2006-05-08'),\n(3, 'Zoltan', '10.A', 45, '2005-03-17'),\n(4, 'Domonkos', '10.B', 77, '2008-11-22'),\n(5, 'Zsofia', '9.B', 67, '2006-02-19'),\n(6, 'Istvan', '9.B', 38, '2008-12-08'),\n(7, 'Dora', '9.B', 68, '2006-01-26'),\n(8, 'Eszter', '10.B', 33, '2005-03-19'),\n(9, 'Peter', '9.B', 48, '2007-08-03'),\n(10, 'Laszlo', '10.B', 42, '2008-12-15'),\n(11, 'Sandor', '10.A', 57, '2008-03-01');\n"
+    expected: "osztaly\n11.A\n9.B\n10.A\n10.B\n"
+    hidden: true
+  - stdin: "CREATE TABLE diak (id INTEGER PRIMARY KEY, nev TEXT, osztaly TEXT, pont INTEGER, szuletes TEXT);\nINSERT INTO diak VALUES\n(1, 'Nora', '10.A', 44, '2007-03-21'),\n(2, 'Gabor', '11.A', 48, '2008-03-23'),\n(3, 'Marcell', '10.A', 98, '2005-05-02'),\n(4, 'Sandor', '11.A', 36, '2005-07-04'),\n(5, 'Domonkos', '11.A', 87, '2007-02-13'),\n(6, 'Laszlo', '9.A', 82, '2007-10-26'),\n(7, 'Balazs', '11.A', 66, '2007-01-08'),\n(8, 'Kata', '11.A', 45, '2005-04-07'),\n(9, 'Zoltan', '9.B', 40, '2008-01-14'),\n(10, 'Fanni', '9.B', 57, '2005-11-01'),\n(11, 'Csilla', '10.B', 53, '2005-12-23'),\n(12, 'Gergo', '10.B', 35, '2008-12-06'),\n(13, 'Olivia', '9.B', 69, '2005-10-27');\n"
+    expected: "osztaly\n10.A\n11.A\n9.A\n9.B\n10.B\n"
+    hidden: true

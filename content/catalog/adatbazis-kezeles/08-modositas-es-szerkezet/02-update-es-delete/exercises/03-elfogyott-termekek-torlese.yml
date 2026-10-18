@@ -1,0 +1,125 @@
+slug: elfogyott-termekek-torlese
+title: Elfogyott termékek törlése
+position: 2
+kind: sql
+level: kozep
+difficulty: 2
+published: false
+allowed_languages:
+- sql
+sql_order_sensitive: true
+description: |
+  A `termek` tábla:
+
+  | oszlop | típus |
+  |---|---|
+  | `id` | `INT`, elsődleges kulcs |
+  | `nev` | `VARCHAR(50)` |
+  | `kategoria` | `VARCHAR(20)` |
+  | `ar` | `INT` (Ft) |
+  | `keszlet` | `INT` (darab) |
+
+  Töröld a táblából azokat a termékeket, amelyekből **elfogyott a készlet** (a `keszlet` értéke 0)! A többi sor maradjon érintetlen.
+
+  A kód végén álló `SELECT` sort **ne töröld és ne módosítsd**: az mutatja meg a tábla állapotát módosítás után, és a rendszer ezt az eredményt hasonlítja az elvárthoz. A saját utasításodat a `SELECT` **elé** írd, pontosvesszővel lezárva.
+
+  Tipp: `DELETE FROM termek WHERE ...;` – a `DELETE` is sorokat töröl, nem oszlopokat, és `WHERE` nélkül minden sor eltűnik.
+starter_code:
+  sql: |
+    -- Ide írd a DELETE utasítást.
+
+    SELECT id, nev, keszlet FROM termek ORDER BY id;
+sample_solutions:
+  sql: |
+    DELETE FROM termek WHERE keszlet = 0;
+
+    SELECT id, nev, keszlet FROM termek ORDER BY id;
+tests:
+- stdin: |
+    CREATE TABLE termek (id INTEGER PRIMARY KEY, nev TEXT, kategoria TEXT, ar INTEGER, keszlet INTEGER);
+    INSERT INTO termek VALUES
+    (1, 'Csirkemell', 'hus', 330, 40),
+    (2, 'Paprika', 'zold', 1400, 28),
+    (3, 'Zsemle', 'pek', 670, 0),
+    (4, 'Sajt', 'tej', 1170, 3),
+    (5, 'Sonka', 'hus', 1520, 0),
+    (6, 'Vaj', 'tej', 510, 38),
+    (7, 'Szalami', 'hus', 300, 18),
+    (8, 'Parizer', 'hus', 2500, 34);
+  expected: |
+    id,nev,keszlet
+    1,Csirkemell,40
+    2,Paprika,28
+    4,Sajt,3
+    6,Vaj,38
+    7,Szalami,18
+    8,Parizer,34
+  hidden: false
+- stdin: |
+    CREATE TABLE termek (id INTEGER PRIMARY KEY, nev TEXT, kategoria TEXT, ar INTEGER, keszlet INTEGER);
+    INSERT INTO termek VALUES
+    (1, 'Tej', 'tej', 1410, 0),
+    (2, 'Csirkemell', 'hus', 230, 5),
+    (3, 'Korte', 'zold', 2340, 24),
+    (4, 'Paradicsom', 'zold', 130, 31),
+    (5, 'Szalami', 'hus', 1110, 39),
+    (6, 'Alma', 'zold', 1410, 39),
+    (7, 'Kefir', 'tej', 1110, 40),
+    (8, 'Vaj', 'tej', 1470, 29),
+    (9, 'Paprika', 'zold', 990, 17),
+    (10, 'Parizer', 'hus', 2270, 36);
+  expected: |
+    id,nev,keszlet
+    2,Csirkemell,5
+    3,Korte,24
+    4,Paradicsom,31
+    5,Szalami,39
+    6,Alma,39
+    7,Kefir,40
+    8,Vaj,29
+    9,Paprika,17
+    10,Parizer,36
+  hidden: true
+- stdin: |
+    CREATE TABLE termek (id INTEGER PRIMARY KEY, nev TEXT, kategoria TEXT, ar INTEGER, keszlet INTEGER);
+    INSERT INTO termek VALUES
+    (1, 'Kifli', 'pek', 2050, 4),
+    (2, 'Paradicsom', 'zold', 930, 0),
+    (3, 'Tej', 'tej', 2170, 0),
+    (4, 'Szalami', 'hus', 410, 28),
+    (5, 'Banan', 'zold', 1220, 26),
+    (6, 'Parizer', 'hus', 380, 13),
+    (7, 'Paprika', 'zold', 1220, 0);
+  expected: |
+    id,nev,keszlet
+    1,Kifli,4
+    4,Szalami,28
+    5,Banan,26
+    6,Parizer,13
+  hidden: true
+- stdin: |
+    CREATE TABLE termek (id INTEGER PRIMARY KEY, nev TEXT, kategoria TEXT, ar INTEGER, keszlet INTEGER);
+    INSERT INTO termek VALUES
+    (1, 'Paprika', 'zold', 1470, 0),
+    (2, 'Sonka', 'hus', 2010, 19),
+    (3, 'Sajt', 'tej', 1310, 0),
+    (4, 'Tej', 'tej', 1510, 26),
+    (5, 'Joghurt', 'tej', 150, 17),
+    (6, 'Paradicsom', 'zold', 730, 29),
+    (7, 'Alma', 'zold', 1680, 31),
+    (8, 'Csirkemell', 'hus', 560, 0),
+    (9, 'Kefir', 'tej', 640, 12),
+    (10, 'Vaj', 'tej', 2460, 0),
+    (11, 'Zsemle', 'pek', 1090, 31),
+    (12, 'Kifli', 'pek', 800, 1);
+  expected: |
+    id,nev,keszlet
+    2,Sonka,19
+    4,Tej,26
+    5,Joghurt,17
+    6,Paradicsom,29
+    7,Alma,31
+    9,Kefir,12
+    11,Zsemle,31
+    12,Kifli,1
+  hidden: true

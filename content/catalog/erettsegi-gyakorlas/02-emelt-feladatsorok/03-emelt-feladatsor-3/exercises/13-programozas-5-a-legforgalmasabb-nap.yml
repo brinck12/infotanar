@@ -1,0 +1,202 @@
+slug: programozas-5-a-legforgalmasabb-nap
+title: Programozás 5 - A legforgalmasabb nap
+position: 12
+kind: code
+level: emelt
+difficulty: 4
+published: false
+allowed_languages:
+- python
+- csharp
+description: |
+  Az `indulasok.txt` a repülőtér egy havi (30 napos) forgalmát tartalmazza, soronként egy indulással, pontosvesszővel elválasztva: `járatszám;célállomás;távolság km;nap;indulás;utasok;késés`. A járatszám két betűből és négy számjegyből áll (pl. `MA1017`), a nap a hónap napja (1–30), az indulás `ÓÓ:PP` alakú, a késés percben értendő (0, ha pontosan indult). Az adatokban nincs ékezet, a fájl legalább egy sort tartalmaz, a sorok nincsenek sorrendben, és egy járat egy napon egy időpontban legfeljebb egyszer szerepel.
+
+  **5. feladat.** Számolja ki napokra bontva (1–30) az utasok számát, majd **rekurzív függvénnyel** keresse meg a legforgalmasabb napot! A függvény a tömb egy `[also, felso]` szakaszában keresse a legnagyobb értékű elem indexét: ha a szakasz egyelemű, azt adja vissza; különben felezze a szakaszt, oldja meg mindkét felet rekurzívan, és a két eredmény közül a nagyobb értékűt adja. Azonos napi utasszámnál a **korábbi nap** számít.
+
+  A mintafájlra a kimenet:
+
+  ```text
+  5. feladat: A legforgalmasabb nap: 16. nap, 505 utas.
+  ```
+
+  Tipp: a napi összegeket a `t[1]..t[30]` elemekben gyűjtsd, a rekurzív hívás `legnagyobb(t, 1, 30)`. Egyenlőségnél a bal fél eredményét tartsd meg, így az első nap nyer.
+starter_code:
+  python: |
+    class Indulas:
+        def __init__(self, sor):
+            r = sor.split(";")
+            self.jarat = r[0]
+            self.cel = r[1]
+            self.tav = int(r[2])
+            self.nap = int(r[3])
+            self.ido = r[4]
+            self.utas = int(r[5])
+            self.keses = int(r[6])
+
+
+    with open("indulasok.txt", encoding="utf-8") as f:
+        indulasok = [Indulas(sor) for sor in f.read().splitlines()]
+    # ide írd a megoldást
+  csharp: |
+    using System;
+    using System.Collections.Generic;
+    using System.IO;
+
+    class Indulas
+    {
+        public string Jarat;
+        public string Cel;
+        public int Tav;
+        public int Nap;
+        public string Ido;
+        public int Utas;
+        public int Keses;
+
+        public Indulas(string sor)
+        {
+            string[] r = sor.Split(';');
+            Jarat = r[0];
+            Cel = r[1];
+            Tav = int.Parse(r[2]);
+            Nap = int.Parse(r[3]);
+            Ido = r[4];
+            Utas = int.Parse(r[5]);
+            Keses = int.Parse(r[6]);
+        }
+    }
+
+    class Program
+    {
+        static void Main()
+        {
+            List<Indulas> indulasok = new List<Indulas>();
+            foreach (string sor in File.ReadAllLines("indulasok.txt"))
+            {
+                indulasok.Add(new Indulas(sor));
+            }
+            // ide írd a megoldást
+        }
+    }
+sample_solutions:
+  python: |
+    class Indulas:
+        def __init__(self, sor):
+            r = sor.split(";")
+            self.jarat = r[0]
+            self.cel = r[1]
+            self.tav = int(r[2])
+            self.nap = int(r[3])
+            self.ido = r[4]
+            self.utas = int(r[5])
+            self.keses = int(r[6])
+
+
+    with open("indulasok.txt", encoding="utf-8") as f:
+        indulasok = [Indulas(sor) for sor in f.read().splitlines()]
+    def legnagyobb(t, also, felso):
+        if also == felso:
+            return also
+        kozep = (also + felso) // 2
+        bal = legnagyobb(t, also, kozep)
+        jobb = legnagyobb(t, kozep + 1, felso)
+        if t[jobb] > t[bal]:
+            return jobb
+        return bal
+
+
+    napi = [0] * 31
+    for i in indulasok:
+        napi[i.nap] += i.utas
+    nap = legnagyobb(napi, 1, 30)
+    print("5. feladat: A legforgalmasabb nap: " + str(nap) + ". nap, " + str(napi[nap]) + " utas.")
+  csharp: |
+    using System;
+    using System.Collections.Generic;
+    using System.IO;
+
+    class Indulas
+    {
+        public string Jarat;
+        public string Cel;
+        public int Tav;
+        public int Nap;
+        public string Ido;
+        public int Utas;
+        public int Keses;
+
+        public Indulas(string sor)
+        {
+            string[] r = sor.Split(';');
+            Jarat = r[0];
+            Cel = r[1];
+            Tav = int.Parse(r[2]);
+            Nap = int.Parse(r[3]);
+            Ido = r[4];
+            Utas = int.Parse(r[5]);
+            Keses = int.Parse(r[6]);
+        }
+    }
+
+    class Program
+    {
+        static int Legnagyobb(int[] t, int also, int felso)
+        {
+            if (also == felso)
+            {
+                return also;
+            }
+            int kozep = (also + felso) / 2;
+            int bal = Legnagyobb(t, also, kozep);
+            int jobb = Legnagyobb(t, kozep + 1, felso);
+            if (t[jobb] > t[bal])
+            {
+                return jobb;
+            }
+            return bal;
+        }
+
+        static void Main()
+        {
+            List<Indulas> indulasok = new List<Indulas>();
+            foreach (string sor in File.ReadAllLines("indulasok.txt"))
+            {
+                indulasok.Add(new Indulas(sor));
+            }
+            int[] napi = new int[31];
+            foreach (Indulas i in indulasok)
+            {
+                napi[i.Nap] += i.Utas;
+            }
+            int nap = Legnagyobb(napi, 1, 30);
+            Console.WriteLine("5. feladat: A legforgalmasabb nap: " + nap + ". nap, " + napi[nap] + " utas.");
+        }
+    }
+files:
+  indulasok.txt: indulasok.txt
+tests:
+- stdin: ''
+  expected: '5. feladat: A legforgalmasabb nap: 16. nap, 505 utas.
+
+    '
+  hidden: false
+- stdin: ''
+  expected: '5. feladat: A legforgalmasabb nap: 21. nap, 80 utas.
+
+    '
+  hidden: true
+  files:
+    indulasok.txt: teszt-2/indulasok.txt
+- stdin: ''
+  expected: '5. feladat: A legforgalmasabb nap: 14. nap, 778 utas.
+
+    '
+  hidden: true
+  files:
+    indulasok.txt: teszt-3/indulasok.txt
+- stdin: ''
+  expected: '5. feladat: A legforgalmasabb nap: 29. nap, 298 utas.
+
+    '
+  hidden: true
+  files:
+    indulasok.txt: teszt-4/indulasok.txt

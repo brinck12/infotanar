@@ -1,0 +1,46 @@
+slug: ket-osztaly-legalabb-50-pont
+title: "Két osztály, legalább 50 pont"
+position: 2
+kind: sql
+level: kozep
+difficulty: 2
+published: false
+allowed_languages: [sql]
+description: |
+  Az alábbi lekérdezésnek azokat a diákokat kellene megadnia, akik a `9.A` **vagy** a `9.B` osztályba járnak, és legalább 50 pontot értek el. A kimenetben azonban olyan `9.A`-s diák is szerepel, aki 50 pont alatt van. Javítsd ki!
+
+  A `diak` tábla:
+
+  | oszlop | típus |
+  |---|---|
+  | `id` | `INT`, elsődleges kulcs |
+  | `nev` | `VARCHAR(50)` |
+  | `osztaly` | `VARCHAR(5)` |
+  | `pont` | `INT` |
+
+  Add meg a `nev`, `osztaly` és `pont` oszlopot! A sorok sorrendje nem számít.
+
+  Tipp: az `AND` erősebben köt, mint az `OR`. Ha más sorrendben akarod kiértékeltetni a feltételeket, használj zárójelet.
+starter_code:
+  sql: |
+    SELECT nev, osztaly, pont
+    FROM diak
+    WHERE osztaly = '9.A' OR osztaly = '9.B' AND pont >= 50;
+sample_solutions:
+  sql: |
+    SELECT nev, osztaly, pont
+    FROM diak
+    WHERE (osztaly = '9.A' OR osztaly = '9.B') AND pont >= 50;
+tests:
+  - stdin: "CREATE TABLE diak (id INTEGER PRIMARY KEY, nev TEXT, osztaly TEXT, pont INTEGER);\nINSERT INTO diak VALUES\n(1, 'Anna', '9.A', 80),\n(2, 'Bela', '9.A', 30),\n(3, 'Cili', '9.B', 50),\n(4, 'Dani', '9.B', 49),\n(5, 'Emma', '10.A', 99);\n"
+    expected: "nev,osztaly,pont\nAnna,9.A,80\nCili,9.B,50\n"
+    hidden: false
+  - stdin: "CREATE TABLE diak (id INTEGER PRIMARY KEY, nev TEXT, osztaly TEXT, pont INTEGER);\nINSERT INTO diak VALUES\n(1, 'Feri', '9.A', 10),\n(2, 'Gabor', '9.A', 20);\n"
+    expected: ""
+    hidden: true
+  - stdin: "CREATE TABLE diak (id INTEGER PRIMARY KEY, nev TEXT, osztaly TEXT, pont INTEGER);\nINSERT INTO diak VALUES\n(1, 'Hanna', '10.A', 60),\n(2, 'Ivan', '10.B', 70),\n(3, 'Jolan', '9.B', 55);\n"
+    expected: "nev,osztaly,pont\nJolan,9.B,55\n"
+    hidden: true
+  - stdin: "CREATE TABLE diak (id INTEGER PRIMARY KEY, nev TEXT, osztaly TEXT, pont INTEGER);\nINSERT INTO diak VALUES\n(1, 'Kata', '9.A', 50),\n(2, 'Laci', '9.A', 100),\n(3, 'Mate', '9.A', 0),\n(4, 'Nora', '9.B', 75),\n(5, 'Oliver', '11.A', 88);\n"
+    expected: "nev,osztaly,pont\nKata,9.A,50\nLaci,9.A,100\nNora,9.B,75\n"
+    hidden: true

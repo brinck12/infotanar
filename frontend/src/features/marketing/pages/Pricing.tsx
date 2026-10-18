@@ -12,7 +12,7 @@ const YES = <Icon name="check" className="text-accent" label="Igen" />
 const NO = <Icon name="x" size={18} className="text-muted" label="Nem" />
 
 const COMPARISON: ReadonlyArray<{ feature: string; free: ReactNode; premium: ReactNode }> = [
-  { feature: 'Az első két lecke minden sávban', free: YES, premium: YES },
+  { feature: 'Az első két lecke minden tanulási úton', free: YES, premium: YES },
   { feature: 'Összes lecke és videó', free: NO, premium: YES },
   { feature: 'Gyakorló feladatok ellenőrzéssel', free: 'Csak az ingyenes leckékben', premium: YES },
   { feature: 'Gyakorló feladatsorok időmérővel', free: NO, premium: YES },
@@ -45,8 +45,8 @@ export function Pricing() {
 
   return (
     <main className="mx-auto w-full max-w-page flex-1 px-4 pt-8 pb-24 md:px-6">
-      <PageTitle>Egy előfizetés, minden sáv</PageTitle>
-      <Lead className="mt-3 max-w-prose text-18">Rejtett díjak nélkül. Az első két lecke minden sávban ingyenes, belépés nélkül is.</Lead>
+      <PageTitle>Egy előfizetés, minden tanulási út</PageTitle>
+      <Lead className="mt-3 max-w-prose text-18">Rejtett díjak nélkül. Az első két lecke minden tanulási úton ingyenes, belépés nélkül is.</Lead>
 
       <div className="mt-10 flex flex-wrap items-start gap-8">
         <Table caption="Az ingyenes és a Prémium csomag összehasonlítása" className="min-w-0 flex-1 basis-120">

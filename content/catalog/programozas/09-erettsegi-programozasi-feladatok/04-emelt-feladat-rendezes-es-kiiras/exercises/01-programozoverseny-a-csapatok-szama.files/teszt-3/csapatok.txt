@@ -1,0 +1,3 @@
+csapat	varos	megoldott	buntetes
+Ketto Egy	Pecs	1	10
+Ketto Ketto	Szeged	1	10

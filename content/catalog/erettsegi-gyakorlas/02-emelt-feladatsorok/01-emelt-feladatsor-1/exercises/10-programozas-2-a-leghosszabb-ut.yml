@@ -1,0 +1,193 @@
+slug: programozas-2-a-leghosszabb-ut
+title: Programozás 2 - A leghosszabb út
+position: 9
+kind: code
+level: emelt
+difficulty: 2
+published: false
+allowed_languages:
+- python
+- csharp
+description: |-
+  Az `utak.txt` a kerékpárkölcsönző egy havi (30 napos) forgalmát tartalmazza, soronként egy úttal, pontosvesszővel elválasztva: `bicikli;nap;indulás;érkezés;távolság`. A bicikli azonosítója `B-01` alakú, a nap a hónap napja (1–30), az indulás és az érkezés `ÓÓ:PP` alakú időpont (ugyanazon a napon belül, az érkezés mindig az indulás után van), a távolság méterben egész szám. A sorok nem rendezettek. Az adatokban nincs ékezet, a fájl legalább egy sort tartalmaz.
+
+  **2. feladat.** Keresse meg a **legtovább tartó** utat (az indulás és az érkezés között eltelt percek száma alapján)! Ha több ilyen is van, az **először** szereplőt adja meg. Írja ki a bicikli azonosítóját, a napot, az indulás és az érkezés idejét és az út hosszát percben a minta szerint.
+
+  A mintafájlra a kimenet:
+
+  ```text
+  2. feladat: Leghosszabb ut: B-04, 2. nap, 06:49-08:27 (98 perc)
+  ```
+
+  Tipp: az időtartam kiszámítása az `Ut` rekordban kész (`perc()` / `Perc()`). Maximumkereséshez tartsd egy változóban az eddigi legjobb utat, és csak **szigorúan nagyobbnál** cseréld le.
+starter_code:
+  python: |
+    class Ut:
+        def __init__(self, sor):
+            r = sor.split(";")
+            self.bicikli = r[0]
+            self.nap = int(r[1])
+            self.indulas = r[2]
+            self.erkezes = r[3]
+            self.tav = int(r[4])
+
+        def perc(self):
+            i = self.indulas.split(":")
+            e = self.erkezes.split(":")
+            return (int(e[0]) * 60 + int(e[1])) - (int(i[0]) * 60 + int(i[1]))
+
+
+    with open("utak.txt", encoding="utf-8") as f:
+        utak = [Ut(sor) for sor in f.read().splitlines()]
+    # ide írd a megoldást
+  csharp: |
+    using System;
+    using System.Collections.Generic;
+    using System.IO;
+
+    class Ut
+    {
+        public string Bicikli;
+        public int Nap;
+        public string Indulas;
+        public string Erkezes;
+        public int Tav;
+
+        public Ut(string sor)
+        {
+            string[] r = sor.Split(';');
+            Bicikli = r[0];
+            Nap = int.Parse(r[1]);
+            Indulas = r[2];
+            Erkezes = r[3];
+            Tav = int.Parse(r[4]);
+        }
+
+        public static int Percben(string ido)
+        {
+            string[] r = ido.Split(':');
+            return int.Parse(r[0]) * 60 + int.Parse(r[1]);
+        }
+
+        public int Perc()
+        {
+            return Percben(Erkezes) - Percben(Indulas);
+        }
+    }
+
+    class Program
+    {
+        static void Main()
+        {
+            List<Ut> utak = new List<Ut>();
+            foreach (string sor in File.ReadAllLines("utak.txt"))
+            {
+                utak.Add(new Ut(sor));
+            }
+            // ide írd a megoldást
+        }
+    }
+sample_solutions:
+  python: |
+    class Ut:
+        def __init__(self, sor):
+            r = sor.split(";")
+            self.bicikli = r[0]
+            self.nap = int(r[1])
+            self.indulas = r[2]
+            self.erkezes = r[3]
+            self.tav = int(r[4])
+
+        def perc(self):
+            i = self.indulas.split(":")
+            e = self.erkezes.split(":")
+            return (int(e[0]) * 60 + int(e[1])) - (int(i[0]) * 60 + int(i[1]))
+
+
+    with open("utak.txt", encoding="utf-8") as f:
+        utak = [Ut(sor) for sor in f.read().splitlines()]
+    legjobb = utak[0]
+    for u in utak:
+        if u.perc() > legjobb.perc():
+            legjobb = u
+    print("2. feladat: Leghosszabb ut: " + legjobb.bicikli + ", " + str(legjobb.nap) + ". nap, " + legjobb.indulas + "-" + legjobb.erkezes + " (" + str(legjobb.perc()) + " perc)")
+  csharp: |
+    using System;
+    using System.Collections.Generic;
+    using System.IO;
+
+    class Ut
+    {
+        public string Bicikli;
+        public int Nap;
+        public string Indulas;
+        public string Erkezes;
+        public int Tav;
+
+        public Ut(string sor)
+        {
+            string[] r = sor.Split(';');
+            Bicikli = r[0];
+            Nap = int.Parse(r[1]);
+            Indulas = r[2];
+            Erkezes = r[3];
+            Tav = int.Parse(r[4]);
+        }
+
+        public static int Percben(string ido)
+        {
+            string[] r = ido.Split(':');
+            return int.Parse(r[0]) * 60 + int.Parse(r[1]);
+        }
+
+        public int Perc()
+        {
+            return Percben(Erkezes) - Percben(Indulas);
+        }
+    }
+
+    class Program
+    {
+        static void Main()
+        {
+            List<Ut> utak = new List<Ut>();
+            foreach (string sor in File.ReadAllLines("utak.txt"))
+            {
+                utak.Add(new Ut(sor));
+            }
+            Ut legjobb = utak[0];
+            foreach (Ut u in utak)
+            {
+                if (u.Perc() > legjobb.Perc())
+                {
+                    legjobb = u;
+                }
+            }
+            Console.WriteLine("2. feladat: Leghosszabb ut: " + legjobb.Bicikli + ", " + legjobb.Nap + ". nap, " + legjobb.Indulas + "-" + legjobb.Erkezes + " (" + legjobb.Perc() + " perc)");
+        }
+    }
+files:
+  utak.txt: utak.txt
+tests:
+- stdin: ''
+  expected: |
+    2. feladat: Leghosszabb ut: B-04, 2. nap, 06:49-08:27 (98 perc)
+  hidden: false
+- stdin: ''
+  expected: |
+    2. feladat: Leghosszabb ut: B-05, 17. nap, 09:51-11:27 (96 perc)
+  hidden: true
+  files:
+    utak.txt: teszt-2/utak.txt
+- stdin: ''
+  expected: |
+    2. feladat: Leghosszabb ut: B-05, 9. nap, 08:05-08:41 (36 perc)
+  hidden: true
+  files:
+    utak.txt: teszt-3/utak.txt
+- stdin: ''
+  expected: |
+    2. feladat: Leghosszabb ut: B-06, 3. nap, 08:30-10:09 (99 perc)
+  hidden: true
+  files:
+    utak.txt: teszt-4/utak.txt

@@ -1,0 +1,129 @@
+slug: idojaras-fagyos-napok-fajlba
+title: 'Időjárás: fagyos napok fájlba'
+position: 4
+kind: code
+level: kozep
+difficulty: 4
+published: false
+allowed_languages:
+- python
+- csharp
+description: "Egy meteorológiai állomás egy hónap napi méréseit a `homerseklet.txt` fájlba mentette. Az első sor a napok száma (`n`), utána soronként egy nap adatai következnek, tabulátorral tagolva: a nap sorszáma (1-től), a napi legalacsonyabb hőmérséklet (°C), a napi legmagasabb hőmérséklet (°C) és a csapadék mennyisége (mm). Minden érték egész szám, a fájl legalább egy napot tartalmaz.\n\nMinden részfeladat kimenete a feladat sorszámával kezdődik (`N. feladat`). A kimenetben ne használj ékezetes betűt (az ékezetmentes kiírás az érettségin is elfogadott). Ahol a feladat bevitelt kér, a kérdést írd ki egy külön sorba, és csak utána olvass be.\n\nGyűjtsd ki a fagyos napokat (ahol a legalacsonyabb hőmérséklet 0 °C-nál kisebb), és írd a `fagyos.txt` fájlba soronként egy napot: a nap sorszámát és a legalacsonyabb hőmérsékletet tabulátorral elválasztva, az eredeti sorrendben. Mivel a futtatás csak a képernyőre írt kimenetet értékeli, olvasd vissza a fájlt: írd ki a `fagyos.txt tartalma:` sort,\
+  \ utána a fájl sorait, végül az összes fagyos nap számát:\n\n```\nfagyos.txt tartalma:\n<nap><TAB><fok>\n...\nOsszesen: <db> nap\n```\n\nKimenet a mellékelt mintafájllal:\n\n```\n5. feladat\nfagyos.txt tartalma:\n3\t-1\n4\t-1\n10\t-3\nOsszesen: 3 nap\n```\n\nTipp: a kiválogatás eredményét előbb listába gyűjtheted, aztán írhatod ki fájlba; a tabulátor jele `\"\\t\"`.\n"
+starter_code:
+  python: |
+    print("5. feladat")
+    with open("homerseklet.txt", encoding="utf-8") as f:
+        sorok = f.read().splitlines()
+    db = int(sorok[0])
+    napok = []
+    for sor in sorok[1:]:
+        r = sor.split("\t")
+        napok.append((int(r[0]), int(r[1]), int(r[2]), int(r[3])))
+    # ide írd a megoldást
+  csharp: |
+    using System;
+    using System.Collections.Generic;
+    using System.Globalization;
+    using System.IO;
+    using System.Linq;
+
+    class Program
+    {
+        static void Main()
+        {
+            Console.WriteLine("5. feladat");
+            string[] sorok = File.ReadAllLines("homerseklet.txt");
+            int db = int.Parse(sorok[0]);
+            int[][] napok = new int[db][];
+            for (int i = 0; i < db; i++)
+            {
+                string[] r = sorok[i + 1].Split('\t');
+                napok[i] = new int[] { int.Parse(r[0]), int.Parse(r[1]), int.Parse(r[2]), int.Parse(r[3]) };
+            }
+            // ide írd a megoldást
+        }
+    }
+sample_solutions:
+  python: |
+    print("5. feladat")
+    with open("homerseklet.txt", encoding="utf-8") as f:
+        sorok = f.read().splitlines()
+    db = int(sorok[0])
+    napok = []
+    for sor in sorok[1:]:
+        r = sor.split("\t")
+        napok.append((int(r[0]), int(r[1]), int(r[2]), int(r[3])))
+    sorok_ki = []
+    for nap in napok:
+        if nap[1] < 0:
+            sorok_ki.append(str(nap[0]) + "\t" + str(nap[1]))
+    with open("fagyos.txt", "w", encoding="utf-8") as f:
+        for s in sorok_ki:
+            f.write(s + "\n")
+    print("fagyos.txt tartalma:")
+    with open("fagyos.txt", encoding="utf-8") as f:
+        for s in f.read().splitlines():
+            print(s)
+    print("Osszesen:", len(sorok_ki), "nap")
+  csharp: |
+    using System;
+    using System.Collections.Generic;
+    using System.Globalization;
+    using System.IO;
+    using System.Linq;
+
+    class Program
+    {
+        static void Main()
+        {
+            Console.WriteLine("5. feladat");
+            string[] sorok = File.ReadAllLines("homerseklet.txt");
+            int db = int.Parse(sorok[0]);
+            int[][] napok = new int[db][];
+            for (int i = 0; i < db; i++)
+            {
+                string[] r = sorok[i + 1].Split('\t');
+                napok[i] = new int[] { int.Parse(r[0]), int.Parse(r[1]), int.Parse(r[2]), int.Parse(r[3]) };
+            }
+            List<string> ki = new List<string>();
+            foreach (int[] nap in napok)
+            {
+                if (nap[1] < 0)
+                {
+                    ki.Add(nap[0] + "\t" + nap[1]);
+                }
+            }
+            File.WriteAllLines("fagyos.txt", ki);
+            Console.WriteLine("fagyos.txt tartalma:");
+            foreach (string s in File.ReadAllLines("fagyos.txt"))
+            {
+                Console.WriteLine(s);
+            }
+            Console.WriteLine("Osszesen: " + ki.Count + " nap");
+        }
+    }
+files:
+  homerseklet.txt: homerseklet.txt
+tests:
+- stdin: ''
+  expected: "5. feladat\nfagyos.txt tartalma:\n3\t-1\n4\t-1\n10\t-3\nOsszesen: 3 nap\n"
+  hidden: false
+- stdin: ''
+  expected: "5. feladat\nfagyos.txt tartalma:\n1\t-2\nOsszesen: 1 nap\n"
+  hidden: true
+  files:
+    homerseklet.txt: teszt-2/homerseklet.txt
+- stdin: ''
+  expected: "5. feladat\nfagyos.txt tartalma:\n12\t-1\n18\t-2\n21\t-1\n25\t-1\n28\t-1\nOsszesen: 5 nap\n"
+  hidden: true
+  files:
+    homerseklet.txt: teszt-3/homerseklet.txt
+- stdin: ''
+  expected: |
+    5. feladat
+    fagyos.txt tartalma:
+    Osszesen: 0 nap
+  hidden: true
+  files:
+    homerseklet.txt: teszt-4/homerseklet.txt

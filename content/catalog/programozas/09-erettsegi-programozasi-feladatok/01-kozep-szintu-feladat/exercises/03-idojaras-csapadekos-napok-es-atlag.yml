@@ -1,0 +1,150 @@
+slug: idojaras-csapadekos-napok-es-atlag
+title: 'Időjárás: csapadékos napok és átlag'
+position: 2
+kind: code
+level: kozep
+difficulty: 3
+published: false
+allowed_languages:
+- python
+- csharp
+description: |
+  Egy meteorológiai állomás egy hónap napi méréseit a `homerseklet.txt` fájlba mentette. Az első sor a napok száma (`n`), utána soronként egy nap adatai következnek, tabulátorral tagolva: a nap sorszáma (1-től), a napi legalacsonyabb hőmérséklet (°C), a napi legmagasabb hőmérséklet (°C) és a csapadék mennyisége (mm). Minden érték egész szám, a fájl legalább egy napot tartalmaz.
+
+  Minden részfeladat kimenete a feladat sorszámával kezdődik (`N. feladat`). A kimenetben ne használj ékezetes betűt (az ékezetmentes kiírás az érettségin is elfogadott). Ahol a feladat bevitelt kér, a kérdést írd ki egy külön sorba, és csak utána olvass be.
+
+  Számold meg a csapadékos napokat (ahol a csapadék több mint 0 mm), és add meg az átlagos napi csapadékot az **összes** nap alapján, két tizedesjegyre kerekítve:
+
+  ```
+  Csapadekos napok: <db>
+  Atlagos csapadek: <atlag> mm
+  ```
+
+  Kimenet a mellékelt mintafájllal:
+
+  ```
+  3. feladat
+  Csapadekos napok: 6
+  Atlagos csapadek: 5.42 mm
+  ```
+
+  Tipp: az összegzés és a megszámlálás egy ciklusban is elvégezhető; az osztásnál ügyelj arra, hogy valós osztás legyen (C#-ban `(double)` átalakítással).
+starter_code:
+  python: |
+    print("3. feladat")
+    with open("homerseklet.txt", encoding="utf-8") as f:
+        sorok = f.read().splitlines()
+    db = int(sorok[0])
+    napok = []
+    for sor in sorok[1:]:
+        r = sor.split("\t")
+        napok.append((int(r[0]), int(r[1]), int(r[2]), int(r[3])))
+    # ide írd a megoldást
+  csharp: |
+    using System;
+    using System.Collections.Generic;
+    using System.Globalization;
+    using System.IO;
+    using System.Linq;
+
+    class Program
+    {
+        static void Main()
+        {
+            Console.WriteLine("3. feladat");
+            string[] sorok = File.ReadAllLines("homerseklet.txt");
+            int db = int.Parse(sorok[0]);
+            int[][] napok = new int[db][];
+            for (int i = 0; i < db; i++)
+            {
+                string[] r = sorok[i + 1].Split('\t');
+                napok[i] = new int[] { int.Parse(r[0]), int.Parse(r[1]), int.Parse(r[2]), int.Parse(r[3]) };
+            }
+            // ide írd a megoldást
+        }
+    }
+sample_solutions:
+  python: |
+    print("3. feladat")
+    with open("homerseklet.txt", encoding="utf-8") as f:
+        sorok = f.read().splitlines()
+    db = int(sorok[0])
+    napok = []
+    for sor in sorok[1:]:
+        r = sor.split("\t")
+        napok.append((int(r[0]), int(r[1]), int(r[2]), int(r[3])))
+    csapadekos = 0
+    osszeg = 0
+    for nap in napok:
+        osszeg += nap[3]
+        if nap[3] > 0:
+            csapadekos += 1
+    print("Csapadekos napok:", csapadekos)
+    print(f"Atlagos csapadek: {osszeg / db:.2f} mm")
+  csharp: |
+    using System;
+    using System.Collections.Generic;
+    using System.Globalization;
+    using System.IO;
+    using System.Linq;
+
+    class Program
+    {
+        static void Main()
+        {
+            Console.WriteLine("3. feladat");
+            string[] sorok = File.ReadAllLines("homerseklet.txt");
+            int db = int.Parse(sorok[0]);
+            int[][] napok = new int[db][];
+            for (int i = 0; i < db; i++)
+            {
+                string[] r = sorok[i + 1].Split('\t');
+                napok[i] = new int[] { int.Parse(r[0]), int.Parse(r[1]), int.Parse(r[2]), int.Parse(r[3]) };
+            }
+            int csapadekos = 0;
+            int osszeg = 0;
+            foreach (int[] nap in napok)
+            {
+                osszeg += nap[3];
+                if (nap[3] > 0)
+                {
+                    csapadekos++;
+                }
+            }
+            Console.WriteLine("Csapadekos napok: " + csapadekos);
+            Console.WriteLine("Atlagos csapadek: " + ((double)osszeg / db).ToString("F2", CultureInfo.InvariantCulture) + " mm");
+        }
+    }
+files:
+  homerseklet.txt: homerseklet.txt
+tests:
+- stdin: ''
+  expected: |
+    3. feladat
+    Csapadekos napok: 6
+    Atlagos csapadek: 5.42 mm
+  hidden: false
+- stdin: ''
+  expected: |
+    3. feladat
+    Csapadekos napok: 1
+    Atlagos csapadek: 3.00 mm
+  hidden: true
+  files:
+    homerseklet.txt: teszt-2/homerseklet.txt
+- stdin: ''
+  expected: |
+    3. feladat
+    Csapadekos napok: 17
+    Atlagos csapadek: 6.87 mm
+  hidden: true
+  files:
+    homerseklet.txt: teszt-3/homerseklet.txt
+- stdin: ''
+  expected: |
+    3. feladat
+    Csapadekos napok: 3
+    Atlagos csapadek: 6.50 mm
+  hidden: true
+  files:
+    homerseklet.txt: teszt-4/homerseklet.txt

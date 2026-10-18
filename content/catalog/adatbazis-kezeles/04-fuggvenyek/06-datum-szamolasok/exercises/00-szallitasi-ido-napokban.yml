@@ -1,0 +1,79 @@
+slug: szallitasi-ido-napokban
+title: Szállítási idő napokban
+position: 0
+kind: sql
+level: kozep
+difficulty: 1
+published: false
+allowed_languages: [sql]
+description: |
+    Listázd a vevő nevét (`vevo`) és azt, hogy a rendeléstől hány nap telt el a szállításig (`napok`). Ha még nem szállították ki, a `napok` értéke üres marad.
+
+    A `rendeles` tábla:
+
+    | `id` | `vevo` | `rendelve` | `hatarido` | `szallitva` |
+    |---|---|---|---|---|
+    | 1 | Kiss Anna | 2025-03-03 | 2025-03-10 | 2025-03-07 |
+    | 2 | Nagy Bela | 2025-03-08 | 2025-03-15 | 2025-03-17 |
+    | 3 | Toth Csaba | 2025-02-26 | 2025-03-05 | 2025-03-05 |
+
+    Az eredmény ezekre az adatokra:
+
+    | `vevo` | `napok` |
+    |---|---|
+    | Kiss Anna | 4 |
+    | Nagy Bela | 9 |
+    | Toth Csaba | 7 |
+
+    Tipp: `DATEDIFF(későbbi, korábbi)` a két dátum közti napok számát adja.
+starter_code:
+  sql: |
+    SELECT vevo, ... AS napok
+    FROM rendeles;
+sample_solutions:
+  sql: |
+    SELECT vevo, DATEDIFF(szallitva, rendelve) AS napok
+    FROM rendeles;
+tests:
+  - stdin: |
+      CREATE TABLE rendeles (id INT, vevo VARCHAR(30), rendelve DATE, hatarido DATE, szallitva DATE);
+      INSERT INTO rendeles VALUES (1, 'Kiss Anna', '2025-03-03', '2025-03-10', '2025-03-07');
+      INSERT INTO rendeles VALUES (2, 'Nagy Bela', '2025-03-08', '2025-03-15', '2025-03-17');
+      INSERT INTO rendeles VALUES (3, 'Toth Csaba', '2025-02-26', '2025-03-05', '2025-03-05');
+    expected: |
+      vevo,napok
+      Kiss Anna,4
+      Nagy Bela,9
+      Toth Csaba,7
+    hidden: false
+  - stdin: |
+      CREATE TABLE rendeles (id INT, vevo VARCHAR(30), rendelve DATE, hatarido DATE, szallitva DATE);
+      INSERT INTO rendeles VALUES (4, 'Szabo Dora', '2025-12-20', '2026-01-02', '2026-01-03');
+      INSERT INTO rendeles VALUES (5, 'Varga Fanni', '2025-03-09', '2025-03-16', '2025-03-12');
+      INSERT INTO rendeles VALUES (6, 'Ho Eva', '2024-02-20', '2024-03-01', '2024-03-01');
+    expected: |
+      vevo,napok
+      Szabo Dora,14
+      Varga Fanni,3
+      Ho Eva,10
+    hidden: true
+  - stdin: |
+      CREATE TABLE rendeles (id INT, vevo VARCHAR(30), rendelve DATE, hatarido DATE, szallitva DATE);
+      INSERT INTO rendeles VALUES (7, 'Bo Li', '2025-03-05', '2025-03-12', '2025-03-05');
+      INSERT INTO rendeles VALUES (8, 'Papp Jozsef', '2025-04-04', '2025-04-11', NULL);
+    expected: |
+      vevo,napok
+      Bo Li,0
+      Papp Jozsef,
+    hidden: true
+  - stdin: |
+      CREATE TABLE rendeles (id INT, vevo VARCHAR(30), rendelve DATE, hatarido DATE, szallitva DATE);
+      INSERT INTO rendeles VALUES (6, 'Ho Eva', '2024-02-20', '2024-03-01', '2024-03-01');
+      INSERT INTO rendeles VALUES (7, 'Bo Li', '2025-03-05', '2025-03-12', '2025-03-05');
+      INSERT INTO rendeles VALUES (8, 'Papp Jozsef', '2025-04-04', '2025-04-11', NULL);
+    expected: |
+      vevo,napok
+      Ho Eva,10
+      Bo Li,0
+      Papp Jozsef,
+    hidden: true

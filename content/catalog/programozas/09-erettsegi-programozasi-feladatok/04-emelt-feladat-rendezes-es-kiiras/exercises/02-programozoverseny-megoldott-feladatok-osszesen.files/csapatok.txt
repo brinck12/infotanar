@@ -1,0 +1,13 @@
+csapat	varos	megoldott	buntetes
+Alfa Kod	Szeged	7	210
+Byte Bajnokok	Debrecen	9	180
+Ciklus Csapat	Szeged	7	195
+Delta Ketto	Pecs	5	240
+Esetleg	Gyor	9	180
+Futar Fiuk	Debrecen	6	150
+Gepelok	Pecs	7	195
+Hibakeresok	Miskolc	3	300
+Indexelok	Szeged	8	220
+Java Szigete	Gyor	6	150
+Kod Kobor	Miskolc	4	270
+Lusta Lambda	Debrecen	0	0

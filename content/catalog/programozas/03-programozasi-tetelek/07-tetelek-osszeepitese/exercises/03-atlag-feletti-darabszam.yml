@@ -1,0 +1,152 @@
+slug: atlag-feletti-darabszam
+title: Átlag feletti darabszám
+position: 2
+kind: code
+level: emelt
+difficulty: 4
+published: false
+allowed_languages:
+- python
+- csharp
+description: |
+  ## Feladat
+
+  Olvass be egy `N` egész számot, majd `N` darab egész számot. Számold meg, **hány szám nagyobb a számok átlagánál**!
+
+  ### Bemenet
+
+  - Az első sorban egy `N` egész szám (`1 ≤ N ≤ 100`).
+  - A következő `N` sorban egy-egy egész szám.
+
+  ### Kimenet
+
+  Egyetlen sorban az átlagnál szigorúan nagyobb számok darabszáma.
+
+  ### Példa
+
+  Bemenet: `5`, majd `1`, `2`, `3`, `4`, `10`. Kimenet: `1` (az átlag 4, csak a 10 nagyobb)
+
+  Tipp: az átlagot csak az összes szám ismeretében tudod, ezért két menet kell: először olvasd be a számokat egy listába és összegezz, aztán a listán számold meg az átlag felettieket. A tizedes törtet elkerülheted: `szam * n > osszeg` ugyanazt jelenti, mint `szam > osszeg / n`.
+starter_code:
+  python: |
+    n = int(input())
+    szamok = []
+    osszeg = 0
+    for _ in range(n):
+        szam = int(input())
+        szamok.append(szam)
+        osszeg += szam
+    db = 0
+    # TODO: menj végig a listán, és számold meg az átlag felettieket
+    print(db)
+  csharp: |
+    using System;
+
+    class Program
+    {
+        static void Main()
+        {
+            int n = int.Parse(Console.ReadLine());
+            int[] szamok = new int[n];
+            int osszeg = 0;
+            for (int i = 0; i < n; i++)
+            {
+                szamok[i] = int.Parse(Console.ReadLine());
+                osszeg += szamok[i];
+            }
+            int db = 0;
+            // TODO: menj végig a tömbön, és számold meg az átlag felettieket
+            Console.WriteLine(db);
+        }
+    }
+sample_solutions:
+  python: |
+    n = int(input())
+    szamok = []
+    osszeg = 0
+    for _ in range(n):
+        szam = int(input())
+        szamok.append(szam)
+        osszeg += szam
+    db = 0
+    for szam in szamok:
+        if szam * n > osszeg:
+            db += 1
+    print(db)
+  csharp: |
+    using System;
+
+    class Program
+    {
+        static void Main()
+        {
+            int n = int.Parse(Console.ReadLine());
+            int[] szamok = new int[n];
+            int osszeg = 0;
+            for (int i = 0; i < n; i++)
+            {
+                szamok[i] = int.Parse(Console.ReadLine());
+                osszeg += szamok[i];
+            }
+            int db = 0;
+            for (int i = 0; i < n; i++)
+            {
+                if (szamok[i] * n > osszeg)
+                {
+                    db++;
+                }
+            }
+            Console.WriteLine(db);
+        }
+    }
+tests:
+- stdin: |
+    5
+    1
+    2
+    3
+    4
+    10
+  expected: |
+    1
+  hidden: false
+- stdin: |
+    1
+    7
+  expected: |
+    0
+  hidden: true
+- stdin: |
+    3
+    5
+    5
+    5
+  expected: |
+    0
+  hidden: true
+- stdin: |
+    4
+    -3
+    -1
+    -2
+    -10
+  expected: |
+    3
+  hidden: true
+- stdin: |
+    2
+    1
+    2
+  expected: |
+    1
+  hidden: true
+- stdin: |
+    5
+    0
+    0
+    0
+    9
+    1
+  expected: |
+    1
+  hidden: true

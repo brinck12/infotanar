@@ -1,0 +1,102 @@
+slug: programozas-4-egy-szerzo-muvei
+title: Programozás 4 - Egy szerző művei
+position: 7
+kind: code
+level: kozep
+difficulty: 3
+published: false
+allowed_languages:
+- python
+- csharp
+description: "A `konyvek.txt` a könyvtár állományát tartalmazza, soronként egy könyvvel, pontosvesszővel elválasztva: `szerző;cím;kiadás éve;oldalszám`. Az adatokban nincs ékezet, a fájl legalább egy sort tartalmaz.\n\n**4. feladat.** Kérjen be egy szerzőnevet! Ha a szerzőnek van könyve a fájlban, írja ki a `4. feladat:` sort, alá pedig a könyveinek címét a fájlbeli sorrendben, soronként egyet. Ha nincs, a kimenet egyetlen sor: `4. feladat: Nincs ilyen szerzo!`\n\nMinta (a billentyűzetről beolvasott sor):\n\n```text\nNemes Anna\n```\n\nA mintafájlra a kimenet:\n\n```text\n4. feladat:\r\nAz elveszett kulcs\r\nEsti mesek\r\n```\n\nTipp: gyűjtsd a találatokat egy listába; a lista hossza dönti el, melyik kiírás kell."
+starter_code:
+  python: |
+    with open("konyvek.txt", encoding="utf-8") as f:
+        konyvek = [sor.split(";") for sor in f.read().splitlines()]
+    szerzo = input()
+    # ide írd a megoldást
+  csharp: |
+    using System;
+    using System.Collections.Generic;
+    using System.IO;
+
+    class Program
+    {
+        static void Main()
+        {
+            string[] sorok = File.ReadAllLines("konyvek.txt");
+            string szerzo = Console.ReadLine().Trim();
+            // ide írd a megoldást
+        }
+    }
+sample_solutions:
+  python: |
+    with open("konyvek.txt", encoding="utf-8") as f:
+        konyvek = [sor.split(";") for sor in f.read().splitlines()]
+    szerzo = input().strip()
+    cimek = [k[1] for k in konyvek if k[0] == szerzo]
+    if cimek:
+        print("4. feladat:")
+        for c in cimek:
+            print(c)
+    else:
+        print("4. feladat: Nincs ilyen szerzo!")
+  csharp: |
+    using System;
+    using System.Collections.Generic;
+    using System.IO;
+
+    class Program
+    {
+        static void Main()
+        {
+            string[] sorok = File.ReadAllLines("konyvek.txt");
+            string szerzo = Console.ReadLine().Trim();
+            List<string> cimek = new List<string>();
+            foreach (string sor in sorok)
+            {
+                string[] r = sor.Split(';');
+                if (r[0] == szerzo)
+                {
+                    cimek.Add(r[1]);
+                }
+            }
+            if (cimek.Count > 0)
+            {
+                Console.WriteLine("4. feladat:");
+                foreach (string c in cimek)
+                {
+                    Console.WriteLine(c);
+                }
+            }
+            else
+            {
+                Console.WriteLine("4. feladat: Nincs ilyen szerzo!");
+            }
+        }
+    }
+files:
+  konyvek.txt: konyvek.txt
+tests:
+- stdin: |
+    Nemes Anna
+  expected: "4. feladat:\r\nAz elveszett kulcs\r\nEsti mesek\r\n"
+  hidden: false
+- stdin: |
+    Nemes Anna
+  expected: "4. feladat: Nincs ilyen szerzo!\r\n"
+  hidden: true
+  files:
+    konyvek.txt: teszt-2/konyvek.txt
+- stdin: |
+    Farkas Daniel
+  expected: "4. feladat:\r\nAz elveszett kulcs\r\nA regi malom\r\nA tanito naploja\r\nCsendes folyo\r\nA titkos kert\r\n"
+  hidden: true
+  files:
+    konyvek.txt: teszt-3/konyvek.txt
+- stdin: |
+    Nemes Anna
+  expected: "4. feladat:\r\nBarlangok vilaga\r\nLampasok\r\nA negy evszak\r\nEzust ora\r\n"
+  hidden: true
+  files:
+    konyvek.txt: teszt-4/konyvek.txt

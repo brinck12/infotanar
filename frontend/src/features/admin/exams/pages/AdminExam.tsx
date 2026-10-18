@@ -100,7 +100,7 @@ function ExamEditor({ exam }: { exam: Exam }) {
       )}
 
       <Section title="A vizsga adatai" aside={<SavedNote mutation={save} />}>
-        <MutationError error={save.error} fields={['title', 'session', 'level', 'minutes', 'points', 'is_published', 'timed_mode']} />
+        <MutationError error={save.error} fields={['title', 'session', 'level', 'minutes', 'points']} />
         <form onSubmit={submit} noValidate className="flex flex-col gap-5">
           <div className="flex flex-wrap gap-5">
             <Field className="flex-1 basis-72" label="Megnevezés" value={form.title} onChange={(e) => set('title', e.target.value)} error={errors.title} />

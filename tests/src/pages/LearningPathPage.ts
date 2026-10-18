@@ -14,7 +14,7 @@ export class LearningPathPage extends BasePage {
     this.heading = page.getByRole('heading', { level: 1 })
     this.pointsBar = page.getByRole('img', { name: /pont$/ })
     this.levelSwitch = page.getByRole('group', { name: 'Szint' })
-    this.trackTabs = page.getByRole('tablist', { name: 'Sávok' })
+    this.trackTabs = page.getByRole('tablist', { name: 'Tanulási utak' })
     this.stages = page.getByRole('tabpanel').getByRole('listitem')
   }
 

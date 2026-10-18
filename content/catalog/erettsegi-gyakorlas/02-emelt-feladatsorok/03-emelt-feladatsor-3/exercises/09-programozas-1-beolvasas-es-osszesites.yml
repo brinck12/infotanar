@@ -1,0 +1,173 @@
+slug: programozas-1-beolvasas-es-osszesites
+title: Programozás 1 - Beolvasás és összesítés
+position: 8
+kind: code
+level: emelt
+difficulty: 1
+published: false
+allowed_languages:
+- python
+- csharp
+description: |
+  Az `indulasok.txt` a repülőtér egy havi (30 napos) forgalmát tartalmazza, soronként egy indulással, pontosvesszővel elválasztva: `járatszám;célállomás;távolság km;nap;indulás;utasok;késés`. A járatszám két betűből és négy számjegyből áll (pl. `MA1017`), a nap a hónap napja (1–30), az indulás `ÓÓ:PP` alakú, a késés percben értendő (0, ha pontosan indult). Az adatokban nincs ékezet, a fájl legalább egy sort tartalmaz, a sorok nincsenek sorrendben, és egy járat egy napon egy időpontban legfeljebb egyszer szerepel.
+
+  **1. feladat.** Olvassa be a fájlt, és írja ki az indulások számát és a felszállt utasok összesített számát, a mintának megfelelően.
+
+  A mintafájlra a kimenet:
+
+  ```text
+  1. feladat: A fajlban 40 indulas szerepel, osszesen 3858 utassal.
+  ```
+
+  Tipp: számlálás és összegzés egyetlen cikluson belül is megoldható.
+starter_code:
+  python: |
+    class Indulas:
+        def __init__(self, sor):
+            r = sor.split(";")
+            self.jarat = r[0]
+            self.cel = r[1]
+            self.tav = int(r[2])
+            self.nap = int(r[3])
+            self.ido = r[4]
+            self.utas = int(r[5])
+            self.keses = int(r[6])
+
+
+    with open("indulasok.txt", encoding="utf-8") as f:
+        indulasok = [Indulas(sor) for sor in f.read().splitlines()]
+    # ide írd a megoldást
+  csharp: |
+    using System;
+    using System.Collections.Generic;
+    using System.IO;
+
+    class Indulas
+    {
+        public string Jarat;
+        public string Cel;
+        public int Tav;
+        public int Nap;
+        public string Ido;
+        public int Utas;
+        public int Keses;
+
+        public Indulas(string sor)
+        {
+            string[] r = sor.Split(';');
+            Jarat = r[0];
+            Cel = r[1];
+            Tav = int.Parse(r[2]);
+            Nap = int.Parse(r[3]);
+            Ido = r[4];
+            Utas = int.Parse(r[5]);
+            Keses = int.Parse(r[6]);
+        }
+    }
+
+    class Program
+    {
+        static void Main()
+        {
+            List<Indulas> indulasok = new List<Indulas>();
+            foreach (string sor in File.ReadAllLines("indulasok.txt"))
+            {
+                indulasok.Add(new Indulas(sor));
+            }
+            // ide írd a megoldást
+        }
+    }
+sample_solutions:
+  python: |
+    class Indulas:
+        def __init__(self, sor):
+            r = sor.split(";")
+            self.jarat = r[0]
+            self.cel = r[1]
+            self.tav = int(r[2])
+            self.nap = int(r[3])
+            self.ido = r[4]
+            self.utas = int(r[5])
+            self.keses = int(r[6])
+
+
+    with open("indulasok.txt", encoding="utf-8") as f:
+        indulasok = [Indulas(sor) for sor in f.read().splitlines()]
+    osszes = 0
+    for i in indulasok:
+        osszes += i.utas
+    print("1. feladat: A fajlban " + str(len(indulasok)) + " indulas szerepel, osszesen " + str(osszes) + " utassal.")
+  csharp: |
+    using System;
+    using System.Collections.Generic;
+    using System.IO;
+
+    class Indulas
+    {
+        public string Jarat;
+        public string Cel;
+        public int Tav;
+        public int Nap;
+        public string Ido;
+        public int Utas;
+        public int Keses;
+
+        public Indulas(string sor)
+        {
+            string[] r = sor.Split(';');
+            Jarat = r[0];
+            Cel = r[1];
+            Tav = int.Parse(r[2]);
+            Nap = int.Parse(r[3]);
+            Ido = r[4];
+            Utas = int.Parse(r[5]);
+            Keses = int.Parse(r[6]);
+        }
+    }
+
+    class Program
+    {
+        static void Main()
+        {
+            List<Indulas> indulasok = new List<Indulas>();
+            foreach (string sor in File.ReadAllLines("indulasok.txt"))
+            {
+                indulasok.Add(new Indulas(sor));
+            }
+            int osszes = 0;
+            foreach (Indulas i in indulasok)
+            {
+                osszes += i.Utas;
+            }
+            Console.WriteLine("1. feladat: A fajlban " + indulasok.Count + " indulas szerepel, osszesen " + osszes + " utassal.");
+        }
+    }
+files:
+  indulasok.txt: indulasok.txt
+tests:
+- stdin: ''
+  expected: '1. feladat: A fajlban 40 indulas szerepel, osszesen 3858 utassal.
+
+    '
+  hidden: false
+- stdin: ''
+  expected: '1. feladat: A fajlban 1 indulas szerepel, osszesen 80 utassal.
+
+    '
+  hidden: true
+  files:
+    indulasok.txt: teszt-2/indulasok.txt
+- stdin: ''
+  expected: '1. feladat: A fajlban 70 indulas szerepel, osszesen 6705 utassal.
+
+    '
+  hidden: true
+  files:
+    indulasok.txt: teszt-3/indulasok.txt
+- stdin: ''
+  expected: '1. feladat: A fajlban 12 indulas szerepel, osszesen 1464 utassal.
+
+    '
+  hidden: true
+  files:
+    indulasok.txt: teszt-4/indulasok.txt

@@ -1,0 +1,66 @@
+slug: szam-elojele
+title: Szám előjele
+position: 2
+kind: code
+level: kozep
+difficulty: 2
+published: false
+allowed_languages: [python, csharp]
+description: |
+  Olvass be egy egész számot. Írd ki, hogy `pozitiv`, `negativ` vagy `nulla`.
+
+  Példa: a `-5` bemenetre a kimenet `negativ`.
+
+  Tipp: három eset van, ezért egy `if` és egy `elif` (C#-ban `else if`) után `else` ág is kell.
+starter_code:
+  python: |
+    n = int(input())
+    # innen folytasd
+  csharp: |
+    using System;
+
+    class Program
+    {
+        static void Main()
+        {
+            int n = int.Parse(Console.ReadLine());
+            // innen folytasd
+        }
+    }
+sample_solutions:
+  python: |
+    n = int(input())
+    if n > 0:
+        print("pozitiv")
+    elif n < 0:
+        print("negativ")
+    else:
+        print("nulla")
+  csharp: |
+    using System;
+
+    class Program
+    {
+        static void Main()
+        {
+            int n = int.Parse(Console.ReadLine());
+            if (n > 0)
+            {
+                Console.WriteLine("pozitiv");
+            }
+            else if (n < 0)
+            {
+                Console.WriteLine("negativ");
+            }
+            else
+            {
+                Console.WriteLine("nulla");
+            }
+        }
+    }
+tests:
+  - { stdin: "-5\n", expected: "negativ\n", hidden: false }
+  - { stdin: "12\n", expected: "pozitiv\n", hidden: true }
+  - { stdin: "0\n", expected: "nulla\n", hidden: true }
+  - { stdin: "1\n", expected: "pozitiv\n", hidden: true }
+  - { stdin: "-1\n", expected: "negativ\n", hidden: true }

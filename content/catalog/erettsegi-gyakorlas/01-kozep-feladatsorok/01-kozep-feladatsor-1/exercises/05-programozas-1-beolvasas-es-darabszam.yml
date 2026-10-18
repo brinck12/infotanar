@@ -1,0 +1,68 @@
+slug: programozas-1-beolvasas-es-darabszam
+title: Programozás 1 - Beolvasás és darabszám
+position: 4
+kind: code
+level: kozep
+difficulty: 1
+published: false
+allowed_languages:
+- python
+- csharp
+description: "A `konyvek.txt` a könyvtár állományát tartalmazza, soronként egy könyvvel, pontosvesszővel elválasztva: `szerző;cím;kiadás éve;oldalszám`. Az adatokban nincs ékezet, a fájl legalább egy sort tartalmaz.\n\n**1. feladat.** Olvassa be a fájlt, és írja ki, hány könyv szerepel benne, a mintának megfelelően.\n\nA mintafájlra a kimenet:\n\n```text\n1. feladat: A fajlban 12 konyv szerepel.\r\n```\n\nTipp: a fájl sorainak száma a könyvek száma."
+starter_code:
+  python: |
+    with open("konyvek.txt", encoding="utf-8") as f:
+        konyvek = [sor.split(";") for sor in f.read().splitlines()]
+    # ide írd a megoldást
+  csharp: |
+    using System;
+    using System.Collections.Generic;
+    using System.IO;
+
+    class Program
+    {
+        static void Main()
+        {
+            string[] sorok = File.ReadAllLines("konyvek.txt");
+            // ide írd a megoldást
+        }
+    }
+sample_solutions:
+  python: |
+    with open("konyvek.txt", encoding="utf-8") as f:
+        konyvek = [sor.split(";") for sor in f.read().splitlines()]
+    print("1. feladat: A fajlban", len(konyvek), "konyv szerepel.")
+  csharp: |
+    using System;
+    using System.Collections.Generic;
+    using System.IO;
+
+    class Program
+    {
+        static void Main()
+        {
+            string[] sorok = File.ReadAllLines("konyvek.txt");
+            Console.WriteLine("1. feladat: A fajlban " + sorok.Length + " konyv szerepel.");
+        }
+    }
+files:
+  konyvek.txt: konyvek.txt
+tests:
+- stdin: ''
+  expected: "1. feladat: A fajlban 12 konyv szerepel.\r\n"
+  hidden: false
+- stdin: ''
+  expected: "1. feladat: A fajlban 1 konyv szerepel.\r\n"
+  hidden: true
+  files:
+    konyvek.txt: teszt-2/konyvek.txt
+- stdin: ''
+  expected: "1. feladat: A fajlban 26 konyv szerepel.\r\n"
+  hidden: true
+  files:
+    konyvek.txt: teszt-3/konyvek.txt
+- stdin: ''
+  expected: "1. feladat: A fajlban 9 konyv szerepel.\r\n"
+  hidden: true
+  files:
+    konyvek.txt: teszt-4/konyvek.txt

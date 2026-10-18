@@ -1,0 +1,77 @@
+slug: monogram
+title: Monogram
+position: 3
+kind: sql
+level: kozep
+difficulty: 3
+published: false
+allowed_languages: [sql]
+description: |
+    Készíts minden tanulónak monogramot: a vezetéknév és a keresztnév első betűje, mindkettő után ponttal, például `K.A.`. Az oszlop neve `monogram` legyen.
+
+    A `tanulo` tábla:
+
+    | `id` | `vezeteknev` | `keresztnev` | `osztaly` |
+    |---|---|---|---|
+    | 1 | Kiss | Anna | 10.A |
+    | 2 | Nagy | Bela | 10.B |
+    | 3 | Toth | Csaba | 10.A |
+
+    Az eredmény ezekre az adatokra:
+
+    | `monogram` |
+    |---|
+    | K.A. |
+    | N.B. |
+    | T.C. |
+
+    Tipp: két `LEFT(..., 1)` kell, és a `CONCAT` fűzi össze őket a pontokkal.
+starter_code:
+  sql: |
+    SELECT CONCAT(...) AS monogram
+    FROM tanulo;
+sample_solutions:
+  sql: |
+    SELECT CONCAT(LEFT(vezeteknev, 1), '.', LEFT(keresztnev, 1), '.') AS monogram
+    FROM tanulo;
+tests:
+  - stdin: |
+      CREATE TABLE tanulo (id INT, vezeteknev VARCHAR(30), keresztnev VARCHAR(30), osztaly VARCHAR(5));
+      INSERT INTO tanulo VALUES (1, 'Kiss', 'Anna', '10.A');
+      INSERT INTO tanulo VALUES (2, 'Nagy', 'Bela', '10.B');
+      INSERT INTO tanulo VALUES (3, 'Toth', 'Csaba', '10.A');
+    expected: |
+      monogram
+      K.A.
+      N.B.
+      T.C.
+    hidden: false
+  - stdin: |
+      CREATE TABLE tanulo (id INT, vezeteknev VARCHAR(30), keresztnev VARCHAR(30), osztaly VARCHAR(5));
+      INSERT INTO tanulo VALUES (4, 'Szabo', 'Dora', '11.A');
+      INSERT INTO tanulo VALUES (5, 'Varga', 'Fanni', '10.B');
+      INSERT INTO tanulo VALUES (6, 'Horvath', 'Erik', '11.A');
+    expected: |
+      monogram
+      S.D.
+      V.F.
+      H.E.
+    hidden: true
+  - stdin: |
+      CREATE TABLE tanulo (id INT, vezeteknev VARCHAR(30), keresztnev VARCHAR(30), osztaly VARCHAR(5));
+      INSERT INTO tanulo VALUES (8, 'Ho', 'Eva', '11.B');
+      INSERT INTO tanulo VALUES (11, 'Bo', 'Li', '10.A');
+    expected: |
+      monogram
+      H.E.
+      B.L.
+    hidden: true
+  - stdin: |
+      CREATE TABLE tanulo (id INT, vezeteknev VARCHAR(30), keresztnev VARCHAR(30), osztaly VARCHAR(5));
+      INSERT INTO tanulo VALUES (9, 'Kovacs', 'Gabor', '10.B');
+      INSERT INTO tanulo VALUES (12, 'Szentpeteri', 'Zsombor', '11.B');
+    expected: |
+      monogram
+      K.G.
+      S.Z.
+    hidden: true

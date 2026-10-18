@@ -1,0 +1,132 @@
+slug: beszuro-rendezes-kezzel
+title: "Beszúró rendezés kézzel"
+position: 3
+kind: code
+level: emelt
+difficulty: 4
+published: false
+allowed_languages: [python, csharp]
+description: |
+  Az első sor a személyek száma (N, legalább 1), majd N sor: `nev;kor` (a kor egész szám). Rendezd őket **kor szerint növekvő sorrendbe beszúró rendezéssel**, a beépített rendezés használata nélkül, a rendezés legyen **stabil** (az azonos korúak a bemeneti sorrendjüket megtartják). Írd ki soronként `nev kor` alakban a rendezett listát, majd egy sorban az elemmozgatások számát: `Mozgatas: k`. Egy mozgatás az, amikor egy elemet eggyel jobbra tolsz, mert az előtte lévő kora szigorúan nagyobb a beszúrt elem koránál.
+
+  Példa bemenet:
+
+  ```
+  4
+  Anna;30
+  Bence;25
+  Csilla;30
+  David;20
+  ```
+
+  Kimenet:
+
+  ```
+  David 20
+  Bence 25
+  Anna 30
+  Csilla 30
+  Mozgatas: 4
+  ```
+
+  Tipp: a beszúrandó elemet vedd ki, told jobbra a nála szigorúan nagyobb korúakat (ezt számold), és az üres helyre tedd be.
+starter_code:
+  python: |
+    n = int(input())
+    szemelyek = []
+    for _ in range(n):
+        resz = input().split(";")
+        szemelyek.append((resz[0], int(resz[1])))
+    mozgatas = 0
+    # beszúró rendezés kor szerint
+  csharp: |
+    using System;
+    using System.Collections.Generic;
+
+    class Szemely
+    {
+        public string Nev;
+        public int Kor;
+    }
+
+    class Program
+    {
+        static void Main()
+        {
+            int n = int.Parse(Console.ReadLine());
+            var szemelyek = new List<Szemely>();
+            for (int i = 0; i < n; i++)
+            {
+                string[] resz = Console.ReadLine().Split(';');
+                szemelyek.Add(new Szemely { Nev = resz[0], Kor = int.Parse(resz[1]) });
+            }
+            int mozgatas = 0;
+            // beszúró rendezés kor szerint
+        }
+    }
+sample_solutions:
+  python: |
+    n = int(input())
+    szemelyek = []
+    for _ in range(n):
+        resz = input().split(";")
+        szemelyek.append((resz[0], int(resz[1])))
+    mozgatas = 0
+    for i in range(1, n):
+        x = szemelyek[i]
+        j = i - 1
+        while j >= 0 and szemelyek[j][1] > x[1]:
+            szemelyek[j + 1] = szemelyek[j]
+            mozgatas += 1
+            j -= 1
+        szemelyek[j + 1] = x
+    for sz in szemelyek:
+        print(sz[0], sz[1])
+    print("Mozgatas:", mozgatas)
+  csharp: |
+    using System;
+    using System.Collections.Generic;
+
+    class Szemely
+    {
+        public string Nev;
+        public int Kor;
+    }
+
+    class Program
+    {
+        static void Main()
+        {
+            int n = int.Parse(Console.ReadLine());
+            var szemelyek = new List<Szemely>();
+            for (int i = 0; i < n; i++)
+            {
+                string[] resz = Console.ReadLine().Split(';');
+                szemelyek.Add(new Szemely { Nev = resz[0], Kor = int.Parse(resz[1]) });
+            }
+            int mozgatas = 0;
+            for (int i = 1; i < n; i++)
+            {
+                var x = szemelyek[i];
+                int j = i - 1;
+                while (j >= 0 && szemelyek[j].Kor > x.Kor)
+                {
+                    szemelyek[j + 1] = szemelyek[j];
+                    mozgatas++;
+                    j--;
+                }
+                szemelyek[j + 1] = x;
+            }
+            foreach (var sz in szemelyek)
+            {
+                Console.WriteLine(sz.Nev + " " + sz.Kor);
+            }
+            Console.WriteLine("Mozgatas: " + mozgatas);
+        }
+    }
+tests:
+  - { stdin: "4\nAnna;30\nBence;25\nCsilla;30\nDavid;20\n", expected: "David 20\nBence 25\nAnna 30\nCsilla 30\nMozgatas: 4\n", hidden: false }
+  - { stdin: "1\nEmil;50\n", expected: "Emil 50\nMozgatas: 0\n", hidden: true }
+  - { stdin: "3\nFanni;10\nGabor;10\nHanna;10\n", expected: "Fanni 10\nGabor 10\nHanna 10\nMozgatas: 0\n", hidden: true }
+  - { stdin: "5\nIvan;5\nJudit;4\nKata;3\nLaci;2\nMaja;1\n", expected: "Maja 1\nLaci 2\nKata 3\nJudit 4\nIvan 5\nMozgatas: 10\n", hidden: true }
+  - { stdin: "6\nNora;7\nOlga;3\nPeti;7\nRita;3\nSanyi;7\nTibor;3\n", expected: "Olga 3\nRita 3\nTibor 3\nNora 7\nPeti 7\nSanyi 7\nMozgatas: 6\n", hidden: true }

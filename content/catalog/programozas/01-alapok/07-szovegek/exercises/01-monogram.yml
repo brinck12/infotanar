@@ -1,0 +1,53 @@
+slug: monogram
+title: Monogram
+position: 0
+kind: code
+level: kozep
+difficulty: 1
+published: false
+allowed_languages: [python, csharp]
+description: |
+  Olvass be két sort: a vezetéknevet, majd a keresztnevet (ékezet nélkül). Írd ki a monogramot: a két név első betűjét **nagybetűvel**, pontokkal, ebben a formában: `K.A.`
+
+  Példa: a bemenet `kovacs` és `Anna`, a kimenet `K.A.`
+
+  Tipp: az első karakter a `0` indexű; a nagybetűssé alakítás új szöveget ad. C#-ban a `Substring(0, 1)` egy egykarakteres szöveget ad.
+starter_code:
+  python: |
+    vezeteknev = input()
+    keresztnev = input()
+    # ide írd a megoldást
+  csharp: |
+    using System;
+
+    class Program
+    {
+        static void Main()
+        {
+            var vezeteknev = Console.ReadLine();
+            var keresztnev = Console.ReadLine();
+            // ide írd a megoldást
+        }
+    }
+sample_solutions:
+  python: |
+    vezeteknev = input()
+    keresztnev = input()
+    print(vezeteknev[0].upper() + "." + keresztnev[0].upper() + ".")
+  csharp: |
+    using System;
+
+    class Program
+    {
+        static void Main()
+        {
+            var vezeteknev = Console.ReadLine();
+            var keresztnev = Console.ReadLine();
+            Console.WriteLine(vezeteknev.Substring(0, 1).ToUpper() + "." + keresztnev.Substring(0, 1).ToUpper() + ".");
+        }
+    }
+tests:
+  - { stdin: "kovacs\nAnna\n", expected: "K.A.\n", hidden: false }
+  - { stdin: "nagy\npeter\n", expected: "N.P.\n", hidden: true }
+  - { stdin: "X\nY\n", expected: "X.Y.\n", hidden: true }
+  - { stdin: "szabo\nZoltan\n", expected: "S.Z.\n", hidden: true }

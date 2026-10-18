@@ -1,0 +1,85 @@
+slug: kesett-vagy-idoben
+title: Késett vagy időben
+position: 4
+kind: sql
+level: kozep
+difficulty: 3
+published: false
+allowed_languages: [sql]
+description: |
+    Egy rendelés késett, ha a szállítás napja későbbi, mint a határidő. Listázd az azonosítót (`id`), a vevő nevét (`vevo`) és az állapotot (`allapot`): `kesett` vagy `idoben`. (A kiszállított rendelések kerüljenek a listába; a még nem szállítottakat hagyd ki.)
+
+    A `rendeles` tábla:
+
+    | `id` | `vevo` | `rendelve` | `hatarido` | `szallitva` |
+    |---|---|---|---|---|
+    | 1 | Kiss Anna | 2025-03-03 | 2025-03-10 | 2025-03-07 |
+    | 2 | Nagy Bela | 2025-03-08 | 2025-03-15 | 2025-03-17 |
+    | 3 | Toth Csaba | 2025-02-26 | 2025-03-05 | 2025-03-05 |
+    | 8 | Papp Jozsef | 2025-04-04 | 2025-04-11 | NULL |
+
+    Az eredmény ezekre az adatokra:
+
+    | `id` | `vevo` | `allapot` |
+    |---|---|---|
+    | 1 | Kiss Anna | idoben |
+    | 2 | Nagy Bela | kesett |
+    | 3 | Toth Csaba | idoben |
+
+    Tipp: a kihagyáshoz `WHERE szallitva IS NOT NULL`. A késést a `DATEDIFF(szallitva, hatarido) > 0` mutatja, ezt tedd az `IF`-be.
+starter_code:
+  sql: |
+    SELECT id, vevo, IF(..., ..., ...) AS allapot
+    FROM rendeles
+    WHERE szallitva IS NOT NULL;
+sample_solutions:
+  sql: |
+    SELECT id, vevo, IF(DATEDIFF(szallitva, hatarido) > 0, 'kesett', 'idoben') AS allapot
+    FROM rendeles
+    WHERE szallitva IS NOT NULL;
+tests:
+  - stdin: |
+      CREATE TABLE rendeles (id INT, vevo VARCHAR(30), rendelve DATE, hatarido DATE, szallitva DATE);
+      INSERT INTO rendeles VALUES (1, 'Kiss Anna', '2025-03-03', '2025-03-10', '2025-03-07');
+      INSERT INTO rendeles VALUES (2, 'Nagy Bela', '2025-03-08', '2025-03-15', '2025-03-17');
+      INSERT INTO rendeles VALUES (3, 'Toth Csaba', '2025-02-26', '2025-03-05', '2025-03-05');
+      INSERT INTO rendeles VALUES (8, 'Papp Jozsef', '2025-04-04', '2025-04-11', NULL);
+    expected: |
+      id,vevo,allapot
+      1,Kiss Anna,idoben
+      2,Nagy Bela,kesett
+      3,Toth Csaba,idoben
+    hidden: false
+  - stdin: |
+      CREATE TABLE rendeles (id INT, vevo VARCHAR(30), rendelve DATE, hatarido DATE, szallitva DATE);
+      INSERT INTO rendeles VALUES (1, 'Kiss Anna', '2025-03-03', '2025-03-10', '2025-03-07');
+      INSERT INTO rendeles VALUES (3, 'Toth Csaba', '2025-02-26', '2025-03-05', '2025-03-05');
+      INSERT INTO rendeles VALUES (5, 'Varga Fanni', '2025-03-09', '2025-03-16', '2025-03-12');
+      INSERT INTO rendeles VALUES (7, 'Bo Li', '2025-03-05', '2025-03-12', '2025-03-05');
+      INSERT INTO rendeles VALUES (8, 'Papp Jozsef', '2025-04-04', '2025-04-11', NULL);
+    expected: |
+      id,vevo,allapot
+      1,Kiss Anna,idoben
+      3,Toth Csaba,idoben
+      5,Varga Fanni,idoben
+      7,Bo Li,idoben
+    hidden: true
+  - stdin: |
+      CREATE TABLE rendeles (id INT, vevo VARCHAR(30), rendelve DATE, hatarido DATE, szallitva DATE);
+      INSERT INTO rendeles VALUES (2, 'Nagy Bela', '2025-03-08', '2025-03-15', '2025-03-17');
+      INSERT INTO rendeles VALUES (4, 'Szabo Dora', '2025-12-20', '2026-01-02', '2026-01-03');
+    expected: |
+      id,vevo,allapot
+      2,Nagy Bela,kesett
+      4,Szabo Dora,kesett
+    hidden: true
+  - stdin: |
+      CREATE TABLE rendeles (id INT, vevo VARCHAR(30), rendelve DATE, hatarido DATE, szallitva DATE);
+      INSERT INTO rendeles VALUES (2, 'Nagy Bela', '2025-03-08', '2025-03-15', '2025-03-17');
+      INSERT INTO rendeles VALUES (6, 'Ho Eva', '2024-02-20', '2024-03-01', '2024-03-01');
+      INSERT INTO rendeles VALUES (8, 'Papp Jozsef', '2025-04-04', '2025-04-11', NULL);
+    expected: |
+      id,vevo,allapot
+      2,Nagy Bela,kesett
+      6,Ho Eva,idoben
+    hidden: true

@@ -1,0 +1,64 @@
+slug: szokoev
+title: Szökőév
+position: 1
+kind: code
+level: kozep
+difficulty: 3
+published: false
+allowed_languages: [python, csharp]
+description: |
+  Olvass be egy évszámot (pozitív egész szám). Írd ki, hogy `szokoev` vagy `nem szokoev`.
+
+  Egy év szökőév, ha osztható 4-gyel, kivéve, ha osztható 100-zal; de ha osztható 400-zal, akkor mégis szökőév.
+
+  Példa: a `2024` bemenetre `szokoev`, az `1900` bemenetre `nem szokoev` a kimenet.
+
+  Tipp: egy szám akkor osztható `k`-val, ha a `k`-val vett maradéka 0. Az összetett feltételt zárójelezd.
+starter_code:
+  python: |
+    ev = int(input())
+    # innen folytasd
+  csharp: |
+    using System;
+
+    class Program
+    {
+        static void Main()
+        {
+            int ev = int.Parse(Console.ReadLine());
+            // innen folytasd
+        }
+    }
+sample_solutions:
+  python: |
+    ev = int(input())
+    if (ev % 4 == 0 and ev % 100 != 0) or ev % 400 == 0:
+        print("szokoev")
+    else:
+        print("nem szokoev")
+  csharp: |
+    using System;
+
+    class Program
+    {
+        static void Main()
+        {
+            int ev = int.Parse(Console.ReadLine());
+            if ((ev % 4 == 0 && ev % 100 != 0) || ev % 400 == 0)
+            {
+                Console.WriteLine("szokoev");
+            }
+            else
+            {
+                Console.WriteLine("nem szokoev");
+            }
+        }
+    }
+tests:
+  - { stdin: "2024\n", expected: "szokoev\n", hidden: false }
+  - { stdin: "2023\n", expected: "nem szokoev\n", hidden: true }
+  - { stdin: "1900\n", expected: "nem szokoev\n", hidden: true }
+  - { stdin: "2000\n", expected: "szokoev\n", hidden: true }
+  - { stdin: "2100\n", expected: "nem szokoev\n", hidden: true }
+  - { stdin: "1996\n", expected: "szokoev\n", hidden: true }
+  - { stdin: "1\n", expected: "nem szokoev\n", hidden: true }

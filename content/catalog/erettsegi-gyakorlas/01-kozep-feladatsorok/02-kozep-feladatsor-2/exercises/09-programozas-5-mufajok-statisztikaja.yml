@@ -1,0 +1,248 @@
+slug: programozas-5-mufajok-statisztikaja
+title: Programozás 5 - Műfajok statisztikája
+position: 8
+kind: code
+level: kozep
+difficulty: 4
+published: false
+allowed_languages:
+- python
+- csharp
+description: |
+  A `vetitesek.txt` a mozi vetítéseit tartalmazza, soronként egy vetítéssel, pontosvesszővel elválasztva: `cím;műfaj;játékidő percben;kezdés;eladott jegyek;jegyár`. A kezdés `ÓÓ:PP` alakú. Az adatokban nincs ékezet, a fájl legalább egy sort tartalmaz.
+
+  **5. feladat.** Készítsen statisztikát műfajonként! Írja ki a `5. feladat:` sort, alá műfajonként egy sort `műfaj: vetítések száma db, összes jegy db, átlagos jegyár Ft` alakban. A műfajok a fájlban **először előforduló** sorrendben következzenek, az átlagos jegyárat (a vetítések jegyárainak átlaga) egy tizedesjegyre kerekítve írja ki.
+
+  A mintafájlra a kimenet:
+
+  ```text
+  5. feladat:
+  animacio: 5 db, 389 jegy, atlagos jegyar 2180.0 Ft
+  akcio: 5 db, 307 jegy, atlagos jegyar 2100.0 Ft
+  scifi: 3 db, 130 jegy, atlagos jegyar 1933.3 Ft
+  drama: 1 db, 114 jegy, atlagos jegyar 2200.0 Ft
+  ```
+
+  Tipp: tartson egy listát a már látott műfajokról; minden műfajra külön számolja a darabszámot, a jegyeket és a jegyárak összegét. A kerekítést formázással végezze (`{:.1f}` Pythonban, `ToString("0.0", CultureInfo.InvariantCulture)` C#-ban).
+starter_code:
+  python: |
+    class Vetites:
+        def __init__(self, sor):
+            r = sor.split(";")
+            self.cim = r[0]
+            self.mufaj = r[1]
+            self.hossz = int(r[2])
+            self.kezdes = r[3]
+            self.eladott = int(r[4])
+            self.jegyar = int(r[5])
+
+        def bevetel(self):
+            return self.eladott * self.jegyar
+
+
+    with open("vetitesek.txt", encoding="utf-8") as f:
+        vetitesek = [Vetites(sor) for sor in f.read().splitlines()]
+    # ide írd a megoldást
+  csharp: |
+    using System;
+    using System.Collections.Generic;
+    using System.IO;
+
+    class Vetites
+    {
+        public string Cim;
+        public string Mufaj;
+        public int Hossz;
+        public string Kezdes;
+        public int Eladott;
+        public int Jegyar;
+
+        public Vetites(string sor)
+        {
+            string[] r = sor.Split(';');
+            Cim = r[0];
+            Mufaj = r[1];
+            Hossz = int.Parse(r[2]);
+            Kezdes = r[3];
+            Eladott = int.Parse(r[4]);
+            Jegyar = int.Parse(r[5]);
+        }
+
+        public int Bevetel()
+        {
+            return Eladott * Jegyar;
+        }
+    }
+
+    class Program
+    {
+        static void Main()
+        {
+            List<Vetites> vetitesek = new List<Vetites>();
+            foreach (string sor in File.ReadAllLines("vetitesek.txt"))
+            {
+                vetitesek.Add(new Vetites(sor));
+            }
+            // ide írd a megoldást
+        }
+    }
+sample_solutions:
+  python: |
+    class Vetites:
+        def __init__(self, sor):
+            r = sor.split(";")
+            self.cim = r[0]
+            self.mufaj = r[1]
+            self.hossz = int(r[2])
+            self.kezdes = r[3]
+            self.eladott = int(r[4])
+            self.jegyar = int(r[5])
+
+        def bevetel(self):
+            return self.eladott * self.jegyar
+
+
+    with open("vetitesek.txt", encoding="utf-8") as f:
+        vetitesek = [Vetites(sor) for sor in f.read().splitlines()]
+    mufajok = []
+    for v in vetitesek:
+        if v.mufaj not in mufajok:
+            mufajok.append(v.mufaj)
+    print("5. feladat:")
+    for m in mufajok:
+        db = 0
+        jegy = 0
+        ar = 0
+        for v in vetitesek:
+            if v.mufaj == m:
+                db += 1
+                jegy += v.eladott
+                ar += v.jegyar
+        print(m + ": " + str(db) + " db, " + str(jegy) + " jegy, atlagos jegyar " + "{:.1f}".format(ar / db) + " Ft")
+  csharp: |
+    using System;
+    using System.Collections.Generic;
+    using System.IO;
+
+    class Vetites
+    {
+        public string Cim;
+        public string Mufaj;
+        public int Hossz;
+        public string Kezdes;
+        public int Eladott;
+        public int Jegyar;
+
+        public Vetites(string sor)
+        {
+            string[] r = sor.Split(';');
+            Cim = r[0];
+            Mufaj = r[1];
+            Hossz = int.Parse(r[2]);
+            Kezdes = r[3];
+            Eladott = int.Parse(r[4]);
+            Jegyar = int.Parse(r[5]);
+        }
+
+        public int Bevetel()
+        {
+            return Eladott * Jegyar;
+        }
+    }
+
+    class Program
+    {
+        static void Main()
+        {
+            List<Vetites> vetitesek = new List<Vetites>();
+            foreach (string sor in File.ReadAllLines("vetitesek.txt"))
+            {
+                vetitesek.Add(new Vetites(sor));
+            }
+            List<string> mufajok = new List<string>();
+            foreach (Vetites v in vetitesek)
+            {
+                if (!mufajok.Contains(v.Mufaj))
+                {
+                    mufajok.Add(v.Mufaj);
+                }
+            }
+            Console.WriteLine("5. feladat:");
+            foreach (string m in mufajok)
+            {
+                int db = 0;
+                int jegy = 0;
+                int ar = 0;
+                foreach (Vetites v in vetitesek)
+                {
+                    if (v.Mufaj == m)
+                    {
+                        db++;
+                        jegy += v.Eladott;
+                        ar += v.Jegyar;
+                    }
+                }
+                double atlag = (double)ar / db;
+                Console.WriteLine(m + ": " + db + " db, " + jegy + " jegy, atlagos jegyar " + atlag.ToString("0.0", System.Globalization.CultureInfo.InvariantCulture) + " Ft");
+            }
+        }
+    }
+files:
+  vetitesek.txt: vetitesek.txt
+tests:
+- stdin: ''
+  expected: '5. feladat:
+
+    animacio: 5 db, 389 jegy, atlagos jegyar 2180.0 Ft
+
+    akcio: 5 db, 307 jegy, atlagos jegyar 2100.0 Ft
+
+    scifi: 3 db, 130 jegy, atlagos jegyar 1933.3 Ft
+
+    drama: 1 db, 114 jegy, atlagos jegyar 2200.0 Ft
+
+    '
+  hidden: false
+- stdin: ''
+  expected: '5. feladat:
+
+    vigjatek: 1 db, 83 jegy, atlagos jegyar 2200.0 Ft
+
+    '
+  hidden: true
+  files:
+    vetitesek.txt: teszt-2/vetitesek.txt
+- stdin: ''
+  expected: '5. feladat:
+
+    scifi: 8 db, 550 jegy, atlagos jegyar 2200.0 Ft
+
+    animacio: 3 db, 150 jegy, atlagos jegyar 2266.7 Ft
+
+    drama: 6 db, 405 jegy, atlagos jegyar 1983.3 Ft
+
+    akcio: 4 db, 243 jegy, atlagos jegyar 2250.0 Ft
+
+    vigjatek: 4 db, 302 jegy, atlagos jegyar 2175.0 Ft
+
+    '
+  hidden: true
+  files:
+    vetitesek.txt: teszt-3/vetitesek.txt
+- stdin: ''
+  expected: '5. feladat:
+
+    akcio: 1 db, 30 jegy, atlagos jegyar 2500.0 Ft
+
+    animacio: 1 db, 47 jegy, atlagos jegyar 1800.0 Ft
+
+    vigjatek: 3 db, 271 jegy, atlagos jegyar 1933.3 Ft
+
+    drama: 2 db, 100 jegy, atlagos jegyar 2000.0 Ft
+
+    scifi: 1 db, 46 jegy, atlagos jegyar 2500.0 Ft
+
+    '
+  hidden: true
+  files:
+    vetitesek.txt: teszt-4/vetitesek.txt

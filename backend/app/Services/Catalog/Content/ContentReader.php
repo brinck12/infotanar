@@ -23,10 +23,10 @@ final class ContentReader
 
     private const EXERCISE_KEYS = [
         'slug', 'title', 'position', 'kind', 'level', 'difficulty', 'published', 'allowed_languages',
-        'description', 'starter_code', 'sample_solutions', 'constraints', 'sql_order_sensitive', 'limits', 'tests',
+        'description', 'starter_code', 'sample_solutions', 'constraints', 'sql_order_sensitive', 'limits', 'files', 'tests',
     ];
 
-    private const TEST_KEYS = ['stdin', 'expected', 'hidden'];
+    private const TEST_KEYS = ['stdin', 'expected', 'hidden', 'files'];
 
     /** @var array<string, string> */
     private const RENAMES = ['free' => 'is_free', 'published' => 'is_published'];
@@ -167,19 +167,28 @@ final class ContentReader
         }
 
         $tests = $data['tests'] ?? [];
-        unset($data['tests']);
+        $filesMap = $data['files'] ?? [];
+        unset($data['tests'], $data['files']);
+
+        // Az adatfájlok a feladatfájl melletti `<fájlnév-törzs>.files/` mappában vannak.
+        $filesDir = dirname($path).'/'.basename($path, '.yml').'.files';
+        $testFiles = [];
+        $cases = $this->testCases($tests, $file, $filesDir, $testFiles);
 
         return new ExerciseNode(
             $file,
-            $this->attributes($data, array_diff(self::EXERCISE_KEYS, ['tests']), $file),
-            $this->testCases($tests, $file),
+            $this->attributes($data, array_diff(self::EXERCISE_KEYS, ['tests', 'files']), $file),
+            $cases,
+            $this->contentFiles($filesMap, $file, $filesDir, 'files'),
+            $testFiles,
         );
     }
 
     /**
+     * @param  array<int, array<string, ContentFile>>  $testFiles  kimenet: a teszteset `order` indexe => bemeneti fájlok
      * @return list<array{stdin: string, expected_stdout: string, is_hidden: bool, order: int}>
      */
-    private function testCases(mixed $tests, string $file): array
+    private function testCases(mixed $tests, string $file, string $filesDir, array &$testFiles): array
     {
         if (! is_array($tests) || ! array_is_list($tests)) {
             $this->problems[] = ContentProblem::of($file, 'invalid_type', ['field' => 'tests', 'expected' => (string) __('catalog_import.type_list')]);
@@ -220,10 +229,77 @@ final class ContentReader
 
             if ($valid && is_string($stdin) && is_string($expected) && is_bool($hidden)) {
                 $cases[] = ['stdin' => $stdin, 'expected_stdout' => $expected, 'is_hidden' => $hidden, 'order' => $index];
+                $files = $this->contentFiles($entry['files'] ?? [], $file, $filesDir, 'tests['.$number.'].files');
+                if ($files !== []) {
+                    $testFiles[$index] = $files;
+                }
             }
         }
 
         return $cases;
+    }
+
+    /**
+     * Egy `files:` térkép (fájlnév => relatív útvonal a `.files` mappán belül) feloldása. Itt csak az útvonal
+     * biztonságát és a fájl meglétét nézzük; a név- és méretszabályokat a `ContentValidator` ellenőrzi.
+     *
+     * @return array<string, ContentFile>
+     */
+    private function contentFiles(mixed $map, string $file, string $filesDir, string $field): array
+    {
+        if ($map === null || $map === []) {
+            return [];
+        }
+        if (! is_array($map) || array_is_list($map)) {
+            $this->problems[] = ContentProblem::of($file, 'invalid_type', ['field' => $field, 'expected' => (string) __('catalog_import.type_file_pairs')]);
+
+            return [];
+        }
+
+        $root = realpath($filesDir);
+        $files = [];
+        foreach ($map as $name => $relative) {
+            $name = (string) $name;
+            if (! is_string($relative) || ! $this->safeRelativePath($relative)) {
+                $this->problems[] = ContentProblem::of($file, 'file_path_unsafe', ['field' => $field, 'name' => $name]);
+
+                continue;
+            }
+
+            $real = $root === false ? false : realpath($root.'/'.$relative);
+            if ($root === false || $real === false || ! str_starts_with($real, $root.DIRECTORY_SEPARATOR) || ! is_file($real)) {
+                $this->problems[] = ContentProblem::of($file, 'file_missing', ['field' => $field, 'name' => $name, 'path' => basename($filesDir).'/'.$relative]);
+
+                continue;
+            }
+
+            $size = filesize($real);
+            $hash = hash_file('sha256', $real);
+            if ($size === false || $hash === false) {
+                $this->problems[] = ContentProblem::of($file, 'unreadable');
+
+                continue;
+            }
+            $files[$name] = new ContentFile($name, $real, $size, $hash);
+        }
+
+        return $files;
+    }
+
+    /** Nem üres, nem abszolút, backslasht és `..`/`.` szakaszt nem tartalmazó útvonal. */
+    private function safeRelativePath(string $path): bool
+    {
+        if ($path === '' || str_contains($path, chr(92)) || str_contains($path, chr(0)) || str_starts_with($path, '/')) {
+            return false;
+        }
+
+        foreach (explode('/', $path) as $segment) {
+            if (in_array($segment, ['', '.', '..'], true)) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     /**

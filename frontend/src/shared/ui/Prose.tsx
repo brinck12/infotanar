@@ -77,8 +77,9 @@ function ProseLink({ href, children }: ComponentProps<'a'>) {
  */
 function ScrollableTable({ children }: ComponentProps<'table'>) {
   return (
+    // `group`, nem `region`: egy leckében több táblázat is lehet, a region viszont egyedi nevet kíván.
     // oxlint-disable-next-line jsx-a11y/no-noninteractive-tabindex
-    <div className="prose-scroll" role="region" aria-label="Táblázat (vízszintesen görgethető)" tabIndex={0}>
+    <div className="prose-scroll" role="group" aria-label="Táblázat (vízszintesen görgethető)" tabIndex={0}>
       <table>{children}</table>
     </div>
   )

@@ -173,7 +173,7 @@ function GoalsForm({ initial, storedOnServer, save }: GoalsFormProps) {
             )}
           </ul>
           <p className="mt-4 text-14 leading-relaxed text-ink-soft">
-            A terv csak javaslat. Bármelyik sávot megnyithatod.{' '}
+            A terv csak javaslat. Bármelyik tanulási utat megnyithatod.{' '}
             {storedOnServer
               ? 'A beállításaidat a fiókodhoz mentjük, így másik eszközön is megmaradnak.'
               : 'A beállításaidat egyelőre ez a böngésző őrzi meg.'}

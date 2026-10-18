@@ -1,0 +1,70 @@
+slug: faktorialis
+title: "Faktoriális"
+position: 0
+kind: code
+level: emelt
+difficulty: 2
+published: false
+allowed_languages: [python, csharp]
+description: |
+  Olvass be egy `N` egész számot (`0 ≤ N ≤ 20`), és számítsd ki az `N!` értékét **rekurzív** függvénnyel. Az eredményt írd ki.
+
+  Példa: `N = 5` esetén a kimenet `120`; `N = 0` esetén `1`.
+
+  Tipp: `0! = 1` az alapeset, `n! = n · (n-1)!`. C#-ban `long` típust használj.
+starter_code:
+  python: |
+    def fakt(n):
+        # TODO
+        pass
+
+    print(fakt(int(input())))
+  csharp: |
+    using System;
+
+    class Program
+    {
+        static long Fakt(int n)
+        {
+            // TODO
+            return 0;
+        }
+
+        static void Main()
+        {
+            Console.WriteLine(Fakt(int.Parse(Console.ReadLine())));
+        }
+    }
+sample_solutions:
+  python: |
+    def fakt(n):
+        if n == 0:
+            return 1
+        return n * fakt(n - 1)
+
+    print(fakt(int(input())))
+  csharp: |
+    using System;
+
+    class Program
+    {
+        static long Fakt(int n)
+        {
+            if (n == 0)
+            {
+                return 1;
+            }
+            return n * Fakt(n - 1);
+        }
+
+        static void Main()
+        {
+            Console.WriteLine(Fakt(int.Parse(Console.ReadLine())));
+        }
+    }
+tests:
+  - { stdin: "5\n", expected: "120\n", hidden: false }
+  - { stdin: "0\n", expected: "1\n", hidden: true }
+  - { stdin: "1\n", expected: "1\n", hidden: true }
+  - { stdin: "12\n", expected: "479001600\n", hidden: true }
+  - { stdin: "20\n", expected: "2432902008176640000\n", hidden: true }

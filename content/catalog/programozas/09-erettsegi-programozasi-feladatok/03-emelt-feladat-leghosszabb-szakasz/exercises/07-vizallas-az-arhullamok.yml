@@ -1,0 +1,207 @@
+slug: vizallas-az-arhullamok
+title: 'Vízállás: az árhullámok'
+position: 6
+kind: code
+level: emelt
+difficulty: 5
+published: false
+allowed_languages:
+- python
+- csharp
+description: |
+  Egy folyó vízállását naponta egyszer mérik. A `vizallas.txt` fájl első sora fejléc (`datum`, `allas`), utána minden sor egy mérés, tabulátorral tagolva: a dátum (`ÉÉÉÉ-HH-NN` alakban) és a vízállás centiméterben (egész szám). A sorok időrendben, hézag nélkül követik egymást: minden sor az előző napot követő nap mérése. A fájl legalább egy mérést tartalmaz.
+
+  A programban egy mérést rekordként (osztályként) érdemes tárolni: dátum, vízállás. Minden részfeladat kimenete a sorszámával kezdődik (`N. feladat`), a kimenetben ne használj ékezetes betűt. Ahol a feladat bevitelt kér, a kérdést külön sorban írd ki, csak utána olvass be.
+
+  Kérj be egy küszöbértéket (egész szám, centiméter). **Árhullámnak** nevezzük a legalább 3 napos egybefüggő szakaszt, amelyben a vízállás minden napon nagyobb a küszöbnél; a szakasz akkor ér véget, ha egy nap nem nagyobb a küszöbnél (vagy elfogy a fájl). Írd ki az árhullámok számát, majd időrendben mindegyik első és utolsó napját és hosszát. Ha nem volt árhullám, csak a darabszám (`0`) szerepel.
+
+  ```
+  Arhullamok szama: <db>
+  <elso nap> - <utolso nap> (<hossz> nap)
+  ...
+  ```
+
+  Kimenet a mellékelt mintafájllal és `200` bemenettel:
+
+  ```
+  7. feladat
+  Add meg a kuszobot (cm):
+  Arhullamok szama: 1
+  2024-03-20 - 2024-03-26 (7 nap)
+  ```
+
+  Tipp: külső ciklussal haladj a napokon; ha küszöb feletti napot találsz, egy belső ciklussal lépj a szakasz végéig, és a szakasz után ugorj. A szakaszok kezdő- és végindexét listában tárold.
+starter_code:
+  python: |
+    class Meres:
+        def __init__(self, datum, allas):
+            self.datum = datum
+            self.allas = allas
+    print("7. feladat")
+    with open("vizallas.txt", encoding="utf-8") as f:
+        sorok = f.read().splitlines()
+    meresek = []
+    for sor in sorok[1:]:
+        r = sor.split("\t")
+        meresek.append(Meres(r[0], int(r[1])))
+    # ide írd a megoldást
+  csharp: |
+    using System;
+    using System.Collections.Generic;
+    using System.IO;
+    using System.Linq;
+
+    class Meres
+    {
+        public string Datum;
+        public int Allas;
+    }
+
+    class Program
+    {
+        static void Main()
+        {
+            Console.WriteLine("7. feladat");
+            string[] sorok = File.ReadAllLines("vizallas.txt");
+            List<Meres> meresek = new List<Meres>();
+            for (int i = 1; i < sorok.Length; i++)
+            {
+                string[] r = sorok[i].Split('\t');
+                Meres m = new Meres();
+                m.Datum = r[0];
+                m.Allas = int.Parse(r[1]);
+                meresek.Add(m);
+            }
+            // ide írd a megoldást
+        }
+    }
+sample_solutions:
+  python: |
+    class Meres:
+        def __init__(self, datum, allas):
+            self.datum = datum
+            self.allas = allas
+    print("7. feladat")
+    with open("vizallas.txt", encoding="utf-8") as f:
+        sorok = f.read().splitlines()
+    meresek = []
+    for sor in sorok[1:]:
+        r = sor.split("\t")
+        meresek.append(Meres(r[0], int(r[1])))
+    print("Add meg a kuszobot (cm):")
+    kuszob = int(input())
+    hullamok = []
+    i = 0
+    while i < len(meresek):
+        if meresek[i].allas > kuszob:
+            j = i
+            while j + 1 < len(meresek) and meresek[j + 1].allas > kuszob:
+                j += 1
+            if j - i + 1 >= 3:
+                hullamok.append((i, j))
+            i = j + 1
+        else:
+            i += 1
+    print(f"Arhullamok szama: {len(hullamok)}")
+    for a, b in hullamok:
+        print(f"{meresek[a].datum} - {meresek[b].datum} ({b - a + 1} nap)")
+  csharp: |
+    using System;
+    using System.Collections.Generic;
+    using System.IO;
+    using System.Linq;
+
+    class Meres
+    {
+        public string Datum;
+        public int Allas;
+    }
+
+    class Program
+    {
+        static void Main()
+        {
+            Console.WriteLine("7. feladat");
+            string[] sorok = File.ReadAllLines("vizallas.txt");
+            List<Meres> meresek = new List<Meres>();
+            for (int i = 1; i < sorok.Length; i++)
+            {
+                string[] r = sorok[i].Split('\t');
+                Meres m = new Meres();
+                m.Datum = r[0];
+                m.Allas = int.Parse(r[1]);
+                meresek.Add(m);
+            }
+            Console.WriteLine("Add meg a kuszobot (cm):");
+            int kuszob = int.Parse(Console.ReadLine());
+            List<int[]> hullamok = new List<int[]>();
+            int k = 0;
+            while (k < meresek.Count)
+            {
+                if (meresek[k].Allas > kuszob)
+                {
+                    int j = k;
+                    while (j + 1 < meresek.Count && meresek[j + 1].Allas > kuszob)
+                    {
+                        j++;
+                    }
+                    if (j - k + 1 >= 3)
+                    {
+                        hullamok.Add(new int[] { k, j });
+                    }
+                    k = j + 1;
+                }
+                else
+                {
+                    k++;
+                }
+            }
+            Console.WriteLine("Arhullamok szama: " + hullamok.Count);
+            foreach (int[] h in hullamok)
+            {
+                Console.WriteLine(meresek[h[0]].Datum + " - " + meresek[h[1]].Datum + " (" + (h[1] - h[0] + 1) + " nap)");
+            }
+        }
+    }
+files:
+  vizallas.txt: vizallas.txt
+tests:
+- stdin: |
+    200
+  expected: |
+    7. feladat
+    Add meg a kuszobot (cm):
+    Arhullamok szama: 1
+    2024-03-20 - 2024-03-26 (7 nap)
+  hidden: false
+- stdin: |
+    200
+  expected: |
+    7. feladat
+    Add meg a kuszobot (cm):
+    Arhullamok szama: 3
+    2024-04-26 - 2024-04-28 (3 nap)
+    2024-05-03 - 2024-05-06 (4 nap)
+    2024-05-08 - 2024-05-10 (3 nap)
+  hidden: true
+  files:
+    vizallas.txt: teszt-2/vizallas.txt
+- stdin: |
+    500
+  expected: |
+    7. feladat
+    Add meg a kuszobot (cm):
+    Arhullamok szama: 0
+  hidden: true
+  files:
+    vizallas.txt: teszt-3/vizallas.txt
+- stdin: |
+    5
+  expected: |
+    7. feladat
+    Add meg a kuszobot (cm):
+    Arhullamok szama: 1
+    2024-03-31 - 2024-04-03 (4 nap)
+  hidden: true
+  files:
+    vizallas.txt: teszt-4/vizallas.txt

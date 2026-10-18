@@ -8,7 +8,7 @@ import { MutationError, QueryState } from '../components/QueryState'
 import { QuickCreate } from '../components/QuickCreate'
 import { useChildMutations } from '../useCatalogMutations'
 
-/** Admin tananyag-kezelés (#47): a képzési ágak listája. */
+/** Admin tananyag-kezelés (#47): a tanulási utak listája. */
 export function AdminCatalog() {
   const navigate = useNavigate()
   const tracks = useQuery(tracksQuery())
@@ -21,10 +21,10 @@ export function AdminCatalog() {
     <QueryState query={tracks}>
       {(data) => (
         <AdminShell crumbs={[{ label: 'Admin', to: '/admin' }, { label: 'Katalógus' }]} title="Katalógus">
-          <Section title="Képzési ágak">
+          <Section title="Tanulási utak">
             <MutationError error={deleteChild.error ?? reorderChildren.error} />
             <ChildList
-              noun="képzési ág"
+              noun="tanulási út"
               items={data.map((track) => ({
                 id: track.id,
                 title: track.title,
@@ -36,14 +36,14 @@ export function AdminCatalog() {
                   </>
                 ),
               }))}
-              emptyText="Még nincs képzési ág."
+              emptyText="Még nincs tanulási út."
               busy={busy}
               onReorder={(ids) => reorderChildren.mutate(ids)}
               onDelete={(id) => deleteChild.mutate(id)}
             />
           </Section>
 
-          <Section title="Új képzési ág">
+          <Section title="Új tanulási út">
             <MutationError error={createChild.error} fields={['title', 'slug']} />
             <QuickCreate
               titleLabel="Cím"

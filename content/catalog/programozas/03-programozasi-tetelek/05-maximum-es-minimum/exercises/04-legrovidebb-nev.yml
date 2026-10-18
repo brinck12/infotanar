@@ -1,0 +1,125 @@
+slug: legrovidebb-nev
+title: Legrövidebb név
+position: 3
+kind: code
+level: kozep
+difficulty: 3
+published: false
+allowed_languages:
+- python
+- csharp
+description: |
+  ## Feladat
+
+  Olvass be egy `N` számot, majd `N` darab nevet (soronként egyet). Írd ki a **legrövidebb nevet**! Ha több azonos hosszúságú legrövidebb név van, az elsőt add meg.
+
+  ### Bemenet
+
+  - Az első sorban egy `N` egész szám (`1 ≤ N ≤ 100`).
+  - A következő `N` sorban egy-egy név (ékezet nélkül, szóköz nélkül).
+
+  ### Kimenet
+
+  Egyetlen sorban a legrövidebb név.
+
+  ### Példa
+
+  Bemenet: `4`, majd `Eszter`, `Bela`, `Anna`, `Ede`. Kimenet: `Ede`
+
+  Tipp: a kiválasztás nem csak számokra működik: itt a nevek hosszát (`len`, illetve `.Length`) hasonlítod össze, de a nevet kell eltárolnod.
+starter_code:
+  python: |
+    n = int(input())
+    legrovidebb = input()
+    for _ in range(n - 1):
+        nev = input()
+        # TODO: frissítsd, ha rövidebbet találtál
+    print(legrovidebb)
+  csharp: |
+    using System;
+
+    class Program
+    {
+        static void Main()
+        {
+            int n = int.Parse(Console.ReadLine());
+            string legrovidebb = Console.ReadLine();
+            for (int i = 1; i < n; i++)
+            {
+                string nev = Console.ReadLine();
+                // TODO: frissítsd, ha rövidebbet találtál
+            }
+            Console.WriteLine(legrovidebb);
+        }
+    }
+sample_solutions:
+  python: |
+    n = int(input())
+    legrovidebb = input()
+    for _ in range(n - 1):
+        nev = input()
+        if len(nev) < len(legrovidebb):
+            legrovidebb = nev
+    print(legrovidebb)
+  csharp: |
+    using System;
+
+    class Program
+    {
+        static void Main()
+        {
+            int n = int.Parse(Console.ReadLine());
+            string legrovidebb = Console.ReadLine();
+            for (int i = 1; i < n; i++)
+            {
+                string nev = Console.ReadLine();
+                if (nev.Length < legrovidebb.Length)
+                {
+                    legrovidebb = nev;
+                }
+            }
+            Console.WriteLine(legrovidebb);
+        }
+    }
+tests:
+- stdin: |
+    4
+    Eszter
+    Bela
+    Anna
+    Ede
+  expected: |
+    Ede
+  hidden: false
+- stdin: |
+    1
+    Katalin
+  expected: |
+    Katalin
+  hidden: true
+- stdin: |
+    3
+    Bela
+    Anna
+    Eszter
+  expected: |
+    Bela
+  hidden: true
+- stdin: |
+    3
+    Z
+    An
+    B
+  expected: |
+    Z
+  hidden: true
+- stdin: |
+    5
+    Peter
+    Pal
+    Petra
+    Peti
+    On
+  expected: |
+    On
+  hidden: true

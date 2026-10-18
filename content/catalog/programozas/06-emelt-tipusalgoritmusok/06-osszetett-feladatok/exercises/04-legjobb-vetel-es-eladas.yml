@@ -1,0 +1,144 @@
+slug: legjobb-vetel-es-eladas
+title: "Legjobb vétel és eladás"
+position: 3
+kind: code
+level: emelt
+difficulty: 5
+published: false
+allowed_languages: [python, csharp]
+description: |
+  Egy részvény napi árfolyamát N napon át rögzítették. A bemenet első sora N (legalább 1), majd N sor: `datum;ar` (a dátum `éééé-hh-nn` alakú szöveg, az ár egész szám). Egyszer lehet venni, és egy **későbbi** napon eladni. Keresd meg a legnagyobb nyereséget hozó vételi és eladási napot. Írd ki három sorban: `Vetel: datum`, `Eladas: datum`, `Nyereseg: ...`. Ha nincs nyereséget hozó pár (az árfolyam végig csökken vagy állandó, vagy csak egy nap van), egyetlen sort írj ki: `Nincs nyereseg`. Ha több pár ad azonos legnagyobb nyereséget, az számít, amelyiknél az eladási nap korábbi, azon belül amelyiknél a vételi nap korábbi.
+
+  Példa bemenet:
+
+  ```
+  6
+  2024-03-01;50
+  2024-03-02;40
+  2024-03-03;70
+  2024-03-04;65
+  2024-03-05;90
+  2024-03-06;30
+  ```
+
+  Kimenet:
+
+  ```
+  Vetel: 2024-03-02
+  Eladas: 2024-03-05
+  Nyereseg: 50
+  ```
+
+  Tipp: egy bejárás elég. Tartsd nyilván az eddigi legkisebb árat és a napját (az első legkisebbet), és minden napot nézz eladási napnak: a nyereség az ár és az eddigi minimum különbsége. A legnagyobb nyereséget szigorú összehasonlítással frissítsd.
+starter_code:
+  python: |
+    n = int(input())
+    napok = []
+    for _ in range(n):
+        resz = input().split(";")
+        napok.append((resz[0], int(resz[1])))
+    # keresd a legjobb vételi és eladási napot
+  csharp: |
+    using System;
+    using System.Collections.Generic;
+
+    class Nap
+    {
+        public string Datum;
+        public int Ar;
+    }
+
+    class Program
+    {
+        static void Main()
+        {
+            int n = int.Parse(Console.ReadLine());
+            var napok = new List<Nap>();
+            for (int i = 0; i < n; i++)
+            {
+                string[] resz = Console.ReadLine().Split(';');
+                napok.Add(new Nap { Datum = resz[0], Ar = int.Parse(resz[1]) });
+            }
+            // keresd a legjobb vételi és eladási napot
+        }
+    }
+sample_solutions:
+  python: |
+    n = int(input())
+    napok = []
+    for _ in range(n):
+        resz = input().split(";")
+        napok.append((resz[0], int(resz[1])))
+    minimum = napok[0]
+    legjobb = 0
+    vetel = None
+    eladas = None
+    for i in range(1, n):
+        if napok[i][1] - minimum[1] > legjobb:
+            legjobb = napok[i][1] - minimum[1]
+            vetel = minimum
+            eladas = napok[i]
+        if napok[i][1] < minimum[1]:
+            minimum = napok[i]
+    if legjobb == 0:
+        print("Nincs nyereseg")
+    else:
+        print("Vetel: " + vetel[0])
+        print("Eladas: " + eladas[0])
+        print("Nyereseg:", legjobb)
+  csharp: |
+    using System;
+    using System.Collections.Generic;
+
+    class Nap
+    {
+        public string Datum;
+        public int Ar;
+    }
+
+    class Program
+    {
+        static void Main()
+        {
+            int n = int.Parse(Console.ReadLine());
+            var napok = new List<Nap>();
+            for (int i = 0; i < n; i++)
+            {
+                string[] resz = Console.ReadLine().Split(';');
+                napok.Add(new Nap { Datum = resz[0], Ar = int.Parse(resz[1]) });
+            }
+            Nap minimum = napok[0];
+            int legjobb = 0;
+            Nap vetel = null;
+            Nap eladas = null;
+            for (int i = 1; i < n; i++)
+            {
+                if (napok[i].Ar - minimum.Ar > legjobb)
+                {
+                    legjobb = napok[i].Ar - minimum.Ar;
+                    vetel = minimum;
+                    eladas = napok[i];
+                }
+                if (napok[i].Ar < minimum.Ar)
+                {
+                    minimum = napok[i];
+                }
+            }
+            if (legjobb == 0)
+            {
+                Console.WriteLine("Nincs nyereseg");
+            }
+            else
+            {
+                Console.WriteLine("Vetel: " + vetel.Datum);
+                Console.WriteLine("Eladas: " + eladas.Datum);
+                Console.WriteLine("Nyereseg: " + legjobb);
+            }
+        }
+    }
+tests:
+  - { stdin: "6\n2024-03-01;50\n2024-03-02;40\n2024-03-03;70\n2024-03-04;65\n2024-03-05;90\n2024-03-06;30\n", expected: "Vetel: 2024-03-02\nEladas: 2024-03-05\nNyereseg: 50\n", hidden: false }
+  - { stdin: "1\n2024-01-01;10\n", expected: "Nincs nyereseg\n", hidden: true }
+  - { stdin: "4\n2024-01-01;9\n2024-01-02;8\n2024-01-03;7\n2024-01-04;7\n", expected: "Nincs nyereseg\n", hidden: true }
+  - { stdin: "4\n2024-02-01;5\n2024-02-02;5\n2024-02-03;8\n2024-02-04;8\n", expected: "Vetel: 2024-02-01\nEladas: 2024-02-03\nNyereseg: 3\n", hidden: true }
+  - { stdin: "5\n2024-05-01;10\n2024-05-02;20\n2024-05-03;5\n2024-05-04;15\n2024-05-05;15\n", expected: "Vetel: 2024-05-01\nEladas: 2024-05-02\nNyereseg: 10\n", hidden: true }

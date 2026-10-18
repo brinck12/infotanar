@@ -1,0 +1,117 @@
+slug: uj-diak-felvetele
+title: Új diák felvétele
+position: 0
+kind: sql
+level: kozep
+difficulty: 1
+published: false
+allowed_languages:
+- sql
+description: |
+  A `diak` tábla:
+
+  | oszlop | típus |
+  |---|---|
+  | `id` | `INT`, elsődleges kulcs |
+  | `nev` | `VARCHAR(50)` |
+  | `osztaly` | `VARCHAR(5)` |
+  | `pont` | `INT` |
+
+  Vedd fel a táblába az alábbi diákot **minden oszlop értékét megadva**: `id` = 50, `nev` = Kiss Anna, `osztaly` = 9.A, `pont` = 77.
+
+  A kód végén álló `SELECT` sort **ne töröld és ne módosítsd**: az mutatja meg a tábla állapotát módosítás után, és a rendszer ezt az eredményt hasonlítja az elvárthoz. A saját utasításodat a `SELECT` **elé** írd, pontosvesszővel lezárva.
+
+  Tipp: `INSERT INTO diak VALUES (50, 'Kiss Anna', '9.A', 77);`
+starter_code:
+  sql: |
+    -- Ide írd az INSERT utasítást.
+
+    SELECT id, nev, osztaly, pont FROM diak ORDER BY id;
+sample_solutions:
+  sql: |
+    INSERT INTO diak VALUES (50, 'Kiss Anna', '9.A', 77);
+
+    SELECT id, nev, osztaly, pont FROM diak ORDER BY id;
+tests:
+- stdin: |
+    CREATE TABLE diak (id INTEGER PRIMARY KEY, nev TEXT, osztaly TEXT, pont INTEGER);
+    INSERT INTO diak VALUES
+    (1, 'Varga Eszter', '9.B', 48),
+    (2, 'Nagy Norbert', '9.B', 66),
+    (3, 'Molnar Aron', '10.B', 45),
+    (4, 'Toth Lilla', '10.A', 49),
+    (5, 'Farkas Dora', '10.B', 43),
+    (6, 'Kovacs Maria', '9.A', 82);
+  expected: |
+    id,nev,osztaly,pont
+    1,Varga Eszter,9.B,48
+    2,Nagy Norbert,9.B,66
+    3,Molnar Aron,10.B,45
+    4,Toth Lilla,10.A,49
+    5,Farkas Dora,10.B,43
+    6,Kovacs Maria,9.A,82
+    50,Kiss Anna,9.A,77
+  hidden: false
+- stdin: |
+    CREATE TABLE diak (id INTEGER PRIMARY KEY, nev TEXT, osztaly TEXT, pont INTEGER);
+    INSERT INTO diak VALUES
+    (1, 'Toth Orsolya', '10.A', 64),
+    (2, 'Balogh Bela', '10.B', 23),
+    (3, 'Toth Eszter', '9.B', 21),
+    (4, 'Kovacs Peter', '10.B', 44),
+    (5, 'Szabo Hajnal', '9.A', 24),
+    (6, 'Toth Fanni', '9.B', 81),
+    (7, 'Farkas Istvan', '9.A', 94);
+  expected: |
+    id,nev,osztaly,pont
+    1,Toth Orsolya,10.A,64
+    2,Balogh Bela,10.B,23
+    3,Toth Eszter,9.B,21
+    4,Kovacs Peter,10.B,44
+    5,Szabo Hajnal,9.A,24
+    6,Toth Fanni,9.B,81
+    7,Farkas Istvan,9.A,94
+    50,Kiss Anna,9.A,77
+  hidden: true
+- stdin: |
+    CREATE TABLE diak (id INTEGER PRIMARY KEY, nev TEXT, osztaly TEXT, pont INTEGER);
+    INSERT INTO diak VALUES
+    (1, 'Horvath Zsofia', '9.B', 43),
+    (2, 'Toth Emese', '9.B', 47),
+    (3, 'Balogh Julia', '10.A', 97),
+    (4, 'Molnar Csaba', '10.B', 73),
+    (5, 'Horvath Istvan', '10.A', 90);
+  expected: |
+    id,nev,osztaly,pont
+    1,Horvath Zsofia,9.B,43
+    2,Toth Emese,9.B,47
+    3,Balogh Julia,10.A,97
+    4,Molnar Csaba,10.B,73
+    5,Horvath Istvan,10.A,90
+    50,Kiss Anna,9.A,77
+  hidden: true
+- stdin: |
+    CREATE TABLE diak (id INTEGER PRIMARY KEY, nev TEXT, osztaly TEXT, pont INTEGER);
+    INSERT INTO diak VALUES
+    (1, 'Varga Norbert', '9.A', 71),
+    (2, 'Kovacs Lilla', '10.A', 43),
+    (3, 'Nagy Orsolya', '9.A', 46),
+    (4, 'Varga Bence', '10.B', 63),
+    (5, 'Varga Hanna', '10.B', 61),
+    (6, 'Varga Reka', '9.A', 63),
+    (7, 'Kiss Dalma', '9.A', 67),
+    (8, 'Varga Aron', '10.A', 90),
+    (9, 'Nagy Hajnal', '10.A', 37);
+  expected: |
+    id,nev,osztaly,pont
+    1,Varga Norbert,9.A,71
+    2,Kovacs Lilla,10.A,43
+    3,Nagy Orsolya,9.A,46
+    4,Varga Bence,10.B,63
+    5,Varga Hanna,10.B,61
+    6,Varga Reka,9.A,63
+    7,Kiss Dalma,9.A,67
+    8,Varga Aron,10.A,90
+    9,Nagy Hajnal,10.A,37
+    50,Kiss Anna,9.A,77
+  hidden: true

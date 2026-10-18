@@ -6,17 +6,21 @@ namespace App\Services\Catalog\Content;
 
 use App\Actions\Admin\Catalog\CreateExercise;
 use App\Actions\Admin\Catalog\CreateLesson;
+use App\Actions\Admin\Catalog\ManageAttachment;
 use App\Actions\Admin\Catalog\ManageCatalogItem;
 use App\Actions\Admin\Catalog\ManageTestCase;
 use App\Actions\Admin\Catalog\UpdateExercise;
 use App\Actions\Admin\Catalog\UpdateLesson;
+use App\Enums\AttachmentRole;
 use App\Exceptions\DomainException;
+use App\Models\Attachment;
 use App\Models\Exercise;
 use App\Models\Lesson;
 use App\Models\Module;
 use App\Models\TestCase;
 use App\Models\Track;
 use App\Models\User;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
@@ -44,6 +48,7 @@ final class ContentImporter
         private readonly CreateExercise $createExercise,
         private readonly UpdateExercise $updateExercise,
         private readonly ManageTestCase $testCases,
+        private readonly ManageAttachment $attachments,
     ) {}
 
     /**
@@ -161,6 +166,7 @@ final class ContentImporter
             );
             $this->created++;
             $this->replaceTests($exercise, $node);
+            $this->syncFiles($exercise, $node);
             if (($attributes['is_published'] ?? false) === true) {
                 $this->updateExercise->handle($exercise, ['is_published' => true], $this->actor);
             }
@@ -181,10 +187,74 @@ final class ContentImporter
         if (in_array('tests', $entry->changedFields, true)) {
             $this->replaceTests($exercise, $node);
         }
-        if (array_diff($entry->changedFields, ['tests']) !== []) {
+        if (array_diff($entry->changedFields, ['tests', 'files', 'test_files']) !== []) {
             $this->updateExercise->handle($exercise, $attributes, $this->actor);
         }
+        // Az adatfájlok az attribútumok (pl. fajta) után: a fajtaváltást a csatolmányok megléte tiltja.
+        if (array_intersect($entry->changedFields, ['tests', 'files', 'test_files']) !== []) {
+            $this->syncFiles($exercise, $node);
+        }
         $this->updated++;
+    }
+
+    /**
+     * A feladat adatfájljainak egyeztetése a fájlokkal: a közös fájlok (`source`) és tesztesetenként a bemeneti
+     * fájlok (`input`). Csak a hiányzót/eltérőt (sha256) tölti fel, a fájlokból eltűnteket törli.
+     */
+    private function syncFiles(Exercise $exercise, ExerciseNode $node): void
+    {
+        $this->syncRole($exercise, AttachmentRole::Source, null, $node->files);
+
+        $cases = TestCase::query()->where('exercise_id', $exercise->id)->orderBy('order')->get()->values();
+        foreach ($node->testCases as $position => $case) {
+            $testCase = $cases->get($position);
+            if ($testCase instanceof TestCase) {
+                $this->syncRole($exercise, AttachmentRole::Input, $testCase, $node->testFiles[$case['order']] ?? []);
+            }
+        }
+    }
+
+    /**
+     * @param  array<string, ContentFile>  $wanted
+     */
+    private function syncRole(Exercise $exercise, AttachmentRole $role, ?TestCase $testCase, array $wanted): void
+    {
+        $existing = Attachment::query()
+            ->where('attachable_type', $exercise->getMorphClass())
+            ->where('attachable_id', $exercise->id)
+            ->where('role', $role)
+            ->when(
+                $testCase instanceof TestCase,
+                fn ($query) => $query->where('test_case_id', $testCase?->id),
+                fn ($query) => $query->whereNull('test_case_id'),
+            )
+            ->orderBy('id')
+            ->get();
+
+        $current = [];
+        foreach ($existing as $attachment) {
+            if (! array_key_exists($attachment->name, $wanted)) {
+                $this->attachments->delete($attachment, $this->actor);
+
+                continue;
+            }
+            $current[$attachment->name] = $attachment->sha256;
+        }
+
+        foreach ($wanted as $name => $file) {
+            if (($current[$name] ?? null) === $file->sha256) {
+                continue;
+            }
+
+            $this->attachments->store(
+                $exercise,
+                $role,
+                new UploadedFile($file->path, $name, null, null, true),
+                $this->actor,
+                $name,
+                $testCase,
+            );
+        }
     }
 
     /**

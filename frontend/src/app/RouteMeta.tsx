@@ -20,15 +20,15 @@ const PUBLIC_META: Readonly<Record<string, DocumentMeta>> = {
   },
   '/tanulasi-ut': {
     title: 'Tanulási út',
-    description: 'Programozás, adatbázis-kezelés és táblázatkezelés sávokra bontva, leckékkel és gyakorlófeladatokkal.',
+    description: 'Programozás, adatbázis-kezelés és táblázatkezelés tanulási utakra bontva, leckékkel és gyakorlófeladatokkal.',
   },
   '/feladatok': {
     title: 'Feladatok',
-    description: 'Gyakorlófeladatok témakörök szerint, böngészőben futtatható kódszerkesztővel és azonnali értékeléssel.',
+    description: 'Az összes gyakorlófeladat egy helyen, a tananyag sorrendjében, böngészőben futtatható szerkesztővel és azonnali értékeléssel.',
   },
   '/vizsgak': {
-    title: 'Vizsgák',
-    description: 'Érettségi feladatsorok gyakorlása időmérővel, valódi vizsgahelyzetben.',
+    title: 'Érettségi gyakorlás',
+    description: 'Teljes közép- és emelt szintű érettségi-jellegű feladatsorok, lépésenként vagy időmérővel, vizsgahelyzetben.',
   },
   '/szobeli': {
     title: 'Szóbeli felkészítő',
@@ -47,7 +47,7 @@ const PUBLIC_META: Readonly<Record<string, DocumentMeta>> = {
   [LEGAL_DOCUMENTS.imprint.path]: { title: 'Impresszum', description: 'A szolgáltató adatai és elérhetőségei.' },
 }
 
-/** Azok az útvonalak, amelyeknek a címét maga az oldal adja az adataiból (sáv, lecke, feladat, szóbeli téma). */
+/** Azok az útvonalak, amelyeknek a címét maga az oldal adja az adataiból (tanulási út, lecke, feladat, szóbeli téma). */
 function isDataDriven(path: string): boolean {
   return (
     /^\/tanulasi-ut\/[^/]+/.test(path) ||

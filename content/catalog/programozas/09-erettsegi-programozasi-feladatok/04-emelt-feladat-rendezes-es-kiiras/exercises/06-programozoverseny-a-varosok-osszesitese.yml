@@ -1,0 +1,168 @@
+slug: programozoverseny-a-varosok-osszesitese
+title: 'Programozóverseny: a városok összesítése'
+position: 5
+kind: code
+level: emelt
+difficulty: 4
+published: false
+allowed_languages:
+- python
+- csharp
+description: "Egy iskolai programozóversenyen a csapatok eredményeit a `csapatok.txt` fájl tartalmazza. Az első sor fejléc (`csapat`, `varos`, `megoldott`, `buntetes`), utána minden sor egy csapat, tabulátorral tagolva: a csapat neve (ékezet nélkül, szóközt tartalmazhat), a város neve (ékezet nélkül, egyetlen szó), a megoldott feladatok száma és a büntetőpercek száma (mindkettő egész szám). Egy csapat egyszer szerepel. A fájl legalább egy csapatot tartalmaz.\n\nA **rangsorban** az a csapat áll előbb, amelyik több feladatot oldott meg; azonos számú megoldás esetén a kevesebb büntetőperces; ha ez is azonos, a fájlban előbb szereplő. A programban egy csapatot rekordként (osztályként) érdemes tárolni. Minden részfeladat kimenete a sorszámával kezdődik (`N. feladat`), a kimenetben ne használj ékezetes betűt. Ahol a feladat bevitelt kér, a kérdést külön sorban írd ki, csak utána olvass be.\n\nKészíts városonkénti összesítést a `varosok.txt` fájlba: soronként egy város, a város neve, az onnan indult\
+  \ csapatok száma és a csapataik által megoldott feladatok összege, tabulátorral elválasztva. A sorrend: az összes megoldott feladat szerint csökkenő, azonos összegnél a városnév szerinti betűrend (a nevek ékezet nélküliek, a sima karakterkód-sorrend jó). Fejlécsor nincs. Olvasd vissza a fájlt, és írd ki a tartalmát.\n\n```\nvarosok.txt tartalma:\n<varos><TAB><csapatok szama><TAB><osszes megoldott>\n...\n```\n\nKimenet a mellékelt mintafájllal:\n\n```\n6. feladat\nvarosok.txt tartalma:\nSzeged\t3\t22\nDebrecen\t3\t15\nGyor\t2\t15\nPecs\t2\t12\nMiskolc\t2\t7\n```\n\nTipp: szótárban gyűjtsd városonként a darabszámot és az összeget, aztán a szótár elemeit rendezd két kulccsal. C#-ban a szövegek rendezéséhez `StringComparer.Ordinal` kell, hogy a sorrend ne függjön a nyelvi beállítástól.\n"
+starter_code:
+  python: |
+    class Csapat:
+        def __init__(self, nev, varos, megoldott, buntetes):
+            self.nev = nev
+            self.varos = varos
+            self.megoldott = megoldott
+            self.buntetes = buntetes
+    print("6. feladat")
+    with open("csapatok.txt", encoding="utf-8") as f:
+        sorok = f.read().splitlines()
+    csapatok = []
+    for sor in sorok[1:]:
+        r = sor.split("\t")
+        csapatok.append(Csapat(r[0], r[1], int(r[2]), int(r[3])))
+    # ide írd a megoldást
+  csharp: |
+    using System;
+    using System.Collections.Generic;
+    using System.Globalization;
+    using System.IO;
+    using System.Linq;
+
+    class Csapat
+    {
+        public string Nev;
+        public string Varos;
+        public int Megoldott;
+        public int Buntetes;
+    }
+
+    class Program
+    {
+        static void Main()
+        {
+            Console.WriteLine("6. feladat");
+            string[] sorok = File.ReadAllLines("csapatok.txt");
+            List<Csapat> csapatok = new List<Csapat>();
+            for (int i = 1; i < sorok.Length; i++)
+            {
+                string[] r = sorok[i].Split('\t');
+                Csapat c = new Csapat();
+                c.Nev = r[0];
+                c.Varos = r[1];
+                c.Megoldott = int.Parse(r[2]);
+                c.Buntetes = int.Parse(r[3]);
+                csapatok.Add(c);
+            }
+            // ide írd a megoldást
+        }
+    }
+sample_solutions:
+  python: |
+    class Csapat:
+        def __init__(self, nev, varos, megoldott, buntetes):
+            self.nev = nev
+            self.varos = varos
+            self.megoldott = megoldott
+            self.buntetes = buntetes
+    print("6. feladat")
+    with open("csapatok.txt", encoding="utf-8") as f:
+        sorok = f.read().splitlines()
+    csapatok = []
+    for sor in sorok[1:]:
+        r = sor.split("\t")
+        csapatok.append(Csapat(r[0], r[1], int(r[2]), int(r[3])))
+    osszes = {}
+    for c in csapatok:
+        if c.varos not in osszes:
+            osszes[c.varos] = [0, 0]
+        osszes[c.varos][0] += 1
+        osszes[c.varos][1] += c.megoldott
+    lista = sorted(osszes.items(), key=lambda kv: (-kv[1][1], kv[0]))
+    with open("varosok.txt", "w", encoding="utf-8") as f:
+        for varos, adat in lista:
+            f.write(f"{varos}\t{adat[0]}\t{adat[1]}\n")
+    print("varosok.txt tartalma:")
+    with open("varosok.txt", encoding="utf-8") as f:
+        print(f.read(), end="")
+  csharp: |
+    using System;
+    using System.Collections.Generic;
+    using System.Globalization;
+    using System.IO;
+    using System.Linq;
+
+    class Csapat
+    {
+        public string Nev;
+        public string Varos;
+        public int Megoldott;
+        public int Buntetes;
+    }
+
+    class Program
+    {
+        static void Main()
+        {
+            Console.WriteLine("6. feladat");
+            string[] sorok = File.ReadAllLines("csapatok.txt");
+            List<Csapat> csapatok = new List<Csapat>();
+            for (int i = 1; i < sorok.Length; i++)
+            {
+                string[] r = sorok[i].Split('\t');
+                Csapat c = new Csapat();
+                c.Nev = r[0];
+                c.Varos = r[1];
+                c.Megoldott = int.Parse(r[2]);
+                c.Buntetes = int.Parse(r[3]);
+                csapatok.Add(c);
+            }
+            Dictionary<string, int[]> osszes = new Dictionary<string, int[]>();
+            foreach (Csapat c in csapatok)
+            {
+                if (!osszes.ContainsKey(c.Varos))
+                {
+                    osszes[c.Varos] = new int[] { 0, 0 };
+                }
+                osszes[c.Varos][0]++;
+                osszes[c.Varos][1] += c.Megoldott;
+            }
+            List<string> varosok = osszes.Keys.OrderByDescending(v => osszes[v][1]).ThenBy(v => v, StringComparer.Ordinal).ToList();
+            List<string> kiir = new List<string>();
+            foreach (string v in varosok)
+            {
+                kiir.Add(v + "\t" + osszes[v][0] + "\t" + osszes[v][1]);
+            }
+            File.WriteAllLines("varosok.txt", kiir);
+            Console.WriteLine("varosok.txt tartalma:");
+            foreach (string sor in File.ReadAllLines("varosok.txt"))
+            {
+                Console.WriteLine(sor);
+            }
+        }
+    }
+files:
+  csapatok.txt: csapatok.txt
+tests:
+- stdin: ''
+  expected: "6. feladat\nvarosok.txt tartalma:\nSzeged\t3\t22\nDebrecen\t3\t15\nGyor\t2\t15\nPecs\t2\t12\nMiskolc\t2\t7\n"
+  hidden: false
+- stdin: ''
+  expected: "6. feladat\nvarosok.txt tartalma:\nEger\t1\t2\n"
+  hidden: true
+  files:
+    csapatok.txt: teszt-2/csapatok.txt
+- stdin: ''
+  expected: "6. feladat\nvarosok.txt tartalma:\nBekes\t1\t2\nEger\t2\t2\nPecs\t1\t2\n"
+  hidden: true
+  files:
+    csapatok.txt: teszt-3/csapatok.txt
+- stdin: ''
+  expected: "6. feladat\nvarosok.txt tartalma:\nEger\t2\t0\nGyor\t1\t0\n"
+  hidden: true
+  files:
+    csapatok.txt: teszt-4/csapatok.txt

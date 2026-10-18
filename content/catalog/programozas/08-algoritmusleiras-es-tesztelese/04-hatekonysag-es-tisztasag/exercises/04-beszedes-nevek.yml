@@ -1,0 +1,90 @@
+slug: beszedes-nevek
+title: "Beszédes nevek"
+position: 3
+kind: code
+level: emelt
+difficulty: 2
+published: false
+allowed_languages: [python, csharp]
+description: |
+  Az alábbi program egy téglatest felszínét és térfogatát számolja, de a nevek semmitmondóak és a számítás is nehezen követhető. Írd át úgy, hogy a változók és a függvények **beszédes nevűek** legyenek (például `hossz`, `szelesseg`, `magassag`, `felszin`, `terfogat`), és a két számítás külön függvény legyen. A kimenet ne változzon.
+
+  Bemenet: három pozitív egész szám külön sorban (a téglatest három éle). Kimenet két sor: `Felszin: ...` és `Terfogat: ...`.
+
+  Példa: `2`, `3`, `4` esetén `Felszin: 52` és `Terfogat: 24`.
+
+  Tipp: a felszín `2 · (a·b + a·c + b·c)`, a térfogat `a·b·c`.
+starter_code:
+  python: |
+    x = int(input())
+    y = int(input())
+    z = int(input())
+    t1 = x * y
+    t2 = x * z
+    t3 = y * z
+    t = 2 * t1 + 2 * t2 + 2 * t3
+    v = x * y * z
+    print("Felszin:", t)
+    print("Terfogat:", v)
+  csharp: |
+    using System;
+
+    class Program
+    {
+
+        static void Main()
+        {
+            int x = int.Parse(Console.ReadLine());
+            int y = int.Parse(Console.ReadLine());
+            int z = int.Parse(Console.ReadLine());
+            int t1 = x * y;
+            int t2 = x * z;
+            int t3 = y * z;
+            int t = 2 * t1 + 2 * t2 + 2 * t3;
+            int v = x * y * z;
+            Console.WriteLine("Felszin: " + t);
+            Console.WriteLine("Terfogat: " + v);
+        }
+    }
+sample_solutions:
+  python: |
+    def felszin(hossz, szelesseg, magassag):
+        return 2 * (hossz * szelesseg + hossz * magassag + szelesseg * magassag)
+
+    def terfogat(hossz, szelesseg, magassag):
+        return hossz * szelesseg * magassag
+
+    hossz = int(input())
+    szelesseg = int(input())
+    magassag = int(input())
+    print("Felszin:", felszin(hossz, szelesseg, magassag))
+    print("Terfogat:", terfogat(hossz, szelesseg, magassag))
+  csharp: |
+    using System;
+
+    class Program
+    {
+        static int Felszin(int hossz, int szelesseg, int magassag)
+        {
+            return 2 * (hossz * szelesseg + hossz * magassag + szelesseg * magassag);
+        }
+
+        static int Terfogat(int hossz, int szelesseg, int magassag)
+        {
+            return hossz * szelesseg * magassag;
+        }
+
+        static void Main()
+        {
+            int hossz = int.Parse(Console.ReadLine());
+            int szelesseg = int.Parse(Console.ReadLine());
+            int magassag = int.Parse(Console.ReadLine());
+            Console.WriteLine("Felszin: " + Felszin(hossz, szelesseg, magassag));
+            Console.WriteLine("Terfogat: " + Terfogat(hossz, szelesseg, magassag));
+        }
+    }
+tests:
+  - { stdin: "2\n3\n4\n", expected: "Felszin: 52\nTerfogat: 24\n", hidden: false }
+  - { stdin: "1\n1\n1\n", expected: "Felszin: 6\nTerfogat: 1\n", hidden: true }
+  - { stdin: "10\n20\n30\n", expected: "Felszin: 2200\nTerfogat: 6000\n", hidden: true }
+  - { stdin: "5\n1\n7\n", expected: "Felszin: 94\nTerfogat: 35\n", hidden: true }

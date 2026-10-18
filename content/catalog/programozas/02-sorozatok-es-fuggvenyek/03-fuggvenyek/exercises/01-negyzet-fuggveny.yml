@@ -1,0 +1,67 @@
+slug: negyzet-fuggveny
+title: Négyzet függvény
+position: 0
+kind: code
+level: kozep
+difficulty: 1
+published: false
+allowed_languages: [python, csharp]
+description: |
+  Írj `negyzet` nevű függvényt, amely egy egész szám négyzetét adja vissza. A főprogram olvasson be egy egész számot, hívja meg a függvényt, és írja ki az eredményt.
+
+  Példa: ha a bemenet `5`, a kimenet `25`.
+
+  Tipp: a függvény `return`-nel adja vissza az értéket, a kiírást a főprogram végezze.
+starter_code:
+  python: |
+    def negyzet(x):
+        # ide írd: add vissza x négyzetét
+        pass
+
+    szam = int(input())
+    # innen folytasd: hívd meg a függvényt és írd ki az eredményt
+  csharp: |
+    using System;
+
+    class Program
+    {
+        static int Negyzet(int x)
+        {
+            // ide írd: add vissza x négyzetét
+            return 0;
+        }
+
+        static void Main()
+        {
+            int szam = int.Parse(Console.ReadLine());
+            // innen folytasd: hívd meg a metódust és írd ki az eredményt
+        }
+    }
+sample_solutions:
+  python: |
+    def negyzet(x):
+        return x * x
+
+    szam = int(input())
+    print(negyzet(szam))
+  csharp: |
+    using System;
+
+    class Program
+    {
+        static int Negyzet(int x)
+        {
+            return x * x;
+        }
+
+        static void Main()
+        {
+            int szam = int.Parse(Console.ReadLine());
+            Console.WriteLine(Negyzet(szam));
+        }
+    }
+tests:
+  - { stdin: "5\n", expected: "25\n", hidden: false }
+  - { stdin: "-3\n", expected: "9\n", hidden: true }
+  - { stdin: "0\n", expected: "0\n", hidden: true }
+  - { stdin: "12\n", expected: "144\n", hidden: true }

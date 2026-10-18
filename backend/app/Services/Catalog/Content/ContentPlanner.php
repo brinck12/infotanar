@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services\Catalog\Content;
 
+use App\Enums\AttachmentRole;
 use App\Models\Exercise;
 use App\Models\Lesson;
 use App\Models\Module;
@@ -41,7 +42,7 @@ final class ContentPlanner
         }
 
         $existing = Track::query()
-            ->with('modules.lessons.exercises.testCases')
+            ->with('modules.lessons.exercises.testCases', 'modules.lessons.exercises.attachments')
             ->whereIn('slug', $slugs)
             ->get()
             ->keyBy('slug');
@@ -201,7 +202,54 @@ final class ContentPlanner
             $changed[] = 'tests';
         }
 
+        [$shared, $perTest] = $this->storedFiles($exercise);
+        if ($this->canonical($shared) !== $this->canonical($this->fileHashes($node->files))) {
+            $changed[] = 'files';
+        }
+
+        $fileTests = [];
+        foreach ($exercise->testCases as $index => $case) {
+            $fileTests[$index] = $perTest[$case->id] ?? [];
+        }
+        $wanted = [];
+        foreach ($node->testCases as $case) {
+            $wanted[] = $this->fileHashes($node->testFiles[$case['order']] ?? []);
+        }
+        if ($this->canonical($fileTests) !== $this->canonical($wanted)) {
+            $changed[] = 'test_files';
+        }
+
         return $changed;
+    }
+
+    /**
+     * Az adatbázisban lévő adatfájlok: a közösek (`source`) és tesztesetenként a bemeneti fájlok (`input`),
+     * fájlnév => sha256.
+     *
+     * @return array{0: array<string, string>, 1: array<int, array<string, string>>}
+     */
+    private function storedFiles(Exercise $exercise): array
+    {
+        $shared = [];
+        $perTest = [];
+        foreach ($exercise->attachments as $attachment) {
+            if ($attachment->role === AttachmentRole::Source && $attachment->test_case_id === null) {
+                $shared[$attachment->name] = $attachment->sha256;
+            } elseif ($attachment->role === AttachmentRole::Input && $attachment->test_case_id !== null) {
+                $perTest[$attachment->test_case_id][$attachment->name] = $attachment->sha256;
+            }
+        }
+
+        return [$shared, $perTest];
+    }
+
+    /**
+     * @param  array<string, ContentFile>  $files
+     * @return array<string, string>
+     */
+    private function fileHashes(array $files): array
+    {
+        return array_map(static fn (ContentFile $file): string => $file->sha256, $files);
     }
 
     /**

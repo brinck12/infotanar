@@ -1,0 +1,4 @@
+nev	osztaly	pont
+Ede	9c	70
+Fanni	9c	70
+Geza	9a	99

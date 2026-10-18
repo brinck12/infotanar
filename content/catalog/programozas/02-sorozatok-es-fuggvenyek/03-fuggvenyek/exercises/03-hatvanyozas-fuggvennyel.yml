@@ -1,0 +1,82 @@
+slug: hatvanyozas-fuggvennyel
+title: Hatványozás függvénnyel
+position: 2
+kind: code
+level: kozep
+difficulty: 3
+published: false
+allowed_languages: [python, csharp]
+description: |
+  Írj `hatvany` nevű függvényt, amely két paramétert kap, az alapot és a kitevőt (nemnegatív egész szám), és visszaadja az alap kitevőadik hatványát. **Ne használd** a beépített hatványozó műveletet (`**`, `Math.Pow`), hanem szorzással, ciklussal számold ki.
+
+  A főprogram két sorban kapja a bemenetet: előbb az alap, aztán a kitevő; az eredményt írja ki.
+
+  Példa: a `2` és a `10` bemenetre a kimenet `1024`.
+
+  Tipp: az eredmény kezdőértéke 1; a kitevő számú ismétlésnél szorozd meg az alappal. A nulladik hatvány így automatikusan 1 lesz.
+starter_code:
+  python: |
+    def hatvany(alap, kitevo):
+        # ide írd a ciklust
+        return 1
+
+    alap = int(input())
+    kitevo = int(input())
+    # innen folytasd
+  csharp: |
+    using System;
+
+    class Program
+    {
+        static int Hatvany(int alap, int kitevo)
+        {
+            // ide írd a ciklust
+            return 1;
+        }
+
+        static void Main()
+        {
+            int alap = int.Parse(Console.ReadLine());
+            int kitevo = int.Parse(Console.ReadLine());
+            // innen folytasd
+        }
+    }
+sample_solutions:
+  python: |
+    def hatvany(alap, kitevo):
+        eredmeny = 1
+        for i in range(kitevo):
+            eredmeny = eredmeny * alap
+        return eredmeny
+
+    alap = int(input())
+    kitevo = int(input())
+    print(hatvany(alap, kitevo))
+  csharp: |
+    using System;
+
+    class Program
+    {
+        static int Hatvany(int alap, int kitevo)
+        {
+            int eredmeny = 1;
+            for (int i = 0; i < kitevo; i++)
+            {
+                eredmeny = eredmeny * alap;
+            }
+            return eredmeny;
+        }
+
+        static void Main()
+        {
+            int alap = int.Parse(Console.ReadLine());
+            int kitevo = int.Parse(Console.ReadLine());
+            Console.WriteLine(Hatvany(alap, kitevo));
+        }
+    }
+tests:
+  - { stdin: "2\n10\n", expected: "1024\n", hidden: false }
+  - { stdin: "5\n0\n", expected: "1\n", hidden: true }
+  - { stdin: "-2\n3\n", expected: "-8\n", hidden: true }
+  - { stdin: "3\n4\n", expected: "81\n", hidden: true }
+  - { stdin: "0\n5\n", expected: "0\n", hidden: true }

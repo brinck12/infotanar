@@ -1,0 +1,112 @@
+slug: 2-feladat-a-leghosszabb-ut
+title: '2. feladat: a leghosszabb út'
+position: 1
+kind: code
+level: kozep
+difficulty: 3
+published: false
+allowed_languages:
+- python
+- csharp
+description: |
+  Az `ut.txt` fájl egy fuvarozó cég útjait tartalmazza, tabulátorral tagolva. Az első sor fejléc (`datum`, `sofor`, `km`, `perc`); minden további sor egy út: a dátum (`EEEE-HH-NN` alakban), a sofőr neve (ékezet nélkül, szóköz nélkül), a megtett kilométerek és az út ideje percben (egész számok). A fájl legalább egy utat tartalmaz.
+
+  Írd ki a `2. feladat` szöveget, majd a legtöbb kilométert megtett út dátumát, sofőrjét és hosszát:
+
+  ```
+  2. feladat
+  Leghosszabb ut: 2024-03-03 Szabo 210 km
+  ```
+
+  Holtverseny esetén a fájlban korábban szereplő út számít.
+
+  Tipp: maximumkeresés; a legjobb út adatait mind tárold el.
+starter_code:
+  python: |
+    print("2. feladat")
+    with open("ut.txt", encoding="utf-8") as f:
+        sorok = f.read().splitlines()
+    # ide írd a megoldást
+  csharp: |
+    using System;
+    using System.IO;
+
+    class Program
+    {
+        static void Main()
+        {
+            Console.WriteLine("2. feladat");
+            string[] sorok = File.ReadAllLines("ut.txt");
+            // ide írd a megoldást
+        }
+    }
+sample_solutions:
+  python: |
+    print("2. feladat")
+    with open("ut.txt", encoding="utf-8") as f:
+        sorok = f.read().splitlines()
+    legjobb = sorok[1].split("\t")
+    for sor in sorok[1:]:
+        mezok = sor.split("\t")
+        if int(mezok[2]) > int(legjobb[2]):
+            legjobb = mezok
+    print("Leghosszabb ut: " + legjobb[0] + " " + legjobb[1] + " " + legjobb[2] + " km")
+  csharp: |
+    using System;
+    using System.IO;
+
+    class Program
+    {
+        static void Main()
+        {
+            Console.WriteLine("2. feladat");
+            string[] sorok = File.ReadAllLines("ut.txt");
+            string[] legjobb = sorok[1].Split('\t');
+            for (int i = 1; i < sorok.Length; i++)
+            {
+                string[] mezok = sorok[i].Split('\t');
+                if (int.Parse(mezok[2]) > int.Parse(legjobb[2]))
+                {
+                    legjobb = mezok;
+                }
+            }
+            Console.WriteLine("Leghosszabb ut: " + legjobb[0] + " " + legjobb[1] + " " + legjobb[2] + " km");
+        }
+    }
+files:
+  ut.txt: ut.txt
+tests:
+- stdin: ''
+  expected: '2. feladat
+
+    Leghosszabb ut: 2024-03-03 Szabo 210 km
+
+    '
+  hidden: false
+- stdin: ''
+  expected: '2. feladat
+
+    Leghosszabb ut: 2024-04-01 Varga 100 km
+
+    '
+  hidden: true
+  files:
+    ut.txt: teszt-2/ut.txt
+- stdin: ''
+  expected: '2. feladat
+
+    Leghosszabb ut: 2024-05-10 Biro 7 km
+
+    '
+  hidden: true
+  files:
+    ut.txt: teszt-3/ut.txt
+- stdin: ''
+  expected: '2. feladat
+
+    Leghosszabb ut: 2024-06-01 Tar 250 km
+
+    '
+  hidden: true
+  files:
+    ut.txt: teszt-4/ut.txt

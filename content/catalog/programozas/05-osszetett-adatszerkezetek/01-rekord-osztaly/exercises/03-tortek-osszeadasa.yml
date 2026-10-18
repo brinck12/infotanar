@@ -1,0 +1,142 @@
+slug: tortek-osszeadasa
+title: "Törtek összeadása"
+position: 2
+kind: code
+level: emelt
+difficulty: 3
+published: false
+allowed_languages: [python, csharp]
+description: |
+  Egy törtet két szám ír le: a számláló és a nevező. Készíts `Tort` rekordot, és add össze a bemenet két törtjét. A tört `a/b` alakban érkezik (pozitív egészekkel), minden tört külön sorban. Az eredményt egyszerűsítve, szintén `p/q` alakban írd ki; ha az eredmény egész, a nevező akkor is megjelenik (`1/1`).
+
+  Példa bemenet:
+
+  ```
+  1/2
+  1/3
+  ```
+
+  Kimenet:
+
+  ```
+  5/6
+  ```
+
+  Tipp: a közös nevező a két nevező szorzata; az egyszerűsítéshez oszd el a számlálót és a nevezőt a legnagyobb közös osztójukkal. Pythonban `math.gcd`, C#-ban írj egy kis `Nko` függvényt (euklideszi algoritmus).
+starter_code:
+  python: |
+    from dataclasses import dataclass
+    from math import gcd
+
+    @dataclass
+    class Tort:
+        szamlalo: int
+        nevezo: int
+
+    def beolvas():
+        resz = input().split("/")
+        return Tort(int(resz[0]), int(resz[1]))
+
+    x = beolvas()
+    y = beolvas()
+    # add össze, egyszerűsítsd, írd ki
+  csharp: |
+    using System;
+
+    class Tort
+    {
+        public int Szamlalo;
+        public int Nevezo;
+    }
+
+    class Program
+    {
+        static int Nko(int a, int b)
+        {
+            while (b != 0)
+            {
+                int m = a % b;
+                a = b;
+                b = m;
+            }
+            return a;
+        }
+
+        static Tort Beolvas()
+        {
+            string[] resz = Console.ReadLine().Split('/');
+            return new Tort { Szamlalo = int.Parse(resz[0]), Nevezo = int.Parse(resz[1]) };
+        }
+
+        static void Main()
+        {
+            var x = Beolvas();
+            var y = Beolvas();
+            // add össze, egyszerűsítsd, írd ki
+        }
+    }
+sample_solutions:
+  python: |
+    from dataclasses import dataclass
+    from math import gcd
+
+    @dataclass
+    class Tort:
+        szamlalo: int
+        nevezo: int
+
+    def beolvas():
+        resz = input().split("/")
+        return Tort(int(resz[0]), int(resz[1]))
+
+    x = beolvas()
+    y = beolvas()
+    sz = x.szamlalo * y.nevezo + y.szamlalo * x.nevezo
+    n = x.nevezo * y.nevezo
+    k = gcd(sz, n)
+    print(str(sz // k) + "/" + str(n // k))
+  csharp: |
+    using System;
+
+    class Tort
+    {
+        public int Szamlalo;
+        public int Nevezo;
+    }
+
+    class Program
+    {
+        static int Nko(int a, int b)
+        {
+            while (b != 0)
+            {
+                int m = a % b;
+                a = b;
+                b = m;
+            }
+            return a;
+        }
+
+        static Tort Beolvas()
+        {
+            string[] resz = Console.ReadLine().Split('/');
+            return new Tort { Szamlalo = int.Parse(resz[0]), Nevezo = int.Parse(resz[1]) };
+        }
+
+        static void Main()
+        {
+            var x = Beolvas();
+            var y = Beolvas();
+            int sz = x.Szamlalo * y.Nevezo + y.Szamlalo * x.Nevezo;
+            int n = x.Nevezo * y.Nevezo;
+            int k = Nko(sz, n);
+            Console.WriteLine((sz / k) + "/" + (n / k));
+        }
+    }
+tests:
+  - { stdin: "1/2\n1/3\n", expected: "5/6\n", hidden: false }
+  - { stdin: "1/2\n1/2\n", expected: "1/1\n", hidden: true }
+  - { stdin: "3/4\n5/6\n", expected: "19/12\n", hidden: true }
+  - { stdin: "1/6\n1/3\n", expected: "1/2\n", hidden: true }
+  - { stdin: "7/10\n3/10\n", expected: "1/1\n", hidden: true }
+  - { stdin: "1/1\n1/1\n", expected: "2/1\n", hidden: true }

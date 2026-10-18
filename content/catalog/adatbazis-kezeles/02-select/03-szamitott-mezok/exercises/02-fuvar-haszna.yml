@@ -1,0 +1,47 @@
+slug: fuvar-haszna
+title: Fuvar haszna
+position: 1
+kind: sql
+level: kozep
+difficulty: 2
+published: false
+allowed_languages: [sql]
+description: |
+  Egy fuvar kilométerenként 120 Ft költséget jelent a taxisnak. A haszon a díj és a költség különbsége.
+
+  A `taxi` tábla:
+
+  | oszlop | típus |
+  |---|---|
+  | `id` | egész, elsődleges kulcs |
+  | `rendszam` | szöveg |
+  | `indulas` | szöveg |
+  | `cel` | szöveg |
+  | `km` | egész |
+  | `dij` | egész (Ft) |
+  | `fizetes` | szöveg (`keszpenz` vagy `kartya`) |
+
+  Listázd ki a fuvarok **rendszámát** és a hasznát (`dij` mínusz `km` * 120) `haszon` néven! A sorok sorrendje nem számít.
+
+  Tipp: a szorzás előbb hajtódik végre, mint a kivonás: `dij - km * 120`.
+starter_code:
+  sql: |
+    SELECT
+    FROM taxi;
+sample_solutions:
+  sql: |
+    SELECT rendszam, dij - km * 120 AS haszon
+    FROM taxi;
+tests:
+  - stdin: "CREATE TABLE taxi (id INTEGER PRIMARY KEY, rendszam TEXT, indulas TEXT, cel TEXT, km INTEGER, dij INTEGER, fizetes TEXT);\nINSERT INTO taxi VALUES\n(1, 'AKC-353', 'Pecs', 'Szeged', 57, 18100, 'keszpenz'),\n(2, 'ASF-550', 'Szeged', 'Gyor', 60, 19000, 'kartya'),\n(3, 'DPE-352', 'Gyor', 'Pecs', 44, 14200, 'keszpenz'),\n(4, 'BTH-486', 'Szeged', 'Pecs', 3, 1900, 'keszpenz'),\n(5, 'HKH-603', 'Pecs', 'Szeged', 46, 14300, 'keszpenz');\n"
+    expected: "rendszam,haszon\nAKC-353,11260\nASF-550,11800\nDPE-352,8920\nBTH-486,1540\nHKH-603,8780\n"
+    hidden: false
+  - stdin: "CREATE TABLE taxi (id INTEGER PRIMARY KEY, rendszam TEXT, indulas TEXT, cel TEXT, km INTEGER, dij INTEGER, fizetes TEXT);\nINSERT INTO taxi VALUES\n(1, 'BNF-569', 'Eger', 'Gyor', 60, 18500, 'kartya'),\n(2, 'CTD-364', 'Pecs', 'Eger', 11, 4300, 'kartya'),\n(3, 'GRE-691', 'Eger', 'Szeged', 57, 17600, 'kartya'),\n(4, 'DPB-587', 'Gyor', 'Eger', 40, 12800, 'kartya'),\n(5, 'BNG-376', 'Szeged', 'Pecs', 37, 12100, 'kartya'),\n(6, 'FKG-750', 'Gyor', 'Pecs', 12, 4400, 'kartya'),\n(7, 'HKH-922', 'Gyor', 'Pecs', 36, 11600, 'keszpenz'),\n(8, 'ASB-515', 'Gyor', 'Eger', 28, 9400, 'kartya');\n"
+    expected: "rendszam,haszon\nBNF-569,11300\nCTD-364,2980\nGRE-691,10760\nDPB-587,8000\nBNG-376,7660\nFKG-750,2960\nHKH-922,7280\nASB-515,6040\n"
+    hidden: true
+  - stdin: "CREATE TABLE taxi (id INTEGER PRIMARY KEY, rendszam TEXT, indulas TEXT, cel TEXT, km INTEGER, dij INTEGER, fizetes TEXT);\nINSERT INTO taxi VALUES\n(1, 'GPB-184', 'Pecs', 'Szeged', 8, 2900, 'kartya'),\n(2, 'HKA-411', 'Szeged', 'Gyor', 60, 18500, 'keszpenz'),\n(3, 'DMD-531', 'Eger', 'Gyor', 47, 14900, 'keszpenz'),\n(4, 'ENA-251', 'Pecs', 'Eger', 36, 11600, 'keszpenz'),\n(5, 'CRH-958', 'Szeged', 'Gyor', 46, 14300, 'keszpenz'),\n(6, 'CSD-920', 'Pecs', 'Szeged', 50, 15800, 'keszpenz'),\n(7, 'CKC-517', 'Szeged', 'Eger', 32, 10600, 'keszpenz'),\n(8, 'HMD-508', 'Eger', 'Gyor', 13, 4900, 'kartya'),\n(9, 'FLA-411', 'Pecs', 'Szeged', 40, 12500, 'kartya'),\n(10, 'ERC-884', 'Eger', 'Szeged', 37, 11900, 'kartya');\n"
+    expected: "rendszam,haszon\nGPB-184,1940\nHKA-411,11300\nDMD-531,9260\nENA-251,7280\nCRH-958,8780\nCSD-920,9800\nCKC-517,6760\nHMD-508,3340\nFLA-411,7700\nERC-884,7460\n"
+    hidden: true
+  - stdin: "CREATE TABLE taxi (id INTEGER PRIMARY KEY, rendszam TEXT, indulas TEXT, cel TEXT, km INTEGER, dij INTEGER, fizetes TEXT);\nINSERT INTO taxi VALUES\n(1, 'CSC-417', 'Pecs', 'Eger', 10, 3500, 'keszpenz'),\n(2, 'BTB-484', 'Szeged', 'Pecs', 29, 9700, 'keszpenz'),\n(3, 'GMC-655', 'Eger', 'Szeged', 58, 18400, 'kartya'),\n(4, 'BMD-622', 'Szeged', 'Eger', 47, 15100, 'kartya'),\n(5, 'ARA-314', 'Pecs', 'Eger', 22, 7100, 'kartya'),\n(6, 'ESE-154', 'Szeged', 'Gyor', 6, 2800, 'kartya'),\n(7, 'ASG-665', 'Eger', 'Pecs', 41, 13100, 'keszpenz'),\n(8, 'BNH-286', 'Gyor', 'Eger', 54, 17200, 'keszpenz'),\n(9, 'DMF-948', 'Eger', 'Gyor', 31, 10100, 'keszpenz'),\n(10, 'HLH-950', 'Eger', 'Szeged', 44, 14000, 'kartya'),\n(11, 'CRF-938', 'Pecs', 'Eger', 24, 8000, 'kartya'),\n(12, 'ENE-264', 'Pecs', 'Gyor', 40, 12800, 'kartya');\n"
+    expected: "rendszam,haszon\nCSC-417,2300\nBTB-484,6220\nGMC-655,11440\nBMD-622,9460\nARA-314,4460\nESE-154,2080\nASG-665,8180\nBNH-286,10720\nDMF-948,6380\nHLH-950,8720\nCRF-938,5120\nENE-264,8000\n"
+    hidden: true

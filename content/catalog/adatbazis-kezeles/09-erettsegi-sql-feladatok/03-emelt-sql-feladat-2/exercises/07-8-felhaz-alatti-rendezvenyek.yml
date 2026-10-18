@@ -1,0 +1,233 @@
+slug: 8-felhaz-alatti-rendezvenyek
+title: 8. Félház alatti rendezvények
+position: 6
+kind: sql
+level: emelt
+difficulty: 5
+published: false
+allowed_languages:
+- sql
+description: |
+  Egy jegyértékesítő rendszer két táblából áll.
+
+  A `rendezveny` tábla a rendezvényeket tartalmazza:
+
+  | oszlop | típus |
+  |---|---|
+  | `id` | `INT`, elsődleges kulcs |
+  | `nev` | `VARCHAR(50)` |
+  | `helyszin` | `VARCHAR(30)` (város) |
+  | `datum` | `DATE` |
+  | `kapacitas` | `INT`, a férőhelyek száma |
+
+  A `jegy` tábla az eladott jegyeket:
+
+  | oszlop | típus |
+  |---|---|
+  | `id` | `INT`, elsődleges kulcs |
+  | `rendezveny_id` | `INT`, a `rendezveny` tábla `id` oszlopára mutat |
+  | `vevo` | `VARCHAR(50)`, a vásárló neve |
+  | `kategoria` | `VARCHAR(20)`: `allo`, `ules` vagy `vip` |
+  | `ar` | `INT`, a jegy ára forintban |
+  | `vasarlas` | `DATE`, a vásárlás napja |
+
+  **8. feladat.** Adja meg lekérdezéssel azoknak a rendezvényeknek a nevét és kapacitását (**nev, kapacitas**), amelyekre az **eladott jegyek száma nem éri el a kapacitás felét** (az eladott jegyek kétszerese kisebb a kapacitásnál)! Azok a rendezvények is szerepeljenek, amelyekre **egyetlen jegyet sem adtak el**.
+starter_code:
+  sql: |
+    SELECT nev, kapacitas
+    FROM rendezveny
+    WHERE (SELECT COUNT(*) FROM jegy WHERE ) * 2 < ;
+sample_solutions:
+  sql: |
+    SELECT nev, kapacitas
+    FROM rendezveny
+    WHERE (SELECT COUNT(*) FROM jegy WHERE jegy.rendezveny_id = rendezveny.id) * 2 < kapacitas;
+tests:
+- stdin: |
+    CREATE TABLE rendezveny (id INTEGER PRIMARY KEY, nev TEXT, helyszin TEXT, datum TEXT, kapacitas INTEGER);
+    INSERT INTO rendezveny VALUES
+    (1, 'Film fesztival', 'Budapest', '2026-06-01', 24),
+    (2, 'Nyari fesztival', 'Budapest', '2026-06-07', 28),
+    (3, 'Jazz est', 'Szeged', '2026-06-11', 26),
+    (4, 'Rock koncert', 'Budapest', '2026-06-17', 20),
+    (5, 'Kiallitas', 'Budapest', '2026-06-19', 17),
+    (6, 'Stand-up est', 'Budapest', '2026-06-22', 16);
+    CREATE TABLE jegy (id INTEGER PRIMARY KEY, rendezveny_id INTEGER, vevo TEXT, kategoria TEXT, ar INTEGER, vasarlas TEXT);
+    INSERT INTO jegy VALUES
+    (1, 3, 'Szabo Emil', 'vip', 19000, '2026-04-20'),
+    (2, 3, 'Kiss Anna', 'ules', 6500, '2026-05-14'),
+    (3, 5, 'Kiss Anna', 'vip', 17500, '2026-05-26'),
+    (4, 4, 'Varga Fanni', 'ules', 6500, '2026-04-17'),
+    (5, 5, 'Kiss Anna', 'allo', 4500, '2026-05-18'),
+    (6, 2, 'Toth Dora', 'allo', 3500, '2026-04-23'),
+    (7, 2, 'Kovacs Gabor', 'ules', 8000, '2026-05-05'),
+    (8, 3, 'Farkas Imre', 'ules', 9000, '2026-04-11'),
+    (9, 5, 'Kovacs Gabor', 'allo', 3500, '2026-05-12'),
+    (10, 5, 'Toth Dora', 'allo', 5000, '2026-05-09'),
+    (11, 2, 'Nagy Bela', 'allo', 4500, '2026-04-17'),
+    (12, 1, 'Nagy Bela', 'ules', 8000, '2026-05-21'),
+    (13, 5, 'Toth Dora', 'allo', 4000, '2026-04-09'),
+    (14, 2, 'Farkas Imre', 'allo', 3500, '2026-05-04'),
+    (15, 1, 'Molnar Hanna', 'ules', 7500, '2026-05-11'),
+    (16, 3, 'Toth Dora', 'ules', 6000, '2026-05-15'),
+    (17, 5, 'Szabo Emil', 'ules', 6500, '2026-04-26'),
+    (18, 4, 'Varga Fanni', 'allo', 4500, '2026-05-05'),
+    (19, 1, 'Nagy Bela', 'allo', 4500, '2026-05-01'),
+    (20, 2, 'Nagy Bela', 'allo', 4500, '2026-05-07'),
+    (21, 2, 'Kiss Anna', 'allo', 4000, '2026-04-02'),
+    (22, 5, 'Toth Dora', 'allo', 4000, '2026-05-01'),
+    (23, 1, 'Kiss Anna', 'allo', 3500, '2026-05-28'),
+    (24, 3, 'Nagy Bela', 'ules', 8500, '2026-05-15');
+  expected: |
+    nev,kapacitas
+    Film fesztival,24
+    Nyari fesztival,28
+    Jazz est,26
+    Rock koncert,20
+    Kiallitas,17
+    Stand-up est,16
+  hidden: false
+- stdin: |
+    CREATE TABLE rendezveny (id INTEGER PRIMARY KEY, nev TEXT, helyszin TEXT, datum TEXT, kapacitas INTEGER);
+    INSERT INTO rendezveny VALUES
+    (1, 'Kiallitas', 'Budapest', '2026-06-07', 28),
+    (2, 'Nyari fesztival', 'Budapest', '2026-06-08', 22),
+    (3, 'Film fesztival', 'Szeged', '2026-06-10', 29),
+    (4, 'Tavaszi koncert', 'Budapest', '2026-06-15', 14),
+    (5, 'Bor fesztival', 'Pecs', '2026-06-21', 18),
+    (6, 'Rock koncert', 'Debrecen', '2026-06-22', 17),
+    (7, 'Stand-up est', 'Budapest', '2026-06-25', 22);
+    CREATE TABLE jegy (id INTEGER PRIMARY KEY, rendezveny_id INTEGER, vevo TEXT, kategoria TEXT, ar INTEGER, vasarlas TEXT);
+    INSERT INTO jegy VALUES
+    (1, 5, 'Toth Dora', 'ules', 9000, '2026-04-08'),
+    (2, 4, 'Varga Fanni', 'ules', 9000, '2026-05-02'),
+    (3, 2, 'Nagy Bela', 'vip', 18500, '2026-05-14'),
+    (4, 2, 'Nagy Bela', 'allo', 5000, '2026-04-02'),
+    (5, 1, 'Molnar Hanna', 'allo', 5000, '2026-05-22'),
+    (6, 5, 'Toth Dora', 'allo', 3500, '2026-04-25'),
+    (7, 2, 'Farkas Imre', 'ules', 8500, '2026-04-07'),
+    (8, 1, 'Szabo Emil', 'vip', 17000, '2026-04-16'),
+    (9, 5, 'Varga Fanni', 'allo', 3500, '2026-04-12'),
+    (10, 2, 'Szabo Emil', 'allo', 5000, '2026-04-12'),
+    (11, 4, 'Kovacs Gabor', 'vip', 17000, '2026-04-21'),
+    (12, 2, 'Farkas Imre', 'allo', 4500, '2026-04-27'),
+    (13, 6, 'Varga Fanni', 'allo', 2500, '2026-05-18'),
+    (14, 5, 'Toth Dora', 'allo', 5500, '2026-05-19'),
+    (15, 4, 'Molnar Hanna', 'ules', 7500, '2026-05-26'),
+    (16, 4, 'Molnar Hanna', 'vip', 17500, '2026-04-14'),
+    (17, 2, 'Farkas Imre', 'ules', 9000, '2026-05-17'),
+    (18, 3, 'Nagy Bela', 'allo', 4000, '2026-05-17'),
+    (19, 6, 'Varga Fanni', 'ules', 6000, '2026-04-28'),
+    (20, 1, 'Molnar Hanna', 'allo', 5000, '2026-04-22'),
+    (21, 5, 'Nagy Bela', 'allo', 4000, '2026-05-26'),
+    (22, 4, 'Kovacs Gabor', 'vip', 19500, '2026-04-10'),
+    (23, 4, 'Szabo Emil', 'allo', 3500, '2026-05-16'),
+    (24, 5, 'Szabo Emil', 'allo', 2500, '2026-04-03'),
+    (25, 3, 'Kovacs Gabor', 'allo', 4000, '2026-04-13'),
+    (26, 4, 'Kovacs Gabor', 'vip', 20000, '2026-05-22');
+  expected: |
+    nev,kapacitas
+    Kiallitas,28
+    Nyari fesztival,22
+    Film fesztival,29
+    Bor fesztival,18
+    Rock koncert,17
+    Stand-up est,22
+  hidden: true
+- stdin: |
+    CREATE TABLE rendezveny (id INTEGER PRIMARY KEY, nev TEXT, helyszin TEXT, datum TEXT, kapacitas INTEGER);
+    INSERT INTO rendezveny VALUES
+    (1, 'Jazz est', 'Budapest', '2026-06-12', 27),
+    (2, 'Stand-up est', 'Budapest', '2026-06-17', 11),
+    (3, 'Bor fesztival', 'Debrecen', '2026-06-19', 17),
+    (4, 'Kiallitas', 'Debrecen', '2026-06-23', 9),
+    (5, 'Film fesztival', 'Pecs', '2026-06-25', 20),
+    (6, 'Nyari fesztival', 'Debrecen', '2026-06-26', 28);
+    CREATE TABLE jegy (id INTEGER PRIMARY KEY, rendezveny_id INTEGER, vevo TEXT, kategoria TEXT, ar INTEGER, vasarlas TEXT);
+    INSERT INTO jegy VALUES
+    (1, 3, 'Varga Fanni', 'allo', 4500, '2026-04-17'),
+    (2, 2, 'Kovacs Gabor', 'ules', 6000, '2026-04-09'),
+    (3, 3, 'Kovacs Gabor', 'ules', 8500, '2026-05-19'),
+    (4, 3, 'Kiss Anna', 'allo', 4500, '2026-05-13'),
+    (5, 2, 'Nagy Bela', 'allo', 2500, '2026-05-23'),
+    (6, 2, 'Kovacs Gabor', 'allo', 4000, '2026-05-24'),
+    (7, 5, 'Varga Fanni', 'vip', 20000, '2026-05-08'),
+    (8, 5, 'Toth Dora', 'vip', 17000, '2026-05-20'),
+    (9, 3, 'Kiss Anna', 'vip', 18500, '2026-04-15'),
+    (10, 3, 'Kiss Anna', 'vip', 18000, '2026-04-18'),
+    (11, 1, 'Kovacs Gabor', 'allo', 3000, '2026-04-01'),
+    (12, 1, 'Kovacs Gabor', 'ules', 8000, '2026-05-04'),
+    (13, 1, 'Kiss Anna', 'allo', 4500, '2026-05-09'),
+    (14, 6, 'Toth Dora', 'ules', 9000, '2026-05-21'),
+    (15, 5, 'Farkas Imre', 'vip', 18000, '2026-05-23'),
+    (16, 4, 'Molnar Hanna', 'vip', 20000, '2026-05-20'),
+    (17, 3, 'Szabo Emil', 'allo', 4000, '2026-04-24'),
+    (18, 2, 'Szabo Emil', 'ules', 9000, '2026-05-21'),
+    (19, 2, 'Nagy Bela', 'allo', 4000, '2026-04-19'),
+    (20, 6, 'Farkas Imre', 'vip', 17000, '2026-04-28'),
+    (21, 1, 'Molnar Hanna', 'allo', 3500, '2026-04-10'),
+    (22, 4, 'Szabo Emil', 'allo', 2500, '2026-05-09'),
+    (23, 6, 'Szabo Emil', 'vip', 18000, '2026-04-09'),
+    (24, 3, 'Toth Dora', 'ules', 7500, '2026-05-07');
+  expected: |
+    nev,kapacitas
+    Jazz est,27
+    Stand-up est,11
+    Bor fesztival,17
+    Kiallitas,9
+    Film fesztival,20
+    Nyari fesztival,28
+  hidden: true
+- stdin: |
+    CREATE TABLE rendezveny (id INTEGER PRIMARY KEY, nev TEXT, helyszin TEXT, datum TEXT, kapacitas INTEGER);
+    INSERT INTO rendezveny VALUES
+    (1, 'Rock koncert', 'Budapest', '2026-06-01', 30),
+    (2, 'Kiallitas', 'Budapest', '2026-06-05', 22),
+    (3, 'Film fesztival', 'Pecs', '2026-06-11', 28),
+    (4, 'Bor fesztival', 'Debrecen', '2026-06-14', 26),
+    (5, 'Jazz est', 'Budapest', '2026-06-16', 13),
+    (6, 'Stand-up est', 'Szeged', '2026-06-20', 30),
+    (7, 'Nyari fesztival', 'Pecs', '2026-06-22', 10);
+    CREATE TABLE jegy (id INTEGER PRIMARY KEY, rendezveny_id INTEGER, vevo TEXT, kategoria TEXT, ar INTEGER, vasarlas TEXT);
+    INSERT INTO jegy VALUES
+    (1, 5, 'Kovacs Gabor', 'allo', 3500, '2026-04-25'),
+    (2, 3, 'Molnar Hanna', 'vip', 17000, '2026-04-12'),
+    (3, 1, 'Kiss Anna', 'allo', 5000, '2026-04-21'),
+    (4, 2, 'Kiss Anna', 'allo', 5000, '2026-04-15'),
+    (5, 7, 'Farkas Imre', 'vip', 19500, '2026-04-10'),
+    (6, 7, 'Kovacs Gabor', 'ules', 6500, '2026-04-24'),
+    (7, 3, 'Farkas Imre', 'ules', 9000, '2026-04-06'),
+    (8, 4, 'Szabo Emil', 'ules', 8500, '2026-04-12'),
+    (9, 2, 'Kovacs Gabor', 'ules', 8000, '2026-04-13'),
+    (10, 7, 'Szabo Emil', 'ules', 6000, '2026-05-24'),
+    (11, 3, 'Kiss Anna', 'allo', 5000, '2026-05-02'),
+    (12, 6, 'Toth Dora', 'ules', 6500, '2026-05-28'),
+    (13, 3, 'Nagy Bela', 'ules', 6000, '2026-05-09'),
+    (14, 1, 'Kiss Anna', 'ules', 8500, '2026-05-01'),
+    (15, 3, 'Szabo Emil', 'vip', 19000, '2026-05-01'),
+    (16, 5, 'Nagy Bela', 'allo', 4500, '2026-04-27'),
+    (17, 2, 'Szabo Emil', 'vip', 18000, '2026-05-10'),
+    (18, 1, 'Kiss Anna', 'allo', 2500, '2026-05-27'),
+    (19, 4, 'Farkas Imre', 'vip', 20000, '2026-04-10'),
+    (20, 5, 'Kiss Anna', 'ules', 6000, '2026-05-05'),
+    (21, 2, 'Molnar Hanna', 'ules', 6000, '2026-05-24'),
+    (22, 1, 'Varga Fanni', 'ules', 8500, '2026-05-04'),
+    (23, 6, 'Varga Fanni', 'vip', 18500, '2026-04-15'),
+    (24, 3, 'Varga Fanni', 'ules', 7000, '2026-04-27'),
+    (25, 6, 'Farkas Imre', 'allo', 3500, '2026-04-14'),
+    (26, 2, 'Kovacs Gabor', 'ules', 7000, '2026-05-25'),
+    (27, 3, 'Kovacs Gabor', 'ules', 9000, '2026-05-20'),
+    (28, 2, 'Toth Dora', 'allo', 3000, '2026-05-11'),
+    (29, 5, 'Molnar Hanna', 'ules', 8000, '2026-04-24'),
+    (30, 6, 'Toth Dora', 'allo', 4000, '2026-04-01'),
+    (31, 6, 'Kiss Anna', 'allo', 3000, '2026-05-20');
+  expected: |
+    nev,kapacitas
+    Rock koncert,30
+    Kiallitas,22
+    Film fesztival,28
+    Bor fesztival,26
+    Jazz est,13
+    Stand-up est,30
+    Nyari fesztival,10
+  hidden: true

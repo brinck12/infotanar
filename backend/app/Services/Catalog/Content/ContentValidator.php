@@ -4,7 +4,10 @@ declare(strict_types=1);
 
 namespace App\Services\Catalog\Content;
 
+use App\Actions\Admin\Catalog\ManageAttachment;
 use App\Services\Constraints\ConstraintSet;
+use App\Services\Files\UploadedFileInspector;
+use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Str;
 use InvalidArgumentException;
 
@@ -46,6 +49,8 @@ final class ContentValidator
         $this->problems = $set->problems;
 
         $this->checkSiblings($set->tracks);
+        // A szakasz slugja az adatbázisban az összes tanulási úton egyedi (modules.slug), nem csak egy úton belül.
+        $moduleSlugs = [];
         foreach ($set->tracks as $track) {
             $this->checkCommon($track->path, $track->attributes, 'track');
             $this->checkOptionalText($track->path, $track->attributes, 'description');
@@ -53,6 +58,14 @@ final class ContentValidator
 
             $this->checkSiblings($track->modules);
             foreach ($track->modules as $module) {
+                $moduleSlug = $module->attributes['slug'] ?? null;
+                if (is_string($moduleSlug)) {
+                    if (isset($moduleSlugs[$moduleSlug])) {
+                        $this->add($module->path, 'module_slug_taken', ['slug' => $moduleSlug, 'other' => $moduleSlugs[$moduleSlug]]);
+                    } else {
+                        $moduleSlugs[$moduleSlug] = $module->path;
+                    }
+                }
                 $this->checkCommon($module->path, $module->attributes, 'module');
                 $this->checkOptionalText($module->path, $module->attributes, 'description');
 
@@ -179,6 +192,69 @@ final class ContentValidator
 
         if ($exercise->testCases === []) {
             $this->add($file, 'no_tests');
+        }
+
+        $this->checkDataFiles($exercise);
+    }
+
+    /**
+     * Az adatfájlok szabálya ugyanaz, mint az admin feltöltésnél (`ManageAttachment`): szigorú név, nem a Judge0
+     * saját neve, ismert szöveges kiterjesztés, a `filetasks.attachments.judge0_*` darab- és méretkorlát.
+     */
+    private function checkDataFiles(ExerciseNode $exercise): void
+    {
+        $file = $exercise->path;
+
+        if (($exercise->files !== [] || $exercise->testFiles !== []) && ($exercise->attributes['kind'] ?? null) === 'sql') {
+            $this->add($file, 'files_sql');
+        }
+
+        $this->checkFileSet($file, $exercise->files, 'files');
+        foreach ($exercise->testFiles as $index => $files) {
+            $this->checkFileSet($file, $files, 'tests['.($index + 1).'].files');
+        }
+    }
+
+    /**
+     * @param  array<string, ContentFile>  $files
+     */
+    private function checkFileSet(string $file, array $files, string $field): void
+    {
+        $maxFiles = Config::integer('filetasks.attachments.judge0_max_files');
+        if (count($files) > $maxFiles) {
+            $this->add($file, 'files_too_many', ['field' => $field, 'max' => $maxFiles]);
+        }
+
+        $reserved = array_map(mb_strtolower(...), array_filter(Config::array('filetasks.attachments.judge0_reserved_names'), is_string(...)));
+        $maxBytes = min(
+            Config::integer('filetasks.attachments.judge0_max_bytes'),
+            UploadedFileInspector::maxBytesFor('text'),
+        );
+
+        $lower = [];
+        foreach ($files as $name => $content) {
+            $name = (string) $name;
+            if (preg_match(ManageAttachment::STRICT_NAME, $name) !== 1 || in_array($name, ['.', '..'], true)
+                || UploadedFileInspector::categoryOf(UploadedFileInspector::extensionOf($name)) !== 'text') {
+                $this->add($file, 'file_name_invalid', ['field' => $field, 'name' => $name]);
+
+                continue;
+            }
+            if (in_array(mb_strtolower($name), $reserved, true)) {
+                $this->add($file, 'file_name_reserved', ['field' => $field, 'name' => $name]);
+            }
+            if (isset($lower[mb_strtolower($name)])) {
+                $this->add($file, 'file_name_duplicate', ['field' => $field, 'name' => $name]);
+            }
+            $lower[mb_strtolower($name)] = true;
+
+            if ($content->size === 0) {
+                $this->add($file, 'file_empty', ['field' => $field, 'name' => $name]);
+            } elseif ($content->size > $maxBytes) {
+                $this->add($file, 'file_too_large', ['field' => $field, 'name' => $name, 'size' => $content->size, 'max' => $maxBytes]);
+            } elseif (! mb_check_encoding((string) file_get_contents($content->path), 'UTF-8')) {
+                $this->add($file, 'file_not_text', ['field' => $field, 'name' => $name]);
+            }
         }
     }
 

@@ -1,0 +1,77 @@
+slug: palindrom-rekurzivan
+title: "Palindrom rekurzívan"
+position: 0
+kind: code
+level: emelt
+difficulty: 3
+published: false
+allowed_languages: [python, csharp]
+description: |
+  Olvass be egy kisbetűs szót (nincs benne szóköz). Rekurzív függvénnyel döntsd el, hogy palindrom-e, és írd ki: `igen` vagy `nem`.
+
+  Példa: `kajak` esetén a kimenet `igen`; `alma` esetén `nem`. Az egybetűs szó palindrom.
+
+  Tipp: ha az első és utolsó betű különbözik, a válasz `nem`; különben vizsgáld a két szélső betű nélküli részt.
+starter_code:
+  python: |
+    def palindrom(s):
+        # TODO
+        pass
+
+    print("igen" if palindrom(input()) else "nem")
+  csharp: |
+    using System;
+
+    class Program
+    {
+        static bool Palindrom(string s)
+        {
+            // TODO
+            return false;
+        }
+
+        static void Main()
+        {
+            Console.WriteLine(Palindrom(Console.ReadLine()) ? "igen" : "nem");
+        }
+    }
+sample_solutions:
+  python: |
+    def palindrom(s):
+        if len(s) <= 1:
+            return True
+        if s[0] != s[-1]:
+            return False
+        return palindrom(s[1:-1])
+
+    print("igen" if palindrom(input()) else "nem")
+  csharp: |
+    using System;
+
+    class Program
+    {
+        static bool Palindrom(string s)
+        {
+            if (s.Length <= 1)
+            {
+                return true;
+            }
+            if (s[0] != s[s.Length - 1])
+            {
+                return false;
+            }
+            return Palindrom(s.Substring(1, s.Length - 2));
+        }
+
+        static void Main()
+        {
+            Console.WriteLine(Palindrom(Console.ReadLine()) ? "igen" : "nem");
+        }
+    }
+tests:
+  - { stdin: "kajak\n", expected: "igen\n", hidden: false }
+  - { stdin: "alma\n", expected: "nem\n", hidden: true }
+  - { stdin: "a\n", expected: "igen\n", hidden: true }
+  - { stdin: "abba\n", expected: "igen\n", hidden: true }
+  - { stdin: "abca\n", expected: "nem\n", hidden: true }
+  - { stdin: "level\n", expected: "igen\n", hidden: true }

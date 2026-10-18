@@ -1,0 +1,46 @@
+slug: cimek-az-a-betuvel
+title: "Címek az A betűvel"
+position: 1
+kind: sql
+level: kozep
+difficulty: 1
+published: false
+allowed_languages: [sql]
+description: |
+  Egy könyvtár katalógusából le akarjuk kérdezni azoknak a könyveknek a címét, amelyek **A betűvel kezdődnek**. Az alábbi lekérdezés mégsem ad egyetlen sort sem. Javítsd ki!
+
+  A `konyv` tábla:
+
+  | oszlop | típus |
+  |---|---|
+  | `id` | `INT`, elsődleges kulcs |
+  | `cim` | `VARCHAR(50)` |
+  | `szerzo` | `VARCHAR(50)` |
+  | `ev` | `INT` (a kiadás éve) |
+
+  Add meg a címeket (`cim` oszlop), amelyek `A` betűvel kezdődnek! A sorok sorrendje nem számít.
+
+  Tipp: a `LIKE` mintában a `%` jelenti azt, hogy "tetszőleges számú tetszőleges karakter".
+starter_code:
+  sql: |
+    SELECT cim
+    FROM konyv
+    WHERE cim LIKE 'A';
+sample_solutions:
+  sql: |
+    SELECT cim
+    FROM konyv
+    WHERE cim LIKE 'A%';
+tests:
+  - stdin: "CREATE TABLE konyv (id INTEGER PRIMARY KEY, cim TEXT, szerzo TEXT, ev INTEGER);\nINSERT INTO konyv VALUES\n(1, 'Aranyember', 'Jokai', 1872),\n(2, 'Bab', 'Kiss', 2001),\n(3, 'Alma', 'Nagy', 1999),\n(4, 'Kert', 'Toth', 1980),\n(5, 'Hajnal a hegyen', 'Szabo', 2010);\n"
+    expected: "cim\nAranyember\nAlma\n"
+    hidden: false
+  - stdin: "CREATE TABLE konyv (id INTEGER PRIMARY KEY, cim TEXT, szerzo TEXT, ev INTEGER);\nINSERT INTO konyv VALUES\n(1, 'Zold ut', 'Kiss', 2005),\n(2, 'Piros', 'Nagy', 1990);\n"
+    expected: ""
+    hidden: true
+  - stdin: "CREATE TABLE konyv (id INTEGER PRIMARY KEY, cim TEXT, szerzo TEXT, ev INTEGER);\nINSERT INTO konyv VALUES\n(1, 'A kicsi herceg', 'Saint', 1943),\n(2, 'Anna', 'Varga', 2015),\n(3, 'Ablak', 'Kovacs', 1988);\n"
+    expected: "cim\nA kicsi herceg\nAnna\nAblak\n"
+    hidden: true
+  - stdin: "CREATE TABLE konyv (id INTEGER PRIMARY KEY, cim TEXT, szerzo TEXT, ev INTEGER);\nINSERT INTO konyv VALUES\n(1, 'Almok', 'Toth', 1977),\n(2, 'Bar', 'Kiss', 1960),\n(3, 'Aratas', 'Szabo', 2002),\n(4, 'Ora', 'Nagy', 2020);\n"
+    expected: "cim\nAlmok\nAratas\n"
+    hidden: true

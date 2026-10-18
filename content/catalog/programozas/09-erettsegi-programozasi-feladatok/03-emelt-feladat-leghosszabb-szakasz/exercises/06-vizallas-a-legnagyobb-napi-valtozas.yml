@@ -1,0 +1,174 @@
+slug: vizallas-a-legnagyobb-napi-valtozas
+title: 'Vízállás: a legnagyobb napi változás'
+position: 5
+kind: code
+level: emelt
+difficulty: 3
+published: false
+allowed_languages:
+- python
+- csharp
+description: |
+  Egy folyó vízállását naponta egyszer mérik. A `vizallas.txt` fájl első sora fejléc (`datum`, `allas`), utána minden sor egy mérés, tabulátorral tagolva: a dátum (`ÉÉÉÉ-HH-NN` alakban) és a vízállás centiméterben (egész szám). A sorok időrendben, hézag nélkül követik egymást: minden sor az előző napot követő nap mérése. A fájl legalább egy mérést tartalmaz.
+
+  A programban egy mérést rekordként (osztályként) érdemes tárolni: dátum, vízállás. Minden részfeladat kimenete a sorszámával kezdődik (`N. feladat`), a kimenetben ne használj ékezetes betűt. Ahol a feladat bevitelt kér, a kérdést külön sorban írd ki, csak utána olvass be.
+
+  Keresd meg azt a két egymást követő napot, amelyek között a vízállás **változásának abszolút értéke** a legnagyobb (akár emelkedés, akár apadás). Több egyforma változás esetén a korábbi napok számítanak. Ha a fájlban csak egy mérés van, a kimenet a `Nincs eleg meres.` sor.
+
+  ```
+  Legnagyobb valtozas: <cm> cm (<elozo nap> -> <nap>)
+  ```
+
+  Kimenet a mellékelt mintafájllal:
+
+  ```
+  6. feladat
+  Legnagyobb valtozas: 14 cm (2024-03-13 -> 2024-03-14)
+  ```
+
+  Tipp: a szomszédos párokat az `i - 1` és `i` indexű elemek adják, `i` 1-től indul. Az abszolút érték: `abs` / `Math.Abs`.
+starter_code:
+  python: |
+    class Meres:
+        def __init__(self, datum, allas):
+            self.datum = datum
+            self.allas = allas
+    print("6. feladat")
+    with open("vizallas.txt", encoding="utf-8") as f:
+        sorok = f.read().splitlines()
+    meresek = []
+    for sor in sorok[1:]:
+        r = sor.split("\t")
+        meresek.append(Meres(r[0], int(r[1])))
+    # ide írd a megoldást
+  csharp: |
+    using System;
+    using System.Collections.Generic;
+    using System.IO;
+    using System.Linq;
+
+    class Meres
+    {
+        public string Datum;
+        public int Allas;
+    }
+
+    class Program
+    {
+        static void Main()
+        {
+            Console.WriteLine("6. feladat");
+            string[] sorok = File.ReadAllLines("vizallas.txt");
+            List<Meres> meresek = new List<Meres>();
+            for (int i = 1; i < sorok.Length; i++)
+            {
+                string[] r = sorok[i].Split('\t');
+                Meres m = new Meres();
+                m.Datum = r[0];
+                m.Allas = int.Parse(r[1]);
+                meresek.Add(m);
+            }
+            // ide írd a megoldást
+        }
+    }
+sample_solutions:
+  python: |
+    class Meres:
+        def __init__(self, datum, allas):
+            self.datum = datum
+            self.allas = allas
+    print("6. feladat")
+    with open("vizallas.txt", encoding="utf-8") as f:
+        sorok = f.read().splitlines()
+    meresek = []
+    for sor in sorok[1:]:
+        r = sor.split("\t")
+        meresek.append(Meres(r[0], int(r[1])))
+    if len(meresek) < 2:
+        print("Nincs eleg meres.")
+    else:
+        legjobb = abs(meresek[1].allas - meresek[0].allas)
+        hely = 1
+        for i in range(2, len(meresek)):
+            valtozas = abs(meresek[i].allas - meresek[i - 1].allas)
+            if valtozas > legjobb:
+                legjobb = valtozas
+                hely = i
+        print(f"Legnagyobb valtozas: {legjobb} cm ({meresek[hely - 1].datum} -> {meresek[hely].datum})")
+  csharp: |
+    using System;
+    using System.Collections.Generic;
+    using System.IO;
+    using System.Linq;
+
+    class Meres
+    {
+        public string Datum;
+        public int Allas;
+    }
+
+    class Program
+    {
+        static void Main()
+        {
+            Console.WriteLine("6. feladat");
+            string[] sorok = File.ReadAllLines("vizallas.txt");
+            List<Meres> meresek = new List<Meres>();
+            for (int i = 1; i < sorok.Length; i++)
+            {
+                string[] r = sorok[i].Split('\t');
+                Meres m = new Meres();
+                m.Datum = r[0];
+                m.Allas = int.Parse(r[1]);
+                meresek.Add(m);
+            }
+            if (meresek.Count < 2)
+            {
+                Console.WriteLine("Nincs eleg meres.");
+            }
+            else
+            {
+                int legjobb = Math.Abs(meresek[1].Allas - meresek[0].Allas);
+                int hely = 1;
+                for (int i = 2; i < meresek.Count; i++)
+                {
+                    int valtozas = Math.Abs(meresek[i].Allas - meresek[i - 1].Allas);
+                    if (valtozas > legjobb)
+                    {
+                        legjobb = valtozas;
+                        hely = i;
+                    }
+                }
+                Console.WriteLine("Legnagyobb valtozas: " + legjobb + " cm (" + meresek[hely - 1].Datum + " -> " + meresek[hely].Datum + ")");
+            }
+        }
+    }
+files:
+  vizallas.txt: vizallas.txt
+tests:
+- stdin: ''
+  expected: |
+    6. feladat
+    Legnagyobb valtozas: 14 cm (2024-03-13 -> 2024-03-14)
+  hidden: false
+- stdin: ''
+  expected: |
+    6. feladat
+    Nincs eleg meres.
+  hidden: true
+  files:
+    vizallas.txt: teszt-2/vizallas.txt
+- stdin: ''
+  expected: |
+    6. feladat
+    Legnagyobb valtozas: 10 cm (2024-02-28 -> 2024-02-29)
+  hidden: true
+  files:
+    vizallas.txt: teszt-3/vizallas.txt
+- stdin: ''
+  expected: |
+    6. feladat
+    Legnagyobb valtozas: 60 cm (2025-01-01 -> 2025-01-02)
+  hidden: true
+  files:
+    vizallas.txt: teszt-4/vizallas.txt

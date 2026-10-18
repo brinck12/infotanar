@@ -1,0 +1,109 @@
+slug: leghosszabb-emelkedo-szakasz
+title: "Leghosszabb emelkedő szakasz"
+position: 0
+kind: code
+level: emelt
+difficulty: 4
+published: false
+allowed_languages: [python, csharp]
+description: |
+  A bemenet első sora az elemek száma (N, legalább 1), a másodikban N egész szám áll szóközzel elválasztva. Egy **emelkedő szakasz** egymás melletti elemek olyan sorozata, amelyben minden elem szigorúan nagyobb az előzőnél (egy elem is szakasz). Írd ki a leghosszabb emelkedő szakasz hosszát (`Hossz: ...`) és az első elemének helyét 1-től számozva (`Kezdet: ...`). Egyenlő hosszúságú szakaszok közül az első számít.
+
+  Példa bemenet:
+
+  ```
+  8
+  3 5 6 2 4 7 9 1
+  ```
+
+  Kimenet:
+
+  ```
+  Hossz: 4
+  Kezdet: 4
+  ```
+
+  Tipp: számold az aktuális szakasz hosszát; ha nem emelkedik a sorozat, a hossz újra 1. Közben tartsd nyilván a legjobb eddigi szakasz hosszát és kezdetét.
+starter_code:
+  python: |
+    n = int(input())
+    a = [int(x) for x in input().split()]
+    # keresd a leghosszabb emelkedő szakaszt
+  csharp: |
+    using System;
+    using System.Collections.Generic;
+
+    class Program
+    {
+        static void Main()
+        {
+            int n = int.Parse(Console.ReadLine());
+            var a = new List<int>();
+            foreach (string s in Console.ReadLine().Split(' '))
+            {
+                a.Add(int.Parse(s));
+            }
+            // keresd a leghosszabb emelkedő szakaszt
+        }
+    }
+sample_solutions:
+  python: |
+    n = int(input())
+    a = [int(x) for x in input().split()]
+    hossz = 1
+    legjobb = 1
+    kezdet = 0
+    for i in range(1, n):
+        if a[i] > a[i - 1]:
+            hossz += 1
+        else:
+            hossz = 1
+        if hossz > legjobb:
+            legjobb = hossz
+            kezdet = i - hossz + 1
+    print("Hossz:", legjobb)
+    print("Kezdet:", kezdet + 1)
+  csharp: |
+    using System;
+    using System.Collections.Generic;
+
+    class Program
+    {
+        static void Main()
+        {
+            int n = int.Parse(Console.ReadLine());
+            var a = new List<int>();
+            foreach (string s in Console.ReadLine().Split(' '))
+            {
+                a.Add(int.Parse(s));
+            }
+            int hossz = 1;
+            int legjobb = 1;
+            int kezdet = 0;
+            for (int i = 1; i < n; i++)
+            {
+                if (a[i] > a[i - 1])
+                {
+                    hossz++;
+                }
+                else
+                {
+                    hossz = 1;
+                }
+                if (hossz > legjobb)
+                {
+                    legjobb = hossz;
+                    kezdet = i - hossz + 1;
+                }
+            }
+            Console.WriteLine("Hossz: " + legjobb);
+            Console.WriteLine("Kezdet: " + (kezdet + 1));
+        }
+    }
+tests:
+  - { stdin: "8\n3 5 6 2 4 7 9 1\n", expected: "Hossz: 4\nKezdet: 4\n", hidden: false }
+  - { stdin: "1\n5\n", expected: "Hossz: 1\nKezdet: 1\n", hidden: true }
+  - { stdin: "4\n9 8 7 6\n", expected: "Hossz: 1\nKezdet: 1\n", hidden: true }
+  - { stdin: "5\n1 2 3 4 5\n", expected: "Hossz: 5\nKezdet: 1\n", hidden: true }
+  - { stdin: "7\n1 2 2 3 4 4 5\n", expected: "Hossz: 3\nKezdet: 3\n", hidden: true }
+  - { stdin: "6\n5 6 1 2 0 1\n", expected: "Hossz: 2\nKezdet: 1\n", hidden: true }

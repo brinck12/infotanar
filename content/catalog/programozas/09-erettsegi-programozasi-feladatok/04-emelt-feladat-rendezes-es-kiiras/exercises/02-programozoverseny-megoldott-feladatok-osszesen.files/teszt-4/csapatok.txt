@@ -1,0 +1,4 @@
+csapat	varos	megoldott	buntetes
+A	Eger	1	1
+B	Eger	1	1
+C	Eger	2	1

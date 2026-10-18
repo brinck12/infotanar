@@ -1,0 +1,56 @@
+slug: akcios-ar
+title: Akciós ár
+position: 3
+kind: code
+level: kozep
+difficulty: 3
+published: false
+allowed_languages: [python, csharp]
+description: |
+  Egy bolt százalékos kedvezményt ad. Olvasd be az eredeti árat forintban (egész szám), majd a kedvezmény mértékét százalékban (egész szám, 0 és 100 között), mindegyiket külön sorban. Írd ki az akciós árat **egész forintra kerekítve**, csak a számot.
+
+  Példa: ha a bemenet `1990` és `15`, az akciós ár `1691.5`, ami kerekítve `1692`, ezért a kimenet `1692`.
+
+  Tipp: az akciós ár `ar * (100 - szazalek) / 100`. Vigyázz, hogy C#-ban az egész osztás levágja a törtrészt: az osztáshoz használj `100.0`-t, és a kerekítést alakítsd vissza egésszé: `(int)Math.Round(...)`. Pythonban a `round(...)` egész számot ad.
+starter_code:
+  python: |
+    ar = int(input())
+    szazalek = int(input())
+    # innen folytasd
+  csharp: |
+    using System;
+
+    class Program
+    {
+        static void Main()
+        {
+            int ar = int.Parse(Console.ReadLine());
+            int szazalek = int.Parse(Console.ReadLine());
+            // innen folytasd
+        }
+    }
+sample_solutions:
+  python: |
+    ar = int(input())
+    szazalek = int(input())
+    akcios = ar * (100 - szazalek) / 100
+    print(round(akcios))
+  csharp: |
+    using System;
+
+    class Program
+    {
+        static void Main()
+        {
+            int ar = int.Parse(Console.ReadLine());
+            int szazalek = int.Parse(Console.ReadLine());
+            double akcios = ar * (100 - szazalek) / 100.0;
+            Console.WriteLine((int)Math.Round(akcios));
+        }
+    }
+tests:
+  - { stdin: "1990\n15\n", expected: "1692\n", hidden: false }
+  - { stdin: "1000\n0\n", expected: "1000\n", hidden: true }
+  - { stdin: "1000\n100\n", expected: "0\n", hidden: true }
+  - { stdin: "2000\n25\n", expected: "1500\n", hidden: true }
+  - { stdin: "999\n10\n", expected: "899\n", hidden: true }

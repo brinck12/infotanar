@@ -1,0 +1,83 @@
+slug: megfelelt-vagy-nem
+title: Megfelelt vagy nem
+position: 0
+kind: sql
+level: kozep
+difficulty: 1
+published: false
+allowed_languages: [sql]
+description: |
+    A dolgozat 50 ponttól megfelelt. Listázd a diák nevét (`nev`), a pontját (`pont`) és az eredményét (`eredmeny`): `megfelelt` vagy `nem felelt meg`.
+
+    A `dolgozat` tábla:
+
+    | `id` | `nev` | `pont` |
+    |---|---|---|
+    | 1 | Kiss Anna | 72 |
+    | 2 | Nagy Bela | 45 |
+    | 3 | Toth Csaba | 50 |
+    | 4 | Szabo Dora | 49 |
+
+    Az eredmény ezekre az adatokra:
+
+    | `nev` | `pont` | `eredmeny` |
+    |---|---|---|
+    | Kiss Anna | 72 | megfelelt |
+    | Nagy Bela | 45 | nem felelt meg |
+    | Toth Csaba | 50 | megfelelt |
+    | Szabo Dora | 49 | nem felelt meg |
+
+    Tipp: `IF(feltétel, ha igaz, ha hamis)`. A szöveget aposztrófok közé írd.
+starter_code:
+  sql: |
+    SELECT nev, pont, IF(..., ..., ...) AS eredmeny
+    FROM dolgozat;
+sample_solutions:
+  sql: |
+    SELECT nev, pont, IF(pont >= 50, 'megfelelt', 'nem felelt meg') AS eredmeny
+    FROM dolgozat;
+tests:
+  - stdin: |
+      CREATE TABLE dolgozat (id INT, nev VARCHAR(30), pont INT);
+      INSERT INTO dolgozat VALUES (1, 'Kiss Anna', 72);
+      INSERT INTO dolgozat VALUES (2, 'Nagy Bela', 45);
+      INSERT INTO dolgozat VALUES (3, 'Toth Csaba', 50);
+      INSERT INTO dolgozat VALUES (4, 'Szabo Dora', 49);
+    expected: |
+      nev,pont,eredmeny
+      Kiss Anna,72,megfelelt
+      Nagy Bela,45,nem felelt meg
+      Toth Csaba,50,megfelelt
+      Szabo Dora,49,nem felelt meg
+    hidden: false
+  - stdin: |
+      CREATE TABLE dolgozat (id INT, nev VARCHAR(30), pont INT);
+      INSERT INTO dolgozat VALUES (5, 'Varga Fanni', 100);
+      INSERT INTO dolgozat VALUES (6, 'Ho Eva', 0);
+      INSERT INTO dolgozat VALUES (7, 'Bo Li', 85);
+    expected: |
+      nev,pont,eredmeny
+      Varga Fanni,100,megfelelt
+      Ho Eva,0,nem felelt meg
+      Bo Li,85,megfelelt
+    hidden: true
+  - stdin: |
+      CREATE TABLE dolgozat (id INT, nev VARCHAR(30), pont INT);
+      INSERT INTO dolgozat VALUES (3, 'Toth Csaba', 50);
+      INSERT INTO dolgozat VALUES (4, 'Szabo Dora', 49);
+    expected: |
+      nev,pont,eredmeny
+      Toth Csaba,50,megfelelt
+      Szabo Dora,49,nem felelt meg
+    hidden: true
+  - stdin: |
+      CREATE TABLE dolgozat (id INT, nev VARCHAR(30), pont INT);
+      INSERT INTO dolgozat VALUES (6, 'Ho Eva', 0);
+      INSERT INTO dolgozat VALUES (8, 'Papp Jozsef', 70);
+      INSERT INTO dolgozat VALUES (9, 'Kovacs Gabor', 39);
+    expected: |
+      nev,pont,eredmeny
+      Ho Eva,0,nem felelt meg
+      Papp Jozsef,70,megfelelt
+      Kovacs Gabor,39,nem felelt meg
+    hidden: true

@@ -1,0 +1,162 @@
+slug: programozoverseny-a-rangsor-fajlba
+title: 'Programozóverseny: a rangsor fájlba'
+position: 4
+kind: code
+level: emelt
+difficulty: 4
+published: false
+allowed_languages:
+- python
+- csharp
+description: "Egy iskolai programozóversenyen a csapatok eredményeit a `csapatok.txt` fájl tartalmazza. Az első sor fejléc (`csapat`, `varos`, `megoldott`, `buntetes`), utána minden sor egy csapat, tabulátorral tagolva: a csapat neve (ékezet nélkül, szóközt tartalmazhat), a város neve (ékezet nélkül, egyetlen szó), a megoldott feladatok száma és a büntetőpercek száma (mindkettő egész szám). Egy csapat egyszer szerepel. A fájl legalább egy csapatot tartalmaz.\n\nA **rangsorban** az a csapat áll előbb, amelyik több feladatot oldott meg; azonos számú megoldás esetén a kevesebb büntetőperces; ha ez is azonos, a fájlban előbb szereplő. A programban egy csapatot rekordként (osztályként) érdemes tárolni. Minden részfeladat kimenete a sorszámával kezdődik (`N. feladat`), a kimenetben ne használj ékezetes betűt. Ahol a feladat bevitelt kér, a kérdést külön sorban írd ki, csak utána olvass be.\n\nÍrd a teljes rangsort a `rangsor.txt` fájlba, soronként egy csapat: helyezés, csapat neve, megoldott feladatok,\
+  \ büntetőpercek, tabulátorral elválasztva. A helyezés **versenyhelyezés**: az azonos megoldásszámú és azonos büntetésű csapatok ugyanazt a helyezést kapják, a következő csapat helyezése pedig a rangsorbeli pozíciója (pl. 1, 2, 2, 4). Fejlécsor nincs. Olvasd vissza a fájlt, és írd ki a tartalmát a képernyőre.\n\n```\nrangsor.txt tartalma:\n<helyezes><TAB><nev><TAB><megoldott><TAB><buntetes>\n...\n```\n\nKimenet egy kisebb példafájllal (`Kek` 5/100, `Piros` 7/90, `Zold` 5/100, `Sarga` 2/10):\n\n```\n5. feladat\nrangsor.txt tartalma:\n1\tPiros\t7\t90\n2\tKek\t5\t100\n2\tZold\t5\t100\n4\tSarga\t2\t10\n```\n\nTipp: a rendezett listán haladva a helyezés csak akkor változik, ha az eredmény különbözik az előző csapatétól: ilyenkor az új helyezés `i + 1`.\n"
+starter_code:
+  python: |
+    class Csapat:
+        def __init__(self, nev, varos, megoldott, buntetes):
+            self.nev = nev
+            self.varos = varos
+            self.megoldott = megoldott
+            self.buntetes = buntetes
+    print("5. feladat")
+    with open("csapatok.txt", encoding="utf-8") as f:
+        sorok = f.read().splitlines()
+    csapatok = []
+    for sor in sorok[1:]:
+        r = sor.split("\t")
+        csapatok.append(Csapat(r[0], r[1], int(r[2]), int(r[3])))
+    # ide írd a megoldást
+  csharp: |
+    using System;
+    using System.Collections.Generic;
+    using System.Globalization;
+    using System.IO;
+    using System.Linq;
+
+    class Csapat
+    {
+        public string Nev;
+        public string Varos;
+        public int Megoldott;
+        public int Buntetes;
+    }
+
+    class Program
+    {
+        static void Main()
+        {
+            Console.WriteLine("5. feladat");
+            string[] sorok = File.ReadAllLines("csapatok.txt");
+            List<Csapat> csapatok = new List<Csapat>();
+            for (int i = 1; i < sorok.Length; i++)
+            {
+                string[] r = sorok[i].Split('\t');
+                Csapat c = new Csapat();
+                c.Nev = r[0];
+                c.Varos = r[1];
+                c.Megoldott = int.Parse(r[2]);
+                c.Buntetes = int.Parse(r[3]);
+                csapatok.Add(c);
+            }
+            // ide írd a megoldást
+        }
+    }
+sample_solutions:
+  python: |
+    class Csapat:
+        def __init__(self, nev, varos, megoldott, buntetes):
+            self.nev = nev
+            self.varos = varos
+            self.megoldott = megoldott
+            self.buntetes = buntetes
+    print("5. feladat")
+    with open("csapatok.txt", encoding="utf-8") as f:
+        sorok = f.read().splitlines()
+    csapatok = []
+    for sor in sorok[1:]:
+        r = sor.split("\t")
+        csapatok.append(Csapat(r[0], r[1], int(r[2]), int(r[3])))
+    rangsor = sorted(csapatok, key=lambda c: (-c.megoldott, c.buntetes))
+    with open("rangsor.txt", "w", encoding="utf-8") as f:
+        hely = 1
+        for i in range(len(rangsor)):
+            c = rangsor[i]
+            if i > 0 and (c.megoldott != rangsor[i - 1].megoldott or c.buntetes != rangsor[i - 1].buntetes):
+                hely = i + 1
+            f.write(f"{hely}\t{c.nev}\t{c.megoldott}\t{c.buntetes}\n")
+    print("rangsor.txt tartalma:")
+    with open("rangsor.txt", encoding="utf-8") as f:
+        print(f.read(), end="")
+  csharp: |
+    using System;
+    using System.Collections.Generic;
+    using System.Globalization;
+    using System.IO;
+    using System.Linq;
+
+    class Csapat
+    {
+        public string Nev;
+        public string Varos;
+        public int Megoldott;
+        public int Buntetes;
+    }
+
+    class Program
+    {
+        static void Main()
+        {
+            Console.WriteLine("5. feladat");
+            string[] sorok = File.ReadAllLines("csapatok.txt");
+            List<Csapat> csapatok = new List<Csapat>();
+            for (int i = 1; i < sorok.Length; i++)
+            {
+                string[] r = sorok[i].Split('\t');
+                Csapat c = new Csapat();
+                c.Nev = r[0];
+                c.Varos = r[1];
+                c.Megoldott = int.Parse(r[2]);
+                c.Buntetes = int.Parse(r[3]);
+                csapatok.Add(c);
+            }
+            List<Csapat> rangsor = csapatok.OrderByDescending(c => c.Megoldott).ThenBy(c => c.Buntetes).ToList();
+            List<string> kiir = new List<string>();
+            int hely = 1;
+            for (int i = 0; i < rangsor.Count; i++)
+            {
+                Csapat c = rangsor[i];
+                if (i > 0 && (c.Megoldott != rangsor[i - 1].Megoldott || c.Buntetes != rangsor[i - 1].Buntetes))
+                {
+                    hely = i + 1;
+                }
+                kiir.Add(hely + "\t" + c.Nev + "\t" + c.Megoldott + "\t" + c.Buntetes);
+            }
+            File.WriteAllLines("rangsor.txt", kiir);
+            Console.WriteLine("rangsor.txt tartalma:");
+            foreach (string sor in File.ReadAllLines("rangsor.txt"))
+            {
+                Console.WriteLine(sor);
+            }
+        }
+    }
+files:
+  csapatok.txt: csapatok.txt
+tests:
+- stdin: ''
+  expected: "5. feladat\nrangsor.txt tartalma:\n1\tByte Bajnokok\t9\t180\n1\tEsetleg\t9\t180\n3\tIndexelok\t8\t220\n4\tCiklus Csapat\t7\t195\n4\tGepelok\t7\t195\n6\tAlfa Kod\t7\t210\n7\tFutar Fiuk\t6\t150\n7\tJava Szigete\t6\t150\n9\tDelta Ketto\t5\t240\n10\tKod Kobor\t4\t270\n11\tHibakeresok\t3\t300\n12\tLusta Lambda\t0\t0\n"
+  hidden: false
+- stdin: ''
+  expected: "5. feladat\nrangsor.txt tartalma:\n1\tEgyedul\t2\t55\n"
+  hidden: true
+  files:
+    csapatok.txt: teszt-2/csapatok.txt
+- stdin: ''
+  expected: "5. feladat\nrangsor.txt tartalma:\n1\tA\t3\t30\n1\tB\t3\t30\n1\tC\t3\t30\n1\tD\t3\t30\n"
+  hidden: true
+  files:
+    csapatok.txt: teszt-3/csapatok.txt
+- stdin: ''
+  expected: "5. feladat\nrangsor.txt tartalma:\n1\tD\t4\t80\n2\tB\t4\t90\n2\tC\t4\t90\n4\tA\t1\t9\n5\tE\t0\t0\n5\tF\t0\t0\n"
+  hidden: true
+  files:
+    csapatok.txt: teszt-4/csapatok.txt

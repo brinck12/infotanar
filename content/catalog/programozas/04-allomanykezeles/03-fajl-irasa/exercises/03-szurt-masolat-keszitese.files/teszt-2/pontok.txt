@@ -1,0 +1,3 @@
+nev	pont
+Ede	10
+Fanni	49

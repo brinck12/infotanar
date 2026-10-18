@@ -1,0 +1,47 @@
+slug: hianyzo-e-mail-cim
+title: "Hiányzó e-mail cím"
+position: 0
+kind: sql
+level: kozep
+difficulty: 1
+published: false
+allowed_languages: [sql]
+description: |
+  Az iskola nyilvántartásában néhány diáknak nincs megadva e-mail címe (a mező értéke `NULL`). Az alábbi lekérdezés a nevüket kérdezné le, de üres eredményt ad. Javítsd ki!
+
+  A `diak` tábla:
+
+  | oszlop | típus |
+  |---|---|
+  | `id` | `INT`, elsődleges kulcs |
+  | `nev` | `VARCHAR(50)` |
+  | `osztaly` | `VARCHAR(5)` |
+  | `pont` | `INT` |
+  | `email` | `VARCHAR(50)`, lehet `NULL` |
+
+  Add meg azoknak a diákoknak a nevét (`nev` oszlop), akiknek **nincs** e-mail címük! A sorok sorrendje nem számít.
+
+  Tipp: a `NULL` ismeretlen értéket jelent, ezért az `=` jellel nem hasonlítható össze. Erre külön operátor van.
+starter_code:
+  sql: |
+    SELECT nev
+    FROM diak
+    WHERE email = NULL;
+sample_solutions:
+  sql: |
+    SELECT nev
+    FROM diak
+    WHERE email IS NULL;
+tests:
+  - stdin: "CREATE TABLE diak (id INTEGER PRIMARY KEY, nev TEXT, osztaly TEXT, pont INTEGER, email TEXT);\nINSERT INTO diak VALUES\n(1, 'Anna', '9.A', 80, 'anna@pelda.hu'),\n(2, 'Bela', '9.B', 45, NULL),\n(3, 'Cili', '10.A', 67, NULL),\n(4, 'Dani', '10.A', 90, 'dani@pelda.hu');\n"
+    expected: "nev\nBela\nCili\n"
+    hidden: false
+  - stdin: "CREATE TABLE diak (id INTEGER PRIMARY KEY, nev TEXT, osztaly TEXT, pont INTEGER, email TEXT);\nINSERT INTO diak VALUES\n(1, 'Emma', '9.A', 50, 'emma@pelda.hu'),\n(2, 'Feri', '9.A', 51, 'feri@pelda.hu');\n"
+    expected: ""
+    hidden: true
+  - stdin: "CREATE TABLE diak (id INTEGER PRIMARY KEY, nev TEXT, osztaly TEXT, pont INTEGER, email TEXT);\nINSERT INTO diak VALUES\n(1, 'Gabor', '11.A', 70, NULL),\n(2, 'Hanna', '11.A', 30, NULL),\n(3, 'Ivan', '11.B', 65, 'ivan@pelda.hu');\n"
+    expected: "nev\nGabor\nHanna\n"
+    hidden: true
+  - stdin: "CREATE TABLE diak (id INTEGER PRIMARY KEY, nev TEXT, osztaly TEXT, pont INTEGER, email TEXT);\nINSERT INTO diak VALUES\n(1, 'Jozsi', '9.B', 12, NULL);\n"
+    expected: "nev\nJozsi\n"
+    hidden: true

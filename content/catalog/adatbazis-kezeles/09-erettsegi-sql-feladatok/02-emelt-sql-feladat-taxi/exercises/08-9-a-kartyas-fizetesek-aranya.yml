@@ -1,0 +1,183 @@
+slug: 9-a-kartyas-fizetesek-aranya
+title: 9. A kártyás fizetések aránya
+position: 7
+kind: sql
+level: emelt
+difficulty: 4
+published: false
+allowed_languages:
+- sql
+description: |
+  Egy taxitársaság nyilvántartása két táblából áll.
+
+  A `sofor` tábla a sofőröket tartalmazza:
+
+  | oszlop | típus |
+  |---|---|
+  | `id` | `INT`, elsődleges kulcs |
+  | `nev` | `VARCHAR(50)` |
+  | `szuletes` | `INT`, a születési év |
+  | `angol` | `INT`: 1, ha beszél angolul, különben 0 |
+  | `nemet` | `INT`: 1, ha beszél németül, különben 0 |
+  | `engedely_ev` | `INT`, a taxis engedély megszerzésének éve |
+
+  A `fuvar` tábla a megtett fuvarokat:
+
+  | oszlop | típus |
+  |---|---|
+  | `id` | `INT`, elsődleges kulcs |
+  | `sofor_id` | `INT`, a `sofor` tábla `id` oszlopára mutat |
+  | `rendszam` | `VARCHAR(10)`, az autó rendszáma (pl. `KMB-217`) |
+  | `datum` | `DATE` |
+  | `km` | `INT`, a megtett út kilométerben |
+  | `ar` | `INT`, a fuvar ára forintban |
+  | `fizetes` | `VARCHAR(10)`: `kartya` vagy `keszpenz` |
+
+  **9. feladat.** Adja meg lekérdezéssel, hogy hány fuvar volt **kártyával fizetve**, és ez az összes fuvar hány **százaléka**, **egész százalékra kerekítve**! Az eredmény két oszlop legyen ebben a sorrendben: `kartyas` és `szazalek`. A feltételes számláláshoz használja a `CASE` kifejezést.
+starter_code:
+  sql: |
+    SELECT SUM(CASE WHEN  THEN 1 ELSE 0 END) AS kartyas,
+           ROUND(100 * ) AS szazalek
+    FROM fuvar;
+sample_solutions:
+  sql: |
+    SELECT SUM(CASE WHEN fizetes = 'kartya' THEN 1 ELSE 0 END) AS kartyas,
+           ROUND(100 * SUM(CASE WHEN fizetes = 'kartya' THEN 1 ELSE 0 END) / COUNT(*)) AS szazalek
+    FROM fuvar;
+tests:
+- stdin: |
+    CREATE TABLE sofor (id INTEGER PRIMARY KEY, nev TEXT, szuletes INTEGER, angol INTEGER, nemet INTEGER, engedely_ev INTEGER);
+    INSERT INTO sofor VALUES
+    (1, 'Toth Hajnal', 1973, 0, 0, 2014),
+    (2, 'Horvath Bela', 1988, 0, 0, 2013),
+    (3, 'Toth Fanni', 1982, 0, 0, 2003),
+    (4, 'Szabo Gergo', 1973, 1, 1, 2009),
+    (5, 'Farkas Viktor', 1988, 0, 0, 2010);
+    CREATE TABLE fuvar (id INTEGER PRIMARY KEY, sofor_id INTEGER, rendszam TEXT, datum TEXT, km INTEGER, ar INTEGER, fizetes TEXT);
+    INSERT INTO fuvar VALUES
+    (1, 3, 'KMD-246', '2026-03-02', 3, 2800, 'keszpenz'),
+    (2, 5, 'ABD-135', '2026-03-01', 11, 4500, 'keszpenz'),
+    (3, 4, 'ABC-158', '2026-03-02', 21, 7700, 'kartya'),
+    (4, 2, 'KMD-387', '2026-03-03', 7, 3400, 'kartya'),
+    (5, 3, 'KMD-246', '2026-03-06', 7, 3300, 'keszpenz'),
+    (6, 2, 'KMD-387', '2026-03-07', 21, 7400, 'kartya'),
+    (7, 1, 'KMA-276', '2026-03-04', 17, 5900, 'kartya'),
+    (8, 3, 'KMD-246', '2026-03-05', 5, 2100, 'kartya'),
+    (9, 4, 'ABC-158', '2026-03-04', 20, 6500, 'kartya'),
+    (10, 5, 'ABD-135', '2026-03-08', 10, 4300, 'keszpenz'),
+    (11, 4, 'ABC-158', '2026-03-08', 12, 4700, 'kartya'),
+    (12, 5, 'ABD-135', '2026-03-08', 25, 8500, 'kartya'),
+    (13, 1, 'KMA-276', '2026-03-06', 4, 2700, 'keszpenz');
+  expected: |
+    kartyas,szazalek
+    8,62
+  hidden: false
+- stdin: |
+    CREATE TABLE sofor (id INTEGER PRIMARY KEY, nev TEXT, szuletes INTEGER, angol INTEGER, nemet INTEGER, engedely_ev INTEGER);
+    INSERT INTO sofor VALUES
+    (1, 'Balogh Gabor', 1973, 1, 1, 2009),
+    (2, 'Varga Eszter', 1989, 0, 0, 2023),
+    (3, 'Toth Aron', 1987, 1, 1, 2024),
+    (4, 'Farkas Imre', 1994, 1, 0, 2000),
+    (5, 'Toth Csaba', 1975, 0, 1, 2006),
+    (6, 'Nagy Norbert', 2001, 1, 0, 2007);
+    CREATE TABLE fuvar (id INTEGER PRIMARY KEY, sofor_id INTEGER, rendszam TEXT, datum TEXT, km INTEGER, ar INTEGER, fizetes TEXT);
+    INSERT INTO fuvar VALUES
+    (1, 6, 'ABF-334', '2026-03-04', 18, 6900, 'kartya'),
+    (2, 3, 'KME-123', '2026-03-02', 5, 2900, 'keszpenz'),
+    (3, 1, 'KMD-263', '2026-03-06', 20, 7100, 'kartya'),
+    (4, 3, 'KME-123', '2026-03-01', 13, 5300, 'kartya'),
+    (5, 2, 'KMC-139', '2026-03-06', 20, 7700, 'keszpenz'),
+    (6, 4, 'ABE-294', '2026-03-04', 15, 5500, 'keszpenz'),
+    (7, 3, 'KME-123', '2026-03-03', 12, 4400, 'keszpenz'),
+    (8, 4, 'ABE-294', '2026-03-01', 10, 4600, 'kartya'),
+    (9, 1, 'KMD-263', '2026-03-03', 21, 7200, 'keszpenz'),
+    (10, 3, 'KME-123', '2026-03-04', 8, 4100, 'kartya'),
+    (11, 5, 'KMB-167', '2026-03-01', 7, 3600, 'kartya'),
+    (12, 4, 'ABE-294', '2026-03-05', 23, 8600, 'kartya'),
+    (13, 6, 'ABF-334', '2026-03-03', 18, 7000, 'kartya'),
+    (14, 6, 'ABF-334', '2026-03-05', 19, 6200, 'kartya'),
+    (15, 2, 'KMC-139', '2026-03-08', 9, 4500, 'keszpenz'),
+    (16, 2, 'KMC-139', '2026-03-06', 4, 1800, 'kartya'),
+    (17, 2, 'KMC-139', '2026-03-03', 17, 6400, 'keszpenz'),
+    (18, 5, 'KMB-167', '2026-03-07', 6, 2800, 'kartya');
+  expected: |
+    kartyas,szazalek
+    11,61
+  hidden: true
+- stdin: |
+    CREATE TABLE sofor (id INTEGER PRIMARY KEY, nev TEXT, szuletes INTEGER, angol INTEGER, nemet INTEGER, engedely_ev INTEGER);
+    INSERT INTO sofor VALUES
+    (1, 'Nagy Aron', 2000, 0, 0, 2003),
+    (2, 'Varga Laszlo', 1993, 1, 0, 2013),
+    (3, 'Molnar Maria', 1984, 1, 0, 2022),
+    (4, 'Molnar Reka', 1978, 1, 0, 2012),
+    (5, 'Horvath Peter', 1977, 1, 0, 2003),
+    (6, 'Nagy Norbert', 2002, 1, 0, 2002),
+    (7, 'Varga Gabor', 1986, 0, 0, 2005);
+    CREATE TABLE fuvar (id INTEGER PRIMARY KEY, sofor_id INTEGER, rendszam TEXT, datum TEXT, km INTEGER, ar INTEGER, fizetes TEXT);
+    INSERT INTO fuvar VALUES
+    (1, 4, 'KME-152', '2026-03-05', 18, 7000, 'kartya'),
+    (2, 6, 'ABD-385', '2026-03-04', 20, 7800, 'keszpenz'),
+    (3, 2, 'KMF-110', '2026-03-05', 3, 2900, 'keszpenz'),
+    (4, 5, 'ABE-196', '2026-03-03', 10, 4500, 'kartya'),
+    (5, 7, 'ABA-274', '2026-03-05', 15, 6000, 'keszpenz'),
+    (6, 7, 'ABA-274', '2026-03-01', 16, 5400, 'kartya'),
+    (7, 1, 'KMB-259', '2026-03-04', 21, 8100, 'kartya'),
+    (8, 2, 'KMF-110', '2026-03-07', 10, 4000, 'keszpenz'),
+    (9, 2, 'KMF-110', '2026-03-08', 25, 9000, 'kartya'),
+    (10, 3, 'ABC-234', '2026-03-05', 11, 4600, 'kartya'),
+    (11, 5, 'ABE-196', '2026-03-01', 16, 6500, 'keszpenz'),
+    (12, 4, 'KME-152', '2026-03-08', 24, 8300, 'kartya'),
+    (13, 4, 'KME-152', '2026-03-05', 2, 2400, 'kartya'),
+    (14, 7, 'ABA-274', '2026-03-05', 2, 1500, 'keszpenz'),
+    (15, 2, 'KMF-110', '2026-03-06', 25, 8400, 'kartya'),
+    (16, 5, 'ABE-196', '2026-03-01', 24, 7900, 'kartya'),
+    (17, 6, 'ABD-385', '2026-03-08', 15, 6300, 'kartya'),
+    (18, 3, 'ABC-234', '2026-03-04', 11, 4500, 'keszpenz'),
+    (19, 3, 'ABC-234', '2026-03-02', 17, 5900, 'keszpenz'),
+    (20, 5, 'ABE-196', '2026-03-07', 18, 6300, 'kartya'),
+    (21, 7, 'ABA-274', '2026-03-06', 13, 5800, 'kartya'),
+    (22, 4, 'KME-152', '2026-03-06', 24, 8300, 'kartya'),
+    (23, 1, 'KMB-259', '2026-03-03', 8, 3400, 'kartya');
+  expected: |
+    kartyas,szazalek
+    15,65
+  hidden: true
+- stdin: |
+    CREATE TABLE sofor (id INTEGER PRIMARY KEY, nev TEXT, szuletes INTEGER, angol INTEGER, nemet INTEGER, engedely_ev INTEGER);
+    INSERT INTO sofor VALUES
+    (1, 'Szabo Ferenc', 1972, 0, 1, 2010),
+    (2, 'Toth Istvan', 1973, 0, 0, 2004),
+    (3, 'Kovacs Emese', 1970, 0, 0, 2000),
+    (4, 'Molnar Lilla', 1987, 0, 1, 2019),
+    (5, 'Balogh Maria', 1992, 1, 1, 2005),
+    (6, 'Farkas Bela', 1988, 1, 1, 2001),
+    (7, 'Kiss Norbert', 1986, 1, 1, 2013),
+    (8, 'Molnar Viktor', 1984, 0, 0, 2016);
+    CREATE TABLE fuvar (id INTEGER PRIMARY KEY, sofor_id INTEGER, rendszam TEXT, datum TEXT, km INTEGER, ar INTEGER, fizetes TEXT);
+    INSERT INTO fuvar VALUES
+    (1, 6, 'ABF-370', '2026-03-02', 14, 4800, 'keszpenz'),
+    (2, 6, 'ABF-370', '2026-03-07', 16, 6400, 'kartya'),
+    (3, 4, 'ABD-228', '2026-03-02', 25, 9100, 'kartya'),
+    (4, 8, 'KMD-269', '2026-03-08', 17, 6700, 'keszpenz'),
+    (5, 8, 'KMD-269', '2026-03-03', 24, 8900, 'kartya'),
+    (6, 4, 'ABD-228', '2026-03-05', 10, 4200, 'kartya'),
+    (7, 3, 'KMF-331', '2026-03-01', 23, 7400, 'keszpenz'),
+    (8, 6, 'ABF-370', '2026-03-04', 8, 3700, 'kartya'),
+    (9, 3, 'KMF-331', '2026-03-07', 11, 4800, 'keszpenz'),
+    (10, 2, 'KMB-367', '2026-03-06', 19, 7200, 'keszpenz'),
+    (11, 5, 'TXA-231', '2026-03-04', 5, 2500, 'keszpenz'),
+    (12, 2, 'KMB-367', '2026-03-03', 15, 6200, 'kartya'),
+    (13, 4, 'ABD-228', '2026-03-01', 13, 5600, 'keszpenz'),
+    (14, 7, 'ABD-145', '2026-03-06', 17, 6700, 'keszpenz'),
+    (15, 7, 'ABD-145', '2026-03-07', 22, 7700, 'kartya'),
+    (16, 1, 'KMA-231', '2026-03-06', 4, 1700, 'kartya'),
+    (17, 1, 'KMA-231', '2026-03-01', 12, 4700, 'keszpenz'),
+    (18, 4, 'ABD-228', '2026-03-04', 18, 6100, 'kartya'),
+    (19, 2, 'KMB-367', '2026-03-03', 15, 5200, 'keszpenz'),
+    (20, 5, 'TXA-231', '2026-03-05', 20, 7000, 'keszpenz');
+  expected: |
+    kartyas,szazalek
+    9,45
+  hidden: true

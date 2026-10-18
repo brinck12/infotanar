@@ -20,8 +20,9 @@ test.describe('Nyelvi lapfülek a leckeszövegben', () => {
     await lessonWith(mockApi, `${PY}\n\n${CS}`)
     await lessonPage.open(TRACK, LESSON)
 
-    await expect(lessonPage.tablists).toHaveCount(1)
-    await expect(lessonPage.languageTab(0, 'Python')).toHaveAttribute('aria-selected', 'true')
+    // A leckeoldal tetején a közös nyelvválasztó áll (0.), utána blokkonként egy fülsor.
+    await expect(lessonPage.tablists).toHaveCount(2)
+    await expect(lessonPage.languageTab(1, 'Python')).toHaveAttribute('aria-selected', 'true')
     await expect(lessonPage.codeGroups).toHaveCount(1)
     await expect(lessonPage.codeGroups).toContainText('py-egy')
   })
@@ -32,18 +33,20 @@ test.describe('Nyelvi lapfülek a leckeszövegben', () => {
   }) => {
     await lessonWith(mockApi, `${PY}\n\n${CS}\n\nKözbenső bekezdés.\n\n${PY2}\n\n${CS2}`)
     await lessonPage.open(TRACK, LESSON)
-    await expect(lessonPage.tablists).toHaveCount(2)
+    await expect(lessonPage.tablists).toHaveCount(3)
 
-    await lessonPage.chooseLanguage(0, 'C#')
+    await lessonPage.chooseLanguage(1, 'C#')
 
     await expect(lessonPage.languageTab(0, 'C#')).toHaveAttribute('aria-selected', 'true')
     await expect(lessonPage.languageTab(1, 'C#')).toHaveAttribute('aria-selected', 'true')
+    await expect(lessonPage.languageTab(2, 'C#')).toHaveAttribute('aria-selected', 'true')
     await expect(lessonPage.codeGroups.nth(1)).toContainText('cs-ketto')
 
     await lessonPage.page.reload()
 
     await expect(lessonPage.languageTab(0, 'C#')).toHaveAttribute('aria-selected', 'true')
     await expect(lessonPage.languageTab(1, 'C#')).toHaveAttribute('aria-selected', 'true')
+    await expect(lessonPage.languageTab(2, 'C#')).toHaveAttribute('aria-selected', 'true')
   })
 
   test('a közéjük ékelt bekezdés megakadályozza az összevonást', { tag: '@regression' }, async ({ mockApi, lessonPage }) => {
@@ -51,7 +54,8 @@ test.describe('Nyelvi lapfülek a leckeszövegben', () => {
     await lessonPage.open(TRACK, LESSON)
 
     await expect(lessonPage.codeGroups).toHaveCount(2)
-    await expect(lessonPage.tablists).toHaveCount(0)
+    // Csak a közös nyelvválasztó van; a blokkoknak nincs saját fülsora.
+    await expect(lessonPage.tablists).toHaveCount(1)
   })
 
   test('egyetlen python blokkból nem lesz fülsor', { tag: '@regression' }, async ({ mockApi, lessonPage }) => {
@@ -59,14 +63,14 @@ test.describe('Nyelvi lapfülek a leckeszövegben', () => {
     await lessonPage.open(TRACK, LESSON)
 
     await expect(lessonPage.codeGroups).toHaveCount(1)
-    await expect(lessonPage.tablists).toHaveCount(0)
+    await expect(lessonPage.tablists).toHaveCount(1)
   })
 
   test('a python, csharp, sql sorozatból csak az első kettő vonódik össze', { tag: '@regression' }, async ({ mockApi, lessonPage }) => {
     await lessonWith(mockApi, `${PY}\n\n${CS}\n\n${SQL}`)
     await lessonPage.open(TRACK, LESSON)
 
-    await expect(lessonPage.tablists).toHaveCount(1)
+    await expect(lessonPage.tablists).toHaveCount(2)
     await expect(lessonPage.codeGroups).toHaveCount(2)
     await expect(lessonPage.codeGroups.nth(1)).toContainText('SELECT 1;')
   })
@@ -89,7 +93,7 @@ test.describe('Nyelvi lapfülek a leckeszövegben', () => {
   }) => {
     await lessonWith(mockApi, `${PY}\n\n${CS}`)
     await lessonPage.open(TRACK, LESSON)
-    await expect(lessonPage.tablists).toHaveCount(1)
+    await expect(lessonPage.tablists).toHaveCount(2)
 
     await expectNoA11yViolations()
   })

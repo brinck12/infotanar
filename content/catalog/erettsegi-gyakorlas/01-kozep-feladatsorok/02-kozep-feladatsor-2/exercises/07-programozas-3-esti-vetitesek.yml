@@ -1,0 +1,191 @@
+slug: programozas-3-esti-vetitesek
+title: Programozás 3 - Esti vetítések
+position: 6
+kind: code
+level: kozep
+difficulty: 2
+published: false
+allowed_languages:
+- python
+- csharp
+description: |
+  A `vetitesek.txt` a mozi vetítéseit tartalmazza, soronként egy vetítéssel, pontosvesszővel elválasztva: `cím;műfaj;játékidő percben;kezdés;eladott jegyek;jegyár`. A kezdés `ÓÓ:PP` alakú. Az adatokban nincs ékezet, a fájl legalább egy sort tartalmaz.
+
+  **3. feladat.** Számolja meg az **esti** vetítéseket, vagyis azokat, amelyek kezdése 18:00 vagy későbbi! Írja ki a darabszámot és az esti vetítések jegybevételének összegét (az eladott jegyek és a jegyár szorzatainak összege).
+
+  A mintafájlra a kimenet:
+
+  ```text
+  3. feladat: Esti vetitesek: 6 db, bevetel: 974200 Ft
+  ```
+
+  Tipp: a kezdés `ÓÓ:PP` alakú szöveg, az ábécérend megegyezik az időrenddel, ezért közvetlenül összehasonlítható a `"18:00"` szöveggel.
+starter_code:
+  python: |
+    class Vetites:
+        def __init__(self, sor):
+            r = sor.split(";")
+            self.cim = r[0]
+            self.mufaj = r[1]
+            self.hossz = int(r[2])
+            self.kezdes = r[3]
+            self.eladott = int(r[4])
+            self.jegyar = int(r[5])
+
+        def bevetel(self):
+            return self.eladott * self.jegyar
+
+
+    with open("vetitesek.txt", encoding="utf-8") as f:
+        vetitesek = [Vetites(sor) for sor in f.read().splitlines()]
+    # ide írd a megoldást
+  csharp: |
+    using System;
+    using System.Collections.Generic;
+    using System.IO;
+
+    class Vetites
+    {
+        public string Cim;
+        public string Mufaj;
+        public int Hossz;
+        public string Kezdes;
+        public int Eladott;
+        public int Jegyar;
+
+        public Vetites(string sor)
+        {
+            string[] r = sor.Split(';');
+            Cim = r[0];
+            Mufaj = r[1];
+            Hossz = int.Parse(r[2]);
+            Kezdes = r[3];
+            Eladott = int.Parse(r[4]);
+            Jegyar = int.Parse(r[5]);
+        }
+
+        public int Bevetel()
+        {
+            return Eladott * Jegyar;
+        }
+    }
+
+    class Program
+    {
+        static void Main()
+        {
+            List<Vetites> vetitesek = new List<Vetites>();
+            foreach (string sor in File.ReadAllLines("vetitesek.txt"))
+            {
+                vetitesek.Add(new Vetites(sor));
+            }
+            // ide írd a megoldást
+        }
+    }
+sample_solutions:
+  python: |
+    class Vetites:
+        def __init__(self, sor):
+            r = sor.split(";")
+            self.cim = r[0]
+            self.mufaj = r[1]
+            self.hossz = int(r[2])
+            self.kezdes = r[3]
+            self.eladott = int(r[4])
+            self.jegyar = int(r[5])
+
+        def bevetel(self):
+            return self.eladott * self.jegyar
+
+
+    with open("vetitesek.txt", encoding="utf-8") as f:
+        vetitesek = [Vetites(sor) for sor in f.read().splitlines()]
+    db = 0
+    osszeg = 0
+    for v in vetitesek:
+        if v.kezdes >= "18:00":
+            db += 1
+            osszeg += v.bevetel()
+    print("3. feladat: Esti vetitesek:", db, "db, bevetel:", osszeg, "Ft")
+  csharp: |
+    using System;
+    using System.Collections.Generic;
+    using System.IO;
+
+    class Vetites
+    {
+        public string Cim;
+        public string Mufaj;
+        public int Hossz;
+        public string Kezdes;
+        public int Eladott;
+        public int Jegyar;
+
+        public Vetites(string sor)
+        {
+            string[] r = sor.Split(';');
+            Cim = r[0];
+            Mufaj = r[1];
+            Hossz = int.Parse(r[2]);
+            Kezdes = r[3];
+            Eladott = int.Parse(r[4]);
+            Jegyar = int.Parse(r[5]);
+        }
+
+        public int Bevetel()
+        {
+            return Eladott * Jegyar;
+        }
+    }
+
+    class Program
+    {
+        static void Main()
+        {
+            List<Vetites> vetitesek = new List<Vetites>();
+            foreach (string sor in File.ReadAllLines("vetitesek.txt"))
+            {
+                vetitesek.Add(new Vetites(sor));
+            }
+            int db = 0;
+            int osszeg = 0;
+            foreach (Vetites v in vetitesek)
+            {
+                if (string.CompareOrdinal(v.Kezdes, "18:00") >= 0)
+                {
+                    db++;
+                    osszeg += v.Bevetel();
+                }
+            }
+            Console.WriteLine("3. feladat: Esti vetitesek: " + db + " db, bevetel: " + osszeg + " Ft");
+        }
+    }
+files:
+  vetitesek.txt: vetitesek.txt
+tests:
+- stdin: ''
+  expected: '3. feladat: Esti vetitesek: 6 db, bevetel: 974200 Ft
+
+    '
+  hidden: false
+- stdin: ''
+  expected: '3. feladat: Esti vetitesek: 1 db, bevetel: 182600 Ft
+
+    '
+  hidden: true
+  files:
+    vetitesek.txt: teszt-2/vetitesek.txt
+- stdin: ''
+  expected: '3. feladat: Esti vetitesek: 14 db, bevetel: 2097900 Ft
+
+    '
+  hidden: true
+  files:
+    vetitesek.txt: teszt-3/vetitesek.txt
+- stdin: ''
+  expected: '3. feladat: Esti vetitesek: 4 db, bevetel: 387400 Ft
+
+    '
+  hidden: true
+  files:
+    vetitesek.txt: teszt-4/vetitesek.txt

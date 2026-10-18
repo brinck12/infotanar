@@ -1,0 +1,89 @@
+slug: paros-e-fuggveny
+title: Páros-e függvény
+position: 1
+kind: code
+level: kozep
+difficulty: 2
+published: false
+allowed_languages: [python, csharp]
+description: |
+  Írj `paros` nevű függvényt, amely egy egész számról megmondja, páros-e (igaz/hamis értéket ad vissza). A főprogram az első sorban kapja a számok darabszámát (`N`), utána `N` egész számot, mindegyiket külön sorban. Minden számhoz írja ki külön sorba, hogy `paros` vagy `paratlan`, a `paros` függvény segítségével.
+
+  Példa: a `3`, `4`, `7`, `0` bemenetre (külön sorokban):
+
+  ```
+  paros
+  paratlan
+  paros
+  ```
+
+  Tipp: a függvény törzse egyetlen sor lehet: `x % 2 == 0`. A kiírandó szöveget a főprogram döntse el elágazással.
+starter_code:
+  python: |
+    def paros(x):
+        # ide írd: igazat adjon vissza, ha x páros
+        pass
+
+    n = int(input())
+    # innen folytasd
+  csharp: |
+    using System;
+
+    class Program
+    {
+        static bool Paros(int x)
+        {
+            // ide írd: igazat adjon vissza, ha x páros
+            return false;
+        }
+
+        static void Main()
+        {
+            int n = int.Parse(Console.ReadLine());
+            // innen folytasd
+        }
+    }
+sample_solutions:
+  python: |
+    def paros(x):
+        return x % 2 == 0
+
+    n = int(input())
+    for i in range(n):
+        szam = int(input())
+        if paros(szam):
+            print("paros")
+        else:
+            print("paratlan")
+  csharp: |
+    using System;
+
+    class Program
+    {
+        static bool Paros(int x)
+        {
+            return x % 2 == 0;
+        }
+
+        static void Main()
+        {
+            int n = int.Parse(Console.ReadLine());
+            for (int i = 0; i < n; i++)
+            {
+                int szam = int.Parse(Console.ReadLine());
+                if (Paros(szam))
+                {
+                    Console.WriteLine("paros");
+                }
+                else
+                {
+                    Console.WriteLine("paratlan");
+                }
+            }
+        }
+    }
+tests:
+  - { stdin: "3\n4\n7\n0\n", expected: "paros\nparatlan\nparos\n", hidden: false }
+  - { stdin: "1\n-3\n", expected: "paratlan\n", hidden: true }
+  - { stdin: "2\n-8\n1\n", expected: "paros\nparatlan\n", hidden: true }
+  - { stdin: "4\n100\n101\n102\n103\n", expected: "paros\nparatlan\nparos\nparatlan\n", hidden: true }

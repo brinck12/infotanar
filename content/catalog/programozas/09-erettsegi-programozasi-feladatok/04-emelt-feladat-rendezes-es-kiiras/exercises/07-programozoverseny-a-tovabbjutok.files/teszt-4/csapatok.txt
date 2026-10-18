@@ -1,0 +1,5 @@
+csapat	varos	megoldott	buntetes
+A	Eger	5	10
+B	Pecs	5	10
+C	Gyor	5	10
+D	Gyor	2	10

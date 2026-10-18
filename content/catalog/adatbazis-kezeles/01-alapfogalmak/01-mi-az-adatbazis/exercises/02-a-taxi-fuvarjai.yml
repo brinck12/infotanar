@@ -1,0 +1,47 @@
+slug: a-taxi-fuvarjai
+title: A taxi fuvarjai
+position: 1
+kind: sql
+level: kozep
+difficulty: 1
+published: false
+allowed_languages: [sql]
+description: |
+  Egy taxitársaság minden megtett fuvarját egy táblában rögzíti. Egy rekord egy fuvar.
+
+  A `taxi` tábla:
+
+  | oszlop | típus |
+  |---|---|
+  | `id` | egész, elsődleges kulcs |
+  | `rendszam` | szöveg |
+  | `indulas` | szöveg |
+  | `cel` | szöveg |
+  | `km` | egész |
+  | `dij` | egész (Ft) |
+  | `fizetes` | szöveg (`keszpenz` vagy `kartya`) |
+
+  Olvasd ki a `taxi` tábla teljes tartalmát: minden rekordot, minden mezővel! A sorok sorrendje nem számít.
+
+  Tipp: ugyanaz a lekérdezés, mint az előző feladatban, csak a tábla neve más.
+starter_code:
+  sql: |
+    SELECT
+    FROM taxi;
+sample_solutions:
+  sql: |
+    SELECT *
+    FROM taxi;
+tests:
+  - stdin: "CREATE TABLE taxi (id INTEGER PRIMARY KEY, rendszam TEXT, indulas TEXT, cel TEXT, km INTEGER, dij INTEGER, fizetes TEXT);\nINSERT INTO taxi VALUES\n(1, 'BLD-841', 'Gyor', 'Eger', 23, 7700, 'keszpenz'),\n(2, 'DNH-108', 'Eger', 'Pecs', 11, 4100, 'kartya'),\n(3, 'HNA-547', 'Pecs', 'Szeged', 59, 18700, 'keszpenz'),\n(4, 'FND-487', 'Pecs', 'Szeged', 41, 12800, 'kartya');\n"
+    expected: "id,rendszam,indulas,cel,km,dij,fizetes\n1,BLD-841,Gyor,Eger,23,7700,keszpenz\n2,DNH-108,Eger,Pecs,11,4100,kartya\n3,HNA-547,Pecs,Szeged,59,18700,keszpenz\n4,FND-487,Pecs,Szeged,41,12800,kartya\n"
+    hidden: false
+  - stdin: "CREATE TABLE taxi (id INTEGER PRIMARY KEY, rendszam TEXT, indulas TEXT, cel TEXT, km INTEGER, dij INTEGER, fizetes TEXT);\nINSERT INTO taxi VALUES\n(1, 'CSH-143', 'Pecs', 'Szeged', 26, 8600, 'keszpenz'),\n(2, 'DPE-831', 'Szeged', 'Pecs', 30, 9500, 'kartya'),\n(3, 'ESH-694', 'Pecs', 'Gyor', 24, 8200, 'keszpenz'),\n(4, 'AND-692', 'Gyor', 'Pecs', 40, 12800, 'keszpenz'),\n(5, 'GNG-470', 'Pecs', 'Eger', 39, 12500, 'kartya'),\n(6, 'AKH-584', 'Szeged', 'Gyor', 58, 18400, 'keszpenz'),\n(7, 'FPE-282', 'Gyor', 'Eger', 31, 10100, 'kartya');\n"
+    expected: "id,rendszam,indulas,cel,km,dij,fizetes\n1,CSH-143,Pecs,Szeged,26,8600,keszpenz\n2,DPE-831,Szeged,Pecs,30,9500,kartya\n3,ESH-694,Pecs,Gyor,24,8200,keszpenz\n4,AND-692,Gyor,Pecs,40,12800,keszpenz\n5,GNG-470,Pecs,Eger,39,12500,kartya\n6,AKH-584,Szeged,Gyor,58,18400,keszpenz\n7,FPE-282,Gyor,Eger,31,10100,kartya\n"
+    hidden: true
+  - stdin: "CREATE TABLE taxi (id INTEGER PRIMARY KEY, rendszam TEXT, indulas TEXT, cel TEXT, km INTEGER, dij INTEGER, fizetes TEXT);\nINSERT INTO taxi VALUES\n(1, 'DKG-415', 'Gyor', 'Pecs', 29, 9500, 'kartya'),\n(2, 'CTH-596', 'Szeged', 'Gyor', 36, 11300, 'kartya'),\n(3, 'ELC-263', 'Pecs', 'Szeged', 22, 7600, 'keszpenz'),\n(4, 'BLG-237', 'Pecs', 'Szeged', 40, 12500, 'kartya'),\n(5, 'GME-916', 'Pecs', 'Eger', 24, 7700, 'kartya'),\n(6, 'ERF-240', 'Szeged', 'Gyor', 3, 1700, 'keszpenz'),\n(7, 'ERC-130', 'Pecs', 'Gyor', 11, 3800, 'kartya'),\n(8, 'CMA-386', 'Pecs', 'Eger', 48, 15400, 'kartya'),\n(9, 'FKH-634', 'Szeged', 'Pecs', 42, 13400, 'keszpenz'),\n(10, 'APB-963', 'Szeged', 'Gyor', 35, 11000, 'keszpenz');\n"
+    expected: "id,rendszam,indulas,cel,km,dij,fizetes\n1,DKG-415,Gyor,Pecs,29,9500,kartya\n2,CTH-596,Szeged,Gyor,36,11300,kartya\n3,ELC-263,Pecs,Szeged,22,7600,keszpenz\n4,BLG-237,Pecs,Szeged,40,12500,kartya\n5,GME-916,Pecs,Eger,24,7700,kartya\n6,ERF-240,Szeged,Gyor,3,1700,keszpenz\n7,ERC-130,Pecs,Gyor,11,3800,kartya\n8,CMA-386,Pecs,Eger,48,15400,kartya\n9,FKH-634,Szeged,Pecs,42,13400,keszpenz\n10,APB-963,Szeged,Gyor,35,11000,keszpenz\n"
+    hidden: true
+  - stdin: "CREATE TABLE taxi (id INTEGER PRIMARY KEY, rendszam TEXT, indulas TEXT, cel TEXT, km INTEGER, dij INTEGER, fizetes TEXT);\nINSERT INTO taxi VALUES\n(1, 'ERH-882', 'Pecs', 'Eger', 14, 5200, 'kartya'),\n(2, 'EMD-510', 'Gyor', 'Szeged', 34, 10700, 'kartya'),\n(3, 'CLE-343', 'Pecs', 'Gyor', 60, 18800, 'keszpenz'),\n(4, 'FRF-603', 'Pecs', 'Gyor', 24, 8000, 'kartya'),\n(5, 'CRB-435', 'Gyor', 'Pecs', 48, 15200, 'kartya'),\n(6, 'AKG-322', 'Eger', 'Pecs', 50, 15500, 'kartya'),\n(7, 'DME-632', 'Gyor', 'Pecs', 45, 14300, 'kartya'),\n(8, 'HLC-575', 'Pecs', 'Szeged', 24, 8200, 'keszpenz'),\n(9, 'GPG-589', 'Eger', 'Pecs', 5, 2300, 'keszpenz'),\n(10, 'DNF-660', 'Eger', 'Gyor', 17, 5600, 'kartya'),\n(11, 'HMF-322', 'Szeged', 'Eger', 55, 17000, 'kartya'),\n(12, 'CPA-616', 'Szeged', 'Gyor', 55, 17000, 'kartya');\n"
+    expected: "id,rendszam,indulas,cel,km,dij,fizetes\n1,ERH-882,Pecs,Eger,14,5200,kartya\n2,EMD-510,Gyor,Szeged,34,10700,kartya\n3,CLE-343,Pecs,Gyor,60,18800,keszpenz\n4,FRF-603,Pecs,Gyor,24,8000,kartya\n5,CRB-435,Gyor,Pecs,48,15200,kartya\n6,AKG-322,Eger,Pecs,50,15500,kartya\n7,DME-632,Gyor,Pecs,45,14300,kartya\n8,HLC-575,Pecs,Szeged,24,8200,keszpenz\n9,GPG-589,Eger,Pecs,5,2300,keszpenz\n10,DNF-660,Eger,Gyor,17,5600,kartya\n11,HMF-322,Szeged,Eger,55,17000,kartya\n12,CPA-616,Szeged,Gyor,55,17000,kartya\n"
+    hidden: true

@@ -124,7 +124,7 @@ function CheckoutForm({ initial, plan }: { initial: BillingProfile | null; plan:
         <CardTitle id="summary-title">Összegzés</CardTitle>
         <dl className="mt-4 text-16">
           <div className="flex justify-between gap-4 border-t border-grid py-3">
-            <dt>{plan.name}, havi előfizetés</dt>
+            <dt>{plan.name}</dt>
             <dd className="font-semibold whitespace-nowrap">{formatHuf(plan.price_huf)}</dd>
           </div>
           <div className="flex justify-between gap-4 border-t border-ink py-3 font-bold">

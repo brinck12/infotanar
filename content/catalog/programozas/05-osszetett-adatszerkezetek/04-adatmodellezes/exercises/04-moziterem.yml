@@ -1,0 +1,124 @@
+slug: moziterem
+title: "Moziterem"
+position: 3
+kind: code
+level: emelt
+difficulty: 3
+published: false
+allowed_languages: [python, csharp]
+description: |
+  Egy moziterem R sorból és soronként C székből áll. A bemenet első sora `R C`, a másodiké a már eladott jegyek száma (K), majd K sor: `sor szek` (mindkettő 1-től számozott, a helyek különbözők). Írd ki a szabad helyek számát (`Szabad: ...`), majd azt a sort, amelyben a legtöbb szabad hely van (`Legtobb szabad hely a(z) X. sorban: Y`). Egyenlőség esetén a kisebb sorszámú sor számít.
+
+  Példa bemenet:
+
+  ```
+  3 4
+  5
+  1 1
+  1 2
+  2 4
+  3 1
+  3 3
+  ```
+
+  Kimenet:
+
+  ```
+  Szabad: 7
+  Legtobb szabad hely a(z) 2. sorban: 3
+  ```
+
+  Tipp: a terem természetes modellje egy R × C-s `bool` rács, ahol az igaz érték a foglalt széket jelenti. A bemenet 1-től számoz, a rács 0-tól: igazítsd az indexet.
+starter_code:
+  python: |
+    r, c = input().split()
+    r = int(r)
+    c = int(c)
+    k = int(input())
+    foglalt = [[False] * c for _ in range(r)]
+    # jelöld a foglalt helyeket, majd számolj
+  csharp: |
+    using System;
+
+    class Program
+    {
+        static void Main()
+        {
+            string[] meret = Console.ReadLine().Split(' ');
+            int r = int.Parse(meret[0]);
+            int c = int.Parse(meret[1]);
+            int k = int.Parse(Console.ReadLine());
+            bool[,] foglalt = new bool[r, c];
+            // jelöld a foglalt helyeket, majd számolj
+        }
+    }
+sample_solutions:
+  python: |
+    r, c = input().split()
+    r = int(r)
+    c = int(c)
+    k = int(input())
+    foglalt = [[False] * c for _ in range(r)]
+    for _ in range(k):
+        sor, szek = input().split()
+        foglalt[int(sor) - 1][int(szek) - 1] = True
+    szabad = 0
+    legjobb_sor = 0
+    legjobb_db = -1
+    for i in range(r):
+        db = 0
+        for j in range(c):
+            if not foglalt[i][j]:
+                db += 1
+        szabad += db
+        if db > legjobb_db:
+            legjobb_db = db
+            legjobb_sor = i + 1
+    print("Szabad:", szabad)
+    print("Legtobb szabad hely a(z) " + str(legjobb_sor) + ". sorban: " + str(legjobb_db))
+  csharp: |
+    using System;
+
+    class Program
+    {
+        static void Main()
+        {
+            string[] meret = Console.ReadLine().Split(' ');
+            int r = int.Parse(meret[0]);
+            int c = int.Parse(meret[1]);
+            int k = int.Parse(Console.ReadLine());
+            bool[,] foglalt = new bool[r, c];
+            for (int i = 0; i < k; i++)
+            {
+                string[] resz = Console.ReadLine().Split(' ');
+                foglalt[int.Parse(resz[0]) - 1, int.Parse(resz[1]) - 1] = true;
+            }
+            int szabad = 0;
+            int legjobbSor = 0;
+            int legjobbDb = -1;
+            for (int i = 0; i < r; i++)
+            {
+                int db = 0;
+                for (int j = 0; j < c; j++)
+                {
+                    if (!foglalt[i, j])
+                    {
+                        db++;
+                    }
+                }
+                szabad += db;
+                if (db > legjobbDb)
+                {
+                    legjobbDb = db;
+                    legjobbSor = i + 1;
+                }
+            }
+            Console.WriteLine("Szabad: " + szabad);
+            Console.WriteLine("Legtobb szabad hely a(z) " + legjobbSor + ". sorban: " + legjobbDb);
+        }
+    }
+tests:
+  - { stdin: "3 4\n5\n1 1\n1 2\n2 4\n3 1\n3 3\n", expected: "Szabad: 7\nLegtobb szabad hely a(z) 2. sorban: 3\n", hidden: false }
+  - { stdin: "1 1\n0\n", expected: "Szabad: 1\nLegtobb szabad hely a(z) 1. sorban: 1\n", hidden: true }
+  - { stdin: "2 2\n4\n1 1\n1 2\n2 1\n2 2\n", expected: "Szabad: 0\nLegtobb szabad hely a(z) 1. sorban: 0\n", hidden: true }
+  - { stdin: "4 3\n3\n1 1\n2 2\n3 3\n", expected: "Szabad: 9\nLegtobb szabad hely a(z) 4. sorban: 3\n", hidden: true }

@@ -1,0 +1,66 @@
+slug: legnagyobb-kozos-oszto
+title: Legnagyobb közös osztó
+position: 2
+kind: code
+level: kozep
+difficulty: 3
+published: false
+allowed_languages: [python, csharp]
+description: |
+  Olvass be két pozitív egész számot (külön sorban), és írd ki a legnagyobb közös osztójukat Euklidész algoritmusával, egyetlen számként.
+
+  Példa: ha a bemenet `18` és `12`, a kimenet `6`.
+
+  Az algoritmus: amíg a második szám (`b`) nem nulla, számold ki az `a % b` maradékot, majd `a` legyen a régi `b`, `b` pedig a maradék. Ha `b` nulla lett, az eredmény `a`.
+
+  Tipp: a maradékot tedd egy külön változóba, hogy `a` és `b` frissítése ne zavarja össze az értékeket.
+starter_code:
+  python: |
+    a = int(input())
+    b = int(input())
+    # ide írd a megoldást
+  csharp: |
+    using System;
+
+    class Program
+    {
+        static void Main()
+        {
+            var a = int.Parse(Console.ReadLine());
+            var b = int.Parse(Console.ReadLine());
+            // ide írd a megoldást
+        }
+    }
+sample_solutions:
+  python: |
+    a = int(input())
+    b = int(input())
+    while b != 0:
+        maradek = a % b
+        a = b
+        b = maradek
+    print(a)
+  csharp: |
+    using System;
+
+    class Program
+    {
+        static void Main()
+        {
+            var a = int.Parse(Console.ReadLine());
+            var b = int.Parse(Console.ReadLine());
+            while (b != 0)
+            {
+                var maradek = a % b;
+                a = b;
+                b = maradek;
+            }
+            Console.WriteLine(a);
+        }
+    }
+tests:
+  - { stdin: "18\n12\n", expected: "6\n", hidden: false }
+  - { stdin: "17\n5\n", expected: "1\n", hidden: true }
+  - { stdin: "100\n100\n", expected: "100\n", hidden: true }
+  - { stdin: "48\n180\n", expected: "12\n", hidden: true }
+  - { stdin: "1\n9\n", expected: "1\n", hidden: true }

@@ -1,0 +1,114 @@
+slug: ranglista
+title: "Ranglista"
+position: 0
+kind: code
+level: emelt
+difficulty: 2
+published: false
+allowed_languages: [python, csharp]
+description: |
+  Egy versenyen az első sor a versenyzők száma (N, legalább 1), majd N sor: `nev;pont` (a pont egész szám). Írd ki a ranglistát pont szerint csökkenő sorrendben, soronként `nev: pont` alakban. Egyenlő pontszámnál a bemenetben előbb szereplő versenyző áll előbb.
+
+  Példa bemenet:
+
+  ```
+  4
+  Anna;30
+  Bence;45
+  Csilla;30
+  David;12
+  ```
+
+  Kimenet:
+
+  ```
+  Bence: 45
+  Anna: 30
+  Csilla: 30
+  David: 12
+  ```
+
+  Tipp: a rendezésnek stabilnak kell lennie. Pythonban a `sorted(..., key=..., reverse=True)` az, C#-ban használd az `OrderByDescending`-et (a `List.Sort` nem stabil).
+starter_code:
+  python: |
+    from dataclasses import dataclass
+
+    @dataclass
+    class Versenyzo:
+        nev: str
+        pont: int
+
+    n = int(input())
+    lista = []
+    # olvasd be, rendezd, írd ki
+  csharp: |
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+
+    class Versenyzo
+    {
+        public string Nev;
+        public int Pont;
+    }
+
+    class Program
+    {
+        static void Main()
+        {
+            int n = int.Parse(Console.ReadLine());
+            var lista = new List<Versenyzo>();
+            // olvasd be, rendezd, írd ki
+        }
+    }
+sample_solutions:
+  python: |
+    from dataclasses import dataclass
+
+    @dataclass
+    class Versenyzo:
+        nev: str
+        pont: int
+
+    n = int(input())
+    lista = []
+    for _ in range(n):
+        resz = input().split(";")
+        lista.append(Versenyzo(resz[0], int(resz[1])))
+    rang = sorted(lista, key=lambda v: v.pont, reverse=True)
+    for v in rang:
+        print(v.nev + ": " + str(v.pont))
+  csharp: |
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+
+    class Versenyzo
+    {
+        public string Nev;
+        public int Pont;
+    }
+
+    class Program
+    {
+        static void Main()
+        {
+            int n = int.Parse(Console.ReadLine());
+            var lista = new List<Versenyzo>();
+            for (int i = 0; i < n; i++)
+            {
+                string[] resz = Console.ReadLine().Split(';');
+                lista.Add(new Versenyzo { Nev = resz[0], Pont = int.Parse(resz[1]) });
+            }
+            var rang = lista.OrderByDescending(v => v.Pont).ToList();
+            foreach (var v in rang)
+            {
+                Console.WriteLine(v.Nev + ": " + v.Pont);
+            }
+        }
+    }
+tests:
+  - { stdin: "4\nAnna;30\nBence;45\nCsilla;30\nDavid;12\n", expected: "Bence: 45\nAnna: 30\nCsilla: 30\nDavid: 12\n", hidden: false }
+  - { stdin: "1\nEmil;0\n", expected: "Emil: 0\n", hidden: true }
+  - { stdin: "3\nFanni;5\nGabor;5\nHanna;5\n", expected: "Fanni: 5\nGabor: 5\nHanna: 5\n", hidden: true }
+  - { stdin: "5\nIvan;-1\nJudit;10\nKata;-1\nLaci;10\nMaja;0\n", expected: "Judit: 10\nLaci: 10\nMaja: 0\nIvan: -1\nKata: -1\n", hidden: true }

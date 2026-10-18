@@ -1,0 +1,153 @@
+slug: idojaras-egy-nap-ingadozasa
+title: 'Időjárás: egy nap ingadozása'
+position: 3
+kind: code
+level: kozep
+difficulty: 3
+published: false
+allowed_languages:
+- python
+- csharp
+description: |
+  Egy meteorológiai állomás egy hónap napi méréseit a `homerseklet.txt` fájlba mentette. Az első sor a napok száma (`n`), utána soronként egy nap adatai következnek, tabulátorral tagolva: a nap sorszáma (1-től), a napi legalacsonyabb hőmérséklet (°C), a napi legmagasabb hőmérséklet (°C) és a csapadék mennyisége (mm). Minden érték egész szám, a fájl legalább egy napot tartalmaz.
+
+  Minden részfeladat kimenete a feladat sorszámával kezdődik (`N. feladat`). A kimenetben ne használj ékezetes betűt (az ékezetmentes kiírás az érettségin is elfogadott). Ahol a feladat bevitelt kér, a kérdést írd ki egy külön sorba, és csak utána olvass be.
+
+  A program kérje be egy nap sorszámát (`Add meg a nap sorszamat:` felirattal, külön sorban), majd írja ki, mekkora volt aznap a hőmérséklet-ingadozás, vagyis a legmagasabb és a legalacsonyabb érték különbsége. A megadott sorszámú nap biztosan szerepel a fájlban.
+
+  ```
+  Az ingadozas: <fok> fok
+  ```
+
+  Bemenet a mintaadatokhoz (amit a felhasználó begépel):
+
+  ```
+  7
+  ```
+
+  Kimenet a mellékelt mintafájllal:
+
+  ```
+  4. feladat
+  Add meg a nap sorszamat:
+  Az ingadozas: 5 fok
+  ```
+
+  Tipp: a kért napot kereséssel találod meg; a kérdést a beolvasás előtt írd ki.
+starter_code:
+  python: |
+    print("4. feladat")
+    with open("homerseklet.txt", encoding="utf-8") as f:
+        sorok = f.read().splitlines()
+    db = int(sorok[0])
+    napok = []
+    for sor in sorok[1:]:
+        r = sor.split("\t")
+        napok.append((int(r[0]), int(r[1]), int(r[2]), int(r[3])))
+    # ide írd a megoldást
+  csharp: |
+    using System;
+    using System.Collections.Generic;
+    using System.Globalization;
+    using System.IO;
+    using System.Linq;
+
+    class Program
+    {
+        static void Main()
+        {
+            Console.WriteLine("4. feladat");
+            string[] sorok = File.ReadAllLines("homerseklet.txt");
+            int db = int.Parse(sorok[0]);
+            int[][] napok = new int[db][];
+            for (int i = 0; i < db; i++)
+            {
+                string[] r = sorok[i + 1].Split('\t');
+                napok[i] = new int[] { int.Parse(r[0]), int.Parse(r[1]), int.Parse(r[2]), int.Parse(r[3]) };
+            }
+            // ide írd a megoldást
+        }
+    }
+sample_solutions:
+  python: |
+    print("4. feladat")
+    with open("homerseklet.txt", encoding="utf-8") as f:
+        sorok = f.read().splitlines()
+    db = int(sorok[0])
+    napok = []
+    for sor in sorok[1:]:
+        r = sor.split("\t")
+        napok.append((int(r[0]), int(r[1]), int(r[2]), int(r[3])))
+    print("Add meg a nap sorszamat:")
+    kert = int(input())
+    for nap in napok:
+        if nap[0] == kert:
+            print("Az ingadozas:", nap[2] - nap[1], "fok")
+  csharp: |
+    using System;
+    using System.Collections.Generic;
+    using System.Globalization;
+    using System.IO;
+    using System.Linq;
+
+    class Program
+    {
+        static void Main()
+        {
+            Console.WriteLine("4. feladat");
+            string[] sorok = File.ReadAllLines("homerseklet.txt");
+            int db = int.Parse(sorok[0]);
+            int[][] napok = new int[db][];
+            for (int i = 0; i < db; i++)
+            {
+                string[] r = sorok[i + 1].Split('\t');
+                napok[i] = new int[] { int.Parse(r[0]), int.Parse(r[1]), int.Parse(r[2]), int.Parse(r[3]) };
+            }
+            Console.WriteLine("Add meg a nap sorszamat:");
+            int kert = int.Parse(Console.ReadLine());
+            foreach (int[] nap in napok)
+            {
+                if (nap[0] == kert)
+                {
+                    Console.WriteLine("Az ingadozas: " + (nap[2] - nap[1]) + " fok");
+                }
+            }
+        }
+    }
+files:
+  homerseklet.txt: homerseklet.txt
+tests:
+- stdin: |
+    7
+  expected: |
+    4. feladat
+    Add meg a nap sorszamat:
+    Az ingadozas: 5 fok
+  hidden: false
+- stdin: |
+    1
+  expected: |
+    4. feladat
+    Add meg a nap sorszamat:
+    Az ingadozas: 6 fok
+  hidden: true
+  files:
+    homerseklet.txt: teszt-2/homerseklet.txt
+- stdin: |
+    30
+  expected: |
+    4. feladat
+    Add meg a nap sorszamat:
+    Az ingadozas: 3 fok
+  hidden: true
+  files:
+    homerseklet.txt: teszt-3/homerseklet.txt
+- stdin: |
+    8
+  expected: |
+    4. feladat
+    Add meg a nap sorszamat:
+    Az ingadozas: 5 fok
+  hidden: true
+  files:
+    homerseklet.txt: teszt-4/homerseklet.txt

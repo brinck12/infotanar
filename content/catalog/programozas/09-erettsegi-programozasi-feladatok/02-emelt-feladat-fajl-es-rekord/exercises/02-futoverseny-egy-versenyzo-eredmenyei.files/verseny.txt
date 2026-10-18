@@ -1,0 +1,16 @@
+nev	orszag	tav	ido
+Kovacs Adam	GER	200	22.10
+Farkas Gabor	ITA	400	46.30
+Fekete Mark	HUN	100	13.27
+Simon Flora	POL	400	50.95
+Lukacs Fanni	GER	100	12.37
+Kovacs Adam	GER	400	51.95
+Fekete Mark	HUN	200	21.04
+Toth Bela	FRA	400	50.70
+Szabo Eva	ITA	100	11.42
+Simon Flora	POL	200	21.36
+Kovacs Adam	GER	100	10.15
+Szabo Eva	ITA	200	26.64
+Molnar Reka	POL	100	13.24
+Molnar Reka	POL	200	25.05
+Lukacs Fanni	GER	200	27.05

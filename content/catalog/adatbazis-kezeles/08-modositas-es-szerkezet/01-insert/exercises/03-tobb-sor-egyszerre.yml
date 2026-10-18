@@ -1,0 +1,95 @@
+slug: tobb-sor-egyszerre
+title: Több sor egyszerre
+position: 2
+kind: sql
+level: kozep
+difficulty: 2
+published: false
+allowed_languages:
+- sql
+description: |
+  A `diak` tábla:
+
+  | oszlop | típus |
+  |---|---|
+  | `id` | `INT`, elsődleges kulcs |
+  | `nev` | `VARCHAR(50)` |
+  | `osztaly` | `VARCHAR(5)` |
+  | `pont` | `INT` |
+
+  Egyetlen `INSERT` utasítással vedd fel az alábbi három diákot (az `id`-t hagyd az adatbázisra): Toth Csaba (`9.B`, 55 pont), Szabo Dora (`9.B`, 91 pont), Varga Emil (`10.A`, 68 pont).
+
+  Az ellenőrző lekérdezés most a darabszámot és a pontok összegét mutatja.
+
+  A kód végén álló `SELECT` sort **ne töröld és ne módosítsd**: az mutatja meg a tábla állapotát módosítás után, és a rendszer ezt az eredményt hasonlítja az elvárthoz. A saját utasításodat a `SELECT` **elé** írd, pontosvesszővel lezárva.
+
+  Tipp: a `VALUES` után több zárójeles sort írhatsz vesszővel elválasztva.
+starter_code:
+  sql: |
+    -- Ide írd az INSERT utasítást.
+
+    SELECT COUNT(*) AS db, SUM(pont) AS osszeg FROM diak;
+sample_solutions:
+  sql: |
+    INSERT INTO diak (nev, osztaly, pont) VALUES
+    ('Toth Csaba', '9.B', 55),
+    ('Szabo Dora', '9.B', 91),
+    ('Varga Emil', '10.A', 68);
+
+    SELECT COUNT(*) AS db, SUM(pont) AS osszeg FROM diak;
+tests:
+- stdin: |
+    CREATE TABLE diak (id INTEGER PRIMARY KEY, nev TEXT, osztaly TEXT, pont INTEGER);
+    INSERT INTO diak VALUES
+    (1, 'Horvath Reka', '10.B', 85),
+    (2, 'Molnar Viktor', '9.A', 50),
+    (3, 'Toth Norbert', '9.B', 25),
+    (4, 'Balogh Hanna', '10.B', 23),
+    (5, 'Balogh Emese', '9.B', 94),
+    (6, 'Nagy Fanni', '9.B', 59);
+  expected: |
+    db,osszeg
+    9,550
+  hidden: false
+- stdin: |
+    CREATE TABLE diak (id INTEGER PRIMARY KEY, nev TEXT, osztaly TEXT, pont INTEGER);
+    INSERT INTO diak VALUES
+    (1, 'Nagy Dalma', '10.A', 29),
+    (2, 'Horvath Anna', '9.A', 63),
+    (3, 'Horvath Reka', '10.A', 65),
+    (4, 'Balogh Kata', '9.A', 80),
+    (5, 'Kiss Eszter', '9.A', 42),
+    (6, 'Nagy Zsofia', '10.B', 66),
+    (7, 'Horvath Tamas', '10.B', 25);
+  expected: |
+    db,osszeg
+    10,584
+  hidden: true
+- stdin: |
+    CREATE TABLE diak (id INTEGER PRIMARY KEY, nev TEXT, osztaly TEXT, pont INTEGER);
+    INSERT INTO diak VALUES
+    (1, 'Kiss Gabor', '9.A', 20),
+    (2, 'Kiss Dalma', '9.B', 61),
+    (3, 'Kovacs Zsofia', '9.A', 96),
+    (4, 'Balogh Gergo', '10.A', 75),
+    (5, 'Molnar Maria', '9.A', 88);
+  expected: |
+    db,osszeg
+    8,554
+  hidden: true
+- stdin: |
+    CREATE TABLE diak (id INTEGER PRIMARY KEY, nev TEXT, osztaly TEXT, pont INTEGER);
+    INSERT INTO diak VALUES
+    (1, 'Kiss Lilla', '10.A', 24),
+    (2, 'Nagy Zsofia', '10.B', 70),
+    (3, 'Horvath Bence', '9.A', 52),
+    (4, 'Balogh Norbert', '9.A', 31),
+    (5, 'Molnar Orsolya', '10.B', 51),
+    (6, 'Kiss Csaba', '10.B', 99),
+    (7, 'Farkas Anna', '9.B', 21),
+    (8, 'Horvath Hanna', '9.B', 71),
+    (9, 'Toth Tamas', '9.A', 43);
+  expected: |
+    db,osszeg
+    12,676
+  hidden: true

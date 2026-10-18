@@ -1,0 +1,224 @@
+slug: programozas-7-keses-nelkuli-sorozat
+title: Programozás 7 - Késés nélküli sorozat
+position: 14
+kind: code
+level: emelt
+difficulty: 5
+published: false
+allowed_languages:
+- python
+- csharp
+description: |
+  Az `indulasok.txt` a repülőtér egy havi (30 napos) forgalmát tartalmazza, soronként egy indulással, pontosvesszővel elválasztva: `járatszám;célállomás;távolság km;nap;indulás;utasok;késés`. A járatszám két betűből és négy számjegyből áll (pl. `MA1017`), a nap a hónap napja (1–30), az indulás `ÓÓ:PP` alakú, a késés percben értendő (0, ha pontosan indult). Az adatokban nincs ékezet, a fájl legalább egy sort tartalmaz, a sorok nincsenek sorrendben, és egy járat egy napon egy időpontban legfeljebb egyszer szerepel.
+
+  **7. feladat.** Rendezze az indulásokat időrendbe (nap, majd indulási idő szerint)! Keresse meg a **leghosszabb olyan folyamatos sorozatot**, amelyben egymás után minden járat késés nélkül (`késés = 0`) indult. Írja ki a sorozat hosszát, valamint az első és az utolsó járatot a napjukkal és idejükkel. Ha több azonos hosszúságú van, az **első** számít. Ha egyetlen járat sem indult késés nélkül, a kimenet: `7. feladat: Nem volt keses nelkuli indulas.`
+
+  A mintafájlra a kimenet:
+
+  ```text
+  7. feladat: A leghosszabb keses nelkuli sorozat 2 indulas, MA2059 (2. nap 16:10) es TV7385 (2. nap 17:35) kozott.
+  ```
+
+  Tipp: rendezés után számold az egymás utáni jó elemeket; a késéssel induló járat nullázza a számlálót. Csak szigorúan nagyobb hossz frissítse a legjobbat, és jegyezd meg a sorozat kezdőindexét is. A sorozat végén lévő szakaszra is gondolj.
+starter_code:
+  python: |
+    class Indulas:
+        def __init__(self, sor):
+            r = sor.split(";")
+            self.jarat = r[0]
+            self.cel = r[1]
+            self.tav = int(r[2])
+            self.nap = int(r[3])
+            self.ido = r[4]
+            self.utas = int(r[5])
+            self.keses = int(r[6])
+
+
+    with open("indulasok.txt", encoding="utf-8") as f:
+        indulasok = [Indulas(sor) for sor in f.read().splitlines()]
+    # ide írd a megoldást
+  csharp: |
+    using System;
+    using System.Collections.Generic;
+    using System.IO;
+
+    class Indulas
+    {
+        public string Jarat;
+        public string Cel;
+        public int Tav;
+        public int Nap;
+        public string Ido;
+        public int Utas;
+        public int Keses;
+
+        public Indulas(string sor)
+        {
+            string[] r = sor.Split(';');
+            Jarat = r[0];
+            Cel = r[1];
+            Tav = int.Parse(r[2]);
+            Nap = int.Parse(r[3]);
+            Ido = r[4];
+            Utas = int.Parse(r[5]);
+            Keses = int.Parse(r[6]);
+        }
+    }
+
+    class Program
+    {
+        static void Main()
+        {
+            List<Indulas> indulasok = new List<Indulas>();
+            foreach (string sor in File.ReadAllLines("indulasok.txt"))
+            {
+                indulasok.Add(new Indulas(sor));
+            }
+            // ide írd a megoldást
+        }
+    }
+sample_solutions:
+  python: |
+    class Indulas:
+        def __init__(self, sor):
+            r = sor.split(";")
+            self.jarat = r[0]
+            self.cel = r[1]
+            self.tav = int(r[2])
+            self.nap = int(r[3])
+            self.ido = r[4]
+            self.utas = int(r[5])
+            self.keses = int(r[6])
+
+
+    with open("indulasok.txt", encoding="utf-8") as f:
+        indulasok = [Indulas(sor) for sor in f.read().splitlines()]
+    rendezett = sorted(indulasok, key=lambda i: (i.nap, i.ido, i.jarat))
+    legjobb = 0
+    kezdet = -1
+    aktualis = 0
+    for index in range(len(rendezett)):
+        if rendezett[index].keses == 0:
+            aktualis += 1
+            if aktualis > legjobb:
+                legjobb = aktualis
+                kezdet = index - aktualis + 1
+        else:
+            aktualis = 0
+    if legjobb == 0:
+        print("7. feladat: Nem volt keses nelkuli indulas.")
+    else:
+        elso = rendezett[kezdet]
+        utolso = rendezett[kezdet + legjobb - 1]
+        print("7. feladat: A leghosszabb keses nelkuli sorozat " + str(legjobb) + " indulas, " + elso.jarat + " (" + str(elso.nap) + ". nap " + elso.ido + ") es " + utolso.jarat + " (" + str(utolso.nap) + ". nap " + utolso.ido + ") kozott.")
+  csharp: |
+    using System;
+    using System.Collections.Generic;
+    using System.IO;
+
+    class Indulas
+    {
+        public string Jarat;
+        public string Cel;
+        public int Tav;
+        public int Nap;
+        public string Ido;
+        public int Utas;
+        public int Keses;
+
+        public Indulas(string sor)
+        {
+            string[] r = sor.Split(';');
+            Jarat = r[0];
+            Cel = r[1];
+            Tav = int.Parse(r[2]);
+            Nap = int.Parse(r[3]);
+            Ido = r[4];
+            Utas = int.Parse(r[5]);
+            Keses = int.Parse(r[6]);
+        }
+    }
+
+    class Program
+    {
+        static void Main()
+        {
+            List<Indulas> indulasok = new List<Indulas>();
+            foreach (string sor in File.ReadAllLines("indulasok.txt"))
+            {
+                indulasok.Add(new Indulas(sor));
+            }
+            List<Indulas> rendezett = new List<Indulas>(indulasok);
+            rendezett.Sort((a, b) =>
+            {
+                if (a.Nap != b.Nap)
+                {
+                    return a.Nap.CompareTo(b.Nap);
+                }
+                int c = string.CompareOrdinal(a.Ido, b.Ido);
+                if (c != 0)
+                {
+                    return c;
+                }
+                return string.CompareOrdinal(a.Jarat, b.Jarat);
+            });
+            int legjobb = 0;
+            int kezdet = -1;
+            int aktualis = 0;
+            for (int index = 0; index < rendezett.Count; index++)
+            {
+                if (rendezett[index].Keses == 0)
+                {
+                    aktualis++;
+                    if (aktualis > legjobb)
+                    {
+                        legjobb = aktualis;
+                        kezdet = index - aktualis + 1;
+                    }
+                }
+                else
+                {
+                    aktualis = 0;
+                }
+            }
+            if (legjobb == 0)
+            {
+                Console.WriteLine("7. feladat: Nem volt keses nelkuli indulas.");
+            }
+            else
+            {
+                Indulas elso = rendezett[kezdet];
+                Indulas utolso = rendezett[kezdet + legjobb - 1];
+                Console.WriteLine("7. feladat: A leghosszabb keses nelkuli sorozat " + legjobb + " indulas, " + elso.Jarat + " (" + elso.Nap + ". nap " + elso.Ido + ") es " + utolso.Jarat + " (" + utolso.Nap + ". nap " + utolso.Ido + ") kozott.");
+            }
+        }
+    }
+files:
+  indulasok.txt: indulasok.txt
+tests:
+- stdin: ''
+  expected: '7. feladat: A leghosszabb keses nelkuli sorozat 2 indulas, MA2059 (2. nap 16:10) es TV7385 (2. nap 17:35) kozott.
+
+    '
+  hidden: false
+- stdin: ''
+  expected: '7. feladat: A leghosszabb keses nelkuli sorozat 1 indulas, TV4052 (21. nap 16:10) es TV4052 (21. nap 16:10) kozott.
+
+    '
+  hidden: true
+  files:
+    indulasok.txt: teszt-2/indulasok.txt
+- stdin: ''
+  expected: '7. feladat: A leghosszabb keses nelkuli sorozat 4 indulas, DA4129 (3. nap 07:40) es MA3104 (3. nap 14:45) kozott.
+
+    '
+  hidden: true
+  files:
+    indulasok.txt: teszt-3/indulasok.txt
+- stdin: ''
+  expected: '7. feladat: Nem volt keses nelkuli indulas.
+
+    '
+  hidden: true
+  files:
+    indulasok.txt: teszt-4/indulasok.txt

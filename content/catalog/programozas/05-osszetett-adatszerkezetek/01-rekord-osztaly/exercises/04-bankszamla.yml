@@ -1,0 +1,156 @@
+slug: bankszamla
+title: "Bankszámla"
+position: 3
+kind: code
+level: emelt
+difficulty: 4
+published: false
+allowed_languages: [python, csharp]
+description: |
+  Egy bankszámla egyenlegét egy `Szamla` osztály tárolja. Két művelete van: `befizet(osszeg)` növeli az egyenleget; `kivesz(osszeg)` csak akkor csökkenti, ha az egyenleg legalább annyi, és visszaadja, hogy sikerült-e (igaz/hamis).
+
+  A bemenet első sora a kezdő egyenleg, a másodiké a műveletek száma (N), majd N sor következik: `B 500` (befizetés 500 Ft) vagy `K 300` (kivétel 300 Ft). Hajtsd végre a műveleteket sorban, majd írd ki két sorban a végső egyenleget és az elutasított kivételek számát: `Egyenleg: ...`, `Elutasitott: ...`.
+
+  Példa bemenet:
+
+  ```
+  1000
+  4
+  B 500
+  K 2000
+  K 300
+  K 1200
+  ```
+
+  Kimenet:
+
+  ```
+  Egyenleg: 0
+  Elutasitott: 1
+  ```
+
+  Tipp: a `kivesz` metódus ellenőrizzen, és csak sikeres esetben módosítsa az egyenleget. A hívó számolja az elutasítottakat.
+starter_code:
+  python: |
+    class Szamla:
+        def __init__(self, egyenleg):
+            self.egyenleg = egyenleg
+
+        def befizet(self, osszeg):
+            pass  # töltsd ki
+
+        def kivesz(self, osszeg):
+            pass  # töltsd ki, térjen vissza True/False értékkel
+
+    szamla = Szamla(int(input()))
+    n = int(input())
+    # dolgozd fel a műveleteket
+  csharp: |
+    using System;
+
+    class Szamla
+    {
+        public int Egyenleg;
+
+        public void Befizet(int osszeg)
+        {
+            // töltsd ki
+        }
+
+        public bool Kivesz(int osszeg)
+        {
+            return false; // töltsd ki
+        }
+    }
+
+    class Program
+    {
+        static void Main()
+        {
+            var szamla = new Szamla();
+            szamla.Egyenleg = int.Parse(Console.ReadLine());
+            int n = int.Parse(Console.ReadLine());
+            // dolgozd fel a műveleteket
+        }
+    }
+sample_solutions:
+  python: |
+    class Szamla:
+        def __init__(self, egyenleg):
+            self.egyenleg = egyenleg
+
+        def befizet(self, osszeg):
+            self.egyenleg += osszeg
+
+        def kivesz(self, osszeg):
+            if self.egyenleg >= osszeg:
+                self.egyenleg -= osszeg
+                return True
+            return False
+
+    szamla = Szamla(int(input()))
+    n = int(input())
+    elutasitott = 0
+    for _ in range(n):
+        resz = input().split()
+        osszeg = int(resz[1])
+        if resz[0] == "B":
+            szamla.befizet(osszeg)
+        elif not szamla.kivesz(osszeg):
+            elutasitott += 1
+    print("Egyenleg:", szamla.egyenleg)
+    print("Elutasitott:", elutasitott)
+  csharp: |
+    using System;
+
+    class Szamla
+    {
+        public int Egyenleg;
+
+        public void Befizet(int osszeg)
+        {
+            Egyenleg += osszeg;
+        }
+
+        public bool Kivesz(int osszeg)
+        {
+            if (Egyenleg >= osszeg)
+            {
+                Egyenleg -= osszeg;
+                return true;
+            }
+            return false;
+        }
+    }
+
+    class Program
+    {
+        static void Main()
+        {
+            var szamla = new Szamla();
+            szamla.Egyenleg = int.Parse(Console.ReadLine());
+            int n = int.Parse(Console.ReadLine());
+            int elutasitott = 0;
+            for (int i = 0; i < n; i++)
+            {
+                string[] resz = Console.ReadLine().Split(' ');
+                int osszeg = int.Parse(resz[1]);
+                if (resz[0] == "B")
+                {
+                    szamla.Befizet(osszeg);
+                }
+                else if (!szamla.Kivesz(osszeg))
+                {
+                    elutasitott++;
+                }
+            }
+            Console.WriteLine("Egyenleg: " + szamla.Egyenleg);
+            Console.WriteLine("Elutasitott: " + elutasitott);
+        }
+    }
+tests:
+  - { stdin: "1000\n4\nB 500\nK 2000\nK 300\nK 1200\n", expected: "Egyenleg: 0\nElutasitott: 1\n", hidden: false }
+  - { stdin: "0\n1\nK 1\n", expected: "Egyenleg: 0\nElutasitott: 1\n", hidden: true }
+  - { stdin: "500\n0\n", expected: "Egyenleg: 500\nElutasitott: 0\n", hidden: true }
+  - { stdin: "100\n5\nK 100\nB 50\nK 60\nB 10\nK 60\n", expected: "Egyenleg: 0\nElutasitott: 1\n", hidden: true }
+  - { stdin: "2000\n3\nB 1000\nB 1000\nK 4000\n", expected: "Egyenleg: 0\nElutasitott: 0\n", hidden: true }

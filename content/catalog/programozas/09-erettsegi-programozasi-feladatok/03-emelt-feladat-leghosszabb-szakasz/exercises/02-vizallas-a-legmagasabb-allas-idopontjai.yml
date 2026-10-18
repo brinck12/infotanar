@@ -1,0 +1,194 @@
+slug: vizallas-a-legmagasabb-allas-idopontjai
+title: 'Vízállás: a legmagasabb állás időpontjai'
+position: 1
+kind: code
+level: emelt
+difficulty: 2
+published: false
+allowed_languages:
+- python
+- csharp
+description: |
+  Egy folyó vízállását naponta egyszer mérik. A `vizallas.txt` fájl első sora fejléc (`datum`, `allas`), utána minden sor egy mérés, tabulátorral tagolva: a dátum (`ÉÉÉÉ-HH-NN` alakban) és a vízállás centiméterben (egész szám). A sorok időrendben, hézag nélkül követik egymást: minden sor az előző napot követő nap mérése. A fájl legalább egy mérést tartalmaz.
+
+  A programban egy mérést rekordként (osztályként) érdemes tárolni: dátum, vízállás. Minden részfeladat kimenete a sorszámával kezdődik (`N. feladat`), a kimenetben ne használj ékezetes betűt. Ahol a feladat bevitelt kér, a kérdést külön sorban írd ki, csak utána olvass be.
+
+  Keresd meg a legmagasabb vízállást, és add meg, hogy mikor volt először, és mikor utoljára ekkora. Ha csak egyszer volt, a két dátum megegyezik.
+
+  ```
+  Legmagasabb allas: <allas> cm
+  Eloszor: <datum>
+  Utoljara: <datum>
+  ```
+
+  Kimenet a mellékelt mintafájllal:
+
+  ```
+  2. feladat
+  Legmagasabb allas: 230 cm
+  Eloszor: 2024-03-22
+  Utoljara: 2024-03-23
+  ```
+
+  Tipp: előbb keresd meg a maximumot, aztán egy második ciklusban nézd végig az egyező napokat: az első találatot jegyezd meg, az utolsót minden találatkor írd felül.
+starter_code:
+  python: |
+    class Meres:
+        def __init__(self, datum, allas):
+            self.datum = datum
+            self.allas = allas
+    print("2. feladat")
+    with open("vizallas.txt", encoding="utf-8") as f:
+        sorok = f.read().splitlines()
+    meresek = []
+    for sor in sorok[1:]:
+        r = sor.split("\t")
+        meresek.append(Meres(r[0], int(r[1])))
+    # ide írd a megoldást
+  csharp: |
+    using System;
+    using System.Collections.Generic;
+    using System.IO;
+    using System.Linq;
+
+    class Meres
+    {
+        public string Datum;
+        public int Allas;
+    }
+
+    class Program
+    {
+        static void Main()
+        {
+            Console.WriteLine("2. feladat");
+            string[] sorok = File.ReadAllLines("vizallas.txt");
+            List<Meres> meresek = new List<Meres>();
+            for (int i = 1; i < sorok.Length; i++)
+            {
+                string[] r = sorok[i].Split('\t');
+                Meres m = new Meres();
+                m.Datum = r[0];
+                m.Allas = int.Parse(r[1]);
+                meresek.Add(m);
+            }
+            // ide írd a megoldást
+        }
+    }
+sample_solutions:
+  python: |
+    class Meres:
+        def __init__(self, datum, allas):
+            self.datum = datum
+            self.allas = allas
+    print("2. feladat")
+    with open("vizallas.txt", encoding="utf-8") as f:
+        sorok = f.read().splitlines()
+    meresek = []
+    for sor in sorok[1:]:
+        r = sor.split("\t")
+        meresek.append(Meres(r[0], int(r[1])))
+    max_allas = meresek[0].allas
+    for m in meresek:
+        if m.allas > max_allas:
+            max_allas = m.allas
+    elso = None
+    utolso = None
+    for m in meresek:
+        if m.allas == max_allas:
+            if elso is None:
+                elso = m.datum
+            utolso = m.datum
+    print(f"Legmagasabb allas: {max_allas} cm")
+    print(f"Eloszor: {elso}")
+    print(f"Utoljara: {utolso}")
+  csharp: |
+    using System;
+    using System.Collections.Generic;
+    using System.IO;
+    using System.Linq;
+
+    class Meres
+    {
+        public string Datum;
+        public int Allas;
+    }
+
+    class Program
+    {
+        static void Main()
+        {
+            Console.WriteLine("2. feladat");
+            string[] sorok = File.ReadAllLines("vizallas.txt");
+            List<Meres> meresek = new List<Meres>();
+            for (int i = 1; i < sorok.Length; i++)
+            {
+                string[] r = sorok[i].Split('\t');
+                Meres m = new Meres();
+                m.Datum = r[0];
+                m.Allas = int.Parse(r[1]);
+                meresek.Add(m);
+            }
+            int maxAllas = meresek[0].Allas;
+            foreach (Meres m in meresek)
+            {
+                if (m.Allas > maxAllas)
+                {
+                    maxAllas = m.Allas;
+                }
+            }
+            string elso = null;
+            string utolso = null;
+            foreach (Meres m in meresek)
+            {
+                if (m.Allas == maxAllas)
+                {
+                    if (elso == null)
+                    {
+                        elso = m.Datum;
+                    }
+                    utolso = m.Datum;
+                }
+            }
+            Console.WriteLine("Legmagasabb allas: " + maxAllas + " cm");
+            Console.WriteLine("Eloszor: " + elso);
+            Console.WriteLine("Utoljara: " + utolso);
+        }
+    }
+files:
+  vizallas.txt: vizallas.txt
+tests:
+- stdin: ''
+  expected: |
+    2. feladat
+    Legmagasabb allas: 230 cm
+    Eloszor: 2024-03-22
+    Utoljara: 2024-03-23
+  hidden: false
+- stdin: ''
+  expected: |
+    2. feladat
+    Legmagasabb allas: 30 cm
+    Eloszor: 2024-03-03
+    Utoljara: 2024-03-03
+  hidden: true
+  files:
+    vizallas.txt: teszt-2/vizallas.txt
+- stdin: ''
+  expected: |
+    2. feladat
+    Legmagasabb allas: 50 cm
+    Eloszor: 2024-02-27
+    Utoljara: 2024-03-01
+  hidden: true
+  files:
+    vizallas.txt: teszt-3/vizallas.txt
+- stdin: ''
+  expected: |
+    2. feladat
+    Legmagasabb allas: 90 cm
+    Eloszor: 2024-12-30
+    Utoljara: 2025-01-02
+  hidden: true
+  files:
+    vizallas.txt: teszt-4/vizallas.txt

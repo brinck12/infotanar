@@ -61,7 +61,7 @@ function ResultView({ examId, attemptId, result, attempt }: ResultViewProps) {
 
   return (
     <main className="mx-auto w-full max-w-page flex-1 px-4 pt-8 pb-24 md:px-6">
-      <Breadcrumb items={[{ label: 'Gyakorló vizsgák', to: '/vizsgak' }, { label: name }]} />
+      <Breadcrumb items={[{ label: 'Érettségi gyakorlás', to: '/vizsgak' }, { label: name }]} />
       <PageTitle className="mt-4">Az eredményed</PageTitle>
 
       {navigationState?.notice === 'conflict' && (

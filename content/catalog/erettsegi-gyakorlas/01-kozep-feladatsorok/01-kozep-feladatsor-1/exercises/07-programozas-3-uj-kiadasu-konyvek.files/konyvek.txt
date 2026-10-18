@@ -1,0 +1,12 @@
+Nemes Anna;Az elveszett kulcs;1970;546
+Varga Lilla;Kek ejszaka;1968;289
+Horvath Mate;Napraforgo;1979;396
+Toth Gabor;Tortenelmi kalauz;1976;224
+Nemes Anna;Esti mesek;2022;435
+Horvath Mate;Barlangok vilaga;2005;499
+Toth Gabor;Holdfeny;1990;552
+Varga Lilla;A regi malom;2022;464
+Szabo Eszter;A tanito naploja;2019;207
+Szabo Eszter;Papirsarkany;1965;485
+Szabo Eszter;Hegyek kozott;2014;246
+Toth Gabor;A harmadik ajto;1975;106

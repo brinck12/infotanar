@@ -28,7 +28,7 @@ import { Paywall } from '../../workspace/components/Paywall'
 
 /**
  * A lecke azonosítójával érkező régi hivatkozás (`/leckek/:id`): a katalógusból
- * kikeressük a sávot és a lecke nevét, majd a végleges címre irányítunk.
+ * kikeressük a tanulási utat és a lecke nevét, majd a végleges címre irányítunk.
  */
 export function LessonById() {
   const id = Number(useParams<{ id: string }>().id)
@@ -72,7 +72,7 @@ export function LessonPage() {
 function Lesson({ lesson }: { lesson: LessonDetail }) {
   const firstExercise = lesson.exercises[0]
   const trackPath = `/tanulasi-ut/${encodeURIComponent(lesson.track.slug)}`
-  useDocumentMeta({ title: lesson.title, description: `${lesson.title}: videós lecke és gyakorlófeladatok a(z) ${lesson.track.title} sávban.` })
+  useDocumentMeta({ title: lesson.title, description: `${lesson.title}: videós lecke és gyakorlófeladatok a(z) ${lesson.track.title} tanulási úton.` })
 
   return (
     <main className="mx-auto w-full max-w-page flex-1 px-4 pt-8 pb-24 md:px-6">
@@ -170,7 +170,7 @@ function Exercises({ exercises }: { exercises: ExerciseSummary[] }) {
   )
 }
 
-/** A lecke moduljának többi leckéje; a sáv szerkezetéből jön, ezért a lecke után, külön töltődik. */
+/** A lecke moduljának többi leckéje; a tanulási út szerkezetéből jön, ezért a lecke után, külön töltődik. */
 function ModuleOutline({ lesson }: { lesson: LessonDetail }) {
   const track = useQuery(trackQuery(lesson.track.slug))
   const module = track.data?.modules.find((item) => item.id === lesson.module.id)
@@ -183,7 +183,7 @@ function ModuleOutline({ lesson }: { lesson: LessonDetail }) {
 
   return (
     <aside className="w-full md:w-80 md:flex-none">
-      <Panel as="nav" aria-label="A modul leckéi">
+      <Panel as="nav" aria-label="A szakasz leckéi">
         <CardTitle as="h2">{module.title}</CardTitle>
         {tracked && (
           <p className="mt-1 text-15 text-ink-soft">

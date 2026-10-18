@@ -1,0 +1,99 @@
+slug: erettsegi-osztalyzat
+title: Érettségi osztályzat
+position: 0
+kind: code
+level: kozep
+difficulty: 2
+published: false
+allowed_languages: [python, csharp]
+description: |
+  Olvasd be az érettségi pontszámot (egész szám). Írd ki a hozzá tartozó osztályzatot számmal:
+
+  - 0-24 pont: 1
+  - 25-39 pont: 2
+  - 40-59 pont: 3
+  - 60-79 pont: 4
+  - 80-100 pont: 5
+
+  Ha a pontszám kisebb, mint 0, vagy nagyobb, mint 100, írd ki: `ervenytelen`.
+
+  Példa: a `65` bemenetre a kimenet `4`.
+
+  Tipp: először az érvénytelen esetet vizsgáld (`vagy` kapcsolattal), utána jöhet a sávok vizsgálata.
+starter_code:
+  python: |
+    pont = int(input())
+    # innen folytasd
+  csharp: |
+    using System;
+
+    class Program
+    {
+        static void Main()
+        {
+            int pont = int.Parse(Console.ReadLine());
+            // innen folytasd
+        }
+    }
+sample_solutions:
+  python: |
+    pont = int(input())
+    if pont < 0 or pont > 100:
+        print("ervenytelen")
+    elif pont < 25:
+        print(1)
+    elif pont < 40:
+        print(2)
+    elif pont < 60:
+        print(3)
+    elif pont < 80:
+        print(4)
+    else:
+        print(5)
+  csharp: |
+    using System;
+
+    class Program
+    {
+        static void Main()
+        {
+            int pont = int.Parse(Console.ReadLine());
+            if (pont < 0 || pont > 100)
+            {
+                Console.WriteLine("ervenytelen");
+            }
+            else if (pont < 25)
+            {
+                Console.WriteLine(1);
+            }
+            else if (pont < 40)
+            {
+                Console.WriteLine(2);
+            }
+            else if (pont < 60)
+            {
+                Console.WriteLine(3);
+            }
+            else if (pont < 80)
+            {
+                Console.WriteLine(4);
+            }
+            else
+            {
+                Console.WriteLine(5);
+            }
+        }
+    }
+tests:
+  - { stdin: "65\n", expected: "4\n", hidden: false }
+  - { stdin: "0\n", expected: "1\n", hidden: true }
+  - { stdin: "24\n", expected: "1\n", hidden: true }
+  - { stdin: "25\n", expected: "2\n", hidden: true }
+  - { stdin: "39\n", expected: "2\n", hidden: true }
+  - { stdin: "40\n", expected: "3\n", hidden: true }
+  - { stdin: "59\n", expected: "3\n", hidden: true }
+  - { stdin: "60\n", expected: "4\n", hidden: true }
+  - { stdin: "80\n", expected: "5\n", hidden: true }
+  - { stdin: "100\n", expected: "5\n", hidden: true }
+  - { stdin: "-1\n", expected: "ervenytelen\n", hidden: true }
+  - { stdin: "101\n", expected: "ervenytelen\n", hidden: true }

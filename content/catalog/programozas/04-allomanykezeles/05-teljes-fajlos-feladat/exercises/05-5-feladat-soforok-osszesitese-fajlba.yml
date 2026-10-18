@@ -1,0 +1,136 @@
+slug: 5-feladat-soforok-osszesitese-fajlba
+title: '5. feladat: sofőrök összesítése fájlba'
+position: 4
+kind: code
+level: emelt
+difficulty: 4
+published: false
+allowed_languages:
+- python
+- csharp
+description: |
+  Az `ut.txt` fájl egy fuvarozó cég útjait tartalmazza, tabulátorral tagolva. Az első sor fejléc (`datum`, `sofor`, `km`, `perc`); minden további sor egy út: a dátum (`EEEE-HH-NN` alakban), a sofőr neve (ékezet nélkül, szóköz nélkül), a megtett kilométerek és az út ideje percben (egész számok). A fájl legalább egy utat tartalmaz.
+
+  Írd ki az `5. feladat` szöveget. Készíts `soforok.txt` néven tabulátorral tagolt összesítő fájlt: az első sor a fejléc (`sofor`, `utak`, `km`), utána sofőrönként egy sor a sofőr nevével, útjainak számával és a kilométerek összegével. A sofőrök sorrendje az, ahogy először feltűnnek az `ut.txt` fájlban. Végül olvasd vissza a fájlt, és írd ki a tartalmát:
+
+  ```
+  5. feladat
+  sofor<TAB>utak<TAB>km
+  Kovacs<TAB>4<TAB>330
+  Nagy<TAB>3<TAB>293
+  Szabo<TAB>3<TAB>285
+  ```
+
+  Tipp: a sofőrönkénti összegeket szótárban (C#-ban `Dictionary`) gyűjtheted, a sorrendhez pedig egy külön listát vezess a nevekről.
+starter_code:
+  python: |
+    print("5. feladat")
+    with open("ut.txt", encoding="utf-8") as f:
+        sorok = f.read().splitlines()
+    nevek = []
+    utak = {}
+    km = {}
+    # ide írd az összesítést, majd a fájl írását és visszaolvasását
+  csharp: |
+    using System;
+    using System.Collections.Generic;
+    using System.IO;
+
+    class Program
+    {
+        static void Main()
+        {
+            Console.WriteLine("5. feladat");
+            string[] sorok = File.ReadAllLines("ut.txt");
+            List<string> nevek = new List<string>();
+            Dictionary<string, int> utak = new Dictionary<string, int>();
+            Dictionary<string, int> km = new Dictionary<string, int>();
+            // ide írd az összesítést, majd a fájl írását és visszaolvasását
+        }
+    }
+sample_solutions:
+  python: |
+    print("5. feladat")
+    with open("ut.txt", encoding="utf-8") as f:
+        sorok = f.read().splitlines()
+    nevek = []
+    utak = {}
+    km = {}
+    for sor in sorok[1:]:
+        mezok = sor.split("\t")
+        nev = mezok[1]
+        if nev not in utak:
+            nevek.append(nev)
+            utak[nev] = 0
+            km[nev] = 0
+        utak[nev] += 1
+        km[nev] += int(mezok[2])
+    with open("soforok.txt", "w", encoding="utf-8") as ki:
+        ki.write("sofor\tutak\tkm\n")
+        for nev in nevek:
+            ki.write(nev + "\t" + str(utak[nev]) + "\t" + str(km[nev]) + "\n")
+    with open("soforok.txt", encoding="utf-8") as f:
+        for sor in f:
+            print(sor.rstrip("\n"))
+  csharp: |
+    using System;
+    using System.Collections.Generic;
+    using System.IO;
+
+    class Program
+    {
+        static void Main()
+        {
+            Console.WriteLine("5. feladat");
+            string[] sorok = File.ReadAllLines("ut.txt");
+            List<string> nevek = new List<string>();
+            Dictionary<string, int> utak = new Dictionary<string, int>();
+            Dictionary<string, int> km = new Dictionary<string, int>();
+            for (int i = 1; i < sorok.Length; i++)
+            {
+                string[] mezok = sorok[i].Split('\t');
+                string nev = mezok[1];
+                if (!utak.ContainsKey(nev))
+                {
+                    nevek.Add(nev);
+                    utak[nev] = 0;
+                    km[nev] = 0;
+                }
+                utak[nev]++;
+                km[nev] += int.Parse(mezok[2]);
+            }
+            using (StreamWriter ki = new StreamWriter("soforok.txt"))
+            {
+                ki.WriteLine("sofor\tutak\tkm");
+                foreach (string nev in nevek)
+                {
+                    ki.WriteLine(nev + "\t" + utak[nev] + "\t" + km[nev]);
+                }
+            }
+            foreach (string sor in File.ReadAllLines("soforok.txt"))
+            {
+                Console.WriteLine(sor);
+            }
+        }
+    }
+files:
+  ut.txt: ut.txt
+tests:
+- stdin: ''
+  expected: "5. feladat\nsofor\tutak\tkm\nKovacs\t4\t330\nNagy\t3\t293\nSzabo\t3\t285\n"
+  hidden: false
+- stdin: ''
+  expected: "5. feladat\nsofor\tutak\tkm\nVarga\t2\t200\nLakatos\t1\t99\n"
+  hidden: true
+  files:
+    ut.txt: teszt-2/ut.txt
+- stdin: ''
+  expected: "5. feladat\nsofor\tutak\tkm\nBiro\t1\t7\n"
+  hidden: true
+  files:
+    ut.txt: teszt-3/ut.txt
+- stdin: ''
+  expected: "5. feladat\nsofor\tutak\tkm\nTar\t3\t360\nPap\t2\t380\nFeher\t1\t101\n"
+  hidden: true
+  files:
+    ut.txt: teszt-4/ut.txt

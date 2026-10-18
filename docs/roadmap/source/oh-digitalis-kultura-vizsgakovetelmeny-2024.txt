@@ -1,0 +1,931 @@
+
+=====PAGE 1=====
+A közzététel időpontja: 2021. július 16. 
+Az alkalmazás kezdő dátuma: 2022. január 1. 
+ 
+DIGITÁLIS KULTÚRA 
+ 
+RÉSZLETES ÉRETTSÉGI VIZSGAKÖVETELMÉNYEK 
+ 
+ 
+A) KOMPETENCIÁK 
+ 
+Általános kompetenciák 
+ A vizsgázó legyen képes alkalmazói készsége t igénylő feladatokat megoldani, felismerni és élő ny elven megfogalmazni a 
+problémát és problémára adekvát megoldást adni. A felismert problémát algoritmikus gondolkodás útján, az algoritmikus 
+gondolkodást segítő eszközök és szoftverek használatával oldja meg.  Legyen képes önálló munkavégzésre, végezzen alkotó 
+munkát a problémamegoldás során. Legyen tisztában az informatika és a társadalom kölcsönhatásaival, használja az operációs 
+rendszer hálózati szolgáltatásait. Legyen képes a digitális eszközöket integráltan használni. 
+ 
+Tartalomorientált kompetenciák 
+ Szövegszerkesztés 
+ Számítógépes grafika és képszerkesztés 
+ Bemutatókészítés 
+ Táblázatkezelés 
+ Adatbázis-kezelés 
+ Publikálás a világhálón 
+ Algoritmizálás, adatmodellezés 
+ A programozás eszközei 
+ 
+Az érettségi vizsgán követelmény a komplex eszközhasználat, a feladatokban megjelenhetnek más témakörökhöz tartozó elemek. A 
+vizsgázónak képesnek kell lennie a problémamegoldás során az eszközök integrált használatára. 
+ 
+1. Szövegszerkesztés 
+A vizsgázó 
+ tudjon kezelni egy választott szövegszerkesztő programot; 
+ tudja használni a szövegszerkesztő program eszközeit az adott probléma megoldására; 
+ tudjon feladatleírás alapján szöveges dokumentumokat készíteni; 
+ tudja kezelni a szövegszerkesztő nyelvi eszközeit; 
+
+=====PAGE 2=====
+ 
+ 
+ tudjon szöveges dokumentumaiba képeket, tábláz atokat, illetve egyéb objektumokat beilleszteni, és tulajdonságaikat 
+módosítani; 
+ tudjon kördokumentumot létrehozni; 
+ legyen képes nagyméretű dokumentumok kezelését megkönnyítő eljárások alkalmazására. 
+ 
+2. Számítógépes grafika és képszerkesztés 
+A vizsgázó 
+ tudjon létrehozni az adott probléma megoldásához szükséges rasztergrafikus ábrákat és tudjon ábrákat módosítani; 
+ tudjon létrehozni az adott probléma megoldásához szükséges vektorgrafikus ábrákat és tudjon ábrákat módosítani; 
+ ismerje a raszter-, a vektorgrafikus ábrák tárolási és szerkesztési módszereit; 
+ tudjon digitálisan rögzített képet, fényképet módosítani, manipulálni, szerkeszteni; 
+ tudjon raszter- és vektorgrafikus ábrákat egymásba átalakítani. 
+ 
+3. Bemutatókészítés 
+A vizsgázó 
+ tudjon kezelni egy választott bemutatókészítő programot; 
+ tudja használni a bemutatókészítő program eszközeit az adott probléma megoldására; 
+ tudjon feladatleírás alapján bemutatót készíteni; 
+ legyen képes képeket és ábrákat a szöveges környezetbe helyezni, adatokat táblázatosan elrendezni; 
+ tudja alkalmazni a bemutatókészítési alapelveket; 
+ tudjon interaktív bemutatókat létrehozni. 
+ 
+4. Táblázatkezelés 
+A vizsgázó 
+ tudjon kezelni egy választott táblázatkezelő programot; 
+ tudja használni a táblázatkezelő program eszközeit az adott probléma megoldására; 
+ tudjon a táblázatba szöveget, képet, illetve egyéb objektumot beilleszteni, és azok tulajdonságait módosítani; 
+ legyen képes adatokat táblázatokba rendezni, és áttekinthető módon formázni; 
+ tudjon függvényeket és saját képleteket használva számításokat végezni az adatokkal 
+ tudja célszerűen használni a különböző adatformátumokat; 
+ tudjon hivatkozásokat használni; 
+ tudjon adatokat rendezni, közülük meghatározottakat kigyűjteni; 
+
+=====PAGE 3=====
+ 
+ 
+ tudjon megfelelő típusú diagramot készíteni, tulajdonságait módosítani. 
+ 
+5. Adatbázis-kezelés 
+A vizsgázó 
+ tudjon kezelni egy választott adatbázis-kezelő rendszert; 
+ tudja használni az adatbázis-kezelő eszközeit az adott probléma megoldására; 
+ az adatmodell alapján tudjon adatbázist definiálni, annak tartalmát karbantartani; 
+ legyen képes fájlban tárolt adatokat importálni az adatbázis-kezelő programba; 
+ ismerje az adattípusokat, az adatokon értelmezett műveleteket és függvényeket; 
+ tudjon adattáblák között kapcsolatokat felismerni és használni; 
+ tudjon adatbázisokból lekérdezéssel információt nyerni; 
+ legyen képes az adattáblák tartalmának módosítására. 
+ 
+6. Publikálás a világhálón 
+A vizsgázó 
+ ismerje a HTML formátumú dokumentumok szerkezeti elemeit; 
+ értse a CSS használatának alapelveit; 
+ tudja webdokumentum tartalmát és stílusát szerkeszteni; 
+ tudjon weblapot készíteni HTML és CSS nyelven kódszerkesztő alkalmazással. 
+ 
+7. Algoritmizálás, adatmodellezés 
+A vizsgázó 
+ tudjon pontos feladatmeghatározás alapján adatmodellt felállítani; 
+ ismerje az algoritmusok mondatszerű leírását; 
+ ismerje a típusalgoritmusok felhasználásának lehetőségeit; 
+ tudjon a megoldandó feladathoz algoritmust készíteni; 
+ legyen képes algoritmusok számítógépes megvalósítására szövegesen vagy algoritmusleíró eszközzel megadott feladat alapján. 
+ 
+8. A programozás eszközei 
+A vizsgázó 
+ legyen képes programozási feladatot a választott programozási nyelven megoldani; 
+ tudja használni a választott programozási nyelvet és a választott fejlesztői környezetet. 
+
+=====PAGE 4=====
+ 
+ 
+B) VIZSGAKÖVETELMÉNYEK 
+ 
+Az emelt szintű vizsga tartalmi követelményeibe beletartoznak a középszintű vizsga tartalmi követelményei. 
+ 
+1. Szövegszerkesztés 
+ 
+TÉMÁK VIZSGASZINTEK 
+Középszint Emelt szint 
+1.1. A szövegszerkesztő használata   
+1.1.1. Dokumentum létrehozása, 
+megnyitása, mentése 
+Tudjon különféle formátumú 
+dokumentumokat megnyitni és menteni. 
+ 
+1.1.2. Szövegbevitel, szövegjavítás Tudjon szöveget bevinni, javítani, törölni és 
+szimbólumokat beszúrni. 
+ 
+1.2. Szövegjavítási funkciók   
+1.2.1. Keresés és csere Ismerje a szövegszerkesztő keresés és csere 
+funkcióit. 
+ 
+1.2.2. Kijelölés, másolás, mozgatás, 
+törlés 
+Tudja kijelölni a dokumentum megfelelő 
+részét, legyen képes azt másolni, mozgatni, 
+törölni, másik dokumentumba beilleszteni. 
+ 
+1.2.3. Nyelvi segédeszközök Tudja használni a nyelvi ellenőrzés és az 
+elválasztás lehetőségeit. 
+ 
+1.3. Szövegszerkesztési alapok   
+1.3.1. A dokumentum egységei Ismerje a karakter, szó, sor, bekezdés, 
+hasáb, szakasz, oldal fogalmát  és 
+használatát. 
+Ismerje a tipográfia alapelveit. 
+ 
+1.3.2. Karakterformázás Legyen képes beállítani a karakterek 
+betűtípusát, méretét, stílusát, színét. 
+ 
+1.3.3. Bekezdésformázás Legyen képes beállítani a bekezdések 
+behúzását, térközét,  sorközét, igazítását, 
+szövegbeosztását, szegélyét, hátterét és 
+mintázatát. 
+Legyen képes egy- és többszintű felsorolást, 
+ 
+
+=====PAGE 5=====
+ 
+ 
+TÉMÁK VIZSGASZINTEK 
+Középszint Emelt szint 
+sorszámozott felsorolást létrehozni. 
+Tudjon különböző beállítású tabulátorokat 
+használni. 
+Legyen képes iniciálét létrehozni, jellemzőit 
+módosítani. 
+1.3.4. Szakaszformázás Legyen képes többhasábos szakaszt 
+kialakítani, jellemzőit módosítani. 
+Legyen képes kialakítani és beállítani 
+élőfejet, élőlábat, lapszámozást, margókat, 
+laptájolást, lapméretet, oldalszegélyt, 
+háttérszínt, végjegyzetet, lábjegyzetet. 
+ 
+1.3.5. Stílusok Legyen képes a szövegszerkesztőben 
+megtalálható stílusok alkalmazására, 
+módosítására. 
+Legyen képes új stílust létrehozni, stílusok 
+tulajdonságait beállítani és stílusokat 
+használni 
+1.3.6. Nyomtatás Legyen képes a dokumentumot nyomtatásra 
+előkészíteni és dokumentumokat megadott 
+feltétek szerint fájlba (pl. PDF) nyomtatni. 
+ 
+1.4. Táblázatok és objektumok a 
+szövegben 
+  
+1.4.1. Táblázatkészítés a 
+szövegszerkesztővel 
+Legyen képes szöveges dokumentumokban 
+táblázatot létrehozni, szerkeszteni és a 
+táblázat tulajdonságait beállítani. 
+ 
+1.4.2. Kördokumentum-készítés  Tudjon kördokumentumot készíteni. 
+1.4.3. Képek , alakzatok és egyéb 
+objektumok 
+Legyen képes képeket, alakzatokat és egyéb 
+objektumokat beilleszteni valamint 
+tulajdonságaikat beállítani. 
+ 
+1.4.4. Tartalomjegyzék Legyen képes tartalomjegyzéket készíteni 
+stílusok felhasználásával. 
+ 
+
+=====PAGE 6=====
+ 
+ 
+ 
+2. Számítógépes grafika és képszerkesztés 
+ 
+TÉMÁK VIZSGASZINTEK 
+Középszint Emelt szint 
+2.1. Grafika   
+2.1.1. Megnyitás, mentés, beszúrás Tudjon grafikát, illetve képállományokat 
+megnyitni, megadott formátumban menteni. 
+Legyen képes ábrá kat, képe ket szöveges 
+környezetben elhelyezni. 
+Legyen képes raszter - és vektorgrafikus 
+ábrákat egymásba átalakítani. 
+ 
+2.1.2. Alakzatok megrajzolása, 
+módosítása 
+Tudjon alakzatokat, rajzolni, javítani, 
+módosítani, transzformálni. 
+ 
+2.2. A rasztergrafika   
+2.2.1. Létrehozás, megnyitás, mentés Tudjon az adott probléma megoldásához 
+szükséges rasztergrafikus ábrákat 
+szerkesztőprogrammal létrehozni, 
+megnyitni és megadott formá tumban 
+menteni. 
+ 
+2.2.2. Alakzatok beillesztése, módosítása Tudja kijelölni a grafika megfelelő részét, 
+legyen képes azt másolni, mozgatni, törölni, 
+másik dokumentumba beilleszteni. 
+Tudjon az ábrakészítéshez rétegeket 
+használni. 
+ 
+2.3. A vektorgrafika   
+2.3.1. Létrehozás, megnyitás, mentés Tudjon az adott probléma megoldásához 
+szükséges vektorgrafikus ábrákat 
+szerkesztőprogrammal létrehozni, 
+megnyitni és megadott formá tumban 
+menteni. 
+ 
+2.3.2. Alakzatok beillesztése, módosítása Tudja kijelölni a grafika megfelelő részét, 
+legyen képes azt másolni, mozgatni, törölni, 
+ 
+
+=====PAGE 7=====
+ 
+ 
+TÉMÁK VIZSGASZINTEK 
+Középszint Emelt szint 
+másik dokumentumba beilleszteni. 
+2.3.3. Alakzatok tulajdonságainak 
+módosítása 
+Tudja alakzat méretét, szegélyét, kitöltését, 
+feliratozását, átlátszóságát állítani. Legyen 
+képes az alakzatot transzformálni: 
+elforgatni, tükrözni, nyírni. 
+ 
+2.3.4. Alakzatok e gymáshoz viszonyított 
+elrendezése és halmazműveletei 
+Legyen képes alakzatokat csoportba 
+foglalni, egymáshoz képest igazítani, 
+elosztani. 
+Tudjon alakzatokkal célszerű 
+halmazműveleteket végezni. 
+ 
+2.3.5. Csomópont- és halmazműveletek Legyen képes csomópontokat és 
+csomópontműveleteket használni az 
+ábrakészítéshez. 
+ 
+ 
+2.4. Képek feldolgozása   
+2.4.1. Megnyitás, mentés Tudjon képeket képfeldolgozó programmal 
+megnyitni és megadott formátumban 
+menteni. 
+ 
+2.4.2. Kép beillesztése, módosítása Tudjon képeket képfeldolgozó programmal 
+kezelni, módosítani. 
+Legyen képes rétegeket és rétegműveleteket 
+használni. 
+Tudjon képeket , képrészleteket  vágni, 
+forgatni, torzítani; színét, fényerejét, 
+kontrasztját módosítani; retusálni. 
+ 
+ 
+3. Bemutatókészítés 
+ 
+TÉMÁK VIZSGASZINTEK 
+Középszint Emelt szint 
+3.1. Bemutatókészítés   
+
+=====PAGE 8=====
+ 
+ 
+TÉMÁK VIZSGASZINTEK 
+Középszint Emelt szint 
+3.1.1. Adatok bevitele és módosítása Tudjon a diákra szöveget bevinni, javítani, 
+törölni és szimbólumokat, képeket, 
+alakzatokat, táblázatokat, diagramokat 
+beszúrni, tudja ezek tulajdonságait 
+módosítani. 
+ 
+3.1.2. Bemutató elkészítése és formázása Legyen képes alkalmazni a 
+bemutatókészítés alapelveit. 
+Legyen képes dia létrehozására, tervezésére; 
+áttűnések, animációk szerkesztésére. 
+Tudja a dia elemeit rendezni. 
+Legyen képes alakzatok segítségével 
+vektorgrafikus ábrát létrehozni. 
+Tudja használni a bemutató vetítésére 
+vonatkozó beállításokat. 
+Legyen képes a diamintát  (diasablont) 
+módosítani és használni. 
+ 
+4. Táblázatkezelés 
+ 
+TÉMÁK VIZSGASZINTEK 
+Középszint Emelt szint 
+4.1. A táblázatkezelő használata   
+4.1.1. Táblázat megnyitása, mentése Tudjon különféle formátumú táblázatokat 
+megnyitni és menteni. 
+ 
+4.1.2. Adatok bevitele, javítása Tudjon adatokat bevinni, javítani, törölni és 
+szimbólumokat beszúrni. 
+Tudjon adatokat importálni és exportálni 
+megfelelő karakterkódolással. 
+ 
+4.2. A táblázat szerkezete   
+4.2.1. Cella, oszlop, sor, tartomány, 
+munkalap 
+Ismerje a cella, az oszlop, a sor, a tartomány, 
+valamint a munkalap fogalmát. 
+Tudja ezeket beilleszteni, másolni, 
+mozgatni, illetve törölni. 
+ 
+
+=====PAGE 9=====
+ 
+ 
+TÉMÁK VIZSGASZINTEK 
+Középszint Emelt szint 
+4.3. Adatok a táblázatokban   
+4.3.1. Cella tartalma Tudja, hogy a cella tartalma szöveg, szám , 
+logikai érték vagy képlet lehet. 
+ 
+4.3.2. Számformátumok Legyen képes megfelelő számformátumot 
+beállítani, és egy éni számformátumot  
+kialakítani. 
+Tudja alkalmazni a dátum, az idő, a 
+pénznem, és a százalék formátumot, 
+továbbá beállítani a tizedesjegyek számát és 
+az ezres tagolást. 
+ 
+4.3.3. Adatok rendezése, kigyűjtése Tudjon a táblázatban adatokat egy vagy 
+több szempont alapján rendezni  és 
+kigyűjteni. 
+ 
+4.3.4. A cellahivatkozások használata Tudjon relatív, abszolút és vegyes 
+hivatkozást használni munkalapon belül és 
+munkalapok között. 
+ 
+4.3.5. Képletek szerkesztése, függvények 
+alkalmazása 
+Tudjon saját képleteket készíteni, 
+függvényeket használni. 
+Ismerje a dátum és idő, a matematikai, a 
+statisztikai, a kereső, a szövegkezelő és a 
+logikai függvények használatát. 
+Ismerje az adatbázis -kezelő függvények 
+használatát. 
+4.4. Táblázatformázás   
+4.4.1. Karakter- és cellaformázások Legyen képes beállítani a karakterek 
+betűtípusát, méretét, stílusát, színét. 
+Legyen képes beállítani a cellák igazítását, 
+szegélyezését, háttérszínét, mintával 
+kitöltését. 
+Legyen képes képlettel meghatározott 
+feltétel alapján cellákra formázást beállítani. 
+4.4.2. Sor-, oszlop, tartománybeálltások Legyen képes beállítani az 
+oszlopszélességet és a sormagasságot. 
+Legyen képes cellákat egyesíteni. 
+Legyen képes tartományokat elnevezni, 
+Legyen képes képletekben tartományokra 
+nevük segítségével hivatkozni. 
+
+=====PAGE 10=====
+ 
+ 
+TÉMÁK VIZSGASZINTEK 
+Középszint Emelt szint 
+munkalapokat átnevezni. 
+4.4.3. Oldalbeállítások Tudjon élőfejet és élőlábat készíteni, az 
+oldal tulajdonságait beállítani. 
+Legyen képes a dokumentumot nyomtatásra 
+előkészíteni és dokumentumokat megadott 
+feltétek szerint fájlba (pl. PDF) nyomtatni. 
+ 
+4.5. Diagramok és egyéb objektumok   
+4.5.1. Diagramok Legyen képes diagramot készíteni, 
+szerkeszteni, módosítani. 
+Tudjon az ábrázolandó adatoknak és a 
+belőle levonandó következtetéseknek 
+megfelelő diagramtípust választani. 
+ 
+4.5.2. Objektumok Tudjon a munkalapra képet, alakzatot és 
+szövegdobozt beilleszteni, azok 
+tulajdonságait beállítani. 
+ 
+ 
+5. Adatbázis-kezelés 
+ 
+TÉMÁK VIZSGASZINTEK 
+Középszint Emelt szint 
+5.1. Az adatbázis-kezelés alapfogalmai   
+5.1.1. Az adatbázis alapfogalmai Ismerje az adatbázis, az adattábla, a rekord, 
+a mező, az elsődleges és idegen kulcs 
+fogalmát. 
+ 
+5.2. Az adatbázis szerkezete és 
+kialakítása 
+  
+5.2.1. Adatbázisok és -táblák előkészítése Tudjon adatbázist létrehozni, annak tábláiba 
+különféle formátumú fájlokból adatot 
+importálni. 
+Legyen képes leírás alapján adattáblát 
+létrehozni. 
+ 
+
+=====PAGE 11=====
+ 
+ 
+TÉMÁK VIZSGASZINTEK 
+Középszint Emelt szint 
+Legyen képes az adattábla mezőit definiálni, 
+a tábla kulcsát beállítani, a táblát adatokkal 
+feltölteni. 
+5.2.2. Adattípusok Ismerje a szöveg, az egész és a valós szám, 
+a dátum és az idő, valamint a logika i érték 
+tárolására szolgáló adattípust. 
+Legyen képes a mezők adattípusát megadni. 
+ 
+5.2.3. Adatok módosítása, törlése Lekérdezés használata nélkül tudjon 
+rekordokat megjeleníteni, egyes mezőket, 
+rekordokat törölni, vagy a bennük levő 
+adatokat újakkal felülírni. 
+ 
+5.2.4. Adattáblák közötti kapcsolatok Tudjon táblák közötti logikai kapcsolatokat 
+létrehozni és felhasználni. 
+ 
+5.3. Adatbázis-kezelési műveletek   
+5.3.1. Lekérdezések Tudjon választó lekérdezéseket készíteni. 
+Tudja kiválasztani, hogy a lekérdezésben 
+mely mezők megjelenítése szükséges. 
+Legyen képes az adatokat  csoportosítva 
+kezelni, szűrni. 
+Tudjon segédlekérdezés készítését igénylő 
+problémát megoldani. 
+Legyen képes az adatokat megadott 
+feltételek szerint rendezve megjeleníteni. 
+Legyen képes a feladatokat SQL utasítások 
+segítségével, lekérdezé s-tervező rács 
+használata nélkül megoldani. 
+Tudjon SQL utasítások segítségével 
+adatbázist létrehozni és törölni. 
+Tudjon SQL utasítások segítségével a 
+tárolandó adatnak megfelelő mezőkkel 
+rendelkező táblákat létrehozni és törölni. 
+Tudjon SQL utasítások segítségével frissítő 
+és törlő lekérdezést készíteni. 
+Tudjon megoldani allekérdezés készítését 
+igénylő problémát. 
+5.3.2. Számítások végzése Legyen képes számított értéket 
+megjeleníteni. 
+Legyen képes ag gregáló függvényeket 
+használni: MAX() , MIN(), COUNT(), 
+SUM(), AVG(). 
+Tudjon leírás alapján tetszőleges függvényt 
+alkalmazni. 
+
+=====PAGE 12=====
+ 
+ 
+TÉMÁK VIZSGASZINTEK 
+Középszint Emelt szint 
+Tudja használni a YEAR(), MONTH(), 
+DAY(), NOW(), HOUR(), MINUTE(), 
+SECOND() függvényeket. 
+ 
+6. Publikálás a világhálón 
+ 
+TÉMÁK VIZSGASZINTEK 
+Középszint Emelt szint 
+6.1 Webhely felépítése   
+6.1.1 Könyvtárszerkezet  Legyen képes a webhely fájljait célszerűen 
+kialakított mapparendszerbe szervezni és 
+elhelyezni. 
+6.1.2 A webhely elemeinek kapcsolata  Tudja kialakítani a webhelyet alkotó 
+különböző típusú állományok célszerű 
+kapcsolatát. 
+Tudjon külső , webhelyen és weboldalon 
+belüli hivatkozásokat létrehozni. 
+Értse és alkalmazza az abszolút és relatív 
+hivatkozások közti különbséget. 
+6.2. Webdokumentum tartalma    
+6.2.1. A tartalom szöveges része  Legyen képes kódszerkesztővel a 
+publikálandó tartalom felépítést tükröző 
+weblapot készíteni HTML nyelven. 
+Ismerje a különféle szerepű oldalelemek, a 
+címek, bekezdések, szakaszok, hivatkozások, 
+listák, táblázatok megadásának módját. 
+Ismerje és használja a HTML címkéinek 
+fontosabb jellemzőit. 
+6.2.2. A tartalom egyéb részei  Tudjon nem szöveges elemeket a weboldalba 
+építeni. 
+6.3. Webdokumentum formázása   
+
+=====PAGE 13=====
+ 
+ 
+TÉMÁK VIZSGASZINTEK 
+Középszint Emelt szint 
+6.3.1. A webhely állományainak 
+kapcsolata 
+ Legyen képes a weblap kapcsolatát beállítani 
+a formázásáért felelős CSS-fájllal. 
+6.3.2. A CSS elemei  Legyen képes a weblap elemeit előre 
+elkészített stílusokkal formázni. 
+Tudjon kijelölőket használni. 
+Legyen képes a formázást végző CSS-kód 
+módosítására. 
+Tudjon CSS -kódot a HTML -fájlon belül, 
+illetve önálló fájlban elhelyezni. 
+ 
+7. Algoritmizálás, adatmodellezés 
+ 
+TÉMÁK VIZSGASZINTEK 
+Középszint Emelt szint 
+7.1. Adatszerkezetek, adat be- és kivitel,    
+7.1.1. Egyszerű adattípusok Tudja használni az egyszerű adattípusokat: 
+egész és valós szám, logikai érték, karakter. 
+Ismerje az egyszerű adattípusokon 
+végezhető műveleteket . Tudjon véletlen 
+értékeket előállítani. 
+ 
+7.1.2. Összetett adattípusok Tudja használni a szöveg és a sorozat elemi 
+típusokból felépülő összetett adattípusokat. 
+Ismerje az ezeken az adat típusokon 
+végezhető műveleteket. 
+Legyen képes többdimenziós adatszerkezet 
+használatára. Tudjon összetett 
+adatszerkezetben különböző típusú adatokat 
+tárolni. 
+7.2. Algoritmusleíró eszközök   
+7.2.1. Feladatmegoldás egy algoritmus -
+leíró eszköz segítségével 
+Ismerje a z algoritmusok mondatszerű 
+leírását. 
+Legyen képest megadott algoritmust 
+módosítani. 
+7.3. Elemi algoritmusok   
+7.3.1. A programozás alapelvei Feladatmegoldásához tudja használni az 
+alapvető programszerkezeteket: szekvencia, 
+elágazás, ciklus. 
+Tudja használni a kiválo gatás, rendezés, 
+szétválogatás, metszet és unió 
+típusalgoritmusait. 
+
+=====PAGE 14=====
+ 
+ 
+TÉMÁK VIZSGASZINTEK 
+Középszint Emelt szint 
+Tudja használni a típusalgoritmusokat: 
+összegzés, eldöntés, kiválasztás, keresés, 
+megszámlálás, maximum-kiválasztás. 
+Tudjon egyetlen típusalgoritmust igénylő 
+problémát megoldani. 
+Tudjon közepes nehézségű, 
+típusalgoritmusok egymásba építését 
+igénylő, összetett problémát megoldani. 
+7.4. Rekurzió   
+7.4.1. Rekurzív algoritmus  Ismerje a rekurzió fogalmát. 
+ 
+8. A programozás eszközei 
+ 
+TÉMÁK VIZSGASZINTEK 
+Középszint Emelt szint 
+8.1. Programozási nyelv   
+8.1.1. Egy programozási nyelv ismerete Ismerje egy programozási nyelven a 
+változódeklaráció, a be - és kiviteli 
+utasítások; alapvető programszerkezetek, 
+azaz szekvencia, elágazás, ciklus 
+megvalósítását. 
+Legyen képes egy mondatszerű leírással 
+készült algoritmust a használt programozási 
+nyelvben kódolni. 
+Legyen képes az adott problémát megoldó 
+programot írni. 
+Ismerje egy programozási nyelven az 
+eljárások, függvén yek; állománykezelő 
+műveletek megvalósítását. 
+Legyen képes mondatszerű leírással 
+megadott rekurzív algoritmust kódolni, és 
+felhasználni. 
+8.1.2. Adat be- és kivitel Tudjon olyan parancssori alkalmazást 
+készíteni, amely billentyűzetről képes 
+adatokat olvasn i, illetve monitoron 
+megjeleníteni. 
+Tudjon a felhasználóval kulturáltan 
+kommunikáló adatbevitelt és adatkivitelt 
+írni. 
+Legyen képes a szöveges állományokra 
+alkalmazható műveleteket megvalósítani. 
+8.2. Programfejlesztés és környezet   
+
+=====PAGE 15=====
+ 
+ 
+TÉMÁK VIZSGASZINTEK 
+Középszint Emelt szint 
+8.2.1. Kódolási, szerkesztési eszközök 
+valamilyen programnyelvi fejlesztői 
+környezetben 
+Ismerje egy, a választott programozási 
+nyelvvel használható fejlesztőkörnyezet 
+működését, használatát, eszközeit. 
+ 
+8.2.2. Tesztelés Legyen képes a program különböző 
+kimeneteinek tesztelésére alkalmas 
+mintaadatokkal ellenőrizni a program 
+helyes működését. 
+Tudjon nyomkövetéssel programot 
+tesztelni. 
+ 
+ 
+C) VIZSGALEÍRÁS 
+A vizsga részei 
+ 
+Középszint Emelt szint 
+Gyakorlati vizsga Szóbeli vizsga Gyakorlati vizsga Szóbeli vizsga 
+180 perc 15 perc 240 perc 20 perc 
+100 pont 50 pont 120 pont 30 pont 
+ 
+A vizsgán használható segédeszközök 
+ 
+ Középszint Emelt szint 
+Gyakorlati vizsga Szóbeli vizsga Gyakorlati vizsga Szóbeli vizsga 
+A vizsgázó biztosítja vonalzó NINCS vonalzó NINCS 
+A vizsgaszervező 
+intézmény biztosítja 
+számítógép a megfelelő 
+szoftverekkel 
+nyomtatott és elektronikus 
+források, 
+internetkapcsolattal 
+rendelkező és 
+internetkapcsolattal nem 
+rendelkező számítógép a 
+megfelelő szoftverekkel 
+számítógép a megfelelő 
+szoftverekkel 
+nyomtatott és elektronikus 
+források, 
+internetkapcsolattal 
+rendelkező számítógép  és 
+internetkapcsolattal nem 
+rendelkező számítógép  a 
+megfelelő szoftverekkel 
+ 
+Közzé kell tenni 
+
+=====PAGE 16=====
+ 
+ 
+ 
+ Középszint Emelt szint 
+Gyakorlati vizsga Szóbeli vizsga Gyakorlati vizsga Szóbeli vizsga 
+Anyag szoftverlista NINCS szoftverlista NINCS 
+Határidő a vizsga évét megelőző 
+tanév végéig 
+NINCS a vizsga évét megelőző 
+tanév végéig 
+NINCS 
+Felelős A vizsgaanyagok elkészítéséért felelős intézmény 
+ 
+Gyakorlati vizsga 
+Általános szabályok a vizsga mind a két szintjére 
+A gyakorlati vizsgán az érettségizőknek egy központi feladatsort kell megoldaniuk. A vizsgázó a rendelkezésére álló időt tetszése szerint 
+oszthatja el az egyes feladatok között és megoldásuk sorrendjét is önállóan választhatja meg. 
+A vizsga időtartama alatt a rendszergazdának elérhetőnek kell lennie. A rendszergazda a vizsgaterembe csak gép - vagy szoftverhiba 
+elhárítására hívható be. Jelenlétéről és az általa végzett tevékenységről jegyzőkönyvet kell felvenni. 
+Vizsgázónként szüks éges eszközök: számítógép a megfelelő szoftverekkel (a vizsgaszervező intézmény biztosítja), vonalzó (a 
+vizsgázónak kell hoznia). 
+A fővárosi és megyei kormányhivatal által szervezett vizsgák esetén a vizsgázó az adott vizsgaidőszakra érvényes, az Oktatási  Hivatal 
+által központilag kiadott szoftverlistáról választhat. A középiskola által szervezett vizsga esetén a vizsgázó az iskola álta l kihirdetett 
+szoftverek közül választhat. A vizsgázónak a jelentkezéssel egy időben le kell adnia egy nyilatkozatot, amely ben megjelöli, hogy az 
+érettségi vizsgán az egyes szoftvercsoportokon belül az adott vizsgaidőszakra a vizsgaszervező által rendelkezésére bocsátott  
+szoftverlistából mely szoftvereket kívánja használni. 
+A gyakorlati vizsga helyszínén a vizsgázónak a vizsga kezdete előtt fél órával kell megjelennie, ahol a rendszergazda által kijelölt helyet 
+kell elfoglalnia. Ekkor a rendszergazda írásban tájékoztatja a vizsgázót arról, hogy milyen felhasználói adatai vannak, milyen módon éri 
+el a vizsgához szükséges forrásfájlokat, valamint arról, hogy befejezett munkáját hova mentse. A vizsgázó ellenőrzi, hogy rendelkezésére 
+állnak-e és elindíthatók -e a kiválasztott szoftverek. A vizsga kezdetekor a felügyelő tanár kiosztja a feladatlapot és a lepecsételt 
+piszkozatlapot. A vizsgázó a feladatlapok kiosztásával egyidejűleg kezdheti használni a számítógépet a feladatok megoldására. 
+A felügyelő tanárnak a vizsga befejezése előtt kb. 10 perccel figyelmeztetnie kell a vizsgázókat, hogy mentsék el a munkájukat. 
+ 
+A gyakorlati vizsgarész lebonyolítási szabályai 
+Tárgyi feltételek 
+A terem berendezése 
+ A géptermet lehetőség szerint a számítógépes munkahelyre vonatkozó előírások figyelembevételével kell berendezni. 
+ A monitorok elhelyezése olyan legyen, hogy a vizsgázók egymás munkáját ne zavarják, illetve ne tudják segíteni egymást. 
+
+=====PAGE 17=====
+ 
+ 
+A számítógépek 
+ A megfelelő működés biztosítása érdekében a vizsgakörnyezetet kellő időben elő kell készíteni. Rendelkezésre kell állni legalább 
+a vizsgázók számának megfelelő számú számítógépnek, valamint tartalékgépeknek. 
+ Csak olyan számítógép használható, amely lehetővé teszi az alkalmazott operációs rendszer és egyéb szoftverek gördülékeny 
+futtatását. 
+ A vizsga ideje alatt a gépekről nem lehet elérhető egyetlen olyan állomány sem, amely a várható feladat ok megoldását segíti és 
+nem tartozik a telepített programokhoz. 
+A vizsga előkészítése 
+ A vizsga során használható gépeket (a tartalékgépeket is) úgy kell előkészíteni, hogy a vizsgázók a számukra létrehozott egyedi 
+azonosítóval bejelentkezve tudják elkészít eni a munkájukat. A vizsgázó neve és egyedi azonosító párosokat a 
+vizsgadokumentációval együtt kell kezelni. 
+ A feladatok megoldásához szükséges forrásállományokat minden vizsgázó mappájába be kell másolni, miután az a központból 
+elérhetővé válik. 
+ Az internet elérését tiltani kell a vizsgagépeken a gyakorlati vizsga teljes idejére. 
+Archiválás 
+ A rendszergazda a vizsga után a lehető legrövidebb időn belül a vizsgázók beadott fájljait tartalmazó mappákat legalább két 
+példányban, egyszer írható, kellőképpen elterjedt adathordozóra (például CD vagy DVD) írja. 
+ A vizsgaszervező intézmény az egyik adathordozót bélyegzővel ellátva elzárja mint biztonsági másolatot, a másikat pedig a 
+továbbiakban az írásbeli dolgozatokra vonatkozó szabályoknak megfelelően kezeli. 
+ 
+ 
+KÖZÉPSZINTŰ VIZSGA 
+ 
+A vizsga részei 
+ 
+Gyakorlati vizsga Szóbeli vizsga 
+180 perc 15 perc 
+Számítógéppel megoldandó feladatsor Egy téma összefüggő kifejtése és egy programozással kapcsolatos 
+feladat megoldásának bemutatása 
+100 pont 50 pont 
+ 
+A gyakorlati feladatlap tartalmi jellemzői 
+A feladatsor lefedi az alábbi témaköröket, és időarányaiban a következőkre törekszik: 
+
+=====PAGE 18=====
+ 
+ 
+Feladat Témakör(ök) Idő 
+Szövegszerkesztés Szövegszerkesztés 45 perc 
+Vizuális elemek Számítógépes grafika és képszerkesztés 
+Bemutatókészítés 
+35 perc 
+Táblázatkezelés Táblázatkezelés 40 perc 
+Adatbázis-kezelés Adatbázis-kezelés 30 perc 
+Algoritmizálás és programozás Algoritmizálás, adatmodellezés 
+A programozás eszközei 
+30 perc 
+ 
+Egy-egy feladat állhat egyetlen nagyobb, vagy több kisebb részfeladatból. 
+A vizuális elemek feladatban nem mindegyik témakörnek kell megjelennie. 
+A feladatsor egy része egyértelmű utalásokat tartalmaz a feladat minden részletének megoldására, ezáltal csak a feladatban sz ereplő 
+fogalmak és a feladatmegoldáshoz használt eszköz ismeretét, valamint az eszköz kezelésében való jártasságot méri. Ezeket az 
+utasításokat végrehajtva megszerezhető a pontszám legalább fele. Egy feladatban maximum 30% pontarányban más témakör vagy akár 
+több másik témakör is megjelenhet. 
+ 
+A gyakorlati feladatlap értékelése 
+A gyakorlati vizsgadolgozatot szaktanár javítja és értékeli. Az értékelés központi javítási-értékelési útmutató alapján történik. A javítási-
+értékelési útmutató tartalmazza a feladatok részletes megoldásait, annak egy vagy több lehetséges változatát, az egyes megoldásrészekre 
+adható részpontszámokat, azok lehetséges bontását. A gyakorlati vizsgarészen szerzett pontok vizsgaponttá alakítása központi javítási -
+értékelési útmutató alapján történik. 
+ 
+A témakörök szerinti vizsgapontszámok a következők: 
+Feladat Vizsgapontszám 
+Szövegszerkesztés 25 pont 
+Vizuális elemek 20 pont 
+Táblázatkezelés 25 pont 
+Adatbázis-kezelés 15 pont 
+Algoritmizálás és programozás 15 pont 
+ 
+A vizsga befejeztével a vizsgázó számára kijelölt mappában lévő fájlokról és mappákról archívum készül. Értékelni kizárólag az 
+archívum tartalmát lehet. A javítótanár minden vizsgázó vizsgadolgozatáról értékelőlapot tölt ki. A dolgozat értékelésének 
+megtekintésekor a vizsgázó a s aját munkájáról kitöltött értékelőlap másolatát, valamint az archívum tartalmá nak a vizsgázó saját 
+
+=====PAGE 19=====
+ 
+ 
+adathordozójára készített másolatát kaphatja meg. 
+ 
+Szóbeli vizsga 
+Általános szabályok 
+A szóbeli tételek nem hozhatók nyilvánosságra. 
+A szóbeli vizsga helyszí nén internetkapcsolattal rendelkező és internetkapcsolattal nem rendelkező számítógépnek rendelkezésre kell 
+állnia. Internetkapcsolattal rendelkező számítógépet a vizsgázó csak a felelet  kifejtése során használ hat. A számítógépek 
+működőképességének biztosítása érdekében a rendszergazdának a szóbeli vizsga teljes ideje alatt elérhetőnek kell lennie. 
+ 
+A szóbeli tételsor tartalmi és formai jellemzői 
+A tételsor jellemzői 
+A tételsor legfeljebb 20 tételből áll. A tételsor tételeinek legalább 10%-a évenként cserélendő. 
+Az A) feladatnál felsorolt öt témakörhöz kapcsolódóan legalább két-két tételnek szerepelnie kell a tételsorban. 
+ 
+A tétel jellemzői 
+A szóbeli tétel két feladatból áll:  
+ A) feladat: egy téma kifejtése konkrét tartalmi szempontok alapján a Szövegszerkesztés, Számítógépes grafika és képszerkesztés, 
+Bemutatókészítés, Táblázatkezelés, Adatbázis -kezelés témakörökhöz kapcsolódóan. A téma kifejtéséhez számítógépes 
+szemléltetés is kérhető. 
+ B) feladat:  egy programozási feladat megoldása és bemutatása, amelyhez  ha a feladat kódolást, kódmódosítást, -értelmezést 
+igényel, akkor internetkapcsolattal nem rendelkező számítógépet használhat a vizsgázó a felkészülési ideje alatt. 
+A B) feladatot a vizsgázónak a felkészülési időben kell megoldania. A felelet során a vizsgázónak az A) feladatot szóban, önállóan kell 
+kifejtenie és a B) feladathoz elkészített megoldását kell bemutatnia. 
+A vizsgára megfogalmazott tételek a tételcímeken túl a kifejtéshez konkrét tartalmi szempontokat is felsorolnak. 
+ 
+A szóbeli vizsgarész értékelése 
+A felelet értékelése a következő szempontok alapján történik: 
+Tartalom (Mindent tartalmaz-e, ami a témakörhöz szükséges; vannak-e tárgyi tévedések, rossz magyarázatok.) 28 pont 
+A) feladat 18 pont 
+B) feladat 10 pont 
+Logikai felépítés (Jó időbeosztás; a lényeg kiemelése; követhető gondolatmenet.): 8 pont 
+Kifejezőkészség, szaknyelv használata: 8 pont 
+Kommunikatív készség (Lehet-e a vizsgázót a témában vezetni; ha elakad, megérti-e, amit kérdez a bizottság; lehet-e a 6 pont 
+
+=====PAGE 20=====
+ 
+ 
+vizsgázóval a témáról tartalmas párbeszédet folytatni.): 
+ 
+ 
+EMELT SZINTŰ VIZSGA 
+ 
+A vizsga részei 
+ 
+Gyakorlati vizsga Szóbeli vizsga 
+240 perc 20 perc 
+Számítógéppel megoldandó feladatsor Egy téma összefüggő kifejtése és egy vagy több programozással 
+kapcsolatos feladat megoldásának bemutatása 
+120 pont 30 pont 
+ 
+A gyakorlati feladatlap tartalmi jellemzői 
+A feladatsor tematikailag lefedi az alábbi témaköröket, és időarányaiban a következőkre törekszik: 
+Feladat Témakör(ök) Idő 
+Dokumentumkészítés Szövegszerkesztés 
+Számítógépes grafika és képszerkesztés 
+Bemutatókészítés 
+Publikálás a világhálón 
+70 perc 
+vagy   
+Táblázatkezelés Táblázatkezelés  
+Adatbázis-kezelés Adatbázis-kezelés 70 perc 
+Algoritmizálás és programozás Algoritmizálás, adatmodellezés 
+A programozás eszközei 
+100 perc 
+ 
+A vizsgán az első két feladatból a vizsgázónak egyet kell megoldania. A vizsgázó a feladatlapon jelzi, hogy melyik feladatot választotta. 
+Ha nem derül ki egyértelműen, hogy melyik feladat értékelését kéri, akkor az első feladat kerül értékelésre. 
+Egy-egy feladat állhat egyetlen nagyobb, vagy több kisebb részfeladatból. 
+A Dokumentumkészítés feladatban nem mindegyik témakörnek kell megjelennie. 
+A feladatsor egy része egyértelmű utalásokat tartalmaz a feladat minden részletének megoldására, ezáltal csak a feladatban sz ereplő 
+fogalmak és a feladatot megoldó eszköz ismeretét, valamint az eszköz kezelésében való jártasságot méri. Ezeket az utasítások at 
+végrehajtva megszerezhető a pontszám legalább fele. Egy feladatban maximum 30% pontarányban más témakör vagy akár több másik 
+
+=====PAGE 21=====
+ 
+ 
+témakör is megjelenhet. 
+ 
+A gyakorlati feladatlap értékelése 
+Az értékelés központi javítási -értékelési útmutató alapján történik.  A javítási -értékelési útmutató tartalmazza a feladatok részletes 
+megoldásait, annak egy vagy több lehetséges változatát, az egyes megoldásrészekre adható részpontszámokat, azok lehetséges bontását. 
+A gyakorlati vizsgarészen szerzett pontok vizsgaponttá alakítása központi javítási-értékelési útmutató alapján történik. 
+ 
+A feladatok vizsgapontszámai a következők: 
+Feladatok Vizsgapontszám 
+Dokumentumkészítés vagy Táblázatkezelés 35 pont 
+Adatbázis-kezelés 35 pont 
+Algoritmizálás és programozás 50 pont 
+ 
+A vizsga befejeztével a vizsgázó számára kijelölt mappában lévő fájlokról és mappákról archívum készül. Értékelni kizárólag az 
+archívum tartalmát lehet. A javítótanár minden vizsgázó vizsgadolgozatáról értékelőlapot tölt ki. A dolgozat értékelésének 
+megtekintésekor a vizsgázó a saját munkájáról kitöltött értékelőlap másolatát, valamint az archívum tartalmá nak a vizsgázó saját 
+adathordozójára készített másolatát kaphatja meg. 
+ 
+Szóbeli vizsga 
+Általános szabályok 
+A szóbeli tételek nem hozhatók nyilvánosságra. 
+A szóbeli vizsga helyszínén internetkapcsolattal rendelkező és internetkapcsolattal nem rendelkező számítógépnek kell rendelk ezésre 
+állnia. Internetkapcsolattal rendelkező számítógépet a vizsgázó csak a felelet  kifejtése során használ hat. A számítógépek 
+működőképességének biztosítása érdekében a rendszergazdának a szóbeli vizsga teljes ideje alatt elérhetőnek kell lennie. 
+ 
+A szóbeli tételsor tartalmi és formai jellemzői 
+A tételsor jellemzői 
+Az emelt szintű szóbeli vizsga központi tételsor alapján zajlik.  A tételsor legalább 20 tételből áll . A tételsor tételeinek legalább 10% -a 
+évenként cserélendő. 
+ 
+A tétel jellemzői 
+A szóbeli tétel két tételrészből áll:  
+
+=====PAGE 22=====
+ 
+ 
+ A) feladat: egy téma kifejtése konkrét tartalmi szempontok alapján a Szövegszerkesztés, Számítógépes grafika és 
+képszerkesztés, Bemutatókészítés, Publikálás a világhálón, Táblázatkezelés és Adatbázis-kezelés témakörökhöz kapcsolódóan. 
+Mind a hat témakörhöz kapcsolódó tételnek szerepelnie kell a tételsorban. A téma kifejtéséhez számítógépes szemléltetés is 
+kérhető. 
+ B) feladat: egy vagy több programozási feladat megoldása és bemutatása. Ha a feladat kódolást, kódmódosítást, -értelmezést 
+igényel, akkor internetkapcsolattal nem rendelkező számítógépet használhat a vizsgázó a felkészülési ideje alatt. 
+A B) feladatot a vizsgázónak a felkészülési időben kell megoldania. A felelet során a vizsgázónak az A) feladatot szóban, önállóan kell 
+kifejtenie és a B) feladathoz elkészített megoldását kell bemutatnia. 
+ 
+A vizsgára megfogalmazott tételek a tételcímeken túl a kifejtéshez konkrét tartalmi szempontokat is felsorolnak. 
+ 
+A szóbeli vizsgarész értékelése 
+A felelet értékelése a következő szempontok alapján történik: 
+Tartalom (Mindent tartalmaz-e, ami a témakörhöz szükséges; vannak-e tárgyi tévedések, rossz magyarázatok.) 18 pont 
+A) feladat 8 pont 
+B) feladat 10 pont 
+Logikai felépítés (Jó időbeosztás; a lényeg kiemelése; követhető gondolatmenet.): 4 pont 
+Kifejezőkészség, szaknyelv használata: 4 pont 
+Kommunikatív készség (Lehet-e a vizsgázót a témában vezetni; ha elakad, megérti-e, amit kérdez a bizottság; lehet-e a 
+vizsgázóval a témáról tartalmas párbeszédet folytatni.): 
+4 pont 
+ 

@@ -8,7 +8,7 @@ test.describe('Kezdőlap', () => {
     await homePage.goto()
 
     await expect(homePage.heading).toContainText('Az alapoktól az érettségi feladatsorig')
-    for (const name of ['Tanulási út', 'Feladatok', 'Gyakorló vizsgák', 'Szóbeli', 'Haladásom', 'Árak']) {
+    for (const name of ['Tanulási út', 'Érettségi gyakorlás', 'Szóbeli', 'Haladásom', 'Árak']) {
       await expect(homePage.navLink(name)).toBeVisible()
     }
     await expect(homePage.price).toBeVisible()
@@ -30,11 +30,11 @@ test.describe('Kezdőlap', () => {
     await expect(homePage.demoResults.nth(3)).not.toContainText('Bemenet')
   })
 
-  test('az első feladat gombja a feladatlistára visz', { tag: '@regression' }, async ({ homePage, taskListPage }) => {
+  test('a kezdő gomb a tanulási útra visz', { tag: '@regression' }, async ({ homePage, learningPathPage }) => {
     await homePage.goto()
     await homePage.firstTaskLink.click()
 
-    await expect(taskListPage.heading).toBeVisible()
+    await expect(learningPathPage.heading).toBeVisible()
   })
 
   test('keskeny kijelzőn a főmenü gombra nyílik', { tag: '@regression' }, async ({ homePage, page }) => {
@@ -50,7 +50,7 @@ test.describe('Kezdőlap', () => {
 })
 
 test.describe('Tanulási út', () => {
-  test('a pontok megoszlása és a sáv szakaszai megjelennek', { tag: '@smoke' }, async ({ learningPathPage }) => {
+  test('a pontok megoszlása és a tanulási út szakaszai megjelennek', { tag: '@smoke' }, async ({ learningPathPage }) => {
     await learningPathPage.goto()
 
     await expect(learningPathPage.pointsBar).toHaveAccessibleName(/Középszint: .*Táblázatkezelés 25/)

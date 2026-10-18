@@ -1,0 +1,78 @@
+slug: konyvtabla-letrehozasa
+title: Könyvtábla létrehozása
+position: 0
+kind: sql
+level: kozep
+difficulty: 2
+published: false
+allowed_languages:
+- sql
+sql_order_sensitive: true
+description: |
+  Készítsd el a könyvtár adatbázisát MariaDB-ben:
+
+  1. Hozz létre egy `konyvtar` nevű adatbázist, és válaszd ki a `USE` utasítással.
+  2. Hozz létre benne egy `konyv` nevű táblát az alábbi szerkezettel, `ENGINE=InnoDB` táblamotorral:
+
+  | oszlop | típus | megkötés |
+  |---|---|---|
+  | `id` | `INT` | elsődleges kulcs, automatikusan számozott (`AUTO_INCREMENT`) |
+  | `cim` | `VARCHAR(100)` | nem lehet üres (`NOT NULL`) |
+  | `szerzo` | `VARCHAR(60)` | |
+  | `ev` | `INT` | |
+
+  3. Vegyél fel két könyvet az `id` megadása nélkül, ebben a sorrendben: ('A kis herceg', 'Saint-Exupery', 1943), majd ('Egri csillagok', 'Gardonyi Geza', 1901). Az `id`-t az `AUTO_INCREMENT` osztja ki: 1 és 2 lesz.
+
+  A kód végén álló `SELECT` sort **ne töröld és ne módosítsd**: az mutatja meg a tábla állapotát módosítás után, és a rendszer ezt az eredményt hasonlítja az elvárthoz. A saját utasításodat a `SELECT` **elé** írd, pontosvesszővel lezárva.
+
+  Tipp: `CREATE DATABASE konyvtar;` `USE konyvtar;` majd `CREATE TABLE konyv (id INT AUTO_INCREMENT PRIMARY KEY, cim VARCHAR(100) NOT NULL, ...) ENGINE=InnoDB;`. Az `INSERT INTO konyv (cim, szerzo, ev) VALUES ...;` oszloplistája kihagyja az `id`-t.
+starter_code:
+  sql: |
+    -- Ide írd a CREATE DATABASE, USE, CREATE TABLE és INSERT utasítást.
+
+    SELECT id, cim, szerzo, ev FROM konyv ORDER BY id;
+sample_solutions:
+  sql: |
+    CREATE DATABASE konyvtar;
+    USE konyvtar;
+
+    CREATE TABLE konyv (
+      id INT AUTO_INCREMENT PRIMARY KEY,
+      cim VARCHAR(100) NOT NULL,
+      szerzo VARCHAR(60),
+      ev INT
+    ) ENGINE=InnoDB;
+
+    INSERT INTO konyv (cim, szerzo, ev) VALUES ('A kis herceg', 'Saint-Exupery', 1943);
+    INSERT INTO konyv (cim, szerzo, ev) VALUES ('Egri csillagok', 'Gardonyi Geza', 1901);
+
+    SELECT id, cim, szerzo, ev FROM konyv ORDER BY id;
+tests:
+- stdin: |
+    -- ures adatbazis (1)
+  expected: |
+    id,cim,szerzo,ev
+    1,A kis herceg,Saint-Exupery,1943
+    2,Egri csillagok,Gardonyi Geza,1901
+  hidden: false
+- stdin: |
+    -- ures adatbazis (2)
+  expected: |
+    id,cim,szerzo,ev
+    1,A kis herceg,Saint-Exupery,1943
+    2,Egri csillagok,Gardonyi Geza,1901
+  hidden: true
+- stdin: |
+    -- ures adatbazis (3)
+  expected: |
+    id,cim,szerzo,ev
+    1,A kis herceg,Saint-Exupery,1943
+    2,Egri csillagok,Gardonyi Geza,1901
+  hidden: true
+- stdin: |
+    -- ures adatbazis (4)
+  expected: |
+    id,cim,szerzo,ev
+    1,A kis herceg,Saint-Exupery,1943
+    2,Egri csillagok,Gardonyi Geza,1901
+  hidden: true

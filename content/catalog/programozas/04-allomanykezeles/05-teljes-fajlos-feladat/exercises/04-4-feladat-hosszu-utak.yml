@@ -1,0 +1,142 @@
+slug: 4-feladat-hosszu-utak
+title: '4. feladat: hosszú utak'
+position: 3
+kind: code
+level: emelt
+difficulty: 4
+published: false
+allowed_languages:
+- python
+- csharp
+description: |
+  Az `ut.txt` fájl egy fuvarozó cég útjait tartalmazza, tabulátorral tagolva. Az első sor fejléc (`datum`, `sofor`, `km`, `perc`); minden további sor egy út: a dátum (`EEEE-HH-NN` alakban), a sofőr neve (ékezet nélkül, szóköz nélkül), a megtett kilométerek és az út ideje percben (egész számok). A fájl legalább egy utat tartalmaz.
+
+  Írd ki a `4. feladat` szöveget, majd sorban (a fájlbeli sorrendben) minden olyan út dátumát, sofőrjét és kilométerét, amely legalább 100 km hosszú, szóközzel elválasztva. A végén a `Darab:` sorban a találatok száma szerepeljen:
+
+  ```
+  4. feladat
+  2024-03-01 Kovacs 120
+  2024-03-03 Szabo 210
+  2024-03-05 Kovacs 105
+  2024-03-07 Nagy 160
+  Darab: 4
+  ```
+
+  Tipp: kiválogatás; közben számláld is a találatokat.
+starter_code:
+  python: |
+    print("4. feladat")
+    with open("ut.txt", encoding="utf-8") as f:
+        sorok = f.read().splitlines()
+    darab = 0
+    # ide írd a megoldást
+    print("Darab:", darab)
+  csharp: |
+    using System;
+    using System.IO;
+
+    class Program
+    {
+        static void Main()
+        {
+            Console.WriteLine("4. feladat");
+            string[] sorok = File.ReadAllLines("ut.txt");
+            int darab = 0;
+            // ide írd a megoldást
+            Console.WriteLine("Darab: " + darab);
+        }
+    }
+sample_solutions:
+  python: |
+    print("4. feladat")
+    with open("ut.txt", encoding="utf-8") as f:
+        sorok = f.read().splitlines()
+    darab = 0
+    for sor in sorok[1:]:
+        mezok = sor.split("\t")
+        if int(mezok[2]) >= 100:
+            print(mezok[0], mezok[1], mezok[2])
+            darab += 1
+    print("Darab:", darab)
+  csharp: |
+    using System;
+    using System.IO;
+
+    class Program
+    {
+        static void Main()
+        {
+            Console.WriteLine("4. feladat");
+            string[] sorok = File.ReadAllLines("ut.txt");
+            int darab = 0;
+            for (int i = 1; i < sorok.Length; i++)
+            {
+                string[] mezok = sorok[i].Split('\t');
+                if (int.Parse(mezok[2]) >= 100)
+                {
+                    Console.WriteLine(mezok[0] + " " + mezok[1] + " " + mezok[2]);
+                    darab++;
+                }
+            }
+            Console.WriteLine("Darab: " + darab);
+        }
+    }
+files:
+  ut.txt: ut.txt
+tests:
+- stdin: ''
+  expected: '4. feladat
+
+    2024-03-01 Kovacs 120
+
+    2024-03-03 Szabo 210
+
+    2024-03-05 Kovacs 105
+
+    2024-03-07 Nagy 160
+
+    Darab: 4
+
+    '
+  hidden: false
+- stdin: ''
+  expected: '4. feladat
+
+    2024-04-01 Varga 100
+
+    2024-04-02 Varga 100
+
+    Darab: 2
+
+    '
+  hidden: true
+  files:
+    ut.txt: teszt-2/ut.txt
+- stdin: ''
+  expected: '4. feladat
+
+    Darab: 0
+
+    '
+  hidden: true
+  files:
+    ut.txt: teszt-3/ut.txt
+- stdin: ''
+  expected: '4. feladat
+
+    2024-06-01 Tar 250
+
+    2024-06-02 Pap 250
+
+    2024-06-04 Pap 130
+
+    2024-06-05 Feher 101
+
+    2024-06-06 Tar 100
+
+    Darab: 5
+
+    '
+  hidden: true
+  files:
+    ut.txt: teszt-4/ut.txt

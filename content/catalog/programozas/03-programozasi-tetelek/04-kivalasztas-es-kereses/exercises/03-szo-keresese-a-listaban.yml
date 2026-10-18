@@ -1,0 +1,165 @@
+slug: szo-keresese-a-listaban
+title: Szó keresése a listában
+position: 2
+kind: code
+level: kozep
+difficulty: 3
+published: false
+allowed_languages:
+- python
+- csharp
+description: |
+  ## Feladat
+
+  Olvass be egy `N` számot, majd `N` darab szót (soronként egyet), végül egy keresett szót. Írd ki, hogy a keresett szó **hányadik a listában** (az első szó sorszáma 1)! Ha többször is szerepel, az első előfordulás számít. Ha nincs a listában, a kiírandó szöveg `NINCS`. A kis- és nagybetű különbözik.
+
+  ### Bemenet
+
+  - Az első sorban egy `N` egész szám (`1 ≤ N ≤ 100`).
+  - A következő `N` sorban egy-egy szó (ékezet nélkül, szóköz nélkül).
+  - Az utolsó sorban a keresett szó.
+
+  ### Kimenet
+
+  Egyetlen sorban a sorszám, vagy `NINCS`.
+
+  ### Példa
+
+  Bemenet: `4`, majd `alma`, `korte`, `barack`, `szilva`, végül `barack`. Kimenet: `3`
+
+  Tipp: előbb olvasd be az összes szót egy listába, és csak utána olvasd be a keresett szót; aztán a listán keress a ciklussal.
+starter_code:
+  python: |
+    n = int(input())
+    szavak = []
+    for _ in range(n):
+        szavak.append(input())
+    keresett = input()
+    hely = 0
+    # TODO: keresd meg az első előfordulást
+    if hely == 0:
+        print('NINCS')
+    else:
+        print(hely)
+  csharp: |
+    using System;
+
+    class Program
+    {
+        static void Main()
+        {
+            int n = int.Parse(Console.ReadLine());
+            string[] szavak = new string[n];
+            for (int i = 0; i < n; i++)
+            {
+                szavak[i] = Console.ReadLine();
+            }
+            string keresett = Console.ReadLine();
+            int hely = 0;
+            // TODO: keresd meg az első előfordulást
+            if (hely == 0)
+            {
+                Console.WriteLine("NINCS");
+            }
+            else
+            {
+                Console.WriteLine(hely);
+            }
+        }
+    }
+sample_solutions:
+  python: |
+    n = int(input())
+    szavak = []
+    for _ in range(n):
+        szavak.append(input())
+    keresett = input()
+    hely = 0
+    for i in range(n):
+        if szavak[i] == keresett:
+            hely = i + 1
+            break
+    if hely == 0:
+        print('NINCS')
+    else:
+        print(hely)
+  csharp: |
+    using System;
+
+    class Program
+    {
+        static void Main()
+        {
+            int n = int.Parse(Console.ReadLine());
+            string[] szavak = new string[n];
+            for (int i = 0; i < n; i++)
+            {
+                szavak[i] = Console.ReadLine();
+            }
+            string keresett = Console.ReadLine();
+            int hely = 0;
+            for (int i = 0; i < n; i++)
+            {
+                if (szavak[i] == keresett)
+                {
+                    hely = i + 1;
+                    break;
+                }
+            }
+            if (hely == 0)
+            {
+                Console.WriteLine("NINCS");
+            }
+            else
+            {
+                Console.WriteLine(hely);
+            }
+        }
+    }
+tests:
+- stdin: |
+    4
+    alma
+    korte
+    barack
+    szilva
+    barack
+  expected: |
+    3
+  hidden: false
+- stdin: |
+    3
+    alma
+    korte
+    szilva
+    barack
+  expected: |
+    NINCS
+  hidden: true
+- stdin: |
+    1
+    alma
+    alma
+  expected: |
+    1
+  hidden: true
+- stdin: |
+    5
+    ko
+    Papir
+    ollo
+    ko
+    papir
+    papir
+  expected: |
+    5
+  hidden: true
+- stdin: |
+    3
+    alma
+    Alma
+    alma
+    Alma
+  expected: |
+    2
+  hidden: true

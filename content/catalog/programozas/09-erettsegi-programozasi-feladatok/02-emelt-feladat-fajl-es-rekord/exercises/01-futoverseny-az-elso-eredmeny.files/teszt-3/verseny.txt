@@ -1,0 +1,24 @@
+nev	orszag	tav	ido
+Simon Flora	FRA	100	11.30
+Lukacs Fanni	POL	400	59.43
+Horvath Zoli	HUN	100	12.53
+Fekete Mark	GER	200	26.75
+Kiss Anna	GER	200	26.17
+Molnar Reka	HUN	400	59.18
+Toth Bela	GER	400	60.77
+Papp Domi	ITA	200	25.97
+Lukacs Fanni	POL	200	21.69
+Varga Lili	POL	400	54.60
+Balogh Nora	HUN	200	21.82
+Papp Domi	ITA	400	55.80
+Toth Bela	GER	200	24.17
+Nagy Peter	HUN	400	54.84
+Kiss Anna	GER	400	56.72
+Kovacs Adam	ITA	400	53.78
+Horvath Zoli	HUN	400	52.32
+Kiss Anna	GER	100	10.14
+Fekete Mark	GER	100	13.45
+Szabo Eva	POL	400	59.45
+Varga Lili	POL	100	10.94
+Szabo Eva	POL	200	24.39
+Balogh Nora	HUN	400	60.32

@@ -399,7 +399,7 @@ export interface ProgressReport {
   tracks: TrackProgress[]
 }
 
-/** Képzési ág szerkezete (`GET /tracks/{slug}`): modulok, leckék, feladatok. */
+/** Tanulási út szerkezete (`GET /tracks/{slug}`): modulok, leckék, feladatok. */
 export interface ExerciseSummary {
   id: number
   title: string
@@ -469,7 +469,7 @@ export interface LockedLessonDetail extends LessonDetailBase {
 
 export type LessonDetail = UnlockedLessonDetail | LockedLessonDetail
 
-/** Egy képzési ág a listában (`GET /tracks`). */
+/** Egy tanulási út a listában (`GET /tracks`). */
 export interface TrackSummary {
   id: number
   slug: string

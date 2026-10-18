@@ -1,0 +1,47 @@
+slug: kozepes-pontszam
+title: Közepes pontszám
+position: 0
+kind: sql
+level: kozep
+difficulty: 1
+published: false
+allowed_languages: [sql]
+description: |
+  A `BETWEEN a AND b` mindkét határt beleérti: `pont BETWEEN 50 AND 80` ugyanaz, mint `pont >= 50 AND pont <= 80`.
+
+  A `diak` tábla:
+
+  | oszlop | típus |
+  |---|---|
+  | `id` | egész, elsődleges kulcs |
+  | `nev` | szöveg |
+  | `osztaly` | szöveg |
+  | `pont` | egész |
+  | `szuletes` | szöveg (dátum, ÉÉÉÉ-HH-NN) |
+
+  Listázd ki azokat a diákokat (**nev, pont**), akiknek a pontszáma **50 és 80 között** van, a határokat is beleértve! A sorok sorrendje nem számít.
+
+  Tipp: `WHERE pont BETWEEN 50 AND 80`
+starter_code:
+  sql: |
+    SELECT nev, pont
+    FROM diak
+    WHERE ;
+sample_solutions:
+  sql: |
+    SELECT nev, pont
+    FROM diak
+    WHERE pont BETWEEN 50 AND 80;
+tests:
+  - stdin: "CREATE TABLE diak (id INTEGER PRIMARY KEY, nev TEXT, osztaly TEXT, pont INTEGER, szuletes TEXT);\nINSERT INTO diak VALUES\n(1, 'Olivia', '9.A', 50, '2005-03-27'),\n(2, 'Barbara', '10.A', 80, '2007-04-11'),\n(3, 'Zsofia', '9.B', 32, '2006-02-20'),\n(4, 'Nora', '10.B', 64, '2005-06-28'),\n(5, 'Kata', '9.B', 33, '2007-01-24'),\n(6, 'Gergo', '10.B', 47, '2007-06-14'),\n(7, 'Balazs', '9.A', 99, '2008-11-16'),\n(8, 'Csilla', '10.A', 85, '2006-05-20');\n"
+    expected: "nev,pont\nOlivia,50\nBarbara,80\nNora,64\n"
+    hidden: false
+  - stdin: "CREATE TABLE diak (id INTEGER PRIMARY KEY, nev TEXT, osztaly TEXT, pont INTEGER, szuletes TEXT);\nINSERT INTO diak VALUES\n(1, 'Eszter', '11.A', 50, '2008-12-27'),\n(2, 'Kata', '9.B', 80, '2008-07-18'),\n(3, 'Lilla', '10.B', 69, '2005-08-12'),\n(4, 'Zoltan', '9.A', 57, '2005-08-03'),\n(5, 'Domonkos', '9.A', 30, '2008-10-25'),\n(6, 'Endre', '11.A', 51, '2007-10-18'),\n(7, 'Fanni', '11.A', 95, '2007-09-05'),\n(8, 'Peter', '11.A', 64, '2007-10-14'),\n(9, 'Olivia', '9.A', 50, '2008-05-28');\n"
+    expected: "nev,pont\nEszter,50\nKata,80\nLilla,69\nZoltan,57\nEndre,51\nPeter,64\nOlivia,50\n"
+    hidden: true
+  - stdin: "CREATE TABLE diak (id INTEGER PRIMARY KEY, nev TEXT, osztaly TEXT, pont INTEGER, szuletes TEXT);\nINSERT INTO diak VALUES\n(1, 'Eszter', '9.B', 50, '2007-06-02'),\n(2, 'Reka', '10.B', 80, '2008-05-06'),\n(3, 'Sandor', '10.B', 99, '2005-07-02'),\n(4, 'Domonkos', '10.A', 78, '2005-11-14'),\n(5, 'Endre', '10.B', 50, '2007-05-19'),\n(6, 'Csilla', '10.B', 32, '2008-04-12'),\n(7, 'Fanni', '10.B', 95, '2007-02-15'),\n(8, 'Tamas', '9.A', 58, '2006-05-24'),\n(9, 'Kata', '10.B', 56, '2006-07-01'),\n(10, 'Peter', '10.B', 89, '2006-04-12');\n"
+    expected: "nev,pont\nEszter,50\nReka,80\nDomonkos,78\nEndre,50\nTamas,58\nKata,56\n"
+    hidden: true
+  - stdin: "CREATE TABLE diak (id INTEGER PRIMARY KEY, nev TEXT, osztaly TEXT, pont INTEGER, szuletes TEXT);\nINSERT INTO diak VALUES\n(1, 'Mate', '11.A', 50, '2008-06-23'),\n(2, 'Barbara', '10.A', 80, '2006-01-09'),\n(3, 'Domonkos', '9.A', 37, '2008-05-11'),\n(4, 'Zsofia', '10.B', 88, '2008-02-21'),\n(5, 'Gergo', '10.B', 75, '2006-01-12'),\n(6, 'Peter', '10.A', 79, '2005-06-15'),\n(7, 'Eszter', '11.A', 90, '2008-10-05'),\n(8, 'Sandor', '10.A', 39, '2008-12-05'),\n(9, 'Flora', '10.A', 45, '2007-07-26'),\n(10, 'Zoltan', '9.A', 42, '2005-03-26'),\n(11, 'Lilla', '11.A', 91, '2006-05-03'),\n(12, 'Istvan', '11.A', 86, '2006-12-14');\n"
+    expected: "nev,pont\nMate,50\nBarbara,80\nGergo,75\nPeter,79\n"
+    hidden: true

@@ -1,0 +1,60 @@
+slug: paros-vagy-paratlan
+title: Páros vagy páratlan
+position: 0
+kind: code
+level: kozep
+difficulty: 1
+published: false
+allowed_languages: [python, csharp]
+description: |
+  Olvass be egy egész számot (lehet negatív is). Írd ki, hogy `paros` vagy `paratlan`.
+
+  Példa: a `7` bemenetre a kimenet `paratlan`, a `10` bemenetre `paros`.
+
+  Tipp: a szám páros, ha kettővel osztva a maradéka 0. Negatív számnál se a maradék előjele alapján dönts, hanem azt vizsgáld, hogy egyenlő-e nullával.
+starter_code:
+  python: |
+    n = int(input())
+    # innen folytasd
+  csharp: |
+    using System;
+
+    class Program
+    {
+        static void Main()
+        {
+            int n = int.Parse(Console.ReadLine());
+            // innen folytasd
+        }
+    }
+sample_solutions:
+  python: |
+    n = int(input())
+    if n % 2 == 0:
+        print("paros")
+    else:
+        print("paratlan")
+  csharp: |
+    using System;
+
+    class Program
+    {
+        static void Main()
+        {
+            int n = int.Parse(Console.ReadLine());
+            if (n % 2 == 0)
+            {
+                Console.WriteLine("paros");
+            }
+            else
+            {
+                Console.WriteLine("paratlan");
+            }
+        }
+    }
+tests:
+  - { stdin: "7\n", expected: "paratlan\n", hidden: false }
+  - { stdin: "10\n", expected: "paros\n", hidden: true }
+  - { stdin: "0\n", expected: "paros\n", hidden: true }
+  - { stdin: "-3\n", expected: "paratlan\n", hidden: true }
+  - { stdin: "-8\n", expected: "paros\n", hidden: true }

@@ -1,0 +1,182 @@
+slug: vizallas-a-leghosszabb-aradas
+title: 'Vízállás: a leghosszabb áradás'
+position: 3
+kind: code
+level: emelt
+difficulty: 3
+published: false
+allowed_languages:
+- python
+- csharp
+description: |
+  Egy folyó vízállását naponta egyszer mérik. A `vizallas.txt` fájl első sora fejléc (`datum`, `allas`), utána minden sor egy mérés, tabulátorral tagolva: a dátum (`ÉÉÉÉ-HH-NN` alakban) és a vízállás centiméterben (egész szám). A sorok időrendben, hézag nélkül követik egymást: minden sor az előző napot követő nap mérése. A fájl legalább egy mérést tartalmaz.
+
+  A programban egy mérést rekordként (osztályként) érdemes tárolni: dátum, vízállás. Minden részfeladat kimenete a sorszámával kezdődik (`N. feladat`), a kimenetben ne használj ékezetes betűt. Ahol a feladat bevitelt kér, a kérdést külön sorban írd ki, csak utána olvass be.
+
+  Áradásnak nevezzük az egymást követő napok olyan szakaszát, amelyben a vízállás **minden nap nagyobb**, mint az előző napon (az első nap magában is 1 napos szakasz). Keresd meg a leghosszabb ilyen szakaszt. Hossza a napok száma, a kimenetben az első és az utolsó napja szerepel. Több egyforma hosszú szakasz esetén az előbb kezdődő számít.
+
+  ```
+  Leghosszabb emelkedes: <hossz> nap (<elso nap> - <utolso nap>)
+  ```
+
+  Kimenet a mellékelt mintafájllal:
+
+  ```
+  4. feladat
+  Leghosszabb emelkedes: 6 nap (2024-03-09 - 2024-03-14)
+  ```
+
+  Tipp: haladj végig a napokon, és tartsd számon az aktuális szakasz hosszát: ha a mai nap nagyobb a tegnapinál, növeld, különben kezdd újra 1-ről. Közben jegyezd a legjobb hosszat és a kezdőindexét.
+starter_code:
+  python: |
+    class Meres:
+        def __init__(self, datum, allas):
+            self.datum = datum
+            self.allas = allas
+    print("4. feladat")
+    with open("vizallas.txt", encoding="utf-8") as f:
+        sorok = f.read().splitlines()
+    meresek = []
+    for sor in sorok[1:]:
+        r = sor.split("\t")
+        meresek.append(Meres(r[0], int(r[1])))
+    # ide írd a megoldást
+  csharp: |
+    using System;
+    using System.Collections.Generic;
+    using System.IO;
+    using System.Linq;
+
+    class Meres
+    {
+        public string Datum;
+        public int Allas;
+    }
+
+    class Program
+    {
+        static void Main()
+        {
+            Console.WriteLine("4. feladat");
+            string[] sorok = File.ReadAllLines("vizallas.txt");
+            List<Meres> meresek = new List<Meres>();
+            for (int i = 1; i < sorok.Length; i++)
+            {
+                string[] r = sorok[i].Split('\t');
+                Meres m = new Meres();
+                m.Datum = r[0];
+                m.Allas = int.Parse(r[1]);
+                meresek.Add(m);
+            }
+            // ide írd a megoldást
+        }
+    }
+sample_solutions:
+  python: |
+    class Meres:
+        def __init__(self, datum, allas):
+            self.datum = datum
+            self.allas = allas
+    print("4. feladat")
+    with open("vizallas.txt", encoding="utf-8") as f:
+        sorok = f.read().splitlines()
+    meresek = []
+    for sor in sorok[1:]:
+        r = sor.split("\t")
+        meresek.append(Meres(r[0], int(r[1])))
+    legjobb_hossz = 1
+    legjobb_kezdet = 0
+    hossz = 1
+    kezdet = 0
+    for i in range(1, len(meresek)):
+        if meresek[i].allas > meresek[i - 1].allas:
+            hossz += 1
+        else:
+            hossz = 1
+            kezdet = i
+        if hossz > legjobb_hossz:
+            legjobb_hossz = hossz
+            legjobb_kezdet = kezdet
+    vege = legjobb_kezdet + legjobb_hossz - 1
+    print(f"Leghosszabb emelkedes: {legjobb_hossz} nap ({meresek[legjobb_kezdet].datum} - {meresek[vege].datum})")
+  csharp: |
+    using System;
+    using System.Collections.Generic;
+    using System.IO;
+    using System.Linq;
+
+    class Meres
+    {
+        public string Datum;
+        public int Allas;
+    }
+
+    class Program
+    {
+        static void Main()
+        {
+            Console.WriteLine("4. feladat");
+            string[] sorok = File.ReadAllLines("vizallas.txt");
+            List<Meres> meresek = new List<Meres>();
+            for (int i = 1; i < sorok.Length; i++)
+            {
+                string[] r = sorok[i].Split('\t');
+                Meres m = new Meres();
+                m.Datum = r[0];
+                m.Allas = int.Parse(r[1]);
+                meresek.Add(m);
+            }
+            int legjobbHossz = 1;
+            int legjobbKezdet = 0;
+            int hossz = 1;
+            int kezdet = 0;
+            for (int i = 1; i < meresek.Count; i++)
+            {
+                if (meresek[i].Allas > meresek[i - 1].Allas)
+                {
+                    hossz++;
+                }
+                else
+                {
+                    hossz = 1;
+                    kezdet = i;
+                }
+                if (hossz > legjobbHossz)
+                {
+                    legjobbHossz = hossz;
+                    legjobbKezdet = kezdet;
+                }
+            }
+            int vege = legjobbKezdet + legjobbHossz - 1;
+            Console.WriteLine("Leghosszabb emelkedes: " + legjobbHossz + " nap (" + meresek[legjobbKezdet].Datum + " - " + meresek[vege].Datum + ")");
+        }
+    }
+files:
+  vizallas.txt: vizallas.txt
+tests:
+- stdin: ''
+  expected: |
+    4. feladat
+    Leghosszabb emelkedes: 6 nap (2024-03-09 - 2024-03-14)
+  hidden: false
+- stdin: ''
+  expected: |
+    4. feladat
+    Leghosszabb emelkedes: 1 nap (2024-02-27 - 2024-02-27)
+  hidden: true
+  files:
+    vizallas.txt: teszt-2/vizallas.txt
+- stdin: ''
+  expected: |
+    4. feladat
+    Leghosszabb emelkedes: 1 nap (2024-03-01 - 2024-03-01)
+  hidden: true
+  files:
+    vizallas.txt: teszt-3/vizallas.txt
+- stdin: ''
+  expected: |
+    4. feladat
+    Leghosszabb emelkedes: 3 nap (2024-05-01 - 2024-05-03)
+  hidden: true
+  files:
+    vizallas.txt: teszt-4/vizallas.txt

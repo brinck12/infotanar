@@ -1,0 +1,92 @@
+slug: legalabb-50-pont
+title: "Legalább 50 pont"
+position: 1
+kind: code
+level: kozep
+difficulty: 1
+published: false
+allowed_languages: [python, csharp]
+description: |
+  Az alábbi program azt számolná meg, hány diák ért el **legalább** 50 pontot. Az `5`, majd `50`, `49`, `80`, `50`, `10` bemenetre `1`-et ír ki, pedig a helyes válasz `3`. Javítsd a hibát!
+
+  Bemenet: az első sorban `N` (`1 ≤ N ≤ 100`), utána `N` sorban egy-egy pontszám (`0 ≤ pont ≤ 100`). Kimenet: a legalább 50 pontot elérők száma.
+
+  Példa: `5`, majd `50`, `49`, `80`, `50`, `10` esetén a kimenet `3`.
+
+  Tipp: a "legalább 50" azt jelenti, hogy az 50 még belefér. Mit tesz a `>` a pontosan 50-nél?
+starter_code:
+  python: |
+    n = int(input())
+    db = 0
+    for _ in range(n):
+        pont = int(input())
+        if pont > 50:
+            db += 1
+    print(db)
+  csharp: |
+    using System;
+    using System.Globalization;
+
+    class Program
+    {
+        static void Main()
+        {
+            int n = int.Parse(Console.ReadLine());
+            int db = 0;
+            for (int i = 0; i < n; i++)
+            {
+                int pont = int.Parse(Console.ReadLine());
+                if (pont > 50)
+                {
+                    db++;
+                }
+            }
+            Console.WriteLine(db);
+        }
+    }
+sample_solutions:
+  python: |
+    n = int(input())
+    db = 0
+    for _ in range(n):
+        pont = int(input())
+        if pont >= 50:
+            db += 1
+    print(db)
+  csharp: |
+    using System;
+    using System.Globalization;
+
+    class Program
+    {
+        static void Main()
+        {
+            int n = int.Parse(Console.ReadLine());
+            int db = 0;
+            for (int i = 0; i < n; i++)
+            {
+                int pont = int.Parse(Console.ReadLine());
+                if (pont >= 50)
+                {
+                    db++;
+                }
+            }
+            Console.WriteLine(db);
+        }
+    }
+tests:
+  - stdin: "5\n50\n49\n80\n50\n10\n"
+    expected: "3\n"
+    hidden: false
+  - stdin: "1\n50\n"
+    expected: "1\n"
+    hidden: true
+  - stdin: "3\n0\n100\n51\n"
+    expected: "2\n"
+    hidden: true
+  - stdin: "2\n49\n20\n"
+    expected: "0\n"
+    hidden: true
+  - stdin: "4\n50\n50\n50\n50\n"
+    expected: "4\n"
+    hidden: true

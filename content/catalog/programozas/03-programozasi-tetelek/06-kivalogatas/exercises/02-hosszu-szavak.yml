@@ -1,0 +1,112 @@
+slug: hosszu-szavak
+title: Hosszú szavak
+position: 1
+kind: code
+level: kozep
+difficulty: 2
+published: false
+allowed_languages:
+- python
+- csharp
+description: |
+  ## Feladat
+
+  Olvass be egy `N` számot, majd `N` darab szót (soronként egyet). Írd ki **külön sorokba azokat a szavakat, amelyek legalább 5 betűsek**, a beolvasás sorrendjében!
+
+  ### Bemenet
+
+  - Az első sorban egy `N` egész szám (`1 ≤ N ≤ 100`).
+  - A következő `N` sorban egy-egy szó (ékezet nélkül, szóköz nélkül).
+
+  ### Kimenet
+
+  Soronként egy-egy legalább 5 betűs szó. Legalább egy ilyen szó biztosan van.
+
+  ### Példa
+
+  Bemenet: `4`, majd `alma`, `barack`, `szilva`, `ko`. Kimenet: `barack` és `szilva` külön sorokban.
+
+  Tipp: a szó hosszát a `len(szo)`, illetve a `szo.Length` adja.
+starter_code:
+  python: |
+    n = int(input())
+    for _ in range(n):
+        szo = input()
+        # TODO: írd ki, ha legalább 5 betűs
+  csharp: |
+    using System;
+
+    class Program
+    {
+        static void Main()
+        {
+            int n = int.Parse(Console.ReadLine());
+            for (int i = 0; i < n; i++)
+            {
+                string szo = Console.ReadLine();
+                // TODO: írd ki, ha legalább 5 betűs
+            }
+        }
+    }
+sample_solutions:
+  python: |
+    n = int(input())
+    for _ in range(n):
+        szo = input()
+        if len(szo) >= 5:
+            print(szo)
+  csharp: |
+    using System;
+
+    class Program
+    {
+        static void Main()
+        {
+            int n = int.Parse(Console.ReadLine());
+            for (int i = 0; i < n; i++)
+            {
+                string szo = Console.ReadLine();
+                if (szo.Length >= 5)
+                {
+                    Console.WriteLine(szo);
+                }
+            }
+        }
+    }
+tests:
+- stdin: |
+    4
+    alma
+    barack
+    szilva
+    ko
+  expected: |
+    barack
+    szilva
+  hidden: false
+- stdin: |
+    3
+    kutya
+    macska
+    cica
+  expected: |
+    kutya
+    macska
+  hidden: true
+- stdin: |
+    1
+    program
+  expected: |
+    program
+  hidden: true
+- stdin: |
+    5
+    ab
+    abcde
+    abcd
+    abcdef
+    abc
+  expected: |
+    abcde
+    abcdef
+  hidden: true

@@ -1,0 +1,114 @@
+slug: kulonbozo-es-leggyakoribb-ertekek
+title: "Különböző és leggyakoribb értékek"
+position: 3
+kind: code
+level: emelt
+difficulty: 4
+published: false
+allowed_languages: [python, csharp]
+description: |
+  A bemenet első sora az elemek száma (N, legalább 1), a másodikban N egész szám áll szóközzel elválasztva. Írd ki, hány különböző érték szerepel a sorozatban (`Kulonbozo: ...`), és melyik érték fordul elő a legtöbbször, hányszor (`Leggyakoribb: ertek (db)`). Ha több érték is a legtöbbször fordul elő, a kisebbet írd ki.
+
+  Példa bemenet:
+
+  ```
+  7
+  3 1 3 2 1 3 2
+  ```
+
+  Kimenet:
+
+  ```
+  Kulonbozo: 3
+  Leggyakoribb: 3 (3)
+  ```
+
+  Tipp: rendezd a számokat (beépített rendezéssel), így az egyforma elemek szakaszokat alkotnak. Egy menetben megszámolhatod a szakaszokat és a hosszukat.
+starter_code:
+  python: |
+    n = int(input())
+    a = [int(x) for x in input().split()]
+    # rendezz, majd járd be a szakaszokat
+  csharp: |
+    using System;
+    using System.Collections.Generic;
+
+    class Program
+    {
+        static void Main()
+        {
+            int n = int.Parse(Console.ReadLine());
+            var a = new List<int>();
+            foreach (string s in Console.ReadLine().Split(' '))
+            {
+                a.Add(int.Parse(s));
+            }
+            // rendezz, majd járd be a szakaszokat
+        }
+    }
+sample_solutions:
+  python: |
+    n = int(input())
+    a = [int(x) for x in input().split()]
+    a.sort()
+    kulonbozo = 1
+    legjobb_ertek = a[0]
+    legjobb_db = 1
+    db = 1
+    for i in range(1, n):
+        if a[i] == a[i - 1]:
+            db += 1
+        else:
+            kulonbozo += 1
+            db = 1
+        if db > legjobb_db:
+            legjobb_db = db
+            legjobb_ertek = a[i]
+    print("Kulonbozo:", kulonbozo)
+    print("Leggyakoribb: " + str(legjobb_ertek) + " (" + str(legjobb_db) + ")")
+  csharp: |
+    using System;
+    using System.Collections.Generic;
+
+    class Program
+    {
+        static void Main()
+        {
+            int n = int.Parse(Console.ReadLine());
+            var a = new List<int>();
+            foreach (string s in Console.ReadLine().Split(' '))
+            {
+                a.Add(int.Parse(s));
+            }
+            a.Sort();
+            int kulonbozo = 1;
+            int legjobbErtek = a[0];
+            int legjobbDb = 1;
+            int db = 1;
+            for (int i = 1; i < n; i++)
+            {
+                if (a[i] == a[i - 1])
+                {
+                    db++;
+                }
+                else
+                {
+                    kulonbozo++;
+                    db = 1;
+                }
+                if (db > legjobbDb)
+                {
+                    legjobbDb = db;
+                    legjobbErtek = a[i];
+                }
+            }
+            Console.WriteLine("Kulonbozo: " + kulonbozo);
+            Console.WriteLine("Leggyakoribb: " + legjobbErtek + " (" + legjobbDb + ")");
+        }
+    }
+tests:
+  - { stdin: "7\n3 1 3 2 1 3 2\n", expected: "Kulonbozo: 3\nLeggyakoribb: 3 (3)\n", hidden: false }
+  - { stdin: "1\n5\n", expected: "Kulonbozo: 1\nLeggyakoribb: 5 (1)\n", hidden: true }
+  - { stdin: "4\n9 9 9 9\n", expected: "Kulonbozo: 1\nLeggyakoribb: 9 (4)\n", hidden: true }
+  - { stdin: "6\n2 1 2 1 3 4\n", expected: "Kulonbozo: 4\nLeggyakoribb: 1 (2)\n", hidden: true }
+  - { stdin: "5\n-1 -1 0 0 7\n", expected: "Kulonbozo: 3\nLeggyakoribb: -1 (2)\n", hidden: true }

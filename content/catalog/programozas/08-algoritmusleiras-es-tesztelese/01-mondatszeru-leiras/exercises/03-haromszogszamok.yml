@@ -1,0 +1,80 @@
+slug: haromszogszamok
+title: "Háromszögszámok"
+position: 2
+kind: code
+level: kozep
+difficulty: 2
+published: false
+allowed_languages: [python, csharp]
+description: |
+  Kódold le az alábbi algoritmust.
+
+  ```text
+  Algoritmus Haromszog
+    Be: N
+    szam := 0
+    Ciklus i := 1-től N-ig
+      szam := szam + i
+      Ki: szam
+    Ciklus vége
+  Algoritmus vége
+  ```
+
+  Bemenet: egy `N` egész szám (`0 ≤ N ≤ 20`). Kimenet: az algoritmus kiírásai, soronként egy szám. `N = 0` esetén a kimenet üres.
+
+  Példa: `N = 4` esetén a kimenet: `1`, `3`, `6`, `10` külön sorokban.
+
+  Tipp: a `Ki:` a ciklus belsejében van, ezért minden lépésben kiír egy számot.
+starter_code:
+  python: |
+    n = int(input())
+    szam = 0
+    for i in range(1, n + 1):
+        szam = szam + i
+        # TODO: kiírás
+  csharp: |
+    using System;
+
+    class Program
+    {
+
+        static void Main()
+        {
+            int n = int.Parse(Console.ReadLine());
+            int szam = 0;
+            for (int i = 1; i <= n; i++)
+            {
+                szam = szam + i;
+                // TODO: kiírás
+            }
+        }
+    }
+sample_solutions:
+  python: |
+    n = int(input())
+    szam = 0
+    for i in range(1, n + 1):
+        szam = szam + i
+        print(szam)
+  csharp: |
+    using System;
+
+    class Program
+    {
+
+        static void Main()
+        {
+            int n = int.Parse(Console.ReadLine());
+            int szam = 0;
+            for (int i = 1; i <= n; i++)
+            {
+                szam = szam + i;
+                Console.WriteLine(szam);
+            }
+        }
+    }
+tests:
+  - { stdin: "4\n", expected: "1\n3\n6\n10\n", hidden: false }
+  - { stdin: "0\n", expected: "", hidden: true }
+  - { stdin: "1\n", expected: "1\n", hidden: true }
+  - { stdin: "20\n", expected: "1\n3\n6\n10\n15\n21\n28\n36\n45\n55\n66\n78\n91\n105\n120\n136\n153\n171\n190\n210\n", hidden: true }

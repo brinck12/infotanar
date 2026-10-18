@@ -1,0 +1,83 @@
+slug: kategoria-es-sorszam-a-kodbol
+title: Kategória és sorszám a kódból
+position: 0
+kind: sql
+level: kozep
+difficulty: 1
+published: false
+allowed_languages: [sql]
+description: |
+    A termékkód alakja `ABC-2024-017`: három betű (kategória), négyjegyű év, háromjegyű sorszám. Listázd a kódot (`kod`), a kategóriát (`kategoria`, a kód első 3 karaktere) és a sorszámot (`sorszam`, a kód utolsó 3 karaktere).
+
+    A `termek` tábla:
+
+    | `id` | `kod` | `nev` |
+    |---|---|---|
+    | 1 | LAP-2023-001 | Laptop |
+    | 2 | EGE-2024-014 | Vezetek nelkuli eger |
+    | 3 | MON-2022-007 | Monitor |
+
+    Az eredmény ezekre az adatokra:
+
+    | `kod` | `kategoria` | `sorszam` |
+    |---|---|---|
+    | LAP-2023-001 | LAP | 001 |
+    | EGE-2024-014 | EGE | 014 |
+    | MON-2022-007 | MON | 007 |
+
+    Tipp: az első karakterekhez `LEFT(szöveg, hány)`, az utolsókhoz `RIGHT(szöveg, hány)` való.
+starter_code:
+  sql: |
+    SELECT kod,
+      ... AS kategoria,
+      ... AS sorszam
+    FROM termek;
+sample_solutions:
+  sql: |
+    SELECT kod, LEFT(kod, 3) AS kategoria, RIGHT(kod, 3) AS sorszam
+    FROM termek;
+tests:
+  - stdin: |
+      CREATE TABLE termek (id INT, kod VARCHAR(12), nev VARCHAR(30));
+      INSERT INTO termek VALUES (1, 'LAP-2023-001', 'Laptop');
+      INSERT INTO termek VALUES (2, 'EGE-2024-014', 'Vezetek nelkuli eger');
+      INSERT INTO termek VALUES (3, 'MON-2022-007', 'Monitor');
+    expected: |
+      kod,kategoria,sorszam
+      LAP-2023-001,LAP,001
+      EGE-2024-014,EGE,014
+      MON-2022-007,MON,007
+    hidden: false
+  - stdin: |
+      CREATE TABLE termek (id INT, kod VARCHAR(12), nev VARCHAR(30));
+      INSERT INTO termek VALUES (4, 'LAP-2024-102', 'Jatek laptop');
+      INSERT INTO termek VALUES (5, 'BIL-2021-033', 'Billentyuzet');
+      INSERT INTO termek VALUES (6, 'MON-2024-250', 'Ivelt monitor');
+    expected: |
+      kod,kategoria,sorszam
+      LAP-2024-102,LAP,102
+      BIL-2021-033,BIL,033
+      MON-2024-250,MON,250
+    hidden: true
+  - stdin: |
+      CREATE TABLE termek (id INT, kod VARCHAR(12), nev VARCHAR(30));
+      INSERT INTO termek VALUES (7, 'EGE-2023-009', 'Eger');
+      INSERT INTO termek VALUES (8, 'NYO-2022-120', 'Nyomtato');
+    expected: |
+      kod,kategoria,sorszam
+      EGE-2023-009,EGE,009
+      NYO-2022-120,NYO,120
+    hidden: true
+  - stdin: |
+      CREATE TABLE termek (id INT, kod VARCHAR(12), nev VARCHAR(30));
+      INSERT INTO termek VALUES (1, 'LAP-2023-001', 'Laptop');
+      INSERT INTO termek VALUES (3, 'MON-2022-007', 'Monitor');
+      INSERT INTO termek VALUES (5, 'BIL-2021-033', 'Billentyuzet');
+      INSERT INTO termek VALUES (7, 'EGE-2023-009', 'Eger');
+    expected: |
+      kod,kategoria,sorszam
+      LAP-2023-001,LAP,001
+      MON-2022-007,MON,007
+      BIL-2021-033,BIL,033
+      EGE-2023-009,EGE,009
+    hidden: true

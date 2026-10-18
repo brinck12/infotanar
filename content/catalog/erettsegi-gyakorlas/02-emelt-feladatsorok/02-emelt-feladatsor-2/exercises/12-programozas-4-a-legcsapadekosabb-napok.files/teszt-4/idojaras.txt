@@ -1,0 +1,2 @@
+nap;min;max;csapadek;szel
+1;2;9;0;10

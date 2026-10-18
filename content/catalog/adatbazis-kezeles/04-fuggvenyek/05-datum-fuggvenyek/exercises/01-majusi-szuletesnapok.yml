@@ -1,0 +1,83 @@
+slug: majusi-szuletesnapok
+title: Májusi születésnapok
+position: 1
+kind: sql
+level: kozep
+difficulty: 2
+published: false
+allowed_languages: [sql]
+description: |
+    Listázd azoknak a tanulóknak a nevét (`nev`) és születési dátumát (`szuletes`), akik májusban születtek, bármelyik évben.
+
+    A `tanulo` tábla:
+
+    | `id` | `nev` | `szuletes` |
+    |---|---|---|
+    | 1 | Kiss Anna | 2008-05-14 |
+    | 2 | Nagy Bela | 2009-11-02 |
+    | 3 | Toth Csaba | 2008-05-30 |
+    | 4 | Szabo Dora | 2009-02-27 |
+    | 5 | Varga Fanni | 2010-05-01 |
+
+    Az eredmény ezekre az adatokra:
+
+    | `nev` | `szuletes` |
+    |---|---|
+    | Kiss Anna | 2008-05-14 |
+    | Toth Csaba | 2008-05-30 |
+    | Varga Fanni | 2010-05-01 |
+
+    Tipp: a `WHERE`-ben a `MONTH(szuletes)` számot ad, a május az 5.
+starter_code:
+  sql: |
+    SELECT nev, szuletes
+    FROM tanulo
+    WHERE ...;
+sample_solutions:
+  sql: |
+    SELECT nev, szuletes
+    FROM tanulo
+    WHERE MONTH(szuletes) = 5;
+tests:
+  - stdin: |
+      CREATE TABLE tanulo (id INT, nev VARCHAR(30), szuletes DATE);
+      INSERT INTO tanulo VALUES (1, 'Kiss Anna', '2008-05-14');
+      INSERT INTO tanulo VALUES (2, 'Nagy Bela', '2009-11-02');
+      INSERT INTO tanulo VALUES (3, 'Toth Csaba', '2008-05-30');
+      INSERT INTO tanulo VALUES (4, 'Szabo Dora', '2009-02-27');
+      INSERT INTO tanulo VALUES (5, 'Varga Fanni', '2010-05-01');
+    expected: |
+      nev,szuletes
+      Kiss Anna,2008-05-14
+      Toth Csaba,2008-05-30
+      Varga Fanni,2010-05-01
+    hidden: false
+  - stdin: |
+      CREATE TABLE tanulo (id INT, nev VARCHAR(30), szuletes DATE);
+      INSERT INTO tanulo VALUES (2, 'Nagy Bela', '2009-11-02');
+      INSERT INTO tanulo VALUES (4, 'Szabo Dora', '2009-02-27');
+      INSERT INTO tanulo VALUES (6, 'Ho Eva', '2007-12-31');
+      INSERT INTO tanulo VALUES (7, 'Bo Li', '2008-01-01');
+      INSERT INTO tanulo VALUES (8, 'Papp Jozsef', '2009-09-09');
+    expected: ""
+    hidden: true
+  - stdin: |
+      CREATE TABLE tanulo (id INT, nev VARCHAR(30), szuletes DATE);
+      INSERT INTO tanulo VALUES (1, 'Kiss Anna', '2008-05-14');
+      INSERT INTO tanulo VALUES (3, 'Toth Csaba', '2008-05-30');
+      INSERT INTO tanulo VALUES (5, 'Varga Fanni', '2010-05-01');
+    expected: |
+      nev,szuletes
+      Kiss Anna,2008-05-14
+      Toth Csaba,2008-05-30
+      Varga Fanni,2010-05-01
+    hidden: true
+  - stdin: |
+      CREATE TABLE tanulo (id INT, nev VARCHAR(30), szuletes DATE);
+      INSERT INTO tanulo VALUES (3, 'Toth Csaba', '2008-05-30');
+      INSERT INTO tanulo VALUES (6, 'Ho Eva', '2007-12-31');
+      INSERT INTO tanulo VALUES (7, 'Bo Li', '2008-01-01');
+    expected: |
+      nev,szuletes
+      Toth Csaba,2008-05-30
+    hidden: true

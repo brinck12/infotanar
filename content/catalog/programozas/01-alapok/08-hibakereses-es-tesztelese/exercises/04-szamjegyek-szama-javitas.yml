@@ -1,0 +1,75 @@
+slug: szamjegyek-szama-javitas
+title: Számjegyek száma (javítás)
+position: 3
+kind: code
+level: kozep
+difficulty: 3
+published: false
+allowed_languages: [python, csharp]
+description: |
+  A program egy szám számjegyeinek számát akarja kiírni, de **hibás**: a program nem áll le (végtelen ciklus), és van egy bemenet, amelyre akkor is rossz lenne, ha leállna. Két hibát kell kijavítanod.
+
+  A feladat: olvass be egy nemnegatív egész számot, és írd ki, hány számjegyű, egyetlen számként. A `0` egyjegyű.
+
+  Példák: a bemenet `345`, a kimenet `3`; a bemenet `0`, a kimenet `1`.
+
+  Tipp: kövesd végig kézzel a `345` esetet nyomkövető táblázattal. Mitől lesz egyszer hamis a ciklus feltétele? És mi történik a `0` bemenetnél?
+starter_code:
+  python: |
+    szam = int(input())
+    db = 0
+    while szam > 0:
+        db = db + 1
+    print(db)
+  csharp: |
+    using System;
+
+    class Program
+    {
+        static void Main()
+        {
+            var szam = int.Parse(Console.ReadLine());
+            var db = 0;
+            while (szam > 0)
+            {
+                db = db + 1;
+            }
+            Console.WriteLine(db);
+        }
+    }
+sample_solutions:
+  python: |
+    szam = int(input())
+    db = 0
+    if szam == 0:
+        db = 1
+    while szam > 0:
+        db = db + 1
+        szam = szam // 10
+    print(db)
+  csharp: |
+    using System;
+
+    class Program
+    {
+        static void Main()
+        {
+            var szam = int.Parse(Console.ReadLine());
+            var db = 0;
+            if (szam == 0)
+            {
+                db = 1;
+            }
+            while (szam > 0)
+            {
+                db = db + 1;
+                szam = szam / 10;
+            }
+            Console.WriteLine(db);
+        }
+    }
+tests:
+  - { stdin: "345\n", expected: "3\n", hidden: false }
+  - { stdin: "0\n", expected: "1\n", hidden: true }
+  - { stdin: "7\n", expected: "1\n", hidden: true }
+  - { stdin: "1000000\n", expected: "7\n", hidden: true }

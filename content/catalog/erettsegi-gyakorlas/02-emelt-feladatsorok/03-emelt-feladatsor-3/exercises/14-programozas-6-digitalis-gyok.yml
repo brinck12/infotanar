@@ -1,0 +1,208 @@
+slug: programozas-6-digitalis-gyok
+title: Programozás 6 - Digitális gyök
+position: 13
+kind: code
+level: emelt
+difficulty: 4
+published: false
+allowed_languages:
+- python
+- csharp
+description: |
+  Az `indulasok.txt` a repülőtér egy havi (30 napos) forgalmát tartalmazza, soronként egy indulással, pontosvesszővel elválasztva: `járatszám;célállomás;távolság km;nap;indulás;utasok;késés`. A járatszám két betűből és négy számjegyből áll (pl. `MA1017`), a nap a hónap napja (1–30), az indulás `ÓÓ:PP` alakú, a késés percben értendő (0, ha pontosan indult). Az adatokban nincs ékezet, a fájl legalább egy sort tartalmaz, a sorok nincsenek sorrendben, és egy járat egy napon egy időpontban legfeljebb egyszer szerepel.
+
+  **6. feladat.** Egy szám *digitális gyökét* úgy kapjuk, hogy összeadjuk a számjegyeit; ha az összeg még legalább kétjegyű, a műveletet az összegre **ismételjük**, amíg egyjegyű számot nem kapunk (például 4129 → 16 → 7). Írjon **rekurzív** függvényt a digitális gyök kiszámítására! A járatszám számjegyeiből (az utolsó négy karakter) alkotott szám digitális gyökét számolja ki, és keresse meg azt a járatszámot, amelynek a **legnagyobb a digitális gyöke**. Ha több ilyen van, a fájlban **először előforduló** járatszám számít.
+
+  A mintafájlra a kimenet:
+
+  ```text
+  6. feladat: A legnagyobb digitalis gyoku jaratszam: MA1017 (gyok: 9)
+  ```
+
+  Tipp: a számjegyösszeg `n % 10` és `n // 10` ismétlésével adódik; a gyök rekurzív hívása: ha `n < 10`, akkor `n`, különben a számjegyösszeg gyöke. A járatszámokat elég egyszer vizsgálni.
+starter_code:
+  python: |
+    class Indulas:
+        def __init__(self, sor):
+            r = sor.split(";")
+            self.jarat = r[0]
+            self.cel = r[1]
+            self.tav = int(r[2])
+            self.nap = int(r[3])
+            self.ido = r[4]
+            self.utas = int(r[5])
+            self.keses = int(r[6])
+
+
+    with open("indulasok.txt", encoding="utf-8") as f:
+        indulasok = [Indulas(sor) for sor in f.read().splitlines()]
+    # ide írd a megoldást
+  csharp: |
+    using System;
+    using System.Collections.Generic;
+    using System.IO;
+
+    class Indulas
+    {
+        public string Jarat;
+        public string Cel;
+        public int Tav;
+        public int Nap;
+        public string Ido;
+        public int Utas;
+        public int Keses;
+
+        public Indulas(string sor)
+        {
+            string[] r = sor.Split(';');
+            Jarat = r[0];
+            Cel = r[1];
+            Tav = int.Parse(r[2]);
+            Nap = int.Parse(r[3]);
+            Ido = r[4];
+            Utas = int.Parse(r[5]);
+            Keses = int.Parse(r[6]);
+        }
+    }
+
+    class Program
+    {
+        static void Main()
+        {
+            List<Indulas> indulasok = new List<Indulas>();
+            foreach (string sor in File.ReadAllLines("indulasok.txt"))
+            {
+                indulasok.Add(new Indulas(sor));
+            }
+            // ide írd a megoldást
+        }
+    }
+sample_solutions:
+  python: |
+    class Indulas:
+        def __init__(self, sor):
+            r = sor.split(";")
+            self.jarat = r[0]
+            self.cel = r[1]
+            self.tav = int(r[2])
+            self.nap = int(r[3])
+            self.ido = r[4]
+            self.utas = int(r[5])
+            self.keses = int(r[6])
+
+
+    with open("indulasok.txt", encoding="utf-8") as f:
+        indulasok = [Indulas(sor) for sor in f.read().splitlines()]
+    def gyok(n):
+        if n < 10:
+            return n
+        osszeg = 0
+        while n > 0:
+            osszeg += n % 10
+            n = n // 10
+        return gyok(osszeg)
+
+
+    legjobb = ""
+    legjobb_gyok = -1
+    for i in indulasok:
+        g = gyok(int(i.jarat[2:]))
+        if g > legjobb_gyok:
+            legjobb_gyok = g
+            legjobb = i.jarat
+    print("6. feladat: A legnagyobb digitalis gyoku jaratszam: " + legjobb + " (gyok: " + str(legjobb_gyok) + ")")
+  csharp: |
+    using System;
+    using System.Collections.Generic;
+    using System.IO;
+
+    class Indulas
+    {
+        public string Jarat;
+        public string Cel;
+        public int Tav;
+        public int Nap;
+        public string Ido;
+        public int Utas;
+        public int Keses;
+
+        public Indulas(string sor)
+        {
+            string[] r = sor.Split(';');
+            Jarat = r[0];
+            Cel = r[1];
+            Tav = int.Parse(r[2]);
+            Nap = int.Parse(r[3]);
+            Ido = r[4];
+            Utas = int.Parse(r[5]);
+            Keses = int.Parse(r[6]);
+        }
+    }
+
+    class Program
+    {
+        static int Gyok(int n)
+        {
+            if (n < 10)
+            {
+                return n;
+            }
+            int osszeg = 0;
+            while (n > 0)
+            {
+                osszeg += n % 10;
+                n = n / 10;
+            }
+            return Gyok(osszeg);
+        }
+
+        static void Main()
+        {
+            List<Indulas> indulasok = new List<Indulas>();
+            foreach (string sor in File.ReadAllLines("indulasok.txt"))
+            {
+                indulasok.Add(new Indulas(sor));
+            }
+            string legjobb = "";
+            int legjobbGyok = -1;
+            foreach (Indulas i in indulasok)
+            {
+                int g = Gyok(int.Parse(i.Jarat.Substring(2)));
+                if (g > legjobbGyok)
+                {
+                    legjobbGyok = g;
+                    legjobb = i.Jarat;
+                }
+            }
+            Console.WriteLine("6. feladat: A legnagyobb digitalis gyoku jaratszam: " + legjobb + " (gyok: " + legjobbGyok + ")");
+        }
+    }
+files:
+  indulasok.txt: indulasok.txt
+tests:
+- stdin: ''
+  expected: '6. feladat: A legnagyobb digitalis gyoku jaratszam: MA1017 (gyok: 9)
+
+    '
+  hidden: false
+- stdin: ''
+  expected: '6. feladat: A legnagyobb digitalis gyoku jaratszam: TV4052 (gyok: 2)
+
+    '
+  hidden: true
+  files:
+    indulasok.txt: teszt-2/indulasok.txt
+- stdin: ''
+  expected: '6. feladat: A legnagyobb digitalis gyoku jaratszam: DA6336 (gyok: 9)
+
+    '
+  hidden: true
+  files:
+    indulasok.txt: teszt-3/indulasok.txt
+- stdin: ''
+  expected: '6. feladat: A legnagyobb digitalis gyoku jaratszam: DA6336 (gyok: 9)
+
+    '
+  hidden: true
+  files:
+    indulasok.txt: teszt-4/indulasok.txt

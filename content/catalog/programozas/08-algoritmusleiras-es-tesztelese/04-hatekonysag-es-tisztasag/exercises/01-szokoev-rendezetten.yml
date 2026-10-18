@@ -1,0 +1,96 @@
+slug: szokoev-rendezetten
+title: "Szökőév rendezetten"
+position: 0
+kind: code
+level: emelt
+difficulty: 2
+published: false
+allowed_languages: [python, csharp]
+description: |
+  Az alábbi program működik, de esetlen: sok egymásba ágyazott elágazás és felesleges segédváltozó. Alakítsd át úgy, hogy egy `szokoev(ev)` függvény **egyetlen logikai kifejezéssel** adja vissza az igaz/hamis választ, a főprogram pedig ezt használja. A program kimenete ne változzon.
+
+  Bemenet: egy évszám (`1 ≤ ev ≤ 9999`). Kimenet: `szokoev` vagy `nem szokoev`. Egy év szökőév, ha osztható 4-gyel, kivéve a 100-zal oszthatókat, de a 400-zal oszthatók mégis szökőévek.
+
+  Példa: `2024` esetén `szokoev`; `1900` esetén `nem szokoev`.
+
+  Tipp: `ev % 4 == 0 and (ev % 100 != 0 or ev % 400 == 0)`.
+starter_code:
+  python: |
+    ev = int(input())
+    valasz = ""
+    if ev % 4 == 0:
+        if ev % 100 == 0:
+            if ev % 400 == 0:
+                valasz = "szokoev"
+            else:
+                valasz = "nem szokoev"
+        else:
+            valasz = "szokoev"
+    else:
+        valasz = "nem szokoev"
+    print(valasz)
+  csharp: |
+    using System;
+
+    class Program
+    {
+
+        static void Main()
+        {
+            int ev = int.Parse(Console.ReadLine());
+            string valasz = "";
+            if (ev % 4 == 0)
+            {
+                if (ev % 100 == 0)
+                {
+                    if (ev % 400 == 0)
+                    {
+                        valasz = "szokoev";
+                    }
+                    else
+                    {
+                        valasz = "nem szokoev";
+                    }
+                }
+                else
+                {
+                    valasz = "szokoev";
+                }
+            }
+            else
+            {
+                valasz = "nem szokoev";
+            }
+            Console.WriteLine(valasz);
+        }
+    }
+sample_solutions:
+  python: |
+    def szokoev(ev):
+        return ev % 4 == 0 and (ev % 100 != 0 or ev % 400 == 0)
+
+    ev = int(input())
+    print("szokoev" if szokoev(ev) else "nem szokoev")
+  csharp: |
+    using System;
+
+    class Program
+    {
+        static bool Szokoev(int ev)
+        {
+            return ev % 4 == 0 && (ev % 100 != 0 || ev % 400 == 0);
+        }
+
+        static void Main()
+        {
+            int ev = int.Parse(Console.ReadLine());
+            Console.WriteLine(Szokoev(ev) ? "szokoev" : "nem szokoev");
+        }
+    }
+tests:
+  - { stdin: "2024\n", expected: "szokoev\n", hidden: false }
+  - { stdin: "1900\n", expected: "nem szokoev\n", hidden: true }
+  - { stdin: "2000\n", expected: "szokoev\n", hidden: true }
+  - { stdin: "2023\n", expected: "nem szokoev\n", hidden: true }
+  - { stdin: "4\n", expected: "szokoev\n", hidden: true }
+  - { stdin: "9999\n", expected: "nem szokoev\n", hidden: true }

@@ -1,0 +1,77 @@
+slug: szavak-szama-es-leghosszabb-szo
+title: Szavak száma és leghosszabb szó
+position: 1
+kind: code
+level: kozep
+difficulty: 2
+published: false
+allowed_languages: [python, csharp]
+description: |
+  A bemenet egyetlen sor, amelyben szavak állnak szóközzel elválasztva (legalább egy szó; a szavak között néha több szóköz is lehet). Írd ki két sorban a szavak számát és a leghosszabb szó hosszát:
+
+  ```
+  Szavak: <darab>
+  Leghosszabb: <hossz>
+  ```
+
+  Példa: az `alma korte szilva` bemenetre:
+
+  ```
+  Szavak: 3
+  Leghosszabb: 6
+  ```
+
+  Tipp: a szétvágás után a szavak száma a darabok száma, a hosszat a `len` / `Length` adja. Ügyelj arra, hogy az egymás melletti szóközök ne adjanak üres szót.
+starter_code:
+  python: |
+    sor = input()
+    szavak = sor.split()
+    # innen folytasd
+  csharp: |
+    using System;
+
+    class Program
+    {
+        static void Main()
+        {
+            string sor = Console.ReadLine();
+            string[] szavak = sor.Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+            // innen folytasd
+        }
+    }
+sample_solutions:
+  python: |
+    sor = input()
+    szavak = sor.split()
+    leghosszabb = 0
+    for szo in szavak:
+        if len(szo) > leghosszabb:
+            leghosszabb = len(szo)
+    print("Szavak:", len(szavak))
+    print("Leghosszabb:", leghosszabb)
+  csharp: |
+    using System;
+
+    class Program
+    {
+        static void Main()
+        {
+            string sor = Console.ReadLine();
+            string[] szavak = sor.Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+            int leghosszabb = 0;
+            foreach (string szo in szavak)
+            {
+                if (szo.Length > leghosszabb)
+                {
+                    leghosszabb = szo.Length;
+                }
+            }
+            Console.WriteLine("Szavak: " + szavak.Length);
+            Console.WriteLine("Leghosszabb: " + leghosszabb);
+        }
+    }
+tests:
+  - { stdin: "alma korte szilva\n", expected: "Szavak: 3\nLeghosszabb: 6\n", hidden: false }
+  - { stdin: "egy\n", expected: "Szavak: 1\nLeghosszabb: 3\n", hidden: true }
+  - { stdin: "a bb ccc dddd\n", expected: "Szavak: 4\nLeghosszabb: 4\n", hidden: true }
+  - { stdin: "ez   itt   sok\n", expected: "Szavak: 3\nLeghosszabb: 3\n", hidden: true }

@@ -1,0 +1,83 @@
+slug: belepojegy-ara
+title: Belépőjegy ára
+position: 3
+kind: code
+level: kozep
+difficulty: 3
+published: false
+allowed_languages: [python, csharp]
+description: |
+  Egy fürdő belépőjegyének ára az életkortól függ:
+
+  - 6 évesnél fiatalabbaknak ingyenes (0 Ft),
+  - 6 éves kortól 17 éves korig 1200 Ft,
+  - 18 éves kortól 64 éves korig 2400 Ft,
+  - 65 éves kortól 1500 Ft.
+
+  Olvasd be a látogató életkorát (nemnegatív egész szám), és írd ki a jegy árát, csak a számot.
+
+  Példa: a `10` bemenetre a kimenet `1200`.
+
+  Tipp: a feltételeket sorban vizsgáld, a legkisebb életkortól indulva: az első igaz feltétel ága fut le, így a későbbi feltételekben már nem kell az alsó határt vizsgálni.
+starter_code:
+  python: |
+    kor = int(input())
+    # innen folytasd
+  csharp: |
+    using System;
+
+    class Program
+    {
+        static void Main()
+        {
+            int kor = int.Parse(Console.ReadLine());
+            // innen folytasd
+        }
+    }
+sample_solutions:
+  python: |
+    kor = int(input())
+    if kor < 6:
+        print(0)
+    elif kor < 18:
+        print(1200)
+    elif kor < 65:
+        print(2400)
+    else:
+        print(1500)
+  csharp: |
+    using System;
+
+    class Program
+    {
+        static void Main()
+        {
+            int kor = int.Parse(Console.ReadLine());
+            if (kor < 6)
+            {
+                Console.WriteLine(0);
+            }
+            else if (kor < 18)
+            {
+                Console.WriteLine(1200);
+            }
+            else if (kor < 65)
+            {
+                Console.WriteLine(2400);
+            }
+            else
+            {
+                Console.WriteLine(1500);
+            }
+        }
+    }
+tests:
+  - { stdin: "10\n", expected: "1200\n", hidden: false }
+  - { stdin: "0\n", expected: "0\n", hidden: true }
+  - { stdin: "5\n", expected: "0\n", hidden: true }
+  - { stdin: "6\n", expected: "1200\n", hidden: true }
+  - { stdin: "17\n", expected: "1200\n", hidden: true }
+  - { stdin: "18\n", expected: "2400\n", hidden: true }
+  - { stdin: "64\n", expected: "2400\n", hidden: true }
+  - { stdin: "65\n", expected: "1500\n", hidden: true }
+  - { stdin: "100\n", expected: "1500\n", hidden: true }

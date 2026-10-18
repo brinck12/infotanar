@@ -1,0 +1,76 @@
+slug: kozepso-szam
+title: Középső szám
+position: 3
+kind: code
+level: kozep
+difficulty: 4
+published: false
+allowed_languages: [python, csharp]
+description: |
+  Olvass be három egész számot (külön sorban). Írd ki azt, amelyik nagyság szerint középen van: amelyik nem a legkisebb és nem a legnagyobb. Ha több szám egyenlő, a kimenet az az érték, amelyik rendezés után a középső helyen állna.
+
+  Példa: a `7`, `2`, `5` bemenetre a kimenet `5`.
+
+  Tipp: a középső szám az, amelyik legalább az egyik másiknál nem kisebb, és legalább az egyik másiknál nem nagyobb. Írd le ezt az `a`, `b`, `c` változókra `és` és `vagy` kapcsolatokkal, zárójelekkel.
+starter_code:
+  python: |
+    a = int(input())
+    b = int(input())
+    c = int(input())
+    # innen folytasd
+  csharp: |
+    using System;
+
+    class Program
+    {
+        static void Main()
+        {
+            int a = int.Parse(Console.ReadLine());
+            int b = int.Parse(Console.ReadLine());
+            int c = int.Parse(Console.ReadLine());
+            // innen folytasd
+        }
+    }
+sample_solutions:
+  python: |
+    a = int(input())
+    b = int(input())
+    c = int(input())
+    if (a >= b and a <= c) or (a <= b and a >= c):
+        print(a)
+    elif (b >= a and b <= c) or (b <= a and b >= c):
+        print(b)
+    else:
+        print(c)
+  csharp: |
+    using System;
+
+    class Program
+    {
+        static void Main()
+        {
+            int a = int.Parse(Console.ReadLine());
+            int b = int.Parse(Console.ReadLine());
+            int c = int.Parse(Console.ReadLine());
+            if ((a >= b && a <= c) || (a <= b && a >= c))
+            {
+                Console.WriteLine(a);
+            }
+            else if ((b >= a && b <= c) || (b <= a && b >= c))
+            {
+                Console.WriteLine(b);
+            }
+            else
+            {
+                Console.WriteLine(c);
+            }
+        }
+    }
+tests:
+  - { stdin: "7\n2\n5\n", expected: "5\n", hidden: false }
+  - { stdin: "1\n2\n3\n", expected: "2\n", hidden: true }
+  - { stdin: "3\n2\n1\n", expected: "2\n", hidden: true }
+  - { stdin: "2\n3\n1\n", expected: "2\n", hidden: true }
+  - { stdin: "5\n5\n5\n", expected: "5\n", hidden: true }
+  - { stdin: "4\n4\n9\n", expected: "4\n", hidden: true }
+  - { stdin: "-3\n-10\n0\n", expected: "-3\n", hidden: true }

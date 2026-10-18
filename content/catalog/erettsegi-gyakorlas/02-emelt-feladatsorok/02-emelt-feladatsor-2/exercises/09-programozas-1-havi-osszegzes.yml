@@ -1,0 +1,211 @@
+slug: programozas-1-havi-osszegzes
+title: Programozás 1 - Havi összegzés
+position: 8
+kind: code
+level: emelt
+difficulty: 2
+published: false
+allowed_languages:
+- python
+- csharp
+description: |-
+  Egy meteorológiai állomás egy hónapos napi adatait az `idojaras.txt` fájl tartalmazza (UTF-8, ékezet nélkül). Az első sor fejléc (`nap;min;max;csapadek;szel`), utána minden sor egy nap adatait tartalmazza, pontosvesszővel elválasztva: a nap sorszáma (1-től folyamatosan növekszik), a legalacsonyabb és a legmagasabb hőmérséklet °C-ban (egész számok, lehet negatív), a napi csapadék mm-ben (0, ha nem esett) és a legerősebb széllökés km/h-ban. A fájl legalább egy napot tartalmaz.
+
+  A programban egy nap adatait rekordként (osztályként) érdemes tárolni. A kimenetben ne használjon ékezetes betűt, a szöveg pontosan egyezzen a mintával.
+
+  **1. feladat** (5 pont). Olvassa be a fájlt, majd írja ki a napok számát, az átlagos középhőmérsékletet (egy nap középhőmérséklete a minimum és a maximum átlaga; a havi átlag a napi középhőmérsékletek átlaga, két tizedesjegyre kerekítve), valamint a legmelegebb napot (a legnagyobb maximumot, holtversenynél a korábbit) és a leghidegebb éjszakát (a legkisebb minimumot, holtversenynél a korábbit)!
+
+  A mintafájlra a kimenet:
+
+  ```text
+  1. feladat
+  Napok szama: 30
+  Atlagos kozephomerseklet: 11.93 C
+  Legmelegebb nap: 19. nap (25 C)
+  Leghidegebb ejszaka: 7. nap (-4 C)
+  ```
+
+  Tipp: a minimum- és maximumkiválasztásnál szigorú összehasonlítást (`>` illetve `<`) használj, így holtversenynél az első marad. Az átlaghoz elég a `min + max` összegét összeadni, és a végén osztani `2 * napok számával`.
+starter_code:
+  python: |
+    class Nap:
+        def __init__(self, nap, min_, max_, csapadek, szel):
+            self.nap = nap
+            self.min = min_
+            self.max = max_
+            self.csapadek = csapadek
+            self.szel = szel
+
+
+    with open("idojaras.txt", encoding="utf-8") as f:
+        sorok = f.read().splitlines()
+    napok = []
+    for sor in sorok[1:]:
+        r = sor.split(";")
+        napok.append(Nap(int(r[0]), int(r[1]), int(r[2]), int(r[3]), int(r[4])))
+    print("1. feladat")
+    # ide írd a megoldást
+  csharp: |
+    using System;
+    using System.Collections.Generic;
+    using System.Globalization;
+    using System.IO;
+    using System.Linq;
+
+    class Nap
+    {
+        public int Sorszam;
+        public int Min;
+        public int Max;
+        public int Csapadek;
+        public int Szel;
+    }
+
+    class Program
+    {
+        static void Main()
+        {
+            string[] sorok = File.ReadAllLines("idojaras.txt");
+            List<Nap> napok = new List<Nap>();
+            for (int i = 1; i < sorok.Length; i++)
+            {
+                string[] r = sorok[i].Split(';');
+                Nap n = new Nap();
+                n.Sorszam = int.Parse(r[0]);
+                n.Min = int.Parse(r[1]);
+                n.Max = int.Parse(r[2]);
+                n.Csapadek = int.Parse(r[3]);
+                n.Szel = int.Parse(r[4]);
+                napok.Add(n);
+            }
+            Console.WriteLine("1. feladat");
+            // ide írd a megoldást
+        }
+    }
+sample_solutions:
+  python: |
+    class Nap:
+        def __init__(self, nap, min_, max_, csapadek, szel):
+            self.nap = nap
+            self.min = min_
+            self.max = max_
+            self.csapadek = csapadek
+            self.szel = szel
+
+
+    with open("idojaras.txt", encoding="utf-8") as f:
+        sorok = f.read().splitlines()
+    napok = []
+    for sor in sorok[1:]:
+        r = sor.split(";")
+        napok.append(Nap(int(r[0]), int(r[1]), int(r[2]), int(r[3]), int(r[4])))
+    print("1. feladat")
+    print("Napok szama:", len(napok))
+    osszeg = sum(n.min + n.max for n in napok)
+    print(f"Atlagos kozephomerseklet: {osszeg / (2 * len(napok)):.2f} C")
+    legmelegebb = napok[0]
+    leghidegebb = napok[0]
+    for n in napok:
+        if n.max > legmelegebb.max:
+            legmelegebb = n
+        if n.min < leghidegebb.min:
+            leghidegebb = n
+    print(f"Legmelegebb nap: {legmelegebb.nap}. nap ({legmelegebb.max} C)")
+    print(f"Leghidegebb ejszaka: {leghidegebb.nap}. nap ({leghidegebb.min} C)")
+  csharp: |
+    using System;
+    using System.Collections.Generic;
+    using System.Globalization;
+    using System.IO;
+    using System.Linq;
+
+    class Nap
+    {
+        public int Sorszam;
+        public int Min;
+        public int Max;
+        public int Csapadek;
+        public int Szel;
+    }
+
+    class Program
+    {
+        static void Main()
+        {
+            string[] sorok = File.ReadAllLines("idojaras.txt");
+            List<Nap> napok = new List<Nap>();
+            for (int i = 1; i < sorok.Length; i++)
+            {
+                string[] r = sorok[i].Split(';');
+                Nap n = new Nap();
+                n.Sorszam = int.Parse(r[0]);
+                n.Min = int.Parse(r[1]);
+                n.Max = int.Parse(r[2]);
+                n.Csapadek = int.Parse(r[3]);
+                n.Szel = int.Parse(r[4]);
+                napok.Add(n);
+            }
+            Console.WriteLine("1. feladat");
+            Console.WriteLine("Napok szama: " + napok.Count);
+            int osszeg = 0;
+            Nap legmelegebb = napok[0];
+            Nap leghidegebb = napok[0];
+            foreach (Nap n in napok)
+            {
+                osszeg += n.Min + n.Max;
+                if (n.Max > legmelegebb.Max)
+                {
+                    legmelegebb = n;
+                }
+                if (n.Min < leghidegebb.Min)
+                {
+                    leghidegebb = n;
+                }
+            }
+            double atlag = osszeg / (2.0 * napok.Count);
+            Console.WriteLine("Atlagos kozephomerseklet: " + atlag.ToString("F2", CultureInfo.InvariantCulture) + " C");
+            Console.WriteLine("Legmelegebb nap: " + legmelegebb.Sorszam + ". nap (" + legmelegebb.Max + " C)");
+            Console.WriteLine("Leghidegebb ejszaka: " + leghidegebb.Sorszam + ". nap (" + leghidegebb.Min + " C)");
+        }
+    }
+files:
+  idojaras.txt: idojaras.txt
+tests:
+- stdin: ''
+  expected: |
+    1. feladat
+    Napok szama: 30
+    Atlagos kozephomerseklet: 11.93 C
+    Legmelegebb nap: 19. nap (25 C)
+    Leghidegebb ejszaka: 7. nap (-4 C)
+  hidden: false
+- stdin: ''
+  expected: |
+    1. feladat
+    Napok szama: 31
+    Atlagos kozephomerseklet: 1.81 C
+    Legmelegebb nap: 4. nap (14 C)
+    Leghidegebb ejszaka: 18. nap (-6 C)
+  hidden: true
+  files:
+    idojaras.txt: teszt-2/idojaras.txt
+- stdin: ''
+  expected: |
+    1. feladat
+    Napok szama: 28
+    Atlagos kozephomerseklet: 20.23 C
+    Legmelegebb nap: 27. nap (33 C)
+    Leghidegebb ejszaka: 7. nap (9 C)
+  hidden: true
+  files:
+    idojaras.txt: teszt-3/idojaras.txt
+- stdin: ''
+  expected: |
+    1. feladat
+    Napok szama: 1
+    Atlagos kozephomerseklet: 5.50 C
+    Legmelegebb nap: 1. nap (9 C)
+    Leghidegebb ejszaka: 1. nap (2 C)
+  hidden: true
+  files:
+    idojaras.txt: teszt-4/idojaras.txt

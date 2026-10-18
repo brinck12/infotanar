@@ -1,0 +1,101 @@
+slug: konyv-adatlapja
+title: "Könyv adatlapja"
+position: 0
+kind: code
+level: emelt
+difficulty: 2
+published: false
+allowed_languages: [python, csharp]
+description: |
+  Egy könyv adatai három sorban érkeznek: a cím, az oldalszám és az ár (forintban). Tárold őket egy `Konyv` rekordban, majd írd ki négy sorban: `Cim: ...`, `Oldalszam: ...`, `Ar: ... Ft`, és az oldalankénti árat egész osztással: `Oldalankenti ar: ... Ft`.
+
+  Példa bemenet:
+
+  ```
+  Egri csillagok
+  520
+  3990
+  ```
+
+  Kimenet:
+
+  ```
+  Cim: Egri csillagok
+  Oldalszam: 520
+  Ar: 3990 Ft
+  Oldalankenti ar: 7 Ft
+  ```
+
+  Tipp: a rekord osztálya a kezdőkódban már megvan, neked a beolvasás és a kiírás hiányzik. Az oldalszám és az ár szám, ezért alakítsd át őket.
+starter_code:
+  python: |
+    from dataclasses import dataclass
+
+    @dataclass
+    class Konyv:
+        cim: str
+        oldal: int
+        ar: int
+
+    # olvasd be a három adatot, és készíts belőlük egy Konyv-et
+  csharp: |
+    using System;
+
+    class Konyv
+    {
+        public string Cim;
+        public int Oldal;
+        public int Ar;
+    }
+
+    class Program
+    {
+        static void Main()
+        {
+            // olvasd be a három adatot, és készíts belőlük egy Konyv-et
+        }
+    }
+sample_solutions:
+  python: |
+    from dataclasses import dataclass
+
+    @dataclass
+    class Konyv:
+        cim: str
+        oldal: int
+        ar: int
+
+    konyv = Konyv(input(), int(input()), int(input()))
+    print("Cim: " + konyv.cim)
+    print("Oldalszam:", konyv.oldal)
+    print("Ar:", konyv.ar, "Ft")
+    print("Oldalankenti ar:", konyv.ar // konyv.oldal, "Ft")
+  csharp: |
+    using System;
+
+    class Konyv
+    {
+        public string Cim;
+        public int Oldal;
+        public int Ar;
+    }
+
+    class Program
+    {
+        static void Main()
+        {
+            var konyv = new Konyv();
+            konyv.Cim = Console.ReadLine();
+            konyv.Oldal = int.Parse(Console.ReadLine());
+            konyv.Ar = int.Parse(Console.ReadLine());
+            Console.WriteLine("Cim: " + konyv.Cim);
+            Console.WriteLine("Oldalszam: " + konyv.Oldal);
+            Console.WriteLine("Ar: " + konyv.Ar + " Ft");
+            Console.WriteLine("Oldalankenti ar: " + (konyv.Ar / konyv.Oldal) + " Ft");
+        }
+    }
+tests:
+  - { stdin: "Egri csillagok\n520\n3990\n", expected: "Cim: Egri csillagok\nOldalszam: 520\nAr: 3990 Ft\nOldalankenti ar: 7 Ft\n", hidden: false }
+  - { stdin: "Pal utcai fiuk\n300\n2400\n", expected: "Cim: Pal utcai fiuk\nOldalszam: 300\nAr: 2400 Ft\nOldalankenti ar: 8 Ft\n", hidden: true }
+  - { stdin: "A\n1\n100\n", expected: "Cim: A\nOldalszam: 1\nAr: 100 Ft\nOldalankenti ar: 100 Ft\n", hidden: true }
+  - { stdin: "Hosszu regeny\n1000\n999\n", expected: "Cim: Hosszu regeny\nOldalszam: 1000\nAr: 999 Ft\nOldalankenti ar: 0 Ft\n", hidden: true }

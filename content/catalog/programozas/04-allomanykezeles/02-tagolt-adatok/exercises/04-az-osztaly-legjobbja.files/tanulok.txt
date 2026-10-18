@@ -1,0 +1,5 @@
+nev	osztaly	pont
+Anna	9a	78
+Bela	9b	55
+Csilla	9a	91
+Denes	9b	40

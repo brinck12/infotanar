@@ -12,6 +12,7 @@ return [
     'upload_failed' => 'A fájl feltöltése nem sikerült. Próbáld újra.',
     'too_large_for_request' => 'A fájl túl nagy.',
     'session_invalid' => 'A vizsgaidőszak alakja ÉÉÉÉ-05 vagy ÉÉÉÉ-10 legyen.',
+    'part_key_taken' => 'Ehhez a vizsgához ez a vizsgarész már szerepel. Egy területhez egy rész tartozik.',
     'mode_invalid' => 'Válaszd ki, hogy vizsgahelyzetben vagy gyakorlásként indítod.',
 
     'publish' => [

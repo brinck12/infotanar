@@ -1,0 +1,125 @@
+slug: napi-lepesszamok
+title: Napi lépésszámok
+position: 0
+kind: code
+level: kozep
+difficulty: 2
+published: false
+allowed_languages:
+- python
+- csharp
+description: |
+  Egy lépésszámláló napi mérései külön fájlokban vannak: `hetfo.txt`, `kedd.txt`, `szerda.txt`. Mindegyik fájl soronként egy mérést (lépésszámot, egész szám) tartalmaz. A felhasználó megadja a nap nevét (pl. `kedd`); a program a hozzá tartozó fájlt olvassa be (`kedd.txt`), és kiírja a mérések számát és a lépések összegét:
+
+  ```
+  Meresek: 3
+  Osszes lepes: 9400
+  ```
+
+  Tipp: a fájlnevet szövegösszefűzéssel kapod: a bemenet + `".txt"`.
+starter_code:
+  python: |
+    nap = input()
+    nev = nap + ".txt"
+    with open(nev, encoding="utf-8") as f:
+        meresek = f.read().splitlines()
+    # ide írd a megoldást
+  csharp: |
+    using System;
+    using System.IO;
+
+    class Program
+    {
+        static void Main()
+        {
+            string nap = Console.ReadLine();
+            string nev = nap + ".txt";
+            string[] meresek = File.ReadAllLines(nev);
+            // ide írd a megoldást
+        }
+    }
+sample_solutions:
+  python: |
+    nap = input()
+    nev = nap + ".txt"
+    with open(nev, encoding="utf-8") as f:
+        meresek = f.read().splitlines()
+    osszes = 0
+    for m in meresek:
+        osszes += int(m)
+    print("Meresek:", len(meresek))
+    print("Osszes lepes:", osszes)
+  csharp: |
+    using System;
+    using System.IO;
+
+    class Program
+    {
+        static void Main()
+        {
+            string nap = Console.ReadLine();
+            string nev = nap + ".txt";
+            string[] meresek = File.ReadAllLines(nev);
+            int osszes = 0;
+            foreach (string m in meresek)
+            {
+                osszes += int.Parse(m);
+            }
+            Console.WriteLine("Meresek: " + meresek.Length);
+            Console.WriteLine("Osszes lepes: " + osszes);
+        }
+    }
+files:
+  hetfo.txt: hetfo.txt
+  kedd.txt: kedd.txt
+  szerda.txt: szerda.txt
+tests:
+- stdin: 'kedd
+
+    '
+  expected: 'Meresek: 3
+
+    Osszes lepes: 9400
+
+    '
+  hidden: false
+- stdin: 'hetfo
+
+    '
+  expected: 'Meresek: 3
+
+    Osszes lepes: 7000
+
+    '
+  hidden: true
+- stdin: 'szerda
+
+    '
+  expected: 'Meresek: 2
+
+    Osszes lepes: 9800
+
+    '
+  hidden: true
+- stdin: 'kedd
+
+    '
+  expected: 'Meresek: 1
+
+    Osszes lepes: 100
+
+    '
+  hidden: true
+  files:
+    kedd.txt: teszt-4/kedd.txt
+- stdin: 'hetfo
+
+    '
+  expected: 'Meresek: 4
+
+    Osszes lepes: 12003
+
+    '
+  hidden: true
+  files:
+    hetfo.txt: teszt-5/hetfo.txt

@@ -1,0 +1,128 @@
+slug: surun-lakott-varosok
+title: "Sűrűn lakott városok"
+position: 2
+kind: code
+level: emelt
+difficulty: 3
+published: false
+allowed_languages: [python, csharp]
+description: |
+  Városok adatai: az első sor a városok száma (N, legalább 1), majd N sor: `varos;lakos;terulet`, ahol a lakosok száma és a terület (km2) egész szám. Egy város **sűrűn lakott**, ha a népsűrűsége nagyobb, mint 1000 fő/km2, vagyis `lakos > 1000 * terulet`.
+
+  Az első sorba `Darab: k` kerüljön (a sűrűn lakott városok száma), utána soronként a nevük a bemenet sorrendjében.
+
+  Példa bemenet:
+
+  ```
+  3
+  Budapest;1700000;525
+  Szeged;160000;281
+  Vac;32000;12
+  ```
+
+  Kimenet:
+
+  ```
+  Darab: 2
+  Budapest
+  Vac
+  ```
+
+  Tipp: ez kiválogatás rekordokon; a feltétel két mezőből áll. A szorzással elkerülheted az osztást.
+starter_code:
+  python: |
+    from dataclasses import dataclass
+
+    @dataclass
+    class Varos:
+        nev: str
+        lakos: int
+        terulet: int
+
+    n = int(input())
+    varosok = []
+    # olvasd be a városokat, majd válogasd ki a sűrűn lakottakat
+  csharp: |
+    using System;
+    using System.Collections.Generic;
+
+    class Varos
+    {
+        public string Nev;
+        public int Lakos;
+        public int Terulet;
+    }
+
+    class Program
+    {
+        static void Main()
+        {
+            int n = int.Parse(Console.ReadLine());
+            var varosok = new List<Varos>();
+            // olvasd be a városokat, majd válogasd ki a sűrűn lakottakat
+        }
+    }
+sample_solutions:
+  python: |
+    from dataclasses import dataclass
+
+    @dataclass
+    class Varos:
+        nev: str
+        lakos: int
+        terulet: int
+
+    n = int(input())
+    varosok = []
+    for _ in range(n):
+        resz = input().split(";")
+        varosok.append(Varos(resz[0], int(resz[1]), int(resz[2])))
+    suru = []
+    for v in varosok:
+        if v.lakos > 1000 * v.terulet:
+            suru.append(v)
+    print("Darab:", len(suru))
+    for v in suru:
+        print(v.nev)
+  csharp: |
+    using System;
+    using System.Collections.Generic;
+
+    class Varos
+    {
+        public string Nev;
+        public int Lakos;
+        public int Terulet;
+    }
+
+    class Program
+    {
+        static void Main()
+        {
+            int n = int.Parse(Console.ReadLine());
+            var varosok = new List<Varos>();
+            for (int i = 0; i < n; i++)
+            {
+                string[] resz = Console.ReadLine().Split(';');
+                varosok.Add(new Varos { Nev = resz[0], Lakos = int.Parse(resz[1]), Terulet = int.Parse(resz[2]) });
+            }
+            var suru = new List<Varos>();
+            foreach (var v in varosok)
+            {
+                if (v.Lakos > 1000 * v.Terulet)
+                {
+                    suru.Add(v);
+                }
+            }
+            Console.WriteLine("Darab: " + suru.Count);
+            foreach (var v in suru)
+            {
+                Console.WriteLine(v.Nev);
+            }
+        }
+    }
+tests:
+  - { stdin: "3\nBudapest;1700000;525\nSzeged;160000;281\nVac;32000;12\n", expected: "Darab: 2\nBudapest\nVac\n", hidden: false }
+  - { stdin: "1\nFalu;500;5\n", expected: "Darab: 0\n", hidden: true }
+  - { stdin: "2\nA;1000;1\nB;1001;1\n", expected: "Darab: 1\nB\n", hidden: true }
+  - { stdin: "4\nNagyvaros;3000000;1000\nKisvaros;8000;4\nKozep;45000;60\nParkos;999;1\n", expected: "Darab: 2\nNagyvaros\nKisvaros\n", hidden: true }

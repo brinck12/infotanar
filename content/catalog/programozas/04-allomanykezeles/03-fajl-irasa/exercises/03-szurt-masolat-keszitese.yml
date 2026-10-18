@@ -1,0 +1,113 @@
+slug: szurt-masolat-keszitese
+title: Szűrt másolat készítése
+position: 2
+kind: code
+level: emelt
+difficulty: 3
+published: false
+allowed_languages:
+- python
+- csharp
+description: |
+  A `pontok.txt` fájl tabulátorral tagolt, az első sora fejléc (`nev`, `pont`). Készíts belőle egy új fájlt `jok.txt` néven, amely a fejlécet és csak azokat a sorokat tartalmazza, ahol a pont legalább 50. A sorok eredeti sorrendben maradnak. Ezután olvasd vissza a `jok.txt` fájlt, írd ki a tartalmát, a végén pedig azt, hány adatsor (a fejléc nélkül) került bele:
+
+  ```
+  nev<TAB>pont
+  Anna<TAB>78
+  Kiirt sorok: 1
+  ```
+
+  Ha senki nem éri el az 50 pontot, csak a fejléc és a `Kiirt sorok: 0` sor jelenik meg.
+
+  Tipp: egyszerre nyitható az olvasott és az írt fájl is egy `with` blokkban (`with open(...) as be, open(..., "w") as ki:`); a fejlécet külön, a ciklus előtt másold át.
+starter_code:
+  python: |
+    with open("pontok.txt", encoding="utf-8") as f:
+        sorok = f.read().splitlines()
+    with open("jok.txt", "w", encoding="utf-8") as ki:
+        ki.write(sorok[0] + "\n")
+        # ide írd a szűrést
+    with open("jok.txt", encoding="utf-8") as f:
+        kiirt = f.read().splitlines()
+    # ide írd a kiírást
+  csharp: |
+    using System;
+    using System.IO;
+
+    class Program
+    {
+        static void Main()
+        {
+            string[] sorok = File.ReadAllLines("pontok.txt");
+            using (StreamWriter ki = new StreamWriter("jok.txt"))
+            {
+                ki.WriteLine(sorok[0]);
+                // ide írd a szűrést
+            }
+            string[] kiirt = File.ReadAllLines("jok.txt");
+            // ide írd a kiírást
+        }
+    }
+sample_solutions:
+  python: |
+    with open("pontok.txt", encoding="utf-8") as f:
+        sorok = f.read().splitlines()
+    with open("jok.txt", "w", encoding="utf-8") as ki:
+        ki.write(sorok[0] + "\n")
+        for sor in sorok[1:]:
+            if int(sor.split("\t")[1]) >= 50:
+                ki.write(sor + "\n")
+    with open("jok.txt", encoding="utf-8") as f:
+        kiirt = f.read().splitlines()
+    for sor in kiirt:
+        print(sor)
+    print("Kiirt sorok:", len(kiirt) - 1)
+  csharp: |
+    using System;
+    using System.IO;
+
+    class Program
+    {
+        static void Main()
+        {
+            string[] sorok = File.ReadAllLines("pontok.txt");
+            using (StreamWriter ki = new StreamWriter("jok.txt"))
+            {
+                ki.WriteLine(sorok[0]);
+                for (int i = 1; i < sorok.Length; i++)
+                {
+                    if (int.Parse(sorok[i].Split('\t')[1]) >= 50)
+                    {
+                        ki.WriteLine(sorok[i]);
+                    }
+                }
+            }
+            string[] kiirt = File.ReadAllLines("jok.txt");
+            foreach (string sor in kiirt)
+            {
+                Console.WriteLine(sor);
+            }
+            Console.WriteLine("Kiirt sorok: " + (kiirt.Length - 1));
+        }
+    }
+files:
+  pontok.txt: pontok.txt
+tests:
+- stdin: ''
+  expected: "nev\tpont\nAnna\t78\nKiirt sorok: 1\n"
+  hidden: false
+- stdin: ''
+  expected: "nev\tpont\nKiirt sorok: 0\n"
+  hidden: true
+  files:
+    pontok.txt: teszt-2/pontok.txt
+- stdin: ''
+  expected: "nev\tpont\nGeza\t50\nHajni\t100\nJolan\t51\nKiirt sorok: 3\n"
+  hidden: true
+  files:
+    pontok.txt: teszt-3/pontok.txt
+- stdin: ''
+  expected: "nev\tpont\nKaroly\t95\nKiirt sorok: 1\n"
+  hidden: true
+  files:
+    pontok.txt: teszt-4/pontok.txt

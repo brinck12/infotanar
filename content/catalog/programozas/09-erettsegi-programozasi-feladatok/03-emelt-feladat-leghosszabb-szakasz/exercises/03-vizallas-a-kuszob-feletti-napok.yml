@@ -1,0 +1,196 @@
+slug: vizallas-a-kuszob-feletti-napok
+title: 'Vízállás: a küszöb feletti napok'
+position: 2
+kind: code
+level: emelt
+difficulty: 3
+published: false
+allowed_languages:
+- python
+- csharp
+description: |
+  Egy folyó vízállását naponta egyszer mérik. A `vizallas.txt` fájl első sora fejléc (`datum`, `allas`), utána minden sor egy mérés, tabulátorral tagolva: a dátum (`ÉÉÉÉ-HH-NN` alakban) és a vízállás centiméterben (egész szám). A sorok időrendben, hézag nélkül követik egymást: minden sor az előző napot követő nap mérése. A fájl legalább egy mérést tartalmaz.
+
+  A programban egy mérést rekordként (osztályként) érdemes tárolni: dátum, vízállás. Minden részfeladat kimenete a sorszámával kezdődik (`N. feladat`), a kimenetben ne használj ékezetes betűt. Ahol a feladat bevitelt kér, a kérdést külön sorban írd ki, csak utána olvass be.
+
+  Kérj be egy küszöbértéket (egész szám, centiméter). Add meg, hány napon volt a vízállás **nagyobb** a küszöbnél, és melyik volt az első ilyen nap. Ha egyetlen nap sem volt, csak a `Nem volt kuszob feletti nap.` sort írd ki.
+
+  ```
+  Kuszob feletti napok: <db>
+  Elso ilyen nap: <datum>
+  ```
+
+  Kimenet a mellékelt mintafájllal és `200` bemenettel:
+
+  ```
+  3. feladat
+  Add meg a kuszobot (cm):
+  Kuszob feletti napok: 8
+  Elso ilyen nap: 2024-03-14
+  ```
+
+  Tipp: a megszámlálás és az első találat megjegyzése egy ciklusban is mehet; az "első találat" kezdetben üres (`None` / `null`).
+starter_code:
+  python: |
+    class Meres:
+        def __init__(self, datum, allas):
+            self.datum = datum
+            self.allas = allas
+    print("3. feladat")
+    with open("vizallas.txt", encoding="utf-8") as f:
+        sorok = f.read().splitlines()
+    meresek = []
+    for sor in sorok[1:]:
+        r = sor.split("\t")
+        meresek.append(Meres(r[0], int(r[1])))
+    # ide írd a megoldást
+  csharp: |
+    using System;
+    using System.Collections.Generic;
+    using System.IO;
+    using System.Linq;
+
+    class Meres
+    {
+        public string Datum;
+        public int Allas;
+    }
+
+    class Program
+    {
+        static void Main()
+        {
+            Console.WriteLine("3. feladat");
+            string[] sorok = File.ReadAllLines("vizallas.txt");
+            List<Meres> meresek = new List<Meres>();
+            for (int i = 1; i < sorok.Length; i++)
+            {
+                string[] r = sorok[i].Split('\t');
+                Meres m = new Meres();
+                m.Datum = r[0];
+                m.Allas = int.Parse(r[1]);
+                meresek.Add(m);
+            }
+            // ide írd a megoldást
+        }
+    }
+sample_solutions:
+  python: |
+    class Meres:
+        def __init__(self, datum, allas):
+            self.datum = datum
+            self.allas = allas
+    print("3. feladat")
+    with open("vizallas.txt", encoding="utf-8") as f:
+        sorok = f.read().splitlines()
+    meresek = []
+    for sor in sorok[1:]:
+        r = sor.split("\t")
+        meresek.append(Meres(r[0], int(r[1])))
+    print("Add meg a kuszobot (cm):")
+    kuszob = int(input())
+    db = 0
+    elso = None
+    for m in meresek:
+        if m.allas > kuszob:
+            db += 1
+            if elso is None:
+                elso = m.datum
+    if db == 0:
+        print("Nem volt kuszob feletti nap.")
+    else:
+        print(f"Kuszob feletti napok: {db}")
+        print(f"Elso ilyen nap: {elso}")
+  csharp: |
+    using System;
+    using System.Collections.Generic;
+    using System.IO;
+    using System.Linq;
+
+    class Meres
+    {
+        public string Datum;
+        public int Allas;
+    }
+
+    class Program
+    {
+        static void Main()
+        {
+            Console.WriteLine("3. feladat");
+            string[] sorok = File.ReadAllLines("vizallas.txt");
+            List<Meres> meresek = new List<Meres>();
+            for (int i = 1; i < sorok.Length; i++)
+            {
+                string[] r = sorok[i].Split('\t');
+                Meres m = new Meres();
+                m.Datum = r[0];
+                m.Allas = int.Parse(r[1]);
+                meresek.Add(m);
+            }
+            Console.WriteLine("Add meg a kuszobot (cm):");
+            int kuszob = int.Parse(Console.ReadLine());
+            int db = 0;
+            string elso = null;
+            foreach (Meres m in meresek)
+            {
+                if (m.Allas > kuszob)
+                {
+                    db++;
+                    if (elso == null)
+                    {
+                        elso = m.Datum;
+                    }
+                }
+            }
+            if (db == 0)
+            {
+                Console.WriteLine("Nem volt kuszob feletti nap.");
+            }
+            else
+            {
+                Console.WriteLine("Kuszob feletti napok: " + db);
+                Console.WriteLine("Elso ilyen nap: " + elso);
+            }
+        }
+    }
+files:
+  vizallas.txt: vizallas.txt
+tests:
+- stdin: |
+    200
+  expected: |
+    3. feladat
+    Add meg a kuszobot (cm):
+    Kuszob feletti napok: 8
+    Elso ilyen nap: 2024-03-14
+  hidden: false
+- stdin: |
+    230
+  expected: |
+    3. feladat
+    Add meg a kuszobot (cm):
+    Nem volt kuszob feletti nap.
+  hidden: true
+  files:
+    vizallas.txt: teszt-2/vizallas.txt
+- stdin: |
+    0
+  expected: |
+    3. feladat
+    Add meg a kuszobot (cm):
+    Kuszob feletti napok: 30
+    Elso ilyen nap: 2024-03-01
+  hidden: true
+  files:
+    vizallas.txt: teszt-3/vizallas.txt
+- stdin: |
+    49
+  expected: |
+    3. feladat
+    Add meg a kuszobot (cm):
+    Kuszob feletti napok: 2
+    Elso ilyen nap: 2024-05-30
+  hidden: true
+  files:
+    vizallas.txt: teszt-4/vizallas.txt

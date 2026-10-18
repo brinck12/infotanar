@@ -1,0 +1,109 @@
+slug: a-legkisebb-napi-bevetel
+title: A legkisebb napi bevétel
+position: 1
+kind: sql
+level: emelt
+difficulty: 3
+published: false
+allowed_languages:
+- sql
+description: |
+  Az `eladas` tábla egy bolt eladásait tartalmazza:
+
+  | oszlop | típus |
+  |---|---|
+  | `id` | egész, elsődleges kulcs |
+  | `datum` | szöveg (ÉÉÉÉ-HH-NN) |
+  | `db` | egész, az eladott darabszám |
+  | `egysegar` | egész (Ft) |
+
+  Egy eladás értéke `db * egysegar`.
+
+  Mennyi volt a **legkisebb napi bevétel**? Egyetlen értéket adj vissza (**legkisebb**)! Nem elég a `MIN` az eladások értékére: a napi összegek közül kell a legkisebbet kiválasztani.
+
+  Tipp: előbb csoportosíts napok szerint egy allekérdezésben, majd a külső lekérdezésben `MIN`-nel vedd a legkisebbet.
+starter_code:
+  sql: |
+    SELECT MIN(napi) AS legkisebb
+    FROM (SELECT datum, SUM(db * egysegar) AS napi
+          FROM eladas
+          );
+sample_solutions:
+  sql: |
+    SELECT MIN(napi) AS legkisebb
+    FROM (SELECT datum, SUM(db * egysegar) AS napi
+          FROM eladas
+          GROUP BY datum) AS n;
+tests:
+- stdin: |
+    CREATE TABLE eladas (id INTEGER PRIMARY KEY, datum TEXT, db INTEGER, egysegar INTEGER);
+    INSERT INTO eladas VALUES
+    (1, '2026-03-02', 7, 650),
+    (2, '2026-03-02', 7, 400),
+    (3, '2026-03-04', 1, 850),
+    (4, '2026-03-07', 9, 300),
+    (5, '2026-03-07', 1, 250),
+    (6, '2026-03-09', 3, 250),
+    (7, '2026-03-09', 5, 750),
+    (8, '2026-03-09', 2, 700),
+    (9, '2026-03-09', 2, 550);
+  expected: |
+    legkisebb
+    850
+  hidden: false
+- stdin: |
+    CREATE TABLE eladas (id INTEGER PRIMARY KEY, datum TEXT, db INTEGER, egysegar INTEGER);
+    INSERT INTO eladas VALUES
+    (1, '2026-03-05', 1, 500),
+    (2, '2026-03-05', 8, 300),
+    (3, '2026-03-06', 7, 200),
+    (4, '2026-03-10', 3, 750),
+    (5, '2026-03-10', 8, 650),
+    (6, '2026-03-10', 5, 700),
+    (7, '2026-03-14', 3, 850),
+    (8, '2026-03-14', 7, 500),
+    (9, '2026-03-14', 1, 800),
+    (10, '2026-03-14', 8, 450),
+    (11, '2026-03-16', 3, 450),
+    (12, '2026-03-16', 9, 350),
+    (13, '2026-03-16', 7, 400),
+    (14, '2026-03-16', 3, 900);
+  expected: |
+    legkisebb
+    1400
+  hidden: true
+- stdin: |
+    CREATE TABLE eladas (id INTEGER PRIMARY KEY, datum TEXT, db INTEGER, egysegar INTEGER);
+    INSERT INTO eladas VALUES
+    (1, '2026-03-05', 6, 850),
+    (2, '2026-03-05', 5, 700),
+    (3, '2026-03-05', 6, 400),
+    (4, '2026-03-06', 1, 900),
+    (5, '2026-03-08', 8, 800),
+    (6, '2026-03-10', 5, 750),
+    (7, '2026-03-10', 8, 750),
+    (8, '2026-03-12', 6, 850),
+    (9, '2026-03-14', 6, 500),
+    (10, '2026-03-14', 6, 350);
+  expected: |
+    legkisebb
+    900
+  hidden: true
+- stdin: |
+    CREATE TABLE eladas (id INTEGER PRIMARY KEY, datum TEXT, db INTEGER, egysegar INTEGER);
+    INSERT INTO eladas VALUES
+    (1, '2026-03-06', 4, 600),
+    (2, '2026-03-06', 9, 800),
+    (3, '2026-03-06', 7, 650),
+    (4, '2026-03-06', 3, 250),
+    (5, '2026-03-07', 8, 200),
+    (6, '2026-03-10', 6, 300),
+    (7, '2026-03-11', 9, 150),
+    (8, '2026-03-11', 4, 550),
+    (9, '2026-03-12', 6, 650),
+    (10, '2026-03-13', 2, 700),
+    (11, '2026-03-14', 6, 400);
+  expected: |
+    legkisebb
+    1400
+  hidden: true

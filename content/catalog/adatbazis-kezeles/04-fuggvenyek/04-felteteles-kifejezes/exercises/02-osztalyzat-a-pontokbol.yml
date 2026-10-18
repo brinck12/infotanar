@@ -1,0 +1,91 @@
+slug: osztalyzat-a-pontokbol
+title: Osztályzat a pontokból
+position: 2
+kind: sql
+level: kozep
+difficulty: 3
+published: false
+allowed_languages: [sql]
+description: |
+    Add meg a dolgozat jegyét a pontszámból: 40 pont alatt 1, 40-től 55 alatt 2, 55-től 70 alatt 3, 70-től 85 alatt 4, 85-től 5. Listázd a nevet (`nev`), a pontot (`pont`) és a jegyet (`jegy`).
+
+    A `dolgozat` tábla:
+
+    | `id` | `nev` | `pont` |
+    |---|---|---|
+    | 1 | Kiss Anna | 72 |
+    | 2 | Nagy Bela | 45 |
+    | 3 | Toth Csaba | 50 |
+    | 4 | Szabo Dora | 49 |
+
+    Az eredmény ezekre az adatokra:
+
+    | `nev` | `pont` | `jegy` |
+    |---|---|---|
+    | Kiss Anna | 72 | 4 |
+    | Nagy Bela | 45 | 2 |
+    | Toth Csaba | 50 | 2 |
+    | Szabo Dora | 49 | 2 |
+
+    Tipp: négy `IF` egymásba ágyazva, fentről lefelé haladva: előbb a legkisebb sávot kérdezd.
+starter_code:
+  sql: |
+    SELECT nev, pont,
+      IF(pont < 40, 1, IF(..., ..., ...)) AS jegy
+    FROM dolgozat;
+sample_solutions:
+  sql: |
+    SELECT nev, pont,
+      IF(pont < 40, 1, IF(pont < 55, 2, IF(pont < 70, 3, IF(pont < 85, 4, 5)))) AS jegy
+    FROM dolgozat;
+tests:
+  - stdin: |
+      CREATE TABLE dolgozat (id INT, nev VARCHAR(30), pont INT);
+      INSERT INTO dolgozat VALUES (1, 'Kiss Anna', 72);
+      INSERT INTO dolgozat VALUES (2, 'Nagy Bela', 45);
+      INSERT INTO dolgozat VALUES (3, 'Toth Csaba', 50);
+      INSERT INTO dolgozat VALUES (4, 'Szabo Dora', 49);
+    expected: |
+      nev,pont,jegy
+      Kiss Anna,72,4
+      Nagy Bela,45,2
+      Toth Csaba,50,2
+      Szabo Dora,49,2
+    hidden: false
+  - stdin: |
+      CREATE TABLE dolgozat (id INT, nev VARCHAR(30), pont INT);
+      INSERT INTO dolgozat VALUES (9, 'Kovacs Gabor', 39);
+      INSERT INTO dolgozat VALUES (10, 'Zold Mate', 40);
+      INSERT INTO dolgozat VALUES (11, 'Fekete Lili', 54);
+      INSERT INTO dolgozat VALUES (12, 'Feher Zsolt', 55);
+    expected: |
+      nev,pont,jegy
+      Kovacs Gabor,39,1
+      Zold Mate,40,2
+      Fekete Lili,54,2
+      Feher Zsolt,55,3
+    hidden: true
+  - stdin: |
+      CREATE TABLE dolgozat (id INT, nev VARCHAR(30), pont INT);
+      INSERT INTO dolgozat VALUES (5, 'Varga Fanni', 100);
+      INSERT INTO dolgozat VALUES (7, 'Bo Li', 85);
+      INSERT INTO dolgozat VALUES (13, 'Barna Ador', 69);
+      INSERT INTO dolgozat VALUES (14, 'Szurke Eszter', 84);
+    expected: |
+      nev,pont,jegy
+      Varga Fanni,100,5
+      Bo Li,85,5
+      Barna Ador,69,3
+      Szurke Eszter,84,4
+    hidden: true
+  - stdin: |
+      CREATE TABLE dolgozat (id INT, nev VARCHAR(30), pont INT);
+      INSERT INTO dolgozat VALUES (1, 'Kiss Anna', 72);
+      INSERT INTO dolgozat VALUES (6, 'Ho Eva', 0);
+      INSERT INTO dolgozat VALUES (8, 'Papp Jozsef', 70);
+    expected: |
+      nev,pont,jegy
+      Kiss Anna,72,4
+      Ho Eva,0,1
+      Papp Jozsef,70,4
+    hidden: true

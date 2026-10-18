@@ -1,0 +1,52 @@
+slug: a-regenyek-es-iroik-kulcsa
+title: A regények és íróik kulcsa
+position: 1
+kind: sql
+level: kozep
+difficulty: 2
+published: false
+allowed_languages: [sql]
+description: |
+  A `regeny` tábla nem az író nevét tárolja, hanem az `iro_id` idegen kulcsot, amely az `iro` tábla egy rekordjára mutat. Így egy író neve csak egyszer szerepel az adatbázisban, hiába írt több regényt (1:N kapcsolat).
+
+  A `iro` tábla:
+
+  | oszlop | típus |
+  |---|---|
+  | `id` | egész, elsődleges kulcs |
+  | `nev` | szöveg |
+  | `szuletesi_ev` | egész |
+
+  A `regeny` tábla:
+
+  | oszlop | típus |
+  |---|---|
+  | `id` | egész, elsődleges kulcs |
+  | `cim` | szöveg |
+  | `iro_id` | egész, idegen kulcs: `iro.id` |
+  | `oldal` | egész |
+
+  Listázd ki a `regeny` tábla minden sorából a **regény címét és az író azonosítóját** (`iro_id`), ebben a sorrendben! A sorok sorrendje nem számít.
+
+  Tipp: csak a `regeny` táblát kell lekérdezned, az `iro` táblához nem kell nyúlnod.
+starter_code:
+  sql: |
+    SELECT
+    FROM regeny;
+sample_solutions:
+  sql: |
+    SELECT cim, iro_id
+    FROM regeny;
+tests:
+  - stdin: "CREATE TABLE iro (id INTEGER PRIMARY KEY, nev TEXT, szuletesi_ev INTEGER);\nINSERT INTO iro VALUES\n(1, 'Varga Dora', 1964),\n(2, 'Nagy Peter', 1960),\n(3, 'Szabo Reka', 1930),\n(4, 'Horvath Mate', 1929);\nCREATE TABLE regeny (id INTEGER PRIMARY KEY, cim TEXT, iro_id INTEGER, oldal INTEGER, FOREIGN KEY (iro_id) REFERENCES iro(id));\nINSERT INTO regeny VALUES\n(1, 'Szeleso ter', 3, 146),\n(2, 'Nyari vihar', 2, 552),\n(3, 'A tenger fiai', 3, 436),\n(4, 'Csendes folyo', 1, 448);\n"
+    expected: "cim,iro_id\nSzeleso ter,3\nNyari vihar,2\nA tenger fiai,3\nCsendes folyo,1\n"
+    hidden: false
+  - stdin: "CREATE TABLE iro (id INTEGER PRIMARY KEY, nev TEXT, szuletesi_ev INTEGER);\nINSERT INTO iro VALUES\n(1, 'Toth Gabor', 1923),\n(2, 'Szabo Reka', 1955),\n(3, 'Varga Dora', 1904),\n(4, 'Kovacs Lilla', 1915);\nCREATE TABLE regeny (id INTEGER PRIMARY KEY, cim TEXT, iro_id INTEGER, oldal INTEGER, FOREIGN KEY (iro_id) REFERENCES iro(id));\nINSERT INTO regeny VALUES\n(1, 'Az elso tavasz', 4, 527),\n(2, 'Sotet erdo', 4, 274),\n(3, 'Zold ablak', 1, 441),\n(4, 'A kert titka', 3, 285),\n(5, 'Szel ellen', 2, 464),\n(6, 'A tenger fiai', 3, 539);\n"
+    expected: "cim,iro_id\nAz elso tavasz,4\nSotet erdo,4\nZold ablak,1\nA kert titka,3\nSzel ellen,2\nA tenger fiai,3\n"
+    hidden: true
+  - stdin: "CREATE TABLE iro (id INTEGER PRIMARY KEY, nev TEXT, szuletesi_ev INTEGER);\nINSERT INTO iro VALUES\n(1, 'Nagy Peter', 1918),\n(2, 'Kelemen Bela', 1916),\n(3, 'Molnar Eszter', 1911),\n(4, 'Horvath Mate', 1916);\nCREATE TABLE regeny (id INTEGER PRIMARY KEY, cim TEXT, iro_id INTEGER, oldal INTEGER, FOREIGN KEY (iro_id) REFERENCES iro(id));\nINSERT INTO regeny VALUES\n(1, 'Az elso tavasz', 1, 474),\n(2, 'A masik part', 3, 558),\n(3, 'A kert titka', 3, 584),\n(4, 'Hegyi ut', 1, 451),\n(5, 'Kis kert', 2, 578),\n(6, 'Foldrajzi felfedezok', 4, 463),\n(7, 'A hidak kora', 3, 459),\n(8, 'Aranykor', 3, 182);\n"
+    expected: "cim,iro_id\nAz elso tavasz,1\nA masik part,3\nA kert titka,3\nHegyi ut,1\nKis kert,2\nFoldrajzi felfedezok,4\nA hidak kora,3\nAranykor,3\n"
+    hidden: true
+  - stdin: "CREATE TABLE iro (id INTEGER PRIMARY KEY, nev TEXT, szuletesi_ev INTEGER);\nINSERT INTO iro VALUES\n(1, 'Horvath Mate', 1907),\n(2, 'Varga Dora', 1970),\n(3, 'Szabo Reka', 1919),\n(4, 'Nagy Peter', 1914);\nCREATE TABLE regeny (id INTEGER PRIMARY KEY, cim TEXT, iro_id INTEGER, oldal INTEGER, FOREIGN KEY (iro_id) REFERENCES iro(id));\nINSERT INTO regeny VALUES\n(1, 'Foldrajzi felfedezok', 3, 386),\n(2, 'Fenyes napok', 1, 570),\n(3, 'Az elso tavasz', 4, 166),\n(4, 'Hazak kozott', 1, 335),\n(5, 'Esti mesek', 4, 254),\n(6, 'Zold ablak', 4, 298),\n(7, 'Kis kert', 2, 440),\n(8, 'A regi malom', 4, 581),\n(9, 'Csendes folyo', 4, 227),\n(10, 'A tenger fiai', 4, 356);\n"
+    expected: "cim,iro_id\nFoldrajzi felfedezok,3\nFenyes napok,1\nAz elso tavasz,4\nHazak kozott,1\nEsti mesek,4\nZold ablak,4\nKis kert,2\nA regi malom,4\nCsendes folyo,4\nA tenger fiai,4\n"
+    hidden: true

@@ -1,0 +1,9 @@
+Nemes Anna;Barlangok vilaga;2017;471
+Farkas Daniel;Kek ejszaka;2004;426
+Kovacs Peter;A megtalalt level;2017;164
+Nemes Anna;Lampasok;2017;105
+Nemes Anna;A negy evszak;2013;189
+Szabo Eszter;Varos a felhokben;2008;615
+Nemes Anna;Ezust ora;2008;499
+Molnar Reka;A kis hajos;2004;334
+Kovacs Peter;Hideg tel;2017;287

@@ -1,0 +1,79 @@
+slug: legnagyobb-szam-javitas
+title: Legnagyobb szám (javítás)
+position: 1
+kind: code
+level: kozep
+difficulty: 2
+published: false
+allowed_languages: [python, csharp]
+description: |
+  A program a legnagyobb beolvasott számot keresi, de **hibás**: néhány bemenetre rossz eredményt ad. Találj ki olyan bemenetet, amelyre elromlik, és javítsd ki.
+
+  A feladat: az első sorban egy pozitív egész szám (`n`) áll, a következő `n` sorban egy-egy egész szám (lehet negatív is). Írd ki a legnagyobbat, egyetlen számként.
+
+  Példa: ha a bemenet `3`, `4`, `9`, `2` (külön sorokban), a kimenet `9`.
+
+  Tipp: próbáld ki csupa negatív számmal. Mi a legnagyobb szám, amikor a kezdőérték nulla?
+starter_code:
+  python: |
+    n = int(input())
+    legnagyobb = 0
+    for i in range(n):
+        szam = int(input())
+        if szam > legnagyobb:
+            legnagyobb = szam
+    print(legnagyobb)
+  csharp: |
+    using System;
+
+    class Program
+    {
+        static void Main()
+        {
+            var n = int.Parse(Console.ReadLine());
+            var legnagyobb = 0;
+            for (int i = 0; i < n; i++)
+            {
+                var szam = int.Parse(Console.ReadLine());
+                if (szam > legnagyobb)
+                {
+                    legnagyobb = szam;
+                }
+            }
+            Console.WriteLine(legnagyobb);
+        }
+    }
+sample_solutions:
+  python: |
+    n = int(input())
+    legnagyobb = int(input())
+    for i in range(n - 1):
+        szam = int(input())
+        if szam > legnagyobb:
+            legnagyobb = szam
+    print(legnagyobb)
+  csharp: |
+    using System;
+
+    class Program
+    {
+        static void Main()
+        {
+            var n = int.Parse(Console.ReadLine());
+            var legnagyobb = int.Parse(Console.ReadLine());
+            for (int i = 0; i < n - 1; i++)
+            {
+                var szam = int.Parse(Console.ReadLine());
+                if (szam > legnagyobb)
+                {
+                    legnagyobb = szam;
+                }
+            }
+            Console.WriteLine(legnagyobb);
+        }
+    }
+tests:
+  - { stdin: "3\n4\n9\n2\n", expected: "9\n", hidden: false }
+  - { stdin: "3\n-5\n-2\n-9\n", expected: "-2\n", hidden: true }
+  - { stdin: "1\n-7\n", expected: "-7\n", hidden: true }
+  - { stdin: "4\n0\n0\n0\n0\n", expected: "0\n", hidden: true }

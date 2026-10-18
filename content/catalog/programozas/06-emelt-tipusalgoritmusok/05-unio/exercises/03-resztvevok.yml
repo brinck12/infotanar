@@ -1,0 +1,124 @@
+slug: resztvevok
+title: "Résztvevők"
+position: 2
+kind: code
+level: emelt
+difficulty: 3
+published: false
+allowed_languages: [python, csharp]
+description: |
+  Két rendezvény résztvevői érkeznek: az elsőn részt vevők száma (N, legalább 1), majd N sor, soronként egy név (ékezet nélkül); a másodikon részt vevők száma (M, legalább 1), majd M név. Egy rendezvény névsorában a nevek különbözők. Írd ki három sorban: hány különböző ember vett részt legalább az egyik rendezvényen (`Unio: x`), hányan vettek részt mindkettőn (`Metszet: y`), és hányan csak az elsőn (`Csak az elsoben: z`).
+
+  Példa bemenet:
+
+  ```
+  3
+  Anna
+  Bence
+  Csilla
+  3
+  Csilla
+  David
+  Anna
+  ```
+
+  Kimenet:
+
+  ```
+  Unio: 4
+  Metszet: 2
+  Csak az elsoben: 1
+  ```
+
+  Tipp: a metszet méretét meghatározva az unió mérete `N + M - metszet`, az "csak az elsőn" pedig `N - metszet`. Közvetlenül is összeszámolhatod, de az összefüggéssel ellenőrizheted magad.
+starter_code:
+  python: |
+    n = int(input())
+    a = []
+    for _ in range(n):
+        a.append(input())
+    m = int(input())
+    b = []
+    for _ in range(m):
+        b.append(input())
+    # számold ki a metszet méretét, és abból a többit
+  csharp: |
+    using System;
+    using System.Collections.Generic;
+
+    class Program
+    {
+        static List<string> Beolvas()
+        {
+            int n = int.Parse(Console.ReadLine());
+            var lista = new List<string>();
+            for (int i = 0; i < n; i++)
+            {
+                lista.Add(Console.ReadLine());
+            }
+            return lista;
+        }
+
+        static void Main()
+        {
+            var a = Beolvas();
+            var b = Beolvas();
+            // számold ki a metszet méretét, és abból a többit
+        }
+    }
+sample_solutions:
+  python: |
+    n = int(input())
+    a = []
+    for _ in range(n):
+        a.append(input())
+    m = int(input())
+    b = []
+    for _ in range(m):
+        b.append(input())
+    metszet = 0
+    for nev in a:
+        if nev in b:
+            metszet += 1
+    print("Unio:", n + m - metszet)
+    print("Metszet:", metszet)
+    print("Csak az elsoben:", n - metszet)
+  csharp: |
+    using System;
+    using System.Collections.Generic;
+
+    class Program
+    {
+        static List<string> Beolvas()
+        {
+            int n = int.Parse(Console.ReadLine());
+            var lista = new List<string>();
+            for (int i = 0; i < n; i++)
+            {
+                lista.Add(Console.ReadLine());
+            }
+            return lista;
+        }
+
+        static void Main()
+        {
+            var a = Beolvas();
+            var b = Beolvas();
+            int metszet = 0;
+            foreach (string nev in a)
+            {
+                if (b.Contains(nev))
+                {
+                    metszet++;
+                }
+            }
+            Console.WriteLine("Unio: " + (a.Count + b.Count - metszet));
+            Console.WriteLine("Metszet: " + metszet);
+            Console.WriteLine("Csak az elsoben: " + (a.Count - metszet));
+        }
+    }
+tests:
+  - { stdin: "3\nAnna\nBence\nCsilla\n3\nCsilla\nDavid\nAnna\n", expected: "Unio: 4\nMetszet: 2\nCsak az elsoben: 1\n", hidden: false }
+  - { stdin: "1\nEmil\n1\nEmil\n", expected: "Unio: 1\nMetszet: 1\nCsak az elsoben: 0\n", hidden: true }
+  - { stdin: "2\nFanni\nGabor\n1\nHanna\n", expected: "Unio: 3\nMetszet: 0\nCsak az elsoben: 2\n", hidden: true }
+  - { stdin: "4\nIvan\nJudit\nKata\nLaci\n2\nLaci\nKata\n", expected: "Unio: 4\nMetszet: 2\nCsak az elsoben: 2\n", hidden: true }

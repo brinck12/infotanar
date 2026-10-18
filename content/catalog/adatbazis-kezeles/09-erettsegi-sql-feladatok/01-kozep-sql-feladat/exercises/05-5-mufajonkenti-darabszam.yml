@@ -1,0 +1,156 @@
+slug: 5-mufajonkenti-darabszam
+title: 5. Műfajonkénti darabszám
+position: 4
+kind: sql
+level: kozep
+difficulty: 3
+published: false
+allowed_languages:
+- sql
+sql_order_sensitive: true
+description: |
+  Egy filmadatbázis két táblából áll.
+
+  A `mufaj` tábla:
+
+  | oszlop | típus |
+  |---|---|
+  | `id` | `INT`, elsődleges kulcs |
+  | `nev` | `VARCHAR(50)` (pl. `vigjatek`, `drama`, `akcio`, `scifi`, `animacio`) |
+
+  A `film` tábla:
+
+  | oszlop | típus |
+  |---|---|
+  | `id` | `INT`, elsődleges kulcs |
+  | `cim` | `VARCHAR(50)` |
+  | `ev` | `INT`, a bemutató éve |
+  | `hossz` | `INT`, a játékidő percben |
+  | `mufaj_id` | `INT`, a `mufaj` tábla `id` oszlopára mutat |
+  | `ertekeles` | `INT`, 1 és 10 között |
+
+  **5. feladat.** Adja meg lekérdezéssel műfajonként a filmek számát (**nev, darab**)! A `nev` a műfaj neve legyen. Csak azok a műfajok szerepeljenek, amelyekből **van film**. A találatokat rendezze a darabszám szerint **csökkenő**, azonos darabszámnál a műfajnév szerint ábécérendbe!
+starter_code:
+  sql: "SELECT mufaj.nev, COUNT(*) AS darab\nFROM film INNER JOIN mufaj ON \nGROUP BY \nORDER BY ;\n"
+sample_solutions:
+  sql: |
+    SELECT mufaj.nev, COUNT(*) AS darab
+    FROM film INNER JOIN mufaj ON film.mufaj_id = mufaj.id
+    GROUP BY mufaj.id, mufaj.nev
+    ORDER BY darab DESC, mufaj.nev;
+tests:
+- stdin: |
+    CREATE TABLE mufaj (id INTEGER PRIMARY KEY, nev TEXT);
+    INSERT INTO mufaj VALUES
+    (1, 'vigjatek'),
+    (2, 'drama'),
+    (3, 'akcio'),
+    (4, 'scifi'),
+    (5, 'animacio');
+    CREATE TABLE film (id INTEGER PRIMARY KEY, cim TEXT, ev INTEGER, hossz INTEGER, mufaj_id INTEGER, ertekeles INTEGER);
+    INSERT INTO film VALUES
+    (1, 'Orokseg', 1988, 99, 5, 6),
+    (2, 'Csendes ejszaka', 1989, 144, 2, 9),
+    (3, 'Vihar elott', 1985, 98, 1, 5),
+    (4, 'Tukor', 1994, 91, 5, 6),
+    (5, 'Szivarvany', 2012, 118, 1, 4),
+    (6, 'Fenyes jovo', 2012, 95, 4, 9),
+    (7, 'Utazok', 1988, 117, 5, 4),
+    (8, 'Labirintus', 2000, 82, 4, 6);
+  expected: |
+    nev,darab
+    animacio,3
+    scifi,2
+    vigjatek,2
+    drama,1
+  hidden: false
+- stdin: |
+    CREATE TABLE mufaj (id INTEGER PRIMARY KEY, nev TEXT);
+    INSERT INTO mufaj VALUES
+    (1, 'vigjatek'),
+    (2, 'drama'),
+    (3, 'akcio'),
+    (4, 'scifi'),
+    (5, 'animacio');
+    CREATE TABLE film (id INTEGER PRIMARY KEY, cim TEXT, ev INTEGER, hossz INTEGER, mufaj_id INTEGER, ertekeles INTEGER);
+    INSERT INTO film VALUES
+    (1, 'Szivarvany', 1993, 146, 1, 7),
+    (2, 'Alom', 2019, 164, 3, 10),
+    (3, 'Vihar elott', 2012, 101, 5, 6),
+    (4, 'Fenyes jovo', 1988, 118, 4, 8),
+    (5, 'Mesevonat', 1991, 124, 4, 10),
+    (6, 'Csendes ejszaka', 1992, 89, 2, 4),
+    (7, 'Hajnal', 2023, 101, 5, 4),
+    (8, 'Delibab', 2002, 158, 3, 8),
+    (9, 'Palanta', 2020, 87, 5, 6),
+    (10, 'Bolygok', 2019, 134, 1, 6);
+  expected: |
+    nev,darab
+    animacio,3
+    akcio,2
+    scifi,2
+    vigjatek,2
+    drama,1
+  hidden: true
+- stdin: |
+    CREATE TABLE mufaj (id INTEGER PRIMARY KEY, nev TEXT);
+    INSERT INTO mufaj VALUES
+    (1, 'vigjatek'),
+    (2, 'drama'),
+    (3, 'akcio'),
+    (4, 'scifi'),
+    (5, 'animacio');
+    CREATE TABLE film (id INTEGER PRIMARY KEY, cim TEXT, ev INTEGER, hossz INTEGER, mufaj_id INTEGER, ertekeles INTEGER);
+    INSERT INTO film VALUES
+    (1, 'Rejtekhely', 2010, 143, 5, 4),
+    (2, 'Hajnal', 2006, 162, 5, 4),
+    (3, 'Fenyes jovo', 2007, 84, 3, 9),
+    (4, 'Bolygok', 2008, 123, 1, 10),
+    (5, 'Alom', 2002, 155, 2, 6),
+    (6, 'Almodozok', 2006, 98, 1, 9),
+    (7, 'Atkelo', 2015, 80, 1, 9),
+    (8, 'Mesevonat', 2003, 159, 4, 4),
+    (9, 'Tukor', 1991, 157, 4, 6),
+    (10, 'Labirintus', 1997, 127, 5, 10),
+    (11, 'Utazok', 1996, 136, 3, 6),
+    (12, 'Nyari szel', 1990, 87, 1, 7);
+  expected: |
+    nev,darab
+    vigjatek,4
+    animacio,3
+    akcio,2
+    scifi,2
+    drama,1
+  hidden: true
+- stdin: |
+    CREATE TABLE mufaj (id INTEGER PRIMARY KEY, nev TEXT);
+    INSERT INTO mufaj VALUES
+    (1, 'vigjatek'),
+    (2, 'drama'),
+    (3, 'akcio'),
+    (4, 'scifi'),
+    (5, 'animacio');
+    CREATE TABLE film (id INTEGER PRIMARY KEY, cim TEXT, ev INTEGER, hossz INTEGER, mufaj_id INTEGER, ertekeles INTEGER);
+    INSERT INTO film VALUES
+    (1, 'Rejtekhely', 2000, 131, 2, 8),
+    (2, 'Zuhatag', 2006, 109, 1, 10),
+    (3, 'Mesevonat', 1989, 162, 5, 5),
+    (4, 'Hajnal', 2021, 95, 2, 10),
+    (5, 'Szivarvany', 2018, 152, 2, 6),
+    (6, 'Atkelo', 2016, 152, 3, 5),
+    (7, 'Nyari szel', 1989, 105, 2, 8),
+    (8, 'Alom', 1988, 107, 4, 9),
+    (9, 'Palanta', 1995, 128, 5, 6),
+    (10, 'Vihar elott', 2024, 83, 1, 9),
+    (11, 'Fenyes jovo', 2008, 97, 4, 8),
+    (12, 'Labirintus', 1997, 101, 5, 5),
+    (13, 'Kikoto', 2006, 110, 2, 6),
+    (14, 'Csendes ejszaka', 2014, 151, 3, 7);
+  expected: |
+    nev,darab
+    drama,5
+    animacio,3
+    akcio,2
+    scifi,2
+    vigjatek,2
+  hidden: true

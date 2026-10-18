@@ -1,0 +1,78 @@
+slug: paros-rajtszamok
+title: Páros rajtszámok
+position: 2
+kind: sql
+level: kozep
+difficulty: 2
+published: false
+allowed_languages: [sql]
+description: |
+    Listázd azoknak a versenyzőknek a rajtszámát (`rajtszam`) és nevét (`nev`), akiknek a rajtszáma páros.
+
+    A `versenyzo` tábla:
+
+    | `rajtszam` | `nev` |
+    |---|---|
+    | 1 | Kiss Anna |
+    | 2 | Nagy Bela |
+    | 3 | Toth Csaba |
+    | 4 | Szabo Dora |
+    | 5 | Varga Fanni |
+
+    Az eredmény ezekre az adatokra:
+
+    | `rajtszam` | `nev` |
+    |---|---|
+    | 2 | Nagy Bela |
+    | 4 | Szabo Dora |
+
+    Tipp: egy szám pontosan akkor páros, ha 2-vel osztva a maradék 0: `MOD(szám, 2) = 0`.
+starter_code:
+  sql: |
+    SELECT rajtszam, nev
+    FROM versenyzo
+    WHERE ...;
+sample_solutions:
+  sql: |
+    SELECT rajtszam, nev
+    FROM versenyzo
+    WHERE MOD(rajtszam, 2) = 0;
+tests:
+  - stdin: |
+      CREATE TABLE versenyzo (rajtszam INT, nev VARCHAR(30));
+      INSERT INTO versenyzo VALUES (1, 'Kiss Anna');
+      INSERT INTO versenyzo VALUES (2, 'Nagy Bela');
+      INSERT INTO versenyzo VALUES (3, 'Toth Csaba');
+      INSERT INTO versenyzo VALUES (4, 'Szabo Dora');
+      INSERT INTO versenyzo VALUES (5, 'Varga Fanni');
+    expected: |
+      rajtszam,nev
+      2,Nagy Bela
+      4,Szabo Dora
+    hidden: false
+  - stdin: |
+      CREATE TABLE versenyzo (rajtszam INT, nev VARCHAR(30));
+      INSERT INTO versenyzo VALUES (1, 'Kiss Anna');
+      INSERT INTO versenyzo VALUES (3, 'Toth Csaba');
+      INSERT INTO versenyzo VALUES (5, 'Varga Fanni');
+    expected: ""
+    hidden: true
+  - stdin: |
+      CREATE TABLE versenyzo (rajtszam INT, nev VARCHAR(30));
+      INSERT INTO versenyzo VALUES (2, 'Nagy Bela');
+      INSERT INTO versenyzo VALUES (6, 'Horvath Erik');
+      INSERT INTO versenyzo VALUES (8, 'Ho Eva');
+      INSERT INTO versenyzo VALUES (10, 'Bo Li');
+    expected: |
+      rajtszam,nev
+      2,Nagy Bela
+      6,Horvath Erik
+      8,Ho Eva
+      10,Bo Li
+    hidden: true
+  - stdin: |
+      CREATE TABLE versenyzo (rajtszam INT, nev VARCHAR(30));
+      INSERT INTO versenyzo VALUES (7, 'Szilagyi Nora');
+      INSERT INTO versenyzo VALUES (9, 'Kovacs Gabor');
+    expected: ""
+    hidden: true

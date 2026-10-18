@@ -1,0 +1,155 @@
+slug: buszmenetrend
+title: "Buszmenetrend"
+position: 0
+kind: code
+level: emelt
+difficulty: 3
+published: false
+allowed_languages: [python, csharp]
+description: |
+  Egy kisváros buszjáratainak adatai: az első sor a járatok száma (N, legalább 1), majd N sor: `jaratszam;indulas;erkezes`, ahol az időpontok `ó:pp` alakúak (például `6:05` vagy `14:30`), és minden járat ugyanazon a napon érkezik, mint indul (az érkezés később van, mint az indulás).
+
+  Írd ki a leghosszabb menetidejű járat számát és menetidejét (`Leghosszabb: jaratszam (X perc)`; egyenlő menetidőnél a bemenetben előbbi), majd az összes járat menetidejének összegét (`Osszes menetido: Y perc`).
+
+  Példa bemenet:
+
+  ```
+  3
+  12A;6:05;6:50
+  7;7:30;8:45
+  12A;14:00;14:45
+  ```
+
+  Kimenet:
+
+  ```
+  Leghosszabb: 7 (75 perc)
+  Osszes menetido: 165 perc
+  ```
+
+  Tipp: az időpontokat alakítsd percre (`ó * 60 + pp`), és így tárold; a menetidő az érkezés és az indulás különbsége.
+starter_code:
+  python: |
+    from dataclasses import dataclass
+
+    def percre(ido):
+        resz = ido.split(":")
+        return int(resz[0]) * 60 + int(resz[1])
+
+    @dataclass
+    class Jarat:
+        szam: str
+        indulas: int
+        erkezes: int
+
+    n = int(input())
+    jaratok = []
+    # olvasd be a járatokat, majd számolj
+  csharp: |
+    using System;
+    using System.Collections.Generic;
+
+    class Jarat
+    {
+        public string Szam;
+        public int Indulas;
+        public int Erkezes;
+    }
+
+    class Program
+    {
+        static int Percre(string ido)
+        {
+            string[] resz = ido.Split(':');
+            return int.Parse(resz[0]) * 60 + int.Parse(resz[1]);
+        }
+
+        static void Main()
+        {
+            int n = int.Parse(Console.ReadLine());
+            var jaratok = new List<Jarat>();
+            // olvasd be a járatokat, majd számolj
+        }
+    }
+sample_solutions:
+  python: |
+    from dataclasses import dataclass
+
+    def percre(ido):
+        resz = ido.split(":")
+        return int(resz[0]) * 60 + int(resz[1])
+
+    @dataclass
+    class Jarat:
+        szam: str
+        indulas: int
+        erkezes: int
+
+        def menetido(self):
+            return self.erkezes - self.indulas
+
+    n = int(input())
+    jaratok = []
+    for _ in range(n):
+        resz = input().split(";")
+        jaratok.append(Jarat(resz[0], percre(resz[1]), percre(resz[2])))
+    leghosszabb = jaratok[0]
+    osszes = 0
+    for j in jaratok:
+        osszes += j.menetido()
+        if j.menetido() > leghosszabb.menetido():
+            leghosszabb = j
+    print("Leghosszabb: " + leghosszabb.szam + " (" + str(leghosszabb.menetido()) + " perc)")
+    print("Osszes menetido: " + str(osszes) + " perc")
+  csharp: |
+    using System;
+    using System.Collections.Generic;
+
+    class Jarat
+    {
+        public string Szam;
+        public int Indulas;
+        public int Erkezes;
+
+        public int Menetido()
+        {
+            return Erkezes - Indulas;
+        }
+    }
+
+    class Program
+    {
+        static int Percre(string ido)
+        {
+            string[] resz = ido.Split(':');
+            return int.Parse(resz[0]) * 60 + int.Parse(resz[1]);
+        }
+
+        static void Main()
+        {
+            int n = int.Parse(Console.ReadLine());
+            var jaratok = new List<Jarat>();
+            for (int i = 0; i < n; i++)
+            {
+                string[] resz = Console.ReadLine().Split(';');
+                jaratok.Add(new Jarat { Szam = resz[0], Indulas = Percre(resz[1]), Erkezes = Percre(resz[2]) });
+            }
+            var leghosszabb = jaratok[0];
+            int osszes = 0;
+            foreach (var j in jaratok)
+            {
+                osszes += j.Menetido();
+                if (j.Menetido() > leghosszabb.Menetido())
+                {
+                    leghosszabb = j;
+                }
+            }
+            Console.WriteLine("Leghosszabb: " + leghosszabb.Szam + " (" + leghosszabb.Menetido() + " perc)");
+            Console.WriteLine("Osszes menetido: " + osszes + " perc");
+        }
+    }
+tests:
+  - { stdin: "3\n12A;6:05;6:50\n7;7:30;8:45\n12A;14:00;14:45\n", expected: "Leghosszabb: 7 (75 perc)\nOsszes menetido: 165 perc\n", hidden: false }
+  - { stdin: "1\n3;23:10;23:59\n", expected: "Leghosszabb: 3 (49 perc)\nOsszes menetido: 49 perc\n", hidden: true }
+  - { stdin: "2\n1;8:00;8:30\n2;9:15;9:45\n", expected: "Leghosszabb: 1 (30 perc)\nOsszes menetido: 60 perc\n", hidden: true }
+  - { stdin: "4\n5;0:05;1:05\n6;10:59;12:00\n7;11:00;12:01\n8;13:00;13:01\n", expected: "Leghosszabb: 6 (61 perc)\nOsszes menetido: 183 perc\n", hidden: true }

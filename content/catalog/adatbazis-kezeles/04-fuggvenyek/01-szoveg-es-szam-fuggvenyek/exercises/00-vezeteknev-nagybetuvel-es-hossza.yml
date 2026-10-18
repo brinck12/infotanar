@@ -1,0 +1,91 @@
+slug: vezeteknev-nagybetuvel-es-hossza
+title: Vezetéknév nagybetűvel és hossza
+position: 0
+kind: sql
+level: kozep
+difficulty: 1
+published: false
+allowed_languages: [sql]
+description: |
+    Listázd a tanulók vezetéknevét (`vezeteknev`), ugyanezt csupa nagybetűvel (`nagybetus`), és azt, hogy hány karakterből áll (`hossz`).
+
+    A `tanulo` tábla:
+
+    | `id` | `vezeteknev` | `keresztnev` | `osztaly` |
+    |---|---|---|---|
+    | 1 | Kiss | Anna | 10.A |
+    | 2 | Nagy | Bela | 10.B |
+    | 3 | Toth | Csaba | 10.A |
+    | 4 | Szabo | Dora | 11.A |
+
+    Az eredmény ezekre az adatokra:
+
+    | `vezeteknev` | `nagybetus` | `hossz` |
+    |---|---|---|
+    | Kiss | KISS | 4 |
+    | Nagy | NAGY | 4 |
+    | Toth | TOTH | 4 |
+    | Szabo | SZABO | 5 |
+
+    Tipp: az `UCASE(oszlop)` nagybetűssé alakít, a `CHAR_LENGTH(oszlop)` a karakterek számát adja.
+starter_code:
+  sql: |
+    SELECT vezeteknev,
+      ... AS nagybetus,
+      ... AS hossz
+    FROM tanulo;
+sample_solutions:
+  sql: |
+    SELECT vezeteknev, UCASE(vezeteknev) AS nagybetus, CHAR_LENGTH(vezeteknev) AS hossz
+    FROM tanulo;
+tests:
+  - stdin: |
+      CREATE TABLE tanulo (id INT, vezeteknev VARCHAR(30), keresztnev VARCHAR(30), osztaly VARCHAR(5));
+      INSERT INTO tanulo VALUES (1, 'Kiss', 'Anna', '10.A');
+      INSERT INTO tanulo VALUES (2, 'Nagy', 'Bela', '10.B');
+      INSERT INTO tanulo VALUES (3, 'Toth', 'Csaba', '10.A');
+      INSERT INTO tanulo VALUES (4, 'Szabo', 'Dora', '11.A');
+    expected: |
+      vezeteknev,nagybetus,hossz
+      Kiss,KISS,4
+      Nagy,NAGY,4
+      Toth,TOTH,4
+      Szabo,SZABO,5
+    hidden: false
+  - stdin: |
+      CREATE TABLE tanulo (id INT, vezeteknev VARCHAR(30), keresztnev VARCHAR(30), osztaly VARCHAR(5));
+      INSERT INTO tanulo VALUES (5, 'Varga', 'Fanni', '10.B');
+      INSERT INTO tanulo VALUES (6, 'Horvath', 'Erik', '11.A');
+      INSERT INTO tanulo VALUES (7, 'Szilagyi', 'Nora', '10.A');
+      INSERT INTO tanulo VALUES (8, 'Ho', 'Eva', '11.B');
+      INSERT INTO tanulo VALUES (11, 'Bo', 'Li', '10.A');
+    expected: |
+      vezeteknev,nagybetus,hossz
+      Varga,VARGA,5
+      Horvath,HORVATH,7
+      Szilagyi,SZILAGYI,8
+      Ho,HO,2
+      Bo,BO,2
+    hidden: true
+  - stdin: |
+      CREATE TABLE tanulo (id INT, vezeteknev VARCHAR(30), keresztnev VARCHAR(30), osztaly VARCHAR(5));
+      INSERT INTO tanulo VALUES (8, 'Ho', 'Eva', '11.B');
+      INSERT INTO tanulo VALUES (11, 'Bo', 'Li', '10.A');
+      INSERT INTO tanulo VALUES (12, 'Szentpeteri', 'Zsombor', '11.B');
+    expected: |
+      vezeteknev,nagybetus,hossz
+      Ho,HO,2
+      Bo,BO,2
+      Szentpeteri,SZENTPETERI,11
+    hidden: true
+  - stdin: |
+      CREATE TABLE tanulo (id INT, vezeteknev VARCHAR(30), keresztnev VARCHAR(30), osztaly VARCHAR(5));
+      INSERT INTO tanulo VALUES (3, 'Toth', 'Csaba', '10.A');
+      INSERT INTO tanulo VALUES (9, 'Kovacs', 'Gabor', '10.B');
+      INSERT INTO tanulo VALUES (10, 'Meszaros', 'Lilla', '11.A');
+    expected: |
+      vezeteknev,nagybetus,hossz
+      Toth,TOTH,4
+      Kovacs,KOVACS,6
+      Meszaros,MESZAROS,8
+    hidden: true

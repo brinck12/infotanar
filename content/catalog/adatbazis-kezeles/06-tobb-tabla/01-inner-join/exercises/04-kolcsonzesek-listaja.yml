@@ -1,0 +1,158 @@
+slug: kolcsonzesek-listaja
+title: Kölcsönzések listája
+position: 3
+kind: sql
+level: kozep
+difficulty: 3
+published: false
+allowed_languages: [sql]
+sql_order_sensitive: true
+description: |
+    Listázd a kölcsönzéseket a könyv címével (`cim`), az olvasó nevével (`olvaso`) és a dátummal (`datum`). A lista dátum szerint növekvő sorrendben legyen; azonos dátumnál cím, majd olvasó szerint.
+
+    A `konyv` tábla:
+
+    | `id` | `cim` | `szerzo` |
+    |---|---|---|
+    | 1 | Egri csillagok | Gardonyi Geza |
+    | 2 | A Pal utcai fiuk | Molnar Ferenc |
+    | 3 | Abel a rengetegben | Tamasi Aron |
+    | 4 | Tuskevar | Fekete Istvan |
+
+    A `kolcsonzes` tábla:
+
+    | `id` | `konyv_id` | `olvaso` | `datum` |
+    |---|---|---|---|
+    | 1 | 1 | Kiss Anna | 2025-02-03 |
+    | 2 | 2 | Nagy Bela | 2025-02-03 |
+    | 3 | 1 | Toth Csaba | 2025-02-10 |
+    | 4 | 2 | Kiss Anna | 2025-02-17 |
+
+    Az eredmény ezekre az adatokra (a sorrend is számít):
+
+    | `cim` | `olvaso` | `datum` |
+    |---|---|---|
+    | A Pal utcai fiuk | Nagy Bela | 2025-02-03 |
+    | Egri csillagok | Kiss Anna | 2025-02-03 |
+    | Egri csillagok | Toth Csaba | 2025-02-10 |
+    | A Pal utcai fiuk | Kiss Anna | 2025-02-17 |
+
+    Tipp: az `ORDER BY` több oszlopot is felsorolhat vesszővel; a későbbi csak az azonosak között dönt.
+starter_code:
+  sql: |
+    SELECT konyv.cim AS cim, kolcsonzes.olvaso AS olvaso, kolcsonzes.datum AS datum
+    FROM kolcsonzes
+    INNER JOIN konyv ON
+    ORDER BY ;
+sample_solutions:
+  sql: |
+    SELECT konyv.cim AS cim, kolcsonzes.olvaso AS olvaso, kolcsonzes.datum AS datum
+    FROM kolcsonzes
+    INNER JOIN konyv ON kolcsonzes.konyv_id = konyv.id
+    ORDER BY kolcsonzes.datum, konyv.cim, kolcsonzes.olvaso;
+tests:
+  - stdin: |
+      CREATE TABLE konyv (id INTEGER PRIMARY KEY, cim TEXT, szerzo TEXT);
+      CREATE TABLE kolcsonzes (id INTEGER PRIMARY KEY, konyv_id INTEGER, olvaso TEXT, datum TEXT);
+      INSERT INTO konyv VALUES (1, 'Egri csillagok', 'Gardonyi Geza');
+      INSERT INTO konyv VALUES (2, 'A Pal utcai fiuk', 'Molnar Ferenc');
+      INSERT INTO konyv VALUES (3, 'Abel a rengetegben', 'Tamasi Aron');
+      INSERT INTO konyv VALUES (4, 'Tuskevar', 'Fekete Istvan');
+      INSERT INTO kolcsonzes VALUES (1, 1, 'Kiss Anna', '2025-02-03');
+      INSERT INTO kolcsonzes VALUES (2, 2, 'Nagy Bela', '2025-02-03');
+      INSERT INTO kolcsonzes VALUES (3, 1, 'Toth Csaba', '2025-02-10');
+      INSERT INTO kolcsonzes VALUES (4, 2, 'Kiss Anna', '2025-02-17');
+    expected: |
+      cim,olvaso,datum
+      A Pal utcai fiuk,Nagy Bela,2025-02-03
+      Egri csillagok,Kiss Anna,2025-02-03
+      Egri csillagok,Toth Csaba,2025-02-10
+      A Pal utcai fiuk,Kiss Anna,2025-02-17
+    hidden: false
+  - stdin: |
+      CREATE TABLE konyv (id INTEGER PRIMARY KEY, cim TEXT, szerzo TEXT);
+      CREATE TABLE kolcsonzes (id INTEGER PRIMARY KEY, konyv_id INTEGER, olvaso TEXT, datum TEXT);
+      INSERT INTO konyv VALUES (1, 'Egri csillagok', 'Gardonyi Geza');
+      INSERT INTO konyv VALUES (2, 'A Pal utcai fiuk', 'Molnar Ferenc');
+      INSERT INTO konyv VALUES (3, 'Abel a rengetegben', 'Tamasi Aron');
+      INSERT INTO konyv VALUES (4, 'Tuskevar', 'Fekete Istvan');
+      INSERT INTO konyv VALUES (5, 'Az arany ember', 'Jokai Mor');
+      INSERT INTO kolcsonzes VALUES (1, 4, 'Varga Fanni', '2025-03-02');
+      INSERT INTO kolcsonzes VALUES (2, 1, 'Szabo Dora', '2025-03-08');
+      INSERT INTO kolcsonzes VALUES (3, 5, 'Varga Fanni', '2025-01-24');
+      INSERT INTO kolcsonzes VALUES (4, 1, 'Nagy Bela', '2025-01-08');
+      INSERT INTO kolcsonzes VALUES (5, 5, 'Fekete Mate', '2025-03-14');
+      INSERT INTO kolcsonzes VALUES (6, 1, 'Orosz David', '2025-01-04');
+    expected: |
+      cim,olvaso,datum
+      Egri csillagok,Orosz David,2025-01-04
+      Egri csillagok,Nagy Bela,2025-01-08
+      Az arany ember,Varga Fanni,2025-01-24
+      Tuskevar,Varga Fanni,2025-03-02
+      Egri csillagok,Szabo Dora,2025-03-08
+      Az arany ember,Fekete Mate,2025-03-14
+    hidden: true
+  - stdin: |
+      CREATE TABLE konyv (id INTEGER PRIMARY KEY, cim TEXT, szerzo TEXT);
+      CREATE TABLE kolcsonzes (id INTEGER PRIMARY KEY, konyv_id INTEGER, olvaso TEXT, datum TEXT);
+      INSERT INTO konyv VALUES (1, 'Egri csillagok', 'Gardonyi Geza');
+      INSERT INTO konyv VALUES (2, 'A Pal utcai fiuk', 'Molnar Ferenc');
+      INSERT INTO konyv VALUES (3, 'Abel a rengetegben', 'Tamasi Aron');
+      INSERT INTO konyv VALUES (4, 'Tuskevar', 'Fekete Istvan');
+      INSERT INTO konyv VALUES (5, 'Az arany ember', 'Jokai Mor');
+      INSERT INTO konyv VALUES (6, 'Pomade', 'Szabo Magda');
+      INSERT INTO kolcsonzes VALUES (1, 2, 'Juhasz Reka', '2025-01-24');
+      INSERT INTO kolcsonzes VALUES (2, 1, 'Szabo Dora', '2025-02-17');
+      INSERT INTO kolcsonzes VALUES (3, 5, 'Nagy Bela', '2025-03-23');
+      INSERT INTO kolcsonzes VALUES (4, 4, 'Horvath Erik', '2025-03-01');
+      INSERT INTO kolcsonzes VALUES (5, 2, 'Biro Peter', '2025-01-16');
+      INSERT INTO kolcsonzes VALUES (6, 2, 'Balogh Karoly', '2025-01-15');
+      INSERT INTO kolcsonzes VALUES (7, 1, 'Meszaros Lilla', '2025-01-02');
+      INSERT INTO kolcsonzes VALUES (8, 1, 'Kovacs Gabor', '2025-02-01');
+      INSERT INTO kolcsonzes VALUES (9, 4, 'Nagy Bela', '2025-01-18');
+    expected: |
+      cim,olvaso,datum
+      Egri csillagok,Meszaros Lilla,2025-01-02
+      A Pal utcai fiuk,Balogh Karoly,2025-01-15
+      A Pal utcai fiuk,Biro Peter,2025-01-16
+      Tuskevar,Nagy Bela,2025-01-18
+      A Pal utcai fiuk,Juhasz Reka,2025-01-24
+      Egri csillagok,Kovacs Gabor,2025-02-01
+      Egri csillagok,Szabo Dora,2025-02-17
+      Tuskevar,Horvath Erik,2025-03-01
+      Az arany ember,Nagy Bela,2025-03-23
+    hidden: true
+  - stdin: |
+      CREATE TABLE konyv (id INTEGER PRIMARY KEY, cim TEXT, szerzo TEXT);
+      CREATE TABLE kolcsonzes (id INTEGER PRIMARY KEY, konyv_id INTEGER, olvaso TEXT, datum TEXT);
+      INSERT INTO konyv VALUES (1, 'Egri csillagok', 'Gardonyi Geza');
+      INSERT INTO konyv VALUES (2, 'A Pal utcai fiuk', 'Molnar Ferenc');
+      INSERT INTO konyv VALUES (3, 'Abel a rengetegben', 'Tamasi Aron');
+      INSERT INTO konyv VALUES (4, 'Tuskevar', 'Fekete Istvan');
+      INSERT INTO konyv VALUES (5, 'Az arany ember', 'Jokai Mor');
+      INSERT INTO konyv VALUES (6, 'Pomade', 'Szabo Magda');
+      INSERT INTO konyv VALUES (7, 'Jonas almanaja', 'Kaffka Margit');
+      INSERT INTO konyv VALUES (8, 'Szent Peter esernyoje', 'Mikszath Kalman');
+      INSERT INTO kolcsonzes VALUES (1, 4, 'Biro Peter', '2025-01-21');
+      INSERT INTO kolcsonzes VALUES (2, 4, 'Biro Peter', '2025-02-22');
+      INSERT INTO kolcsonzes VALUES (3, 4, 'Juhasz Reka', '2025-02-10');
+      INSERT INTO kolcsonzes VALUES (4, 5, 'Toth Csaba', '2025-02-14');
+      INSERT INTO kolcsonzes VALUES (5, 2, 'Biro Peter', '2025-02-02');
+      INSERT INTO kolcsonzes VALUES (6, 5, 'Gal Vivien', '2025-03-22');
+      INSERT INTO kolcsonzes VALUES (7, 8, 'Papp Julia', '2025-02-18');
+      INSERT INTO kolcsonzes VALUES (8, 5, 'Farkas Imre', '2025-01-28');
+      INSERT INTO kolcsonzes VALUES (9, 3, 'Meszaros Lilla', '2025-02-07');
+      INSERT INTO kolcsonzes VALUES (10, 3, 'Horvath Erik', '2025-01-21');
+    expected: |
+      cim,olvaso,datum
+      Abel a rengetegben,Horvath Erik,2025-01-21
+      Tuskevar,Biro Peter,2025-01-21
+      Az arany ember,Farkas Imre,2025-01-28
+      A Pal utcai fiuk,Biro Peter,2025-02-02
+      Abel a rengetegben,Meszaros Lilla,2025-02-07
+      Tuskevar,Juhasz Reka,2025-02-10
+      Az arany ember,Toth Csaba,2025-02-14
+      Szent Peter esernyoje,Papp Julia,2025-02-18
+      Tuskevar,Biro Peter,2025-02-22
+      Az arany ember,Gal Vivien,2025-03-22
+    hidden: true

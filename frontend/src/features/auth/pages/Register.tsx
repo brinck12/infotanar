@@ -67,7 +67,7 @@ export function Register() {
       lead={
         inviteOnly
           ? 'Zárt bétát futtatunk: a regisztrációhoz meghívókód kell, amit a tanáraidtól vagy tőlünk kapsz.'
-          : 'Ingyenes fiókkal elmented a haladásod, és megnyílik az első két lecke minden sávban.'
+          : 'Ingyenes fiókkal elmented a haladásod, és megnyílik az első két lecke minden tanulási úton.'
       }
       footer={
         <>

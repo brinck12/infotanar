@@ -1,0 +1,79 @@
+slug: fuvardij-savos-szamitassal
+title: Fuvardíj sávos számítással
+position: 4
+kind: sql
+level: kozep
+difficulty: 3
+published: false
+allowed_languages: [sql]
+description: |
+    A fuvar díja: az első 10 km-ig 1000 Ft + 300 Ft kilométerenként; a 10 km feletti rész kilométerenként 200 Ft, a 10 km-ig számolt 4000 Ft-ra ráadva. Listázd a fuvar azonosítóját (`id`), a kilométerét (`km`) és a díját (`dij`).
+
+    A `fuvar` tábla:
+
+    | `id` | `km` |
+    |---|---|
+    | 1 | 5 |
+    | 2 | 12 |
+    | 3 | 20 |
+
+    Az eredmény ezekre az adatokra:
+
+    | `id` | `km` | `dij` |
+    |---|---|---|
+    | 1 | 5 | 2500 |
+    | 2 | 12 | 4400 |
+    | 3 | 20 | 6000 |
+
+    Tipp: ha `km <= 10`, a díj `1000 + km * 300`, különben `4000 + (km - 10) * 200`. Ellenőrizd, hogy pont 10 km-nél mindkét képlet ugyanazt adja.
+starter_code:
+  sql: |
+    SELECT id, km, IF(..., ..., ...) AS dij
+    FROM fuvar;
+sample_solutions:
+  sql: |
+    SELECT id, km, IF(km <= 10, 1000 + km * 300, 4000 + (km - 10) * 200) AS dij
+    FROM fuvar;
+tests:
+  - stdin: |
+      CREATE TABLE fuvar (id INT, km INT);
+      INSERT INTO fuvar VALUES (1, 5);
+      INSERT INTO fuvar VALUES (2, 12);
+      INSERT INTO fuvar VALUES (3, 20);
+    expected: |
+      id,km,dij
+      1,5,2500
+      2,12,4400
+      3,20,6000
+    hidden: false
+  - stdin: |
+      CREATE TABLE fuvar (id INT, km INT);
+      INSERT INTO fuvar VALUES (4, 10);
+      INSERT INTO fuvar VALUES (5, 1);
+      INSERT INTO fuvar VALUES (6, 11);
+    expected: |
+      id,km,dij
+      4,10,4000
+      5,1,1300
+      6,11,4200
+    hidden: true
+  - stdin: |
+      CREATE TABLE fuvar (id INT, km INT);
+      INSERT INTO fuvar VALUES (1, 5);
+      INSERT INTO fuvar VALUES (7, 30);
+    expected: |
+      id,km,dij
+      1,5,2500
+      7,30,8000
+    hidden: true
+  - stdin: |
+      CREATE TABLE fuvar (id INT, km INT);
+      INSERT INTO fuvar VALUES (2, 12);
+      INSERT INTO fuvar VALUES (4, 10);
+      INSERT INTO fuvar VALUES (6, 11);
+    expected: |
+      id,km,dij
+      2,12,4400
+      4,10,4000
+      6,11,4200
+    hidden: true

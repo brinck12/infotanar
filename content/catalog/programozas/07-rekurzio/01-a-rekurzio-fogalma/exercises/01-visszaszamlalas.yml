@@ -1,0 +1,74 @@
+slug: visszaszamlalas
+title: "Visszaszámlálás"
+position: 0
+kind: code
+level: emelt
+difficulty: 1
+published: false
+allowed_languages: [python, csharp]
+description: |
+  Olvass be egy `N` egész számot (`N ≥ 0`), és írd ki **rekurzióval** a számokat `N`-től 1-ig, mindegyiket külön sorba, majd az utolsó sorba az `Indulas!` szöveget.
+
+  Példa: ha `N = 3`, a kimenet: `3`, `2`, `1`, `Indulas!` külön sorokban. Ha `N = 0`, csak az `Indulas!` jelenik meg.
+
+  Tipp: az alapeset az `n == 0`; az elágazás másik ágában írd ki `n`-et, majd hívd a függvényt `n - 1`-gyel.
+starter_code:
+  python: |
+    def visszaszamol(n):
+        # TODO: alapeset és rekurzív hívás
+        pass
+
+    visszaszamol(int(input()))
+  csharp: |
+    using System;
+
+    class Program
+    {
+        static void Visszaszamol(int n)
+        {
+            // TODO: alapeset és rekurzív hívás
+        }
+
+        static void Main()
+        {
+            Visszaszamol(int.Parse(Console.ReadLine()));
+        }
+    }
+sample_solutions:
+  python: |
+    def visszaszamol(n):
+        if n == 0:
+            print("Indulas!")
+        else:
+            print(n)
+            visszaszamol(n - 1)
+
+    visszaszamol(int(input()))
+  csharp: |
+    using System;
+
+    class Program
+    {
+        static void Visszaszamol(int n)
+        {
+            if (n == 0)
+            {
+                Console.WriteLine("Indulas!");
+            }
+            else
+            {
+                Console.WriteLine(n);
+                Visszaszamol(n - 1);
+            }
+        }
+
+        static void Main()
+        {
+            Visszaszamol(int.Parse(Console.ReadLine()));
+        }
+    }
+tests:
+  - { stdin: "3\n", expected: "3\n2\n1\nIndulas!\n", hidden: false }
+  - { stdin: "0\n", expected: "Indulas!\n", hidden: true }
+  - { stdin: "1\n", expected: "1\nIndulas!\n", hidden: true }
+  - { stdin: "6\n", expected: "6\n5\n4\n3\n2\n1\nIndulas!\n", hidden: true }

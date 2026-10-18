@@ -1,0 +1,115 @@
+slug: 1-feladat-utak-szama-es-hossza
+title: '1. feladat: utak száma és hossza'
+position: 0
+kind: code
+level: kozep
+difficulty: 3
+published: false
+allowed_languages:
+- python
+- csharp
+description: |
+  Az `ut.txt` fájl egy fuvarozó cég útjait tartalmazza, tabulátorral tagolva. Az első sor fejléc (`datum`, `sofor`, `km`, `perc`); minden további sor egy út: a dátum (`EEEE-HH-NN` alakban), a sofőr neve (ékezet nélkül, szóköz nélkül), a megtett kilométerek és az út ideje percben (egész számok). A fájl legalább egy utat tartalmaz.
+
+  Írd ki az `1. feladat` szöveget, majd az utak számát és a megtett kilométerek összegét:
+
+  ```
+  1. feladat
+  Utak szama: 10
+  Osszes km: 908
+  ```
+
+  Tipp: olvasd be az `ut.txt` fájlt, a fejlécet hagyd ki, és a kilométereket alakítsd számmá.
+starter_code:
+  python: |
+    print("1. feladat")
+    with open("ut.txt", encoding="utf-8") as f:
+        sorok = f.read().splitlines()
+    # ide írd a megoldást
+  csharp: |
+    using System;
+    using System.IO;
+
+    class Program
+    {
+        static void Main()
+        {
+            Console.WriteLine("1. feladat");
+            string[] sorok = File.ReadAllLines("ut.txt");
+            // ide írd a megoldást
+        }
+    }
+sample_solutions:
+  python: |
+    print("1. feladat")
+    with open("ut.txt", encoding="utf-8") as f:
+        sorok = f.read().splitlines()
+    osszes = 0
+    for sor in sorok[1:]:
+        osszes += int(sor.split("\t")[2])
+    print("Utak szama:", len(sorok) - 1)
+    print("Osszes km:", osszes)
+  csharp: |
+    using System;
+    using System.IO;
+
+    class Program
+    {
+        static void Main()
+        {
+            Console.WriteLine("1. feladat");
+            string[] sorok = File.ReadAllLines("ut.txt");
+            int osszes = 0;
+            for (int i = 1; i < sorok.Length; i++)
+            {
+                osszes += int.Parse(sorok[i].Split('\t')[2]);
+            }
+            Console.WriteLine("Utak szama: " + (sorok.Length - 1));
+            Console.WriteLine("Osszes km: " + osszes);
+        }
+    }
+files:
+  ut.txt: ut.txt
+tests:
+- stdin: ''
+  expected: '1. feladat
+
+    Utak szama: 10
+
+    Osszes km: 908
+
+    '
+  hidden: false
+- stdin: ''
+  expected: '1. feladat
+
+    Utak szama: 3
+
+    Osszes km: 299
+
+    '
+  hidden: true
+  files:
+    ut.txt: teszt-2/ut.txt
+- stdin: ''
+  expected: '1. feladat
+
+    Utak szama: 1
+
+    Osszes km: 7
+
+    '
+  hidden: true
+  files:
+    ut.txt: teszt-3/ut.txt
+- stdin: ''
+  expected: '1. feladat
+
+    Utak szama: 6
+
+    Osszes km: 841
+
+    '
+  hidden: true
+  files:
+    ut.txt: teszt-4/ut.txt

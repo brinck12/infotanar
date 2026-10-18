@@ -1,0 +1,45 @@
+slug: diak-cimke
+title: Diák címke
+position: 2
+kind: sql
+level: kozep
+difficulty: 2
+published: false
+allowed_languages: [sql]
+description: |
+  A szövegeket a `CONCAT(a, b, c)` függvénnyel fűzhetjük össze. A szövegrészeket aposztróf közé írjuk.
+
+  A `diak` tábla:
+
+  | oszlop | típus |
+  |---|---|
+  | `id` | egész, elsődleges kulcs |
+  | `nev` | szöveg |
+  | `osztaly` | szöveg |
+  | `pont` | egész |
+  | `szuletes` | szöveg (dátum, ÉÉÉÉ-HH-NN) |
+
+  Állíts elő minden diákhoz egy `cimke` nevű szöveget `Név (osztály)` alakban, például `Anna (10.A)`! Az eredmény egyetlen oszlop legyen. A sorok sorrendje nem számít.
+
+  Tipp: `CONCAT(nev, ' (', osztaly, ')')`
+starter_code:
+  sql: |
+    SELECT
+    FROM diak;
+sample_solutions:
+  sql: |
+    SELECT CONCAT(nev, ' (', osztaly, ')') AS cimke
+    FROM diak;
+tests:
+  - stdin: "CREATE TABLE diak (id INTEGER PRIMARY KEY, nev TEXT, osztaly TEXT, pont INTEGER, szuletes TEXT);\nINSERT INTO diak VALUES\n(1, 'Domonkos', '10.B', 34, '2006-05-15'),\n(2, 'Reka', '11.A', 60, '2005-07-21'),\n(3, 'Gabor', '9.A', 99, '2005-08-10'),\n(4, 'Dora', '9.A', 58, '2008-11-10'),\n(5, 'Endre', '10.B', 39, '2008-10-18');\n"
+    expected: "cimke\nDomonkos (10.B)\nReka (11.A)\nGabor (9.A)\nDora (9.A)\nEndre (10.B)\n"
+    hidden: false
+  - stdin: "CREATE TABLE diak (id INTEGER PRIMARY KEY, nev TEXT, osztaly TEXT, pont INTEGER, szuletes TEXT);\nINSERT INTO diak VALUES\n(1, 'Eszter', '9.A', 95, '2007-08-21'),\n(2, 'Gergo', '10.B', 52, '2006-11-04'),\n(3, 'Zoltan', '9.A', 71, '2007-08-22'),\n(4, 'Hanna', '11.A', 62, '2006-04-15'),\n(5, 'Bela', '10.B', 99, '2005-02-17'),\n(6, 'Reka', '9.B', 96, '2008-04-21'),\n(7, 'Sandor', '11.A', 49, '2005-03-05'),\n(8, 'Endre', '9.B', 51, '2005-06-06');\n"
+    expected: "cimke\nEszter (9.A)\nGergo (10.B)\nZoltan (9.A)\nHanna (11.A)\nBela (10.B)\nReka (9.B)\nSandor (11.A)\nEndre (9.B)\n"
+    hidden: true
+  - stdin: "CREATE TABLE diak (id INTEGER PRIMARY KEY, nev TEXT, osztaly TEXT, pont INTEGER, szuletes TEXT);\nINSERT INTO diak VALUES\n(1, 'Endre', '9.A', 92, '2007-02-15'),\n(2, 'Barbara', '11.A', 65, '2006-06-17'),\n(3, 'Gabor', '9.B', 52, '2005-02-04'),\n(4, 'Hanna', '10.B', 87, '2008-03-03'),\n(5, 'Domonkos', '10.B', 47, '2005-11-09'),\n(6, 'Anna', '11.A', 40, '2008-06-02'),\n(7, 'Bence', '9.A', 42, '2007-03-07'),\n(8, 'Balazs', '9.B', 67, '2006-02-02'),\n(9, 'Reka', '10.A', 84, '2006-02-17'),\n(10, 'Peter', '11.A', 71, '2008-09-02');\n"
+    expected: "cimke\nEndre (9.A)\nBarbara (11.A)\nGabor (9.B)\nHanna (10.B)\nDomonkos (10.B)\nAnna (11.A)\nBence (9.A)\nBalazs (9.B)\nReka (10.A)\nPeter (11.A)\n"
+    hidden: true
+  - stdin: "CREATE TABLE diak (id INTEGER PRIMARY KEY, nev TEXT, osztaly TEXT, pont INTEGER, szuletes TEXT);\nINSERT INTO diak VALUES\n(1, 'Nora', '9.A', 59, '2005-07-12'),\n(2, 'Mate', '10.B', 76, '2007-12-13'),\n(3, 'Zoltan', '10.B', 31, '2007-11-07'),\n(4, 'Hanna', '11.A', 69, '2008-12-03'),\n(5, 'Judit', '11.A', 57, '2007-04-13'),\n(6, 'Reka', '10.A', 88, '2007-08-27'),\n(7, 'Balazs', '10.B', 67, '2006-09-09'),\n(8, 'Gergo', '9.B', 54, '2006-09-21'),\n(9, 'Fanni', '10.B', 63, '2005-06-03'),\n(10, 'Olivia', '9.A', 79, '2005-09-17'),\n(11, 'Barbara', '9.B', 95, '2008-08-16'),\n(12, 'Marcell', '11.A', 72, '2008-12-02');\n"
+    expected: "cimke\nNora (9.A)\nMate (10.B)\nZoltan (10.B)\nHanna (11.A)\nJudit (11.A)\nReka (10.A)\nBalazs (10.B)\nGergo (9.B)\nFanni (10.B)\nOlivia (9.A)\nBarbara (9.B)\nMarcell (11.A)\n"
+    hidden: true

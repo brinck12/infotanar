@@ -1,0 +1,201 @@
+slug: vizallas-a-leghosszabb-magas-szakasz
+title: 'Vízállás: a leghosszabb magas szakasz'
+position: 4
+kind: code
+level: emelt
+difficulty: 4
+published: false
+allowed_languages:
+- python
+- csharp
+description: |
+  Egy folyó vízállását naponta egyszer mérik. A `vizallas.txt` fájl első sora fejléc (`datum`, `allas`), utána minden sor egy mérés, tabulátorral tagolva: a dátum (`ÉÉÉÉ-HH-NN` alakban) és a vízállás centiméterben (egész szám). A sorok időrendben, hézag nélkül követik egymást: minden sor az előző napot követő nap mérése. A fájl legalább egy mérést tartalmaz.
+
+  A programban egy mérést rekordként (osztályként) érdemes tárolni: dátum, vízállás. Minden részfeladat kimenete a sorszámával kezdődik (`N. feladat`), a kimenetben ne használj ékezetes betűt. Ahol a feladat bevitelt kér, a kérdést külön sorban írd ki, csak utána olvass be.
+
+  Kérj be egy küszöbértéket (egész szám, centiméter). Keresd meg a leghosszabb olyan egybefüggő napszakaszt, amelyben a vízállás **minden napon nagyobb** a küszöbnél. Több egyforma hosszú szakasz esetén a **később kezdődő** számít. Ha egyetlen nap sem volt a küszöb felett, a kimenet a `Nem volt kuszob feletti nap.` sor.
+
+  ```
+  Leghosszabb magas szakasz: <hossz> nap (<elso nap> - <utolso nap>)
+  ```
+
+  Kimenet a mellékelt mintafájllal és `200` bemenettel:
+
+  ```
+  5. feladat
+  Add meg a kuszobot (cm):
+  Leghosszabb magas szakasz: 7 nap (2024-03-20 - 2024-03-26)
+  ```
+
+  Tipp: a szakasz hossza a küszöb feletti napokon nő, máskülönben nullázódik. Holtversenynél a `>=` összehasonlítás a későbbit hagyja meg. A kezdőnap: a mostani index mínusz a hossz plusz egy.
+starter_code:
+  python: |
+    class Meres:
+        def __init__(self, datum, allas):
+            self.datum = datum
+            self.allas = allas
+    print("5. feladat")
+    with open("vizallas.txt", encoding="utf-8") as f:
+        sorok = f.read().splitlines()
+    meresek = []
+    for sor in sorok[1:]:
+        r = sor.split("\t")
+        meresek.append(Meres(r[0], int(r[1])))
+    # ide írd a megoldást
+  csharp: |
+    using System;
+    using System.Collections.Generic;
+    using System.IO;
+    using System.Linq;
+
+    class Meres
+    {
+        public string Datum;
+        public int Allas;
+    }
+
+    class Program
+    {
+        static void Main()
+        {
+            Console.WriteLine("5. feladat");
+            string[] sorok = File.ReadAllLines("vizallas.txt");
+            List<Meres> meresek = new List<Meres>();
+            for (int i = 1; i < sorok.Length; i++)
+            {
+                string[] r = sorok[i].Split('\t');
+                Meres m = new Meres();
+                m.Datum = r[0];
+                m.Allas = int.Parse(r[1]);
+                meresek.Add(m);
+            }
+            // ide írd a megoldást
+        }
+    }
+sample_solutions:
+  python: |
+    class Meres:
+        def __init__(self, datum, allas):
+            self.datum = datum
+            self.allas = allas
+    print("5. feladat")
+    with open("vizallas.txt", encoding="utf-8") as f:
+        sorok = f.read().splitlines()
+    meresek = []
+    for sor in sorok[1:]:
+        r = sor.split("\t")
+        meresek.append(Meres(r[0], int(r[1])))
+    print("Add meg a kuszobot (cm):")
+    kuszob = int(input())
+    legjobb_hossz = 0
+    legjobb_kezdet = 0
+    hossz = 0
+    for i in range(len(meresek)):
+        if meresek[i].allas > kuszob:
+            hossz += 1
+            if hossz >= legjobb_hossz:
+                legjobb_hossz = hossz
+                legjobb_kezdet = i - hossz + 1
+        else:
+            hossz = 0
+    if legjobb_hossz == 0:
+        print("Nem volt kuszob feletti nap.")
+    else:
+        vege = legjobb_kezdet + legjobb_hossz - 1
+        print(f"Leghosszabb magas szakasz: {legjobb_hossz} nap ({meresek[legjobb_kezdet].datum} - {meresek[vege].datum})")
+  csharp: |
+    using System;
+    using System.Collections.Generic;
+    using System.IO;
+    using System.Linq;
+
+    class Meres
+    {
+        public string Datum;
+        public int Allas;
+    }
+
+    class Program
+    {
+        static void Main()
+        {
+            Console.WriteLine("5. feladat");
+            string[] sorok = File.ReadAllLines("vizallas.txt");
+            List<Meres> meresek = new List<Meres>();
+            for (int i = 1; i < sorok.Length; i++)
+            {
+                string[] r = sorok[i].Split('\t');
+                Meres m = new Meres();
+                m.Datum = r[0];
+                m.Allas = int.Parse(r[1]);
+                meresek.Add(m);
+            }
+            Console.WriteLine("Add meg a kuszobot (cm):");
+            int kuszob = int.Parse(Console.ReadLine());
+            int legjobbHossz = 0;
+            int legjobbKezdet = 0;
+            int hossz = 0;
+            for (int i = 0; i < meresek.Count; i++)
+            {
+                if (meresek[i].Allas > kuszob)
+                {
+                    hossz++;
+                    if (hossz >= legjobbHossz)
+                    {
+                        legjobbHossz = hossz;
+                        legjobbKezdet = i - hossz + 1;
+                    }
+                }
+                else
+                {
+                    hossz = 0;
+                }
+            }
+            if (legjobbHossz == 0)
+            {
+                Console.WriteLine("Nem volt kuszob feletti nap.");
+            }
+            else
+            {
+                int vege = legjobbKezdet + legjobbHossz - 1;
+                Console.WriteLine("Leghosszabb magas szakasz: " + legjobbHossz + " nap (" + meresek[legjobbKezdet].Datum + " - " + meresek[vege].Datum + ")");
+            }
+        }
+    }
+files:
+  vizallas.txt: vizallas.txt
+tests:
+- stdin: |
+    200
+  expected: |
+    5. feladat
+    Add meg a kuszobot (cm):
+    Leghosszabb magas szakasz: 7 nap (2024-03-20 - 2024-03-26)
+  hidden: false
+- stdin: |
+    200
+  expected: |
+    5. feladat
+    Add meg a kuszobot (cm):
+    Leghosszabb magas szakasz: 2 nap (2024-06-04 - 2024-06-05)
+  hidden: true
+  files:
+    vizallas.txt: teszt-2/vizallas.txt
+- stdin: |
+    500
+  expected: |
+    5. feladat
+    Add meg a kuszobot (cm):
+    Nem volt kuszob feletti nap.
+  hidden: true
+  files:
+    vizallas.txt: teszt-3/vizallas.txt
+- stdin: |
+    10
+  expected: |
+    5. feladat
+    Add meg a kuszobot (cm):
+    Leghosszabb magas szakasz: 4 nap (2024-02-27 - 2024-03-01)
+  hidden: true
+  files:
+    vizallas.txt: teszt-4/vizallas.txt

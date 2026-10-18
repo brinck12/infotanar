@@ -1,0 +1,26 @@
+Farkas Daniel;Az elveszett kulcs;2022;593
+Toth Gabor;Faluvegi ut;2010;623
+Szabo Eszter;Hideg tel;1996;501
+Farkas Daniel;A regi malom;2007;150
+Toth Gabor;Esti mesek;2004;174
+Horvath Mate;A harmadik ajto;1989;279
+Molnar Reka;Barlangok vilaga;2012;521
+Molnar Reka;Napraforgo;1973;251
+Horvath Mate;A negy evszak;1978;153
+Toth Gabor;Kisfiu a parton;2005;381
+Molnar Reka;Holdfeny;1973;531
+Varga Lilla;Aranyhal;2017;403
+Farkas Daniel;A tanito naploja;2005;629
+Farkas Daniel;Csendes folyo;2020;603
+Toth Gabor;A csillagok nyomaban;1990;330
+Toth Gabor;Ezust ora;2003;635
+Szabo Eszter;A megtalalt level;1999;458
+Nemes Anna;Varos a felhokben;1990;202
+Farkas Daniel;A titkos kert;2020;256
+Varga Lilla;Hegyek kozott;1969;615
+Molnar Reka;Szel a fak kozott;2011;340
+Molnar Reka;A kis hajos;2008;256
+Toth Gabor;Papirsarkany;1985;538
+Toth Gabor;Tortenelmi kalauz;2007;240
+Toth Gabor;Az utolso nyar;1998;504
+Szabo Eszter;Kek ejszaka;1974;571

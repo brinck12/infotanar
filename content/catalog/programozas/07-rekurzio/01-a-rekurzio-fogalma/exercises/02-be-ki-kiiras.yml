@@ -1,0 +1,80 @@
+slug: be-ki-kiiras
+title: "Be-ki kiírás"
+position: 1
+kind: code
+level: emelt
+difficulty: 2
+published: false
+allowed_languages: [python, csharp]
+description: |
+  Olvass be egy `N` egész számot (`N ≥ 0`). Egy rekurzív eljárás írja ki a hívási lánc lefelé és visszafelé haladását:
+
+  - lefelé menet, a rekurzív hívás előtt: `be K`,
+  - visszafelé menet, a rekurzív hívás után: `ki K`,
+
+  ahol `K` az aktuális paraméter. Az eljárás `n = 0` esetén nem ír ki semmit.
+
+  Példa: ha `N = 2`, a kimenet: `be 2`, `be 1`, `ki 1`, `ki 2` külön sorokban. Ha `N = 0`, a kimenet üres.
+
+  Tipp: a rekurzív hívás után is lehet utasítás; az csak visszalépéskor fut le.
+starter_code:
+  python: |
+    def be_ki(n):
+        if n > 0:
+            print("be", n)
+            # TODO: rekurzív hívás és a ki sor
+
+    be_ki(int(input()))
+  csharp: |
+    using System;
+
+    class Program
+    {
+        static void BeKi(int n)
+        {
+            if (n > 0)
+            {
+                Console.WriteLine("be " + n);
+                // TODO: rekurzív hívás és a ki sor
+            }
+        }
+
+        static void Main()
+        {
+            BeKi(int.Parse(Console.ReadLine()));
+        }
+    }
+sample_solutions:
+  python: |
+    def be_ki(n):
+        if n > 0:
+            print("be", n)
+            be_ki(n - 1)
+            print("ki", n)
+
+    be_ki(int(input()))
+  csharp: |
+    using System;
+
+    class Program
+    {
+        static void BeKi(int n)
+        {
+            if (n > 0)
+            {
+                Console.WriteLine("be " + n);
+                BeKi(n - 1);
+                Console.WriteLine("ki " + n);
+            }
+        }
+
+        static void Main()
+        {
+            BeKi(int.Parse(Console.ReadLine()));
+        }
+    }
+tests:
+  - { stdin: "2\n", expected: "be 2\nbe 1\nki 1\nki 2\n", hidden: false }
+  - { stdin: "0\n", expected: "", hidden: true }
+  - { stdin: "1\n", expected: "be 1\nki 1\n", hidden: true }
+  - { stdin: "4\n", expected: "be 4\nbe 3\nbe 2\nbe 1\nki 1\nki 2\nki 3\nki 4\n", hidden: true }

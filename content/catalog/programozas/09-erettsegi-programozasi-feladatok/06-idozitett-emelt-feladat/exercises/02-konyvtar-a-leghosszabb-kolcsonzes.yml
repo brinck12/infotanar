@@ -1,0 +1,172 @@
+slug: konyvtar-a-leghosszabb-kolcsonzes
+title: 'Könyvtár: a leghosszabb kölcsönzés'
+position: 1
+kind: code
+level: emelt
+difficulty: 2
+published: false
+allowed_languages:
+- python
+- csharp
+description: |
+  A városi könyvtár kölcsönzéseit a `kolcsonzes.txt` fájl tartalmazza. Az első sor fejléc (`olvaso`, `kod`, `ki`, `be`), utána minden sor egy kölcsönzés, tabulátorral tagolva: az olvasó neve (ékezet nélkül, szóközt tartalmazhat), a könyv kódja (pl. `K101`), a kikölcsönzés napja és a visszahozás napja az év napjaként számozva (1–365, az év nem szökőév). A visszahozás napja mindig nagyobb a kikölcsönzés napjánál. Egy olvasó és egy könyv többször is szerepelhet. A fájl legalább egy kölcsönzést tartalmaz. Egy kölcsönzés időtartama `be - ki` nap; a kölcsönzési határidő 14 nap. A programban egy kölcsönzést rekordként (osztályként) érdemes tárolni. Minden részfeladat kimenete a sorszámával kezdődik (`N. feladat`), a kimenetben ne használj ékezetes betűt. Ahol a feladat bevitelt kér, a kérdést külön sorban írd ki, csak utána olvass be.
+
+  **(5 pont)** Keresd meg a leghosszabb ideig tartó kölcsönzést, és írd ki az időtartamát napokban és az olvasó nevét. Holtversenynél a fájlban előbb szereplő kölcsönzés számít.
+
+  ```
+  Leghosszabb: <nap> nap, <nev>
+  ```
+
+  Kimenet a mellékelt mintafájllal:
+
+  ```
+  2. feladat
+  Leghosszabb: 30 nap, Nagy Peter
+  ```
+
+  Tipp: Az eddigi legjobb kölcsönzést tárold el, és csak szigorú `>` esetén cseréld le.
+starter_code:
+  python: |
+    class Kolcsonzes:
+        def __init__(self, olvaso, kod, ki, be):
+            self.olvaso = olvaso
+            self.kod = kod
+            self.ki = ki
+            self.be = be
+    with open("kolcsonzes.txt", encoding="utf-8") as f:
+        sorok = f.read().splitlines()
+    kolcsonzesek = []
+    for sor in sorok[1:]:
+        r = sor.split("\t")
+        kolcsonzesek.append(Kolcsonzes(r[0], r[1], int(r[2]), int(r[3])))
+    print("2. feladat")
+    # ide írd a megoldást
+  csharp: |
+    using System;
+    using System.Collections.Generic;
+    using System.Globalization;
+    using System.IO;
+    using System.Linq;
+
+    class Kolcsonzes
+    {
+        public string Olvaso;
+        public string Kod;
+        public int Ki;
+        public int Be;
+    }
+
+    class Program
+    {
+        static List<Kolcsonzes> kolcsonzesek = new List<Kolcsonzes>();
+
+        static void Main()
+        {
+            string[] sorok = File.ReadAllLines("kolcsonzes.txt");
+            for (int i = 1; i < sorok.Length; i++)
+            {
+                string[] r = sorok[i].Split('\t');
+                Kolcsonzes k = new Kolcsonzes();
+                k.Olvaso = r[0];
+                k.Kod = r[1];
+                k.Ki = int.Parse(r[2]);
+                k.Be = int.Parse(r[3]);
+                kolcsonzesek.Add(k);
+            }
+            Console.WriteLine("2. feladat");
+            // ide írd a megoldást
+        }
+    }
+sample_solutions:
+  python: |
+    class Kolcsonzes:
+        def __init__(self, olvaso, kod, ki, be):
+            self.olvaso = olvaso
+            self.kod = kod
+            self.ki = ki
+            self.be = be
+    with open("kolcsonzes.txt", encoding="utf-8") as f:
+        sorok = f.read().splitlines()
+    kolcsonzesek = []
+    for sor in sorok[1:]:
+        r = sor.split("\t")
+        kolcsonzesek.append(Kolcsonzes(r[0], r[1], int(r[2]), int(r[3])))
+    print("2. feladat")
+    legjobb = kolcsonzesek[0]
+    for k in kolcsonzesek:
+        if k.be - k.ki > legjobb.be - legjobb.ki:
+            legjobb = k
+    print("Leghosszabb: " + str(legjobb.be - legjobb.ki) + " nap, " + legjobb.olvaso)
+  csharp: |
+    using System;
+    using System.Collections.Generic;
+    using System.Globalization;
+    using System.IO;
+    using System.Linq;
+
+    class Kolcsonzes
+    {
+        public string Olvaso;
+        public string Kod;
+        public int Ki;
+        public int Be;
+    }
+
+    class Program
+    {
+        static List<Kolcsonzes> kolcsonzesek = new List<Kolcsonzes>();
+
+        static void Main()
+        {
+            string[] sorok = File.ReadAllLines("kolcsonzes.txt");
+            for (int i = 1; i < sorok.Length; i++)
+            {
+                string[] r = sorok[i].Split('\t');
+                Kolcsonzes k = new Kolcsonzes();
+                k.Olvaso = r[0];
+                k.Kod = r[1];
+                k.Ki = int.Parse(r[2]);
+                k.Be = int.Parse(r[3]);
+                kolcsonzesek.Add(k);
+            }
+            Console.WriteLine("2. feladat");
+            Kolcsonzes legjobb = kolcsonzesek[0];
+            foreach (Kolcsonzes k in kolcsonzesek)
+            {
+                if (k.Be - k.Ki > legjobb.Be - legjobb.Ki)
+                {
+                    legjobb = k;
+                }
+            }
+            Console.WriteLine("Leghosszabb: " + (legjobb.Be - legjobb.Ki) + " nap, " + legjobb.Olvaso);
+        }
+    }
+files:
+  kolcsonzes.txt: kolcsonzes.txt
+tests:
+- stdin: ''
+  expected: |
+    2. feladat
+    Leghosszabb: 30 nap, Nagy Peter
+  hidden: false
+- stdin: ''
+  expected: |
+    2. feladat
+    Leghosszabb: 14 nap, Horvath Dora
+  hidden: true
+  files:
+    kolcsonzes.txt: teszt-2/kolcsonzes.txt
+- stdin: ''
+  expected: |
+    2. feladat
+    Leghosszabb: 7 nap, Pap Lili
+  hidden: true
+  files:
+    kolcsonzes.txt: teszt-3/kolcsonzes.txt
+- stdin: ''
+  expected: |
+    2. feladat
+    Leghosszabb: 99 nap, Ivan Nora
+  hidden: true
+  files:
+    kolcsonzes.txt: teszt-4/kolcsonzes.txt

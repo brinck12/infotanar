@@ -1,0 +1,79 @@
+slug: fizetesi-hatarido
+title: Fizetési határidő
+position: 1
+kind: sql
+level: kozep
+difficulty: 2
+published: false
+allowed_languages: [sql]
+description: |
+    A számlát a rendelés napjától számított 14 napon belül kell kifizetni. Listázd a vevő nevét (`vevo`) és a fizetési határidőt (`fizetesi_hatarido`).
+
+    A `rendeles` tábla:
+
+    | `id` | `vevo` | `rendelve` | `hatarido` | `szallitva` |
+    |---|---|---|---|---|
+    | 1 | Kiss Anna | 2025-03-03 | 2025-03-10 | 2025-03-07 |
+    | 2 | Nagy Bela | 2025-03-08 | 2025-03-15 | 2025-03-17 |
+    | 3 | Toth Csaba | 2025-02-26 | 2025-03-05 | 2025-03-05 |
+
+    Az eredmény ezekre az adatokra:
+
+    | `vevo` | `fizetesi_hatarido` |
+    |---|---|
+    | Kiss Anna | 2025-03-17 |
+    | Nagy Bela | 2025-03-22 |
+    | Toth Csaba | 2025-03-12 |
+
+    Tipp: az `ADDDATE(dátum, napok)` a dátumhoz napokat ad. A hónap- és évváltást és a szökőévet a függvény intézi.
+starter_code:
+  sql: |
+    SELECT vevo, ... AS fizetesi_hatarido
+    FROM rendeles;
+sample_solutions:
+  sql: |
+    SELECT vevo, ADDDATE(rendelve, 14) AS fizetesi_hatarido
+    FROM rendeles;
+tests:
+  - stdin: |
+      CREATE TABLE rendeles (id INT, vevo VARCHAR(30), rendelve DATE, hatarido DATE, szallitva DATE);
+      INSERT INTO rendeles VALUES (1, 'Kiss Anna', '2025-03-03', '2025-03-10', '2025-03-07');
+      INSERT INTO rendeles VALUES (2, 'Nagy Bela', '2025-03-08', '2025-03-15', '2025-03-17');
+      INSERT INTO rendeles VALUES (3, 'Toth Csaba', '2025-02-26', '2025-03-05', '2025-03-05');
+    expected: |
+      vevo,fizetesi_hatarido
+      Kiss Anna,2025-03-17
+      Nagy Bela,2025-03-22
+      Toth Csaba,2025-03-12
+    hidden: false
+  - stdin: |
+      CREATE TABLE rendeles (id INT, vevo VARCHAR(30), rendelve DATE, hatarido DATE, szallitva DATE);
+      INSERT INTO rendeles VALUES (4, 'Szabo Dora', '2025-12-20', '2026-01-02', '2026-01-03');
+      INSERT INTO rendeles VALUES (5, 'Varga Fanni', '2025-03-09', '2025-03-16', '2025-03-12');
+      INSERT INTO rendeles VALUES (6, 'Ho Eva', '2024-02-20', '2024-03-01', '2024-03-01');
+    expected: |
+      vevo,fizetesi_hatarido
+      Szabo Dora,2026-01-03
+      Varga Fanni,2025-03-23
+      Ho Eva,2024-03-05
+    hidden: true
+  - stdin: |
+      CREATE TABLE rendeles (id INT, vevo VARCHAR(30), rendelve DATE, hatarido DATE, szallitva DATE);
+      INSERT INTO rendeles VALUES (7, 'Bo Li', '2025-03-05', '2025-03-12', '2025-03-05');
+      INSERT INTO rendeles VALUES (8, 'Papp Jozsef', '2025-04-04', '2025-04-11', NULL);
+    expected: |
+      vevo,fizetesi_hatarido
+      Bo Li,2025-03-19
+      Papp Jozsef,2025-04-18
+    hidden: true
+  - stdin: |
+      CREATE TABLE rendeles (id INT, vevo VARCHAR(30), rendelve DATE, hatarido DATE, szallitva DATE);
+      INSERT INTO rendeles VALUES (3, 'Toth Csaba', '2025-02-26', '2025-03-05', '2025-03-05');
+      INSERT INTO rendeles VALUES (4, 'Szabo Dora', '2025-12-20', '2026-01-02', '2026-01-03');
+      INSERT INTO rendeles VALUES (6, 'Ho Eva', '2024-02-20', '2024-03-01', '2024-03-01');
+    expected: |
+      vevo,fizetesi_hatarido
+      Toth Csaba,2025-03-12
+      Szabo Dora,2026-01-03
+      Ho Eva,2024-03-05
+    hidden: true

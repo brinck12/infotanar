@@ -1,0 +1,139 @@
+slug: primteszt
+title: Prímteszt
+position: 2
+kind: code
+level: kozep
+difficulty: 3
+published: false
+allowed_languages:
+- python
+- csharp
+description: |
+  ## Feladat
+
+  Olvass be egy `N` egész számot, és döntsd el, hogy **prímszám-e**! Prímszám az az 1-nél nagyobb egész, amelynek csak két osztója van: az 1 és önmaga.
+
+  ### Bemenet
+
+  Egyetlen sorban egy `N` egész szám (`1 ≤ N ≤ 100000`).
+
+  ### Kimenet
+
+  Egyetlen sorban `IGEN`, ha `N` prím, egyébként `NEM`.
+
+  ### Példa
+
+  Bemenet: `7`. Kimenet: `IGEN`. Bemenet: `9`. Kimenet: `NEM`.
+
+  Tipp: az 1 nem prím. A többi számnál keress osztót 2-től: ha találsz egyet, `N` nem prím, és kiléphetsz. Elég addig keresni, amíg `d * d <= N`.
+starter_code:
+  python: |
+    n = int(input())
+    prim = n >= 2
+    d = 2
+    while d * d <= n:
+        # TODO: ha d osztja n-et, nem prím; lépj ki
+        d += 1
+    print('IGEN' if prim else 'NEM')
+  csharp: |
+    using System;
+
+    class Program
+    {
+        static void Main()
+        {
+            int n = int.Parse(Console.ReadLine());
+            bool prim = n >= 2;
+            int d = 2;
+            while (d * d <= n)
+            {
+                // TODO: ha d osztja n-et, nem prím; lépj ki
+                d++;
+            }
+            Console.WriteLine(prim ? "IGEN" : "NEM");
+        }
+    }
+sample_solutions:
+  python: |
+    n = int(input())
+    prim = n >= 2
+    d = 2
+    while d * d <= n:
+        if n % d == 0:
+            prim = False
+            break
+        d += 1
+    print('IGEN' if prim else 'NEM')
+  csharp: |
+    using System;
+
+    class Program
+    {
+        static void Main()
+        {
+            int n = int.Parse(Console.ReadLine());
+            bool prim = n >= 2;
+            int d = 2;
+            while (d * d <= n)
+            {
+                if (n % d == 0)
+                {
+                    prim = false;
+                    break;
+                }
+                d++;
+            }
+            Console.WriteLine(prim ? "IGEN" : "NEM");
+        }
+    }
+tests:
+- stdin: |
+    7
+  expected: |
+    IGEN
+  hidden: false
+- stdin: |
+    9
+  expected: |
+    NEM
+  hidden: true
+- stdin: |
+    1
+  expected: |
+    NEM
+  hidden: true
+- stdin: |
+    2
+  expected: |
+    IGEN
+  hidden: true
+- stdin: |
+    4
+  expected: |
+    NEM
+  hidden: true
+- stdin: |
+    97
+  expected: |
+    IGEN
+  hidden: true
+- stdin: |
+    100
+  expected: |
+    NEM
+  hidden: true
+- stdin: |
+    7919
+  expected: |
+    IGEN
+  hidden: true
+- stdin: |
+    99991
+  expected: |
+    IGEN
+  hidden: true
+- stdin: |
+    100000
+  expected: |
+    NEM
+  hidden: true

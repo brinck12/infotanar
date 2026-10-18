@@ -1,0 +1,78 @@
+slug: hany-doboz-kell
+title: Hány doboz kell?
+position: 4
+kind: sql
+level: kozep
+difficulty: 3
+published: false
+allowed_languages: [sql]
+description: |
+    Egy dobozba 12 darab fér. Azokra a termékekre, amelyekből a darabszám **nem** osztható 12-vel, kell egy részben telt doboz is. Listázd ezeknek a termékeknek a nevét (`termek`) és azt, hogy összesen hány doboz kell hozzájuk (`doboz`, a részben telt doboz is számít).
+
+    A `csomag` tábla:
+
+    | `id` | `termek` | `darab` |
+    |---|---|---|
+    | 1 | Fuzet | 30 |
+    | 2 | Toll | 24 |
+    | 3 | Radir | 7 |
+
+    Az eredmény ezekre az adatokra:
+
+    | `termek` | `doboz` |
+    |---|---|
+    | Fuzet | 3 |
+    | Radir | 1 |
+
+    Tipp: felfelé kerekítéshez a `CEIL` való; a szűréshez a `MOD(darab, 12) <> 0` feltétel.
+starter_code:
+  sql: |
+    SELECT termek, ... AS doboz
+    FROM csomag
+    WHERE ...;
+sample_solutions:
+  sql: |
+    SELECT termek, CEIL(darab / 12) AS doboz
+    FROM csomag
+    WHERE MOD(darab, 12) <> 0;
+tests:
+  - stdin: |
+      CREATE TABLE csomag (id INT, termek VARCHAR(30), darab INT);
+      INSERT INTO csomag VALUES (1, 'Fuzet', 30);
+      INSERT INTO csomag VALUES (2, 'Toll', 24);
+      INSERT INTO csomag VALUES (3, 'Radir', 7);
+    expected: |
+      termek,doboz
+      Fuzet,3
+      Radir,1
+    hidden: false
+  - stdin: |
+      CREATE TABLE csomag (id INT, termek VARCHAR(30), darab INT);
+      INSERT INTO csomag VALUES (2, 'Toll', 24);
+      INSERT INTO csomag VALUES (5, 'Vonalzo', 0);
+      INSERT INTO csomag VALUES (7, 'Ollo', 12);
+    expected: ""
+    hidden: true
+  - stdin: |
+      CREATE TABLE csomag (id INT, termek VARCHAR(30), darab INT);
+      INSERT INTO csomag VALUES (3, 'Radir', 7);
+      INSERT INTO csomag VALUES (4, 'Ceruza', 100);
+      INSERT INTO csomag VALUES (6, 'Ragaszto', 13);
+    expected: |
+      termek,doboz
+      Radir,1
+      Ceruza,9
+      Ragaszto,2
+    hidden: true
+  - stdin: |
+      CREATE TABLE csomag (id INT, termek VARCHAR(30), darab INT);
+      INSERT INTO csomag VALUES (1, 'Fuzet', 30);
+      INSERT INTO csomag VALUES (4, 'Ceruza', 100);
+      INSERT INTO csomag VALUES (5, 'Vonalzo', 0);
+      INSERT INTO csomag VALUES (6, 'Ragaszto', 13);
+    expected: |
+      termek,doboz
+      Fuzet,3
+      Ceruza,9
+      Ragaszto,2
+    hidden: true

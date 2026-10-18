@@ -15,42 +15,42 @@ const TRACKS: ReadonlyArray<{ icon: IconName; title: string; body: string; point
     title: 'Programozás',
     body: 'Python 3 és C#. Az alapoktól a programozási tételekig, majd érettségi feladatsorok.',
     points: 'Közép 15, emelt 50 pont',
-    to: '/tanulasi-ut',
+    to: '/tanulasi-ut/programozas',
   },
   {
     icon: 'db',
     title: 'Adatbázis-kezelés',
-    body: 'SQL lekérdezések, importálás, csoportosítás, allekérdezések.',
+    body: 'SQL lekérdezések az érettségin használt MariaDB-szintaxissal: szűrés, függvények, csoportosítás, allekérdezések.',
     points: 'Közép 15, emelt 35 pont',
-    to: '/tanulasi-ut',
+    to: '/tanulasi-ut/adatbazis-kezeles',
   },
   {
     icon: 'sheet',
     title: 'Táblázatkezelés',
     body: 'Képletek, függvények, rendezés, diagramok. Excelben vagy LibreOffice Calcban.',
     points: 'Közép 25 pont, emelt 35 (választható)',
-    to: '/tanulasi-ut',
+    to: '/tanulasi-ut/tablazatkezeles',
   },
   {
     icon: 'doc',
-    title: 'Szövegszerkesztés',
-    body: 'Oldalbeállítás, stílusok, listák, táblázatok, tabulátorok. Wordben vagy Writerben.',
-    points: 'Közép 25 pont',
-    to: '/tanulasi-ut',
-  },
-  {
-    icon: 'slides',
-    title: 'Grafika és bemutató',
-    body: 'Vektor- és pixelgrafika, diák, animáció, áttűnés.',
-    points: 'Közép 20 pont',
-    to: '/tanulasi-ut',
+    title: 'Dokumentumkészítés',
+    body: 'Szövegszerkesztés, grafika és képszerkesztés, bemutató és weboldal. Wordben vagy Writerben is.',
+    points: 'Közép 25 + 20 pont, emelt 35 (választható)',
+    to: '/tanulasi-ut/dokumentumkeszites',
   },
   {
     icon: 'globe',
-    title: 'Weboldal és szóbeli',
-    body: 'HTML és CSS, valamint a szóbeli tételek begyakorlása.',
-    points: 'Emelt dokumentumkészítés, szóbeli',
+    title: 'Szóbeli érettségi',
+    body: 'Tételek kifejtése és programozási feladat bemutatása, időzítővel és önértékeléssel.',
+    points: 'Emelt 30 pont',
     to: '/szobeli',
+  },
+  {
+    icon: 'slides',
+    title: 'Érettségi gyakorlás',
+    body: 'Programozási és adatbázis-feladatsorok a vizsga szerkezetében, hibalistával és ismétlési tervvel.',
+    points: 'Közép és emelt szint',
+    to: '/vizsgak',
   },
 ]
 
@@ -61,7 +61,7 @@ const STEPS: ReadonlyArray<{ icon: IconName; title: string; body: string }> = [
     title: 'Gyakorolsz',
     body: 'Feladatok azonnali ellenőrzéssel. A programodat lefuttatjuk, és tesztesetenként megmutatjuk, mi sikerült.',
   },
-  { icon: 'flag', title: 'Vizsgázol', body: 'Régi feladatsorok időre, a hivatalos pontozás szerint.' },
+  { icon: 'flag', title: 'Vizsgázol', body: 'Feladatsorok a vizsga szerkezetében, részfeladatonként ellenőrizve.' },
 ]
 
 const PREMIUM = [
@@ -95,8 +95,8 @@ export function Home() {
               beépített szerkesztőben azonnal lefuttathatod.
             </Lead>
             <div className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-4">
-              <ButtonLink to="/feladatok" size="lg">
-                Első feladat megnyitása
+              <ButtonLink to="/tanulasi-ut" size="lg">
+                Kezdd el a tanulást
               </ButtonLink>
               <Link to="/arak" className="text-16 font-semibold text-ink">
                 Mennyibe kerül?
@@ -124,10 +124,10 @@ export function Home() {
 
       <section className="mx-auto max-w-page px-4 pt-18 pb-6 md:px-6 md:pt-24" aria-labelledby="utak">
         <h2 id="utak" className="font-serif text-32 leading-snug font-semibold tracking-tight md:text-36">
-          Az érettségi hat része, hat út
+          Hat tanulási út az érettségihez
         </h2>
         <p className="mt-3 max-w-prose text-18 leading-relaxed text-ink-soft">
-          Minden részhez saját tanulási út tartozik. Mindegyikben az első két lecke ingyenes, belépés nélkül is.
+          Mindegyik út az alapoktól az érettségi-jellegű feladatokig vezet. Mindegyikben az első két lecke ingyenes, belépés nélkül is.
         </p>
         <ul className="mt-10 grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
           {TRACKS.map((track) => (

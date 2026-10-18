@@ -1,0 +1,198 @@
+slug: szigetek-a-szigetek-szama
+title: 'Szigetek: a szigetek száma'
+position: 5
+kind: code
+level: emelt
+difficulty: 4
+published: false
+allowed_languages:
+- python
+- csharp
+description: |
+  A `terkep.txt` fájl egy tenger térképét tartalmazza. Az első sorban két egész szám áll szóközzel elválasztva: a sorok száma (`n`) és az oszlopok száma (`m`). Ezután `n` sor következik, mindegyik pontosan `m` karakter: `#` a szárazföld, `.` a víz. Egy **sziget** a vízszintesen vagy függőlegesen (átlósan nem) szomszédos `#` mezők összefüggő csoportja. A sorokat és az oszlopokat a kimenetben 1-től számozd. Minden részfeladat kimenete a sorszámával kezdődik (`N. feladat`), a kimenetben ne használj ékezetes betűt. Ahol a feladat bevitelt kér, a kérdést külön sorban írd ki, csak utána olvass be.
+
+  Számold meg a térkép szigeteit, és add meg a legnagyobb sziget méretét (mezők száma). Ha nincs sziget, csak a `Nincs sziget.` sort írd ki. Figyelj rá, hogy az átlósan szomszédos földmezők **külön** szigetet alkotnak.
+
+  ```
+  Szigetek: <db>
+  Legnagyobb: <meret>
+  ```
+
+  Kimenet a mellékelt mintafájllal:
+
+  ```
+  6. feladat
+  Szigetek: 9
+  Legnagyobb: 5
+  ```
+
+  Tipp: Járd végig a térképet; ha olyan földmezőt találsz, amelyet még nem láttál, új sziget kezdődik: számold meg a rekurzív függvénnyel, és vesd össze az eddigi legnagyobbal.
+starter_code:
+  python: |
+    with open("terkep.txt", encoding="utf-8") as f:
+        sorok = f.read().splitlines()
+    meret = sorok[0].split()
+    n = int(meret[0])
+    m = int(meret[1])
+    terkep = sorok[1:1 + n]
+    print("6. feladat")
+    # ide írd a megoldást
+  csharp: |
+    using System;
+    using System.Collections.Generic;
+    using System.IO;
+    using System.Linq;
+
+    class Program
+    {
+        static string[] terkep;
+        static int n;
+        static int m;
+
+        static void Main()
+        {
+            string[] sorok = File.ReadAllLines("terkep.txt");
+            string[] meret = sorok[0].Split(' ');
+            n = int.Parse(meret[0]);
+            m = int.Parse(meret[1]);
+            terkep = new string[n];
+            for (int i = 0; i < n; i++)
+            {
+                terkep[i] = sorok[i + 1];
+            }
+            Console.WriteLine("6. feladat");
+            // ide írd a megoldást
+        }
+    }
+sample_solutions:
+  python: |
+    with open("terkep.txt", encoding="utf-8") as f:
+        sorok = f.read().splitlines()
+    meret = sorok[0].split()
+    n = int(meret[0])
+    m = int(meret[1])
+    terkep = sorok[1:1 + n]
+    def sziget_meret(i, j, latott):
+        if i < 0 or i >= n or j < 0 or j >= m:
+            return 0
+        if terkep[i][j] != "#" or latott[i][j]:
+            return 0
+        latott[i][j] = True
+        return (1 + sziget_meret(i - 1, j, latott) + sziget_meret(i + 1, j, latott)
+                + sziget_meret(i, j - 1, latott) + sziget_meret(i, j + 1, latott))
+    print("6. feladat")
+    latott = [[False] * m for _ in range(n)]
+    db = 0
+    legnagyobb = 0
+    for i in range(n):
+        for j in range(m):
+            if terkep[i][j] == "#" and not latott[i][j]:
+                db += 1
+                k = sziget_meret(i, j, latott)
+                if k > legnagyobb:
+                    legnagyobb = k
+    if db == 0:
+        print("Nincs sziget.")
+    else:
+        print("Szigetek:", db)
+        print("Legnagyobb:", legnagyobb)
+  csharp: |
+    using System;
+    using System.Collections.Generic;
+    using System.IO;
+    using System.Linq;
+
+    class Program
+    {
+        static string[] terkep;
+        static int n;
+        static int m;
+
+        static int SzigetMeret(int i, int j, bool[,] latott)
+        {
+            if (i < 0 || i >= n || j < 0 || j >= m)
+            {
+                return 0;
+            }
+            if (terkep[i][j] != '#' || latott[i, j])
+            {
+                return 0;
+            }
+            latott[i, j] = true;
+            return 1 + SzigetMeret(i - 1, j, latott) + SzigetMeret(i + 1, j, latott)
+                + SzigetMeret(i, j - 1, latott) + SzigetMeret(i, j + 1, latott);
+        }
+
+        static void Main()
+        {
+            string[] sorok = File.ReadAllLines("terkep.txt");
+            string[] meret = sorok[0].Split(' ');
+            n = int.Parse(meret[0]);
+            m = int.Parse(meret[1]);
+            terkep = new string[n];
+            for (int i = 0; i < n; i++)
+            {
+                terkep[i] = sorok[i + 1];
+            }
+            Console.WriteLine("6. feladat");
+            bool[,] latott = new bool[n, m];
+            int db = 0;
+            int legnagyobb = 0;
+            for (int i = 0; i < n; i++)
+            {
+                for (int j = 0; j < m; j++)
+                {
+                    if (terkep[i][j] == '#' && !latott[i, j])
+                    {
+                        db++;
+                        int k = SzigetMeret(i, j, latott);
+                        if (k > legnagyobb)
+                        {
+                            legnagyobb = k;
+                        }
+                    }
+                }
+            }
+            if (db == 0)
+            {
+                Console.WriteLine("Nincs sziget.");
+            }
+            else
+            {
+                Console.WriteLine("Szigetek: " + db);
+                Console.WriteLine("Legnagyobb: " + legnagyobb);
+            }
+        }
+    }
+files:
+  terkep.txt: terkep.txt
+tests:
+- stdin: ''
+  expected: |
+    6. feladat
+    Szigetek: 9
+    Legnagyobb: 5
+  hidden: false
+- stdin: ''
+  expected: |
+    6. feladat
+    Nincs sziget.
+  hidden: true
+  files:
+    terkep.txt: teszt-2/terkep.txt
+- stdin: ''
+  expected: |
+    6. feladat
+    Szigetek: 1
+    Legnagyobb: 16
+  hidden: true
+  files:
+    terkep.txt: teszt-3/terkep.txt
+- stdin: ''
+  expected: |
+    6. feladat
+    Szigetek: 3
+    Legnagyobb: 2
+  hidden: true
+  files:
+    terkep.txt: teszt-4/terkep.txt

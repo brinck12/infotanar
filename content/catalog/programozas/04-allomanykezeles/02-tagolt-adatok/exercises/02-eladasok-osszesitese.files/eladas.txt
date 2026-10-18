@@ -1,0 +1,4 @@
+termek	darab	ar
+kave	5	450
+tea	4	300
+sutemeny	3	0

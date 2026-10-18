@@ -1,0 +1,49 @@
+slug: ket-kivalasztott-varos
+title: Két kiválasztott város
+position: 2
+kind: sql
+level: kozep
+difficulty: 2
+published: false
+allowed_languages: [sql]
+description: |
+  Az `IN (érték1, érték2, ...)` azt vizsgálja, szerepel-e a mező értéke a felsorolt értékek között. Hosszú `OR` láncot helyettesít; a `NOT IN` a tagadása.
+
+  A `taxi` tábla:
+
+  | oszlop | típus |
+  |---|---|
+  | `id` | egész, elsődleges kulcs |
+  | `rendszam` | szöveg |
+  | `indulas` | szöveg |
+  | `cel` | szöveg |
+  | `km` | egész |
+  | `dij` | egész (Ft) |
+  | `fizetes` | szöveg (`keszpenz` vagy `kartya`) |
+
+  Listázd ki azokat a fuvarokat (**id, cel**), amelyek célja **Pecs vagy Gyor**! A sorok sorrendje nem számít.
+
+  Tipp: `WHERE cel IN ('Pecs', 'Gyor')`
+starter_code:
+  sql: |
+    SELECT id, cel
+    FROM taxi
+    WHERE ;
+sample_solutions:
+  sql: |
+    SELECT id, cel
+    FROM taxi
+    WHERE cel IN ('Pecs', 'Gyor');
+tests:
+  - stdin: "CREATE TABLE taxi (id INTEGER PRIMARY KEY, rendszam TEXT, indulas TEXT, cel TEXT, km INTEGER, dij INTEGER, fizetes TEXT);\nINSERT INTO taxi VALUES\n(1, 'DLF-136', 'Szeged', 'Eger', 14, 4700, 'keszpenz'),\n(2, 'ENC-152', 'Szeged', 'Eger', 40, 12800, 'keszpenz'),\n(3, 'EPC-357', 'Szeged', 'Gyor', 7, 3100, 'keszpenz'),\n(4, 'HKF-232', 'Pecs', 'Eger', 52, 16400, 'keszpenz'),\n(5, 'FNG-850', 'Szeged', 'Pecs', 8, 3400, 'kartya'),\n(6, 'HSF-692', 'Eger', 'Szeged', 37, 11900, 'keszpenz'),\n(7, 'GPE-588', 'Szeged', 'Eger', 15, 5000, 'kartya'),\n(8, 'EKG-638', 'Szeged', 'Gyor', 28, 9200, 'keszpenz');\n"
+    expected: "id,cel\n3,Gyor\n5,Pecs\n8,Gyor\n"
+    hidden: false
+  - stdin: "CREATE TABLE taxi (id INTEGER PRIMARY KEY, rendszam TEXT, indulas TEXT, cel TEXT, km INTEGER, dij INTEGER, fizetes TEXT);\nINSERT INTO taxi VALUES\n(1, 'BMG-457', 'Pecs', 'Gyor', 58, 17900, 'kartya'),\n(2, 'HTC-444', 'Eger', 'Pecs', 33, 10400, 'kartya'),\n(3, 'DNC-985', 'Szeged', 'Gyor', 45, 14300, 'keszpenz'),\n(4, 'ANG-607', 'Gyor', 'Szeged', 58, 18200, 'keszpenz'),\n(5, 'ASE-411', 'Gyor', 'Szeged', 5, 2500, 'keszpenz'),\n(6, 'CND-657', 'Pecs', 'Eger', 37, 12100, 'keszpenz'),\n(7, 'ESB-515', 'Pecs', 'Eger', 60, 18800, 'keszpenz'),\n(8, 'CTG-450', 'Szeged', 'Pecs', 10, 4000, 'keszpenz'),\n(9, 'ANC-540', 'Eger', 'Gyor', 9, 3700, 'keszpenz');\n"
+    expected: "id,cel\n1,Gyor\n2,Pecs\n3,Gyor\n8,Pecs\n9,Gyor\n"
+    hidden: true
+  - stdin: "CREATE TABLE taxi (id INTEGER PRIMARY KEY, rendszam TEXT, indulas TEXT, cel TEXT, km INTEGER, dij INTEGER, fizetes TEXT);\nINSERT INTO taxi VALUES\n(1, 'GMG-474', 'Eger', 'Pecs', 51, 16300, 'keszpenz'),\n(2, 'AKB-592', 'Eger', 'Pecs', 47, 15100, 'kartya'),\n(3, 'FKC-778', 'Eger', 'Gyor', 19, 6700, 'kartya'),\n(4, 'GMH-921', 'Gyor', 'Eger', 29, 9500, 'kartya'),\n(5, 'ASE-860', 'Gyor', 'Pecs', 46, 14600, 'keszpenz'),\n(6, 'GKA-224', 'Eger', 'Pecs', 30, 10000, 'keszpenz'),\n(7, 'FPD-179', 'Pecs', 'Eger', 16, 5800, 'keszpenz'),\n(8, 'DPE-319', 'Eger', 'Pecs', 43, 13700, 'kartya'),\n(9, 'HKE-990', 'Eger', 'Szeged', 10, 3500, 'keszpenz'),\n(10, 'HNH-945', 'Eger', 'Pecs', 38, 12200, 'keszpenz');\n"
+    expected: "id,cel\n1,Pecs\n2,Pecs\n3,Gyor\n5,Pecs\n6,Pecs\n8,Pecs\n10,Pecs\n"
+    hidden: true
+  - stdin: "CREATE TABLE taxi (id INTEGER PRIMARY KEY, rendszam TEXT, indulas TEXT, cel TEXT, km INTEGER, dij INTEGER, fizetes TEXT);\nINSERT INTO taxi VALUES\n(1, 'CRA-809', 'Pecs', 'Gyor', 52, 16600, 'kartya'),\n(2, 'BSH-455', 'Szeged', 'Eger', 7, 2600, 'kartya'),\n(3, 'GMG-996', 'Gyor', 'Pecs', 57, 18100, 'kartya'),\n(4, 'DRG-465', 'Szeged', 'Eger', 27, 8900, 'keszpenz'),\n(5, 'ETF-107', 'Pecs', 'Eger', 26, 8600, 'kartya'),\n(6, 'ALC-374', 'Szeged', 'Eger', 6, 2600, 'keszpenz'),\n(7, 'CTD-677', 'Eger', 'Pecs', 38, 12400, 'kartya'),\n(8, 'ASD-429', 'Szeged', 'Pecs', 20, 6500, 'kartya'),\n(9, 'FMC-611', 'Gyor', 'Szeged', 51, 15800, 'kartya'),\n(10, 'BLD-753', 'Gyor', 'Szeged', 22, 7600, 'keszpenz'),\n(11, 'HTE-139', 'Szeged', 'Gyor', 38, 12200, 'kartya'),\n(12, 'GLA-997', 'Gyor', 'Eger', 9, 3500, 'kartya');\n"
+    expected: "id,cel\n1,Gyor\n3,Pecs\n7,Pecs\n8,Pecs\n11,Gyor\n"
+    hidden: true

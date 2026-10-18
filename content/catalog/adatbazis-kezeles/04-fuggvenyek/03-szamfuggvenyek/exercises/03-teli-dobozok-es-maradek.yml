@@ -1,0 +1,81 @@
+slug: teli-dobozok-es-maradek
+title: Teli dobozok és maradék
+position: 3
+kind: sql
+level: kozep
+difficulty: 3
+published: false
+allowed_languages: [sql]
+description: |
+    Egy dobozba 12 darab fér. Listázd minden terméknél, hány teli doboz lesz belőle (`teli_doboz`) és hány darab marad ki a dobozokból (`maradek`). Az oszlopok: `termek`, `teli_doboz`, `maradek`.
+
+    A `csomag` tábla:
+
+    | `id` | `termek` | `darab` |
+    |---|---|---|
+    | 1 | Fuzet | 30 |
+    | 2 | Toll | 24 |
+    | 3 | Radir | 7 |
+
+    Az eredmény ezekre az adatokra:
+
+    | `termek` | `teli_doboz` | `maradek` |
+    |---|---|---|
+    | Fuzet | 2 | 6 |
+    | Toll | 2 | 0 |
+    | Radir | 0 | 7 |
+
+    Tipp: a teli dobozok száma a darabszám osztva 12-vel, lefelé kerekítve (`FLOOR`); a maradék a `MOD(darab, 12)`.
+starter_code:
+  sql: |
+    SELECT termek,
+      ... AS teli_doboz,
+      ... AS maradek
+    FROM csomag;
+sample_solutions:
+  sql: |
+    SELECT termek, FLOOR(darab / 12) AS teli_doboz, MOD(darab, 12) AS maradek
+    FROM csomag;
+tests:
+  - stdin: |
+      CREATE TABLE csomag (id INT, termek VARCHAR(30), darab INT);
+      INSERT INTO csomag VALUES (1, 'Fuzet', 30);
+      INSERT INTO csomag VALUES (2, 'Toll', 24);
+      INSERT INTO csomag VALUES (3, 'Radir', 7);
+    expected: |
+      termek,teli_doboz,maradek
+      Fuzet,2,6
+      Toll,2,0
+      Radir,0,7
+    hidden: false
+  - stdin: |
+      CREATE TABLE csomag (id INT, termek VARCHAR(30), darab INT);
+      INSERT INTO csomag VALUES (4, 'Ceruza', 100);
+      INSERT INTO csomag VALUES (5, 'Vonalzo', 0);
+      INSERT INTO csomag VALUES (7, 'Ollo', 12);
+    expected: |
+      termek,teli_doboz,maradek
+      Ceruza,8,4
+      Vonalzo,0,0
+      Ollo,1,0
+    hidden: true
+  - stdin: |
+      CREATE TABLE csomag (id INT, termek VARCHAR(30), darab INT);
+      INSERT INTO csomag VALUES (3, 'Radir', 7);
+      INSERT INTO csomag VALUES (6, 'Ragaszto', 13);
+    expected: |
+      termek,teli_doboz,maradek
+      Radir,0,7
+      Ragaszto,1,1
+    hidden: true
+  - stdin: |
+      CREATE TABLE csomag (id INT, termek VARCHAR(30), darab INT);
+      INSERT INTO csomag VALUES (1, 'Fuzet', 30);
+      INSERT INTO csomag VALUES (4, 'Ceruza', 100);
+      INSERT INTO csomag VALUES (6, 'Ragaszto', 13);
+    expected: |
+      termek,teli_doboz,maradek
+      Fuzet,2,6
+      Ceruza,8,4
+      Ragaszto,1,1
+    hidden: true

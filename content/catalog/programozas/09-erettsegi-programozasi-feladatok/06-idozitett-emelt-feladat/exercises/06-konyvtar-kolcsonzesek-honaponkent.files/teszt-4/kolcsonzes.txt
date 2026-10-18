@@ -1,0 +1,9 @@
+olvaso	kod	ki	be
+Fo Mate	B1	31	60
+Fo Mate	B2	32	33
+Gal Reka	B1	59	90
+Gal Reka	B3	60	74
+Hegedus Otto	B2	364	365
+Ivan Nora	B1	1	100
+Ivan Nora	B3	1	15
+Hegedus Otto	B3	360	365

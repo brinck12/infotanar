@@ -1,0 +1,147 @@
+slug: legnagyobb-szam-es-helye
+title: Legnagyobb szám és helye
+position: 2
+kind: code
+level: kozep
+difficulty: 3
+published: false
+allowed_languages:
+- python
+- csharp
+description: |
+  ## Feladat
+
+  Olvass be egy `N` egész számot, majd `N` darab egész számot. Írd ki a legnagyobb számot és azt, hogy **hányadik helyen áll** (az első szám sorszáma 1). Ha a legnagyobb érték többször is előfordul, az első előfordulás helyét add meg.
+
+  ### Bemenet
+
+  - Az első sorban egy `N` egész szám (`1 ≤ N ≤ 100`).
+  - A következő `N` sorban egy-egy egész szám.
+
+  ### Kimenet
+
+  Két sor: `Legnagyobb: ` és az érték, majd `Helye: ` és a sorszám.
+
+  ### Példa
+
+  Bemenet: `5`, majd `4`, `9`, `2`, `9`, `1`. Kimenet:
+
+  ```
+  Legnagyobb: 9
+  Helye: 2
+  ```
+
+  Tipp: az érték mellé jegyezd meg a helyét is, és mindkettőt frissítsd, ha **szigorúan** nagyobbat találsz.
+starter_code:
+  python: |
+    n = int(input())
+    legnagyobb = int(input())
+    hely = 1
+    for i in range(2, n + 1):
+        szam = int(input())
+        # TODO: frissítsd az értéket és a helyét
+    print("Legnagyobb:", legnagyobb)
+    print("Helye:", hely)
+  csharp: |
+    using System;
+
+    class Program
+    {
+        static void Main()
+        {
+            int n = int.Parse(Console.ReadLine());
+            int legnagyobb = int.Parse(Console.ReadLine());
+            int hely = 1;
+            for (int i = 2; i <= n; i++)
+            {
+                int szam = int.Parse(Console.ReadLine());
+                // TODO: frissítsd az értéket és a helyét
+            }
+            Console.WriteLine("Legnagyobb: " + legnagyobb);
+            Console.WriteLine("Helye: " + hely);
+        }
+    }
+sample_solutions:
+  python: |
+    n = int(input())
+    legnagyobb = int(input())
+    hely = 1
+    for i in range(2, n + 1):
+        szam = int(input())
+        if szam > legnagyobb:
+            legnagyobb = szam
+            hely = i
+    print("Legnagyobb:", legnagyobb)
+    print("Helye:", hely)
+  csharp: |
+    using System;
+
+    class Program
+    {
+        static void Main()
+        {
+            int n = int.Parse(Console.ReadLine());
+            int legnagyobb = int.Parse(Console.ReadLine());
+            int hely = 1;
+            for (int i = 2; i <= n; i++)
+            {
+                int szam = int.Parse(Console.ReadLine());
+                if (szam > legnagyobb)
+                {
+                    legnagyobb = szam;
+                    hely = i;
+                }
+            }
+            Console.WriteLine("Legnagyobb: " + legnagyobb);
+            Console.WriteLine("Helye: " + hely);
+        }
+    }
+tests:
+- stdin: |
+    5
+    4
+    9
+    2
+    9
+    1
+  expected: |
+    Legnagyobb: 9
+    Helye: 2
+  hidden: false
+- stdin: |
+    1
+    -5
+  expected: |
+    Legnagyobb: -5
+    Helye: 1
+  hidden: true
+- stdin: |
+    3
+    9
+    1
+    2
+  expected: |
+    Legnagyobb: 9
+    Helye: 1
+  hidden: true
+- stdin: |
+    5
+    1
+    2
+    3
+    4
+    5
+  expected: |
+    Legnagyobb: 5
+    Helye: 5
+  hidden: true
+- stdin: |
+    4
+    -3
+    -2
+    -9
+    -2
+  expected: |
+    Legnagyobb: -2
+    Helye: 2
+  hidden: true

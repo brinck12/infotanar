@@ -1,0 +1,106 @@
+slug: legkisebb-oszto
+title: Legkisebb osztó
+position: 3
+kind: code
+level: kozep
+difficulty: 3
+published: false
+allowed_languages:
+- python
+- csharp
+description: |
+  ## Feladat
+
+  Olvass be egy `N` egész számot, és írd ki a **legkisebb 1-nél nagyobb osztóját**! Egy prímszám legkisebb 1-nél nagyobb osztója önmaga.
+
+  ### Bemenet
+
+  Egyetlen sorban egy `N` egész szám (`2 ≤ N ≤ 1000000`).
+
+  ### Kimenet
+
+  Egyetlen sorban a legkisebb 1-nél nagyobb osztó.
+
+  ### Példa
+
+  Bemenet: `15`. Kimenet: `3`. Bemenet: `13`. Kimenet: `13`.
+
+  Tipp: ez kiválasztás: biztosan van találat (legrosszabb esetben `N` maga). Indulj 2-től, és az első olyan `d`-nél állj meg, amelyre `N % d == 0`.
+starter_code:
+  python: |
+    n = int(input())
+    d = 2
+    # TODO: növeld d-t, amíg nem osztja n-et
+    print(d)
+  csharp: |
+    using System;
+
+    class Program
+    {
+        static void Main()
+        {
+            int n = int.Parse(Console.ReadLine());
+            int d = 2;
+            // TODO: növeld d-t, amíg nem osztja n-et
+            Console.WriteLine(d);
+        }
+    }
+sample_solutions:
+  python: |
+    n = int(input())
+    d = 2
+    while n % d != 0:
+        d += 1
+    print(d)
+  csharp: |
+    using System;
+
+    class Program
+    {
+        static void Main()
+        {
+            int n = int.Parse(Console.ReadLine());
+            int d = 2;
+            while (n % d != 0)
+            {
+                d++;
+            }
+            Console.WriteLine(d);
+        }
+    }
+tests:
+- stdin: |
+    15
+  expected: |
+    3
+  hidden: false
+- stdin: |
+    13
+  expected: |
+    13
+  hidden: true
+- stdin: |
+    2
+  expected: |
+    2
+  hidden: true
+- stdin: |
+    49
+  expected: |
+    7
+  hidden: true
+- stdin: |
+    100
+  expected: |
+    2
+  hidden: true
+- stdin: |
+    10403
+  expected: |
+    101
+  hidden: true
+- stdin: |
+    999983
+  expected: |
+    999983
+  hidden: true

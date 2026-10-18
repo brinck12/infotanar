@@ -98,10 +98,16 @@ function TaskSolveContent() {
   const task = useQuery({ ...taskQuery(taskId), enabled: validId })
 
   useDocumentMeta(task.data ? { title: task.data.title, description: `Gyakorlófeladat: ${task.data.title}` } : null)
+  // A morzsamenü a tananyagot követi: tanulási út, a feladat leckéje, maga a feladat.
+  const lesson = task.data?.lesson
   useCrumbs(
     task.data
-      ? [{ label: 'Feladatok', to: '/feladatok' }, { label: task.data.topic.name, to: `/feladatok?temakor=${task.data.topic.slug}` }, { label: task.data.title }]
-      : [{ label: 'Feladatok', to: '/feladatok' }],
+      ? [
+          { label: 'Tanulási út', to: '/tanulasi-ut' },
+          ...(lesson?.slug && lesson.track_slug ? [{ label: lesson.title, to: `/tanulasi-ut/${lesson.track_slug}/${lesson.slug}` }] : []),
+          { label: task.data.title },
+        ]
+      : [{ label: 'Tanulási út', to: '/tanulasi-ut' }],
   )
 
   if (!validId || task.isError) {
@@ -260,6 +266,8 @@ function Workspace({ task }: { task: UnlockedTaskDetail }) {
   const accepted = execution.data && isSubmission(execution.data) && execution.data.status === 'passed' ? execution.data : null
   // A korlát nyelvenként eltérhet (pl. a C# több időt kaphat), ezért a kiválasztott nyelvét mutatjuk.
   const limits = task.limits?.[language]
+  // SQL-feladatnál a teszteset „bemenete” az adatbázist felépítő szkript.
+  const isSql = task.allowed_languages.length === 1 && task.allowed_languages.includes('sql')
 
   // Az „Itt tartottál legutóbb” sorhoz megjegyezzük a megnyitott feladatot.
   useEffect(() => {
@@ -309,7 +317,7 @@ function Workspace({ task }: { task: UnlockedTaskDetail }) {
             <ul className="mt-3 flex flex-col gap-3">
               {task.example_test_cases.map((tc, i) => (
                 <li key={tc.id} className="flex flex-wrap gap-3">
-                  <ExampleBlock label={`${i + 1}. bemenet`} value={tc.stdin} />
+                  <ExampleBlock label={isSql ? `${i + 1}. adatbázis (kiinduló adatok)` : `${i + 1}. bemenet`} value={tc.stdin} />
                   <ExampleBlock label="Elvárt kimenet" value={tc.expected_stdout} />
                 </li>
               ))}
@@ -447,7 +455,11 @@ function ExampleBlock({ label, value }: { label: string; value: string }) {
   return (
     <div className="min-w-0 flex-1 basis-36 overflow-hidden rounded-md border border-line">
       <p className="border-b border-line bg-headrow px-3 py-1.5 text-14 font-semibold text-ink-soft">{label}</p>
-      <pre className="overflow-x-auto px-3 py-2.5 text-14 leading-relaxed whitespace-pre-wrap">{value || '(üres)'}</pre>
+      {/* A hosszú sor vízszintesen görgethető, ezért a doboz billentyűzettel is elérhető. */}
+      {/* oxlint-disable-next-line jsx-a11y/no-noninteractive-tabindex */}
+      <pre tabIndex={0} className="overflow-x-auto px-3 py-2.5 text-14 leading-relaxed whitespace-pre-wrap">
+        {value || '(üres)'}
+      </pre>
     </div>
   )
 }

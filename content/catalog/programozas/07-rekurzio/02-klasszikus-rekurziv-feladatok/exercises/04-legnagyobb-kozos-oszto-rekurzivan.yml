@@ -1,0 +1,80 @@
+slug: legnagyobb-kozos-oszto-rekurzivan
+title: "Legnagyobb közös osztó rekurzívan"
+position: 3
+kind: code
+level: emelt
+difficulty: 3
+published: false
+allowed_languages: [python, csharp]
+description: |
+  Olvass be két pozitív egész számot külön sorban, és írd ki a legnagyobb közös osztójukat **Euklidész algoritmusával, rekurzívan**.
+
+  A leírás: `lnko(a, b)` értéke `a`, ha `b = 0`; különben `lnko(b, a mod b)`.
+
+  Példa: `48` és `18` esetén a kimenet `6`; `7` és `13` esetén `1`.
+
+  Tipp: a maradékos osztás jele `%`.
+starter_code:
+  python: |
+    def lnko(a, b):
+        # TODO
+        pass
+
+    a = int(input())
+    b = int(input())
+    print(lnko(a, b))
+  csharp: |
+    using System;
+
+    class Program
+    {
+        static int Lnko(int a, int b)
+        {
+            // TODO
+            return 0;
+        }
+
+        static void Main()
+        {
+            int a = int.Parse(Console.ReadLine());
+            int b = int.Parse(Console.ReadLine());
+            Console.WriteLine(Lnko(a, b));
+        }
+    }
+sample_solutions:
+  python: |
+    def lnko(a, b):
+        if b == 0:
+            return a
+        return lnko(b, a % b)
+
+    a = int(input())
+    b = int(input())
+    print(lnko(a, b))
+  csharp: |
+    using System;
+
+    class Program
+    {
+        static int Lnko(int a, int b)
+        {
+            if (b == 0)
+            {
+                return a;
+            }
+            return Lnko(b, a % b);
+        }
+
+        static void Main()
+        {
+            int a = int.Parse(Console.ReadLine());
+            int b = int.Parse(Console.ReadLine());
+            Console.WriteLine(Lnko(a, b));
+        }
+    }
+tests:
+  - { stdin: "48\n18\n", expected: "6\n", hidden: false }
+  - { stdin: "7\n13\n", expected: "1\n", hidden: true }
+  - { stdin: "12\n12\n", expected: "12\n", hidden: true }
+  - { stdin: "18\n48\n", expected: "6\n", hidden: true }
+  - { stdin: "1000000\n250\n", expected: "250\n", hidden: true }

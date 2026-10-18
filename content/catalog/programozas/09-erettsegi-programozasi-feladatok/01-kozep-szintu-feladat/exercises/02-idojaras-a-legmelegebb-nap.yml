@@ -1,0 +1,140 @@
+slug: idojaras-a-legmelegebb-nap
+title: 'Időjárás: a legmelegebb nap'
+position: 1
+kind: code
+level: kozep
+difficulty: 2
+published: false
+allowed_languages:
+- python
+- csharp
+description: |
+  Egy meteorológiai állomás egy hónap napi méréseit a `homerseklet.txt` fájlba mentette. Az első sor a napok száma (`n`), utána soronként egy nap adatai következnek, tabulátorral tagolva: a nap sorszáma (1-től), a napi legalacsonyabb hőmérséklet (°C), a napi legmagasabb hőmérséklet (°C) és a csapadék mennyisége (mm). Minden érték egész szám, a fájl legalább egy napot tartalmaz.
+
+  Minden részfeladat kimenete a feladat sorszámával kezdődik (`N. feladat`). A kimenetben ne használj ékezetes betűt (az ékezetmentes kiírás az érettségin is elfogadott). Ahol a feladat bevitelt kér, a kérdést írd ki egy külön sorba, és csak utána olvass be.
+
+  Keresd meg a legmelegebb napot, vagyis amelyiknek a legmagasabb hőmérséklete a legnagyobb. Írd ki a nap sorszámát és a hőmérsékletet:
+
+  ```
+  Legmelegebb nap: <nap>. nap, <fok> fok
+  ```
+
+  Holtverseny esetén a korábbi nap számít.
+
+  Kimenet a mellékelt mintafájllal:
+
+  ```
+  2. feladat
+  Legmelegebb nap: 1. nap, 18 fok
+  ```
+
+  Tipp: maximumkiválasztás: a `>` jel az első legnagyobbat őrzi meg, a `>=` az utolsót.
+starter_code:
+  python: |
+    print("2. feladat")
+    with open("homerseklet.txt", encoding="utf-8") as f:
+        sorok = f.read().splitlines()
+    db = int(sorok[0])
+    napok = []
+    for sor in sorok[1:]:
+        r = sor.split("\t")
+        napok.append((int(r[0]), int(r[1]), int(r[2]), int(r[3])))
+    # ide írd a megoldást
+  csharp: |
+    using System;
+    using System.Collections.Generic;
+    using System.Globalization;
+    using System.IO;
+    using System.Linq;
+
+    class Program
+    {
+        static void Main()
+        {
+            Console.WriteLine("2. feladat");
+            string[] sorok = File.ReadAllLines("homerseklet.txt");
+            int db = int.Parse(sorok[0]);
+            int[][] napok = new int[db][];
+            for (int i = 0; i < db; i++)
+            {
+                string[] r = sorok[i + 1].Split('\t');
+                napok[i] = new int[] { int.Parse(r[0]), int.Parse(r[1]), int.Parse(r[2]), int.Parse(r[3]) };
+            }
+            // ide írd a megoldást
+        }
+    }
+sample_solutions:
+  python: |
+    print("2. feladat")
+    with open("homerseklet.txt", encoding="utf-8") as f:
+        sorok = f.read().splitlines()
+    db = int(sorok[0])
+    napok = []
+    for sor in sorok[1:]:
+        r = sor.split("\t")
+        napok.append((int(r[0]), int(r[1]), int(r[2]), int(r[3])))
+    legjobb = napok[0]
+    for nap in napok:
+        if nap[2] > legjobb[2]:
+            legjobb = nap
+    print("Legmelegebb nap: " + str(legjobb[0]) + ". nap, " + str(legjobb[2]) + " fok")
+  csharp: |
+    using System;
+    using System.Collections.Generic;
+    using System.Globalization;
+    using System.IO;
+    using System.Linq;
+
+    class Program
+    {
+        static void Main()
+        {
+            Console.WriteLine("2. feladat");
+            string[] sorok = File.ReadAllLines("homerseklet.txt");
+            int db = int.Parse(sorok[0]);
+            int[][] napok = new int[db][];
+            for (int i = 0; i < db; i++)
+            {
+                string[] r = sorok[i + 1].Split('\t');
+                napok[i] = new int[] { int.Parse(r[0]), int.Parse(r[1]), int.Parse(r[2]), int.Parse(r[3]) };
+            }
+            int[] legjobb = napok[0];
+            foreach (int[] nap in napok)
+            {
+                if (nap[2] > legjobb[2])
+                {
+                    legjobb = nap;
+                }
+            }
+            Console.WriteLine("Legmelegebb nap: " + legjobb[0] + ". nap, " + legjobb[2] + " fok");
+        }
+    }
+files:
+  homerseklet.txt: homerseklet.txt
+tests:
+- stdin: ''
+  expected: |
+    2. feladat
+    Legmelegebb nap: 1. nap, 18 fok
+  hidden: false
+- stdin: ''
+  expected: |
+    2. feladat
+    Legmelegebb nap: 1. nap, 4 fok
+  hidden: true
+  files:
+    homerseklet.txt: teszt-2/homerseklet.txt
+- stdin: ''
+  expected: |
+    2. feladat
+    Legmelegebb nap: 8. nap, 20 fok
+  hidden: true
+  files:
+    homerseklet.txt: teszt-3/homerseklet.txt
+- stdin: ''
+  expected: |
+    2. feladat
+    Legmelegebb nap: 7. nap, 22 fok
+  hidden: true
+  files:
+    homerseklet.txt: teszt-4/homerseklet.txt

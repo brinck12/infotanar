@@ -1,0 +1,81 @@
+slug: brutto-ar
+title: Bruttó ár
+position: 0
+kind: sql
+level: kozep
+difficulty: 1
+published: false
+allowed_languages: [sql]
+description: |
+    A termékek ára nettó. Listázd a termék nevét (`nev`) és a 27%-os ÁFÁ-val növelt, egész forintra kerekített árát (`brutto`).
+
+    A `termek` tábla:
+
+    | `id` | `nev` | `ar` |
+    |---|---|---|
+    | 1 | Fuzet | 390 |
+    | 2 | Toll | 140 |
+    | 3 | Radir | 90 |
+
+    Az eredmény ezekre az adatokra:
+
+    | `nev` | `brutto` |
+    |---|---|
+    | Fuzet | 495 |
+    | Toll | 178 |
+    | Radir | 114 |
+
+    Tipp: a 27%-os növelés az árat 1,27-del szorozza (tizedesjel: pont, `1.27`); a `ROUND(...)` egészre kerekít.
+starter_code:
+  sql: |
+    SELECT nev, ... AS brutto
+    FROM termek;
+sample_solutions:
+  sql: |
+    SELECT nev, ROUND(ar * 1.27) AS brutto
+    FROM termek;
+tests:
+  - stdin: |
+      CREATE TABLE termek (id INT, nev VARCHAR(30), ar INT);
+      INSERT INTO termek VALUES (1, 'Fuzet', 390);
+      INSERT INTO termek VALUES (2, 'Toll', 140);
+      INSERT INTO termek VALUES (3, 'Radir', 90);
+    expected: |
+      nev,brutto
+      Fuzet,495
+      Toll,178
+      Radir,114
+    hidden: false
+  - stdin: |
+      CREATE TABLE termek (id INT, nev VARCHAR(30), ar INT);
+      INSERT INTO termek VALUES (4, 'Tolltarto', 1290);
+      INSERT INTO termek VALUES (5, 'Iskolataska', 8990);
+      INSERT INTO termek VALUES (6, 'Szinesceruza', 1480);
+    expected: |
+      nev,brutto
+      Tolltarto,1638
+      Iskolataska,11417
+      Szinesceruza,1880
+    hidden: true
+  - stdin: |
+      CREATE TABLE termek (id INT, nev VARCHAR(30), ar INT);
+      INSERT INTO termek VALUES (7, 'Vonalzo', 240);
+      INSERT INTO termek VALUES (8, 'Ceruza', 60);
+    expected: |
+      nev,brutto
+      Vonalzo,305
+      Ceruza,76
+    hidden: true
+  - stdin: |
+      CREATE TABLE termek (id INT, nev VARCHAR(30), ar INT);
+      INSERT INTO termek VALUES (1, 'Fuzet', 390);
+      INSERT INTO termek VALUES (3, 'Radir', 90);
+      INSERT INTO termek VALUES (5, 'Iskolataska', 8990);
+      INSERT INTO termek VALUES (8, 'Ceruza', 60);
+    expected: |
+      nev,brutto
+      Fuzet,495
+      Radir,114
+      Iskolataska,11417
+      Ceruza,76
+    hidden: true

@@ -1,0 +1,197 @@
+slug: 8-a-legkisebb-napi-bevetel
+title: 8. A legkisebb napi bevétel
+position: 6
+kind: sql
+level: emelt
+difficulty: 5
+published: false
+allowed_languages:
+- sql
+description: |
+  Egy taxitársaság nyilvántartása két táblából áll.
+
+  A `sofor` tábla a sofőröket tartalmazza:
+
+  | oszlop | típus |
+  |---|---|
+  | `id` | `INT`, elsődleges kulcs |
+  | `nev` | `VARCHAR(50)` |
+  | `szuletes` | `INT`, a születési év |
+  | `angol` | `INT`: 1, ha beszél angolul, különben 0 |
+  | `nemet` | `INT`: 1, ha beszél németül, különben 0 |
+  | `engedely_ev` | `INT`, a taxis engedély megszerzésének éve |
+
+  A `fuvar` tábla a megtett fuvarokat:
+
+  | oszlop | típus |
+  |---|---|
+  | `id` | `INT`, elsődleges kulcs |
+  | `sofor_id` | `INT`, a `sofor` tábla `id` oszlopára mutat |
+  | `rendszam` | `VARCHAR(10)`, az autó rendszáma (pl. `KMB-217`) |
+  | `datum` | `DATE` |
+  | `km` | `INT`, a megtett út kilométerben |
+  | `ar` | `INT`, a fuvar ára forintban |
+  | `fizetes` | `VARCHAR(10)`: `kartya` vagy `keszpenz` |
+
+  **8. feladat.** Egy nap bevétele az aznapi fuvarok árának összege. Adja meg lekérdezéssel a **legkisebb napi bevételt**! Az eredmény egyetlen oszlop legyen, `legkisebb` néven.
+starter_code:
+  sql: |
+    SELECT MIN(napi) AS legkisebb
+    FROM (SELECT datum, SUM(ar) AS napi
+          FROM fuvar
+          GROUP BY ) AS n;
+sample_solutions:
+  sql: |
+    SELECT MIN(napi) AS legkisebb
+    FROM (SELECT datum, SUM(ar) AS napi
+          FROM fuvar
+          GROUP BY datum) AS n;
+tests:
+- stdin: |
+    CREATE TABLE sofor (id INTEGER PRIMARY KEY, nev TEXT, szuletes INTEGER, angol INTEGER, nemet INTEGER, engedely_ev INTEGER);
+    INSERT INTO sofor VALUES
+    (1, 'Szabo Laszlo', 1989, 0, 0, 2012),
+    (2, 'Balogh Bela', 1971, 1, 0, 2008),
+    (3, 'Varga Hanna', 1973, 1, 0, 2001),
+    (4, 'Kiss Orsolya', 1986, 1, 0, 2002),
+    (5, 'Szabo Anna', 1994, 0, 1, 2012);
+    CREATE TABLE fuvar (id INTEGER PRIMARY KEY, sofor_id INTEGER, rendszam TEXT, datum TEXT, km INTEGER, ar INTEGER, fizetes TEXT);
+    INSERT INTO fuvar VALUES
+    (1, 5, 'TXD-134', '2026-03-03', 5, 3200, 'kartya'),
+    (2, 2, 'KME-335', '2026-03-07', 3, 1600, 'kartya'),
+    (3, 1, 'KME-218', '2026-03-02', 2, 1200, 'kartya'),
+    (4, 5, 'TXD-134', '2026-03-06', 19, 7000, 'kartya'),
+    (5, 4, 'ABC-386', '2026-03-08', 10, 3900, 'keszpenz'),
+    (6, 4, 'ABC-386', '2026-03-08', 13, 4400, 'kartya'),
+    (7, 5, 'TXD-134', '2026-03-03', 14, 5200, 'kartya'),
+    (8, 3, 'TXF-198', '2026-03-08', 15, 5500, 'kartya'),
+    (9, 2, 'KME-335', '2026-03-06', 12, 4500, 'kartya'),
+    (10, 4, 'ABC-386', '2026-03-03', 10, 3700, 'kartya'),
+    (11, 4, 'ABC-386', '2026-03-08', 4, 2000, 'kartya'),
+    (12, 1, 'KME-218', '2026-03-06', 6, 2500, 'kartya'),
+    (13, 3, 'TXF-198', '2026-03-01', 14, 5400, 'keszpenz'),
+    (14, 5, 'TXD-134', '2026-03-01', 10, 3600, 'kartya'),
+    (15, 3, 'TXF-198', '2026-03-08', 14, 5400, 'kartya'),
+    (16, 2, 'KME-335', '2026-03-08', 17, 7000, 'kartya');
+  expected: |
+    legkisebb
+    1200
+  hidden: false
+- stdin: |
+    CREATE TABLE sofor (id INTEGER PRIMARY KEY, nev TEXT, szuletes INTEGER, angol INTEGER, nemet INTEGER, engedely_ev INTEGER);
+    INSERT INTO sofor VALUES
+    (1, 'Farkas Sandor', 1982, 0, 1, 2006),
+    (2, 'Nagy Maria', 1974, 0, 1, 2010),
+    (3, 'Szabo Csaba', 1993, 1, 0, 2014),
+    (4, 'Szabo Zsofia', 1989, 1, 0, 2021),
+    (5, 'Molnar Bela', 1981, 1, 1, 2021),
+    (6, 'Horvath Kata', 1982, 0, 0, 2015);
+    CREATE TABLE fuvar (id INTEGER PRIMARY KEY, sofor_id INTEGER, rendszam TEXT, datum TEXT, km INTEGER, ar INTEGER, fizetes TEXT);
+    INSERT INTO fuvar VALUES
+    (1, 5, 'KMB-319', '2026-03-01', 17, 6100, 'keszpenz'),
+    (2, 1, 'KMD-283', '2026-03-02', 5, 3100, 'keszpenz'),
+    (3, 2, 'KMF-141', '2026-03-07', 19, 7300, 'kartya'),
+    (4, 4, 'TXE-291', '2026-03-08', 15, 6200, 'keszpenz'),
+    (5, 5, 'KMB-319', '2026-03-04', 8, 3500, 'kartya'),
+    (6, 4, 'TXE-291', '2026-03-03', 14, 5500, 'keszpenz'),
+    (7, 1, 'KMD-283', '2026-03-02', 8, 3300, 'kartya'),
+    (8, 4, 'TXE-291', '2026-03-07', 20, 6900, 'kartya'),
+    (9, 1, 'KMD-283', '2026-03-08', 12, 4900, 'kartya'),
+    (10, 3, 'TXE-287', '2026-03-06', 9, 4400, 'keszpenz'),
+    (11, 5, 'KMB-319', '2026-03-02', 4, 2500, 'kartya'),
+    (12, 3, 'TXE-287', '2026-03-01', 25, 8900, 'kartya'),
+    (13, 6, 'ABC-211', '2026-03-03', 9, 3700, 'keszpenz'),
+    (14, 2, 'KMF-141', '2026-03-02', 24, 9100, 'kartya'),
+    (15, 3, 'TXE-287', '2026-03-01', 10, 4600, 'kartya'),
+    (16, 4, 'TXE-291', '2026-03-06', 3, 1600, 'kartya'),
+    (17, 6, 'ABC-211', '2026-03-02', 20, 7800, 'keszpenz'),
+    (18, 3, 'TXE-287', '2026-03-03', 23, 8400, 'kartya'),
+    (19, 2, 'KMF-141', '2026-03-05', 12, 4900, 'kartya'),
+    (20, 2, 'KMF-141', '2026-03-07', 4, 1700, 'kartya'),
+    (21, 1, 'KMD-283', '2026-03-04', 20, 6900, 'keszpenz');
+  expected: |
+    legkisebb
+    4900
+  hidden: true
+- stdin: |
+    CREATE TABLE sofor (id INTEGER PRIMARY KEY, nev TEXT, szuletes INTEGER, angol INTEGER, nemet INTEGER, engedely_ev INTEGER);
+    INSERT INTO sofor VALUES
+    (1, 'Horvath Bence', 2000, 0, 1, 2009),
+    (2, 'Farkas Lilla', 1993, 0, 1, 2012),
+    (3, 'Varga Imre', 1987, 1, 0, 2022),
+    (4, 'Szabo Fanni', 1993, 0, 0, 2000),
+    (5, 'Balogh Reka', 1998, 1, 1, 2003),
+    (6, 'Farkas Dora', 1985, 0, 1, 2008),
+    (7, 'Varga Tamas', 1978, 1, 1, 2016);
+    CREATE TABLE fuvar (id INTEGER PRIMARY KEY, sofor_id INTEGER, rendszam TEXT, datum TEXT, km INTEGER, ar INTEGER, fizetes TEXT);
+    INSERT INTO fuvar VALUES
+    (1, 2, 'KMF-391', '2026-03-08', 4, 1900, 'kartya'),
+    (2, 2, 'KMF-391', '2026-03-04', 12, 4100, 'keszpenz'),
+    (3, 1, 'KME-287', '2026-03-01', 6, 3600, 'keszpenz'),
+    (4, 5, 'TXC-382', '2026-03-08', 10, 3500, 'kartya'),
+    (5, 3, 'KMD-184', '2026-03-01', 3, 1900, 'kartya'),
+    (6, 5, 'TXC-382', '2026-03-04', 12, 4900, 'kartya'),
+    (7, 7, 'ABF-336', '2026-03-04', 5, 3000, 'keszpenz'),
+    (8, 3, 'KMD-184', '2026-03-07', 21, 7600, 'kartya'),
+    (9, 4, 'KMC-261', '2026-03-05', 16, 6500, 'kartya'),
+    (10, 1, 'KME-287', '2026-03-02', 19, 7100, 'kartya'),
+    (11, 7, 'ABF-336', '2026-03-02', 20, 7200, 'kartya'),
+    (12, 4, 'KMC-261', '2026-03-05', 15, 5400, 'kartya'),
+    (13, 5, 'TXC-382', '2026-03-06', 7, 3000, 'kartya'),
+    (14, 6, 'ABA-142', '2026-03-08', 19, 7000, 'keszpenz'),
+    (15, 4, 'KMC-261', '2026-03-05', 18, 7400, 'kartya'),
+    (16, 7, 'ABF-336', '2026-03-07', 15, 5600, 'kartya'),
+    (17, 2, 'KMF-391', '2026-03-08', 20, 6900, 'keszpenz'),
+    (18, 6, 'ABA-142', '2026-03-06', 3, 2000, 'kartya'),
+    (19, 4, 'KMC-261', '2026-03-03', 19, 6400, 'keszpenz'),
+    (20, 5, 'TXC-382', '2026-03-02', 15, 6300, 'kartya'),
+    (21, 6, 'ABA-142', '2026-03-03', 18, 6100, 'kartya'),
+    (22, 1, 'KME-287', '2026-03-01', 19, 7300, 'kartya'),
+    (23, 7, 'ABF-336', '2026-03-02', 13, 5200, 'kartya'),
+    (24, 1, 'KME-287', '2026-03-06', 3, 2400, 'kartya'),
+    (25, 3, 'KMD-184', '2026-03-04', 20, 6800, 'kartya');
+  expected: |
+    legkisebb
+    7400
+  hidden: true
+- stdin: |
+    CREATE TABLE sofor (id INTEGER PRIMARY KEY, nev TEXT, szuletes INTEGER, angol INTEGER, nemet INTEGER, engedely_ev INTEGER);
+    INSERT INTO sofor VALUES
+    (1, 'Balogh Reka', 1997, 1, 0, 2005),
+    (2, 'Kiss Hanna', 1983, 1, 0, 2018),
+    (3, 'Kovacs Fanni', 1986, 0, 0, 2001),
+    (4, 'Toth Aron', 1987, 1, 0, 2023),
+    (5, 'Varga Kata', 1995, 0, 1, 2008),
+    (6, 'Molnar Emese', 1995, 0, 0, 2000),
+    (7, 'Molnar Gergo', 1971, 0, 1, 2024),
+    (8, 'Balogh Csaba', 1991, 1, 1, 2023);
+    CREATE TABLE fuvar (id INTEGER PRIMARY KEY, sofor_id INTEGER, rendszam TEXT, datum TEXT, km INTEGER, ar INTEGER, fizetes TEXT);
+    INSERT INTO fuvar VALUES
+    (1, 8, 'ABE-224', '2026-03-01', 20, 6900, 'kartya'),
+    (2, 3, 'TXC-333', '2026-03-07', 10, 3500, 'kartya'),
+    (3, 5, 'ABC-110', '2026-03-01', 5, 2600, 'keszpenz'),
+    (4, 4, 'ABB-136', '2026-03-03', 5, 3200, 'kartya'),
+    (5, 2, 'KMB-196', '2026-03-02', 24, 8800, 'kartya'),
+    (6, 6, 'TXB-269', '2026-03-05', 9, 3800, 'kartya'),
+    (7, 3, 'TXC-333', '2026-03-02', 8, 2900, 'keszpenz'),
+    (8, 7, 'TXA-158', '2026-03-06', 10, 3900, 'kartya'),
+    (9, 7, 'TXA-158', '2026-03-05', 13, 4900, 'keszpenz'),
+    (10, 5, 'ABC-110', '2026-03-08', 6, 3700, 'kartya'),
+    (11, 1, 'KMB-256', '2026-03-05', 3, 2900, 'kartya'),
+    (12, 4, 'ABB-136', '2026-03-05', 12, 4200, 'keszpenz'),
+    (13, 2, 'KMB-196', '2026-03-01', 21, 7900, 'kartya'),
+    (14, 2, 'KMB-196', '2026-03-06', 2, 2100, 'keszpenz'),
+    (15, 8, 'ABE-224', '2026-03-04', 4, 1900, 'kartya'),
+    (16, 1, 'KMB-256', '2026-03-08', 3, 2300, 'keszpenz'),
+    (17, 7, 'TXA-158', '2026-03-08', 21, 6800, 'keszpenz'),
+    (18, 5, 'ABC-110', '2026-03-05', 20, 7900, 'kartya'),
+    (19, 6, 'TXB-269', '2026-03-05', 7, 3200, 'kartya'),
+    (20, 3, 'TXC-333', '2026-03-01', 2, 2600, 'kartya'),
+    (21, 7, 'TXA-158', '2026-03-05', 25, 8700, 'kartya'),
+    (22, 1, 'KMB-256', '2026-03-03', 7, 3300, 'kartya'),
+    (23, 5, 'ABC-110', '2026-03-03', 11, 5100, 'kartya'),
+    (24, 3, 'TXC-333', '2026-03-04', 16, 6200, 'keszpenz');
+  expected: |
+    legkisebb
+    3500
+  hidden: true

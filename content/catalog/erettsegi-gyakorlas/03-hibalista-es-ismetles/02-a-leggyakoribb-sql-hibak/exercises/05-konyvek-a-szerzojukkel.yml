@@ -1,0 +1,51 @@
+slug: konyvek-a-szerzojukkel
+title: "Könyvek a szerzőjükkel"
+position: 4
+kind: sql
+level: kozep
+difficulty: 3
+published: false
+allowed_languages: [sql]
+description: |
+  Egy könyvtár két táblában tárolja az adatokat: a `szerzo` és a `konyv` táblában. Az alábbi lekérdezésnek minden könyv címét a szerzője nevével együtt kellene kiadnia, de **minden könyvet minden szerzővel** párosít, így túl sok sort kapsz. Javítsd ki!
+
+  A `szerzo` tábla:
+
+  | oszlop | típus |
+  |---|---|
+  | `id` | `INT`, elsődleges kulcs |
+  | `nev` | `VARCHAR(50)` |
+
+  A `konyv` tábla:
+
+  | oszlop | típus |
+  |---|---|
+  | `id` | `INT`, elsődleges kulcs |
+  | `cim` | `VARCHAR(50)` |
+  | `szerzo_id` | `INT`, a `szerzo` tábla `id` oszlopára mutat |
+
+  Add meg a könyv címét (`cim`) és a szerző nevét (`nev`)! A sorok sorrendje nem számít.
+
+  Tipp: két tábla összekapcsolásakor meg kell mondani, melyik oszlopok egyeznek. Az idegen kulcs (`szerzo_id`) a másik tábla kulcsával (`id`) egyezik.
+starter_code:
+  sql: |
+    SELECT konyv.cim, szerzo.nev
+    FROM konyv, szerzo;
+sample_solutions:
+  sql: |
+    SELECT konyv.cim, szerzo.nev
+    FROM konyv
+    JOIN szerzo ON konyv.szerzo_id = szerzo.id;
+tests:
+  - stdin: "CREATE TABLE szerzo (id INTEGER PRIMARY KEY, nev TEXT);\nCREATE TABLE konyv (id INTEGER PRIMARY KEY, cim TEXT, szerzo_id INTEGER);\nINSERT INTO szerzo VALUES\n(1, 'Jokai'),\n(2, 'Moricz');\nINSERT INTO konyv VALUES\n(1, 'Aranyember', 1),\n(2, 'Rokonok', 2),\n(3, 'Fekete gyemantok', 1);\n"
+    expected: "cim,nev\nAranyember,Jokai\nRokonok,Moricz\nFekete gyemantok,Jokai\n"
+    hidden: false
+  - stdin: "CREATE TABLE szerzo (id INTEGER PRIMARY KEY, nev TEXT);\nCREATE TABLE konyv (id INTEGER PRIMARY KEY, cim TEXT, szerzo_id INTEGER);\nINSERT INTO szerzo VALUES\n(1, 'Kiss Anna');\nINSERT INTO konyv VALUES\n(1, 'Napok', 1);\n"
+    expected: "cim,nev\nNapok,Kiss Anna\n"
+    hidden: true
+  - stdin: "CREATE TABLE szerzo (id INTEGER PRIMARY KEY, nev TEXT);\nCREATE TABLE konyv (id INTEGER PRIMARY KEY, cim TEXT, szerzo_id INTEGER);\nINSERT INTO szerzo VALUES\n(1, 'Nagy'),\n(2, 'Toth'),\n(3, 'Szabo');\nINSERT INTO konyv VALUES\n(1, 'Alma', 3),\n(2, 'Bab', 3),\n(3, 'Cseresznye', 2),\n(4, 'Dio', 1);\n"
+    expected: "cim,nev\nAlma,Szabo\nBab,Szabo\nCseresznye,Toth\nDio,Nagy\n"
+    hidden: true
+  - stdin: "CREATE TABLE szerzo (id INTEGER PRIMARY KEY, nev TEXT);\nCREATE TABLE konyv (id INTEGER PRIMARY KEY, cim TEXT, szerzo_id INTEGER);\nINSERT INTO szerzo VALUES\n(1, 'Varga'),\n(2, 'Kovacs');\nINSERT INTO konyv VALUES\n(1, 'Egyedul', 2);\n"
+    expected: "cim,nev\nEgyedul,Kovacs\n"
+    hidden: true

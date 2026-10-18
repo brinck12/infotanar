@@ -1,0 +1,223 @@
+slug: programozas-7-egyideju-utak
+title: Programozás 7 - Egyidejű utak
+position: 14
+kind: code
+level: emelt
+difficulty: 5
+published: false
+allowed_languages:
+- python
+- csharp
+description: |-
+  Az `utak.txt` a kerékpárkölcsönző egy havi (30 napos) forgalmát tartalmazza, soronként egy úttal, pontosvesszővel elválasztva: `bicikli;nap;indulás;érkezés;távolság`. A bicikli azonosítója `B-01` alakú, a nap a hónap napja (1–30), az indulás és az érkezés `ÓÓ:PP` alakú időpont (ugyanazon a napon belül, az érkezés mindig az indulás után van), a távolság méterben egész szám. A sorok nem rendezettek. Az adatokban nincs ékezet, a fájl legalább egy sort tartalmaz.
+
+  **7. feladat.** Egy bicikli az indulás percétől az érkezés **előtti** percig számít úton lévőnek (az érkezés percében már nem). Határozza meg, **legfeljebb hány bicikli volt egyszerre úton**, és mikor történt ez **először**! Elég az utak indulási időpontjait vizsgálni, mert a darabszám csak új indulásnál nőhet. Írja ki a maximumot, a napot és az időpontot a minta szerint.
+
+  A mintafájlra a kimenet:
+
+  ```text
+  7. feladat: Egyszerre legfeljebb 3 bicikli volt uton, eloszor a(z) 26. napon 07:07-kor.
+  ```
+
+  Tipp: rendezd az utakat nap, majd indulási idő szerint (az `ÓÓ:PP` szöveg ábécérendje megegyezik az időrenddel). Minden indulásnál számold meg, hány azonos napi út van úton: `indulas <= t < erkezes`. Csak szigorúan nagyobb darabszámnál frissítsd a legjobbat, így az első előfordulás marad meg.
+starter_code:
+  python: |
+    class Ut:
+        def __init__(self, sor):
+            r = sor.split(";")
+            self.bicikli = r[0]
+            self.nap = int(r[1])
+            self.indulas = r[2]
+            self.erkezes = r[3]
+            self.tav = int(r[4])
+
+        def perc(self):
+            i = self.indulas.split(":")
+            e = self.erkezes.split(":")
+            return (int(e[0]) * 60 + int(e[1])) - (int(i[0]) * 60 + int(i[1]))
+
+
+    with open("utak.txt", encoding="utf-8") as f:
+        utak = [Ut(sor) for sor in f.read().splitlines()]
+    # ide írd a megoldást
+  csharp: |
+    using System;
+    using System.Collections.Generic;
+    using System.IO;
+
+    class Ut
+    {
+        public string Bicikli;
+        public int Nap;
+        public string Indulas;
+        public string Erkezes;
+        public int Tav;
+
+        public Ut(string sor)
+        {
+            string[] r = sor.Split(';');
+            Bicikli = r[0];
+            Nap = int.Parse(r[1]);
+            Indulas = r[2];
+            Erkezes = r[3];
+            Tav = int.Parse(r[4]);
+        }
+
+        public static int Percben(string ido)
+        {
+            string[] r = ido.Split(':');
+            return int.Parse(r[0]) * 60 + int.Parse(r[1]);
+        }
+
+        public int Perc()
+        {
+            return Percben(Erkezes) - Percben(Indulas);
+        }
+    }
+
+    class Program
+    {
+        static void Main()
+        {
+            List<Ut> utak = new List<Ut>();
+            foreach (string sor in File.ReadAllLines("utak.txt"))
+            {
+                utak.Add(new Ut(sor));
+            }
+            // ide írd a megoldást
+        }
+    }
+sample_solutions:
+  python: |
+    class Ut:
+        def __init__(self, sor):
+            r = sor.split(";")
+            self.bicikli = r[0]
+            self.nap = int(r[1])
+            self.indulas = r[2]
+            self.erkezes = r[3]
+            self.tav = int(r[4])
+
+        def perc(self):
+            i = self.indulas.split(":")
+            e = self.erkezes.split(":")
+            return (int(e[0]) * 60 + int(e[1])) - (int(i[0]) * 60 + int(i[1]))
+
+
+    with open("utak.txt", encoding="utf-8") as f:
+        utak = [Ut(sor) for sor in f.read().splitlines()]
+    rendezett = sorted(utak, key=lambda u: (u.nap, u.indulas))
+    legjobb = 0
+    legjobb_nap = 0
+    legjobb_ido = ""
+    for u in rendezett:
+        db = 0
+        for v in utak:
+            if v.nap == u.nap and v.indulas <= u.indulas < v.erkezes:
+                db += 1
+        if db > legjobb:
+            legjobb = db
+            legjobb_nap = u.nap
+            legjobb_ido = u.indulas
+    print("7. feladat: Egyszerre legfeljebb " + str(legjobb) + " bicikli volt uton, eloszor a(z) " + str(legjobb_nap) + ". napon " + legjobb_ido + "-kor.")
+  csharp: |
+    using System;
+    using System.Collections.Generic;
+    using System.IO;
+
+    class Ut
+    {
+        public string Bicikli;
+        public int Nap;
+        public string Indulas;
+        public string Erkezes;
+        public int Tav;
+
+        public Ut(string sor)
+        {
+            string[] r = sor.Split(';');
+            Bicikli = r[0];
+            Nap = int.Parse(r[1]);
+            Indulas = r[2];
+            Erkezes = r[3];
+            Tav = int.Parse(r[4]);
+        }
+
+        public static int Percben(string ido)
+        {
+            string[] r = ido.Split(':');
+            return int.Parse(r[0]) * 60 + int.Parse(r[1]);
+        }
+
+        public int Perc()
+        {
+            return Percben(Erkezes) - Percben(Indulas);
+        }
+    }
+
+    class Program
+    {
+        static void Main()
+        {
+            List<Ut> utak = new List<Ut>();
+            foreach (string sor in File.ReadAllLines("utak.txt"))
+            {
+                utak.Add(new Ut(sor));
+            }
+            List<Ut> rendezett = new List<Ut>(utak);
+            rendezett.Sort((a, b) =>
+            {
+                if (a.Nap != b.Nap)
+                {
+                    return a.Nap.CompareTo(b.Nap);
+                }
+                return string.CompareOrdinal(a.Indulas, b.Indulas);
+            });
+            int legjobb = 0;
+            int legjobbNap = 0;
+            string legjobbIdo = "";
+            foreach (Ut u in rendezett)
+            {
+                int db = 0;
+                foreach (Ut v in utak)
+                {
+                    if (v.Nap == u.Nap && string.CompareOrdinal(v.Indulas, u.Indulas) <= 0 && string.CompareOrdinal(u.Indulas, v.Erkezes) < 0)
+                    {
+                        db++;
+                    }
+                }
+                if (db > legjobb)
+                {
+                    legjobb = db;
+                    legjobbNap = u.Nap;
+                    legjobbIdo = u.Indulas;
+                }
+            }
+            Console.WriteLine("7. feladat: Egyszerre legfeljebb " + legjobb + " bicikli volt uton, eloszor a(z) " + legjobbNap + ". napon " + legjobbIdo + "-kor.");
+        }
+    }
+files:
+  utak.txt: utak.txt
+tests:
+- stdin: ''
+  expected: |
+    7. feladat: Egyszerre legfeljebb 3 bicikli volt uton, eloszor a(z) 26. napon 07:07-kor.
+  hidden: false
+- stdin: ''
+  expected: |
+    7. feladat: Egyszerre legfeljebb 2 bicikli volt uton, eloszor a(z) 1. napon 10:24-kor.
+  hidden: true
+  files:
+    utak.txt: teszt-2/utak.txt
+- stdin: ''
+  expected: |
+    7. feladat: Egyszerre legfeljebb 1 bicikli volt uton, eloszor a(z) 9. napon 08:05-kor.
+  hidden: true
+  files:
+    utak.txt: teszt-3/utak.txt
+- stdin: ''
+  expected: |
+    7. feladat: Egyszerre legfeljebb 3 bicikli volt uton, eloszor a(z) 23. napon 08:38-kor.
+  hidden: true
+  files:
+    utak.txt: teszt-4/utak.txt

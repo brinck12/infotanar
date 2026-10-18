@@ -1,0 +1,5 @@
+nev	jegy
+Geza	4
+Hajni	3
+Imre	5
+Jolan	4

@@ -1,0 +1,106 @@
+slug: szamjegyek-osszege
+title: Számjegyek összege
+position: 3
+kind: code
+level: kozep
+difficulty: 3
+published: false
+allowed_languages:
+- python
+- csharp
+description: |
+  ## Feladat
+
+  Olvass be egyetlen nemnegatív egész számot, és írd ki a **számjegyeinek összegét**!
+
+  ### Bemenet
+
+  Egyetlen sorban egy nemnegatív egész szám (legfeljebb 18 jegyű).
+
+  ### Kimenet
+
+  Egyetlen sorban a számjegyek összege.
+
+  ### Példa
+
+  Bemenet: `2024`. Kimenet: `8`
+
+  Tipp: olvasd be a számot szövegként, és menj végig a karakterein; minden karaktert alakíts számjeggyé, mielőtt összeadod.
+starter_code:
+  python: |
+    szoveg = input()
+    osszeg = 0
+    for jegy in szoveg:
+        # TODO: alakítsd számmá a karaktert és add az összeghez
+        pass
+    print(osszeg)
+  csharp: |
+    using System;
+
+    class Program
+    {
+        static void Main()
+        {
+            string szoveg = Console.ReadLine();
+            int osszeg = 0;
+            foreach (char jegy in szoveg)
+            {
+                // TODO: alakítsd számmá a karaktert (jegy - '0') és add az összeghez
+            }
+            Console.WriteLine(osszeg);
+        }
+    }
+sample_solutions:
+  python: |
+    szoveg = input()
+    osszeg = 0
+    for jegy in szoveg:
+        osszeg += int(jegy)
+    print(osszeg)
+  csharp: |
+    using System;
+
+    class Program
+    {
+        static void Main()
+        {
+            string szoveg = Console.ReadLine();
+            int osszeg = 0;
+            foreach (char jegy in szoveg)
+            {
+                osszeg += jegy - '0';
+            }
+            Console.WriteLine(osszeg);
+        }
+    }
+tests:
+- stdin: |
+    2024
+  expected: |
+    8
+  hidden: false
+- stdin: |
+    7
+  expected: |
+    7
+  hidden: true
+- stdin: |
+    0
+  expected: |
+    0
+  hidden: true
+- stdin: |
+    99999
+  expected: |
+    45
+  hidden: true
+- stdin: |
+    1000000
+  expected: |
+    1
+  hidden: true
+- stdin: |
+    123456789012345678
+  expected: |
+    81
+  hidden: true

@@ -1,0 +1,71 @@
+slug: fibonacci-szam
+title: "Fibonacci-szám"
+position: 1
+kind: code
+level: emelt
+difficulty: 2
+published: false
+allowed_languages: [python, csharp]
+description: |
+  Olvass be egy `N` egész számot (`0 ≤ N ≤ 25`), és írd ki a Fibonacci-sorozat `N`-edik elemét (0-tól indexelve: `0, 1, 1, 2, 3, 5, ...`). Használj rekurzív függvényt.
+
+  Példa: `N = 6` esetén a kimenet `8`; `N = 0` esetén `0`.
+
+  Tipp: két alapeset van: `fib(0) = 0` és `fib(1) = 1`.
+starter_code:
+  python: |
+    def fib(n):
+        # TODO
+        pass
+
+    print(fib(int(input())))
+  csharp: |
+    using System;
+
+    class Program
+    {
+        static int Fib(int n)
+        {
+            // TODO
+            return 0;
+        }
+
+        static void Main()
+        {
+            Console.WriteLine(Fib(int.Parse(Console.ReadLine())));
+        }
+    }
+sample_solutions:
+  python: |
+    def fib(n):
+        if n < 2:
+            return n
+        return fib(n - 1) + fib(n - 2)
+
+    print(fib(int(input())))
+  csharp: |
+    using System;
+
+    class Program
+    {
+        static int Fib(int n)
+        {
+            if (n < 2)
+            {
+                return n;
+            }
+            return Fib(n - 1) + Fib(n - 2);
+        }
+
+        static void Main()
+        {
+            Console.WriteLine(Fib(int.Parse(Console.ReadLine())));
+        }
+    }
+tests:
+  - { stdin: "6\n", expected: "8\n", hidden: false }
+  - { stdin: "0\n", expected: "0\n", hidden: true }
+  - { stdin: "1\n", expected: "1\n", hidden: true }
+  - { stdin: "2\n", expected: "1\n", hidden: true }
+  - { stdin: "20\n", expected: "6765\n", hidden: true }
+  - { stdin: "25\n", expected: "75025\n", hidden: true }

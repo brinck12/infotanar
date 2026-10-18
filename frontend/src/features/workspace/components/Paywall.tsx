@@ -28,7 +28,7 @@ const COPY: Readonly<Record<LockReason, { icon: IconName; title: string; body: s
   subscription_required: {
     icon: 'lock',
     title: 'Ehhez Prémium előfizetés kell',
-    body: 'Az első két lecke minden sávban ingyenes, a többi a Prémium előfizetőknek érhető el.',
+    body: 'Az első két lecke minden tanulási úton ingyenes, a többi a Prémium előfizetőknek érhető el.',
   },
 }
 

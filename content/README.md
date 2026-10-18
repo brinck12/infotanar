@@ -34,6 +34,31 @@ Egy lista, elemei: `{ stdin: "...", expected: "...", hidden: true|false }`. A `h
 
 A feladat leírásába a segítséget záró `Tipp:` bekezdésként írd.
 
+## Adatfájlok a feladatban
+
+Ha a diák programja fájlból olvas (pl. `open("adatok.txt")`, vagy a felhasználó által megadott nevű fájlból), a fájlt a feladat mellé kell tenni. A feladatfájl (`05-fajl-feladat.yml`) mellett egy `<fájlnév-törzs>.files/` mappa van (`05-fajl-feladat.files/`), a YAML pedig névvel hivatkozik rá:
+
+```yaml
+files:                       # közös fájlok: minden teszteset megkapja
+  adatok.txt: adatok.txt     # <programban látott név>: <útvonal a .files mappán belül>
+tests:
+  - stdin: ""
+    expected: "alma\n"
+    hidden: false
+  - stdin: ""
+    expected: "körte\n"
+    hidden: true
+    files:                   # csak ehhez a teszthez; azonos névnél a közöset felülírja
+      adatok.txt: teszt-2/adatok.txt
+```
+
+- A program a fájlt a futtatási könyvtárban, a megadott néven látja. Az `open("adatok.txt")` működik; a futás közben létrehozott fájl nem számít a pontozásba (csak a standard kimenet), és a futás végén eltűnik.
+- Név: legfeljebb 64 karakter, csak `A-Za-z0-9._-`, ismert szöveges kiterjesztéssel (`.txt`, `.csv`, ...), nem lehet `script.py`, `script.sql`, `main.cs`, `compile`, `run`. A tartalom UTF-8 szöveg, nem üres.
+- Korlát (`config/filetasks.php`, `attachments`): közös fájlból legfeljebb 5, tesztenként legfeljebb 5, fájlonként legfeljebb 256 KiB.
+- Az útvonal a `.files` mappán belüli, relatív útvonal (`..`, abszolút útvonal nem megengedett); a fájlnak léteznie kell.
+- A közös fájl (`files:` a feladat szintjén) a diáknak letölthető forrásfájlként is megjelenhet; ami rejtett kell maradjon (pl. a rejtett teszt adata), az a teszt saját `files:` kulcsába kerüljön.
+- SQL feladathoz nem adható adatfájl. Az import a fájlokat tartalom (sha256) alapján egyezteti: ami nem változott, azt nem tölti fel újra, a fájlokból eltűnteket törli. A `catalog:export` visszaírja őket (közös: `adatok.txt`, teszt: `teszt-N/adatok.txt`). A `catalog:verify` ugyanúgy adja át a fájlokat a Judge0-nak, mint a beküldés.
+
 ## Kódblokkok és nyelvi fülek
 
 A leckeszövegben a Python és C# példát **közvetlenül egymás után** álló kódblokkokként írd, a nyelvjelölő pontosan kisbetűs `python` és `csharp`. A leckeoldal ezeket egy lapfüles blokkba vonja össze, a diák a választott nyelvét látja. C# feladatban a kód **teljes program** legyen (`using System;`, `class Program`, `static void Main()`), mert a Judge0 Mono fordítóval fordít: nincs top-level utasítás és nincs `!` (null-forgiving), C# 7 szintaxist használj.

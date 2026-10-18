@@ -1,0 +1,109 @@
+slug: nevsor-kiirasa
+title: Névsor kiírása
+position: 0
+kind: code
+level: kozep
+difficulty: 1
+published: false
+allowed_languages:
+- python
+- csharp
+description: |
+  A `nevek.txt` fájl soronként egy nevet tartalmaz. Olvasd be a fájlt, és írd ki minden nevet a saját sorába, a név elé `- ` (kötőjel és szóköz) téve.
+
+  Példa: ha a fájl sorai `Anna`, `Bela`, `Csilla`, a kimenet:
+
+  ```
+  - Anna
+  - Bela
+  - Csilla
+  ```
+
+  Tipp: a sorokat ciklussal járd végig; a fájl sorainak végén lévő sortörést Pythonban a `rstrip("\n")` vagy a `strip()` levágja.
+starter_code:
+  python: |
+    # a fájl neve: nevek.txt
+    with open("nevek.txt", encoding="utf-8") as f:
+        for sor in f:
+            # ide írd a megoldást
+            pass
+  csharp: |
+    using System;
+    using System.IO;
+
+    class Program
+    {
+        static void Main()
+        {
+            foreach (string sor in File.ReadAllLines("nevek.txt"))
+            {
+                // ide írd a megoldást
+            }
+        }
+    }
+sample_solutions:
+  python: |
+    with open("nevek.txt", encoding="utf-8") as f:
+        for sor in f:
+            print("- " + sor.strip())
+  csharp: |
+    using System;
+    using System.IO;
+
+    class Program
+    {
+        static void Main()
+        {
+            foreach (string sor in File.ReadAllLines("nevek.txt"))
+            {
+                Console.WriteLine("- " + sor);
+            }
+        }
+    }
+files:
+  nevek.txt: nevek.txt
+tests:
+- stdin: ''
+  expected: '- Anna
+
+    - Bela
+
+    - Csilla
+
+    '
+  hidden: false
+- stdin: ''
+  expected: '- Zoltan
+
+    '
+  hidden: true
+  files:
+    nevek.txt: teszt-2/nevek.txt
+- stdin: ''
+  expected: '- Eszter
+
+    - Feri
+
+    - Gabor
+
+    - Hanna
+
+    - Istvan
+
+    - Judit
+
+    '
+  hidden: true
+  files:
+    nevek.txt: teszt-3/nevek.txt
+- stdin: ''
+  expected: '- Kiss Peter
+
+    - Nagy Anna
+
+    - Toth Bela Janos
+
+    '
+  hidden: true
+  files:
+    nevek.txt: teszt-4/nevek.txt

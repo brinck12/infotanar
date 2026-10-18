@@ -1,0 +1,2 @@
+nev	osztaly	pont
+Zita	9c	100

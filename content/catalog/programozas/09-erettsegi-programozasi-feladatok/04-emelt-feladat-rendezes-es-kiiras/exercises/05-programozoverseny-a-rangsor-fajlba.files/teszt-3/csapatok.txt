@@ -1,0 +1,5 @@
+csapat	varos	megoldott	buntetes
+A	Eger	3	30
+B	Pecs	3	30
+C	Gyor	3	30
+D	Gyor	3	30

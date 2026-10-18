@@ -1,0 +1,84 @@
+slug: programozas-3-uj-kiadasu-konyvek
+title: Programozás 3 - Új kiadású könyvek
+position: 6
+kind: code
+level: kozep
+difficulty: 2
+published: false
+allowed_languages:
+- python
+- csharp
+description: "A `konyvek.txt` a könyvtár állományát tartalmazza, soronként egy könyvvel, pontosvesszővel elválasztva: `szerző;cím;kiadás éve;oldalszám`. Az adatokban nincs ékezet, a fájl legalább egy sort tartalmaz.\n\n**3. feladat.** Kérjen be egy évszámot, és írja ki, hány könyvet adtak ki ebben az évben vagy később, a minta szerint.\n\nMinta (a billentyűzetről beolvasott sor):\n\n```text\n2010\n```\n\nA mintafájlra a kimenet:\n\n```text\n3. feladat: Darab: 4\r\n```\n\nTipp: olvasd be az évszámot (`input()` / `Console.ReadLine()`), és számold meg a nála nem régebbi könyveket."
+starter_code:
+  python: |
+    with open("konyvek.txt", encoding="utf-8") as f:
+        konyvek = [sor.split(";") for sor in f.read().splitlines()]
+    ev = int(input())
+    # ide írd a megoldást
+  csharp: |
+    using System;
+    using System.Collections.Generic;
+    using System.IO;
+
+    class Program
+    {
+        static void Main()
+        {
+            string[] sorok = File.ReadAllLines("konyvek.txt");
+            int ev = int.Parse(Console.ReadLine());
+            // ide írd a megoldást
+        }
+    }
+sample_solutions:
+  python: |
+    with open("konyvek.txt", encoding="utf-8") as f:
+        konyvek = [sor.split(";") for sor in f.read().splitlines()]
+    ev = int(input())
+    print("3. feladat: Darab:", sum(1 for k in konyvek if int(k[2]) >= ev))
+  csharp: |
+    using System;
+    using System.Collections.Generic;
+    using System.IO;
+
+    class Program
+    {
+        static void Main()
+        {
+            string[] sorok = File.ReadAllLines("konyvek.txt");
+            int ev = int.Parse(Console.ReadLine());
+            int db = 0;
+            foreach (string sor in sorok)
+            {
+                if (int.Parse(sor.Split(';')[2]) >= ev)
+                {
+                    db++;
+                }
+            }
+            Console.WriteLine("3. feladat: Darab: " + db);
+        }
+    }
+files:
+  konyvek.txt: konyvek.txt
+tests:
+- stdin: |
+    2010
+  expected: "3. feladat: Darab: 4\r\n"
+  hidden: false
+- stdin: |
+    2030
+  expected: "3. feladat: Darab: 0\r\n"
+  hidden: true
+  files:
+    konyvek.txt: teszt-2/konyvek.txt
+- stdin: |
+    2000
+  expected: "3. feladat: Darab: 14\r\n"
+  hidden: true
+  files:
+    konyvek.txt: teszt-3/konyvek.txt
+- stdin: |
+    2013
+  expected: "3. feladat: Darab: 5\r\n"
+  hidden: true
+  files:
+    konyvek.txt: teszt-4/konyvek.txt

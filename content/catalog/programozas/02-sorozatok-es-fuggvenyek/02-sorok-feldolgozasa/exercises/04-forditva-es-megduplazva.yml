@@ -1,0 +1,77 @@
+slug: forditva-es-megduplazva
+title: Fordítva és megduplázva
+position: 3
+kind: code
+level: kozep
+difficulty: 3
+published: false
+allowed_languages: [python, csharp]
+description: |
+  A bemenet egyetlen sor, amelyben szóközzel elválasztva egész számok állnak (legalább egy). Írd ki egyetlen sorban, szóközzel elválasztva a számok **kétszeresét fordított sorrendben**.
+
+  Példa: az `1 2 3` bemenetre a kimenet `6 4 2`.
+
+  Tipp: alakítsd a darabokat számmá, szorozd meg kettővel és tedd új listába, majd fordított sorrendben fűzd össze az elemeket (`join` / `string.Join`). A végén ne maradjon felesleges szóköz.
+starter_code:
+  python: |
+    sor = input()
+    szamok = []
+    for resz in sor.split():
+        szamok.append(int(resz))
+    # innen folytasd
+  csharp: |
+    using System;
+    using System.Collections.Generic;
+
+    class Program
+    {
+        static void Main()
+        {
+            string sor = Console.ReadLine();
+            string[] reszek = sor.Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+            List<int> szamok = new List<int>();
+            foreach (string resz in reszek)
+            {
+                szamok.Add(int.Parse(resz));
+            }
+            // innen folytasd
+        }
+    }
+sample_solutions:
+  python: |
+    sor = input()
+    szamok = []
+    for resz in sor.split():
+        szamok.append(int(resz))
+    eredmeny = []
+    for i in range(len(szamok) - 1, -1, -1):
+        eredmeny.append(szamok[i] * 2)
+    print(" ".join(map(str, eredmeny)))
+  csharp: |
+    using System;
+    using System.Collections.Generic;
+
+    class Program
+    {
+        static void Main()
+        {
+            string sor = Console.ReadLine();
+            string[] reszek = sor.Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+            List<int> szamok = new List<int>();
+            foreach (string resz in reszek)
+            {
+                szamok.Add(int.Parse(resz));
+            }
+            List<int> eredmeny = new List<int>();
+            for (int i = szamok.Count - 1; i >= 0; i--)
+            {
+                eredmeny.Add(szamok[i] * 2);
+            }
+            Console.WriteLine(string.Join(" ", eredmeny));
+        }
+    }
+tests:
+  - { stdin: "1 2 3\n", expected: "6 4 2\n", hidden: false }
+  - { stdin: "5\n", expected: "10\n", hidden: true }
+  - { stdin: "-5 0\n", expected: "0 -10\n", hidden: true }
+  - { stdin: "10 -2 7 0 3\n", expected: "6 0 14 -4 20\n", hidden: true }

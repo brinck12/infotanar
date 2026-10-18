@@ -1,0 +1,15 @@
+olvaso	kod	ki	be
+Kiss Anna	K101	5	12
+Nagy Peter	K205	8	30
+Kiss Anna	K205	33	40
+Toth Bela	K101	20	41
+Szabo Eva	K310	40	52
+Nagy Peter	K101	45	60
+Kiss Anna	K310	58	59
+Varga Zita	K205	62	90
+Toth Bela	K310	70	80
+Szabo Eva	K101	75	88
+Nagy Peter	K310	100	130
+Kiss Anna	K101	120	125
+Varga Zita	K205	200	214
+Toth Bela	K205	210	225

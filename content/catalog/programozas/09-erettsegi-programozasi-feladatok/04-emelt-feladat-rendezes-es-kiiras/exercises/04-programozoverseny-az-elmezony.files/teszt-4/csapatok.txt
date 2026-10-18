@@ -1,0 +1,6 @@
+csapat	varos	megoldott	buntetes
+A	Eger	4	50
+B	Pecs	4	50
+C	Gyor	4	50
+D	Gyor	4	50
+E	Gyor	6	400
