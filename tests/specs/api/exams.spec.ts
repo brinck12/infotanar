@@ -653,7 +653,11 @@ test.describe('Vizsgaszerkesztő: vizsga és részek', () => {
     const badKey = await addAdminExamPart(admin, exam.id, { key: 'nincs', name: 'x', exercise_id: null, points: 1, minutes: 1 })
     expect(badKey.status).toBe(422)
     expect(badKey.errorBody.errors).toHaveProperty('key')
-    const badKind = await addAdminExamPart(admin, exam.id, { key: 'szoveg', name: 'x', exercise_id: WEB.id, points: 1, minutes: 1 })
+    // Egy területhez egy rész tartozik: a már szereplő kulcs újra nem adható hozzá.
+    const taken = await addAdminExamPart(admin, exam.id, { key: 'szoveg', name: 'x', exercise_id: null, points: 1, minutes: 1 })
+    expect(taken.status).toBe(422)
+    expect(taken.errorBody.errors).toHaveProperty('key')
+    const badKind = await addAdminExamPart(admin, exam.id, { key: 'adatbazis', name: 'x', exercise_id: WEB.id, points: 1, minutes: 1 })
     expect(badKind.status).toBe(422)
     expect(badKind.errorBody.errors).toHaveProperty('exercise_id')
     expect((await addAdminExamPart(admin, exam.id, { key: 'szoveg', name: 'x', exercise_id: 999999, points: 1, minutes: 1 })).status).toBe(422)
