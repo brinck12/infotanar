@@ -1,10 +1,11 @@
 import { useMutation } from '@tanstack/react-query'
 import { useState, type FormEvent } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 import { hibaUzenet, mezoHibak } from '../../../shared/api/errors'
 import { Banner } from '../../../shared/ui/Banner'
 import { Field, SubmitButton } from '../../../shared/ui/Form'
 import { AuthCard } from '../components/AuthCard'
+import { SocialLogin } from '../components/GoogleButton'
 import { useAuth } from '../context'
 import { useRegistrationMode } from '../useRegistrationMode'
 
@@ -12,6 +13,7 @@ import { useRegistrationMode } from '../useRegistrationMode'
 export function Login() {
   const { login, sessionExpired } = useAuth()
   const { mode } = useRegistrationMode()
+  const from = (useLocation().state as { from?: string } | null)?.from
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
 
@@ -68,6 +70,7 @@ export function Login() {
           Belépés
         </SubmitButton>
       </form>
+      <SocialLogin returnTo={from} />
     </AuthCard>
   )
 }

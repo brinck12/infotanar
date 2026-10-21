@@ -33,11 +33,14 @@ export function AccountProfile() {
           {user.email_verified_at ? <Badge kind="ok">Megerősítve</Badge> : <Badge kind="draft">Nincs megerősítve</Badge>}
         </p>
         {!user.email_verified_at && <ResendVerification />}
-        <ChangeEmail pendingEmail={user.pending_email} />
+        {user.linked_providers.includes('google') && (
+          <p className="text-16 leading-relaxed text-ink-soft">A fiókod össze van kötve a Google-fiókoddal, azzal is beléphetsz.</p>
+        )}
+        {user.has_password ? <ChangeEmail pendingEmail={user.pending_email} /> : <PasswordFirst what="az e-mail-cím cseréjéhez" />}
       </Section>
 
       <Section id="jelszo" title="Jelszó">
-        <ChangePassword />
+        {user.has_password ? <ChangePassword /> : <SetPassword email={user.email} />}
       </Section>
 
       <Section id="adataim" title="Az adataim">
@@ -45,7 +48,7 @@ export function AccountProfile() {
       </Section>
 
       <Section id="torles" title="Fiók törlése" danger>
-        <DeleteAccount />
+        {user.has_password ? <DeleteAccount /> : <PasswordFirst what="a fiók törléséhez" />}
       </Section>
     </div>
   )
@@ -180,6 +183,40 @@ function ChangeEmail({ pendingEmail }: { pendingEmail: string | null }) {
         </SubmitButton>
       </div>
     </form>
+  )
+}
+
+/** Jelszót kérő művelet jelszó nélküli (Google-lel nyitott) fióknál: előbb a Jelszó résznél kell egyet beállítani. */
+function PasswordFirst({ what }: { what: string }) {
+  return (
+    <p className="text-16 leading-relaxed text-ink-soft">
+      {what[0]?.toUpperCase()}
+      {what.slice(1)} jelszó kell, de a fiókod Google-lel nyílt, ezért még nincs. Állíts be egyet <a href="#jelszo">a Jelszó résznél</a>.
+    </p>
+  )
+}
+
+/**
+ * Google-lel nyitott fiók jelszava. A beállítás az „elfelejtett jelszó” levélen át megy: a
+ * levél az e-mail-cím birtoklását igazolja, ezért ellopott token nem tudja átvenni a fiókot.
+ */
+function SetPassword({ email }: { email: string }) {
+  const send = useMutation({ mutationFn: () => authApi.forgotPassword(email) })
+
+  return (
+    <div className="flex flex-col gap-4">
+      <p className="text-16 leading-relaxed text-ink-soft">
+        A fiókod Google-lel nyílt, ezért még nincs jelszavad. Ha e-mail-címmel és jelszóval is be szeretnél tudni lépni, küldünk egy
+        linket a címedre, ahol beállíthatod.
+      </p>
+      {send.isError && <Banner kind="error">{hibaUzenet(send.error)}</Banner>}
+      {send.isSuccess && <Banner kind="success">{send.data}</Banner>}
+      <div>
+        <Button variant="secondary" busy={send.isPending} busyLabel="Küldés…" onClick={() => send.mutate()}>
+          Jelszó beállítása e-mailben
+        </Button>
+      </div>
+    </div>
   )
 }
 

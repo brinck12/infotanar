@@ -317,6 +317,10 @@ export interface AuthUser {
   pending_email: string | null
   role: Role
   email_verified_at: string | null
+  /** Hamis, ha a fiókot közösségi (Google) belépéssel nyitották, és még nem állítottak be jelszót. */
+  has_password: boolean
+  /** Az összekötött közösségi belépések (pl. `google`). */
+  linked_providers: string[]
 }
 
 export interface LoginResponse {
