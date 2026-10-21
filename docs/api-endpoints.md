@@ -112,9 +112,14 @@ Minden végpont a `/api/v1` előtag alatt érhető el. A hozzáférés oszlop je
 |---|---|---|---|
 | `POST` | `/auth/email/verification-notification` | bejelentkezve | `verification-resend` |
 | `POST` | `/auth/forgot-password` | nyilvános | `password-reset` |
+| `GET` | `/auth/google/callback` | nyilvános | `oauth` |
+| `POST` | `/auth/google/complete` | nyilvános | `oauth` |
+| `POST` | `/auth/google/exchange` | nyilvános | `oauth` |
+| `POST` | `/auth/google/redirect` | nyilvános | `oauth` |
 | `POST` | `/auth/login` | nyilvános | `login` |
 | `POST` | `/auth/logout` | bejelentkezve | – |
 | `GET` | `/auth/me` | bejelentkezve | – |
+| `GET` | `/auth/providers` | nyilvános | `60,1` |
 | `POST` | `/auth/register` | nyilvános | `register` |
 | `POST` | `/auth/reset-password` | nyilvános | `password-reset` |
 | `GET` | `/auth/verify-email/{id}/{hash}` | aláírt link | – |

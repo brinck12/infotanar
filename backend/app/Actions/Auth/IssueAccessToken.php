@@ -20,7 +20,8 @@ final readonly class IssueAccessToken
     {
         $user = User::query()->where('email', $email)->first();
 
-        if ($user === null || ! Hash::check($password, $user->password)) {
+        // Jelszo nelkuli (kozossegi belepessel nyitott) fiokkal jelszavas belepes nem lehetseges.
+        if ($user === null || ! $user->hasPassword() || ! Hash::check($password, (string) $user->password)) {
             // A naplora nem kerul e-mail-cim: csak az, hogy letezo fiok ellen tortent-e a proba.
             $this->audit->handle(AuditAction::AuthLoginFailed, null, $user);
 

@@ -25,6 +25,18 @@ return [
         'waitlist_joined' => 'Feliratkoztál a várólistára. Ha felvesszük a bétába, a megadott címen értesítünk.',
     ],
 
+    'social' => [
+        'failed' => 'A Google-belépés nem sikerült. Próbáld újra, vagy lépj be e-mail-címmel.',
+        'email_not_verified' => 'A Google-fiókod e-mail-címe nincs megerősítve, ezért nem tudunk vele belépni.',
+        'password_required' => 'Ehhez a művelethez jelszó kell, de a fiókodhoz még nincs. Állíts be egyet az „Elfelejtett jelszó” oldalon.',
+        'linked_mail' => [
+            'subject' => 'Összekötöttük a Google-fiókodat',
+            'greeting' => 'Szia :name!',
+            'intro' => 'Az InfoTanár-fiókodba éppen most léptél be először Google-lel, és összekötöttük a kettőt.',
+            'outro' => 'Ha nem te voltál, azonnal kérj új jelszót a „Elfelejtett jelszó” oldalon, és írj nekünk.',
+        ],
+    ],
+
     'verification' => [
         'verified' => 'Az e-mail-címed megerősítve.',
         'already_verified' => 'Az e-mail-címed már meg van erősítve.',
