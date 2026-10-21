@@ -21,6 +21,10 @@ export function AccountProfile() {
   const { user } = useAuth()
   if (!user) return null
 
+  // Csak a kifejezett `false` jelent jelszó nélküli fiókot: a mező hiánya (régebbi válasz) a megszokott, jelszavas működést adja.
+  const hasPassword = user.has_password !== false
+  const googleLinked = user.linked_providers?.includes('google') === true
+
   return (
     <div className="flex max-w-form flex-col gap-6">
       <Section id="profil" title="Profil">
@@ -33,14 +37,14 @@ export function AccountProfile() {
           {user.email_verified_at ? <Badge kind="ok">Megerősítve</Badge> : <Badge kind="draft">Nincs megerősítve</Badge>}
         </p>
         {!user.email_verified_at && <ResendVerification />}
-        {user.linked_providers.includes('google') && (
-          <p className="text-16 leading-relaxed text-ink-soft">A fiókod össze van kötve a Google-fiókoddal, azzal is beléphetsz.</p>
+        {googleLinked && (
+          <p className="mb-3 text-16 leading-relaxed text-ink-soft">A fiókod össze van kötve a Google-fiókoddal, azzal is beléphetsz.</p>
         )}
-        {user.has_password ? <ChangeEmail pendingEmail={user.pending_email} /> : <PasswordFirst what="az e-mail-cím cseréjéhez" />}
+        {hasPassword ? <ChangeEmail pendingEmail={user.pending_email} /> : <PasswordFirst what="az e-mail-cím cseréjéhez" />}
       </Section>
 
       <Section id="jelszo" title="Jelszó">
-        {user.has_password ? <ChangePassword /> : <SetPassword email={user.email} />}
+        {hasPassword ? <ChangePassword /> : <SetPassword email={user.email} />}
       </Section>
 
       <Section id="adataim" title="Az adataim">
@@ -48,7 +52,7 @@ export function AccountProfile() {
       </Section>
 
       <Section id="torles" title="Fiók törlése" danger>
-        {user.has_password ? <DeleteAccount /> : <PasswordFirst what="a fiók törléséhez" />}
+        {hasPassword ? <DeleteAccount /> : <PasswordFirst what="a fiók törléséhez" />}
       </Section>
     </div>
   )

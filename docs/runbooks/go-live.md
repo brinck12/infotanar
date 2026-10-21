@@ -29,6 +29,12 @@ nincs kipipálva, az élesben el fog törni vagy észrevétlen marad.
       Ellenőrzés: regisztráció egy külső címmel; a megerősítő levél megérkezik, és nem a spamben köt ki.
 - [ ] A fájlfeladatok két privát tárolója írható a PHP-FPM felhasználójának (`storage/app/private/exercise-files`, `…/submission-files`; az első írásnál jönnek létre).
       Ellenőrzés: az `app:check-config` nem jelez `EXERCISE_FILES_DISK`, `SUBMISSION_FILES_DISK` vagy `ext-zip` problémát.
+- [ ] **Google-belépés** (opcionális; nélküle a gomb nem jelenik meg, az e-mailes belépés teljes értékű). Előfeltétel: végleges domain.
+      Google Cloud Console: projekt → OAuth consent screen (External), állapot **In production** (Testing módban 100 felhasználó a plafon, és a hozzájárulás 7 naponta lejár), scope csak `openid email profile`, adatvédelmi URL: az `/adatkezeles` oldal.
+      Credentials → OAuth client ID (Web application), jogosult átirányítási URI: `https://<domain>/api/v1/auth/google/callback`.
+      A szerver `.env`-jébe: `GOOGLE_LOGIN_ENABLED=true`, `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `GOOGLE_REDIRECT_URI` (ugyanaz az URI). A `GOOGLE_AUTH_URL`, `GOOGLE_TOKEN_URL` és `GOOGLE_USERINFO_URL` élesben maradjon üresen.
+      Előtte az adatkezelési tájékoztató frissítése (a Google új adatfeldolgozó), lásd `docs/privacy/ropa.md`.
+      Ellenőrzés: az `app:check-config` nem jelez `GOOGLE_*` problémát; egy külső Google-fiókkal a belépés végigmegy, és a fiók megerősítettként jön létre.
 - [ ] `ALERT_EMAIL` beállítva (ide jönnek a riasztások), `HEALTH_TOKEN` generálva (`openssl rand -hex 32`).
 - [ ] GitHub: `DEPLOY_URL` és `HEALTH_TOKEN` secret, `DEPLOY_STRICT_CONFIG=true` változó.
 

@@ -60,6 +60,7 @@ final readonly class ResolveSocialLogin
     private function linkedUser(SocialProfile $profile): ?User
     {
         $account = SocialAccount::query()
+            ->with('user')
             ->where('provider', $profile->provider)
             ->where('provider_user_id', $profile->providerUserId)
             ->first();

@@ -28,6 +28,7 @@ final class ProductionConfigAudit
             ...$this->urls(),
             ...$this->mail(),
             ...$this->billing(),
+            ...$this->socialLogin(),
             ...$this->queue(),
             ...$this->redis(),
             ...$this->fileStorage(),
@@ -191,6 +192,32 @@ final class ProductionConfigAudit
                 ? new ConfigProblem('BARION_ENVIRONMENT', 'A Barion tesztkörnyezete van beállítva: valódi fizetés nem történik.')
                 : null,
             $this->required('billing.szamlazz.agent_key', 'SZAMLAZZ_AGENT_KEY', 'Nélküle a fizetésekről nem készül számla.'),
+        ];
+    }
+
+    /**
+     * Google-belepes: csak bekapcsolva ellenorzott. Az *_URL ertekek a teszt-stubhoz valok;
+     * eles uzemben mas hostra mutatva barki hamis azonossaggal beleptethetne magat, ezert blokkolo.
+     *
+     * @return list<ConfigProblem|null>
+     */
+    private function socialLogin(): array
+    {
+        if (! Config::boolean('services.google.enabled')) {
+            return [];
+        }
+
+        $endpoint = fn (string $key, string $variable, string $host): ?ConfigProblem => parse_url($this->text($key), PHP_URL_HOST) === $host && str_starts_with($this->text($key), 'https://')
+            ? null
+            : new ConfigProblem($variable, "Nem a Google ({$host}) HTTPS-címére mutat: a belépés hamisítható.", blocking: true);
+
+        return [
+            $this->required('services.google.client_id', 'GOOGLE_CLIENT_ID', 'Nélküle a Google-belépés ki van kapcsolva.'),
+            $this->required('services.google.client_secret', 'GOOGLE_CLIENT_SECRET', 'Nélküle a Google-belépés ki van kapcsolva.'),
+            $this->publicHttpsUrl('services.google.redirect', 'GOOGLE_REDIRECT_URI'),
+            $endpoint('services.google.auth_url', 'GOOGLE_AUTH_URL', 'accounts.google.com'),
+            $endpoint('services.google.token_url', 'GOOGLE_TOKEN_URL', 'www.googleapis.com'),
+            $endpoint('services.google.userinfo_url', 'GOOGLE_USERINFO_URL', 'www.googleapis.com'),
         ];
     }
 

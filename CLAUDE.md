@@ -100,6 +100,10 @@ The lesson texts and exercises live as Markdown/YAML under `content/catalog/` (f
 
 `Services/Access/ContentAccess` is the single rule for "may this user see this lesson": free lessons for everyone; otherwise login + verified email + premium (active subscription or an admin-issued `AccessGrant`), admins always. Lesson, video, run and submit endpoints all ask it; do not re-implement the check. Lesson videos are served from a private disk via short-lived signed URLs (`lessons.video.stream` / `.captions` are `signed:relative`).
 
+### Social login (Google)
+
+Optional "Folytatás Google-lel" login (Socialite), off unless `GOOGLE_LOGIN_ENABLED` and the keys are set (the endpoints 404 and the button hides). Decision and the account-linking rules: `docs/adr/0004-social-login.md`; read it before touching `Actions/Auth/Social`. The API has no sessions, so state lives in the cache (`OAuthHandshake`) and the code is bound to the browser by a PKCE-style `verifier`/`challenge`. `ResolveSocialLogin` is the security core: it links to an existing account only on a provider-verified email, and wipes the password and tokens of an unverified account before linking (pre-hijack). New accounts need the same consent and (closed beta) invite code as `RegisterUser`, via `CompleteSocialSignup`. Social accounts have `users.password = NULL` (`User::hasPassword()`); password-requiring requests use the `RequiresPassword` trait, and the account page sends such users through "forgot password". Locally, point `GOOGLE_AUTH_URL`/`GOOGLE_TOKEN_URL`/`GOOGLE_USERINFO_URL` at a stub; `app:check-config` blocks these in production.
+
 ### Billing
 
 Decisions are recorded in `docs/adr/` (0001 Barion, 0002 Számlázz.hu); read them before touching billing.

@@ -6,7 +6,15 @@
 
 **Branch:** `fullstack/<issue-szám>-google-login` (issue-t előbb fel kell venni). Merge commit `main`-re; a push élesít, ezért előtte a CI-kapuk helyben.
 
-**Státusz:** terv, még nincs kód. A kérdéseket a felhasználó kihagyta, a lenti döntések **az én döntéseim**, nem egyeztetettek (lásd „Döntések").
+**Státusz (2026-10-22):** megvalósítva a `fullstack/252-google-login` ágon (#252), éles bekapcsolás előtt még nyitott: domain, Google-kulcsok, a nyilvános adatkezelési tájékoztató szövege. A kérdéseket a felhasználó kihagyta, a lenti döntések **az én döntéseim**, nem egyeztetettek (lásd „Döntések"); a 9. döntést (gomb) jóváhagyta.
+
+## Eltérések a tervtől (megvalósításkor)
+
+- **Task 10 (Playwright-tesztek) nincs megírva.** A felhasználó állandó megállapodása szerint a teszteket ő írja (memória: „leave tests to the user"). Helyette eldobható szkriptekkel (Google-stub + valódi backend és böngésző) ellenőriztem a folyamatot; a lefedendő viselkedések listája a végső összefoglalóban van.
+- **Soft-deleted címes szabály kiesett:** a törölt fiók e-mailje anonimizálódik (`DeleteAccount`), ezért nem ütközik; az új fiók simán nyílik.
+- **Jelszó beállítása:** a fiók oldalon gomb (`Jelszó beállítása e-mailben`) hívja az „elfelejtett jelszó” végpontot, mert az `/elfelejtett-jelszo` oldal `GuestOnly`, bejelentkezve nem érhető el.
+- **`has_password`/`linked_providers`:** a fiók oldal csak a kifejezett `has_password === false`-t kezeli jelszó nélküliként, így a régebbi (mockolt) `/auth/me` válasz nem töri el.
+- **Plusz:** `GOOGLE_AUTH_URL`/`GOOGLE_TOKEN_URL`/`GOOGLE_USERINFO_URL` felülírhatók a stubhoz; az `app:check-config` élesben blokkolja, ha nem a Google hostjaira mutatnak. Az ADR neve `0004-social-login.md`.
 
 ## Előfeltételek (nem kódolhatók)
 
