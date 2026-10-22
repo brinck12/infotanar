@@ -213,6 +213,7 @@ Minden végpont a `/api/v1` előtag alatt érhető el. A hozzáférés oszlop je
 | Metódus | Útvonal | Hozzáférés | Limit |
 |---|---|---|---|
 | `GET` | `/progress` | bejelentkezve | – |
+| `GET` | `/progress/rhythm` | bejelentkezve | – |
 
 ## registration
 

@@ -44,6 +44,7 @@ use App\Http\Controllers\Api\V1\Execution\SubmissionHistoryController;
 use App\Http\Controllers\Api\V1\HealthController;
 use App\Http\Controllers\Api\V1\Progress\LessonCompletionController;
 use App\Http\Controllers\Api\V1\Progress\ProgressController;
+use App\Http\Controllers\Api\V1\Progress\RhythmController;
 use App\Http\Controllers\Api\V1\ReadinessController;
 use App\Http\Controllers\Api\V1\Registration\RegistrationController;
 use App\Http\Middleware\EnsureGoogleLoginEnabled;
@@ -124,6 +125,7 @@ Route::prefix('v1')->name('api.')->middleware(RejectInvalidToken::class)->group(
     });
 
     Route::get('/progress', ProgressController::class)->middleware('auth:sanctum')->name('progress');
+    Route::get('/progress/rhythm', RhythmController::class)->middleware('auth:sanctum')->name('progress.rhythm');
 
     // A diak sajat beadasai (#147): lista feladatonkent es osszesen, valamint egy beadas a forraskoddal.
     Route::middleware('auth:sanctum')->group(function (): void {
