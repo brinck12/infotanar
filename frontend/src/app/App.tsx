@@ -76,6 +76,7 @@ export default function App() {
               <Route path="/regisztracio/kesz" element={<Pages.RegisterDone />} />
               <Route path="/bejelentkezes" element={<GuestOnly><Pages.Login /></GuestOnly>} />
               <Route path="/belepes/google" element={<Pages.GoogleCallback />} />
+              <Route path="/leiratkozas" element={<Pages.WeeklySummaryUnsubscribe />} />
               <Route path="/email-megerosites" element={<Pages.VerifyEmail />} />
               <Route path="/elfelejtett-jelszo" element={<GuestOnly><Pages.ForgotPassword /></GuestOnly>} />
               <Route path="/jelszo-visszaallitas" element={<Pages.ResetPassword />} />

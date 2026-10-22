@@ -319,6 +319,8 @@ export interface AuthUser {
   email_verified_at: string | null
   /** Hamis, ha a fiókot közösségi (Google) belépéssel nyitották, és még nem állítottak be jelszót. */
   has_password: boolean
+  /** Heti összefoglaló e-mail (opt-in); a hiánya (régebbi válasz) kikapcsoltat jelent. */
+  weekly_summary: boolean
   /** Az összekötött közösségi belépések (pl. `google`). */
   linked_providers: string[]
 }

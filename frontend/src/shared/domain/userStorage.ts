@@ -12,6 +12,7 @@ const userKeyPrefixes = (userId: number): string[] => [
   `infotanar.preferences.v1.u${userId}`,
   `infotanar.practice.v1.u${userId}.`,
   `infotanar.workspace.split.${userId}`,
+  `infotanar.rhythm.offer.v1.u${userId}`,
 ]
 
 /** Törli a megadott felhasználó minden böngészőbeli adatát; tiltott tárhelyen nem tesz semmit. */

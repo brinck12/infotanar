@@ -7,11 +7,12 @@ import { clearUserStorage } from '../../../shared/domain/userStorage'
 import { Badge } from '../../../shared/ui/Badge'
 import { Banner } from '../../../shared/ui/Banner'
 import { Button } from '../../../shared/ui/Button'
-import { Field, SubmitButton } from '../../../shared/ui/Form'
+import { Field, SubmitButton, Switch } from '../../../shared/ui/Form'
 import { Modal } from '../../../shared/ui/Modal'
 import { Panel } from '../../../shared/ui/Panel'
 import { SectionTitle } from '../../../shared/ui/Text'
 import { useToast } from '../../../shared/ui/useToast'
+import { useWeeklySummary } from '../../../shared/hooks/useWeeklySummary'
 import * as authApi from '../../auth/api'
 import { useAuth } from '../../auth/context'
 import * as accountApi from '../api'
@@ -45,6 +46,10 @@ export function AccountProfile() {
 
       <Section id="jelszo" title="Jelszó">
         {hasPassword ? <ChangePassword /> : <SetPassword email={user.email} />}
+      </Section>
+
+      <Section id="ertesitesek" title="Értesítések">
+        <WeeklySummarySetting />
       </Section>
 
       <Section id="adataim" title="Az adataim">
@@ -187,6 +192,26 @@ function ChangeEmail({ pendingEmail }: { pendingEmail: string | null }) {
         </SubmitButton>
       </div>
     </form>
+  )
+}
+
+/**
+ * Heti összefoglaló e-mail: alapból kikapcsolt, kérésre kapcsolható. Csak akkor kapsz levelet, ha
+ * azon a héten tanultál; a leiratkozás minden levélben egy kattintás.
+ */
+function WeeklySummarySetting() {
+  const weekly = useWeeklySummary()
+
+  return (
+    <div className="flex flex-col gap-3">
+      <p className="text-16 leading-relaxed text-ink-soft">
+        Hetente legfeljebb egy rövid levelet küldünk arról, mit haladtál. Csak akkor érkezik, ha azon a héten tanultál, és bármikor
+        kikapcsolhatod.
+      </p>
+      {weekly.isError && <Banner kind="error">{hibaUzenet(weekly.error)}</Banner>}
+      <Switch label="Heti összefoglaló e-mailben" checked={weekly.enabled} disabled={weekly.pending || (!weekly.canEnable && !weekly.enabled)} onChange={weekly.set} />
+      {!weekly.canEnable && !weekly.enabled && <p className="text-15 leading-relaxed text-ink-soft">Előbb erősítsd meg az e-mail-címedet.</p>}
+    </div>
   )
 }
 
