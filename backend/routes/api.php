@@ -43,6 +43,7 @@ use App\Http\Controllers\Api\V1\Execution\RunController;
 use App\Http\Controllers\Api\V1\Execution\SubmissionController;
 use App\Http\Controllers\Api\V1\Execution\SubmissionHistoryController;
 use App\Http\Controllers\Api\V1\HealthController;
+use App\Http\Controllers\Api\V1\Notifications\UnsubscribeController;
 use App\Http\Controllers\Api\V1\Progress\LessonCompletionController;
 use App\Http\Controllers\Api\V1\Progress\ProgressController;
 use App\Http\Controllers\Api\V1\Progress\RhythmController;
@@ -64,6 +65,12 @@ Route::prefix('v1')->name('api.')->middleware(RejectInvalidToken::class)->group(
     // Zart beta kapu (LAUNCH-2): a mod nyilvanos, a varolista szuk limitu es semleges valaszu.
     Route::get('/registration', [RegistrationController::class, 'show'])->middleware('throttle:60,1')->name('registration');
     Route::post('/waitlist', [RegistrationController::class, 'joinWaitlist'])->middleware('throttle:waitlist')->name('waitlist');
+
+    // Leiratkozas a heti osszefoglalorol a level linkjerol: bejelentkezes nelkul is megy, az alairas vedi.
+    Route::post('/notifications/weekly-summary/{id}/unsubscribe', UnsubscribeController::class)
+        ->whereNumber('id')
+        ->middleware(['signed:relative', 'throttle:30,1'])
+        ->name('notifications.weekly-summary.unsubscribe');
 
     Route::prefix('auth')->name('auth.')->group(function (): void {
         Route::post('/register', RegisterController::class)->middleware('throttle:register')->name('register');

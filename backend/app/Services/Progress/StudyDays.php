@@ -25,22 +25,20 @@ final class StudyDays
     public static function forWeek(User $user, CarbonImmutable $weekStart): array
     {
         $timezone = Config::string('learning.timezone');
-        $from = $weekStart->setTimezone($timezone)->startOfDay();
-        // Naptari 7 nap, nem 168 ora: az oraallitas hetenek vasarnapja 23 vagy 25 oras.
-        $until = $from->addDays(7)->startOfDay();
+        [$from, $until] = self::bounds($weekStart);
 
         $moments = [
             ...LessonCompletion::query()
                 ->where('user_id', $user->id)
-                ->where('completed_at', '>=', $from->utc())
-                ->where('completed_at', '<', $until->utc())
+                ->where('completed_at', '>=', $from)
+                ->where('completed_at', '<', $until)
                 ->get(['completed_at'])
                 ->map(static fn (LessonCompletion $completion): CarbonInterface => $completion->completed_at)
                 ->all(),
             ...Submission::query()
                 ->where('user_id', $user->id)
-                ->where('created_at', '>=', $from->utc())
-                ->where('created_at', '<', $until->utc())
+                ->where('created_at', '>=', $from)
+                ->where('created_at', '<', $until)
                 ->get(['created_at'])
                 ->map(static fn (Submission $submission): ?CarbonInterface => $submission->created_at)
                 ->filter()
@@ -56,5 +54,18 @@ final class StudyDays
         sort($dates);
 
         return $dates;
+    }
+
+    /**
+     * A het hatarai UTC-ben (a tarolas UTC): hetfo 00:00 magyar ido, es a kovetkezo hetfo 00:00.
+     * Naptari 7 nap, nem 168 ora: az oraallitas hetenek vasarnapja 23 vagy 25 oras.
+     *
+     * @return array{CarbonImmutable, CarbonImmutable}
+     */
+    public static function bounds(CarbonImmutable $weekStart): array
+    {
+        $from = $weekStart->setTimezone(Config::string('learning.timezone'))->startOfDay();
+
+        return [$from->utc(), $from->addDays(7)->startOfDay()->utc()];
     }
 }
