@@ -1,5 +1,7 @@
 # Heti ritmus és kedves heti összefoglaló: megvalósítási terv
 
+**Státusz (2026-10-22):** megvalósítva a `fullstack/253-weekly-rhythm` ágon (#253), a Google-belépés ágára építve. Eltérések: a `WeeklySummaryNotification` az aláírt linkeket maga számolja (`UnsubscribeLinks`), nem kapja konstruktorban; a leiratkozó végpont `throttle:30,1` (a `sensitive` 5/perc a levelezők egyklikkes hívásait is fojtaná); az opt-in végpont `PUT /account/notifications`; a felület a meglévő `Switch` komponenst használja.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 >
 > **Eltérés a szokásos TDD-menettől:** a felhasználó állandó megállapodása szerint a teszteket (Playwright) **ő írja**. Ezért a tesztlépések helyett minden feladat „Ellenőrzés” lépése eldobható szkripttel és a repo kapuival bizonyít (nem commitolt szkript, a Google-belépésnél bevált módon), és minden feladat végén ott a **„A felhasználó tesztjeihez”** lista: mely viselkedéseket kell lefedni. Új Playwright-specet nem írunk.
