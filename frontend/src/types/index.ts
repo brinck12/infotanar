@@ -398,6 +398,16 @@ export interface TrackProgress extends ProgressSummary {
   lessons: Array<{ id: number; status: LessonProgressStatus }>
 }
 
+/** Heti ritmus (`GET /progress/rhythm`): a hét hét napja; szám és széria szándékosan nincs. */
+export interface WeeklyRhythm {
+  week_start: string
+  today: string
+  days: { date: string; active: boolean }[]
+  /** Aktív napok száma, amit a megadott heti óraszám alapján kényelmesnek tartunk; null, ha nincs megadva. */
+  goal_days: number | null
+  goal_reached: boolean
+}
+
 export interface ProgressReport {
   overall: ProgressSummary
   tracks: TrackProgress[]

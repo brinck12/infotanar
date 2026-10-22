@@ -12,6 +12,7 @@ import { CardTitle, Lead, PageTitle, SectionTitle } from '../../../shared/ui/Tex
 import type { LessonProgressStatus, ModuleSummary, TrackDetail } from '../../../types'
 import { useCatalogTree } from '../../catalog/useCatalogTree'
 import { useLessonStatuses } from '../../progress/useLessonStatuses'
+import { WeeklyRhythm } from '../../progress/components/WeeklyRhythm'
 import { PointsBar } from '../components/PointsBar'
 
 /** A 2024 májusa és 2026 májusa közötti tíz programozási feladat elemzéséből (FRONTEND.md 13.). */
@@ -50,6 +51,8 @@ export function LearningPath() {
         Az érettségi nem csak programozás. Itt minden résznek van saját útja: először megtanulod, aztán gyakorolsz, a végén
         érettségi-jellegű feladatokat oldasz.
       </Lead>
+
+      <WeeklyRhythm className="mt-8" />
 
       <div className="mt-10">
         <PointsBar />
