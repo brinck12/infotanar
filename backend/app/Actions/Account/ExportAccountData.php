@@ -43,6 +43,7 @@ final readonly class ExportAccountData
                 'email' => $user->email,
                 'role' => $user->role->value,
                 'email_verified_at' => $user->email_verified_at?->toIso8601String(),
+                'weekly_summary' => $user->weekly_summary_opt_in,
                 'registered_at' => $user->created_at?->toIso8601String(),
             ],
             // Csak a szolgaltato neve es a kotes ideje: tokent, profilkepet nem tarolunk.

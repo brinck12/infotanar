@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Http\Controllers\Api\V1\Account\AccountController;
+use App\Http\Controllers\Api\V1\Account\NotificationSettingsController;
 use App\Http\Controllers\Api\V1\Account\ProfileController;
 use App\Http\Controllers\Api\V1\Admin\AccessGrantController;
 use App\Http\Controllers\Api\V1\Admin\Catalog\ConstraintOptionsController;
@@ -145,6 +146,7 @@ Route::prefix('v1')->name('api.')->middleware(RejectInvalidToken::class)->group(
 
         // Sajat adatok modositasa (#135). A jelszot kero muveletek a talalgatas ellen szuk limitet kapnak.
         Route::patch('/profile', [ProfileController::class, 'update'])->middleware('throttle:profile-update')->name('profile.update');
+        Route::put('/notifications', NotificationSettingsController::class)->middleware('throttle:profile-update')->name('notifications.update');
         Route::put('/password', [ProfileController::class, 'changePassword'])->middleware('throttle:sensitive')->name('password.update');
         Route::post('/email', [ProfileController::class, 'requestEmailChange'])->middleware('throttle:sensitive')->name('email.request');
     });

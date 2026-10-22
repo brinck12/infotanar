@@ -81,6 +81,9 @@ final readonly class DeleteAccount
                 'remember_token' => null,
                 // A tanulasi celok szemelyes adatok.
                 'preferences' => null,
+                // A heti level kapcsoloja es a kuldes nyoma is a felhasznalohoz kotott adat.
+                'weekly_summary_opt_in' => false,
+                'weekly_summary_sent_at' => null,
             ])->save();
 
             $user->delete();

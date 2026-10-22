@@ -10,6 +10,8 @@ enum AuditAction: string
     case AccountDeleted = 'account.deleted';
     case AccountPasswordChanged = 'account.password_changed';
     case AccountEmailChanged = 'account.email_changed';
+    case AccountWeeklySummaryEnabled = 'account.weekly_summary_enabled';
+    case AccountWeeklySummaryDisabled = 'account.weekly_summary_disabled';
 
     // Hitelesites: csak azonositok kerulnek a naplora (e-mail-cim, jelszo soha).
     case AuthLoginSucceeded = 'auth.login_succeeded';
