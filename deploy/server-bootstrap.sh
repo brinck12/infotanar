@@ -126,6 +126,9 @@ upload_max_filesize = 12M
 post_max_size = 14M
 max_file_uploads = 5
 memory_limit = 256M
+; PHP2Shell (CVE-2026-109618/109619): a sessionos feltoltes-haladas utvonal kikapcsolasa, amig a
+; php8.3 csomag nincs 8.3.36+ (vagy a disztribucio javitott) verzion. Az API-nak nincs sessionje.
+session.upload_progress.enabled = 0
 PHPINI
 
 # Kulon pool a kodfuttatashoz (deploy/php-fpm/pool.conf), hogy egy osztalynyi futtatas ne allitsa le a belepest.
