@@ -4,7 +4,7 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 >
-> **Eltérés a szokásos TDD-menettől:** a felhasználó állandó megállapodása szerint a teszteket (Playwright) **ő írja**. Ezért a tesztlépések helyett minden feladat „Ellenőrzés” lépése eldobható szkripttel és a repo kapuival bizonyít (nem commitolt szkript, a Google-belépésnél bevált módon), és minden feladat végén ott a **„A felhasználó tesztjeihez”** lista: mely viselkedéseket kell lefedni. Új Playwright-specet nem írunk.
+> **Megjegyzés a tesztekről:** a terv írásakor a felhasználó maga írta a teszteket, ezért a feladatok „Ellenőrzés” lépése eldobható szkript. 2026-10-24-én a felhasználó kérésére a teszteket megírtam: `tests/specs/api/weekly-rhythm.spec.ts` (14), `weekly-summary.spec.ts` (23), a szerződés-sémák a `contract.spec.ts`-ben, és `tests/specs/e2e/weekly-rhythm.spec.ts` (21). A „A felhasználó tesztjeihez” listák a fedett viselkedéseket adják.
 
 **Goal:** A diák egy szám nélküli, heti ritmussávon látja, mely napokon tanult; kérésre hetente egy ünneplő hangú e-mail összefoglalót kap. Elveszíteni nincs mit, szidás és nógatás nincs.
 
