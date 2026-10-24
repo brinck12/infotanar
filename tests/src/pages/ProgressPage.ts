@@ -35,6 +35,6 @@ export class ProgressPage extends BasePage {
 
   /** Egy nap jele a hozzaferheto neve alapjan, pl. `hétfő, volt tanulás` vagy `csütörtök (ma)`. */
   day(name: string): Locator {
-    return this.card.getByRole('img', { name })
+    return this.card.getByRole('img', { name, exact: true })
   }
 }
