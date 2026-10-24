@@ -7,6 +7,8 @@
  */
 import { execFileSync, spawnSync } from 'node:child_process'
 import path from 'node:path'
+import { env } from '../../config/env'
+import { TEST_APP_KEY } from '../../config/web-servers'
 
 export const BACKEND_DIR = path.resolve(process.env.TEST_BACKEND_PATH ?? path.join(__dirname, '../../../backend'))
 
@@ -19,6 +21,10 @@ function backendEnv(): NodeJS.ProcessEnv {
     CACHE_STORE: 'file',
     QUEUE_CONNECTION: 'sync',
     MAIL_MAILER: 'outbox',
+    // Ugyanaz a kulcs es cim, mint a teszt-szerveren: a tinkerben keszult alairt linkek (pl. leiratkozas) a szerveren is ervenyesek.
+    APP_KEY: TEST_APP_KEY,
+    FRONTEND_URL: env.BASE_URL,
+    APP_URL: new URL(env.API_BASE_URL).origin,
   }
 }
 
@@ -86,7 +92,10 @@ export function ageFileSubmission(id: number, ageDays: number): void {
 }
 
 /** Hany sor van a megadott tablaban a felhasznalo azonositojaval (user_id). */
-export function rowCount(table: 'file_submissions' | 'exam_attempts' | 'oral_practices', userId: number): number {
+export function rowCount(
+  table: 'file_submissions' | 'exam_attempts' | 'oral_practices' | 'consents' | 'social_accounts' | 'lesson_completions',
+  userId: number
+): number {
   return Number(tinkerJson(`return Illuminate\\Support\\Facades\\DB::table('${table}')->where('user_id', ${String(userId)})->count();`))
 }
 
@@ -127,4 +136,45 @@ export function artisanResult(args: string[]): ArtisanResult {
   })
 
   return { status: result.status ?? 1, stdout: result.stdout, stderr: result.stderr }
+}
+
+/**
+ * Lecketeljesitest ir a felhasznalonak (egy, meg nem teljesitett leckere), a MOSTANI magyar het hetfo 00:00-jatol
+ * szamitott percekkel: 30 = hetfo 00:30, 7 * 24 * 60 - 30 = a het vasarnapjanak 23:30-a, -30 = az elozo het vasarnap 23:30-a.
+ * A hatarok ellenorzesehez kell, amit valodi ido mellett nem lehetne elerni.
+ */
+export function plantLessonCompletion(userId: number, minutesFromWeekStart: number): void {
+  tinkerJson(`
+    $when = Carbon\\CarbonImmutable::now('Europe/Budapest')->startOfWeek()->startOfDay()->addMinutes(${String(minutesFromWeekStart)});
+    $done = App\\Models\\LessonCompletion::query()->where('user_id', ${String(userId)})->pluck('lesson_id');
+    $lesson = App\\Models\\Lesson::query()->whereNotIn('id', $done)->firstOrFail();
+    App\\Models\\LessonCompletion::query()->create(['user_id' => ${String(userId)}, 'lesson_id' => $lesson->id, 'completed_at' => $when]);
+    return true;
+  `)
+}
+
+/** A heti osszefoglalo e-mail job szinkron futtatasa (vasarnap este az utemezo teszi). */
+export function runWeeklySummaries(): void {
+  tinkerJson(`app()->call([new App\\Jobs\\SendWeeklySummaries, 'handle']); return true;`)
+}
+
+/** A heti osszefoglalo kapcsoloja es a kuldes lefoglalasa a nyers adatbazisbol (torolt fiokot is lat). */
+export function weeklySummaryState(userId: number): { optIn: boolean; sentAt: string | null } {
+  return tinkerJson(`
+    $row = Illuminate\\Support\\Facades\\DB::table('users')->where('id', ${String(userId)})->first(['weekly_summary_opt_in', 'weekly_summary_sent_at']);
+    return ['optIn' => (bool) $row->weekly_summary_opt_in, 'sentAt' => $row->weekly_summary_sent_at];
+  `) as { optIn: boolean; sentAt: string | null }
+}
+
+/** A heti osszefoglalo kapcsolojat kozvetlenul allitja (olyan allapothoz, amelyhez nincs vegpont: pl. nem megerositett cim). */
+export function forceWeeklySummary(userId: number, optIn: boolean, sentDaysAgo?: number): void {
+  const sentAt = sentDaysAgo === undefined ? 'null' : `now()->subDays(${String(sentDaysAgo)})`
+  tinkerJson(
+    `Illuminate\\Support\\Facades\\DB::table('users')->where('id', ${String(userId)})->update(['weekly_summary_opt_in' => ${optIn ? 'true' : 'false'}, 'weekly_summary_sent_at' => ${sentAt}]); return true;`
+  )
+}
+
+/** Megerositetlenne teszi a felhasznalo e-mail-cimet (a megerositest igenylo agakhoz). */
+export function unverifyEmail(userId: number): void {
+  tinkerJson(`Illuminate\\Support\\Facades\\DB::table('users')->where('id', ${String(userId)})->update(['email_verified_at' => null]); return true;`)
 }

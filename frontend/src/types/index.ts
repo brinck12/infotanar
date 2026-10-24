@@ -319,6 +319,8 @@ export interface AuthUser {
   email_verified_at: string | null
   /** Hamis, ha a fiókot közösségi (Google) belépéssel nyitották, és még nem állítottak be jelszót. */
   has_password: boolean
+  /** Heti összefoglaló e-mail (opt-in); a hiánya (régebbi válasz) kikapcsoltat jelent. */
+  weekly_summary: boolean
   /** Az összekötött közösségi belépések (pl. `google`). */
   linked_providers: string[]
 }
@@ -396,6 +398,16 @@ export interface TrackProgress extends ProgressSummary {
   slug: string
   title: string
   lessons: Array<{ id: number; status: LessonProgressStatus }>
+}
+
+/** Heti ritmus (`GET /progress/rhythm`): a hét hét napja; szám és széria szándékosan nincs. */
+export interface WeeklyRhythm {
+  week_start: string
+  today: string
+  days: { date: string; active: boolean }[]
+  /** Aktív napok száma, amit a megadott heti óraszám alapján kényelmesnek tartunk; null, ha nincs megadva. */
+  goal_days: number | null
+  goal_reached: boolean
 }
 
 export interface ProgressReport {

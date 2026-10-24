@@ -74,6 +74,7 @@ validálja. Elsőbbségi sorrend: valódi környezeti változó >
 | `API_BASE_URL` | a backend `/api/v1/` gyökere (záró perjellel) |
 | `START_WEB_SERVERS` | indítsa-e a Playwright a helyi szervereket |
 | `JUDGE0_MOCK_PORT` | a Judge0 mock portja |
+| `GOOGLE_MOCK_PORT` | a Google-belépés mock portja (a backend a Google helyett ezt hívja) |
 | `MONACO_SOURCE` | `local`: a Monaco a frontend `node_modules`-ából, CDN nélkül; `cdn`: jsDelivr |
 | `API_DATABASE_URL` | opcionális; megadva az API tesztek backendje MySQL-en fut sqlite helyett |
 

@@ -15,6 +15,7 @@ import { useAuth } from '../../auth/context'
 import { RecentSubmissions } from '../../submissions/components/RecentSubmissions'
 import { progressQuery } from '../api'
 import { TrackProgressCard } from '../components/TrackProgressCard'
+import { WeeklyRhythm } from '../components/WeeklyRhythm'
 
 /** Haladásom (#28): visszaszámlálás, összesítés és tanulási utanként a leckék állapota. */
 export function ProgressDashboard() {
@@ -45,6 +46,8 @@ export function ProgressDashboard() {
           </ButtonLink>
         )}
       </Panel>
+
+      <WeeklyRhythm className="mt-6" />
 
       <p className="mt-4">
         <Link to="/feladatok?allapot=todo" className="text-16 font-semibold">

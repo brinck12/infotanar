@@ -16,6 +16,7 @@ Minden végpont a `/api/v1` előtag alatt érhető el. A hozzáférés oszlop je
 | `POST` | `/account/email` | bejelentkezve | `sensitive` |
 | `GET` | `/account/email/confirm/{id}/{hash}` | aláírt link | – |
 | `GET` | `/account/export` | bejelentkezve | `account-export` |
+| `PUT` | `/account/notifications` | bejelentkezve | `profile-update` |
 | `PUT` | `/account/password` | bejelentkezve | `sensitive` |
 | `GET` | `/account/preferences` | bejelentkezve | – |
 | `PUT` | `/account/preferences` | bejelentkezve | `30,1,preferences` |
@@ -200,6 +201,12 @@ Minden végpont a `/api/v1` előtag alatt érhető el. A hozzáférés oszlop je
 | `GET` | `/lessons/{lesson}/video/captions` | aláírt link | – |
 | `GET` | `/lessons/{lesson}/video/stream` | aláírt link | – |
 
+## notifications
+
+| Metódus | Útvonal | Hozzáférés | Limit |
+|---|---|---|---|
+| `POST` | `/notifications/weekly-summary/{id}/unsubscribe` | aláírt link | `30,1` |
+
 ## oral
 
 | Metódus | Útvonal | Hozzáférés | Limit |
@@ -213,6 +220,7 @@ Minden végpont a `/api/v1` előtag alatt érhető el. A hozzáférés oszlop je
 | Metódus | Útvonal | Hozzáférés | Limit |
 |---|---|---|---|
 | `GET` | `/progress` | bejelentkezve | – |
+| `GET` | `/progress/rhythm` | bejelentkezve | – |
 
 ## registration
 

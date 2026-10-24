@@ -32,6 +32,8 @@ use Laravel\Sanctum\HasApiTokens;
  * @property string|null $password NULL = kozossegi belepessel nyitott fiok, nincs jelszo.
  * @property array{level: string, exam_period: string, language: string, weekly_hours: string}|null $preferences NULL = meg nem mentett celokat.
  * @property CarbonImmutable|Carbon|null $email_verified_at
+ * @property bool $weekly_summary_opt_in Heti osszefoglalo e-mail (opt-in, alapbol false).
+ * @property CarbonImmutable|Carbon|null $weekly_summary_sent_at A heti level kuldesenek lefoglalasa.
  */
 final class User extends Authenticatable implements MustVerifyEmail
 {
@@ -61,6 +63,8 @@ final class User extends Authenticatable implements MustVerifyEmail
     {
         return [
             'email_verified_at' => 'datetime',
+            'weekly_summary_opt_in' => 'boolean',
+            'weekly_summary_sent_at' => 'datetime',
             'password' => 'hashed',
             'role' => Role::class,
             'preferences' => 'array',

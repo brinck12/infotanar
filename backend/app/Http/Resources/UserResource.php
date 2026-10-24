@@ -28,6 +28,7 @@ final class UserResource extends JsonResource
             'role' => $this->role,
             'email_verified_at' => $this->email_verified_at,
             // Kozossegi belepessel nyitott fiokhoz nincs jelszo: a jelszot kero muveletekhez elobb be kell allitani.
+            'weekly_summary' => $user->weekly_summary_opt_in,
             'has_password' => $this->hasPassword(),
             'linked_providers' => $user->socialAccounts->pluck('provider')->values()->all(),
         ];

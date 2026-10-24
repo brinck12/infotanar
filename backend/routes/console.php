@@ -11,6 +11,7 @@ use App\Jobs\RecordQueueHeartbeat;
 use App\Jobs\ReportStuckBilling;
 use App\Jobs\RetryPendingInvoices;
 use App\Jobs\SendRenewalReminders;
+use App\Jobs\SendWeeklySummaries;
 use App\Jobs\SyncPendingPayments;
 use App\Services\Health\Heartbeat;
 use Illuminate\Support\Facades\Schedule;
@@ -29,6 +30,9 @@ Schedule::job(new ProcessDueSubscriptions)->hourly();
 
 // Emlekezteto a kozelgo megujitasrol (#137); delelott, magyar ido szerint.
 Schedule::job(new SendRenewalReminders)->dailyAt('09:00')->timezone('Europe/Budapest');
+
+// Heti, unnepelo hangu osszefoglalo (opt-in): vasarnap este, magyar ido szerint; csak annak, aki tanult.
+Schedule::job(new SendWeeklySummaries)->weeklyOn(0, '17:00')->timezone('Europe/Budapest');
 
 // Napi riasztas arrol, ami magatol nem oldodik meg (#131); reggel, magyar ido szerint.
 Schedule::job(new ReportStuckBilling)->dailyAt('08:00')->timezone('Europe/Budapest');

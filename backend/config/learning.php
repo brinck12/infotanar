@@ -15,6 +15,18 @@ return [
 
     'weekly_hours' => ['1-2', '3-4', '5+'],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Heti ritmus
+    |--------------------------------------------------------------------------
+    | A napok hatara ebben az idozonaban van (a tarolas UTC). A cel (aktiv napok szama
+    | hetente) a `weekly_hours` ertekeibol jon: a kulcsoknak egyezniuk kell vele.
+    | A cel el nem erese sehol nem latszik, csak az elerese.
+    */
+    'timezone' => 'Europe/Budapest',
+
+    'weekly_goal_days' => ['1-2' => 2, '3-4' => 3, '5+' => 4],
+
     'languages' => ['python', 'csharp'],
 
     /*

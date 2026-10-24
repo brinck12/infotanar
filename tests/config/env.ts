@@ -48,6 +48,8 @@ const EnvSchema = z.object({
    */
   START_WEB_SERVERS: booleanFromString,
   JUDGE0_MOCK_PORT: z.coerce.number().int().positive().default(2358),
+  /** A Google-belepes mock (src/mocks/google) portja: a backend a Google helyett ezt hivja. */
+  GOOGLE_MOCK_PORT: z.coerce.number().int().positive().default(2359),
 
   /**
    * A helyben inditott teszt-backend adatbazisa. Megadas nelkul eldobhato

@@ -9,6 +9,9 @@ export const user = z.object({
   pending_email: z.string().nullable(),
   role: z.enum(['student', 'admin']),
   email_verified_at: isoDateTime.nullable(),
+  has_password: z.boolean(),
+  linked_providers: z.array(z.string()),
+  weekly_summary: z.boolean(),
 })
 
 /** `GET /auth/me`. */
@@ -21,6 +24,20 @@ export const loginResponse = envelope(
     token_type: z.literal('Bearer'),
     expires_at: isoDateTime.nullable(),
     user,
+  })
+)
+
+/** `GET /auth/providers`: mely kozossegi belepes van bekapcsolva. */
+export const providersResponse = envelope(z.object({ google: z.boolean() }))
+
+/** `GET /progress/rhythm`: a het hete napja; szam es szeria szandekosan nincs. */
+export const rhythmResponse = envelope(
+  z.object({
+    week_start: z.iso.date(),
+    today: z.iso.date(),
+    days: z.array(z.object({ date: z.iso.date(), active: z.boolean() })).length(7),
+    goal_days: z.number().int().min(1).nullable(),
+    goal_reached: z.boolean(),
   })
 )
 

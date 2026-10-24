@@ -15,6 +15,7 @@ export const Register = page(() => import('../features/auth/pages/Register'), 'R
 export const RegisterDone = page(() => import('../features/auth/pages/RegisterDone'), 'RegisterDone')
 export const Login = page(() => import('../features/auth/pages/Login'), 'Login')
 export const GoogleCallback = page(() => import('../features/auth/pages/GoogleCallback'), 'GoogleCallback')
+export const WeeklySummaryUnsubscribe = page(() => import('../features/auth/pages/WeeklySummaryUnsubscribe'), 'WeeklySummaryUnsubscribe')
 export const VerifyEmail = page(() => import('../features/auth/pages/VerifyEmail'), 'VerifyEmail')
 export const ForgotPassword = page(() => import('../features/auth/pages/ForgotPassword'), 'ForgotPassword')
 export const ResetPassword = page(() => import('../features/auth/pages/ResetPassword'), 'ResetPassword')

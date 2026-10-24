@@ -1,5 +1,6 @@
 import type { Page, Route } from '@playwright/test'
 import { AdminAuthoringMock, type AdminAuthoringOptions } from './AdminAuthoringMock'
+import type { WeeklyRhythm } from '../api/areas/rhythm'
 import type { RunResponse, SubmissionResponse, TaskDetail, Topic, User } from '../api/types'
 import { buildTaskDetail, buildTopic, buildTrackDetail, toLessonDetail, toTaskListItem, toTrackSummary } from '../data/builders/catalog'
 
@@ -30,6 +31,27 @@ export interface WirePreferences {
   exam_period: string
   language: string
   weekly_hours: string
+}
+
+/** A Google-belepes mockolt kodvaltasa: azonnali belepes, hozzajarulas-kereses, vagy a szerver elutasitasa. */
+export interface MockGoogleLoginOptions {
+  exchange: 'signed_in' | 'consent_required' | 'rejected'
+  /** A belepo felhasznalo (belepes es a fiok nyitasa utan). */
+  user: User
+  /** Uj fiok eseten a Google profilja. */
+  profile?: { name: string; email: string }
+}
+
+/** A Google-belepes mockolt hivasai (a kuldott torzsek, sorrendben). */
+export interface MockGoogleLogin {
+  redirects: () => Record<string, unknown>[]
+  exchanges: () => Record<string, unknown>[]
+  completes: () => Record<string, unknown>[]
+}
+
+/** A heti osszefoglalo kapcsolo mockja: a kuldott PUT torzsek, es az aktualis felhasznalo. */
+export interface MockWeeklySummary {
+  puts: () => Record<string, unknown>[]
 }
 
 export interface MockOralRow {
@@ -323,6 +345,98 @@ export class MockApi {
     const mock = new AdminAuthoringMock(this.page, options)
     await mock.install()
     return mock
+  }
+
+  /** A kozossegi belepesek elerhetosege (GET /auth/providers). */
+  async withAuthProviders(google: boolean): Promise<void> {
+    await this.page.route(`${API}/auth/providers`, (route) => route.fulfill({ json: { data: { google } } }))
+  }
+
+  /**
+   * A Google-belepes vegpontjai: az atiranyitas a frontend visszateresi oldalara visz (kodot ad), a kodvaltas
+   * az `exchange` szerint valaszol, a fiok nyitasa csak elfogadassal sikerul (kulonben 422, mint a szerveren).
+   * A Google gomb latszik (`providers`: google = true). A `/auth/me` a belepett felhasznalot adja.
+   */
+  async withGoogleLogin(options: MockGoogleLoginOptions): Promise<MockGoogleLogin> {
+    const redirects: Record<string, unknown>[] = []
+    const exchanges: Record<string, unknown>[] = []
+    const completes: Record<string, unknown>[] = []
+    const session = { token: 'pw-mock-token', token_type: 'Bearer', expires_at: null, user: options.user }
+    const profile = options.profile ?? { name: 'Google Gabi', email: 'gabi@example.test' }
+    const body = (route: Route) => route.request().postDataJSON() as Record<string, unknown>
+
+    await this.withAuthProviders(true)
+    await this.page.route(`${API}/auth/me`, (route) => route.fulfill({ json: { data: options.user } }))
+    await this.page.route(`${API}/auth/google/redirect`, (route) => {
+      redirects.push(body(route))
+      return route.fulfill({ json: { data: { url: '/belepes/google?code=pw-mock-code' } } })
+    })
+    await this.page.route(`${API}/auth/google/exchange`, (route) => {
+      exchanges.push(body(route))
+      if (options.exchange === 'rejected') return route.fulfill({ status: 422, json: { message: 'A Google-belépés nem sikerült. Próbáld újra, vagy lépj be e-mail-címmel.' } })
+      if (options.exchange === 'consent_required') return route.fulfill({ json: { data: { status: 'consent_required', ...profile } } })
+      return route.fulfill({ json: { data: { status: 'signed_in', ...session } } })
+    })
+    await this.page.route(`${API}/auth/google/complete`, (route) => {
+      const sent = body(route)
+      completes.push(sent)
+      if (sent.accept_terms !== true) {
+        return route.fulfill({
+          status: 422,
+          json: { message: 'Hibás adatok.', errors: { accept_terms: ['A regisztrációhoz el kell fogadnod az ÁSZF-et.'] } },
+        })
+      }
+      return route.fulfill({ json: { data: session } })
+    })
+
+    return { redirects: () => redirects, exchanges: () => exchanges, completes: () => completes }
+  }
+
+  /** Az "elfelejtett jelszo" levelkeres (POST /auth/forgot-password); a visszaadott fuggveny a kuldott torzsek listaja. */
+  async onForgotPassword(): Promise<() => unknown[]> {
+    const sent: unknown[] = []
+    await this.page.route(`${API}/auth/forgot-password`, (route) => {
+      sent.push(route.request().postDataJSON() as unknown)
+      return route.fulfill({ json: { message: 'Elküldtük a jelszó-visszaállító linket, ha van ilyen fiók.' } })
+    })
+    return () => sent
+  }
+
+  /** A heti ritmus (GET /progress/rhythm); `'error'`: a vegpont 500-at ad. */
+  async withRhythm(rhythm: WeeklyRhythm | 'error'): Promise<void> {
+    await this.page.route(`${API}/progress/rhythm`, (route) =>
+      rhythm === 'error' ? route.fulfill({ status: 500, json: { message: 'Hiba' } }) : route.fulfill({ json: { data: rhythm } })
+    )
+  }
+
+  /**
+   * A heti osszefoglalo kapcsoloja (PUT /account/notifications): a PUT a kapcsolot allitja, es utana a
+   * `/auth/me` is az uj allapotot adja, mint a valodi szerver. A `signIn` helyett hasznald.
+   */
+  async withWeeklySummary(user: User): Promise<MockWeeklySummary> {
+    let current = user
+    const puts: Record<string, unknown>[] = []
+    await this.page.addInitScript(() => { localStorage.setItem('infotanar.token', 'pw-mock-token'); })
+    await this.page.route(`${API}/auth/me`, (route) => route.fulfill({ json: { data: current } }))
+    await this.page.route(`${API}/account/notifications`, (route) => {
+      const sent = route.request().postDataJSON() as Record<string, unknown>
+      puts.push(sent)
+      current = { ...current, weekly_summary: sent.enabled === true }
+      return route.fulfill({ json: { data: current } })
+    })
+    return { puts: () => puts }
+  }
+
+  /** A leiratkozas a level linkjerol (POST /notifications/weekly-summary/{id}/unsubscribe); a hivott URL-ek listaja. */
+  async onUnsubscribe({ status = 200 }: MockResponseOptions = {}): Promise<() => string[]> {
+    const urls: string[] = []
+    await this.page.route(`${API}/notifications/weekly-summary/*/unsubscribe*`, (route) => {
+      urls.push(route.request().url())
+      return status === 200
+        ? route.fulfill({ json: { message: 'Nem küldünk több heti összefoglalót. Bármikor visszakapcsolhatod a fiókodnál.' } })
+        : route.fulfill({ status, json: { message: 'Érvénytelen aláírás.' } })
+    })
+    return () => urls
   }
 
   private async fulfillTask(route: Route, tasks: TaskDetail[]): Promise<void> {

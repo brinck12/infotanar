@@ -242,6 +242,16 @@ export class ApiClient {
     return { status: response.status(), ok: response.ok(), headers: response.headers(), body: await response.body() }
   }
 
+  /**
+   * Egyetlen kerelem, atiranyitas KOVETESE nelkul: az OAuth-lepesek (Google engedelykeres, visszateres a
+   * backendre) ezen mennek, hogy a `Location` fejlec vizsgalhato legyen. Az URL teljes (akar masik hoston).
+   */
+  async getWithoutRedirect(url: string): Promise<{ status: number; location: string | null }> {
+    recordEndpointHit('GET', url)
+    const response = await this.request.fetch(url, { method: 'GET', maxRedirects: 0 })
+    return { status: response.status(), location: response.headers().location ?? null }
+  }
+
   private async send<T>(
     method: string,
     path: string,
