@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Requests\Account;
 
 use App\Http\Requests\Concerns\NormalizesEmail;
+use App\Http\Requests\Concerns\RequiresPassword;
 use Illuminate\Foundation\Http\FormRequest;
 
 /**
@@ -13,7 +14,16 @@ use Illuminate\Foundation\Http\FormRequest;
  */
 final class ChangeEmailRequest extends FormRequest
 {
-    use NormalizesEmail;
+    use NormalizesEmail {
+        prepareForValidation as private normalizeEmail;
+    }
+    use RequiresPassword;
+
+    protected function prepareForValidation(): void
+    {
+        $this->ensureHasPassword();
+        $this->normalizeEmail();
+    }
 
     /** @return array<string, mixed> */
     public function rules(): array

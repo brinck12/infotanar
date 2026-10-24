@@ -141,6 +141,11 @@ final class AppServiceProvider extends ServiceProvider
             ->by('register:'.$request->ip())
             ->response($tooMany));
 
+        // Google-belepes: a folyamat barmelyik lepese IP-nkent korlatos (a callback publikus es kulso hivast indit).
+        RateLimiter::for('oauth', static fn (Request $request) => Limit::perMinute(Config::integer('auth.throttle.oauth_per_minute'))
+            ->by('oauth:'.$request->ip())
+            ->response($tooMany));
+
         // Varolista: barki hivhatja, ezert IP-nkent szuk.
         RateLimiter::for('waitlist', static fn (Request $request) => Limit::perMinute(Config::integer('registration.rate.waitlist_per_minute'))
             ->by('waitlist:'.$request->ip())

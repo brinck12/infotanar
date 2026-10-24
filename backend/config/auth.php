@@ -122,6 +122,8 @@ return [
     'throttle' => [
         'login_ip_per_minute' => (int) env('AUTH_LOGIN_IP_PER_MINUTE', 20),
         'reset_ip_per_minute' => (int) env('AUTH_RESET_IP_PER_MINUTE', 10),
+        // Google-belepes lepesei IP-nkent (iskolai kozos IP mogott is elegendo keret).
+        'oauth_per_minute' => (int) env('AUTH_OAUTH_PER_MINUTE', 30),
     ],
 
 ];

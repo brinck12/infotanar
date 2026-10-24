@@ -24,6 +24,7 @@ use App\Http\Controllers\Api\V1\Auth\EmailVerificationController;
 use App\Http\Controllers\Api\V1\Auth\PasswordResetController;
 use App\Http\Controllers\Api\V1\Auth\RegisterController;
 use App\Http\Controllers\Api\V1\Auth\SessionController;
+use App\Http\Controllers\Api\V1\Auth\SocialAuthController;
 use App\Http\Controllers\Api\V1\Billing\BarionCallbackController;
 use App\Http\Controllers\Api\V1\Billing\BillingProfileController;
 use App\Http\Controllers\Api\V1\Billing\CheckoutController;
@@ -45,6 +46,7 @@ use App\Http\Controllers\Api\V1\Progress\LessonCompletionController;
 use App\Http\Controllers\Api\V1\Progress\ProgressController;
 use App\Http\Controllers\Api\V1\ReadinessController;
 use App\Http\Controllers\Api\V1\Registration\RegistrationController;
+use App\Http\Middleware\EnsureGoogleLoginEnabled;
 use App\Http\Middleware\RejectInvalidToken;
 use Illuminate\Support\Facades\Route;
 
@@ -64,6 +66,16 @@ Route::prefix('v1')->name('api.')->middleware(RejectInvalidToken::class)->group(
     Route::prefix('auth')->name('auth.')->group(function (): void {
         Route::post('/register', RegisterController::class)->middleware('throttle:register')->name('register');
         Route::post('/login', [SessionController::class, 'store'])->middleware('throttle:login')->name('login');
+
+        // Google-belepes (kulcsok es GOOGLE_LOGIN_ENABLED nelkul 404). A callback a Google
+        // visszairanyitasa: bongeszo-navigacio, ezert a frontendre iranyit, nem JSON-t ad.
+        Route::get('/providers', [SocialAuthController::class, 'providers'])->middleware('throttle:60,1')->name('providers');
+        Route::prefix('google')->name('google.')->middleware([EnsureGoogleLoginEnabled::class, 'throttle:oauth'])->group(function (): void {
+            Route::post('/redirect', [SocialAuthController::class, 'redirect'])->name('redirect');
+            Route::get('/callback', [SocialAuthController::class, 'callback'])->name('callback');
+            Route::post('/exchange', [SocialAuthController::class, 'exchange'])->name('exchange');
+            Route::post('/complete', [SocialAuthController::class, 'complete'])->name('complete');
+        });
 
         Route::get('/verify-email/{id}/{hash}', [EmailVerificationController::class, 'verify'])
             ->whereNumber('id')

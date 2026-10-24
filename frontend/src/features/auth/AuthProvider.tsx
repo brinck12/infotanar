@@ -5,6 +5,7 @@ import { onSessionExpired } from '../../shared/api/client'
 import { httpStatus } from '../../shared/api/errors'
 import { tokenStore } from '../../shared/api/tokenStore'
 import { clearUserStorage } from '../../shared/domain/userStorage'
+import type { LoginResponse } from '../../types'
 import * as authApi from './api'
 import { AuthContext, type AuthState } from './context'
 
@@ -79,19 +80,27 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     [forgetSession, navigate],
   )
 
+  const acceptLogin = useCallback(
+    async ({ token, user: loggedIn }: LoginResponse) => {
+      tokenStore.set(token)
+      setSessionExpired(false)
+      queryClient.setQueryData(authApi.authKeys.me, loggedIn)
+      await resetViewerData()
+      return loggedIn
+    },
+    [queryClient, resetViewerData],
+  )
+
   const value = useMemo<AuthState>(
     () => ({
       user: user ?? null,
       loading: isLoading,
       sessionExpired,
 
+      acceptLogin,
+
       async login(email, password) {
-        const { token, user: loggedIn } = await authApi.login(email, password)
-        tokenStore.set(token)
-        setSessionExpired(false)
-        queryClient.setQueryData(authApi.authKeys.me, loggedIn)
-        await resetViewerData()
-        return loggedIn
+        return acceptLogin(await authApi.login(email, password))
       },
 
       async logout() {
@@ -106,7 +115,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         await resetViewerData()
       },
     }),
-    [user, isLoading, sessionExpired, queryClient, resetViewerData, forgetSession],
+    [user, isLoading, sessionExpired, queryClient, resetViewerData, forgetSession, acceptLogin],
   )
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

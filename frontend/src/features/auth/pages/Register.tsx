@@ -9,6 +9,7 @@ import { LEGAL_VERSIONS } from '../../legal/documents'
 import { LegalLink } from '../../legal/LegalLink'
 import * as authApi from '../api'
 import { AuthCard } from '../components/AuthCard'
+import { SocialLogin } from '../components/GoogleButton'
 import { WaitlistForm } from '../components/WaitlistForm'
 import { useAuth } from '../context'
 import { useRegistrationMode } from '../useRegistrationMode'
@@ -139,6 +140,7 @@ export function Register() {
           </SubmitButton>
         </form>
       )}
+      {!modePending && <SocialLogin />}
       {inviteOnly && inviteCode.trim() === '' && (
         <section aria-label="Várólista" className="border-t border-grid pt-5">
           <h2 className="mb-1.5 text-17 font-bold">Nincs meghívókódod?</h2>

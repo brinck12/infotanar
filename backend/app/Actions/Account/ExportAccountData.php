@@ -14,6 +14,7 @@ use App\Models\Invoice;
 use App\Models\LessonCompletion;
 use App\Models\OralPractice;
 use App\Models\Payment;
+use App\Models\SocialAccount;
 use App\Models\Submission;
 use App\Models\Subscription;
 use App\Models\User;
@@ -44,6 +45,15 @@ final readonly class ExportAccountData
                 'email_verified_at' => $user->email_verified_at?->toIso8601String(),
                 'registered_at' => $user->created_at?->toIso8601String(),
             ],
+            // Csak a szolgaltato neve es a kotes ideje: tokent, profilkepet nem tarolunk.
+            'linked_logins' => $user->socialAccounts()
+                ->oldest()
+                ->get()
+                ->map(static fn (SocialAccount $account): array => [
+                    'provider' => $account->provider,
+                    'linked_at' => $account->created_at?->toIso8601String(),
+                ])
+                ->all(),
             'completed_lessons' => $user->lessonCompletions()
                 ->with('lesson:id,title')
                 ->oldest('completed_at')

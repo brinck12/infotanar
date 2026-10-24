@@ -16,6 +16,12 @@ enum AuditAction: string
     case AuthLoginFailed = 'auth.login_failed';
     case AuthPasswordReset = 'auth.password_reset';
 
+    // Kozossegi (Google) belepes: a naplora csak a szolgaltato neve kerul, e-mail-cim nem.
+    case AuthSocialLoginSucceeded = 'auth.social_login_succeeded';
+    case AuthSocialLoginFailed = 'auth.social_login_failed';
+    case AuthSocialRegistered = 'auth.social_registered';
+    case AuthSocialLinked = 'auth.social_linked';
+
     case FileSubmissionManuallyMarked = 'file_submission.manually_marked';
 
     case CatalogCreated = 'catalog.created';

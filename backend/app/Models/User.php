@@ -29,6 +29,7 @@ use Laravel\Sanctum\HasApiTokens;
  * vegpontja irja, ellenorzott ertekekkel.
  *
  * @property Role $role
+ * @property string|null $password NULL = kozossegi belepessel nyitott fiok, nincs jelszo.
  * @property array{level: string, exam_period: string, language: string, weekly_hours: string}|null $preferences NULL = meg nem mentett celokat.
  * @property CarbonImmutable|Carbon|null $email_verified_at
  */
@@ -69,6 +70,18 @@ final class User extends Authenticatable implements MustVerifyEmail
     public function isAdmin(): bool
     {
         return $this->role === Role::Admin;
+    }
+
+    /** Kozossegi belepessel nyitott fiokhoz nincs jelszo (NULL), a jelszavas belepes ra nem all. */
+    public function hasPassword(): bool
+    {
+        return $this->password !== null;
+    }
+
+    /** @return HasMany<SocialAccount, $this> */
+    public function socialAccounts(): HasMany
+    {
+        return $this->hasMany(SocialAccount::class);
     }
 
     /** @return HasMany<Submission, $this> */
