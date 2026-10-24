@@ -131,7 +131,7 @@ Responses come wrapped as `{ data: … }` (`Envelope<T>`). Keep TypeScript types
 
 ### Tests and CI
 
-`tests/` has one Playwright config with three projects. `e2e-mocked` serves the *built* frontend and intercepts every API call with `mockApi` (no backend). `api` and `api-rate-limit` hit a real Laravel (`php -S`, SQLite fixture DB, `MAIL_MAILER=outbox` so tests read mail links from `backend/storage/framework/outbox`, Judge0 replaced by `src/mocks/judge0`). `api-rate-limit` runs after `api` because it exhausts the shared quota. The seeded data the API tests assume is described in `tests/src/data/seed.ts`, sourced from `backend/database/seeders/ApiTestSeeder.php`: change one, change the other.
+`tests/` has one Playwright config with three projects. `e2e-mocked` serves the *built* frontend and intercepts every API call with `mockApi` (no backend). `api` and `api-rate-limit` hit a real Laravel (`php -S`, SQLite fixture DB, `MAIL_MAILER=outbox` so tests read mail links from `backend/storage/framework/outbox`, Judge0 replaced by `src/mocks/judge0`, Google by `src/mocks/google`: the spec sets who "signs in" with `googleStub.signInAs()`). `api-rate-limit` runs after `api` because it exhausts the shared quota. The seeded data the API tests assume is described in `tests/src/data/seed.ts`, sourced from `backend/database/seeders/ApiTestSeeder.php`: change one, change the other.
 
 CI (`.github/workflows/ci.yml`) runs on every push: frontend lint/typecheck/build, backend `composer lint` + `composer analyse`, test-code `check`, sharded E2E, API tests. Deploy (`deploy.yml`) runs only after CI succeeds on `main`, over SSH/rsync; never hand-copy code or run migrations on the server. The server `.env` is hand-managed and never overwritten by deploy.
 
