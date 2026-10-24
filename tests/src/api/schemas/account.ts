@@ -9,6 +9,9 @@ export const user = z.object({
   pending_email: z.string().nullable(),
   role: z.enum(['student', 'admin']),
   email_verified_at: isoDateTime.nullable(),
+  has_password: z.boolean(),
+  linked_providers: z.array(z.string()),
+  weekly_summary: z.boolean(),
 })
 
 /** `GET /auth/me`. */

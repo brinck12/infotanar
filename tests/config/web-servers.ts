@@ -9,6 +9,7 @@ export type ServerGroup = 'frontend' | 'backend'
 const FRONTEND_URL = new URL(env.BASE_URL)
 const API_URL = new URL(env.API_BASE_URL)
 const JUDGE0_URL = `http://127.0.0.1:${env.JUDGE0_MOCK_PORT}`
+const GOOGLE_URL = `http://127.0.0.1:${env.GOOGLE_MOCK_PORT}`
 
 /** A buildelt frontendet szolgaljuk ki: ugyanaz fut, mint ami deployolodik. */
 const frontend: WebServer = {
@@ -25,6 +26,18 @@ const judge0Mock: WebServer = {
   reuseExistingServer: !env.CI,
   timeout: 30_000,
   env: { JUDGE0_MOCK_PORT: String(env.JUDGE0_MOCK_PORT) },
+}
+
+/**
+ * Minimalis Google-hasonmas (OAuth + userinfo) a Google-belepeshez (src/mocks/google).
+ * A teszt allitja be, kinek a nevében jon vissza a "Google"; a backend ezt hivja.
+ */
+const googleMock: WebServer = {
+  command: 'npx tsx src/mocks/google/server.ts',
+  url: `${GOOGLE_URL}/about`,
+  reuseExistingServer: !env.CI,
+  timeout: 30_000,
+  env: { GOOGLE_MOCK_PORT: String(env.GOOGLE_MOCK_PORT) },
 }
 
 /** A teszt-backend APP_KEY-e: csak a helyi, eldobhato backendhez tartozik, nem titok. */
@@ -71,6 +84,17 @@ const backend: WebServer = {
     MAIL_MAILER: 'outbox',
     FRONTEND_URL: env.BASE_URL,
     JUDGE0_URL,
+    // Google-belepes: a Google helyett a helyi mockot hivja (src/mocks/google), hogy a teljes folyamat
+    // (atiranyitas, visszateres, kodvaltas) valodi backenden is tesztelheto legyen.
+    GOOGLE_LOGIN_ENABLED: 'true',
+    GOOGLE_CLIENT_ID: 'pw-google-client',
+    GOOGLE_CLIENT_SECRET: 'pw-google-secret',
+    GOOGLE_REDIRECT_URI: new URL('auth/google/callback', API_URL).toString(),
+    GOOGLE_AUTH_URL: `${GOOGLE_URL}/auth`,
+    GOOGLE_TOKEN_URL: `${GOOGLE_URL}/token`,
+    GOOGLE_USERINFO_URL: `${GOOGLE_URL}/userinfo`,
+    // A Google-belepes lepesei IP-nkent ne fogjak vissza a sok fiokot nyito teszteket.
+    AUTH_OAUTH_PER_MINUTE: '10000',
     // Vizsgak: nincs turelmi ido a hatarido utan, igy a 0 perces fixture vizsga
     // probalkozasa azonnal lejar, es az idotullepes varakozas nelkul tesztelheto.
     EXAMS_GRACE_SECONDS: '0',
@@ -97,7 +121,7 @@ const backend: WebServer = {
 
 const SERVERS: Record<ServerGroup, WebServer[]> = {
   frontend: [frontend],
-  backend: [judge0Mock, backend],
+  backend: [judge0Mock, googleMock, backend],
 }
 
 /**

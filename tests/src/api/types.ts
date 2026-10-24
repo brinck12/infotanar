@@ -126,6 +126,12 @@ export interface User {
   email: string
   role: UserRole
   email_verified_at: string | null
+  /** Hamis, ha a fiokot Google-lel nyitottak, es meg nincs jelszava. */
+  has_password?: boolean
+  /** Az osszekotott kozossegi belepesek (pl. `google`). */
+  linked_providers?: string[]
+  /** A heti osszefoglalo e-mail kapcsoloja. */
+  weekly_summary?: boolean
 }
 
 export interface LoginRequest {

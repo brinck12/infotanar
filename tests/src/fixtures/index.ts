@@ -1,6 +1,7 @@
 import { test as base } from '@playwright/test'
 import { ApiClient } from '../api/ApiClient'
 import { Outbox } from '../api/Outbox'
+import { GoogleStub } from '../mocks/google/GoogleStub'
 import { MockApi } from '../mocks/MockApi'
 import { AdminExamPage } from '../pages/AdminExamPage'
 import { AdminExercisePage } from '../pages/AdminExercisePage'
@@ -43,6 +44,8 @@ export interface FrameworkFixtures {
   apiClient: ApiClient
   /** A helyi teszt-backend altal kikuldott levelek (MAIL_MAILER=outbox). */
   outbox: Outbox
+  /** A Google-belepes mockja (src/mocks/google): a teszt allitja be, ki "lep be a Googlen". */
+  googleStub: GoogleStub
 }
 
 /**
@@ -125,6 +128,10 @@ export const test = base.extend<FrameworkFixtures & A11yFixtures & FrameworkOpti
   // eslint-disable-next-line no-empty-pattern
   outbox: async ({}, use) => {
     await use(new Outbox())
+  },
+
+  googleStub: async ({ request }, use) => {
+    await use(new GoogleStub(request))
   },
 
   ...a11yFixtures,
