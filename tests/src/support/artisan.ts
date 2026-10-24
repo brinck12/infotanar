@@ -7,6 +7,8 @@
  */
 import { execFileSync, spawnSync } from 'node:child_process'
 import path from 'node:path'
+import { env } from '../../config/env'
+import { TEST_APP_KEY } from '../../config/web-servers'
 
 export const BACKEND_DIR = path.resolve(process.env.TEST_BACKEND_PATH ?? path.join(__dirname, '../../../backend'))
 
@@ -19,6 +21,10 @@ function backendEnv(): NodeJS.ProcessEnv {
     CACHE_STORE: 'file',
     QUEUE_CONNECTION: 'sync',
     MAIL_MAILER: 'outbox',
+    // Ugyanaz a kulcs es cim, mint a teszt-szerveren: a tinkerben keszult alairt linkek (pl. leiratkozas) a szerveren is ervenyesek.
+    APP_KEY: TEST_APP_KEY,
+    FRONTEND_URL: env.BASE_URL,
+    APP_URL: new URL(env.API_BASE_URL).origin,
   }
 }
 

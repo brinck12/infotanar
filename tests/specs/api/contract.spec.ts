@@ -23,6 +23,8 @@ import {
   lessonResponse,
   loginResponse,
   meResponse,
+  providersResponse,
+  rhythmResponse,
   parseContract,
   paymentsResponse,
   planResponse,
@@ -75,6 +77,9 @@ test.describe('Szerzodes: fiok es elofizetes @regression', () => {
     expectContract(await client.get('billing/payments'), paymentsResponse, 'GET /billing/payments')
     expectContract(await client.get('account/preferences'), preferencesResponse, 'GET /account/preferences')
     expectContract(await client.get('account/export'), accountExportResponse, 'GET /account/export')
+    expectContract(await apiClient.get('auth/providers'), providersResponse, 'GET /auth/providers')
+    expectContract(await client.get('progress/rhythm'), rhythmResponse, 'GET /progress/rhythm')
+    expectContract(await client.put('account/notifications', { enabled: false }), meResponse, 'PUT /account/notifications')
   })
 })
 

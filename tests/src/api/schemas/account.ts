@@ -27,6 +27,20 @@ export const loginResponse = envelope(
   })
 )
 
+/** `GET /auth/providers`: mely kozossegi belepes van bekapcsolva. */
+export const providersResponse = envelope(z.object({ google: z.boolean() }))
+
+/** `GET /progress/rhythm`: a het hete napja; szam es szeria szandekosan nincs. */
+export const rhythmResponse = envelope(
+  z.object({
+    week_start: z.iso.date(),
+    today: z.iso.date(),
+    days: z.array(z.object({ date: z.iso.date(), active: z.boolean() })).length(7),
+    goal_days: z.number().int().min(1).nullable(),
+    goal_reached: z.boolean(),
+  })
+)
+
 /** `GET /billing/plan`. */
 export const planResponse = envelope(z.object({ name: z.string(), price_huf: z.number(), period_months: z.number().int() }))
 
