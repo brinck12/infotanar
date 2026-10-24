@@ -1,5 +1,6 @@
 export * from './builders/catalog'
 export * from './builders/exams'
+export * from './builders/rhythm'
 export * from './builders/run-result'
 export * from './builders/user'
 export * from './files'

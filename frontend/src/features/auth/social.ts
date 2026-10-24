@@ -2,6 +2,9 @@ import * as authApi from './api'
 
 const STORAGE_KEY = 'infotanar.google.login'
 
+/** A böngésző nem engedi a titok tárolását, ezért a Google-belépés nem indítható (az üzenet a felhasználónak szól). */
+export class GoogleStorageUnavailable extends Error {}
+
 interface PendingLogin {
   verifier: string
   /** Ahová a sikeres belépés után vissza kell térni (a Google-oldal után a router állapota elveszik). */
@@ -31,7 +34,7 @@ function safePath(path: string | undefined): string | undefined {
  * Elindítja a Google-belépést: titkos verifiert tart a böngészőben, a hash-ét
  * elküldi a szervernek, és visszaadja a Google belépőoldalának címét.
  *
- * @throws Error ha a böngésző nem engedi a tárolást: a visszatérés után nem lenne meg a verifier.
+ * @throws GoogleStorageUnavailable ha a böngésző nem engedi a tárolást: a visszatérés után nem lenne meg a verifier.
  */
 export async function beginGoogleLogin(from?: string): Promise<string> {
   const verifier = base64Url(crypto.getRandomValues(new Uint8Array(32)))
@@ -40,7 +43,7 @@ export async function beginGoogleLogin(from?: string): Promise<string> {
   try {
     sessionStorage.setItem(STORAGE_KEY, JSON.stringify(pending))
   } catch {
-    throw new Error('A böngésződ nem engedi a Google-belépéshez szükséges tárolást. Lépj be e-mail-címmel.')
+    throw new GoogleStorageUnavailable('A böngésződ nem engedi a Google-belépéshez szükséges tárolást. Lépj be e-mail-címmel.')
   }
 
   return authApi.googleRedirect(await challengeFor(verifier))

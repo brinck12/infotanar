@@ -3,14 +3,17 @@ import { ApiClient } from '../api/ApiClient'
 import { Outbox } from '../api/Outbox'
 import { GoogleStub } from '../mocks/google/GoogleStub'
 import { MockApi } from '../mocks/MockApi'
+import { AccountPage } from '../pages/AccountPage'
 import { AdminExamPage } from '../pages/AdminExamPage'
 import { AdminExercisePage } from '../pages/AdminExercisePage'
 import { ExamPage } from '../pages/ExamPage'
 import { HomePage } from '../pages/HomePage'
 import { LearningPathPage } from '../pages/LearningPathPage'
 import { LessonPage } from '../pages/LessonPage'
+import { LoginPage } from '../pages/LoginPage'
 import { OnboardingPage } from '../pages/OnboardingPage'
 import { OralPage } from '../pages/OralPage'
+import { ProgressPage } from '../pages/ProgressPage'
 import { RegisterPage } from '../pages/RegisterPage'
 import { SheetPracticePage } from '../pages/SheetPracticePage'
 import { TaskListPage } from '../pages/TaskListPage'
@@ -28,6 +31,7 @@ export interface FrameworkOptions {
 export interface FrameworkFixtures {
   /** Route-interception alapu backend mock; `mockBackend` eseten az alap katalogussal. */
   mockApi: MockApi
+  accountPage: AccountPage
   adminExamPage: AdminExamPage
   adminExercisePage: AdminExercisePage
   examPage: ExamPage
@@ -36,6 +40,8 @@ export interface FrameworkFixtures {
   oralPage: OralPage
   learningPathPage: LearningPathPage
   lessonPage: LessonPage
+  loginPage: LoginPage
+  progressPage: ProgressPage
   registerPage: RegisterPage
   sheetPracticePage: SheetPracticePage
   taskListPage: TaskListPage
@@ -73,6 +79,10 @@ export const test = base.extend<FrameworkFixtures & A11yFixtures & FrameworkOpti
 
   // Az oldalobjektumok a mockApi-tol fuggnek, igy a mockok mar a legelso
   // navigacio elott a helyukon vannak.
+  accountPage: async ({ page, mockApi: _ }, use) => {
+    await use(new AccountPage(page))
+  },
+
   adminExamPage: async ({ page, mockApi: _ }, use) => {
     await use(new AdminExamPage(page))
   },
@@ -103,6 +113,14 @@ export const test = base.extend<FrameworkFixtures & A11yFixtures & FrameworkOpti
 
   lessonPage: async ({ page, mockApi: _ }, use) => {
     await use(new LessonPage(page))
+  },
+
+  loginPage: async ({ page, mockApi: _ }, use) => {
+    await use(new LoginPage(page))
+  },
+
+  progressPage: async ({ page, mockApi: _ }, use) => {
+    await use(new ProgressPage(page))
   },
 
   registerPage: async ({ page, mockApi: _ }, use) => {

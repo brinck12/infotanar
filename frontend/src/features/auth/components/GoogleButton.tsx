@@ -2,7 +2,7 @@ import { useMutation } from '@tanstack/react-query'
 import { hibaUzenet } from '../../../shared/api/errors'
 import { Banner } from '../../../shared/ui/Banner'
 import { Button } from '../../../shared/ui/Button'
-import { beginGoogleLogin } from '../social'
+import { beginGoogleLogin, GoogleStorageUnavailable } from '../social'
 import { useAuthProviders } from '../useAuthProviders'
 
 /**
@@ -38,7 +38,9 @@ export function SocialLogin({ returnTo }: { returnTo?: string }) {
 
   return (
     <section aria-label="Belépés Google-lel" className="flex flex-col gap-4 border-t border-grid pt-5">
-      {start.isError && <Banner kind="error">{hibaUzenet(start.error)}</Banner>}
+      {start.isError && (
+        <Banner kind="error">{start.error instanceof GoogleStorageUnavailable ? start.error.message : hibaUzenet(start.error)}</Banner>
+      )}
       <Button variant="secondary" size="lg" fullWidth busy={start.isPending || start.isSuccess} busyLabel="Átirányítás a Google-hez…" onClick={() => start.mutate()}>
         <GoogleMark />
         Folytatás Google-lel
