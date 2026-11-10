@@ -36,3 +36,10 @@ tests/config/environments/*.local.env
 # A Laravel a keretrendszer level-sablonjainak feluliarasat a resources/views/vendor
 # ala varja; ez nem Composer-fuggoseg, verziokezelni kell (#137).
 !backend/resources/views/vendor/
+
+# graphify: a graph.json, graph.html es GRAPH_REPORT.md verziokezelt, a helyi gyorsitotar es gepfuggo fajlok nem
+graphify-out/cache/
+graphify-out/.graphify_python
+graphify-out/.graphify_root
+graphify-out/.graphify_build.json
+graphify-out/20*/
