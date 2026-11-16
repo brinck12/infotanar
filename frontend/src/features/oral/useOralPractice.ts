@@ -1,7 +1,7 @@
 import { useQuery, useQueryClient, type QueryClient } from '@tanstack/react-query'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { httpStatus } from '../../shared/api/errors'
-import { userKeyOf } from '../../shared/domain/lastTask'
+import { userKeyOf } from '../../shared/domain/userStorage'
 import { usePersistentState } from '../../shared/hooks/usePersistentState'
 import { useToast } from '../../shared/ui/useToast'
 import { useAuth } from '../auth/context'

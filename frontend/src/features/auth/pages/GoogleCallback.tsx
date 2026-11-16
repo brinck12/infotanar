@@ -3,12 +3,12 @@ import { useEffect, useRef, useState, type FormEvent } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { hibaUzenet, mezoHibak } from '../../../shared/api/errors'
 import { Banner } from '../../../shared/ui/Banner'
-import { CheckboxField, Field, SubmitButton } from '../../../shared/ui/Form'
+import { Field, SubmitButton } from '../../../shared/ui/Form'
 import { Skeleton } from '../../../shared/ui/States'
 import { LEGAL_VERSIONS } from '../../legal/documents'
-import { LegalLink } from '../../legal/LegalLink'
 import * as authApi from '../api'
 import { AuthCard } from '../components/AuthCard'
+import { TermsConsentField } from '../components/TermsConsentField'
 import { useAuth } from '../context'
 import { clearPendingGoogleLogin, pendingGoogleLogin } from '../social'
 import { useRegistrationMode } from '../useRegistrationMode'
@@ -153,18 +153,7 @@ function Consent({ name, email, code, verifier, landing }: { name: string; email
             hint="Zárt bétát futtatunk: a fiók létrehozásához meghívókód kell."
           />
         )}
-        <CheckboxField
-          checked={accepted}
-          onChange={(e) => setAccepted(e.target.checked)}
-          required
-          error={errors.accept_terms}
-          label={
-            <>
-              Elfogadom az <LegalLink to="terms">általános szerződési feltételeket</LegalLink>, és megismertem az{' '}
-              <LegalLink to="privacy">adatkezelési tájékoztatót</LegalLink>.
-            </>
-          }
-        />
+        <TermsConsentField checked={accepted} onChange={setAccepted} error={errors.accept_terms} />
         <SubmitButton busy={complete.isPending} busyLabel="Fiók létrehozása…" size="lg">
           Fiók létrehozása
         </SubmitButton>

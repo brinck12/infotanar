@@ -1,15 +1,13 @@
 import { useEffect, useMemo, useState } from 'react'
-import { userKeyOf } from '../../../shared/domain/lastTask'
-import { usePersistentState } from '../../../shared/hooks/usePersistentState'
-import { Badge, LevelBadge } from '../../../shared/ui/Badge'
+import { userKeyOf, userStorageKey } from '../../../shared/domain/userStorage'
+import { isStringRecord, usePersistentState } from '../../../shared/hooks/usePersistentState'
+import { Badge } from '../../../shared/ui/Badge'
 import { Button } from '../../../shared/ui/Button'
 import { cx } from '../../../shared/ui/cx'
 import { FileChip } from '../../../shared/ui/Dropzone'
 import { formatBytes, pointsLabel } from '../../../shared/ui/format'
 import { Panel } from '../../../shared/ui/Panel'
-import { Prose } from '../../../shared/ui/Prose'
-import { RubricItem } from '../../../shared/ui/RubricItem'
-import { CardTitle } from '../../../shared/ui/Text'
+import { TaskBrief } from '../../../shared/ui/TaskBrief'
 import type { UnlockedTaskDetail, WebTaskInfo } from '../../../types'
 import { useAuth } from '../../auth/context'
 import { CodeEditor } from '../../workspace/components/CodeEditor'
@@ -20,14 +18,10 @@ import { previewDocument, runWebChecks } from '../checks'
  * böngészőkeretben az előnézet, alatta az ellenőrzőlista. Minden a böngészőben
  * történik; az előnézet homokozóban fut, szkript nélkül.
  */
-function isFileDrafts(value: unknown): value is Record<string, string> {
-  return typeof value === 'object' && value !== null && !Array.isArray(value) && Object.values(value).every((item) => typeof item === 'string')
-}
-
 export function WebTaskWorkspace({ task, info }: { task: UnlockedTaskDetail; info: WebTaskInfo }) {
   const { user } = useAuth()
   // A kód a böngészőben megmarad (felhasználónként és feladatonként), újratöltés után is.
-  const [stored, storeFiles] = usePersistentState<Record<string, string>>(`infotanar.practice.v1.${userKeyOf(user)}.web.${task.id}`, {}, isFileDrafts)
+  const [stored, storeFiles] = usePersistentState<Record<string, string>>(userStorageKey('practice', userKeyOf(user), 'web', task.id), {}, isStringRecord)
   const [files, setFiles] = useState<ReadonlyMap<string, string>>(() => new Map(info.files.map((file) => [file.name, stored[file.name] ?? file.content])))
   useEffect(() => {
     storeFiles(Object.fromEntries(files))
@@ -60,43 +54,35 @@ export function WebTaskWorkspace({ task, info }: { task: UnlockedTaskDetail; inf
 
   return (
     <main className="mx-auto flex w-full max-w-work flex-wrap items-start gap-6 px-4 py-6 md:px-6">
-      <Panel as="section" pad="xl" aria-label="Feladat leírása" className="min-w-0 flex-1 basis-100 lg:max-w-form">
-        <h1 className="font-serif text-32 leading-tight font-semibold tracking-tight">{task.title}</h1>
-        <div className="mt-4 flex flex-wrap gap-2">
-          <LevelBadge level={task.level} />
-          <Badge kind="lang">HTML és CSS</Badge>
-          {info.exam_reference && <Badge kind="neutral">{info.exam_reference}</Badge>}
-        </div>
-        <Prose markdown={task.description} className="mt-6" />
-
-        {task.sources && task.sources.length > 0 && (
-          <div className="mt-6 flex flex-wrap gap-3">
-            {task.sources.map((file) => (
-              <FileChip key={file.name} name={file.name} size={formatBytes(file.size)} href={file.url} />
-            ))}
-          </div>
-        )}
-
-        <div className="mt-8 flex flex-wrap items-baseline justify-between gap-3">
-          <CardTitle>Ellenőrzés</CardTitle>
-          <span className="text-15 font-semibold" aria-live="polite">
-            {pointsLabel(earned, total)}
-          </span>
-        </div>
-        <ul className="mt-2" aria-live="polite">
-          {results.map((result) => (
-            <RubricItem
-              key={result.check.id}
-              state={result.state}
-              text={result.check.label}
-              points={result.state === 'ok' ? result.check.points : 0}
-              maxPoints={result.check.points}
-              found={result.found}
-              hint={result.state === 'ok' ? null : result.check.hint}
-            />
-          ))}
-        </ul>
-      </Panel>
+      <TaskBrief
+        task={task}
+        badges={
+          <>
+            <Badge kind="lang">HTML és CSS</Badge>
+            {info.exam_reference && <Badge kind="neutral">{info.exam_reference}</Badge>}
+          </>
+        }
+        extras={
+          task.sources && task.sources.length > 0 && (
+            <div className="mt-6 flex flex-wrap gap-3">
+              {task.sources.map((file) => (
+                <FileChip key={file.name} name={file.name} size={formatBytes(file.size)} href={file.url} />
+              ))}
+            </div>
+          )
+        }
+        checklistTitle="Ellenőrzés"
+        score={pointsLabel(earned, total)}
+        checks={results.map((result) => ({
+          id: result.check.id,
+          state: result.state,
+          text: result.check.label,
+          points: result.state === 'ok' ? result.check.points : 0,
+          maxPoints: result.check.points,
+          found: result.found,
+          hint: result.state === 'ok' ? null : result.check.hint,
+        }))}
+      />
 
       <div className="flex min-w-0 flex-1 basis-120 flex-col gap-6">
         <Panel kind="work" pad="none" as="section" aria-label="Szerkesztő" className="overflow-hidden">

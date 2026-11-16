@@ -7,6 +7,7 @@ import { hibaUzenet, varakozas, zarolasOka, type ExecutionWait } from '../../../
 import { LANGUAGE_LABEL } from '../../../shared/domain/labels'
 import { rememberLastTask } from '../../../shared/domain/lastTask'
 import { formatMemoryLimit, formatTimeLimit } from '../../../shared/domain/limits'
+import { userKeyOf, userStorageKey } from '../../../shared/domain/userStorage'
 import { useCountdown } from '../../../shared/hooks/useCountdown'
 import { useMediaQuery } from '../../../shared/hooks/useMediaQuery'
 import { usePersistentState } from '../../../shared/hooks/usePersistentState'
@@ -196,7 +197,7 @@ function Workspace({ task }: { task: UnlockedTaskDetail }) {
   // Keskeny nézetben (#30) melyik fül látszik; a leírással kezdünk.
   const [view, setView] = useState<WorkspaceView>('task')
   // Felhasználónként (ugyanazon a gépen) megőrzött panelarány (#29).
-  const [split, setSplit] = usePersistentState(`infotanar.workspace.split.${user?.id ?? 'guest'}`, DEFAULT_SPLIT, isSplitRatio)
+  const [split, setSplit] = usePersistentState(userStorageKey('workspaceSplit', userKeyOf(user)), DEFAULT_SPLIT, isSplitRatio)
 
   const [wait, setWait] = useState<ExecutionWait | null>(null)
   const countdown = useCountdown()

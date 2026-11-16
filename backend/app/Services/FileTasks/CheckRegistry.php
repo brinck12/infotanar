@@ -37,16 +37,6 @@ final class CheckRegistry
     }
 
     /**
-     * Azok a kiterjesztesek, amelyekhez van olvaso.
-     *
-     * @return list<string>
-     */
-    public function readableExtensions(): array
-    {
-        return array_keys($this->readers());
-    }
-
-    /**
      * A tipus osszes kezeloje, konfiguracios sorrendben; ures, ha nincs.
      *
      * @return list<CheckHandler>

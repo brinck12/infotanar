@@ -43,8 +43,3 @@ export function CardTitle({ children, className, id, as: Tag = 'h3' }: TextProps
 export function Lead({ children, className }: TextProps) {
   return <p className={cx('text-19 leading-relaxed text-ink-soft', className)}>{children}</p>
 }
-
-/** Kódrészlet a folyó szövegben. */
-export function InlineCode({ children }: { children: ReactNode }) {
-  return <code className="rounded-sm bg-headrow px-1.5 py-px text-inline">{children}</code>
-}

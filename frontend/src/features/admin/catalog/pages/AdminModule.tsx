@@ -2,10 +2,11 @@ import { useQuery } from '@tanstack/react-query'
 import { useState, type FormEvent } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { mezoHibak } from '../../../../shared/api/errors'
-import { Field, SubmitButton, TextAreaField } from '../../../../shared/ui/Form'
+import { TextAreaField } from '../../../../shared/ui/Form'
 import { moduleQuery, trackQuery, type AdminLesson, type AdminModule, type ModulePayload } from '../api'
 import { AdminShell, Section, StatusPill } from '../../components/AdminShell'
 import { ChildList } from '../components/ChildList'
+import { SaveRow, TitleSlugFields } from '../components/EntityFields'
 import { MutationError, QueryState } from '../components/QueryState'
 import { QuickCreate } from '../components/QuickCreate'
 import { SavedNote } from '../components/SavedNote'
@@ -52,10 +53,7 @@ function ModuleEditor({ module }: { module: AdminModule }) {
       <Section title="Modul adatai" aside={<SavedNote mutation={save} />}>
         <MutationError error={save.error} fields={['title', 'slug', 'description']} />
         <form onSubmit={submit} noValidate className="grid gap-5">
-          <div className="grid gap-5 sm:grid-cols-2">
-            <Field label="Cím" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} error={errors.title} />
-            <Field label="URL-azonosító" value={form.slug} onChange={(e) => setForm({ ...form, slug: e.target.value })} error={errors.slug} />
-          </div>
+          <TitleSlugFields title={form.title} slug={form.slug} errors={errors} onTitle={(title) => setForm({ ...form, title })} onSlug={(slug) => setForm({ ...form, slug })} />
           <TextAreaField
             label="Leírás"
             rows={3}
@@ -63,11 +61,7 @@ function ModuleEditor({ module }: { module: AdminModule }) {
             onChange={(e) => setForm({ ...form, description: e.target.value || null })}
             error={errors.description}
           />
-          <div>
-            <SubmitButton busy={save.isPending} fullWidth={false}>
-              {save.isPending ? 'Mentés…' : 'Mentés'}
-            </SubmitButton>
-          </div>
+          <SaveRow busy={save.isPending} />
         </form>
       </Section>
 

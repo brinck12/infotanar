@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 import { useSearchParams } from 'react-router-dom'
-import { readLastTask, userKeyOf } from '../../../shared/domain/lastTask'
+import { readLastTask } from '../../../shared/domain/lastTask'
+import { userKeyOf } from '../../../shared/domain/userStorage'
 import { Banner } from '../../../shared/ui/Banner'
 import { ButtonLink } from '../../../shared/ui/Button'
 import { FilterChips, type FilterOption } from '../../../shared/ui/FilterChips'

@@ -1,4 +1,5 @@
 import type { Level } from '../../types'
+import { userStorageKey } from './userStorage'
 
 /**
  * A tanuló céljai (szint, vizsgaidőszak, nyelv, heti óraszám). Belépve a
@@ -34,7 +35,7 @@ export const DEFAULT_PREFERENCES: StudyPreferences = {
   weeklyHours: '3-4',
 }
 
-export const preferencesKey = (userKey: string) => `infotanar.preferences.v1.${userKey}`
+export const preferencesKey = (userKey: string) => userStorageKey('preferences', userKey)
 
 export function isStudyPreferences(value: unknown): value is StudyPreferences {
   if (typeof value !== 'object' || value === null) return false

@@ -146,12 +146,6 @@ final class Vocabulary
         return self::KINDS[$kind][0] ?? self::KINDS['other'][0];
     }
 
-    /** @return list<string> */
-    public static function kindKeys(): array
-    {
-        return array_keys(self::KINDS);
-    }
-
     public static function normaliseEffect(string $text): ?string
     {
         return self::lookup(self::EFFECTS, $text);

@@ -1,3 +1,4 @@
+import { userStorageKey } from './userStorage'
 /**
  * A legutóbb megnyitott feladat a böngészőben, felhasználónként: ebből lesz az
  * „Itt tartottál legutóbb” sor. Kényelmi adat, a szerver nem tud róla.
@@ -9,7 +10,7 @@ export interface LastTask {
   openedAt: number
 }
 
-const key = (userKey: string) => `infotanar.lastTask.v1.${userKey}`
+const key = (userKey: string) => userStorageKey('lastTask', userKey)
 
 function isLastTask(value: unknown): value is LastTask {
   if (typeof value !== 'object' || value === null) return false
@@ -33,8 +34,4 @@ export function rememberLastTask(userKey: string, task: Omit<LastTask, 'openedAt
   } catch {
     // Tiltott vagy teli tárhely: a sor egyszerűen nem jelenik meg.
   }
-}
-
-export function userKeyOf(user: { id: number } | null): string {
-  return user ? `u${user.id}` : 'guest'
 }

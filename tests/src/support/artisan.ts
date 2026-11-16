@@ -145,7 +145,7 @@ export function artisanResult(args: string[]): ArtisanResult {
  */
 export function plantLessonCompletion(userId: number, minutesFromWeekStart: number): void {
   tinkerJson(`
-    $when = Carbon\\CarbonImmutable::now('Europe/Budapest')->startOfWeek()->startOfDay()->addMinutes(${String(minutesFromWeekStart)});
+    $when = Carbon\\CarbonImmutable::now('Europe/Budapest')->startOfWeek()->startOfDay()->addMinutes(${String(minutesFromWeekStart)})->utc();
     $done = App\\Models\\LessonCompletion::query()->where('user_id', ${String(userId)})->pluck('lesson_id');
     $lesson = App\\Models\\Lesson::query()->whereNotIn('id', $done)->firstOrFail();
     App\\Models\\LessonCompletion::query()->create(['user_id' => ${String(userId)}, 'lesson_id' => $lesson->id, 'completed_at' => $when]);
