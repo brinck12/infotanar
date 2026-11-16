@@ -1,3 +1,4 @@
+import { userStorageKey } from '../../shared/domain/userStorage'
 import type { LanguageKey } from '../../types'
 
 /**
@@ -7,7 +8,7 @@ import type { LanguageKey } from '../../types'
  * tárhelynél csendben nem ment.
  */
 
-const PREFIX = 'infotanar.draft.v1.'
+const DRAFT_ROOT = userStorageKey('draft', '')
 /** Ennél régebbi piszkozatot nem tartunk meg (a tárhely véges). */
 const MAX_AGE_MS = 60 * 24 * 60 * 60 * 1000
 /** A backend is 64 KB körül korlátozza a forráskódot; nagyobbat nem érdemes menteni. */
@@ -23,8 +24,8 @@ export interface DraftScope {
   taskId: number
 }
 
-const codeKey = (scope: DraftScope, language: LanguageKey) => `${PREFIX}${scope.userKey}.${scope.taskId}.${language}`
-const languageKey = (scope: DraftScope) => `${PREFIX}${scope.userKey}.${scope.taskId}.lang`
+const codeKey = (scope: DraftScope, language: LanguageKey) => userStorageKey('draft', scope.userKey, scope.taskId, language)
+const languageKey = (scope: DraftScope) => userStorageKey('draft', scope.userKey, scope.taskId, 'lang')
 
 function isStoredDraft(value: unknown): value is StoredDraft {
   return (
@@ -93,7 +94,7 @@ export function pruneDrafts(): void {
     const stale: string[] = []
     for (let i = 0; i < localStorage.length; i++) {
       const key = localStorage.key(i)
-      if (!key?.startsWith(PREFIX) || key.endsWith('.lang')) continue
+      if (!key?.startsWith(DRAFT_ROOT) || key.endsWith('.lang')) continue
       const value = readJson(key)
       if (!isStoredDraft(value) || Date.now() - value.savedAt >= MAX_AGE_MS) stale.push(key)
     }

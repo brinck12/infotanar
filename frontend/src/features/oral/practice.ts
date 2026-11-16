@@ -1,3 +1,5 @@
+import { userStorageKey } from '../../shared/domain/userStorage'
+
 /**
  * Egy szóbeli tétel gyakorlásának állapota a böngészőben, felhasználónként és
  * témánként: kipipált vázlatpontok, jegyzet, önértékelés és a gyakorlások száma.
@@ -12,7 +14,7 @@ export interface OralPractice {
 
 export const EMPTY_PRACTICE: OralPractice = { checked: [], notes: '', scores: {}, attempts: 0 }
 
-export const practiceKey = (userKey: string, slug: string) => `infotanar.oral.v1.${userKey}.${slug}`
+export const practiceKey = (userKey: string, slug: string) => userStorageKey('oral', userKey, slug)
 
 export function isOralPractice(value: unknown): value is OralPractice {
   if (typeof value !== 'object' || value === null) return false

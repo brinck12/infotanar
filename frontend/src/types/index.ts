@@ -5,13 +5,6 @@ export type Level = 'kozep' | 'emelt'
 /** A `tasks.allowed_languages` mezőben és a futtatáskor használt nyelvkulcs. */
 export type LanguageKey = 'python' | 'csharp' | 'sql'
 
-export interface Topic {
-  id: number
-  name: string
-  slug: string
-  task_count: number
-}
-
 export interface TaskTopic {
   id: number
   name: string

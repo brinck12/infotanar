@@ -145,9 +145,6 @@ function round(args: Evaluated[], method: (value: number) => number = Math.round
   return method(toNumber(value) * factor) / factor
 }
 
-/** A képletekben használható függvények neve (a súgóhoz és az ellenőrzéshez). */
-export const FUNCTION_NAMES: ReadonlyArray<string> = Object.keys(FUNCTIONS)
-
 class Parser {
   private position = 0
   private readonly tokens: Token[]

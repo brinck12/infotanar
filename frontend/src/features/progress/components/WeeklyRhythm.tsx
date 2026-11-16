@@ -7,13 +7,14 @@ import { Button } from '../../../shared/ui/Button'
 import { cx } from '../../../shared/ui/cx'
 import { Panel } from '../../../shared/ui/Panel'
 import { CardTitle } from '../../../shared/ui/Text'
+import { userKeyOf, userStorageKey } from '../../../shared/domain/userStorage'
 import { useAuth } from '../../auth/context'
 import { rhythmQuery } from '../api'
 
 const DAY_NAMES = ['hétfő', 'kedd', 'szerda', 'csütörtök', 'péntek', 'szombat', 'vasárnap'] as const
 const DAY_LETTERS = ['H', 'K', 'Sz', 'Cs', 'P', 'Sz', 'V'] as const
 
-const offerKey = (userId: number) => `infotanar.rhythm.offer.v1.u${userId}`
+const offerKey = (userId: number) => userStorageKey('rhythmOffer', userKeyOf({ id: userId }))
 
 function offerDismissed(userId: number): boolean {
   try {

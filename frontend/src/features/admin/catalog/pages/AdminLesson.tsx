@@ -4,10 +4,11 @@ import { useParams } from 'react-router-dom'
 import { mezoHibak } from '../../../../shared/api/errors'
 import { LEVEL_LABEL } from '../../../../shared/domain/labels'
 import { ButtonLink } from '../../../../shared/ui/Button'
-import { CheckboxField, Field, SubmitButton, TextAreaField } from '../../../../shared/ui/Form'
+import { CheckboxField, Field, TextAreaField } from '../../../../shared/ui/Form'
 import { lessonQuery, moduleQuery, trackQuery, type AdminExercise, type AdminLesson, type LessonPayload } from '../api'
 import { AdminShell, Section, StatusPill } from '../../components/AdminShell'
 import { ChildList } from '../components/ChildList'
+import { SaveRow, TitleSlugFields } from '../components/EntityFields'
 import { MutationError, QueryState } from '../components/QueryState'
 import { SavedNote } from '../components/SavedNote'
 import { useChildMutations, useSaveEntity } from '../useCatalogMutations'
@@ -57,10 +58,7 @@ function LessonEditor({ lesson }: { lesson: AdminLesson }) {
       <Section title="Lecke adatai" aside={<SavedNote mutation={save} />}>
         <MutationError error={save.error} fields={['title', 'slug', 'content', 'video_path', 'captions_path', 'is_free', 'is_published']} />
         <form onSubmit={submit} noValidate className="grid gap-5">
-          <div className="grid gap-5 sm:grid-cols-2">
-            <Field label="Cím" value={form.title} onChange={(e) => set('title', e.target.value)} error={errors.title} />
-            <Field label="URL-azonosító" value={form.slug} onChange={(e) => set('slug', e.target.value)} error={errors.slug} />
-          </div>
+          <TitleSlugFields title={form.title} slug={form.slug} errors={errors} onTitle={(value) => set('title', value)} onSlug={(value) => set('slug', value)} />
           <TextAreaField
             label="Tananyag (Markdown)"
             rows={8}
@@ -101,11 +99,7 @@ function LessonEditor({ lesson }: { lesson: AdminLesson }) {
               error={errors.is_published}
             />
           </div>
-          <div>
-            <SubmitButton busy={save.isPending} fullWidth={false}>
-              {save.isPending ? 'Mentés…' : 'Mentés'}
-            </SubmitButton>
-          </div>
+          <SaveRow busy={save.isPending} />
         </form>
       </Section>
 

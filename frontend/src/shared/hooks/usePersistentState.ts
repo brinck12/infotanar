@@ -1,5 +1,10 @@
 import { useCallback, useState } from 'react'
 
+/** Szöveg-szöveg párok objektuma (fájlnév → tartalom, cella → érték). */
+export function isStringRecord(value: unknown): value is Record<string, string> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value) && Object.values(value).every((item) => typeof item === 'string')
+}
+
 function read<T>(key: string, fallback: T, isValid: (value: unknown) => value is T): T {
   try {
     const raw = localStorage.getItem(key)

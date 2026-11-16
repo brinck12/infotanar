@@ -47,12 +47,6 @@ final readonly class RubricCheckCatalog
         return $firstError ?? __('filetasks.check_unavailable');
     }
 
-    /** Ertekelheto-e a tipus automatikusan (van-e hozza legalabb egy kezelo). */
-    public function isAutomated(RubricCheckType $checkType): bool
-    {
-        return $this->registry->handlersFor($checkType) !== [];
-    }
-
     /**
      * Az automatikusan ertekelheto tipusok.
      *

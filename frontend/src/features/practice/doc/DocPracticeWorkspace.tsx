@@ -1,13 +1,12 @@
 import { useMemo, useState } from 'react'
-import { Badge, LevelBadge } from '../../../shared/ui/Badge'
+import { Badge } from '../../../shared/ui/Badge'
 import { Button } from '../../../shared/ui/Button'
 import { cx } from '../../../shared/ui/cx'
 import { SelectField } from '../../../shared/ui/Form'
 import { Icon, type IconName } from '../../../shared/ui/Icon'
 import { Panel } from '../../../shared/ui/Panel'
-import { Prose } from '../../../shared/ui/Prose'
-import { RubricItem, type RubricState } from '../../../shared/ui/RubricItem'
-import { CardTitle } from '../../../shared/ui/Text'
+import type { RubricState } from '../../../shared/ui/RubricItem'
+import { TaskBrief } from '../../../shared/ui/TaskBrief'
 import type { DocPracticeInfo, UnlockedTaskDetail } from '../../../types'
 
 type Align = 'left' | 'center' | 'right' | 'justify'
@@ -80,37 +79,19 @@ export function DocPracticeWorkspace({ task, info }: { task: UnlockedTaskDetail;
 
   return (
     <main className="mx-auto flex w-full max-w-work flex-wrap items-start gap-6 px-4 py-6 md:px-6">
-      <Panel as="section" pad="xl" aria-label="Feladat leírása" className="min-w-0 flex-1 basis-100 lg:max-w-form">
-        <h1 className="font-serif text-32 leading-tight font-semibold tracking-tight">{task.title}</h1>
-        <div className="mt-4 flex flex-wrap gap-2">
-          <LevelBadge level={task.level} />
-          <Badge kind="lang">Böngészős gyakorló</Badge>
-        </div>
-        <Prose markdown={task.description} className="mt-6" />
-
-        <div className="mt-8 flex flex-wrap items-baseline justify-between gap-3">
-          <CardTitle>Ellenőrzőlista</CardTitle>
-          <span className="text-15 font-semibold">
-            {done} / {results.length} kész
-          </span>
-        </div>
-        <p className="mt-1 text-15 text-ink-soft">Dolgozz közvetlenül a lapon. A lista élőben frissül.</p>
-        <ul className="mt-2" aria-live="polite">
-          {results.map((result) => (
-            <RubricItem
-              key={result.check.id}
-              state={result.state}
-              text={result.check.label}
-              points={result.state === 'ok' ? 1 : 0}
-              maxPoints={1}
-              found={result.found}
-            />
-          ))}
-        </ul>
-        <Button variant="text" onClick={() => setFormats(info.paragraphs.map(() => DEFAULT_FORMAT))} className="mt-4">
-          Kiinduló szöveg
-        </Button>
-      </Panel>
+      <TaskBrief
+        task={task}
+        badges={<Badge kind="lang">Böngészős gyakorló</Badge>}
+        checklistTitle="Ellenőrzőlista"
+        score={`${done} / ${results.length} kész`}
+        note="Dolgozz közvetlenül a lapon. A lista élőben frissül."
+        checks={results.map((result) => ({ id: result.check.id, state: result.state, text: result.check.label, points: result.state === 'ok' ? 1 : 0, maxPoints: 1, found: result.found }))}
+        footer={
+          <Button variant="text" onClick={() => setFormats(info.paragraphs.map(() => DEFAULT_FORMAT))} className="mt-4">
+            Kiinduló szöveg
+          </Button>
+        }
+      />
 
       <Panel kind="work" pad="none" as="section" aria-label="Dokumentum" className="min-w-0 flex-1 basis-120 overflow-hidden">
         <div role="toolbar" aria-label="Formázás" className="flex flex-wrap items-end gap-x-4 gap-y-3 border-b border-line bg-headrow px-4 py-3">

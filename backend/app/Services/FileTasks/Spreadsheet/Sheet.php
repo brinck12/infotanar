@@ -87,38 +87,9 @@ final readonly class Sheet
         return round($stored * self::DIGIT_WIDTH_PIXELS) * self::MILLIMETRES_PER_PIXEL;
     }
 
-    public static function millimetresToCharacters(float $millimetres): float
-    {
-        return max(0.0, ($millimetres / self::MILLIMETRES_PER_PIXEL - self::COLUMN_PADDING_PIXELS) / self::DIGIT_WIDTH_PIXELS);
-    }
-
     public function cell(int $column, int $row): ?Cell
     {
         return $this->rows[$row][$column] ?? null;
-    }
-
-    /**
-     * A tartomany kitoltott cellai sorfolytonosan: [oszlop, sor, cella].
-     *
-     * @return list<array{0: int, 1: int, 2: Cell}>
-     */
-    public function cellsIn(CellRange $range): array
-    {
-        $found = [];
-
-        foreach ($this->rows as $row => $cells) {
-            if ($row < $range->firstRow || $row > $range->lastRow) {
-                continue;
-            }
-
-            foreach ($cells as $column => $cell) {
-                if ($column >= $range->firstColumn && $column <= $range->lastColumn) {
-                    $found[] = [$column, $row, $cell];
-                }
-            }
-        }
-
-        return $found;
     }
 
     /** Az oszlop szelessege milliméterben; ha a fajl nem adja meg, a lap alapszelessege. */

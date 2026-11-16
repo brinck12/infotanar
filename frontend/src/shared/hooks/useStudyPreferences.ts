@@ -1,7 +1,7 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useCallback, useEffect, useRef } from 'react'
 import { httpStatus } from '../api/errors'
-import { userKeyOf } from '../domain/lastTask'
+import { userKeyOf } from '../domain/userStorage'
 import {
   DEFAULT_PREFERENCES,
   forgetStoredPreferences,
