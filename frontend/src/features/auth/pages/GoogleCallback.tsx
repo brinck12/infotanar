@@ -5,6 +5,7 @@ import { hibaReszek, hibaUzenet } from '../../../shared/api/errors'
 import { Banner } from '../../../shared/ui/Banner'
 import { SubmitButton } from '../../../shared/ui/Form'
 import { Skeleton } from '../../../shared/ui/States'
+import { LANDING_PATH } from '../../../shared/navigation'
 import * as authApi from '../api'
 import { AuthCard } from '../components/AuthCard'
 import { InviteCodeField } from '../components/InviteCodeField'
@@ -13,7 +14,6 @@ import { useAuth } from '../context'
 import { clearPendingGoogleLogin, pendingGoogleLogin } from '../social'
 import { useSignupConsent } from '../useSignupConsent'
 
-const DEFAULT_LANDING = '/feladatok'
 
 const FAILED_TEXT = 'A Google-belépés nem sikerült. Próbáld újra, vagy lépj be e-mail-címmel.'
 const CANCELLED_TEXT = 'A Google-belépést megszakítottad. Ha mégis szeretnéd, próbáld újra, vagy lépj be e-mail-címmel.'
@@ -33,7 +33,7 @@ export function GoogleCallback() {
   // A tárolt adat a renderek között változatlan; egyszer olvassuk, mielőtt a belépés törölné.
   const [pending] = useState(pendingGoogleLogin)
 
-  const landing = pending?.from ?? DEFAULT_LANDING
+  const landing = pending?.from ?? LANDING_PATH
 
   const exchange = useMutation({
     mutationFn: async (): Promise<authApi.GoogleExchange> => {

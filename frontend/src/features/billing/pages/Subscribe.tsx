@@ -1,7 +1,9 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useId, useState } from 'react'
-import { Navigate } from 'react-router-dom'
+import { Navigate, useLocation } from 'react-router-dom'
 import { hibaReszek, hibaUzenet, mezoHibak } from '../../../shared/api/errors'
+import { userKeyOf } from '../../../shared/domain/userStorage'
+import { readFrom } from '../../../shared/navigation'
 import { Banner } from '../../../shared/ui/Banner'
 import { Breadcrumb } from '../../../shared/ui/Breadcrumb'
 import { Button } from '../../../shared/ui/Button'
@@ -17,6 +19,7 @@ import { LEGAL_VERSIONS } from '../../legal/documents'
 import { LegalLink } from '../../legal/LegalLink'
 import * as billingApi from '../api'
 import { billingKeys } from '../api'
+import { rememberCheckoutReturn } from '../checkoutReturn'
 import { BillingProfileForm } from '../components/BillingProfileForm'
 import { formatHuf } from '../format'
 
@@ -73,6 +76,9 @@ export function Subscribe() {
 
 function CheckoutForm({ initial, plan }: { initial: BillingProfile | null; plan: Plan }) {
   const queryClient = useQueryClient()
+  const { user } = useAuth()
+  // Az oldal, ahonnan az előfizetéshez indult (pl. zárolt lecke): a fizetés után ide vezet vissza.
+  const from = readFrom(useLocation().state)
   const formId = useId()
   const [accepted, setAccepted] = useState(false)
   const [termsError, setTermsError] = useState(false)
@@ -85,7 +91,10 @@ function CheckoutForm({ initial, plan }: { initial: BillingProfile | null; plan:
   })
   const checkout = useMutation({
     mutationFn: billingApi.checkout,
-    onSuccess: ({ checkout_url }) => window.location.assign(checkout_url),
+    onSuccess: ({ checkout_url }) => {
+      rememberCheckoutReturn(userKeyOf(user), from)
+      window.location.assign(checkout_url)
+    },
   })
 
   const busy = save.isPending || checkout.isPending || checkout.isSuccess

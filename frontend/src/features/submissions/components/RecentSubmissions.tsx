@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import { Link } from 'react-router-dom'
+import { originState } from '../../../shared/navigation'
 import { Panel } from '../../../shared/ui/Panel'
 import { LoadError, Skeleton } from '../../../shared/ui/States'
 import { CardTitle } from '../../../shared/ui/Text'
@@ -30,7 +31,7 @@ export function RecentSubmissions() {
             (submission) =>
               submission.exercise && (
                 <li key={submission.id} data-testid="recent-submission" className="border-t border-grid">
-                  <Link to={`/feladatok/${submission.exercise.id}`} className="flex min-h-11 items-center py-2 no-underline hover:bg-note">
+                  <Link to={`/feladatok/${submission.exercise.id}`} state={originState({ label: 'Haladásom', to: '/haladas' })} className="flex min-h-11 items-center py-2 no-underline hover:bg-note">
                     <SubmissionLine submission={submission} title={submission.exercise.title} />
                   </Link>
                 </li>

@@ -1,6 +1,7 @@
 import { useMutation } from '@tanstack/react-query'
 import { useLocation } from 'react-router-dom'
 import { hibaUzenet } from '../../../shared/api/errors'
+import { fromState } from '../../../shared/navigation'
 import { Banner } from '../../../shared/ui/Banner'
 import { Button, ButtonLink } from '../../../shared/ui/Button'
 import { Icon, type IconName } from '../../../shared/ui/Icon'
@@ -57,7 +58,7 @@ export function Paywall({ reason, message }: Props) {
 function PaywallAction({ reason }: { reason: LockReason }) {
   const location = useLocation()
   const resend = useMutation({ mutationFn: authApi.resendVerification })
-  const from = { from: location.pathname + location.search }
+  const from = fromState(location.pathname + location.search)
 
   switch (reason) {
     case 'login_required':
@@ -66,7 +67,7 @@ function PaywallAction({ reason }: { reason: LockReason }) {
           <ButtonLink to="/bejelentkezes" state={from}>
             Belépés
           </ButtonLink>
-          <ButtonLink to="/regisztracio" variant="secondary">
+          <ButtonLink to="/regisztracio" state={from} variant="secondary">
             Regisztráció
           </ButtonLink>
         </div>
@@ -89,7 +90,9 @@ function PaywallAction({ reason }: { reason: LockReason }) {
     case 'subscription_required':
       return (
         <div className="flex flex-wrap gap-3">
-          <ButtonLink to="/elofizetes">Prémium előfizetés</ButtonLink>
+          <ButtonLink to="/elofizetes" state={from}>
+            Prémium előfizetés
+          </ButtonLink>
           <ButtonLink to="/arak" variant="text">
             Árak
           </ButtonLink>

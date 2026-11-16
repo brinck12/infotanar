@@ -15,6 +15,8 @@ export class TaskSolvePage extends BasePage {
   /** A futtatasi korlat uzenete az eredmenypanel helyen (#148). */
   readonly rateLimitNotice: Locator
   readonly executionLimits: Locator
+  /** A fejlec morzsamenuje: megmutatja, honnan erkeztunk a feladatra. */
+  readonly breadcrumb: Locator
 
   constructor(page: Page) {
     super(page)
@@ -26,6 +28,7 @@ export class TaskSolvePage extends BasePage {
     this.nextStep = page.getByTestId('next-step')
     this.rateLimitNotice = page.getByTestId('rate-limit-notice')
     this.executionLimits = page.getByTestId('execution-limits')
+    this.breadcrumb = page.getByRole('navigation', { name: 'Morzsamenü' })
   }
 
   /** A feladat oldala URL-je, pl. a navigacio ellenorzesehez. */

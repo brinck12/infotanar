@@ -2,6 +2,8 @@ import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { hibaUzenet } from '../../../shared/api/errors'
+import { userKeyOf } from '../../../shared/domain/userStorage'
+import { fromState, LANDING_PATH } from '../../../shared/navigation'
 import { Button, ButtonLink } from '../../../shared/ui/Button'
 import { cx } from '../../../shared/ui/cx'
 import { Icon, type IconName } from '../../../shared/ui/Icon'
@@ -9,6 +11,7 @@ import { Panel } from '../../../shared/ui/Panel'
 import type { PaymentSummary } from '../../../types'
 import { useAuth } from '../../auth/context'
 import * as billingApi from '../api'
+import { clearCheckoutReturn, readCheckoutReturn } from '../checkoutReturn'
 import { formatHuf } from '../format'
 
 const POLL_MS = 2000
@@ -27,7 +30,10 @@ export function PaymentReturn() {
   const [startedAt] = useState(() => Date.now())
   const [gaveUp, setGaveUp] = useState(false)
   const queryClient = useQueryClient()
-  const { refresh } = useAuth()
+  const { user, refresh } = useAuth()
+  const userKey = userKeyOf(user)
+  // Az oldal, ahonnan a fizetés indult; egyszer olvassuk, mielőtt a siker törli.
+  const [returnTo] = useState(() => readCheckoutReturn(userKey))
   // A végleges eredményt megjegyezzük: a hozzáférés frissítése minden lekérdezést
   // (ezt is) alaphelyzetbe állít, és az eredmény közben nem tűnhet el a képernyőről.
   const [settled, setSettled] = useState<PaymentSummary | null>(null)
@@ -48,10 +54,11 @@ export function PaymentReturn() {
     if (settled?.status !== 'succeeded' || refreshed.current) return
     refreshed.current = true
     void refresh()
+    clearCheckoutReturn(userKey)
     void queryClient.invalidateQueries({ queryKey: ['billing'] })
     void queryClient.invalidateQueries({ queryKey: ['catalog'] })
     void queryClient.invalidateQueries({ queryKey: ['progress'] })
-  }, [settled?.status, queryClient, refresh])
+  }, [settled?.status, queryClient, refresh, userKey])
 
   useEffect(() => {
     if (settled) return
@@ -71,7 +78,7 @@ export function PaymentReturn() {
           Ezt az oldalt a Barion fizetőoldaláról visszatérve látod. A fizetéseid állapotát a fiókodban találod.
         </Result>
       ) : settled ? (
-        <Outcome payment={settled} />
+        <Outcome payment={settled} returnTo={returnTo} />
       ) : payment.isError ? (
         <Result
           tone="bad"
@@ -135,7 +142,7 @@ function Result({ tone, icon, title, children, actions }: ResultProps) {
   )
 }
 
-function Outcome({ payment }: { payment: PaymentSummary }) {
+function Outcome({ payment, returnTo }: { payment: PaymentSummary; returnTo: string | undefined }) {
   if (payment.status === 'succeeded') {
     return (
       <Result
@@ -144,7 +151,7 @@ function Outcome({ payment }: { payment: PaymentSummary }) {
         title="Sikeres fizetés"
         actions={
           <>
-            <ButtonLink to="/tanulasi-ut">Tovább a tanuláshoz</ButtonLink>
+            <ButtonLink to={returnTo ?? LANDING_PATH}>{returnTo ? 'Vissza oda, ahol tartottál' : 'Tovább a tanuláshoz'}</ButtonLink>
             <ButtonLink to="/fiok/fizetesek" variant="text">
               Számla megtekintése
             </ButtonLink>
@@ -175,7 +182,9 @@ function Outcome({ payment }: { payment: PaymentSummary }) {
       title="A fizetés nem sikerült"
       actions={
         <>
-          <ButtonLink to="/elofizetes">Újrapróbálom</ButtonLink>
+          <ButtonLink to="/elofizetes" state={fromState(returnTo)}>
+            Újrapróbálom
+          </ButtonLink>
           <ButtonLink to="/arak" variant="text">
             Vissza az árakhoz
           </ButtonLink>

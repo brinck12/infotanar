@@ -2,6 +2,7 @@ import { useMutation } from '@tanstack/react-query'
 import { useState, type FormEvent } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { hibaReszek } from '../../../shared/api/errors'
+import { fromState, readFrom } from '../../../shared/navigation'
 import { Banner } from '../../../shared/ui/Banner'
 import { Field, SubmitButton } from '../../../shared/ui/Form'
 import { AuthCard } from '../components/AuthCard'
@@ -9,11 +10,11 @@ import { SocialLogin } from '../components/GoogleButton'
 import { useAuth } from '../context'
 import { useRegistrationMode } from '../useRegistrationMode'
 
-/** Sikeres belépés után a GuestOnly guard visz tovább (a `from` helyre vagy a feladatokhoz). */
+/** Sikeres belépés után a GuestOnly guard visz tovább (a `from` helyre vagy a tanulási útra). */
 export function Login() {
   const { login, sessionExpired } = useAuth()
   const { mode } = useRegistrationMode()
-  const from = (useLocation().state as { from?: string } | null)?.from
+  const from = readFrom(useLocation().state)
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
 
@@ -33,12 +34,17 @@ export function Login() {
       footer={
         mode === 'invite' ? (
           <>
-            Zárt béta fut. Van meghívókódod? <Link to="/regisztracio">Regisztrálj vele</Link>. Nincs még? A regisztrációs oldalon
+            Zárt béta fut. Van meghívókódod? <Link to="/regisztracio" state={fromState(from)}>
+              Regisztrálj vele
+            </Link>. Nincs még? A regisztrációs oldalon
             feliratkozhatsz a várólistára.
           </>
         ) : (
           <>
-            Még nincs fiókod? <Link to="/regisztracio">Regisztrálj</Link>, ingyenes.
+            Még nincs fiókod? <Link to="/regisztracio" state={fromState(from)}>
+              Regisztrálj
+            </Link>
+            , ingyenes.
           </>
         )
       }

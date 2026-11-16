@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
 import type { ExerciseStatus, LanguageKey, Level } from '../../types'
 import { LANGUAGE_LABEL } from '../domain/labels'
+import { originState, type Origin } from '../navigation'
 import { Badge, LevelBadge } from './Badge'
 import { cx } from './cx'
 import { Icon, StateIcon } from './Icon'
@@ -26,10 +27,12 @@ interface TaskCardProps {
   task: TaskCardData
   /** A tanuló állapota a feladatnál (#146): `null`, ha még nem adott be; bejelentkezés nélkül nem ismert. */
   status?: ExerciseStatus | null
+  /** Az oldal, ahol a kártya áll: a feladat morzsamenüje innen indul, és ide lehet visszalépni. */
+  origin?: Origin
 }
 
 /** Feladatkártya: minden állapotban ugyanaz az elrendezés, csak az alsó sor változik. */
-export function TaskCard({ task, status }: TaskCardProps) {
+export function TaskCard({ task, status, origin }: TaskCardProps) {
   const locked = task.locked ?? false
   const line = locked ? { text: 'Prémium kell hozzá', className: 'text-ink-soft' } : status === undefined ? null : STATUS_LINE[status ?? 'none']
 
@@ -37,6 +40,7 @@ export function TaskCard({ task, status }: TaskCardProps) {
     <li className="flex">
       <Link
         to={`/feladatok/${task.id}`}
+        state={origin && originState(origin)}
         data-testid="task-card"
         className={cx(
           'flex flex-1 flex-col gap-3.5 rounded-md border border-line px-6 py-5 text-ink no-underline hover:bg-faint hover:text-ink',

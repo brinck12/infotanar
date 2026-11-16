@@ -1,4 +1,5 @@
 import { useLocation } from 'react-router-dom'
+import { fromState } from '../../../shared/navigation'
 import type { ExecutionWait } from '../../../shared/api/errors'
 import { Banner } from '../../../shared/ui/Banner'
 import { ButtonLink } from '../../../shared/ui/Button'
@@ -28,7 +29,7 @@ export function RateLimitNotice({ wait, seconds }: Props) {
       title={seconds > 0 ? REASON[wait.reason] : 'Most már újra futtathatsz.'}
       action={
         wait.guest && (
-          <ButtonLink to="/bejelentkezes" state={{ from: location.pathname + location.search }} variant="secondary">
+          <ButtonLink to="/bejelentkezes" state={fromState(location.pathname + location.search)} variant="secondary">
             Belépés a magasabb limitért
           </ButtonLink>
         )
