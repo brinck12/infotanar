@@ -1,4 +1,5 @@
 import { useSyncExternalStore } from 'react'
+import { readStoredJson, removeStored, writeStoredJson } from '../domain/localStore'
 
 /**
  * A látogató süti-döntése (#139). A működéshez szükséges tárolás (belépés,
@@ -17,27 +18,26 @@ const listeners = new Set<() => void>()
 /** Ha a localStorage nem elérhető (privát mód), a döntés a lap bezárásáig él. */
 let memory: Consent | null = null
 
+interface StoredConsent {
+  version: number
+  decision: Consent
+}
+
+function isStoredConsent(value: unknown): value is StoredConsent {
+  if (typeof value !== 'object' || value === null) return false
+  const { version, decision } = value as { version?: unknown; decision?: unknown }
+
+  return version === VERSION && (decision === 'granted' || decision === 'rejected')
+}
+
 function read(): Consent | null {
-  try {
-    const stored: unknown = JSON.parse(localStorage.getItem(STORAGE_KEY) ?? 'null')
-    if (typeof stored !== 'object' || stored === null) return memory
-
-    const { version, decision } = stored as { version?: unknown; decision?: unknown }
-
-    return version === VERSION && (decision === 'granted' || decision === 'rejected') ? decision : memory
-  } catch {
-    return memory
-  }
+  return readStoredJson(STORAGE_KEY, isStoredConsent)?.decision ?? memory
 }
 
 function write(decision: Consent | null): void {
   memory = decision
-  try {
-    if (decision) localStorage.setItem(STORAGE_KEY, JSON.stringify({ version: VERSION, decision }))
-    else localStorage.removeItem(STORAGE_KEY)
-  } catch {
-    // A memóriabeli példány elég a munkamenet végéig.
-  }
+  if (decision) writeStoredJson(STORAGE_KEY, { version: VERSION, decision } satisfies StoredConsent)
+  else removeStored(STORAGE_KEY)
   listeners.forEach((notify) => notify())
 }
 

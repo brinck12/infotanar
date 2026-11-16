@@ -4,12 +4,9 @@ declare(strict_types=1);
 
 namespace App\Actions\Auth;
 
-use App\Actions\Consent\RecordConsent;
-use App\Actions\Registration\ConsumeInviteCode;
-use App\Enums\ConsentType;
+use App\Actions\Registration\AdmitNewUser;
 use App\Models\User;
 use App\Notifications\AccountAlreadyExistsNotification;
-use App\Services\Registration\RegistrationGate;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Support\Facades\DB;
@@ -17,11 +14,7 @@ use Illuminate\Validation\ValidationException;
 
 final readonly class RegisterUser
 {
-    public function __construct(
-        private RecordConsent $recordConsent,
-        private RegistrationGate $gate,
-        private ConsumeInviteCode $consumeInviteCode,
-    ) {}
+    public function __construct(private AdmitNewUser $admit) {}
 
     /**
      * A fiok es az elfogadott dokumentumok rogzitese egyutt tortenik (#133):
@@ -69,16 +62,7 @@ final readonly class RegisterUser
                 'password' => $password,
             ])->refresh();
 
-            if ($this->gate->requiresInvite()) {
-                if ($inviteCode === null || $inviteCode === '') {
-                    throw ValidationException::withMessages(['invite_code' => __('auth.invite.required')]);
-                }
-
-                $this->consumeInviteCode->handle($inviteCode, $user);
-            }
-
-            $this->recordConsent->handle($user, ConsentType::Terms, $termsVersion);
-            $this->recordConsent->handle($user, ConsentType::Privacy, $privacyVersion);
+            $this->admit->handle($user, $termsVersion, $privacyVersion, $inviteCode);
 
             return $user;
         });

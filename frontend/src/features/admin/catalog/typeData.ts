@@ -36,7 +36,7 @@ const text = (value: unknown): string => (typeof value === 'string' ? value : ''
 const list = (value: unknown): string[] => (Array.isArray(value) ? value.filter((item): item is string => typeof item === 'string') : [])
 const numberText = (value: unknown): string => (typeof value === 'number' ? String(value) : '')
 
-export function emptyUploadFields(): UploadFields {
+function emptyUploadFields(): UploadFields {
   return { steps: '', deliverable: '', accepted_extensions: [], software: '', exam_reference: '', exam_points: '', raw_points: '' }
 }
 

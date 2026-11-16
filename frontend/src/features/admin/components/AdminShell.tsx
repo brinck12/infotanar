@@ -54,3 +54,8 @@ const PILL: Readonly<Record<'published' | 'draft' | 'free' | 'info', BadgeKind>>
 export function StatusPill({ tone, children }: { tone: keyof typeof PILL; children: ReactNode }) {
   return <Badge kind={PILL[tone]}>{children}</Badge>
 }
+
+/** Közzétett vagy piszkozat: minden katalóguselem és vizsga ugyanígy jelzi. */
+export function PublishedPill({ published }: { published: boolean }) {
+  return <StatusPill tone={published ? 'published' : 'draft'}>{published ? 'Közzétéve' : 'Piszkozat'}</StatusPill>
+}

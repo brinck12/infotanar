@@ -1,3 +1,4 @@
+import { readStoredJson, removeStored, storedKeys, writeStoredJson } from '../../shared/domain/localStore'
 import { userStorageKey } from '../../shared/domain/userStorage'
 import type { LanguageKey } from '../../types'
 
@@ -36,52 +37,29 @@ function isStoredDraft(value: unknown): value is StoredDraft {
   )
 }
 
-function readJson(key: string): unknown {
-  try {
-    const raw = localStorage.getItem(key)
-    return raw === null ? null : (JSON.parse(raw) as unknown)
-  } catch {
-    return null
-  }
-}
-
-function write(key: string, value: unknown): void {
-  try {
-    localStorage.setItem(key, JSON.stringify(value))
-  } catch {
-    // Teli vagy tiltott tárhely: a piszkozat csak a memóriában él.
-  }
-}
-
-function remove(key: string): void {
-  try {
-    localStorage.removeItem(key)
-  } catch {
-    // Nincs teendő.
-  }
-}
+const isFresh = (draft: StoredDraft) => Date.now() - draft.savedAt < MAX_AGE_MS
 
 export function loadDraft(scope: DraftScope, language: LanguageKey): StoredDraft | null {
-  const value = readJson(codeKey(scope, language))
-  return isStoredDraft(value) && Date.now() - value.savedAt < MAX_AGE_MS ? value : null
+  const draft = readStoredJson(codeKey(scope, language), isStoredDraft)
+  return draft !== null && isFresh(draft) ? draft : null
 }
 
 /** A kiinduló kóddal egyező tartalomhoz nem kell piszkozat: törli a régit. */
 export function saveDraft(scope: DraftScope, language: LanguageKey, code: string, starterCode: string): void {
   if (code === starterCode || code.length > MAX_CODE_LENGTH) {
-    remove(codeKey(scope, language))
+    removeStored(codeKey(scope, language))
     return
   }
-  write(codeKey(scope, language), { code, savedAt: Date.now() } satisfies StoredDraft)
+  writeStoredJson(codeKey(scope, language), { code, savedAt: Date.now() } satisfies StoredDraft)
 }
 
 export function loadLastLanguage(scope: DraftScope, allowed: readonly LanguageKey[]): LanguageKey | null {
-  const value = readJson(languageKey(scope))
+  const value = readStoredJson(languageKey(scope), (stored): stored is string => typeof stored === 'string')
   return allowed.find((language) => language === value) ?? null
 }
 
 export function saveLastLanguage(scope: DraftScope, language: LanguageKey): void {
-  write(languageKey(scope), language)
+  writeStoredJson(languageKey(scope), language)
 }
 
 let pruned = false
@@ -90,16 +68,10 @@ let pruned = false
 export function pruneDrafts(): void {
   if (pruned) return
   pruned = true
-  try {
-    const stale: string[] = []
-    for (let i = 0; i < localStorage.length; i++) {
-      const key = localStorage.key(i)
-      if (!key?.startsWith(DRAFT_ROOT) || key.endsWith('.lang')) continue
-      const value = readJson(key)
-      if (!isStoredDraft(value) || Date.now() - value.savedAt >= MAX_AGE_MS) stale.push(key)
-    }
-    stale.forEach(remove)
-  } catch {
-    // Nincs teendő.
-  }
+  storedKeys((key) => key.startsWith(DRAFT_ROOT) && !key.endsWith('.lang'))
+    .filter((key) => {
+      const draft = readStoredJson(key, isStoredDraft)
+      return draft === null || !isFresh(draft)
+    })
+    .forEach(removeStored)
 }

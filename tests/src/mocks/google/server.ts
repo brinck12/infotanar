@@ -8,7 +8,8 @@
 // A tobbi vegpont azt utanozza, amit a backend (Laravel Socialite) hiv: /auth (engedelykeres atiranyitasa),
 // /token (kodvaltas), /userinfo (profil), es /about az indulas jelzesehez.
 
-import http, { type IncomingMessage, type ServerResponse } from 'node:http'
+import type { IncomingMessage, ServerResponse } from 'node:http'
+import { readJsonBody, requestUrl, send, serveMock } from '../http'
 
 const PORT = Number(process.env.GOOGLE_MOCK_PORT ?? 2359)
 const ACCESS_TOKEN = 'pw-google-access-token'
@@ -25,31 +26,8 @@ const DEFAULT_IDENTITY: GoogleIdentity = { sub: 'pw-default', email: 'pw-default
 let identity: GoogleIdentity = DEFAULT_IDENTITY
 let denyNext = false
 
-function send(res: ServerResponse, status: number, body: unknown): void {
-  const payload = JSON.stringify(body)
-  res.writeHead(status, { 'Content-Type': 'application/json', 'Content-Length': Buffer.byteLength(payload) })
-  res.end(payload)
-}
-
-function readJson(req: IncomingMessage): Promise<Record<string, unknown>> {
-  return new Promise((resolve, reject) => {
-    let raw = ''
-    req.on('data', (chunk: Buffer) => {
-      raw += chunk.toString()
-    })
-    req.on('end', () => {
-      try {
-        resolve(raw ? (JSON.parse(raw) as Record<string, unknown>) : {})
-      } catch (err) {
-        reject(err instanceof Error ? err : new Error(String(err)))
-      }
-    })
-    req.on('error', reject)
-  })
-}
-
 async function handle(req: IncomingMessage, res: ServerResponse): Promise<void> {
-  const url = new URL(req.url ?? '/', `http://${req.headers.host ?? '127.0.0.1'}`)
+  const url = requestUrl(req)
 
   if (req.method === 'GET' && url.pathname === '/about') {
     send(res, 200, { mock: 'google' })
@@ -57,7 +35,7 @@ async function handle(req: IncomingMessage, res: ServerResponse): Promise<void> 
   }
 
   if (req.method === 'POST' && url.pathname === '/__identity') {
-    const body = await readJson(req)
+    const body = await readJsonBody(req)
     if (body.deny === true) denyNext = true
     if (typeof body.identity === 'object' && body.identity !== null) identity = { ...DEFAULT_IDENTITY, ...(body.identity as Partial<GoogleIdentity>) }
     send(res, 200, { identity, denyNext })
@@ -101,13 +79,4 @@ async function handle(req: IncomingMessage, res: ServerResponse): Promise<void> 
   send(res, 404, { error: 'not found' })
 }
 
-const server = http.createServer((req, res) => {
-  handle(req, res).catch((err: unknown) => {
-    console.error(err)
-    send(res, 500, { error: 'mock failure' })
-  })
-})
-
-server.listen(PORT, '127.0.0.1', () => {
-  console.log(`Google mock listening on http://127.0.0.1:${String(PORT)}`)
-})
+serveMock('Google', PORT, handle)

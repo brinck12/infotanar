@@ -23,7 +23,7 @@ export interface AdminOverviewData {
   recent_actions: RecentAction[]
 }
 
-export const adminOverviewKeys = {
+const adminOverviewKeys = {
   all: ['admin', 'overview'] as const,
 }
 

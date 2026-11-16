@@ -24,10 +24,8 @@ test.describe('Feladatlista', () => {
       await expect(taskSolvePage.page).toHaveURL(TaskSolvePage.urlPattern(task.id))
       await expect(taskSolvePage.heading(task.title)).toBeVisible()
 
-      // A feladatleírás markdownként renderelődik.
       await expect(taskSolvePage.page.getByText('Add össze a beolvasott számokat!')).toBeVisible()
 
-      // A Monaco szerkesztő betöltődött és a kiinduló kód benne van.
       await taskSolvePage.editor.waitUntilReady()
       await expect(taskSolvePage.editor.root).toContainText('n = int(input())')
 

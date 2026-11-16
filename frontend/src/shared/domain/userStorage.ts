@@ -1,3 +1,5 @@
+import { removeStored, storedKeys } from './localStore'
+
 /**
  * A felhasználóhoz kötött localStorage-kulcsok egyetlen jegyzéke (PRIV-7). A kulcsokat
  * itt építjük, és kijelentkezéskor, fióktörléskor ugyanebből a jegyzékből töröljük
@@ -26,18 +28,9 @@ export function userStorageKey(family: StorageFamily, userKey: string, ...parts:
   return [FAMILIES[family], userKey, ...parts].join('.')
 }
 
-/** Törli a megadott felhasználó minden böngészőbeli adatát; tiltott tárhelyen nem tesz semmit. */
+/** Törli a megadott felhasználó minden böngészőbeli adatát. */
 export function clearUserStorage(userId: number): void {
-  try {
-    const userKey = userKeyOf({ id: userId })
-    const roots = (Object.keys(FAMILIES) as StorageFamily[]).map((family) => userStorageKey(family, userKey))
-    const doomed: string[] = []
-    for (let i = 0; i < localStorage.length; i++) {
-      const key = localStorage.key(i)
-      if (key !== null && roots.some((root) => key === root || key.startsWith(`${root}.`))) doomed.push(key)
-    }
-    doomed.forEach((key) => localStorage.removeItem(key))
-  } catch {
-    // Tiltott tárhely: nincs mit törölni.
-  }
+  const userKey = userKeyOf({ id: userId })
+  const roots = (Object.keys(FAMILIES) as StorageFamily[]).map((family) => userStorageKey(family, userKey))
+  storedKeys((key) => roots.some((root) => key === root || key.startsWith(`${root}.`))).forEach(removeStored)
 }

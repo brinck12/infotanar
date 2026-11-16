@@ -5,15 +5,12 @@ declare(strict_types=1);
 namespace App\Actions\Auth\Social;
 
 use App\Actions\Audit\RecordAuditEvent;
-use App\Actions\Consent\RecordConsent;
-use App\Actions\Registration\ConsumeInviteCode;
+use App\Actions\Registration\AdmitNewUser;
 use App\Enums\AuditAction;
-use App\Enums\ConsentType;
 use App\Exceptions\Auth\SocialEmailNotVerified;
 use App\Exceptions\Auth\SocialLoginFailed;
 use App\Models\User;
 use App\Services\Auth\Social\OAuthHandshake;
-use App\Services\Registration\RegistrationGate;
 use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
@@ -28,9 +25,7 @@ final readonly class CompleteSocialSignup
 {
     public function __construct(
         private OAuthHandshake $handshake,
-        private RegistrationGate $gate,
-        private RecordConsent $recordConsent,
-        private ConsumeInviteCode $consumeInviteCode,
+        private AdmitNewUser $admit,
         private ResolveSocialLogin $resolve,
         private IssueSocialToken $issueToken,
         private RecordAuditEvent $audit,
@@ -59,16 +54,7 @@ final readonly class CompleteSocialSignup
                 // A cimet a Google igazolta; a fillable-ben nincs, ezert forceFill.
                 $user->forceFill(['email_verified_at' => now()])->save();
 
-                if ($this->gate->requiresInvite()) {
-                    if ($inviteCode === null || $inviteCode === '') {
-                        throw ValidationException::withMessages(['invite_code' => __('auth.invite.required')]);
-                    }
-
-                    $this->consumeInviteCode->handle($inviteCode, $user);
-                }
-
-                $this->recordConsent->handle($user, ConsentType::Terms, $termsVersion);
-                $this->recordConsent->handle($user, ConsentType::Privacy, $privacyVersion);
+                $this->admit->handle($user, $termsVersion, $privacyVersion, $inviteCode);
 
                 $user->socialAccounts()->create([
                     'provider' => $profile->provider,

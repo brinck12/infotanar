@@ -173,8 +173,3 @@ export function forceWeeklySummary(userId: number, optIn: boolean, sentDaysAgo?:
     `Illuminate\\Support\\Facades\\DB::table('users')->where('id', ${String(userId)})->update(['weekly_summary_opt_in' => ${optIn ? 'true' : 'false'}, 'weekly_summary_sent_at' => ${sentAt}]); return true;`
   )
 }
-
-/** Megerositetlenne teszi a felhasznalo e-mail-cimet (a megerositest igenylo agakhoz). */
-export function unverifyEmail(userId: number): void {
-  tinkerJson(`Illuminate\\Support\\Facades\\DB::table('users')->where('id', ${String(userId)})->update(['email_verified_at' => null]); return true;`)
-}

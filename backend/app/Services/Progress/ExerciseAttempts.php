@@ -63,16 +63,6 @@ final class ExerciseAttempts
     }
 
     /**
-     * Minden feladat, amelyhez a felhasznalonak van beadasa (megoldott is).
-     *
-     * @return Collection<int, int>
-     */
-    public static function attemptedBy(User $user): Collection
-    {
-        return collect(array_keys(self::outcomesFor($user)));
-    }
-
-    /**
      * Azok a leckek, amelyek valamelyik feladatahoz a felhasznalonak van beadasa.
      *
      * @return Collection<int, int>

@@ -1,4 +1,5 @@
 import type { Level } from '../../types'
+import { readStoredJson, removeStored } from './localStore'
 import { userStorageKey } from './userStorage'
 
 /**
@@ -50,20 +51,10 @@ export function isStudyPreferences(value: unknown): value is StudyPreferences {
 
 /** A böngészőben mentett célok; `null`, ha nincs ilyen (vagy sérült, vagy a tárhely tiltott). */
 export function readStoredPreferences(userKey: string): StudyPreferences | null {
-  try {
-    const raw = localStorage.getItem(preferencesKey(userKey))
-    const parsed: unknown = raw === null ? null : JSON.parse(raw)
-    return isStudyPreferences(parsed) ? parsed : null
-  } catch {
-    return null
-  }
+  return readStoredJson(preferencesKey(userKey), isStudyPreferences)
 }
 
 /** A böngészőbeli példány törlése, miután a szerver átvette. */
 export function forgetStoredPreferences(userKey: string): void {
-  try {
-    localStorage.removeItem(preferencesKey(userKey))
-  } catch {
-    // Tiltott tárhelyen nincs mit törölni.
-  }
+  removeStored(preferencesKey(userKey))
 }

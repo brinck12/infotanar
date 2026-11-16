@@ -6,7 +6,7 @@ import type { LessonDetail, TaskDetail, TaskListItem, TaskTopic, Topic, TrackDet
  * ami az adott eset szempontjabol lenyeges.
  */
 
-export function buildTaskTopic(overrides: Partial<TaskTopic> = {}): TaskTopic {
+function buildTaskTopic(overrides: Partial<TaskTopic> = {}): TaskTopic {
   return { id: 1, name: 'Programozási tételek', slug: 'programozasi-tetelek', ...overrides }
 }
 

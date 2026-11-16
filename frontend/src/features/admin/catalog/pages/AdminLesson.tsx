@@ -6,7 +6,7 @@ import { LEVEL_LABEL } from '../../../../shared/domain/labels'
 import { ButtonLink } from '../../../../shared/ui/Button'
 import { CheckboxField, Field, TextAreaField } from '../../../../shared/ui/Form'
 import { lessonQuery, moduleQuery, trackQuery, type AdminExercise, type AdminLesson, type LessonPayload } from '../api'
-import { AdminShell, Section, StatusPill } from '../../components/AdminShell'
+import { AdminShell, PublishedPill, Section, StatusPill } from '../../components/AdminShell'
 import { ChildList } from '../components/ChildList'
 import { SaveRow, TitleSlugFields } from '../components/EntityFields'
 import { MutationError, QueryState } from '../components/QueryState'
@@ -122,7 +122,7 @@ function LessonEditor({ lesson }: { lesson: AdminLesson }) {
               <>
                 <StatusPill tone="info">{LEVEL_LABEL[exercise.level]}</StatusPill>
                 <StatusPill tone="info">{exercise.test_case_count ?? 0} teszteset</StatusPill>
-                <StatusPill tone={exercise.is_published ? 'published' : 'draft'}>{exercise.is_published ? 'Közzétéve' : 'Piszkozat'}</StatusPill>
+                <PublishedPill published={exercise.is_published} />
               </>
             ),
           }))}

@@ -3,7 +3,7 @@ import { AxiosError } from 'axios'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { hibaUzenet } from '../api/errors'
 
-export const OFFLINE_MESSAGE = 'Nincs internet, a fájl nem ment fel. Ellenőrizd a kapcsolatot, és próbáld újra.'
+const OFFLINE_MESSAGE = 'Nincs internet, a fájl nem ment fel. Ellenőrizd a kapcsolatot, és próbáld újra.'
 
 interface UploadOptions<T> {
   send: (file: File, onProgress: (percent: number) => void, signal: AbortSignal) => Promise<T>

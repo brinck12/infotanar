@@ -12,7 +12,7 @@ class FormulaError extends Error {}
 
 const COLUMNS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
 
-export function columnName(index: number): string {
+function columnName(index: number): string {
   return COLUMNS[index] ?? '?'
 }
 

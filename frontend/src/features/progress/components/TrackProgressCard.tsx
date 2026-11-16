@@ -19,7 +19,7 @@ const STATUS_BADGE: Readonly<Record<LessonProgressStatus, BadgeKind>> = {
 }
 
 /** Egy lecke állapota: a szín mellett mindig szöveg is. */
-export function LessonStatusBadge({ status }: { status: LessonProgressStatus }) {
+function LessonStatusBadge({ status }: { status: LessonProgressStatus }) {
   return (
     <span data-testid="lesson-status" data-status={status}>
       <Badge kind={STATUS_BADGE[status]}>{LESSON_STATUS_LABEL[status]}</Badge>

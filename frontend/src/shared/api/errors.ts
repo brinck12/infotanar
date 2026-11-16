@@ -76,3 +76,13 @@ export function mezoHibak(error: unknown): Record<string, string> {
     Object.entries(errors).flatMap(([field, messages]) => (messages[0] ? [[field, messages[0]]] : [])),
   )
 }
+
+/**
+ * Egy űrlapküldés hibája két helyre kerül: a mezőhibák a mezők alá, minden más egy
+ * általános üzenetként az űrlap fölé. `general` csak akkor van, ha nincs mezőhiba.
+ */
+export function hibaReszek(error: unknown): { fields: Record<string, string>; general: string | null } {
+  const fields = mezoHibak(error)
+  const general = error != null && Object.keys(fields).length === 0 ? hibaUzenet(error) : null
+  return { fields, general }
+}

@@ -17,7 +17,6 @@ test.describe('Kezdőlap', () => {
   test('az élő minta hibás kóddal elbukik, javítás után minden teszten átmegy', { tag: '@regression' }, async ({ homePage }) => {
     await homePage.goto()
 
-    // Kezdetben a hibás kód két nyilvános tesztjének eredménye látszik.
     await expect(homePage.demoResults).toHaveCount(2)
     await expect(homePage.demo).toContainText('1 / 2 teszteset sikeres')
 
@@ -25,7 +24,6 @@ test.describe('Kezdőlap', () => {
 
     await expect(homePage.demoResults).toHaveCount(4)
     await expect(homePage.demo).toContainText('4 / 4 teszteset sikeres')
-    // A rejtett teszteknél csak az ítélet látszik, bemenet és kimenet nem.
     await expect(homePage.demoResults.nth(3)).toContainText('Rejtett')
     await expect(homePage.demoResults.nth(3)).not.toContainText('Bemenet')
   })

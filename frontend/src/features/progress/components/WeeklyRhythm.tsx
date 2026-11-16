@@ -7,6 +7,7 @@ import { Button } from '../../../shared/ui/Button'
 import { cx } from '../../../shared/ui/cx'
 import { Panel } from '../../../shared/ui/Panel'
 import { CardTitle } from '../../../shared/ui/Text'
+import { readStored, writeStored } from '../../../shared/domain/localStore'
 import { userKeyOf, userStorageKey } from '../../../shared/domain/userStorage'
 import { useAuth } from '../../auth/context'
 import { rhythmQuery } from '../api'
@@ -16,21 +17,10 @@ const DAY_LETTERS = ['H', 'K', 'Sz', 'Cs', 'P', 'Sz', 'V'] as const
 
 const offerKey = (userId: number) => userStorageKey('rhythmOffer', userKeyOf({ id: userId }))
 
-function offerDismissed(userId: number): boolean {
-  try {
-    return localStorage.getItem(offerKey(userId)) !== null
-  } catch {
-    return false
-  }
-}
+const offerDismissed = (userId: number): boolean => readStored(offerKey(userId)) !== null
 
-function rememberDismissed(userId: number): void {
-  try {
-    localStorage.setItem(offerKey(userId), '1')
-  } catch {
-    // Tiltott tárhelyen a felkínálás a következő megnyitáskor újra megjelenhet; ez nem baj.
-  }
-}
+// Tiltott tárhelyen a felkínálás a következő megnyitáskor újra megjelenhet; ez nem baj.
+const rememberDismissed = (userId: number): void => writeStored(offerKey(userId), '1')
 
 /**
  * Heti ritmus: a hét hét napja, a tanulással töltöttek kitöltve. Szándékosan nincs benne

@@ -27,34 +27,9 @@ final readonly class PaymentRequestFactory
      */
     public function withCardRegistration(Payment $payment, User $user): array
     {
-        $plan = Config::string('billing.plan.name');
-
         return [
-            'PaymentType' => 'Immediate',
-            'GuestCheckOut' => true,
-            'FundingSources' => ['All'],
-            'PaymentRequestId' => $payment->request_id,
-            'PayerHint' => $user->email,
-            'Locale' => 'hu-HU',
-            'Currency' => $payment->currency,
-            'InitiateRecurrence' => true,
-            'RecurrenceId' => $payment->recurrence_id,
-            'RecurrenceType' => 'RecurringPayment',
+            ...$this->body($payment, $user, initiateRecurrence: true),
             'RedirectUrl' => Config::string('app.frontend_url').'/elofizetes/visszateres?fizetes='.$payment->request_id,
-            'CallbackUrl' => route('api.webhooks.barion'),
-            'Transactions' => [[
-                'POSTransactionId' => $payment->request_id,
-                'Payee' => $this->barion->payee(),
-                'Total' => $payment->amount,
-                'Items' => [[
-                    'Name' => $plan,
-                    'Description' => $plan,
-                    'Quantity' => 1,
-                    'Unit' => 'hónap',
-                    'UnitPrice' => $payment->amount,
-                    'ItemTotal' => $payment->amount,
-                ]],
-            ]],
         ];
     }
 
@@ -68,6 +43,16 @@ final readonly class PaymentRequestFactory
      */
     public function recurringCharge(Payment $payment, User $user): array
     {
+        return $this->body($payment, $user, initiateRecurrence: false);
+    }
+
+    /**
+     * @return array<string, mixed>
+     *
+     * @throws BarionException
+     */
+    private function body(Payment $payment, User $user, bool $initiateRecurrence): array
+    {
         $plan = Config::string('billing.plan.name');
 
         return [
@@ -78,7 +63,7 @@ final readonly class PaymentRequestFactory
             'PayerHint' => $user->email,
             'Locale' => 'hu-HU',
             'Currency' => $payment->currency,
-            'InitiateRecurrence' => false,
+            'InitiateRecurrence' => $initiateRecurrence,
             'RecurrenceId' => $payment->recurrence_id,
             'RecurrenceType' => 'RecurringPayment',
             'CallbackUrl' => route('api.webhooks.barion'),

@@ -69,7 +69,7 @@ function evaluate(check: Check, cells: Cells): { passed: boolean; found: string 
 const ERROR_VALUES: ReadonlySet<string> = new Set(Object.values(ERROR))
 
 /** A rövid magyar tipp a hibaértékhez: mit szokás elrontani. */
-export function errorHint(value: string): string {
+function errorHint(value: string): string {
   switch (value) {
     case ERROR.name:
       return 'Ismeretlen név. A függvények magyarul vannak: SZUM, ÁTLAG, HA, DARABTELI. Az angol SUM vagy IF nem működik.'

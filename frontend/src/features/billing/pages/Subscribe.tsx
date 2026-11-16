@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useId, useState } from 'react'
 import { Navigate } from 'react-router-dom'
-import { hibaUzenet, mezoHibak } from '../../../shared/api/errors'
+import { hibaReszek, hibaUzenet, mezoHibak } from '../../../shared/api/errors'
 import { Banner } from '../../../shared/ui/Banner'
 import { Breadcrumb } from '../../../shared/ui/Breadcrumb'
 import { Button } from '../../../shared/ui/Button'
@@ -89,15 +89,10 @@ function CheckoutForm({ initial, plan }: { initial: BillingProfile | null; plan:
   })
 
   const busy = save.isPending || checkout.isPending || checkout.isSuccess
-  const fieldErrors = mezoHibak(save.error)
+  const { fields: fieldErrors, general: saveError } = hibaReszek(save.error)
   // A szerver sem indít fizetést az azonnali teljesítés kifejezett kérése nélkül (#133).
   const consentError = mezoHibak(checkout.error).accept_immediate_performance
-  const generalError =
-    save.isError && Object.keys(fieldErrors).length === 0
-      ? hibaUzenet(save.error)
-      : checkout.isError && !consentError
-        ? hibaUzenet(checkout.error)
-        : null
+  const generalError = saveError ?? (checkout.isError && !consentError ? hibaUzenet(checkout.error) : null)
 
   function submit(payload: BillingProfilePayload) {
     setTermsError(!accepted)

@@ -1,4 +1,4 @@
-import { Field, SubmitButton } from '../../../../shared/ui/Form'
+import { Field, SubmitButton, TextAreaField } from '../../../../shared/ui/Form'
 
 /** A katalóguselemek közös első sora: cím és URL-azonosító. */
 export function TitleSlugFields({
@@ -20,6 +20,11 @@ export function TitleSlugFields({
       <Field label="URL-azonosító" value={slug} onChange={(e) => onSlug(e.target.value)} error={errors.slug} />
     </div>
   )
+}
+
+/** A tanulási út és a modul rövid leírása; üresen null kerül a szerverre. */
+export function DescriptionField({ value, onChange, error }: { value: string | null; onChange: (value: string | null) => void; error?: string }) {
+  return <TextAreaField label="Leírás" rows={3} value={value ?? ''} onChange={(e) => onChange(e.target.value || null)} error={error} />
 }
 
 /** Az adatlap mentés gombja. */

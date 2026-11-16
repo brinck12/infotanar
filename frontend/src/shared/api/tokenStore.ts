@@ -1,3 +1,5 @@
+import { readStored, removeStored, writeStored } from '../domain/localStore'
+
 const TOKEN_KEY = 'infotanar.token'
 
 /**
@@ -8,19 +10,11 @@ let memoryToken: string | null = null
 
 export const tokenStore = {
   get(): string | null {
-    try {
-      return localStorage.getItem(TOKEN_KEY) ?? memoryToken
-    } catch {
-      return memoryToken
-    }
+    return readStored(TOKEN_KEY) ?? memoryToken
   },
   set(token: string | null): void {
     memoryToken = token
-    try {
-      if (token) localStorage.setItem(TOKEN_KEY, token)
-      else localStorage.removeItem(TOKEN_KEY)
-    } catch {
-      // A memóriabeli példány elég a munkamenet végéig.
-    }
+    if (token) writeStored(TOKEN_KEY, token)
+    else removeStored(TOKEN_KEY)
   },
 }

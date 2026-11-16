@@ -1,4 +1,6 @@
+import { readStoredJson, writeStoredJson } from './localStore'
 import { userStorageKey } from './userStorage'
+
 /**
  * A legutóbb megnyitott feladat a böngészőben, felhasználónként: ebből lesz az
  * „Itt tartottál legutóbb” sor. Kényelmi adat, a szerver nem tud róla.
@@ -19,19 +21,9 @@ function isLastTask(value: unknown): value is LastTask {
 }
 
 export function readLastTask(userKey: string): LastTask | null {
-  try {
-    const raw = localStorage.getItem(key(userKey))
-    const parsed: unknown = raw === null ? null : JSON.parse(raw)
-    return isLastTask(parsed) ? parsed : null
-  } catch {
-    return null
-  }
+  return readStoredJson(key(userKey), isLastTask)
 }
 
 export function rememberLastTask(userKey: string, task: Omit<LastTask, 'openedAt'>): void {
-  try {
-    localStorage.setItem(key(userKey), JSON.stringify({ ...task, openedAt: Date.now() } satisfies LastTask))
-  } catch {
-    // Tiltott vagy teli tárhely: a sor egyszerűen nem jelenik meg.
-  }
+  writeStoredJson(key(userKey), { ...task, openedAt: Date.now() } satisfies LastTask)
 }

@@ -22,7 +22,7 @@ const MIME_TYPES: Record<string, string> = {
 }
 
 /** A fajlnev kiterjesztesehez illo MIME-tipus; ismeretlennel altalanos binaris. */
-export function mimeTypeOf(name: string): string {
+function mimeTypeOf(name: string): string {
   return MIME_TYPES[path.extname(name).toLowerCase()] ?? 'application/octet-stream'
 }
 
