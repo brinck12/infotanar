@@ -33,4 +33,19 @@ test.describe('Feladatlista', () => {
       await expect(taskSolvePage.submitButton).toBeVisible()
     }
   )
+
+  test(
+    'a feladat morzsamenüje a feladatlistához vezet vissza, nem a tanulási úthoz',
+    { tag: '@regression' },
+    async ({ taskListPage, taskSolvePage }) => {
+      await taskListPage.goto()
+      await taskListPage.openTask(task.title)
+
+      await expect(taskSolvePage.breadcrumb.getByRole('link', { name: 'Feladatok' })).toBeVisible()
+      await expect(taskSolvePage.breadcrumb.getByRole('link', { name: 'Tanulási út' })).toHaveCount(0)
+
+      await taskSolvePage.breadcrumb.getByRole('link', { name: 'Feladatok' }).click()
+      await expect(taskSolvePage.page).toHaveURL(/\/feladatok$/)
+    }
+  )
 })

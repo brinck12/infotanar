@@ -6,6 +6,7 @@ import { userKeyOf } from '../../../shared/domain/userStorage'
 import { ButtonLink } from '../../../shared/ui/Button'
 import { Icon } from '../../../shared/ui/Icon'
 import { PageLoader } from '../../../shared/ui/PageLoader'
+import { originState } from '../../../shared/navigation'
 import { Panel } from '../../../shared/ui/Panel'
 import { Bar } from '../../../shared/ui/Progress'
 import { Stat } from '../../../shared/ui/Stat'
@@ -17,6 +18,8 @@ import { RecentSubmissions } from '../../submissions/components/RecentSubmission
 import { progressQuery } from '../api'
 import { TrackProgressCard } from '../components/TrackProgressCard'
 import { WeeklyRhythm } from '../components/WeeklyRhythm'
+
+const PROGRESS_ORIGIN = { label: 'Haladásom', to: '/haladas' } as const
 
 /** Haladásom (#28): visszaszámlálás, összesítés és tanulási utanként a leckék állapota. */
 export function ProgressDashboard() {
@@ -38,7 +41,7 @@ export function ProgressDashboard() {
           <p className="mt-1 text-16 leading-relaxed text-ink-soft">Heti két feladattal addig {tasksUntilExam(days)} feladat jön össze.</p>
         </div>
         {lastTask ? (
-          <ButtonLink to={`/feladatok/${lastTask.id}`} size="lg">
+          <ButtonLink to={`/feladatok/${lastTask.id}`} state={originState(PROGRESS_ORIGIN)} size="lg">
             Folytatás: {lastTask.title}
           </ButtonLink>
         ) : (

@@ -1,7 +1,8 @@
 import { useMutation } from '@tanstack/react-query'
 import { useState, type ChangeEvent, type FormEvent } from 'react'
-import { Link, Navigate, useNavigate, useSearchParams } from 'react-router-dom'
+import { Link, Navigate, useLocation, useNavigate, useSearchParams } from 'react-router-dom'
 import { hibaReszek } from '../../../shared/api/errors'
+import { fromState, LANDING_PATH, readFrom } from '../../../shared/navigation'
 import { Banner } from '../../../shared/ui/Banner'
 import { Field, SubmitButton } from '../../../shared/ui/Form'
 import { Skeleton } from '../../../shared/ui/States'
@@ -21,6 +22,8 @@ export function Register() {
   const { user, login } = useAuth()
   const navigate = useNavigate()
   const [params] = useSearchParams()
+  // Ahonnan a regisztrációra érkeztünk (pl. zárolt lecke): a regisztráció után onnan folytatódik.
+  const from = readFrom(useLocation().state)
   const [form, setForm] = useState<Form>({ name: '', email: '', password: '', password_confirmation: '' })
   // A meghívó linkje (?kod=…) előtölti a mezőt.
   const consent = useSignupConsent(params.get('kod') ?? '')
@@ -36,11 +39,11 @@ export function Register() {
         // A "Nézd meg a leveleidet" oldal bejelentkezés nélkül is jó.
       }
     },
-    onSuccess: (_, payload) => navigate('/regisztracio/kesz', { replace: true, state: { email: payload.email } }),
+    onSuccess: (_, payload) => navigate('/regisztracio/kesz', { replace: true, state: { email: payload.email, ...fromState(from) } }),
   })
 
   // Bejelentkezett felhasználónak nincs mit regisztrálnia (a saját sikeres regisztrációnk kivételével).
-  if (user && mutation.isIdle) return <Navigate to="/feladatok" replace />
+  if (user && mutation.isIdle) return <Navigate to={from ?? LANDING_PATH} replace />
 
   const { fields: errors, general: generalError } = hibaReszek(mutation.error)
 
@@ -63,7 +66,9 @@ export function Register() {
       }
       footer={
         <>
-          Van már fiókod? <Link to="/bejelentkezes">Belépés</Link>
+          Van már fiókod? <Link to="/bejelentkezes" state={fromState(from)}>
+            Belépés
+          </Link>
         </>
       }
     >
@@ -108,7 +113,7 @@ export function Register() {
           </SubmitButton>
         </form>
       )}
-      {!modePending && <SocialLogin />}
+      {!modePending && <SocialLogin returnTo={from} />}
       {inviteOnly && consent.inviteCode.trim() === '' && (
         <section aria-label="Várólista" className="border-t border-grid pt-5">
           <h2 className="mb-1.5 text-17 font-bold">Nincs meghívókódod?</h2>

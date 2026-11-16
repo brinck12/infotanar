@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useEffect, useState } from 'react'
-import { Link, useParams, useSearchParams } from 'react-router-dom'
+import { Link, useLocation, useParams, useSearchParams } from 'react-router-dom'
 import { useDocumentMeta } from '../../../shared/hooks/useDocumentMeta'
 import { saveBlob } from '../../../shared/api/download'
 import { hibaUzenet, varakozas, zarolasOka, type ExecutionWait } from '../../../shared/api/errors'
@@ -8,6 +8,7 @@ import { LANGUAGE_LABEL } from '../../../shared/domain/labels'
 import { rememberLastTask } from '../../../shared/domain/lastTask'
 import { formatMemoryLimit, formatTimeLimit } from '../../../shared/domain/limits'
 import { userKeyOf, userStorageKey } from '../../../shared/domain/userStorage'
+import { readOrigin, type Origin } from '../../../shared/navigation'
 import { useCountdown } from '../../../shared/hooks/useCountdown'
 import { useMediaQuery } from '../../../shared/hooks/useMediaQuery'
 import { usePersistentState } from '../../../shared/hooks/usePersistentState'
@@ -90,25 +91,40 @@ export function TaskSolve() {
   )
 }
 
+/** Ahonnan a feladatra érkeztünk: a linkben átadott oldal, vizsgából nyitva pedig a futó vizsga. */
+function originOf(state: unknown, params: URLSearchParams): Origin | null {
+  const examId = Number(params.get('vizsga'))
+  const attemptId = Number(params.get('proba'))
+  if (Number.isInteger(examId) && examId > 0 && Number.isInteger(attemptId) && attemptId > 0) {
+    return { label: 'Vizsga', to: `/vizsgak/${examId}/fut?proba=${attemptId}` }
+  }
+  return readOrigin(state)
+}
+
 function TaskSolveContent() {
   const { id } = useParams<{ id: string }>()
+  const [params] = useSearchParams()
   const { user, loading: authLoading } = useAuth()
+  const origin = originOf(useLocation().state, params)
   const taskId = Number(id)
   const validId = Number.isInteger(taskId) && taskId > 0
 
   const task = useQuery({ ...taskQuery(taskId), enabled: validId })
 
   useDocumentMeta(task.data ? { title: task.data.title, description: `Gyakorlófeladat: ${task.data.title}` } : null)
-  // A morzsamenü a tananyagot követi: tanulási út, a feladat leckéje, maga a feladat.
+  // A morzsamenü ahhoz az oldalhoz vezet vissza, ahonnan érkeztünk (feladatlista, haladás, vizsga).
+  // Közvetlen vagy leckéből érkezésnél a tananyagot követi: tanulási út, a feladat leckéje, maga a feladat.
   const lesson = task.data?.lesson
   useCrumbs(
     task.data
-      ? [
-          { label: 'Tanulási út', to: '/tanulasi-ut' },
-          ...(lesson?.slug && lesson.track_slug ? [{ label: lesson.title, to: `/tanulasi-ut/${lesson.track_slug}/${lesson.slug}` }] : []),
-          { label: task.data.title },
-        ]
-      : [{ label: 'Tanulási út', to: '/tanulasi-ut' }],
+      ? origin
+        ? [origin, { label: task.data.title }]
+        : [
+            { label: 'Tanulási út', to: '/tanulasi-ut' },
+            ...(lesson?.slug && lesson.track_slug ? [{ label: lesson.title, to: `/tanulasi-ut/${lesson.track_slug}/${lesson.slug}` }] : []),
+            { label: task.data.title },
+          ]
+      : [origin ?? { label: 'Tanulási út', to: '/tanulasi-ut' }],
   )
 
   if (!validId || task.isError) {
@@ -119,8 +135,8 @@ function TaskSolveContent() {
           title="Nem sikerült megnyitni a feladatot"
           data-testid="task-load-error"
           action={
-            <ButtonLink to="/feladatok" variant="secondary">
-              Vissza a feladatokhoz
+            <ButtonLink to={origin?.to ?? '/feladatok'} variant="secondary">
+              {origin ? `Vissza: ${origin.label}` : 'Vissza a feladatokhoz'}
             </ButtonLink>
           }
         >

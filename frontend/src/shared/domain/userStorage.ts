@@ -14,6 +14,7 @@ const FAMILIES = {
   practice: 'infotanar.practice.v1',
   workspaceSplit: 'infotanar.workspace.split.v1',
   rhythmOffer: 'infotanar.rhythm.offer.v1',
+  checkoutReturn: 'infotanar.checkoutReturn.v1',
 } as const
 
 type StorageFamily = keyof typeof FAMILIES

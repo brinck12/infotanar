@@ -1,5 +1,6 @@
 import { useMutation } from '@tanstack/react-query'
 import { Link, useLocation } from 'react-router-dom'
+import { LANDING_PATH, readFrom } from '../../../shared/navigation'
 import { hibaUzenet } from '../../../shared/api/errors'
 import { Banner } from '../../../shared/ui/Banner'
 import { Button, ButtonLink } from '../../../shared/ui/Button'
@@ -9,7 +10,10 @@ import { useAuth } from '../context'
 
 export function RegisterDone() {
   const { user } = useAuth()
-  const email = (useLocation().state as { email?: string } | null)?.email ?? user?.email
+  const state: unknown = useLocation().state
+  const stateEmail = typeof state === 'object' && state !== null && 'email' in state && typeof state.email === 'string' ? state.email : undefined
+  const email = stateEmail ?? user?.email
+  const from = readFrom(state)
   const resend = useMutation({ mutationFn: authApi.resendVerification })
 
   return (
@@ -22,7 +26,7 @@ export function RegisterDone() {
           lévő linkre kattintva aktiválod a fiókod.
         </>
       }
-      footer={<Link to="/tanulasi-ut">Tovább a tanulási útra</Link>}
+      footer={from ? <Link to={from}>Vissza oda, ahol tartottál</Link> : <Link to={LANDING_PATH}>Tovább a tanulási útra</Link>}
     >
       <Banner kind="info" title="Nem érkezett meg?">
         Nézd meg a levélszemét mappát is. Ha pár perc múlva sincs ott, kérhetsz újat.

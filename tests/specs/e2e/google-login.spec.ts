@@ -48,7 +48,7 @@ test.describe('Google-belépés: meglévő fiók', () => {
 
     await loginPage.continueWithGoogle()
 
-    await expect(page).toHaveURL(/\/feladatok$/)
+    await expect(page).toHaveURL(/\/tanulasi-ut$/)
     const [redirect] = google.redirects()
     const [exchange] = google.exchanges()
     const challenge = String(redirect?.code_challenge)
@@ -66,7 +66,7 @@ test.describe('Google-belépés: meglévő fiók', () => {
 
     await loginPage.continueWithGoogle()
 
-    await expect(page).toHaveURL(/\/feladatok$/)
+    await expect(page).toHaveURL(/\/tanulasi-ut$/)
     expect(await page.evaluate(() => sessionStorage.getItem('infotanar.google.login'))).toBeNull()
   })
 
@@ -116,7 +116,7 @@ test.describe('Google-belépés: új fiók (hozzájárulás)', () => {
     await page.getByRole('checkbox', { name: /Elfogadom/ }).check()
     await page.getByRole('button', { name: 'Fiók létrehozása' }).click()
 
-    await expect(page).toHaveURL(/\/feladatok$/)
+    await expect(page).toHaveURL(/\/tanulasi-ut$/)
     const [exchange] = google.exchanges()
     expect(google.completes()[0]).toMatchObject({
       code: 'pw-mock-code',
@@ -138,7 +138,7 @@ test.describe('Google-belépés: új fiók (hozzájárulás)', () => {
     await page.getByRole('checkbox', { name: /Elfogadom/ }).check()
     await page.getByRole('button', { name: 'Fiók létrehozása' }).click()
 
-    await expect(page).toHaveURL(/\/feladatok$/)
+    await expect(page).toHaveURL(/\/tanulasi-ut$/)
     expect(google.completes()[0]).toMatchObject({ invite_code: 'PW-BETA-1' })
   })
 
@@ -152,7 +152,7 @@ test.describe('Google-belépés: új fiók (hozzájárulás)', () => {
     await page.getByRole('checkbox', { name: /Elfogadom/ }).check()
     await page.getByRole('button', { name: 'Fiók létrehozása' }).click()
 
-    await expect(page).toHaveURL(/\/feladatok$/)
+    await expect(page).toHaveURL(/\/tanulasi-ut$/)
     expect(google.completes()[0]).not.toHaveProperty('invite_code')
   })
 })

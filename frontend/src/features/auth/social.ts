@@ -1,3 +1,4 @@
+import { localPath } from '../../shared/navigation'
 import * as authApi from './api'
 
 const STORAGE_KEY = 'infotanar.google.login'
@@ -25,11 +26,6 @@ async function challengeFor(verifier: string): Promise<string> {
   return base64Url(new Uint8Array(digest))
 }
 
-/** Csak helyi útvonalra engedünk visszatérni, nehogy a tárolt érték külső címre vigyen. */
-function safePath(path: string | undefined): string | undefined {
-  return path !== undefined && path.startsWith('/') && !path.startsWith('//') ? path : undefined
-}
-
 /**
  * Elindítja a Google-belépést: titkos verifiert tart a böngészőben, a hash-ét
  * elküldi a szervernek, és visszaadja a Google belépőoldalának címét.
@@ -54,7 +50,7 @@ export function pendingGoogleLogin(): { verifier: string; from: string | undefin
     const raw = sessionStorage.getItem(STORAGE_KEY)
     const parsed: unknown = raw === null ? null : JSON.parse(raw)
     if (typeof parsed !== 'object' || parsed === null || !('verifier' in parsed) || typeof parsed.verifier !== 'string') return null
-    const from = 'from' in parsed && typeof parsed.from === 'string' ? safePath(parsed.from) : undefined
+    const from = 'from' in parsed && typeof parsed.from === 'string' ? localPath(parsed.from) : undefined
     return { verifier: parsed.verifier, from }
   } catch {
     return null

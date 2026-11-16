@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
-import { useSearchParams } from 'react-router-dom'
+import { useLocation, useSearchParams } from 'react-router-dom'
 import { readLastTask } from '../../../shared/domain/lastTask'
 import { userKeyOf } from '../../../shared/domain/userStorage'
 import { Banner } from '../../../shared/ui/Banner'
@@ -7,6 +7,7 @@ import { ButtonLink } from '../../../shared/ui/Button'
 import { FilterChips, type FilterOption } from '../../../shared/ui/FilterChips'
 import { Panel } from '../../../shared/ui/Panel'
 import { CardSkeleton, EmptyState, LoadError } from '../../../shared/ui/States'
+import { originState } from '../../../shared/navigation'
 import { TaskCard } from '../../../shared/ui/TaskCard'
 import { Lead, PageTitle, SectionTitle } from '../../../shared/ui/Text'
 import type { ExerciseStatus, Level, TaskListItem } from '../../../types'
@@ -67,6 +68,9 @@ function groupTasks(tasks: TaskListItem[], tree: CatalogTree | null): TaskGroup[
 export function TaskList() {
   const { user } = useAuth()
   const [searchParams, setSearchParams] = useSearchParams()
+  const location = useLocation()
+  // A feladatról ide lehet visszalépni, a beállított szűrőkkel együtt.
+  const origin = { label: 'Feladatok', to: `/feladatok${location.search}` }
   const topic = searchParams.get('temakor') ?? ''
   const track = searchParams.get('sav') ?? ''
   const levelParam = searchParams.get('szint') ?? ''
@@ -119,7 +123,7 @@ export function TaskList() {
             <p className="mt-1 font-serif text-24 leading-snug font-semibold">{lastTask.title}</p>
             <p className="mt-1.5 text-15 text-ink-soft">{lastTask.topic}</p>
           </div>
-          <ButtonLink to={`/feladatok/${lastTask.id}`} size="lg">
+          <ButtonLink to={`/feladatok/${lastTask.id}`} state={originState(origin)} size="lg">
             Folytatás
           </ButtonLink>
         </Panel>
@@ -174,7 +178,7 @@ export function TaskList() {
                 </div>
                 <ul className="mt-5 grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
                   {group.tasks.map((task) => (
-                    <TaskCard key={task.id} task={task} status={statusOf(task)} />
+                    <TaskCard key={task.id} task={task} status={statusOf(task)} origin={origin} />
                   ))}
                 </ul>
               </section>
