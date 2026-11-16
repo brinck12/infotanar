@@ -2,11 +2,10 @@ import { useQuery } from '@tanstack/react-query'
 import { useState, type FormEvent } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { mezoHibak } from '../../../../shared/api/errors'
-import { TextAreaField } from '../../../../shared/ui/Form'
 import { moduleQuery, trackQuery, type AdminLesson, type AdminModule, type ModulePayload } from '../api'
-import { AdminShell, Section, StatusPill } from '../../components/AdminShell'
+import { AdminShell, PublishedPill, Section, StatusPill } from '../../components/AdminShell'
 import { ChildList } from '../components/ChildList'
-import { SaveRow, TitleSlugFields } from '../components/EntityFields'
+import { DescriptionField, SaveRow, TitleSlugFields } from '../components/EntityFields'
 import { MutationError, QueryState } from '../components/QueryState'
 import { QuickCreate } from '../components/QuickCreate'
 import { SavedNote } from '../components/SavedNote'
@@ -33,7 +32,6 @@ function ModuleEditor({ module }: { module: AdminModule }) {
   const lessons = useChildMutations<AdminLesson>('lessons', `/admin/modules/${module.id}/lessons/order`, (created) =>
     navigate(`/admin/tananyag/leckek/${created.id}`),
   )
-  const createErrors = mezoHibak(lessons.createChild.error)
 
   function submit(e: FormEvent) {
     e.preventDefault()
@@ -54,13 +52,7 @@ function ModuleEditor({ module }: { module: AdminModule }) {
         <MutationError error={save.error} fields={['title', 'slug', 'description']} />
         <form onSubmit={submit} noValidate className="grid gap-5">
           <TitleSlugFields title={form.title} slug={form.slug} errors={errors} onTitle={(title) => setForm({ ...form, title })} onSlug={(slug) => setForm({ ...form, slug })} />
-          <TextAreaField
-            label="Leírás"
-            rows={3}
-            value={form.description ?? ''}
-            onChange={(e) => setForm({ ...form, description: e.target.value || null })}
-            error={errors.description}
-          />
+          <DescriptionField value={form.description} onChange={(description) => setForm({ ...form, description })} error={errors.description} />
           <SaveRow busy={save.isPending} />
         </form>
       </Section>
@@ -77,7 +69,7 @@ function ModuleEditor({ module }: { module: AdminModule }) {
               <>
                 <StatusPill tone="info">{lesson.exercise_count ?? 0} feladat</StatusPill>
                 {lesson.is_free && <StatusPill tone="free">Ingyenes</StatusPill>}
-                <StatusPill tone={lesson.is_published ? 'published' : 'draft'}>{lesson.is_published ? 'Közzétéve' : 'Piszkozat'}</StatusPill>
+                <PublishedPill published={lesson.is_published} />
               </>
             ),
           }))}
@@ -87,12 +79,10 @@ function ModuleEditor({ module }: { module: AdminModule }) {
           onDelete={(lessonId) => lessons.deleteChild.mutate(lessonId)}
         />
         <div className="mt-5 border-t border-grid pt-5">
-          <MutationError error={lessons.createChild.error} fields={['title', 'slug']} />
           <QuickCreate
             titleLabel="Új lecke címe"
             submitLabel="Lecke létrehozása"
-            busy={lessons.createChild.isPending}
-            errors={createErrors}
+            mutation={lessons.createChild}
             onCreate={(values) => lessons.createChild.mutate({ ...values, module_id: module.id, is_free: false, is_published: false })}
           />
         </div>

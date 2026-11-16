@@ -1,3 +1,4 @@
+import { readStoredJson, removeStored } from '../../shared/domain/localStore'
 import { userStorageKey } from '../../shared/domain/userStorage'
 
 /**
@@ -30,13 +31,7 @@ export function isOralPractice(value: unknown): value is OralPractice {
 }
 
 export function readPractice(userKey: string, slug: string): OralPractice {
-  try {
-    const raw = localStorage.getItem(practiceKey(userKey, slug))
-    const parsed: unknown = raw === null ? null : JSON.parse(raw)
-    return isOralPractice(parsed) ? parsed : EMPTY_PRACTICE
-  } catch {
-    return EMPTY_PRACTICE
-  }
+  return readStoredPractice(userKey, slug) ?? EMPTY_PRACTICE
 }
 
 /** `mm:ss` */
@@ -47,20 +42,10 @@ export function formatClock(seconds: number): string {
 
 /** A böngészőben mentett gyakorlás; `null`, ha nincs ilyen (vagy sérült, vagy a tárhely tiltott). */
 export function readStoredPractice(userKey: string, slug: string): OralPractice | null {
-  try {
-    const raw = localStorage.getItem(practiceKey(userKey, slug))
-    const parsed: unknown = raw === null ? null : JSON.parse(raw)
-    return isOralPractice(parsed) ? parsed : null
-  } catch {
-    return null
-  }
+  return readStoredJson(practiceKey(userKey, slug), isOralPractice)
 }
 
 /** A böngészőbeli példány törlése, miután a szerver átvette. */
 export function forgetStoredPractice(userKey: string, slug: string): void {
-  try {
-    localStorage.removeItem(practiceKey(userKey, slug))
-  } catch {
-    // Tiltott tárhelyen nincs mit törölni.
-  }
+  removeStored(practiceKey(userKey, slug))
 }

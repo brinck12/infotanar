@@ -1,17 +1,17 @@
 import { useMutation } from '@tanstack/react-query'
 import { useEffect, useRef, useState, type FormEvent } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
-import { hibaUzenet, mezoHibak } from '../../../shared/api/errors'
+import { hibaReszek, hibaUzenet } from '../../../shared/api/errors'
 import { Banner } from '../../../shared/ui/Banner'
-import { Field, SubmitButton } from '../../../shared/ui/Form'
+import { SubmitButton } from '../../../shared/ui/Form'
 import { Skeleton } from '../../../shared/ui/States'
-import { LEGAL_VERSIONS } from '../../legal/documents'
 import * as authApi from '../api'
 import { AuthCard } from '../components/AuthCard'
+import { InviteCodeField } from '../components/InviteCodeField'
 import { TermsConsentField } from '../components/TermsConsentField'
 import { useAuth } from '../context'
 import { clearPendingGoogleLogin, pendingGoogleLogin } from '../social'
-import { useRegistrationMode } from '../useRegistrationMode'
+import { useSignupConsent } from '../useSignupConsent'
 
 const DEFAULT_LANDING = '/feladatok'
 
@@ -95,21 +95,10 @@ function Failure({ message }: { message: string }) {
 function Consent({ name, email, code, verifier, landing }: { name: string; email: string; code: string; verifier: string; landing: string }) {
   const navigate = useNavigate()
   const { acceptLogin } = useAuth()
-  const { mode } = useRegistrationMode()
-  const [accepted, setAccepted] = useState(false)
-  const [inviteCode, setInviteCode] = useState('')
-  const inviteOnly = mode === 'invite'
+  const consent = useSignupConsent()
 
   const complete = useMutation({
-    mutationFn: () =>
-      authApi.googleComplete({
-        code,
-        code_verifier: verifier,
-        accept_terms: accepted,
-        terms_version: LEGAL_VERSIONS.terms,
-        privacy_version: LEGAL_VERSIONS.privacy,
-        ...(inviteOnly ? { invite_code: inviteCode.trim() } : {}),
-      }),
+    mutationFn: () => authApi.googleComplete({ code, code_verifier: verifier, ...consent.payload() }),
     onSuccess: async (response) => {
       clearPendingGoogleLogin()
       await acceptLogin(response)
@@ -117,8 +106,7 @@ function Consent({ name, email, code, verifier, landing }: { name: string; email
     },
   })
 
-  const errors = mezoHibak(complete.error)
-  const generalError = complete.isError && Object.keys(errors).length === 0 ? hibaUzenet(complete.error) : null
+  const { fields: errors, general: generalError } = hibaReszek(complete.error)
 
   function onSubmit(e: FormEvent) {
     e.preventDefault()
@@ -139,21 +127,15 @@ function Consent({ name, email, code, verifier, landing }: { name: string; email
     >
       {generalError && <Banner kind="error">{generalError}</Banner>}
       <form onSubmit={onSubmit} className="flex flex-col gap-5" noValidate>
-        {inviteOnly && (
-          <Field
-            label="Meghívókód"
-            autoComplete="off"
-            autoCapitalize="characters"
-            spellCheck={false}
-            mono
-            required
-            value={inviteCode}
-            onChange={(e) => setInviteCode(e.target.value)}
+        {consent.inviteOnly && (
+          <InviteCodeField
+            value={consent.inviteCode}
+            onChange={consent.setInviteCode}
             error={errors.invite_code}
             hint="Zárt bétát futtatunk: a fiók létrehozásához meghívókód kell."
           />
         )}
-        <TermsConsentField checked={accepted} onChange={setAccepted} error={errors.accept_terms} />
+        <TermsConsentField checked={consent.accepted} onChange={consent.setAccepted} error={errors.accept_terms} />
         <SubmitButton busy={complete.isPending} busyLabel="Fiók létrehozása…" size="lg">
           Fiók létrehozása
         </SubmitButton>

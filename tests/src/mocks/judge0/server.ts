@@ -15,8 +15,9 @@
 //   - PW_JUDGE0_REQUIRE_FILE      -> az `additional_files` adatfajljabol szamol;
 //                                    fajl nelkul hibas kimenet
 
-import http, { type IncomingMessage, type ServerResponse } from 'node:http'
+import type { IncomingMessage, ServerResponse } from 'node:http'
 import { JUDGE0_CONTROL } from '../../data/seed'
+import { readJsonBody, requestUrl, send, serveMock } from '../http'
 import { hasAdditionalFiles, readAdditionalFiles } from './additional-files'
 import { DATA_FILE_NAME, JUDGE0_EXECUTION_CONTROL, JUDGE0_FILE_OUTPUT, SUBTASKS_PARTIAL_STDOUT, subtasksStdout } from './controls'
 
@@ -36,33 +37,6 @@ interface SubmissionRequest {
 
 const fromBase64 = (value: unknown): string => Buffer.from(typeof value === 'string' ? value : '', 'base64').toString('utf8')
 const toBase64 = (value: string): string => Buffer.from(value).toString('base64')
-
-function readJsonBody(req: IncomingMessage): Promise<SubmissionRequest> {
-  return new Promise((resolve, reject) => {
-    let raw = ''
-    req.on('data', (chunk: Buffer) => {
-      raw += chunk.toString()
-    })
-    req.on('end', () => {
-      if (!raw) {
-        resolve({})
-        return
-      }
-      try {
-        resolve(JSON.parse(raw) as SubmissionRequest)
-      } catch (err) {
-        reject(err instanceof Error ? err : new Error(String(err)))
-      }
-    })
-    req.on('error', reject)
-  })
-}
-
-function send(res: ServerResponse, status: number, body: unknown): void {
-  const payload = JSON.stringify(body)
-  res.writeHead(status, { 'Content-Type': 'application/json', 'Content-Length': Buffer.byteLength(payload) })
-  res.end(payload)
-}
 
 function acceptedWithStdout(stdout: string) {
   return {
@@ -91,7 +65,7 @@ function solveFromDataFile(additionalFiles: unknown): string {
 }
 
 async function handle(req: IncomingMessage, res: ServerResponse): Promise<void> {
-  const url = new URL(req.url ?? '/', `http://${req.headers.host ?? '127.0.0.1'}`)
+  const url = requestUrl(req)
 
   if (req.method === 'GET' && url.pathname === '/about') {
     send(res, 200, { version: 'playwright-mock' })
@@ -106,7 +80,7 @@ async function handle(req: IncomingMessage, res: ServerResponse): Promise<void> 
   if (req.method === 'POST' && url.pathname === '/submissions') {
     let body: SubmissionRequest
     try {
-      body = await readJsonBody(req)
+      body = await readJsonBody<SubmissionRequest>(req)
     } catch {
       send(res, 400, { error: 'invalid json' })
       return
@@ -144,13 +118,4 @@ async function handle(req: IncomingMessage, res: ServerResponse): Promise<void> 
   send(res, 404, { error: 'not found' })
 }
 
-const server = http.createServer((req, res) => {
-  handle(req, res).catch((err: unknown) => {
-    console.error(err)
-    send(res, 500, { error: 'mock failure' })
-  })
-})
-
-server.listen(PORT, '127.0.0.1', () => {
-  console.log(`Judge0 mock listening on http://127.0.0.1:${String(PORT)}`)
-})
+serveMock('Judge0', PORT, handle)

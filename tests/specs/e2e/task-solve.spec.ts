@@ -57,7 +57,6 @@ test.describe('Feladat megoldása', () => {
       const panel = taskSolvePage.resultPanel
       await expect(panel.results).toHaveCount(2)
       await expect(panel.result(1)).toContainText('Rejtett')
-      // A rejtett tesztesetnél nem jelenik meg kimenet.
       await expect(panel.actualOutputOf(panel.result(1))).toHaveCount(0)
     })
 

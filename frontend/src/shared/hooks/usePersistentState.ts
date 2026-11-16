@@ -1,19 +1,9 @@
 import { useCallback, useState } from 'react'
+import { readStoredJson, writeStoredJson } from '../domain/localStore'
 
 /** Szöveg-szöveg párok objektuma (fájlnév → tartalom, cella → érték). */
 export function isStringRecord(value: unknown): value is Record<string, string> {
   return typeof value === 'object' && value !== null && !Array.isArray(value) && Object.values(value).every((item) => typeof item === 'string')
-}
-
-function read<T>(key: string, fallback: T, isValid: (value: unknown) => value is T): T {
-  try {
-    const raw = localStorage.getItem(key)
-    if (raw === null) return fallback
-    const parsed: unknown = JSON.parse(raw)
-    return isValid(parsed) ? parsed : fallback
-  } catch {
-    return fallback
-  }
 }
 
 /**
@@ -26,20 +16,16 @@ export function usePersistentState<T>(
   fallback: T,
   isValid: (value: unknown) => value is T,
 ): [T, (value: T) => void] {
-  const [state, setState] = useState(() => ({ key, value: read(key, fallback, isValid) }))
+  const [state, setState] = useState(() => ({ key, value: readStoredJson(key, isValid) ?? fallback }))
 
   // Kulcsváltáskor renderelés közben olvasunk újra (nem effektben), így nincs villanás.
-  const current = state.key === key ? state : { key, value: read(key, fallback, isValid) }
+  const current = state.key === key ? state : { key, value: readStoredJson(key, isValid) ?? fallback }
   if (current !== state) setState(current)
 
   const persist = useCallback(
     (value: T) => {
       setState({ key, value })
-      try {
-        localStorage.setItem(key, JSON.stringify(value))
-      } catch {
-        // A tárhely nem elérhető: a beállítás csak ebben a munkamenetben él.
-      }
+      writeStoredJson(key, value)
     },
     [key],
   )

@@ -14,7 +14,7 @@ const PAST_SESSIONS: ReadonlyArray<{ value: string; label: string }> = [
   { value: '2026-10', label: '2026. október–november' },
 ]
 
-export const SESSION_OPTIONS: ReadonlyArray<{ value: string; label: string }> = [...PAST_SESSIONS, ...EXAM_PERIODS]
+const SESSION_OPTIONS: ReadonlyArray<{ value: string; label: string }> = [...PAST_SESSIONS, ...EXAM_PERIODS]
 
 export const DEFAULT_SESSION = '2026-05'
 

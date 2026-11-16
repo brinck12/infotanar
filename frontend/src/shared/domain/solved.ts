@@ -1,5 +1,5 @@
 /** Ennyi arány (a pontok 80 százaléka) kell ahhoz, hogy egy fájlfeladat vagy vizsga megoldottnak számítson. */
-export const SOLVED_THRESHOLD = 0.8
+const SOLVED_THRESHOLD = 0.8
 
 export interface SolvedVerdict {
   solved: boolean

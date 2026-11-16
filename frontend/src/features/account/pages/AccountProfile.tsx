@@ -1,7 +1,7 @@
 import { useMutation } from '@tanstack/react-query'
 import { useId, useState, type ChangeEvent, type FormEvent, type ReactNode } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { hibaUzenet, mezoHibak } from '../../../shared/api/errors'
+import { hibaReszek, hibaUzenet, mezoHibak } from '../../../shared/api/errors'
 import { tokenStore } from '../../../shared/api/tokenStore'
 import { clearUserStorage } from '../../../shared/domain/userStorage'
 import { Badge } from '../../../shared/ui/Badge'
@@ -149,8 +149,7 @@ function ChangeEmail({ pendingEmail }: { pendingEmail: string | null }) {
     },
   })
 
-  const errors = mezoHibak(request.error)
-  const generalError = request.isError && Object.keys(errors).length === 0 ? hibaUzenet(request.error) : null
+  const { fields: errors, general: generalError } = hibaReszek(request.error)
 
   function submit(event: FormEvent) {
     event.preventDefault()
@@ -256,8 +255,7 @@ function ChangePassword() {
   const [form, setForm] = useState(EMPTY_PASSWORD)
   const change = useMutation({ mutationFn: accountApi.changePassword, onSuccess: () => setForm(EMPTY_PASSWORD) })
 
-  const errors = mezoHibak(change.error)
-  const generalError = change.isError && Object.keys(errors).length === 0 ? hibaUzenet(change.error) : null
+  const { fields: errors, general: generalError } = hibaReszek(change.error)
 
   const set = (field: keyof accountApi.ChangePasswordPayload) => (e: ChangeEvent<HTMLInputElement>) =>
     setForm((f) => ({ ...f, [field]: e.target.value }))

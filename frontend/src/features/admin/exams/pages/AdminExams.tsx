@@ -8,7 +8,7 @@ import { Button } from '../../../../shared/ui/Button'
 import { EmptyState, LoadError, Skeleton } from '../../../../shared/ui/States'
 import { Table, Td, Th, Tr } from '../../../../shared/ui/Table'
 import { MutationError } from '../../catalog/components/QueryState'
-import { AdminShell } from '../../components/AdminShell'
+import { AdminShell, PublishedPill } from '../../components/AdminShell'
 import { adminExamKeys, adminExamsQuery, createExam } from '../api'
 import { DEFAULT_SESSION } from '../sessions'
 
@@ -77,7 +77,7 @@ export function AdminExams() {
                   <Td align="right">{exam.points}</Td>
                   <Td>
                     <span className="flex flex-wrap gap-1.5">
-                      <Badge kind={exam.is_published ? 'pub' : 'draft'}>{exam.is_published ? 'Közzétéve' : 'Piszkozat'}</Badge>
+                      <PublishedPill published={exam.is_published} />
                       {incomplete > 0 && <Badge kind="bad">{incomplete} hiányos értékelőlap</Badge>}
                     </span>
                   </Td>

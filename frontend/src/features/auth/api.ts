@@ -5,17 +5,21 @@ interface Message {
   message: string
 }
 
-export interface RegisterPayload {
-  name: string
-  email: string
-  password: string
-  password_confirmation: string
+/** Új fiók nyitásának közös feltételei, jelszóval és Google-lel is. */
+export interface SignupConsentPayload {
   /** Az ÁSZF és az adatkezelési tájékoztató elfogadása, a megjelenített verziókkal (#133). */
   accept_terms: boolean
   terms_version: string
   privacy_version: string
   /** Csak zárt béta (invite) módban kötelező: a szerver ellenőrzi és felhasználja. */
   invite_code?: string
+}
+
+export interface RegisterPayload extends SignupConsentPayload {
+  name: string
+  email: string
+  password: string
+  password_confirmation: string
 }
 
 /** A regisztráció módja: nyitott, vagy csak meghívókóddal (zárt béta). */
@@ -100,14 +104,9 @@ export async function googleExchange(code: string, codeVerifier: string): Promis
   return (await http.post<Envelope<GoogleExchange>>('/auth/google/exchange', { code, code_verifier: codeVerifier, device_name: 'web' })).data.data
 }
 
-export interface GoogleCompletePayload {
+export interface GoogleCompletePayload extends SignupConsentPayload {
   code: string
   code_verifier: string
-  accept_terms: boolean
-  terms_version: string
-  privacy_version: string
-  /** Csak zárt béta (invite) módban kötelező. */
-  invite_code?: string
 }
 
 export async function googleComplete(payload: GoogleCompletePayload): Promise<LoginResponse> {

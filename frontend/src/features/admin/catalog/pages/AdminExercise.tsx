@@ -3,7 +3,6 @@ import { useId, useState, type FormEvent, type ReactNode } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { mezoHibak } from '../../../../shared/api/errors'
 import { LEVEL_LABEL } from '../../../../shared/domain/labels'
-import { Badge } from '../../../../shared/ui/Badge'
 import { Banner } from '../../../../shared/ui/Banner'
 import { Button } from '../../../../shared/ui/Button'
 import { CheckboxField, Field, SelectField, Switch, TextAreaField } from '../../../../shared/ui/Form'
@@ -24,7 +23,7 @@ import {
   type ExercisePayload,
   type LanguageOption,
 } from '../api'
-import { AdminShell } from '../../components/AdminShell'
+import { AdminShell, PublishedPill } from '../../components/AdminShell'
 import { RubricBuilder } from '../../exams/components/RubricBuilder'
 import { AttachmentManager } from '../components/AttachmentManager'
 import { ConstraintEditor } from '../components/ConstraintEditor'
@@ -421,7 +420,7 @@ function ExerciseEditor({ lesson, exercise }: { lesson: AdminLesson; exercise: A
             {exercise ? 'Mentés' : 'Feladat létrehozása'}
           </Button>
           <Switch label="Közzétéve" checked={form.is_published} onChange={(checked) => set('is_published', checked)} />
-          <Badge kind={exercise?.is_published ? 'pub' : 'draft'}>{exercise?.is_published ? 'Közzétéve' : 'Piszkozat'}</Badge>
+          <PublishedPill published={exercise?.is_published === true} />
           <SavedNote mutation={save} />
         </div>
         <p className="text-14 leading-relaxed text-ink-soft">

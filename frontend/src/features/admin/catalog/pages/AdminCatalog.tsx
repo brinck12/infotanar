@@ -1,8 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 import { useNavigate } from 'react-router-dom'
-import { mezoHibak } from '../../../../shared/api/errors'
 import { tracksQuery, type AdminTrack } from '../api'
-import { AdminShell, Section, StatusPill } from '../../components/AdminShell'
+import { AdminShell, PublishedPill, Section, StatusPill } from '../../components/AdminShell'
 import { ChildList } from '../components/ChildList'
 import { MutationError, QueryState } from '../components/QueryState'
 import { QuickCreate } from '../components/QuickCreate'
@@ -15,7 +14,6 @@ export function AdminCatalog() {
   const { createChild, deleteChild, reorderChildren, busy } = useChildMutations<AdminTrack>('tracks', '/admin/tracks/order', (created) =>
     navigate(`/admin/tananyag/agak/${created.id}`),
   )
-  const createErrors = mezoHibak(createChild.error)
 
   return (
     <QueryState query={tracks}>
@@ -32,7 +30,7 @@ export function AdminCatalog() {
                 meta: (
                   <>
                     <StatusPill tone="info">{track.module_count ?? 0} modul</StatusPill>
-                    <StatusPill tone={track.is_published ? 'published' : 'draft'}>{track.is_published ? 'Közzétéve' : 'Piszkozat'}</StatusPill>
+                    <PublishedPill published={track.is_published} />
                   </>
                 ),
               }))}
@@ -44,12 +42,10 @@ export function AdminCatalog() {
           </Section>
 
           <Section title="Új tanulási út">
-            <MutationError error={createChild.error} fields={['title', 'slug']} />
             <QuickCreate
               titleLabel="Cím"
               submitLabel="Létrehozás"
-              busy={createChild.isPending}
-              errors={createErrors}
+              mutation={createChild}
               onCreate={(values) => createChild.mutate({ ...values, is_published: false })}
             />
           </Section>

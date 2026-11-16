@@ -2,7 +2,7 @@ import type { WeeklyRhythm } from '../../api/areas/rhythm'
 import type { User } from '../../api/types'
 
 /** A mockolt hetek rogzitett hete: 2026-10-19 (hetfo) .. 2026-10-25 (vasarnap), "ma" csutortok. */
-export const MOCK_WEEK = {
+const MOCK_WEEK = {
   start: '2026-10-19',
   today: '2026-10-22',
   dates: ['2026-10-19', '2026-10-20', '2026-10-21', '2026-10-22', '2026-10-23', '2026-10-24', '2026-10-25'],

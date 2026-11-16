@@ -1,4 +1,5 @@
 import { useSyncExternalStore } from 'react'
+import { readStored, writeStored } from './localStore'
 import type { StudyLanguage } from './preferences'
 
 // Szándékosan nem felhasználóhoz kötött (nincs a userStorage.ts-ben): nem személyes adat, csak eszközönkénti megjelenítési beállítás.
@@ -14,13 +15,8 @@ function isLanguage(value: unknown): value is StudyLanguage {
 
 function read(): StudyLanguage {
   if (current !== null) return current
-  try {
-    const stored = localStorage.getItem(KEY)
-    current = isLanguage(stored) ? stored : DEFAULT_LANGUAGE
-  } catch {
-    // Tiltott tárhely: marad az alapérték, és a választás csak az oldal életére szól.
-    current = DEFAULT_LANGUAGE
-  }
+  const stored = readStored(KEY)
+  current = isLanguage(stored) ? stored : DEFAULT_LANGUAGE
 
   return current
 }
@@ -35,11 +31,7 @@ function subscribe(listener: () => void): () => void {
 
 function write(language: StudyLanguage): void {
   current = language
-  try {
-    localStorage.setItem(KEY, language)
-  } catch {
-    // Tiltott tárhely: a választás csak a memóriában él.
-  }
+  writeStored(KEY, language)
   listeners.forEach((listener) => listener())
 }
 

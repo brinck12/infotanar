@@ -1,6 +1,6 @@
 import { useEffect } from 'react'
 
-export const SITE_NAME = 'InfoTanár'
+const SITE_NAME = 'InfoTanár'
 
 /** Az oldal kanonikus alap-URL-je; a build idején a `VITE_SITE_URL` adja (lásd scripts/generate-seo.mjs). */
 const SITE_URL = (import.meta.env['VITE_SITE_URL'] as string | undefined)?.replace(/\/+$/, '') ?? ''

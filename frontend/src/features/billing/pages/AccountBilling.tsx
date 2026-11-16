@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { hibaUzenet, mezoHibak } from '../../../shared/api/errors'
+import { hibaReszek } from '../../../shared/api/errors'
 import { Banner } from '../../../shared/ui/Banner'
 import { Panel } from '../../../shared/ui/Panel'
 import { LoadError, Skeleton } from '../../../shared/ui/States'
@@ -21,7 +21,7 @@ export function AccountBilling() {
       toast.show('A számlázási adatokat elmentettük.')
     },
   })
-  const fieldErrors = mezoHibak(save.error)
+  const { fields: fieldErrors, general: generalError } = hibaReszek(save.error)
 
   if (profile.isError) return <LoadError error={profile.error} onRetry={() => void profile.refetch()} />
   if (!profile.isSuccess) return <Skeleton lines={6} />
@@ -32,9 +32,9 @@ export function AccountBilling() {
         Számlázási adatok
       </SectionTitle>
       <p className="mt-2 mb-6 text-16 leading-relaxed text-ink-soft">Ezek kerülnek az új számlákra. A kiállított számlák nem változnak.</p>
-      {save.isError && Object.keys(fieldErrors).length === 0 && (
+      {generalError && (
         <Banner kind="error" className="mb-5">
-          {hibaUzenet(save.error)}
+          {generalError}
         </Banner>
       )}
       <BillingProfileForm

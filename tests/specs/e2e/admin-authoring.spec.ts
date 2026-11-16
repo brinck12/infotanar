@@ -65,7 +65,6 @@ test.describe('Admin: új típusú tartalom szerkesztése', () => {
     await page.tryRubric.click()
     await expect(page.tryResult).toContainText('5 / 5 pont')
 
-    // Közzététel.
     await page.tab('Leírás').click()
     await page.published.click()
     await page.save.click()

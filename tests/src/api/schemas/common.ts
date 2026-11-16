@@ -42,12 +42,6 @@ export const cursorResource = <T extends z.ZodType>(item: T) =>
     meta: z.object({ per_page: z.number().int(), next_cursor: z.string().nullable(), prev_cursor: z.string().nullable() }),
   })
 
-/** Hibas valasz alakja (HTTP 4xx). */
-export const messageResponse = z.object({ message: z.string() })
-
-/** Validacios hiba (422). */
-export const validationError = z.object({ message: z.string(), errors: z.record(z.string(), z.array(z.string())) })
-
 /**
  * Validalja a valasz torzset, es olvashato hibaval bukik: melyik vegpont, melyik mezo.
  * A visszaadott ertek a sema szerint tipusos.
